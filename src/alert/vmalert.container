@@ -1,0 +1,44 @@
+# /etc/containers/systemd/vmalert.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Executes alerting and recording rules"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=victoriametrics.service
+Requires=alertmanager.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/victoriametrics/vmalert:stable
+ContainerName=vmalert
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=observer.network
+Network=telem.network
+HostName=alert.{{ site.url }}
+# https://docs.victoriametrics.com/vmalert/#web
+# metrics at :8880/metrics
+# api at :8880/api/v1
+# web frontend at :8880
+
+Exec=--datasource.url="http://metrics.{{ site.url }}:8428/" \
+     --remoteRead.url="http://metrics.{{ site.url }}:8428/" \
+     --remoteWrite.url="http://metrics.{{ site.url }}:8428/" \
+     --notifier.url="http://alertmanager.{{ site.url }}:9093/" \
+     --rule="/etc/alerts/*.yml" \
+     --external.url="http://graph.{{ site.url }}:3000" \
+     {% raw %}--external.alert.source='explore?orgId=1&left={"datasource":"VictoriaMetrics","queries":[{"expr":{{$$expr|jsonEscape|queryEscape}},"refId":"A"}],"range":{"from":"now-1h","to":"now"}}'{% endraw %}
+
+Environment=TZ={{ personal.timezone }}
+Volume=/etc/opt/vmalert:/etc/alerts:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

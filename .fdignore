@@ -1,0 +1,17 @@
+# Hide files from Jinja2 template rendering
+
+# System
+.DS_Store
+
+# Development
+.git
+.gitignore
+LICENSE
+.vscode
+notes
+
+# Project
+vars.yml
+vars.template.yml
+src/grafana/dashboards/*.json
+src/alert/configs/*.yml

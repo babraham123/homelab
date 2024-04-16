@@ -1,0 +1,39 @@
+# /etc/containers/systemd/victoriametrics.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Time series database and monitoring system"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/victoriametrics/victoria-metrics:stable
+ContainerName=victoriametrics
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# http web front-end, ":8428/vmui"
+Network=observer.network
+HostName=metrics.{{ site.url }}
+
+Exec=--storageDataPath="/storage" \
+     --graphiteListenAddr=":2003" \
+     --opentsdbListenAddr=":4242" \
+     --httpListenAddr=":8428" \
+     --influxListenAddr=":8089" \
+     --promscrape.config="/etc/prometheus/prometheus.yml" \
+     --vmalert.proxyURL="http://alert.{{ site.url }}:8880"
+
+Environment=TZ={{ personal.timezone }}
+Volume=/etc/opt/victoriametrics/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+Volume=vmdata.volume:/storage
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

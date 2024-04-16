@@ -1,0 +1,33 @@
+---
+# /etc/opt/traefik/config/static/traefik.yml
+global:
+  sendAnonymousUsage: false
+  checkNewVersion: false
+api:
+  dashboard: true
+  insecure: false
+log:
+  level: DEBUG
+  format: common
+providers:
+  file:
+    watch: true
+    directory: /config/dynamic
+entryPoints:
+  web:
+    address: ":80/tcp"
+    proxyProtocol:
+      insecure: false
+      trustedIPs: [{{ vpn.ip }}]
+    forwardedHeaders:
+      insecure: false
+      trustedIPs: [{{ vpn.ip }}]
+  websecure:
+    address: ":443/tcp"
+    proxyProtocol:
+      insecure: false
+      trustedIPs: [{{ vpn.ip }}]
+    forwardedHeaders:
+      insecure: false
+      trustedIPs: [{{ vpn.ip }}]
+...

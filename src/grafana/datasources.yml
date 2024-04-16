@@ -1,0 +1,15 @@
+# /etc/opt/grafana/datasources.yml
+apiVersion: 1
+
+datasources:
+  - name: VictoriaMetrics
+    type: victoriametrics-datasource
+    # type: prometheus
+    access: proxy
+    url: http://metrics.{{ site.url }}:8428
+    isDefault: true
+
+  - name: VictoriaLogs
+    type: victorialogs-datasource
+    access: proxy
+    url:  http://logs.{{ site.url }}:9428

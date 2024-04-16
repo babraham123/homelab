@@ -1,0 +1,171 @@
+# /etc/opt/traefik/config/dynamic/traefik.yml
+# References:
+#   - https://www.authelia.com/integration/proxies/traefik/
+#   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+#   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+---
+http:
+  routers:
+    traefik: &service
+      rule: Host(`secproxy.{{ site.url }}`)
+      entryPoints: websecure
+      service: api@internal
+      middlewares:
+        - authelia@file
+        - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    authelia:
+      <<: *service
+      rule: Host(`auth.{{ site.url }}`)
+      service: authelia@file
+      middlewares:
+        - secure-headers@file
+    lldap:
+      <<: *service
+      rule: Host(`ldap.{{ site.url }}`)
+      service: lldap@file
+    gatus:
+      <<: *service
+      rule: Host(`uptime.{{ site.url }}`)
+      service: gatus@file
+    grafana:
+      <<: *service
+      rule: Host(`graph.{{ site.url }}`)
+      service: grafana@file
+    victoriametrics:
+      <<: *service
+      rule: Host(`metrics.{{ site.url }}`)
+      service: victoriametrics@file
+    victorialogs:
+      <<: *service
+      rule: Host(`logs.{{ site.url }}`)
+      service: victorialogs@file
+    vmalert:
+      <<: *service
+      rule: Host(`alert.{{ site.url }}`)
+      service: vmalert@file
+    alertmanager:
+      <<: *service
+      rule: Host(`alertmanager.{{ site.url }}`)
+      service: alertmanager@file
+    # vault:
+    #   <<: *service
+    #   rule: Host(`vault.{{ site.url }}`)
+    #   service: vault@file
+    # hass:
+    #   <<: *service
+    #   rule: Host(`hass.{{ site.url }}`)
+    #   service: hass@file
+  services:
+    authelia:
+      loadBalancer:
+        servers:
+          - url: https://auth.{{ site.url }}:9091/
+        serversTransport: autheliaMutualTLS
+    lldap:
+      loadBalancer:
+        servers:
+          - url: http://ldap.{{ site.url }}:17170/
+    gatus:
+      loadBalancer:
+        servers:
+          - url: http://uptime.{{ site.url }}:8080/
+    grafana:
+      loadBalancer:
+        servers:
+          - url: http://graph.{{ site.url }}:3000/
+    victoriametrics:
+      loadBalancer:
+        servers:
+          - url: http://metrics.{{ site.url }}:8428/vmui/
+    victorialogs:
+      loadBalancer:
+        servers:
+          - url: http://logs.{{ site.url }}:9428/select/vmui/
+    vmalert:
+      loadBalancer:
+        servers:
+          - url: http://alert.{{ site.url }}:8880/
+    alertmanager:
+      loadBalancer:
+        servers:
+          - url: http://alertmanager.{{ site.url }}:9093/
+    # vault:
+    #   loadBalancer:
+    #     servers:
+    #       - url: http://vault.{{ site.url }}:80/
+    # hass:
+    #   loadBalancer:
+    #     servers:
+    #       - url: https://homesvcs.{{ site.url }}:443/
+  serversTransports:
+    autheliaMutualTLS:
+      certificates:
+        - certFile: /certificates/secproxy.client.crt
+          keyFile: /certificates/secproxy.key
+      rootCAs:
+        - /certificates/ca.chain.crt
+  middlewares:
+    authelia:
+      forwardAuth:
+        address: https://auth.{{ site.url }}:9091/api/verify?rd=https%3A%2F%2Fauth.{{ site.url }}%2F
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Email"
+          - "Remote-Name"
+        tls:
+          ca: /certificates/ca.chain.crt
+          cert: /certificates/secproxy.client.crt
+          key: /certificates/secproxy.key
+    authelia-basic:
+      forwardAuth:
+        address: https://auth.{{ site.url }}:9091/api/verify?auth=basic
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Email"
+          - "Remote-Name"
+        tls:
+          ca: /certificates/ca.chain.crt
+          cert: /certificates/secproxy.crt
+          key: /certificates/secproxy.key
+    secure-headers:
+      headers:
+        hostsProxyHeaders:
+          - "X-Forwarded-Host"
+        # HSTS, 2yrs
+        stsSeconds: 63072000
+        stsIncludeSubdomains: true
+        forceSTSHeader: true
+        # Superseded by CSP on newer browsers
+        customFrameOptionsValue: "allow-from https:{{ site.url }}"
+        contentTypeNosniff: true
+        referrerPolicy: "same-origin"
+        # Setting CSP is more secure but it can break apps. Consider script-src 'self';
+        contentSecurityPolicy: "frame-ancestors 'https://*.{{ site.url }}'; object-src 'none';"
+        permissionsPolicy: "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
+
+tls:
+  # https://ssl-config.mozilla.org/#server=traefik&version=2.10&config=intermediate&guideline=5.7
+  options:
+    modern:
+      minVersion: "VersionTLS13"
+    intermediate:
+      minVersion: "VersionTLS12"
+      sniStrict: true
+      cipherSuites:
+        - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305"
+        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+...

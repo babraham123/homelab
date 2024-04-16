@@ -1,0 +1,101 @@
+// /etc/headscale/acl.hujson
+// Ref: https://tailscale.com/kb/1018/acls/
+// Ref: https://github.com/juanfont/headscale/blob/main/docs/acls.md
+// tests: https://github.com/juanfont/headscale/blob/main/hscontrol/policy/acls_test.go
+{
+  // groups are collections of users having a common scope. A user can be in multiple groups
+  // groups cannot be composed of groups
+  "groups": {
+    "group:admin": ["{{ username }}"], // treated as the admin / machine user
+    "group:family": [
+{% for user in users %}
+      "{{ user }}",
+{% endfor %}
+    ], // add more family members
+    // "group:guests": ["guest1"],
+  },
+  // hosts should be defined using its IP addresses and a subnet mask.
+  // to define a single host, use a /32 mask. You cannot use DNS entries here,
+  // as they're prone to be hijacked by replacing their IP addresses.
+  // see https://github.com/tailscale/tailscale/issues/3800 for more information.
+  "hosts": {
+    "router": "{{ router.ip }}/32",
+    "pve1": "{{ pve1.mask }}",
+    "pve2": "{{ pve2.mask }}",
+    "wifi": "{{ wifi.mask }}",
+    "websvcs": "{{ websvcs.ip }}/32",
+    "gaming": "{{ gaming.ip }}/32",
+    "secsvcs": "{{ secsvcs.ip }}/32",
+    "homesvcs": "{{ homesvcs.ip }}/32",
+  },
+  // There's an additional rule to allow traffic to be
+  // forwarded to the internal subnet. See this issue
+  // https://github.com/juanfont/headscale/issues/502
+  "acls": [
+    {
+      "action": "accept",
+      "src": ["{{ username }}"],
+      "dst": ["*:*"]
+    },
+    {
+      "action": "accept",
+      "src": ["public"],
+      "dst": ["*:*"]
+    },
+
+    // ACLs currently don't work for subnets, re-enable in future version
+    // // admin has access to all nodes
+    // {
+    //   "action": "accept",
+    //   "src": ["group:admin"],
+    //   "dst": ["*:*"]
+    // },
+    // // family can access entire VPN
+    // {
+    //   "action": "accept",
+    //   "src": ["group:family"],
+    //   "dst": [
+    //     "*:0",
+    //     "pve1:*",
+    //     "pve2:*",
+    //     "wifi:*"
+    //   ]
+    // },
+    // // guests can access useful services
+    // {
+    //   "action": "accept",
+    //   "src": ["group:guests"],
+    //   "dst": [
+    //     "*:0",
+    //     "wifi:*"
+    //   ]
+    // },
+    // // public endpoint can access web services
+    // {
+    //   "action": "accept",
+    //   "src": ["public"],
+    //   "dst": [
+    //     "*:0",
+    //     "secsvcs:80,443",
+    //     "websvcs:80,443"
+    //   ]
+    // },
+
+    // We still have to allow internal users communications since nothing guarantees that each user have
+    // their own users.
+    { "action": "accept", "src": ["{{ username }}"], "dst": ["{{ username }}:*"] },
+    { "action": "accept", "src": ["public"], "dst": ["public:*"] },
+{% for user in users %}
+    { "action": "accept", "src": ["{{ user }}"], "dst": ["{{ user }}:*"] },
+{% endfor %}
+    // add more family members
+    // { "action": "accept", "src": ["guest1"], "dst": ["guest1:*"] },
+  ],
+  "tests": [
+    {
+      "src": "public",
+      "accept": ["{{ websvcs.ip }}:443", "{{ secsvcs.ip }}:80"],
+      "deny": ["{{ pve2.ip }}:443", "{{ pve2.gateway }}:443"],
+    }
+  ]
+}

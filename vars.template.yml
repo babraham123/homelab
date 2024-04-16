@@ -1,0 +1,76 @@
+# Ref: https://github.com/babraham123/Jinja-Recurse
+---
+personal:
+  city: "Middletown"
+  state: "California"
+  country_code: "US"
+  timezone: "America/Los_Angeles"
+
+username: "jdoe"
+site:
+  url: "janedoe.com"
+  name: "JD's System"
+  email: "jdoe2@gmail.com"
+users:
+  - jane
+  - jayden
+  - jasper
+repo: "https://github.com/babraham123/homelab"
+
+vpn:
+  ip: 12.34.56.78
+  interface: "eth0"
+router:
+  ip: 192.168.1.1
+secsvcs:
+  ip: 192.168.4.20
+  interface: "enp6s18"
+websvcs:
+  ip: 192.168.2.20
+  interface: "enp6s18"
+homesvcs:
+  ip: 192.168.4.21
+  interface: "enp6s18"
+gaming:
+  ip: 192.168.2.21
+devtop:
+  ip: 192.168.2.22
+  interface: "enp6s18"
+rpigame:
+  ip: 192.168.1.101
+
+wifi:
+  subnet: 192.168.1
+  gateway: 192.168.1.1
+  mask: 192.168.1.0/24
+  ssid24: "cool-house"
+  ssid5: "cool-house5"
+pve1:
+  subnet: 192.168.4
+  gateway: 192.168.4.1
+  mask: 192.168.4.0/24
+  ip: 192.168.4.10
+pve2:
+  subnet: 192.168.2
+  gateway: 192.168.2.1
+  mask: 192.168.2.0/24
+  ip: 192.168.2.10
+iot:
+  subnet: 192.168.3
+  gateway: 192.168.3.1
+  mask: 192.168.3.0/24
+
+critical_svcs:
+  - auth
+  - ldap
+  - uptime
+  - graph
+  - metrics
+  - logs
+  - alert
+  - alertmanager
+  - secproxy
+  - pgdb
+  - vault
+  - hass
+...

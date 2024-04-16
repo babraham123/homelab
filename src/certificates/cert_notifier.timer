@@ -1,0 +1,15 @@
+# /etc/systemd/system/cert_notifier.timer
+
+[Unit]
+Description="Homelab: Runs cert_notifier.service every week"
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+# Run if machine was off
+Persistent=true
+OnCalendar=Fri *-*-* 06:00:00
+Unit=cert_notifier.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,29 @@
+# /etc/containers/systemd/nginx.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Nginx reverse proxy, used to serve static content"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/library/nginx:stable
+ContainerName=nginx
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# Listening to port 8100
+Network=static.network
+
+Environment=TZ={{ personal.timezone }}
+Volume=/var/opt/nginx/www:/www:ro
+Volume=/etc/opt/nginx/conf:/etc/nginx:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

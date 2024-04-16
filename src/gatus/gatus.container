@@ -1,0 +1,45 @@
+# /etc/containers/systemd/gatus.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Blackbox uptime monitoring and alerting"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/twinproduction/gatus:stable
+ContainerName=gatus
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# http web front-end, port = 8080
+Network=telem.network
+Network=pg.network
+HostName=uptime.{{ site.url }}
+DNS=1.1.1.1
+
+PodmanArgs=--entrypoint="/runner.sh"
+
+Environment=TZ={{ personal.timezone }}
+Environment=GATUS_DELAY_START_SECONDS=10
+Environment=POSTGRES_USER=gatus
+Environment=POSTGRES_DB=gatus
+# https://www.postgresql.org/docs/14/libpq-envars.html
+Environment=PGSSLMODE=verify-full
+Environment=PGSSLROOTCERT=/certificates/ca.chain.pem
+Secret=gatus_pg_password,type=env,target=POSTGRES_PASSWORD
+Secret=gatus_ldap_password,type=env,target=LDAP_PASSWORD
+
+Volume=/etc/opt/gatus/config.yaml:/config/config.yaml
+Volume=/etc/opt/gatus/certificates:/certificates:ro
+Volume=/etc/opt/gatus/authelia_login.sh:/authelia_login.sh:ro
+Volume=/etc/opt/gatus/runner.sh:/runner.sh:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

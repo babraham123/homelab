@@ -1,0 +1,9 @@
+# /etc/network/interfaces
+
+auto vmbr0
+iface vmbr0 inet static
+	address {{ pve1.ip }}/24
+	gateway {{ pve1.gateway }}
+	bridge-ports none
+	bridge-stp off
+	bridge-fd 0

@@ -1,0 +1,48 @@
+# /etc/containers/systemd/postgres.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Postgres SQL database server"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/library/postgres:14-alpine
+ContainerName=postgres
+# No auto-update for data safety
+NoNewPrivileges=true
+
+Network=pg.network
+HostName=pgdb.{{ site.url }}
+# hostPort:containerPort
+PublishPort=5432:5432
+
+# https://www.postgresql.org/docs/14/runtime-config-connection.html#RUNTIME-CONFIG-CONNECTION-SSL
+Exec=-c "ssl=on" \
+     -c "ssl_cert_file=/certificates/pgdb.crt" \
+     -c "ssl_key_file=/certificates/pgdb.key" \
+     -c "ssl_ca_file=/certificates/ca.chain.crt" \
+     -c "ssl_min_protocol_version=TLSv1.2" \
+     -c "ssl_ciphers=HIGH:+3DES:!aNULL"
+
+Environment=TZ={{ personal.timezone }}
+
+Secret=postgres_password,type=env,target=POSTGRES_PASSWORD
+Secret=lldap_pg_password,type=env,target=LLDAP_POSTGRES_PASSWORD
+Secret=authelia_pg_password,type=env,target=AUTHELIA_POSTGRES_PASSWORD
+Secret=gatus_pg_password,type=env,target=GATUS_POSTGRES_PASSWORD
+
+Volume=postgresdb.volume:/var/lib/postgresql/data
+# https://hub.docker.com/_/postgres#:~:text=and%20POSTGRES_DB.-,Initialization%20scripts,-If%20you%20would
+Volume=/var/opt/db/pg_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+Volume=/etc/opt/db/certificates:/certificates:ro
+# Expects uid and gid to be 70
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
