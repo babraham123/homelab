@@ -1,0 +1,40 @@
+# /etc/containers/systemd/vmagent.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+# On secsvcs just use VictoriaMetrics
+
+[Unit]
+Description="Homelab: Metric collector"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=victoriametrics.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/victoriametrics/vmagent:stable
+ContainerName=vmagent
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=telem.network
+HostName=metric-collector.{{ site.url }}
+# port 8429
+# https://docs.victoriametrics.com/vmagent/#how-to-push-data-to-vmagent
+
+Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
+     --graphiteListenAddr=":2003" \
+     --opentsdbListenAddr=":4242" \
+     --influxListenAddr=":8089" \
+     --remoteWrite.url="http://metrics.{{ site.url }}:8428/api/v1/write"
+
+Environment=TZ={{ personal.timezone }}
+Volume=/etc/opt/vmagent/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+Volume=vmagentdata.volume:/vmagentdata
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

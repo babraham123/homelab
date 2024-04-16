@@ -1,0 +1,8 @@
+# /etc/containers/systemd/grafanadata.volume
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#volume-units-volume
+
+[Volume]
+User=root
+Group=root
+# default: Driver=local
+# /var/lib/containers/storage/volumes

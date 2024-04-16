@@ -1,0 +1,11 @@
+alias ls='ls -a'
+alias vi='vim'
+alias result='echo $?'
+alias fdfind='fd'
+
+alias master='git checkout master'
+alias st='git status'
+alias lg='git log --stat'
+alias lastcommit='git commit --amend --no-edit'
+alias branches='git branch | cut -c 3- | xargs -I@ sh -c '"'"'printf "\e[1;31m%-6s\e[m -> " "@"; git --no-pager log --pretty=format:"%an, %cr%n  %s" --abbrev-commit @^..@; echo ""'"'"''
+alias ggrep='git grep -n'

@@ -1,0 +1,17 @@
+# Ref:
+# Icons: https://docs.olivetin.app/icons.html
+#   https://iconify.design/
+# Actions: https://docs.olivetin.app/action-container-control.html
+
+# Listen on all addresses available, port 1337
+listenAddressSingleHTTPFrontend: 0.0.0.0:1337
+
+# Choose from INFO (default), WARN and DEBUG
+logLevel: "INFO"
+
+# Actions (buttons) to show up on the WebUI:
+actions:
+- title: Start Gaming Server
+  icon: <iconify-icon icon="maki:gaming"></iconify-icon>
+  popupOnStart: default
+  shell: ssh root@pve2.{{ site.url }} 'qm start $(/usr/local/bin/get_vm_id.sh gaming)'

@@ -1,0 +1,11 @@
+# Mac system files
+.DS_Store
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Personal details
+vars.yml
+notes
+

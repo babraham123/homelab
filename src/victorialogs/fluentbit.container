@@ -1,0 +1,33 @@
+# /etc/containers/systemd/fluentbit.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Logs collector"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=victorialogs.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/fluent/fluent-bit:latest
+ContainerName=fluentbit
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=telem.network
+HostName=log-collector.{{ site.url }}
+# port 5140
+
+Environment=TZ={{ personal.timezone }}
+Volume=/etc/opt/fluentbit/config.conf:/fluent-bit/etc/fluent-bit.conf:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+ExecStartPre=/etc/opt/fluentbit/prestart.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,36 @@
+# /etc/opt/gatus/config.yaml
+# Ref: https://github.com/TwiN/gatus?tab=readme-ov-file
+---
+storage:
+  type: postgres
+  path: "postgres://gatus:${POSTGRES_PASSWORD}@pgdb.{{ site.url }}:5432/gatus"
+
+public-endpoint: &public
+  group: public
+  interval: 10m
+  client:
+    timeout: 30s
+  conditions:
+    - "[STATUS] == 200"
+    - "[RESPONSE_TIME] < 300"
+
+internal-endpoint: &internal
+  group: internal
+  interval: 10m
+  client:
+    timeout: 30s
+  headers:
+    cookie: "${AUTH_COOKIE}"
+  conditions:
+    - "[STATUS] == 200"
+    - "[RESPONSE_TIME] < 300"
+
+endpoints:
+  - name: Homepage
+    <<: *public
+    url: "https://{{ site.url }}"
+
+  - name: LDAP Frontend
+    <<: *internal
+    url: "https://ldap.{{ site.url }}"
+...

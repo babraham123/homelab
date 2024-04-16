@@ -1,0 +1,32 @@
+# /etc/containers/systemd/alertmanager.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Sends alerting notifications"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/prom/alertmanager:latest
+ContainerName=alertmanager
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=observer.network
+HostName=alertmanager.{{ site.url }}
+# port 9093
+
+Exec=--config.file="/config/alertmanager.yml"
+
+Environment=TZ={{ personal.timezone }}
+Volume=/etc/opt/alertmanager/config.yml:/config/alertmanager.yml:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+# /etc/containers/systemd/observer.network
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#network-units-network
+# Handles traffic to VM or its related services
+
+[Network]
+Driver=bridge

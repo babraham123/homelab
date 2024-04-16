@@ -1,0 +1,33 @@
+# /etc/containers/systemd/victorialogs.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Time series database and monitoring system"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/victoriametrics/victoria-logs:stable
+ContainerName=victorialogs
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# http web front-end, ":9428/select/vmui"
+Network=telem.network
+HostName=logs.{{ site.url }}
+
+Exec=--storageDataPath="/vlogs" \
+     --httpListenAddr=":9428"
+
+Environment=TZ={{ personal.timezone }}
+Volume=vldata.volume:/vlogs
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+# /etc/systemd/system/cert_notifier.service
+
+[Unit]
+Description="Homelab: Sends notifications about certificate renewal"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Service]
+Type=simple
+
+Environment=TZ={{ personal.timezone }}
+
+ExecStart=/usr/local/bin/cert_notifier.sh
+
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

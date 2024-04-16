@@ -1,0 +1,218 @@
+# Proxmox setup
+
+## Hardware & Network
+- Setup dedicated LAN in pfSense
+  - Open admin console: https://{{ router.ip }}/
+  - Configure new interface, record gateway details
+  - Setup DHCP in `[100,200]` range, add static IP based on MAC
+  - Copy firewall rules from LAN
+- Make a [flash drive](https://www.lewan.com/blog/2012/02/10/making-a-bootable-usb-stick-on-an-apple-mac-os-x-from-an-iso) with proxmox [iso](https://www.proxmox.com/en/downloads/category/iso-images-pve) and install
+  - F2 during startup to select USB boot
+- Test connection: https://{{ pve2.ip }}:8006/ 
+
+## PVE setup
+- Shell in with root, pswd
+- Update deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/) 
+  - `nano /etc/apt/sources.list`, add `contrib non-free non-free-firmware` to all 3 sources
+  - `nano /etc/apt/sources.list.d/pve-enterprise.list`
+```
+# Not recommended for production use
+deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+```
+- [Basic debian setup](./debian_setup.md)
+- Install special tools
+```bash
+sudo wget https://enterprise.proxmox.com/debian/proxmox-release-bullseye.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
+sudo apt install -y libguestfs-tools intel-microcode
+```
+- Remove unnecessary services
+```bash
+sudo systemctl disable --now pve-ha-crm.service
+sudo systemctl disable --now pve-ha-lrm.service
+sudo systemctl disable --now corosync.service
+```
+- Collect system stats to help with VM selection 
+```bash
+# Show which CPUs are P (performance) vs E (efficiency)
+lscpu --all --extended
+# Show total / free RAM
+free -h
+# Show disk size
+lsblk
+```
+
+## PCI passthrough
+[src](https://pve.proxmox.com/wiki/PCI_Passthrough)
+
+### GPU
+- Update grub
+```bash
+# Check if grub or systemd-boot
+efibootmgr -v
+sudo vim /etc/default/grub
+```
+
+```
+GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt initcall_blacklist=sysfb_init"
+```
+```bash
+sudo update-grub
+```
+- Update modules
+```bash
+sudo vim /etc/modules
+```
+```
+vfio
+vfio_iommu_type1
+vfio_pci
+vfio_virqfd
+```
+
+```bash
+sudo vim /etc/modprobe.d/pve-blacklist.conf
+```
+```
+blacklist nvidiafb
+blacklist nvidia
+blacklist radeon
+blacklist nouveau
+
+blacklist snd_hda_intel
+blacklist snd_hda_codec_hdmi
+```
+- Update BIOS settings
+  - Under CPU, confirm that VT-d and VT-x/VMX are enabled
+  - Under Graphics, make the iGPU the Primary Display
+- Confirm its works and find PCI id
+```bash
+sudo reboot
+# Confirm that IOMMU is enabled
+sudo dmesg | grep -e DMAR -e IOMMU
+# Confirm that remapping is enabled
+sudo dmesg | grep 'remapping'
+# Confirm dedicated IOMMU groups / ACS support, record GPU group #
+find /sys/kernel/iommu_groups/ -type l | sort
+# record GPU PCI IDs
+lspci -nnv | grep VGA
+lspci -s 01:00 && lspci -s 01:00 -n
+```
+
+### iGPU
+- Same as above
+- `sudo vim /etc/modprobe.d/pve-blacklist.conf`
+```
+blacklist i915
+```
+```bash
+sudo reboot
+lspci -nnv | grep VGA
+```
+
+### Intel NIC
+- Fix crashes
+	- `sudo vim /etc/network/interfaces`
+```
+iface eno1 inet manual
+	post-up ethtool -K eno1 tso off gso off
+```
+
+### Coral TPU
+- Update modules
+  `sudo vim /etc/modprobe.d/blacklist-apex.conf`
+```
+blacklist gasket
+blacklist apex
+options vfio-pci ids=1ac1:089a
+```
+```bash
+sudo reboot
+lspci -nnv | grep TPU
+```
+- In VM setup, uncheck "Pre-Enroll keys" in BIOS
+- If doesn't work, consider `pcie_aspm=off`
+  [ref1](https://github.com/blakeblackshear/frigate/issues/1020), [ref2](https://forum.proxmox.com/threads/guest-internal-error-when-passing-through-pcie.99239/), [ref3](https://www.derekseaman.com/2023/06/home-assistant-frigate-vm-on-proxmox-with-pcie-coral-tpu.html)
+
+## VM creation
+[ref](https://www.youtube.com/watch?v=sZcOlW-DwrU)
+- Upload OS ISO image, use net install version
+- For UEFI host:
+  - Machine: q35
+  - BIOS: OVMF
+- SCSI controller: VirtIO SCSI single
+- Disk (host SSD)
+  - SSD emulation
+  - Discard (if storage supports thin provisioning and zeroing of unused space: ZFS, Ceph, thin LVM)
+- CPU
+  - type: host
+  - max cores = host cores - 1
+- OS installation
+  - Use ext4, no lvm, all files in 1 partition [ref](https://forum.proxmox.com/threads/lvm-or-ext4-on-kvm-guest.39055/)
+
+Reference links:
+- [Display devices](https://www.kraxel.org/blog/2019/09/display-devices-in-qemu/)
+- [BIOS](https://www.reddit.com/r/Proxmox/comments/1acugae/bios_or_uefi_for_linux_vms_for_performance/)
+- [Storage](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#chapter_storage)
+
+Maintenance:
+- [Resize disks](https://pve.proxmox.com/wiki/Resize_disks#Online_for_Linux_guests_without_LVM)
+
+## Backups
+Install on pve2 but can support both. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
+
+- Update deb repository
+  - `sudo vim /etc/apt/sources.list.d/pbs-enterprise.list`
+```
+# NOT recommended for production use
+deb http://download.proxmox.com/debian/pbs bookworm pbs-no-subscription
+```
+- Install PBS, [ref](https://pbs.proxmox.com/docs/installation.html)
+```bash
+sudo apt update
+sudo apt install -y proxmox-backup-server
+```
+- Connect to console: https://{{ pve2.ip }}:8007/ 
+- Further [setup](https://www.youtube.com/watch?v=33ubleU4OFc), [setup2](https://www.youtube.com/watch?v=Px5eHcUKbbQ)
+  - Storage >> Directory >> Create: Directory
+  - Datastore >> backup1 >> Prune & GC tab, [options](https://pbs.proxmox.com/docs/maintenance.html)
+    - Prune Jobs >> Add >> Last weekly: 3, last monthly: 3, daily
+    - Garbage Collection >> Edit >> daily
+- PVE setup
+  - Datacenter >> Storage >> Add >> Proxmox Backup Server
+  - VM >> Backup >> Backup now
+  - Datacenter >> Backup >> Add
+
+- PVE / PBS backups
+```bash
+sudo tar -czf "etc-backup-$(date -I).tar.gz" /etc
+```
+
+## Monitoring
+- Prep for the PVE exporter, [src](https://github.com/prometheus-pve/prometheus-pve-exporter?tab=readme-ov-file), [ref](https://forum.proxmox.com/threads/proxmox-prometheus-exporter-questions.74862/#post-334340)
+  - Add a new user (`prometheus`), Permissions >> Users >> Add
+  - Assign `prometheus` the "/" path permission with read-only access (PVEAuditor role). Permissions >> Add
+  - Later, store the password in the secsvcs secrets file
+
+## Upgrade from PVE 7 to 8 (bullseye to bookworm)
+- [PVE guide](https://pve.proxmox.com/wiki/Upgrade_from_7_to_8)
+- [PBS guide](https://pbs.proxmox.com/wiki/index.php/Upgrade_from_2_to_3#In-place_Upgrade)
+```bash
+sudo su
+pve7to8 --full
+apt update
+apt dist-upgrade
+pveversion
+sed -i 's/bullseye/bookworm/g' /etc/apt/sources.list
+sed -i -e 's/bullseye/bookworm/g' /etc/apt/sources.list.d/*.list
+apt update
+apt dist-upgrade
+pve7to8 --full
+[ -d /sys/firmware/efi ] && sudo apt install grub-efi-amd64
+systemctl reboot
+
+sudo su
+systemctl status proxmox-backup-proxy.service proxmox-backup.service
+pve7to8 --full
+apt update
+apt upgrade
+```

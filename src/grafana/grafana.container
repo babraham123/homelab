@@ -1,0 +1,43 @@
+# /etc/containers/systemd/grafana.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/grafana/grafana/blob/main/Dockerfile
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Graphs and alerts for time series data"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=victoriametrics.service
+Requires=victorialogs.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/grafana/grafana-oss:latest
+ContainerName=grafana
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# http web front-end, port = 3000
+Network=observer.network
+HostName=graph.{{ site.url }}
+
+PodmanArgs=--entrypoint='/bin/bash -c "/download.sh && /run.sh"'
+
+Environment=TZ={{ personal.timezone }}
+Volume=/etc/opt/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+Volume=/etc/opt/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+Volume=/etc/opt/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml:ro
+Volume=/etc/opt/grafana/dashboards:/var/lib/grafana/dashboards:ro
+Volume=/etc/opt/grafana/vm_download.sh:/download.sh:ro
+Volume=/var/opt/grafana/plugins:/var/lib/grafana/plugins
+Volume=grafanadata.volume:/var/lib/grafana
+
+# Expects the user's uid to be 472, the gid to be 0
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

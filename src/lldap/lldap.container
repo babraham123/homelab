@@ -1,0 +1,47 @@
+# /etc/containers/systemd/lldap.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: LDAP server, stores user and group metadata"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=postgres.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/nitnelave/lldap:stable
+ContainerName=lldap
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# For LDAP, port = 3890
+# For LDAPS (LDAP Over SSL), port = 6360
+# http web front-end, port = 17170
+Network=ldap.network
+Network=pg.network
+HostName=ldap.{{ site.url }}
+# hostPort:containerPort
+PublishPort=6360:6360
+
+# Run as root
+Environment=UID=0 GID=0
+Environment=TZ={{ personal.timezone }}
+# https://www.postgresql.org/docs/14/libpq-envars.html
+Environment=PGSSLMODE=verify-full
+Environment=PGSSLROOTCERT=/data/certificates/ca.chain.pem
+#PodmanArgs=--env-merge=LLDAP_DATABASE_URL=postgres://lldap:${PGPASSWORD}@pgdb.{{ site.url }}/lldap
+Secret=lldap_db_url,type=env,target=LLDAP_DATABASE_URL
+Secret=lldap_jwt_secret,type=env,target=LLDAP_JWT_SECRET
+Secret=lldap_admin_password,type=env,target=LLDAP_LDAP_USER_PASS
+Secret=lldap_pg_password,type=env,target=PGPASSWORD
+Secret=lldap_admin_password,type=env,target=LLDAP_KEY_SEED
+Secret=lldap_smtp_password,type=env,target=LLDAP_SMTP_OPTIONS__PASSWORD
+Volume=/etc/opt/lldap:/data
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
