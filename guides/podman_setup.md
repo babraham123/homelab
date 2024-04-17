@@ -76,6 +76,6 @@ podman secret ls
 adduser node_exporter --system
 groupadd node_exporter
 usermod -a -G node_exporter node_exporter
-
+cd /root/homelab-rendered
 src/debian/install_svcs.sh node_exporter
 ```
