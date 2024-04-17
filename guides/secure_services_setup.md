@@ -20,6 +20,8 @@ src/secsvcs/install_svcs.sh vmalert
 src/secsvcs/install_svcs.sh grafana
 # src/secsvcs/install_svcs.sh vault
 src/secsvcs/install_svcs.sh fluentbit
+
+systemctl restart node_exporter
 ```
 
 ## Networking

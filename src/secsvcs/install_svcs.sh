@@ -32,7 +32,7 @@ case $1 in
     mkdir -p /etc/opt/traefik/config/static
     cp secsvcs/traefik/dynamic.yml /etc/opt/traefik/config/dynamic/traefik.yml
     cp secsvcs/traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
-    cp secsvcs/traefik/traefic.container /etc/containers/systemd
+    cp secsvcs/traefik/traefik.container /etc/containers/systemd
     cp secsvcs/traefik/net.network /etc/containers/systemd
     cp authelia/auth.network /etc/containers/systemd
     cp lldap/ldap.network /etc/containers/systemd
@@ -57,7 +57,7 @@ case $1 in
     cp gatus/config.yaml /etc/opt/gatus
     cp gatus/runner.sh /etc/opt/gatus
     cp gatus/authelia_login.sh /etc/opt/gatus
-    cp authelia/gatus.container /etc/containers/systemd
+    cp gatus/gatus.container /etc/containers/systemd
     cp victoriametrics/telem.network /etc/containers/systemd
     ;;
   pve_exporter)
@@ -83,12 +83,13 @@ case $1 in
     cp victoriametrics/telem.network /etc/containers/systemd
     ;;
   grafana)
-    mkdir -p /etc/opt/grafana/plugins
+    mkdir -p /etc/opt/grafana
+    mkdir -p /var/opt/grafana/plugins
     cp grafana/grafana.ini /etc/opt/grafana
     cp grafana/datasources.yml /etc/opt/grafana
     cp grafana/dashboard.yml /etc/opt/grafana
     cp grafana/vm_download.sh /etc/opt/grafana
-    cp grafana/dashboards /etc/opt/grafana
+    cp -r grafana/dashboards /etc/opt/grafana
     cp grafana/grafana.container /etc/containers/systemd
     cp grafana/grafanadata.volume /etc/containers/systemd
     cp victoriametrics/observer.network /etc/containers/systemd
