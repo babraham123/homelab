@@ -25,6 +25,7 @@ cp /etc/opt/traefik/certificates/ca.chain.crt /etc/opt/authelia/certificates/ca.
 cp /etc/opt/traefik/certificates/ca.chain.crt /etc/opt/lldap/certificates/ca.chain.pem
 cp /etc/opt/traefik/certificates/ca.chain.crt /etc/opt/db/certificates/ca.chain.crt
 cp /etc/opt/traefik/certificates/ca.chain.crt /etc/opt/gatus/certificates/ca.chain.pem
+cp /etc/opt/traefik/certificates/ca.chain.crt /etc/opt/grafana/certificates/ca.chain.pem
 
 mv wildcard.{{ site.url }}.cert.pem /etc/opt/traefik/certificates/wildcard.crt
 

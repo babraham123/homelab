@@ -19,6 +19,7 @@ case $1 in
     cp lldap/lldap_config.toml /etc/opt/lldap
     cp lldap/lldap.container /etc/containers/systemd
     cp lldap/ldap.network /etc/containers/systemd
+    cp postgres/pg.network /etc/containers/systemd
     ;;
   authelia)
     mkdir -p /etc/opt/authelia/config
@@ -26,6 +27,8 @@ case $1 in
     cp authelia/configuration.yml /etc/opt/authelia/config
     cp authelia/authelia.container /etc/containers/systemd
     cp authelia/auth.network /etc/containers/systemd
+    cp lldap/ldap.network /etc/containers/systemd
+    cp postgres/pg.network /etc/containers/systemd
     ;;
   traefik)
     mkdir -p /etc/opt/traefik/config/dynamic
@@ -34,6 +37,7 @@ case $1 in
     cp secsvcs/traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
     cp secsvcs/traefik/traefik.container /etc/containers/systemd
     cp secsvcs/traefik/net.network /etc/containers/systemd
+    cp gatus/uptime.network /etc/containers/systemd
     cp authelia/auth.network /etc/containers/systemd
     cp lldap/ldap.network /etc/containers/systemd
     cp victoriametrics/observer.network /etc/containers/systemd
@@ -54,10 +58,18 @@ case $1 in
     ;;
   gatus)
     mkdir -p /etc/opt/gatus/certificates
+    mkdir -p /var/opt/gatus
     cp gatus/config.yaml /etc/opt/gatus
     cp gatus/runner.sh /etc/opt/gatus
     cp gatus/authelia_login.sh /etc/opt/gatus
+    wget --output-document=/var/opt/gatus/busybox "https://www.busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox"
+    chmod +x /var/opt/gatus/busybox
+    CU_VERSION=$(curl -s "https://api.github.com/repos/moparisthebest/static-curl/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    wget --output-document=/var/opt/gatus/curl "https://github.com/moparisthebest/static-curl/releases/download/v$CU_VERSION/curl-amd64"
+    chmod +x /var/opt/gatus/curl
     cp gatus/gatus.container /etc/containers/systemd
+    cp gatus/uptime.network /etc/containers/systemd
+    cp postgres/pg.network /etc/containers/systemd
     cp victoriametrics/telem.network /etc/containers/systemd
     ;;
   pve_exporter)
@@ -83,8 +95,9 @@ case $1 in
     cp victoriametrics/telem.network /etc/containers/systemd
     ;;
   grafana)
-    mkdir -p /etc/opt/grafana
+    mkdir -p /etc/opt/grafana/certificates
     mkdir -p /var/opt/grafana/plugins
+    chown -R 472:0 /var/opt/grafana
     cp grafana/grafana.ini /etc/opt/grafana
     cp grafana/datasources.yml /etc/opt/grafana
     cp grafana/dashboard.yml /etc/opt/grafana
@@ -93,6 +106,7 @@ case $1 in
     cp grafana/grafana.container /etc/containers/systemd
     cp grafana/grafanadata.volume /etc/containers/systemd
     cp victoriametrics/observer.network /etc/containers/systemd
+    cp postgres/pg.network /etc/containers/systemd
     ;;
   vault)
     echo "TODO: Implement vault"

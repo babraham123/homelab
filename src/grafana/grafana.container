@@ -1,5 +1,6 @@
 # /etc/containers/systemd/grafana.container
-# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# Ref:
+# https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://github.com/grafana/grafana/blob/main/Dockerfile
 # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
 
@@ -20,19 +21,24 @@ NoNewPrivileges=true
 
 # http web front-end, port = 3000
 Network=observer.network
+Network=pg.network
 HostName=graph.{{ site.url }}
 
-PodmanArgs=--entrypoint='/bin/bash -c "/download.sh && /run.sh"'
+PodmanArgs=--entrypoint='["/bin/sh", "-c", "/download.sh && /run.sh"]'
 
 Environment=TZ={{ personal.timezone }}
+# https://www.postgresql.org/docs/14/libpq-envars.html
+Secret=grafana_pg_password,type=env,target=PGPASSWORD
+
 Volume=/etc/opt/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
 Volume=/etc/opt/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
 Volume=/etc/opt/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml:ro
 Volume=/etc/opt/grafana/dashboards:/var/lib/grafana/dashboards:ro
 Volume=/etc/opt/grafana/vm_download.sh:/download.sh:ro
+Volume=/etc/opt/grafana/certificates:/certificates:ro
+
 Volume=/var/opt/grafana/plugins:/var/lib/grafana/plugins
 Volume=grafanadata.volume:/var/lib/grafana
-
 # Expects the user's uid to be 472, the gid to be 0
 
 [Service]

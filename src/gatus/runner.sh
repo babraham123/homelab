@@ -1,15 +1,19 @@
-#!/usr/bin/env bash
+#!/bin/busybox sh
 # /etc/opt/gatus/runner.sh
 # Ref:
 # https://stackoverflow.com/questions/360201/how-do-i-kill-background-processes-jobs-when-my-shell-script-exits
 # https://github.com/TwiN/gatus/blob/master/Dockerfile
 
-set -euo pipefail
+set -eu
+
+echo "Started Gatus runner script"
 
 /authelia_login.sh &
 /gatus &
 
 # shellcheck disable=SC2064
-trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+trap "trap - TERM && kill -- -$$" INT TERM EXIT
 
-wait < <(jobs -p)
+for job in $(jobs -p); do
+  wait "$job"
+done
