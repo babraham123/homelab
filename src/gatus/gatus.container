@@ -15,27 +15,28 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 # http web front-end, port = 8080
+Network=uptime.network
 Network=telem.network
 Network=pg.network
 HostName=uptime.{{ site.url }}
 DNS=1.1.1.1
 
-PodmanArgs=--entrypoint="/runner.sh"
+PodmanArgs=--entrypoint='["/bin/busybox", "sh", "-c", "/runner.sh"]'
 
 Environment=TZ={{ personal.timezone }}
 Environment=GATUS_DELAY_START_SECONDS=10
-Environment=POSTGRES_USER=gatus
-Environment=POSTGRES_DB=gatus
 # https://www.postgresql.org/docs/14/libpq-envars.html
 Environment=PGSSLMODE=verify-full
-Environment=PGSSLROOTCERT=/certificates/ca.chain.pem
-Secret=gatus_pg_password,type=env,target=POSTGRES_PASSWORD
+Environment=PGSSLROOTCERT=/etc/ssl/certs/ca.chain.pem
+Secret=gatus_pg_password,type=env,target=PGPASSWORD
 Secret=gatus_ldap_password,type=env,target=LDAP_PASSWORD
 
 Volume=/etc/opt/gatus/config.yaml:/config/config.yaml
-Volume=/etc/opt/gatus/certificates:/certificates:ro
+Volume=/etc/opt/gatus/certificates:/etc/ssl/certs:ro
 Volume=/etc/opt/gatus/authelia_login.sh:/authelia_login.sh:ro
 Volume=/etc/opt/gatus/runner.sh:/runner.sh:ro
+Volume=/var/opt/gatus/busybox:/bin/busybox:ro
+Volume=/var/opt/gatus/curl:/bin/curl:ro
 
 [Service]
 Restart=on-failure

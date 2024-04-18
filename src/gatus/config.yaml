@@ -1,9 +1,11 @@
 # /etc/opt/gatus/config.yaml
 # Ref: https://github.com/TwiN/gatus?tab=readme-ov-file
 ---
+metrics: true
+
 storage:
   type: postgres
-  path: "postgres://gatus:${POSTGRES_PASSWORD}@pgdb.{{ site.url }}:5432/gatus"
+  path: "postgres://gatus@pgdb.{{ site.url }}:5432/gatus"
 
 public-endpoint: &public
   group: public

@@ -17,6 +17,7 @@ NoNewPrivileges=true
 
 # http web front-end, ":8428/vmui"
 Network=observer.network
+Network=telem.network
 HostName=metrics.{{ site.url }}
 
 Exec=--storageDataPath="/storage" \
