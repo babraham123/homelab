@@ -1,5 +1,4 @@
 # /etc/opt/victoriametrics/prometheus.yml
-
 global:
   scrape_interval: 10s
 
@@ -36,6 +35,6 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: pve_exporter.{{ site.url }}:9221
-  - job_name: 'node_exporter'
-    static_configs:
-      - targets: ['host.containers.internal:9100']
+  # - job_name: 'node_exporter'
+  #   static_configs:
+  #     - targets: ['host.containers.internal:9100']

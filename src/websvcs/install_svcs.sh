@@ -16,7 +16,7 @@ case $1 in
     cp traefik/headers.yml /etc/opt/traefik/config/dynamic
     cp traefik/tls.yml /etc/opt/traefik/config/dynamic
     cp traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
-    cp websvcs/traefik/traefic.container /etc/containers/systemd
+    cp websvcs/traefik/traefik.container /etc/containers/systemd
     ;;
   vmagent)
     mkdir -p /etc/opt/vmagent
@@ -29,8 +29,8 @@ case $1 in
     mkdir -p /var/opt/nginx/www/www
     mkdir -p /var/opt/nginx/www/error
     cp nginx/nginx.conf /etc/opt/nginx/conf
-    cp nginx/index.html /etc/opt/nginx/www/www
-    cp nginx/404.html /etc/opt/nginx/www/error
+    cp nginx/index.html /var/opt/nginx/www/www
+    cp nginx/404.html /var/opt/nginx/www/error
     cp nginx/nginx.container /etc/containers/systemd
     ;;
   dashy)
