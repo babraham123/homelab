@@ -27,10 +27,10 @@ systemctl restart node_exporter
 ## Networking
 - Enable LAN access to postgres, lldap and authelia
 ```bash
+NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 ufw allow in from {{ pve2.mask }} to any port 5432,6360,9091 proto tcp
 ufw allow in from {{ pve1.mask }} to any port 5432,6360,9091 proto tcp
-ufw route allow in on {{ secsvcs.interface }} out on podman1 to any port 5432,6360,9091 proto tcp
-# TODO: confirm podman1 works with new networks. If not figure out way to map them
+ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 5432,6360,9091 proto tcp
 ```
 
 - Confirm that the logs for traefik, authelia and lldap look good 

@@ -11,22 +11,22 @@ case $1 in
     wget --output-document=headscale.deb "https://github.com/juanfont/headscale/releases/download/v${HS_VERSION}/headscale_${HS_VERSION}_linux_amd64.deb"
     dpkg --install headscale.deb
     rm headscale.deb
-    src/debian/add_homelab_tag.sh /etc/systemd/system/headscale.service
+    debian/add_homelab_tag.sh /usr/lib/systemd/system/headscale.service
     cp headscale/headscale.yaml /etc/headscale/config.yaml
-    cp src/headscale/headscale_acl.hujson /etc/headscale/acl.hujson
+    cp headscale/headscale_acl.hujson /etc/headscale/acl.hujson
     ;;
   tailscale)
     curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
     curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
     sudo apt update
     sudo apt install -y tailscale
-    src/debian/add_homelab_tag.sh /etc/systemd/system/tailscaled.service
+    debian/add_homelab_tag.sh /usr/lib/systemd/system/tailscaled.service
     ;;
   haproxy)
     apt install -y haproxy
-    src/debian/add_homelab_tag.sh /etc/systemd/system/haproxy.service
+    debian/add_homelab_tag.sh /usr/lib/systemd/system/haproxy.service
     mkdir -p /etc/haproxy/certs
-    cp src/haproxy/haproxy.cfg /etc/haproxy
+    cp haproxy/haproxy.cfg /etc/haproxy
     curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
     if [ ! -f /etc/haproxy/certs/vpnui.all.pem ]; then
       # placeholder cert

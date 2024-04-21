@@ -52,6 +52,7 @@ tools/render_src.sh ~/Documents/homelab-rendered
 
 cd ~/Documents/homelab-rendered/src
 cp macos/aliases.zsh ~/.oh-my-zsh/custom
+cp macos/functions.zsh ~/.oh-my-zsh/custom
 ```
 
 ## Auto-switch DNS

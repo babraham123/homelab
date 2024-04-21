@@ -7,12 +7,13 @@
 ## Install Podman
 - Install dependencies
 ```bash
-sudo apt install -y age jq
+sudo su
+apt install -y age jq
 
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
 wget "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" -O - | tar xz
-sudo mv yq_linux_amd64 /usr/bin/yq
-sudo ./install-man-page.sh
+mv yq_linux_amd64 /usr/bin/yq
+./install-man-page.sh
 rm yq* install-man-page.sh
 ```
 - Install podman: [ref](https://podman.io/docs/installation#linux-distributions)
@@ -23,30 +24,37 @@ rm yq* install-man-page.sh
 
 curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Testing/Release.key \
   | gpg --dearmor \
-  | sudo tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null
+  | tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
     https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Testing/ /" \
-  | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null
+  | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null
 
-sudo apt update
-sudo apt -y upgrade
-sudo apt -y install podman libgpgme11-dev buildah libyajl2
+apt update
+apt -y upgrade
+apt -y install podman libgpgme11-dev buildah libyajl2
 ```
 
 ## Networking
 - Account for conflicts between the podman network and the firewall, [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
 ```bash
-sudo ufw allow http
-sudo ufw allow https
-sudo ufw route allow in on {{ secsvcs.interface }} out on podman1 to any port 80,443 proto tcp
+ufw allow http
+ufw allow https
+
+cd /root/homelab-rendered
+cp src/secsvcs/traefik/net.network /etc/containers/systemd
+cp src/victoriametrics/telem.network /etc/containers/systemd
+systemctl daemon-reload
+NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,443 proto tcp
 ```
 
 - Allow access from container to host
 ```bash
 # scrape node_exporter
 # TODO: fix
-sudo ufw allow in on {{ secsvcs.interface }} from podman1 to any port 9100 proto tcp
+TELEM_IFACE=$(podman network inspect systemd-telem | jq -r '.[0].network_interface')
+ufw route allow in on $TELEM_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
 ```
 
 ## Secrets
