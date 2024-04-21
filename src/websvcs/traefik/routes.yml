@@ -1,0 +1,61 @@
+# /etc/opt/traefik/config/dynamic/traefik.yml
+# References:
+#   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+#   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+http:
+  routers:
+    traefik: &service
+      rule: Host(`webproxy.{{ site.url }}`)
+      entryPoints: websecure
+      service: api@internal
+      middlewares:
+        - authelia@file
+        - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    root:
+      <<: *service
+      rule: Host(`{{ site.url }}`)
+      service: nginx@file
+      middlewares:
+        - www-redirect@file
+    dashy:
+      <<: *service
+      rule: Host(`dash.{{ site.url }}`)
+      service: dashy@file
+    static-files:
+      <<: *service
+      rule: Host(`www.{{ site.url }}`, `static.{{ site.url }}`, `blog.{{ site.url }}`, `wifi.{{ site.url }}`)
+      service: nginx@file
+      middlewares:
+        - gzip@file
+        - secure-headers@file
+    # example-static:
+    #   <<: *service
+    #   rule: (Host(`example.{{ site.url }}`) && Path(`/static`))
+    #   service: nginx@file
+    #   middlewares:
+    #     - gzip@file
+    #     - static-strip-prefix@file
+  services:
+    nginx:
+      loadBalancer:
+        servers:
+          - url: http://nginx:8100/
+    dashy:
+      loadBalancer:
+        servers:
+          - url: http://dashy:4000/
+  middlewares:
+    gzip:
+      compress: {}
+    static-strip-prefix:
+      stripPrefix:
+        prefixes: "/static"
+        forceSlash: false
+    www-redirect:
+      redirectRegex:
+        regex: "^https?://?(.+)"
+        replacement: "https://www.${1}"
+        permanent: true

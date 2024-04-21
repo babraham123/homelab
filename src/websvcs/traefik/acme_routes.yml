@@ -1,0 +1,28 @@
+# /etc/opt/traefik/config/dynamic/traefik.yml
+# Ref: https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+http:
+  routers:
+    pve1: &acme_service
+      rule: Host(`pve1.{{ site.url }}`)
+      entryPoints: websecure
+      service: s403@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    pve2:
+      <<: *acme_service
+      rule: Host(`pve2.{{ site.url }}`)
+    pbs2:
+      <<: *acme_service
+      rule: Host(`pbs2.{{ site.url }}`)
+    router:
+      <<: *acme_service
+      rule: Host(`router.{{ site.url }}`)
+    vpnui:
+      <<: *acme_service
+      rule: Host(`vpn-ui.{{ site.url }}`)
+  services:
+    s403:
+      loadBalancer:
+        servers:
+          - url: https://www.{{ site.url }}/error/403.html

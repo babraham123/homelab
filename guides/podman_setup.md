@@ -2,7 +2,7 @@
 
 - Setup Linux using [debian_setup.md](./debian_setup.md)
 - Make sure host setup has been mostly completed, see [vm_host_setup.md](./vm_host_setup.md)
-- Review container security measures, for example [ref1](https://www.panoptica.app/research/7-ways-to-escape-a-container)
+- Review container security measures, for example [ref](https://www.panoptica.app/research/7-ways-to-escape-a-container)
 
 ## Install Podman
 - Install dependencies
@@ -53,8 +53,8 @@ ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,4
 ```bash
 # scrape node_exporter
 # TODO: fix
-TELEM_IFACE=$(podman network inspect systemd-telem | jq -r '.[0].network_interface')
-ufw route allow in on $TELEM_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
+# TELEM_IFACE=$(podman network inspect systemd-telem | jq -r '.[0].network_interface')
+# ufw route allow in on $TELEM_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
 ```
 
 ## Secrets

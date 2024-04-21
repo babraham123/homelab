@@ -19,7 +19,7 @@ NoNewPrivileges=true
 Network=net.network
 Network=static.network
 Network=dash.network
-HostName=secproxy.{{ site.url }}
+HostName=webproxy.{{ site.url }}
 # hostPort:containerPort
 PublishPort=80:80
 PublishPort=443:443

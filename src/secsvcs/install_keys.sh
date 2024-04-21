@@ -9,7 +9,7 @@ chown root:root ./*.pem
 mv auth.{{ site.url }}.key.pem /etc/opt/authelia/certificates/auth.key
 mv ldap.{{ site.url }}.key.pem /etc/opt/lldap/certificates/ldap.key.pem
 
-mv secproxy.{{ site.url }}.key.pem /etc/opt/traefik/certificates/secproxy.key
+mv secproxy.{{ site.url }}.key.pem /etc/opt/traefik/certificates/proxy.key
 mv wildcard.{{ site.url }}.key.pem /etc/opt/traefik/certificates/wildcard.key
 
 mv pgdb.{{ site.url }}.key.pem /etc/opt/db/certificates/pgdb.key

@@ -14,9 +14,9 @@ mv pgdb.{{ site.url }}.cert.pem /etc/opt/db/certificates/pgdb.crt
 chown 70:70 /etc/opt/db/certificates/*.crt
 # https://github.com/docker-library/postgres/blob/master/14/alpine3.19/Dockerfile
 
-mv secproxy.{{ site.url }}.cert.pem /etc/opt/traefik/certificates/secproxy.crt
-mv secproxy.{{ site.url }}.client_cert.pem /etc/opt/traefik/certificates/secproxy.client.crt
-cp /etc/opt/traefik/certificates/secproxy.client.crt /etc/opt/authelia/certificates/secproxy.client.pem
+mv secproxy.{{ site.url }}.cert.pem /etc/opt/traefik/certificates/proxy.crt
+mv secproxy.{{ site.url }}.client_cert.pem /etc/opt/traefik/certificates/proxy.client.crt
+cp /etc/opt/traefik/certificates/proxy.client.crt /etc/opt/authelia/certificates/secproxy.client.pem
 
 mv webproxy.{{ site.url }}.client_cert.pem /etc/opt/authelia/certificates/webproxy.client.pem
 mv ca-chain.cert.pem /etc/opt/traefik/certificates/ca.chain.crt
