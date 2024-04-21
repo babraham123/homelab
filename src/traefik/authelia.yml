@@ -1,0 +1,37 @@
+# /etc/opt/traefik/config/dynamic/traefik.yml
+# Ref: https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+http:
+  serversTransports:
+    autheliaMutualTLS:
+      certificates:
+        - certFile: /certificates/proxy.client.crt
+          keyFile: /certificates/proxy.key
+      rootCAs:
+        - /certificates/ca.chain.crt
+  middlewares:
+    authelia:
+      forwardAuth:
+        address: https://auth.{{ site.url }}:9091/api/verify?rd=https%3A%2F%2Fauth.{{ site.url }}%2F
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Email"
+          - "Remote-Name"
+        tls:
+          ca: /certificates/ca.chain.crt
+          cert: /certificates/proxy.client.crt
+          key: /certificates/proxy.key
+    authelia-basic:
+      forwardAuth:
+        address: https://auth.{{ site.url }}:9091/api/verify?auth=basic
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Email"
+          - "Remote-Name"
+        tls:
+          ca: /certificates/ca.chain.crt
+          cert: /certificates/proxy.crt
+          key: /certificates/proxy.key

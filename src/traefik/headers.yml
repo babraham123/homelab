@@ -1,0 +1,17 @@
+# /etc/opt/traefik/config/dynamic/headers.yml
+http:
+  middlewares:
+    secure-headers:
+      headers:
+        hostsProxyHeaders:
+          - "X-Forwarded-Host"
+        # HSTS, 2yrs
+        stsSeconds: 63072000
+        stsIncludeSubdomains: true
+        # Superseded by CSP on newer browsers
+        customFrameOptionsValue: "allow-from https:{{ site.url }}"
+        contentTypeNosniff: true
+        referrerPolicy: "same-origin"
+        # Setting CSP is more secure but it can break apps. Consider script-src 'self';
+        contentSecurityPolicy: "frame-ancestors 'https://*.{{ site.url }}'; object-src 'none';"
+        permissionsPolicy: "camera=(), geolocation=(), microphone=(), payment=(), usb=()"

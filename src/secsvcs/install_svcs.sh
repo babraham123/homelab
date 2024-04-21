@@ -5,6 +5,7 @@ set -euo pipefail
 
 cd /root/homelab-rendered/src
 mkdir -p /etc/containers/systemd
+cp traefik/net.network /etc/containers/systemd
 
 case $1 in
   postgres)
@@ -33,10 +34,13 @@ case $1 in
   traefik)
     mkdir -p /etc/opt/traefik/config/dynamic
     mkdir -p /etc/opt/traefik/config/static
-    cp secsvcs/traefik/dynamic.yml /etc/opt/traefik/config/dynamic/traefik.yml
-    cp secsvcs/traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
+    rm -rf /etc/opt/traefik/config/dynamic/*
+    cp secsvcs/traefik/* /etc/opt/traefik/config/dynamic
+    cp traefik/authelia.yml /etc/opt/traefik/config/dynamic
+    cp traefik/headers.yml /etc/opt/traefik/config/dynamic
+    cp traefik/tls.yml /etc/opt/traefik/config/dynamic
+    cp traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
     cp secsvcs/traefik/traefik.container /etc/containers/systemd
-    cp secsvcs/traefik/net.network /etc/containers/systemd
     cp gatus/uptime.network /etc/containers/systemd
     cp authelia/auth.network /etc/containers/systemd
     cp lldap/ldap.network /etc/containers/systemd

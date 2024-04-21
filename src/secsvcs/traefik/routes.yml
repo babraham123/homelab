@@ -3,7 +3,6 @@
 #   - https://www.authelia.com/integration/proxies/traefik/
 #   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
 #   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
----
 http:
   routers:
     traefik: &service
@@ -100,72 +99,3 @@ http:
     #   loadBalancer:
     #     servers:
     #       - url: https://homesvcs.{{ site.url }}:443/
-  serversTransports:
-    autheliaMutualTLS:
-      certificates:
-        - certFile: /certificates/secproxy.client.crt
-          keyFile: /certificates/secproxy.key
-      rootCAs:
-        - /certificates/ca.chain.crt
-  middlewares:
-    authelia:
-      forwardAuth:
-        address: https://auth.{{ site.url }}:9091/api/verify?rd=https%3A%2F%2Fauth.{{ site.url }}%2F
-        trustForwardHeader: true
-        authResponseHeaders:
-          - "Remote-User"
-          - "Remote-Groups"
-          - "Remote-Email"
-          - "Remote-Name"
-        tls:
-          ca: /certificates/ca.chain.crt
-          cert: /certificates/secproxy.client.crt
-          key: /certificates/secproxy.key
-    authelia-basic:
-      forwardAuth:
-        address: https://auth.{{ site.url }}:9091/api/verify?auth=basic
-        trustForwardHeader: true
-        authResponseHeaders:
-          - "Remote-User"
-          - "Remote-Groups"
-          - "Remote-Email"
-          - "Remote-Name"
-        tls:
-          ca: /certificates/ca.chain.crt
-          cert: /certificates/secproxy.crt
-          key: /certificates/secproxy.key
-    secure-headers:
-      headers:
-        hostsProxyHeaders:
-          - "X-Forwarded-Host"
-        # HSTS, 2yrs
-        stsSeconds: 63072000
-        stsIncludeSubdomains: true
-        forceSTSHeader: true
-        # Superseded by CSP on newer browsers
-        customFrameOptionsValue: "allow-from https:{{ site.url }}"
-        contentTypeNosniff: true
-        referrerPolicy: "same-origin"
-        # Setting CSP is more secure but it can break apps. Consider script-src 'self';
-        contentSecurityPolicy: "frame-ancestors 'https://*.{{ site.url }}'; object-src 'none';"
-        permissionsPolicy: "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
-
-tls:
-  # https://ssl-config.mozilla.org/#server=traefik&version=2.10&config=intermediate&guideline=5.7
-  options:
-    modern:
-      minVersion: "VersionTLS13"
-    intermediate:
-      minVersion: "VersionTLS12"
-      sniStrict: true
-      cipherSuites:
-        - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
-        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
-        - "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
-        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
-        - "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305"
-        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
-      curvePreferences:
-        - CurveP521
-        - CurveP384
-...

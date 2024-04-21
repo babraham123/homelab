@@ -5,15 +5,19 @@ set -euo pipefail
 
 cd /root/homelab-rendered/src
 mkdir -p /etc/containers/systemd
+cp traefik/net.network /etc/containers/systemd
 
 case $1 in
   traefik)
     mkdir -p /etc/opt/traefik/config/dynamic
     mkdir -p /etc/opt/traefik/config/static
-    cp websvcs/traefik/dynamic.yml /etc/opt/traefik/config/dynamic/traefik.yml
-    cp websvcs/traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
+    rm -rf /etc/opt/traefik/config/dynamic/*
+    cp websvcs/traefik/* /etc/opt/traefik/config/dynamic
+    cp traefik/authelia.yml /etc/opt/traefik/config/dynamic
+    cp traefik/headers.yml /etc/opt/traefik/config/dynamic
+    cp traefik/tls.yml /etc/opt/traefik/config/dynamic
+    cp traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
     cp websvcs/traefik/traefic.container /etc/containers/systemd
-    cp websvcs/traefik/net.network /etc/containers/systemd
     cp victoriametrics/static.network /etc/containers/systemd
     cp victoriametrics/dash.network /etc/containers/systemd
     ;;
