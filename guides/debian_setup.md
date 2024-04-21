@@ -69,18 +69,10 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 ...
 plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```
-- `vim ~/.oh-my-zsh/custom/aliases.zsh`
-```bash
-alias ls='ls -a --color=tty'
-alias vi='vim'
-alias result='echo $?'
+- Copy files from source repo, under `src/debian`
+	- `vim ~/.oh-my-zsh/custom/aliases.zsh`
+  - `vim ~/.oh-my-zsh/custom/functions.zsh`
+  - `sudo vim /root/.zshrc`
 
-alias master='git checkout master'
-alias st='git status'
-alias lg='git log --stat'
-alias lastcommit='git commit --amend --no-edit'
-alias branches='git branch | cut -c 3- | xargs -I@ sh -c '"'"'printf "\e[1;31m%-6s\e[m -> " "@"; git --no-pager log --pretty=format:"%an, %cr%n  %s" --abbrev-commit @^..@; echo ""'"'"''
-alias ggrep='git grep -n'
-```
 - Logout and log back in. Configure oh-my-zsh
 	- Answers: `yyyy211n1111111y1y`
