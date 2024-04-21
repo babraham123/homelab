@@ -42,8 +42,7 @@ ufw allow http
 ufw allow https
 
 cd /root/homelab-rendered
-cp src/secsvcs/traefik/net.network /etc/containers/systemd
-cp src/victoriametrics/telem.network /etc/containers/systemd
+cp src/traefik/net.network /etc/containers/systemd
 systemctl daemon-reload
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,443 proto tcp

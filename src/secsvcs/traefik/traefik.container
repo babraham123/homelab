@@ -18,10 +18,6 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 Network=net.network
-Network=auth.network
-Network=ldap.network
-Network=observer.network
-Network=uptime.network
 HostName=secproxy.{{ site.url }}
 # hostPort:containerPort
 PublishPort=80:80

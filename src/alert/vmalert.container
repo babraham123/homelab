@@ -17,8 +17,7 @@ ContainerName=vmalert
 AutoUpdate=registry
 NoNewPrivileges=true
 
-Network=observer.network
-Network=telem.network
+Network=net.network
 HostName=alert.{{ site.url }}
 # https://docs.victoriametrics.com/vmalert/#web
 # metrics at :8880/metrics

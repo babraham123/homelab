@@ -18,8 +18,7 @@ NoNewPrivileges=true
 # For LDAP, port = 3890
 # For LDAPS (LDAP Over SSL), port = 6360
 # http web front-end, port = 17170
-Network=ldap.network
-Network=pg.network
+Network=net.network
 HostName=ldap.{{ site.url }}
 # hostPort:containerPort
 PublishPort=6360:6360

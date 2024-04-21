@@ -15,7 +15,7 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 # Listening to port 8100
-Network=static.network
+Network=net.network
 
 Environment=TZ={{ personal.timezone }}
 Volume=/var/opt/nginx/www:/www:ro
