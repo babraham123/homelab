@@ -52,8 +52,7 @@ ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,4
 ```bash
 # scrape node_exporter
 # TODO: fix
-# TELEM_IFACE=$(podman network inspect systemd-telem | jq -r '.[0].network_interface')
-# ufw route allow in on $TELEM_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
+# ufw route allow in on $NET_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
 ```
 
 ## Secrets
