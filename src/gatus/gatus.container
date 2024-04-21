@@ -15,9 +15,7 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 # http web front-end, port = 8080
-Network=uptime.network
-Network=telem.network
-Network=pg.network
+Network=net.network
 HostName=uptime.{{ site.url }}
 DNS=1.1.1.1
 

@@ -23,7 +23,7 @@ Environment=HOST=https://dash.{{ site.url }}
 Environment=INTEGRITY=true
 
 # Listens on port 4000
-Network=dash.network
+Network=net.network
 # TODO: make read only
 Volume=/etc/opt/dashy/config/dashy.yml:/public/conf.yml
 

@@ -17,7 +17,7 @@ ContainerName=vmagent
 AutoUpdate=registry
 NoNewPrivileges=true
 
-Network=telem.network
+Network=net.network
 HostName=metric-collector.{{ site.url }}
 # port 8429
 # https://docs.victoriametrics.com/vmagent/#how-to-push-data-to-vmagent

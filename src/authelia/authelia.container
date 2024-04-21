@@ -16,9 +16,7 @@ ContainerName=authelia
 AutoUpdate=registry
 NoNewPrivileges=true
 
-Network=auth.network
-Network=ldap.network
-Network=pg.network
+Network=net.network
 HostName=auth.{{ site.url }}
 # hostPort:containerPort
 PublishPort=9091:9091

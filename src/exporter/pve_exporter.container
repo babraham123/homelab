@@ -15,7 +15,7 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 # port = 9221
-Network=telem.network
+Network=net.network
 HostName=pve_exporter.{{ site.url }}
 
 Environment=TZ={{ personal.timezone }}

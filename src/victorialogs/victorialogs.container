@@ -16,7 +16,7 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 # http web front-end, ":9428/select/vmui"
-Network=telem.network
+Network=net.network
 HostName=logs.{{ site.url }}
 
 Exec=--storageDataPath="/vlogs" \

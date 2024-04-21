@@ -16,7 +16,7 @@ ContainerName=fluentbit
 AutoUpdate=registry
 NoNewPrivileges=true
 
-Network=telem.network
+Network=net.network
 HostName=log-collector.{{ site.url }}
 # port 5140
 

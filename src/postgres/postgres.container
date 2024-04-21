@@ -14,7 +14,7 @@ ContainerName=postgres
 # No auto-update for data safety
 NoNewPrivileges=true
 
-Network=pg.network
+Network=net.network
 HostName=pgdb.{{ site.url }}
 # hostPort:containerPort
 PublishPort=5432:5432

@@ -20,8 +20,7 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 # http web front-end, port = 3000
-Network=observer.network
-Network=pg.network
+Network=net.network
 HostName=graph.{{ site.url }}
 
 PodmanArgs=--entrypoint='["/bin/sh", "-c", "/download.sh && /run.sh"]'

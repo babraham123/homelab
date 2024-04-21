@@ -15,7 +15,7 @@ ContainerName=alertmanager
 AutoUpdate=registry
 NoNewPrivileges=true
 
-Network=observer.network
+Network=net.network
 HostName=alertmanager.{{ site.url }}
 # port 9093
 
