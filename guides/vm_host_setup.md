@@ -231,6 +231,6 @@ mkdir -p /var/lib/vz/snippets
 cp src/pve2/gpu_hookscript.pl /var/lib/vz/snippets
 # get IDs of GPU VMs, devtop and gaming
 qm list
-qm set 101 --hookscript local:snippets/gpu_hookscript.pl
+qm set 100 --hookscript local:snippets/gpu_hookscript.pl
 qm set 102 --hookscript local:snippets/gpu_hookscript.pl
 ```

@@ -21,7 +21,7 @@
 - Setup RDP
 	- In Start menu search for `remote desktop settings`, enable
 	- On mac, install `Microsoft Remote Desktop`, verify connection
-		- username = `windows11-1\{{ username }}`, login password
+		- username = `windows11-gaming\{{ username }}`, login password
 - Install apps
 	- Launch shell (win R, `PowerShell`, ctrl shift enter)
 ```powershell
@@ -58,4 +58,3 @@ Set-Service -Name sshd -StartupType 'Automatic'
 TODO: figure out cmds
 ```
 	- `scp file.txt gaming:'"/c:/Users/{{ username }}/Documents/file.txt"'`
-

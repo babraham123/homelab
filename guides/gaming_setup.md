@@ -5,8 +5,8 @@
 - Install [Playnite](https://playnite.link/)
 - Install [ChangeScreenResolution.exe](https://tools.taubenkorb.at/change-screen-resolution/)
 - Install [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/installation.html)
-    - Add Playnite as a cmd: `"C:\Users\{{ username }}\AppData\Local\Playnite\Playnite.FullscreenApp.exe" --hidesplashscreen`
-    - Run PowerShell cmds:
+  - Add Playnite as a cmd: `"C:\Users\{{ username }}\AppData\Local\Playnite\Playnite.FullscreenApp.exe" --hidesplashscreen`
+  - Run PowerShell cmds:
 ```PowerShell
 cd "C:\Program Files\Sunshine\scripts"
 ./add-firewall-rule.bat
@@ -14,13 +14,13 @@ cd "C:\Program Files\Sunshine\scripts"
 ```
 - Install [Moonlight](https://github.com/moonlight-stream/moonlight-qt/releases) on Mac, Raspberry Pi
 - Install Oculus App
-    - Run as admin: `C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe`
-    - Start the App
-    - On pfSense, install Avahi service and enable mDNS reflection ([src](https://forums.lawrencesystems.com/t/avahi-with-google-chromecast-on-pfsense/2074/4))
-    - On Quest 2, Settings > System > Link, enable Air link, pair with computer
+  - Run as admin: `C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe`
+  - Start the App
+  - On pfSense, install Avahi service and enable mDNS reflection ([src](https://forums.lawrencesystems.com/t/avahi-with-google-chromecast-on-pfsense/2074/4))
+  - On Quest 2, Settings > System > Link, enable Air link, pair with computer
 - Install Yuzu, Ryujinx
-    - Download [keys](https://theprodkeys.com/yuzu-encryption-keys-are-missing/) and copy to correct folder location
-    - Import into Playnite
+  - Download [keys](https://theprodkeys.com/yuzu-encryption-keys-are-missing/) and copy to correct folder location
+  - Import into Playnite
 - Install Dolphin, import into Playnite
 
 ### Raspberry Pi streaming client and controllers
