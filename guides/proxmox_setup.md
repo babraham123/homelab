@@ -133,30 +133,6 @@ lspci -nnv | grep TPU
 - If doesn't work, consider `pcie_aspm=off`
   [ref1](https://github.com/blakeblackshear/frigate/issues/1020), [ref2](https://forum.proxmox.com/threads/guest-internal-error-when-passing-through-pcie.99239/), [ref3](https://www.derekseaman.com/2023/06/home-assistant-frigate-vm-on-proxmox-with-pcie-coral-tpu.html)
 
-## VM creation
-[ref](https://www.youtube.com/watch?v=sZcOlW-DwrU)
-- Upload OS ISO image, use net install version
-- For UEFI host:
-  - Machine: q35
-  - BIOS: OVMF
-- SCSI controller: VirtIO SCSI single
-- Disk (host SSD)
-  - SSD emulation
-  - Discard (if storage supports thin provisioning and zeroing of unused space: ZFS, Ceph, thin LVM)
-- CPU
-  - type: host
-  - max cores = host cores - 1
-- OS installation
-  - Use ext4, no lvm, all files in 1 partition [ref](https://forum.proxmox.com/threads/lvm-or-ext4-on-kvm-guest.39055/)
-
-Reference links:
-- [Display devices](https://www.kraxel.org/blog/2019/09/display-devices-in-qemu/)
-- [BIOS](https://www.reddit.com/r/Proxmox/comments/1acugae/bios_or_uefi_for_linux_vms_for_performance/)
-- [Storage](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#chapter_storage)
-
-Maintenance:
-- [Resize disks](https://pve.proxmox.com/wiki/Resize_disks#Online_for_Linux_guests_without_LVM)
-
 ## Backups
 Install on pve2 but can support both. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
 

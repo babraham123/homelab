@@ -3,6 +3,12 @@
 - First do the basic [vm_setup.md](./vm_setup.md)
 
 ## Packages
+- If graphical install, open Terminal app. Otherwise just ssh in as root.
+```bash
+su
+usermod -aG sudo {{ username }}
+apt install -y ssh
+```
 - Fix deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/) 
 	- `nano /etc/apt/sources.list`
 	- add `contrib non-free non-free-firmware` to all Debian sources
@@ -11,7 +17,6 @@
 apt update && apt upgrade
 apt install -y sudo zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw
 chsh -s /bin/zsh
-echo 'export EDITOR="vim"' >> ~/.zshrc
 
 # enable firewall
 ufw allow ssh
@@ -19,8 +24,9 @@ ufw enable
 
 adduser {{ username }}
 usermod -aG sudo {{ username }}
-# Exit and reconnect as {{ username }}
+exit
 ```
+- Reconnect as {{ username }}
 - Configure updates
 	- Uncomment "-updates": `sudo vim /etc/apt/apt.conf.d/50unattended-upgrades`
 
@@ -70,9 +76,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```
 - Copy files from source repo, under `src/debian`
-	- `vim ~/.oh-my-zsh/custom/aliases.zsh`
+  - `vim ~/.oh-my-zsh/custom/aliases.zsh`
   - `vim ~/.oh-my-zsh/custom/functions.zsh`
   - `sudo vim /root/.zshrc`
 
 - Logout and log back in. Configure oh-my-zsh
-	- Answers: `yyyy211n1111111y1y`
+	- Answers: `yyyy211n1311111y1y`
