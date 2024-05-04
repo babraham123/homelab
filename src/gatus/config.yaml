@@ -22,7 +22,7 @@ internal-endpoint: &internal
   client:
     timeout: 30s
   headers:
-    cookie: "${AUTH_COOKIE}"
+    cookie: "$AUTH_COOKIE"
   conditions:
     - "[STATUS] == 200"
     - "[RESPONSE_TIME] < 300"
