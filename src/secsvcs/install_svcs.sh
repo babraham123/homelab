@@ -50,6 +50,7 @@ case $1 in
     mkdir -p /etc/opt/gatus/certificates
     mkdir -p /var/opt/gatus
     cp gatus/config.yaml /etc/opt/gatus
+    chmod 600 /etc/opt/gatus/config.yaml
     cp gatus/runner.sh /etc/opt/gatus
     cp gatus/authelia_login.sh /etc/opt/gatus
     wget --output-document=/var/opt/gatus/busybox "https://www.busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox"
