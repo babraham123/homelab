@@ -1,5 +1,6 @@
 # Raspberry Pi setup
 
+## Prepare the SD card
 - Flash a SD card with RPi OS: [src](https://www.cyberciti.biz/faq/how-to-create-disk-image-on-mac-os-x-with-dd-command/)
 ```bash
 diskutil
@@ -25,6 +26,8 @@ vim /Volumes/bootfs/wpa_supplicant.conf
 	- `vim /Volumes/bootfs/config.txt`
 - Eject SD card and plug into Pi
 - Power on Pi (LED [status codes](https://pimylifeup.com/raspberry-pi-red-green-lights))
+
+## Configure
 ```bash
 ssh-keygen -R raspberrypi.local
 ssh pi@raspberrypi.local

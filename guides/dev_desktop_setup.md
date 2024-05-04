@@ -4,6 +4,7 @@
 
 ## Install GPU firmware
 - Disable secure boot, [vid](https://www.youtube.com/watch?v=js_Xoa0f8zM)
+
 - Install CUDA, [ref](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#debian)
 ```bash
 sudo su
@@ -27,8 +28,15 @@ reboot
 echo 'export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}}' >> ~/.zshrc
 echo 'export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' >> ~/.zshrc
 source ~/.zshrc
+sudo apt install -y nvtop g++ freeglut3-dev libx11-dev libxmu-dev libxi-dev libglu1-mesa-dev libfreeimage-dev libglfw3-dev
+```
+
+- Confirm GPU status
+```bash
 ls /dev/nvidia*
 sudo systemctl status nvidia-persistenced
 cat /proc/driver/nvidia/version
-sudo apt install -y g++ freeglut3-dev libx11-dev libxmu-dev libxi-dev libglu1-mesa-dev libfreeimage-dev libglfw3-dev
+sudo lspci -nnv | grep VGA
+nvidia-smi
+nvtop
 ```

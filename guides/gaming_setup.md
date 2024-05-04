@@ -1,5 +1,8 @@
 # Gaming setup
 
+- First stand up the Windows VM: [vm_windows_setup.md](./vm_windows_setup.md)
+- And the Raspberry Pi client for the TV: [rpi_setup.md](./rpi_setup.md)
+
 ### Windows streaming server and game platforms
 - Install [ViGEmBus](https://github.com/ViGEm/ViGEmBus)
 - Install [Playnite](https://playnite.link/)
@@ -39,11 +42,9 @@ gpu_mem=128
 ```bash
 curl -1sLf 'https://dl.cloudsmith.io/public/moonlight-game-streaming/moonlight-qt/setup.deb.sh' | distro=raspbian codename=buster sudo -E bash
 sudo apt install -y moonlight-qt vim less iproute2 git netcat
-
-sudo apt update && sudo apt upgrade
-
+sudo apt update
+sudo apt upgrade
 sudo vim /etc/systemd/system/moonlight.service
-
 sudo systemctl enable moonlight.service
 ```
 - In the Moonlight GUI, set resolution to 1080p, refresh rate to 60Hz

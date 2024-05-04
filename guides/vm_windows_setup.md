@@ -22,6 +22,7 @@
 	- In Start menu search for `remote desktop settings`, enable
 	- On mac, install `Microsoft Remote Desktop`, verify connection
 		- username = `windows11-gaming\{{ username }}`, login password
+  - Disable login, [ref](https://answers.microsoft.com/en-us/windows/forum/all/how-to-login-automatically-to-windows-11/c0e9301e-392e-445a-a5cb-f44d00289715)
 - Install apps
 	- Launch shell (win R, `PowerShell`, ctrl shift enter)
 ```powershell
@@ -53,8 +54,9 @@ Set-Service -Name sshd -StartupType 'Automatic'
 ### SSH
 - `vi ~/.ssh/config`
 - Example commands
-	- `ssh -l "{{ username }}" {{ gaming.ip }}`
+	- `ssh -l "{{ username }}" gaming.{{ site.url }}`
 ```Powershell
-TODO: figure out cmds
+# TODO: add more cmds
+shutdown /r
 ```
-	- `scp file.txt gaming:'"/c:/Users/{{ username }}/Documents/file.txt"'`
+	- `scp file.txt gaming.{{ site.url }}:'"/c:/Users/{{ username }}/Documents/file.txt"'`

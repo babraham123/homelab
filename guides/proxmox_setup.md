@@ -157,6 +157,7 @@ sudo apt install -y proxmox-backup-server
   - Datacenter >> Storage >> Add >> Proxmox Backup Server
   - VM >> Backup >> Backup now
   - Datacenter >> Backup >> Add
+    - Exclude fingerprint for Let's Encrypt derived PBS certs
 
 - PVE / PBS backups
 ```bash
