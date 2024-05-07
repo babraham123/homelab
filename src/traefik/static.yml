@@ -10,6 +10,8 @@ api:
 log:
   level: WARN
   format: common
+# accessLog:
+#   addInternals: true
 providers:
   file:
     watch: true

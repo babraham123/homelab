@@ -28,8 +28,7 @@ systemctl restart node_exporter
 - Enable LAN access to postgres, lldap and authelia
 ```bash
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-ufw allow in from {{ pve2.mask }} to any port 5432,6360,9091 proto tcp
-ufw allow in from {{ pve1.mask }} to any port 5432,6360,9091 proto tcp
+ufw allow in from {{ websvcs.ip }} to any port 5432,6360,9091 proto tcp
 ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 5432,6360,9091 proto tcp
 ```
 

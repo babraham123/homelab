@@ -21,8 +21,8 @@ scrape_configs:
   - job_name: pve
     static_configs:
       - targets:  # Proxmox VE nodes
-        - {{ pve1.ip }}
-        - {{ pve2.ip }}
+        - pve1.{{ site.url }}
+        - pve2.{{ site.url }}
     metrics_path: /pve
     params:
       module: [default]
@@ -35,6 +35,6 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: pve_exporter.{{ site.url }}:9221
-  # - job_name: 'node_exporter'
-  #   static_configs:
-  #     - targets: ['host.containers.internal:9100']
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['{{ pve1.ip }}:9100']
