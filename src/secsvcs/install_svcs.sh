@@ -28,10 +28,8 @@ case $1 in
     mkdir -p /etc/opt/traefik/config/dynamic
     mkdir -p /etc/opt/traefik/config/static
     rm -rf /etc/opt/traefik/config/dynamic/*
-    cp secsvcs/traefik/* /etc/opt/traefik/config/dynamic
-    cp traefik/authelia.yml /etc/opt/traefik/config/dynamic
-    cp traefik/headers.yml /etc/opt/traefik/config/dynamic
-    cp traefik/tls.yml /etc/opt/traefik/config/dynamic
+    cp secsvcs/traefik/*.yml /etc/opt/traefik/config/dynamic
+    cp traefik/dynamic/*.yml /etc/opt/traefik/config/dynamic
     cp traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
     cp secsvcs/traefik/traefik.container /etc/containers/systemd
     ;;

@@ -19,7 +19,7 @@ Network=net.network
 HostName=pve_exporter.{{ site.url }}
 
 Environment=TZ={{ personal.timezone }}
-Environment=PVE_USER=prometheus
+Environment=PVE_USER=prometheus@pve
 Secret=pve_prom_password,type=env,target=PVE_PASSWORD
 
 Volume=/etc/opt/pve_exporter/pve.yml:/etc/prometheus/pve.yml:ro
