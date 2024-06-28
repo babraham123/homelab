@@ -10,8 +10,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-# TODO: upgrade to v3, latest
-Image=docker.io/library/traefik:v2.11
+Image=docker.io/library/traefik:v3.0
 ContainerName=traefik
 AddCapability=CAP_NET_BIND_SERVICE
 AutoUpdate=registry

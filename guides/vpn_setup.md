@@ -150,8 +150,8 @@ exit
 ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986'
 # Store hashed and raw version of secret
 ssh -t {{ username }}@pve1.{{ site.url }} 'sudo /usr/local/bin/secret_secsvcs_update.sh'
-# Update the authelia config, include hashed secret version
-ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo vim /etc/opt/authelia/config/configuration.yml'
+# Restart authelia to pick up hashed secret version
+ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo systemctl restart authelia'
 ```
 - Deploy on the VPN server
 ```bash
