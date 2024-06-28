@@ -11,7 +11,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/authelia/authelia:latest
+Image=docker.io/authelia/authelia:4.38
 ContainerName=authelia
 AutoUpdate=registry
 NoNewPrivileges=true
@@ -25,22 +25,23 @@ Volume=/etc/opt/authelia/config:/config
 Volume=/etc/opt/authelia/certificates:/certificates
 
 Environment=TZ={{ personal.timezone }}
+Environment=X_AUTHELIA_CONFIG=template
 # https://www.authelia.com/configuration/methods/secrets/
 Environment=AUTHELIA_AUTHENTICATION_BACKEND_LDAP_TLS_PRIVATE_KEY_FILE=/certificates/auth.key
 Environment=AUTHELIA_AUTHENTICATION_BACKEND_LDAP_TLS_CERTIFICATE_CHAIN_FILE=/certificates/auth.cert.pem
 Environment=AUTHELIA_NOTIFIER_SMTP_TLS_PRIVATE_KEY_FILE=/certificates/auth.key
 Environment=AUTHELIA_NOTIFIER_SMTP_TLS_CERTIFICATE_CHAIN_FILE=/certificates/auth.cert.pem
-Environment=AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY_FILE=/certificates/auth.key
-Environment=AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_CERTIFICATE_CHAIN_FILE=/certificates/auth.cert.pem
 
 # https://www.authelia.com/configuration/methods/secrets/
-Secret=authelia_jwt_secret,type=env,target=AUTHELIA_JWT_SECRET
+Secret=authelia_jwt_secret,type=env,target=AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET
 Secret=lldap_admin_password,type=env,target=AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD
 Secret=authelia_storage_key,type=env,target=AUTHELIA_STORAGE_ENCRYPTION_KEY
 Secret=authelia_pg_password,type=env,target=AUTHELIA_STORAGE_POSTGRES_PASSWORD
 # https://support.google.com/accounts/answer/185833?hl=en
 Secret=authelia_smtp_password,type=env,target=AUTHELIA_NOTIFIER_SMTP_PASSWORD
 Secret=oidc_hmac_secret,type=env,target=AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET
+# https://www.authelia.com/reference/guides/templating/
+Secret=hs_ui_oidc_secret_hash,type=env,target=HEADSCALE_UI_OIDC_SECRET
 
 [Service]
 Restart=on-failure

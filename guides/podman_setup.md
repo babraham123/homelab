@@ -51,7 +51,7 @@ ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,4
 - Allow access from container to host
 ```bash
 # scrape node_exporter
-ufw allow in from any to any port 9100 proto tcp
+ufw allow in from 10.0.0.0/8 to any port 9100 proto tcp
 ufw route allow in on $NET_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
 ```
 

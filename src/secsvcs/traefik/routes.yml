@@ -1,4 +1,4 @@
-# /etc/opt/traefik/config/dynamic/traefik.yml
+# /etc/opt/traefik/config/dynamic/routes.yml
 # References:
 #   - https://www.authelia.com/integration/proxies/traefik/
 #   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/

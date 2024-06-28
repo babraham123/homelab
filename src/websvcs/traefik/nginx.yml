@@ -1,0 +1,14 @@
+# /etc/opt/traefik/config/dynamic/nginx.yml
+# Ref: https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+http:
+  middlewares:
+    gzip:
+      compress: {}
+    static-strip-prefix:
+      stripPrefix:
+        prefixes: "/static"
+    www-redirect:
+      redirectRegex:
+        regex: "^https?://?(.+)"
+        replacement: "https://www.${1}"
+        permanent: true

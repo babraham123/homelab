@@ -36,7 +36,7 @@ do
 
       if grep -q '"status":"OK"' /tmp/login_status; then
         # Triggers Gatus to reload the configuration within 30 seconds
-        sed -i "s#\$AUTH_COOKIE#$cookie#g" /config/config.yaml
+        sed -Ei 's/^(\s*cookie: ).*/\1"'"$cookie"'"/g' /config/config.yaml
         echo "Automator successfully logged in"
       else
         if [ "$login_status" != "$last_login" ]; then
