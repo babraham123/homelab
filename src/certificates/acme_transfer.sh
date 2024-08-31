@@ -52,7 +52,12 @@ scp pve2.{{ site.url }}/privatekey.key {{ username }}@pve2.{{ site.url }}:/home/
 scp pbs2.{{ site.url }}/certificate.crt {{ username }}@pve2.{{ site.url }}:/home/{{ username }}/proxy.pem
 scp pbs2.{{ site.url }}/privatekey.key {{ username }}@pve2.{{ site.url }}:/home/{{ username }}/proxy.key
 echo "PVE2 root password:"
-ssh -t {{ username }}@pve2.{{ site.url }} 'sudo /root/homelab-rendered/src/pve2/install_certs.sh'
+ssh -t {{ username }}@pve2.{{ site.url }} 'sudo /root/homelab-rendered/src/pve2/install_certs.sh' > pbs2_cert_info.txt
+
+# Update PBS fingerprint for PVE1
+# Ref: https://pbs.proxmox.com/docs/pve-integration.html
+fingerprint=$(grep "Fingerprint" pbs2_cert_info.txt | sed -r 's/Fingerprint\s+\(sha256\):\s+([a-f0-9:]+)/\1/')
+pvesm set pbs2 --fingerprint "$fingerprint"
 
 # Ref: https://github.com/stompro/pfsense-import-certificate
 scp router.{{ site.url }}/certificate.crt admin@router.{{ site.url }}:/root/router.cert.pem
