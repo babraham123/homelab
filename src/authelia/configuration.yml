@@ -1282,11 +1282,11 @@ identity_providers:
         # sector_identifier_uri: 'https://example.com/sector.json'
 
         ## Sets the client to public. This should typically not be set, please see the documentation for usage.
-        public: false
+        # public: false
 
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
         redirect_uris:
-        - https://vpn-ui.{{ site.url }}/oidc_callback
+          - https://vpn-ui.{{ site.url }}/oidc_callback
 
         ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
         ## URIs to fetch Request Objects.
@@ -1320,7 +1320,7 @@ identity_providers:
 
         ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
         ## authorization policies section.
-        # authorization_policy: 'two_factor'
+        authorization_policy: 'two_factor'
 
         ## The custom lifespan name to use for this client. This must be configured independent of the client before
         ## utilization. Custom lifespans are reusable similar to authorization policies.
@@ -1435,4 +1435,62 @@ identity_providers:
               # -----BEGIN CERTIFICATE-----
               # ...
               # -----END CERTIFICATE-----
+      -
+        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
+        ## configuration.
+        client_id: 'grafana-webui'
+
+        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
+        client_name: 'Grafana'
+
+        ## The client secret is a shared secret between Authelia and the consumer of this client.
+        # yamllint disable-line rule:line-length
+        # The digest of 'insecure_secret'.
+        secret: '{% raw %}{{ env "GRAFANA_OIDC_SECRET" }}{% endraw %}'
+
+        ## Sector Identifiers are occasionally used to generate pairwise subject identifiers. In most cases this is not
+        ## necessary. It is critical to read the documentation for more information.
+        # sector_identifier_uri: 'https://example.com/sector.json'
+
+        ## Sets the client to public. This should typically not be set, please see the documentation for usage.
+        # public: false
+
+        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
+        redirect_uris:
+          - https://graph.{{ site.url }}/oidc_callback
+
+        ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
+        ## URIs to fetch Request Objects.
+        # request_uris:
+          # - 'https://oidc.example.com:8080/oidc/request-object.jwk'
+
+        ## Audience this client is allowed to request.
+        # audience: []
+
+        ## Scopes this client is allowed to request.
+        scopes:
+          - 'openid'
+          - 'groups'
+          - 'email'
+          - 'profile'
+
+        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
+        ## authorization policies section.
+        authorization_policy: 'two_factor'
+
+        ## Enforces the use of PKCE for this client when set to true.
+        require_pkce: true
+
+        ## Enforces the use of PKCE for this client when configured, and enforces the specified challenge method.
+        ## Options are 'plain' and 'S256'.
+        pkce_challenge_method: 'S256'
+
+        ## The permitted client authentication method for the Token Endpoint for this client.
+        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
+        ## defaults to 'none' per the specifications.
+        token_endpoint_auth_method: 'client_secret_basic'
+
+        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
+        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
+        # token_endpoint_auth_signing_alg: 'RS256'
 ...
