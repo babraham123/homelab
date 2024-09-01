@@ -83,6 +83,7 @@ case $1 in
     mkdir -p /var/opt/grafana/plugins
     chown -R 472:0 /var/opt/grafana
     cp grafana/grafana.ini /etc/opt/grafana
+    cp grafana/ldap.toml /etc/opt/grafana
     cp grafana/datasources.yml /etc/opt/grafana
     cp grafana/dashboard.yml /etc/opt/grafana
     cp grafana/vm_download.sh /etc/opt/grafana

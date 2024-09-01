@@ -37,6 +37,17 @@ case $1 in
       rm ./*.pem
     fi
     ;;
+  headscale-ui)
+    apt install -y gcc python3-poetry
+    mkdir -p /var/opt/headscale-ui/data
+    pushd /var/opt/headscale-ui
+    HSUI_VERSION=$(curl -s "https://api.github.com/repos/iFargle/headscale-webui/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    wget "https://github.com/iFargle/headscale-webui/archive/refs/tags/v${HSUI_VERSION}.tar.gz" -O - | tar xz
+    mv "headscale-webui-${HSUI_VERSION}"/* .
+    poetry install --only main
+    popd
+    cp headscale/headscale-ui.service /etc/systemd/system
+    ;;
   *)
     echo "Unknown service: $1"
     exit 1

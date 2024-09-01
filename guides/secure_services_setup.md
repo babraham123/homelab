@@ -48,7 +48,10 @@ journalctl -eu authelia
     `age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age | yq ".lldap_admin_password"`
   - Add some users, add them to the `lldap_password_manager` group
   - Create the `authelia_gen_access` group, add users to it
-  - Add `gatus` user, create `uptime_robot` group, add `gatus` to it
+  - Create robot users. Use `{{ site.email.replace('@', '+USER@') }}` for the email. Use the stored passwords: 
+    `age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age | yq ".USER_lldap_password"`
+    - Add `gatus` user, create `uptime_robot` group, add `gatus` to it
+    - Add `grafana` user, add to `lldap_strict_readonly` group
   - Uncomment out the authelia middleware
     `vim /etc/opt/traefik/config/dynamic/traefik.yml`
 

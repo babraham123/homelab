@@ -2,6 +2,7 @@
 # Renders the source code and copies it to other servers.
 # Run from root of the project directory on PVE1.
 # Usage:
+#   cd /root/homelab
 #   tools/update_src.sh
 
 set -euo pipefail
@@ -10,7 +11,9 @@ user=$(yq ".username" vars.yml)
 url=$(yq ".site.url" vars.yml)
 
 rm -rf /root/homelab-rendered
-git pull
+git fetch origin
+# Set to whatever the current branch is. Default: main
+git reset --hard origin/HEAD
 tools/render_src.sh /root/homelab-rendered
 
 # Copy rendered files to other servers

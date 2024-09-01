@@ -2,6 +2,7 @@
 # Backs up the source code to a tarball at the given location.
 # Run from root of the project directory.
 # Usage:
+#   cd project/dir
 #   ./tools/backup_src.sh /path/to/backup.tar.gz
 
 set -euo pipefail
