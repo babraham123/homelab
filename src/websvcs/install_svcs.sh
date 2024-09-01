@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# src/websvcs/install_svcs.sh SERVICE_NAME
+# Installs websvcs specific systemd services.
+# Usage:
+#   src/websvcs/install_svcs.sh SERVICE_NAME
 
 set -euo pipefail
 

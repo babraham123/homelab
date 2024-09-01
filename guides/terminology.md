@@ -1,6 +1,5 @@
 # Terminology
-
-I sometimes use multiple words to refer to the same thing, or cryptic acronyms. Hopefully this glossary helps!
+The documentation sometimes use multiple words to refer to the same thing, or cryptic acronyms. Hopefully this glossary helps.
 
 1. Cloud VM / cloudvpn / vpn
   The Linode cloud VM that funnels public traffic into my private network.

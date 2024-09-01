@@ -1,4 +1,5 @@
 # System Architecture
+Detailed walkthrough of the homelab's logical and physical components.
 
 ## Overview
 

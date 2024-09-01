@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# /usr/local/bin/detect_wifi_change.sh
+# Detects the current Wi-Fi network and switches the network location accordingly.
+# Only runs on macOS.
+# Usage:
+#   /usr/local/bin/detect_wifi_change.sh
 
 set -euo pipefail
 

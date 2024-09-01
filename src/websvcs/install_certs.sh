@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# src/websvcs/install_certs.sh
+# Moves the certificates into their respective locations. Websvcs only.
+# Usage:
+#   src/websvcs/install_certs.sh
 
 set -euo pipefail
 

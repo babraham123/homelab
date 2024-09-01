@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# src/secsvcs/install_keys.sh
+# Moves the SSL keys into their respective locations. Secsvcs only.
+# Usage:
+#   src/secsvcs/install_keys.sh
 
 set -euo pipefail
 

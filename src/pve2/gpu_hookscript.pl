@@ -1,7 +1,9 @@
 #!/usr/bin/perl
 # /var/lib/vz/snippets/gpu_hookscript.pl
 # Hook script for PVE guests (hookscript config option)
-# Ref: https://pve.proxmox.com/pve-docs/pve-admin-guide.html#_hookscripts
+# Ref:
+#   https://pve.proxmox.com/pve-docs/pve-admin-guide.html#_hookscripts
+#   https://forum.proxmox.com/threads/backup-vm-same-pcie-device-iommu-on-two-vm.129600/#post-567803
 # Example: /usr/share/pve-docs/examples/guest-example-hookscript.pl
 
 use strict;

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/list_services.sh
+# Prints out all systemd services with the "Homelab: " prefix.
+# Usage:
+#   /usr/local/bin/list_services.sh
 
 set -euo pipefail
 

@@ -1,4 +1,5 @@
 # Raspberry Pi setup
+Guide to setup a Raspberry PI device.
 
 ## Prepare the SD card
 - Flash a SD card with RPi OS: [src](https://www.cyberciti.biz/faq/how-to-create-disk-image-on-mac-os-x-with-dd-command/)

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/secret_websvcs_update.sh
+# Updates and installs websvcs custom secrets.
+# Usage:
+#   /usr/local/bin/secret_websvcs_update.sh
 
 set -euo pipefail
 

@@ -1,4 +1,5 @@
 # Host setup for Debian VMs running containers
+Initial setup for the primary VM host, PVE1. Handles the self signed CA and other certificates, secrets management, notifications and VM management services (these can also run on PVE2).
 
 - Make sure that Proxmox setup has been completed, see [proxmox_setup.md](./proxmox_setup.md)
 - Create the secsvcs (on pve1) and websvcs (on pve2) VMs with the desired resources and devices attached. secsvcs holds a select group of services that have higher security and uptime requirements. websvcs runs the rest of the web apps on a beefier machine. All services are containerized.
@@ -216,7 +217,7 @@ src/debian/install_svcs.sh cert_notifier
 ```
 
 ## VM management
-[docs](https://pve.proxmox.com/pve-docs/qm.1.html)
+Also run on PVE2. [docs](https://pve.proxmox.com/pve-docs/qm.1.html)
 
 - Watchdog to prevent stuck VM
 ```bash

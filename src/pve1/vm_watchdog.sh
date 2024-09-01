@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/vm_watchdog.sh
+# Checks proxmox for any frozen VMs and resets them.
+# Usage:
+#   /usr/local/bin/vm_watchdog.sh
 # Ref:
 # https://github.com/rtadams89/ProxmoxVMMonitoring/blob/main/reset_frozen_vms.sh
 # https://pve.proxmox.com/pve-docs/qm.1.html

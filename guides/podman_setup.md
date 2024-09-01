@@ -1,4 +1,5 @@
 # Podman setup
+Initial setup to install Proxmox and configure it with the relevant scripts and services.
 
 - Setup Linux using [debian_setup.md](./debian_setup.md)
 - Make sure host setup has been mostly completed, see [vm_host_setup.md](./vm_host_setup.md)

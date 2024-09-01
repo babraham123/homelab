@@ -1,4 +1,5 @@
 # Windows VM setup
+Guide to create a Windows VM. 
 
 - First do the basic [vm_setup.md](./vm_setup.md)
 

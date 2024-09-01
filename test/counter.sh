@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Simple counter to test signal handling.
 
 set -euo pipefail
 finish=0

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# src/debian/install_svcs.sh SERVICE_NAME
+# Installs VPN secific systemd services.
+# Usage:
+#   src/debian/install_svcs.sh SERVICE_NAME
 
 set -euo pipefail
 

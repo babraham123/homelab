@@ -1,4 +1,5 @@
 # pfSense setup on Proxmox
+Setups PVE1 from scratch to run pfsense as a VM on proxmox. You probably want a combo wifi/router on hand as backup in case you run into any issues.
 
 ## Install Proxmox
 - Make a [usb installer](https://www.lewan.com/blog/2012/02/10/making-a-bootable-usb-stick-on-an-apple-mac-os-x-from-an-iso) with proxmox [iso](https://www.proxmox.com/en/downloads/category/iso-images-pve)

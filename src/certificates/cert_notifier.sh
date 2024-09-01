@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# /usr/local/bin/cert_notifier.sh
+# Check when the self-signed and ACME cert upgrade scripts were last run.
+# If those certs are in danger of expiring, send an email to the site owner.
+# Usage:
+#   /usr/local/bin/cert_notifier.sh
 set -eo pipefail
 
 now=$(date +%s)

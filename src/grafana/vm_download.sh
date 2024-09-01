@@ -1,5 +1,7 @@
 #!/bin/sh
-# /etc/opt/grafana/vm_download.sh
+# Downloads the VictoriaMetrics and VictoriaLogs plugins for Grafana. Runs on startup.
+# Usage:
+#   /etc/opt/grafana/vm_download.sh
 # https://github.com/VictoriaMetrics/victorialogs-datasource?tab=readme-ov-file
 
 set -eu

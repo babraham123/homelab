@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/secret_secsvcs_update.sh
+# Updates and installs secsvcs custom secrets.
+# Usage:
+#   /usr/local/bin/secret_secsvcs_update.sh
 
 set -euo pipefail
 
@@ -21,7 +23,7 @@ ssh -t {{ username }}@secsvcs.{{ site.url }} '
 sudo mv /home/{{ username }}/secrets.yaml.age /etc/opt/secrets/secrets.yaml.age
 sudo chown root:root /etc/opt/secrets/secrets.yaml.age
 '
-echo -e '\nMake sure to restart the relevant services'
 
-# If creating a new secret, run the following command on secsvcs:
-# sudo podman secret create 'SECRET_NAME' /root/placeholder.txt
+echo -e '\nMake sure to restart the relevant services\n'
+echo 'If creating a new secret, run the following cmd:'
+echo 'sudo podman secret create "SECRET_NAME" /root/placeholder.txt'
