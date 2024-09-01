@@ -132,41 +132,33 @@ ufw status verbose
 ```
 
 ## Headscale UI (optional)
-- TODO: switch to Podman
+- Create the OIDC credentials
+```bash
+exit
+exit
+ssh {{ username }}@secsvcs.{{ site.url }}
+sudo podman run --rmi docker.io/authelia/authelia:latest authelia crypto rand --length 72 --charset rfc3986
+sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986
+# Store hashed and raw version of secret under hs_ui_oidc_secret(_hash). id under hs_ui_oidc_id
+ssh -t {{ username }}@pve1.{{ site.url }} 'sudo /usr/local/bin/secret_secsvcs_update.sh'
+# Restart authelia to pick up hashed secret version
+sudo systemctl restart authelia
+exit
+```
 - Generate and store the secrets
 ```bash
+ssh {{ username }}@{{ vpn.ip }}
+sudo su
 mkdir -p /etc/opt/secrets
 chmod 700 /etc/opt/secrets
 headscale apikeys create | tail -n 1 > /etc/opt/secrets/headscale_api_key
 openssl rand -base64 32 > /etc/opt/secrets/hs_ui_storage_key
-# Grab the raw version of the oidc secret from the steps below
+# Grab the oidc client id and the raw version of the client secret from the steps above
+vim /etc/opt/secrets/hs_ui_oidc_id
 vim /etc/opt/secrets/hs_ui_oidc_secret
 chmod 600 /etc/opt/secrets/*
-exit
-exit
-```
-- Create the new secret
-```bash
-ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986'
-# Store hashed and raw version of secret
-ssh -t {{ username }}@pve1.{{ site.url }} 'sudo /usr/local/bin/secret_secsvcs_update.sh'
-# Restart authelia to pick up hashed secret version
-ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo systemctl restart authelia'
 ```
 - Deploy on the VPN server
 ```bash
-ssh {{ username }}@{{ vpn.ip }}
-sudo su
-apt install -y gcc python3-poetry
-mkdir -p /var/opt/headscale-ui/data
-cd /var/opt/headscale-ui
-HSUI_VERSION=$(curl -s "https://api.github.com/repos/iFargle/headscale-webui/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-wget "https://github.com/iFargle/headscale-webui/archive/refs/tags/v${HSUI_VERSION}.tar.gz" -O - | tar xz
-mv "headscale-webui-${HSUI_VERSION}"/* .
-poetry install --only main
-
-cp /root/homelab-rendered/src/headscale/headscale-ui.service /etc/systemd/system
-systemctl enable headscale-ui.service
-systemctl start headscale-ui.service
-journalctl -eu headscale-ui
+src/vpn/install_svcs.sh headscale-ui
 ```

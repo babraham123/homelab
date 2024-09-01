@@ -8,7 +8,8 @@ For more details see the [Architecture](./guides/architecture.md), [Terminology]
 
 ## Guide order of execution
 
-Most of the config files are templatized to remove personal details. Once the network, hosts and VMs are setup, you'll download the repo onto the SBC and render all of the templates. From there most of the guides will copy files, configure services and other chores.
+Most of the config files are templatized to remove personal details. So first, render the source locally and then start following the guides. 
+Once the network, hosts and VMs are setup, you'll download the repo onto the SBC and render all of the templates. From there most of the guides will copy files, configure services and other chores.
 
 1. pve1 computer build
 1. Network build

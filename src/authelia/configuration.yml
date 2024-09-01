@@ -308,7 +308,7 @@ ntp:
   ## Format: [<scheme>://]<hostname>[:<port>].
   ## Square brackets indicate optional portions of the format. Scheme must be 'udp', 'udp4', or 'udp6'.
   ## The default scheme is 'udp'. The default port is '123'.
-  address: 'udp://time.cloudflare.com:123'
+  address: 'udp://debian.pool.ntp.org:123'
 
   ## NTP version.
   version: 4
@@ -1267,7 +1267,7 @@ identity_providers:
       -
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
         ## configuration.
-        client_id: 'headscale-webui'
+        '{% raw %}{{ env "HEADSCALE_UI_OIDC_ID" }}{% endraw %}'
 
         ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
         client_name: 'Headscale UI'
@@ -1436,9 +1436,10 @@ identity_providers:
               # ...
               # -----END CERTIFICATE-----
       -
+        # Ref: https://www.authelia.com/integration/openid-connect/grafana/
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
         ## configuration.
-        client_id: 'grafana-webui'
+        client_id: '{% raw %}{{ env "GRAFANA_OIDC_ID" }}{% endraw %}'
 
         ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
         client_name: 'Grafana'

@@ -1,4 +1,4 @@
-# Ref: https://github.com/babraham123/Jinja-Recurse
+# Ref: https://github.com/diginc/Jinja-Recurse
 ---
 personal:
   city: "Middletown"
@@ -10,7 +10,7 @@ username: "jdoe"
 site:
   url: "janedoe.com"
   name: "JD's System"
-  email: "jdoe2@gmail.com"
+  email: "jdoe@gmail.com"
 users:
   - jane
   - jayden

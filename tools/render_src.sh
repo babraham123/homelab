@@ -2,6 +2,7 @@
 # Renders the source code into the given folder. Fills in personal details from vars.yml.
 # Run from root of the project directory.
 # Usage:
+#   cd project/dir
 #   tools/render_src.sh /dir/to/store/rendered/copy
 # Ref:
 # https://manpages.debian.org/buster/fd-find/fdfind.1.en.html

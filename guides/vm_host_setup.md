@@ -33,7 +33,7 @@ rm yq* install-man-page.sh
 - Render source
 ```bash
 git clone {{ repo }} homelab
-cd homelab
+cd /root/homelab
 # Fill in personal details based on vars.template.yml
 vim vars.yml
 tools/update_src.sh

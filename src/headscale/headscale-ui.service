@@ -41,12 +41,11 @@ Environment=HS_VERSION="v0.23.0-alpha1"
 # https://github.com/fedora-infra/flask-oidc/blob/develop/docs/index.rst#manual-client-registration
 # URL for your OIDC issuer's well-known endpoint
 Environment=OIDC_AUTH_URL=https://auth.{{ site.url }}/.well-known/openid-configuration
-# Your OIDC Issuer's Client ID for Headscale-WebUI
-Environment=OIDC_CLIENT_ID=headscale-webui
-
 # Generate with "openssl rand -base64 32" - used to encrypt your key on disk.
 EnvironmentFile=KEY=/etc/opt/secrets/hs_ui_storage_key
-# Your OIDC Issuer's Secret Key for Headscale-WebUI
+# Your OIDC Issuer's client credentials for Headscale-WebUI
+# sudo podman run --rmi docker.io/authelia/authelia:latest authelia crypto rand --length 72 --charset rfc3986
+EnvironmentFile=OIDC_CLIENT_ID=/etc/opt/secrets/hs_ui_oidc_id
 # sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986
 EnvironmentFile=OIDC_CLIENT_SECRET=/etc/opt/secrets/hs_ui_oidc_secret
 

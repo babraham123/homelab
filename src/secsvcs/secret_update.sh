@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Updates and installs secsvcs custom secrets.
+# TODO: Fix sudo bug, currently requires sudo su first
 # Usage:
 #   /usr/local/bin/secret_secsvcs_update.sh
 
