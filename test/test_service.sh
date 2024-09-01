@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Tests how podman passes env vars and secrets to a container.
 
 set -euo pipefail
 

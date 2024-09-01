@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# src/secsvcs/install_certs.sh
+# Moves the certificates to their respective directories. Secsvcs only.
+# Usage:
+#   src/secsvcs/install_certs.sh
 
 set -euo pipefail
 

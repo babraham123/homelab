@@ -1,5 +1,7 @@
 #!/bin/busybox sh
-# /etc/opt/gatus/authelia_login.sh
+# Automates the login process for Authelia and stores the temporary auth cookie.
+# Usage:
+#   /etc/opt/gatus/authelia_login.sh
 # Ref:
 # https://github.com/TwiN/gatus?tab=readme-ov-file#reloading-configuration-on-the-fly
 # https://www.authelia.com/configuration/security/access-control/#rule-matching-concept-2-subject-criteria-requires-authentication

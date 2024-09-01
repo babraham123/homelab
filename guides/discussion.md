@@ -1,4 +1,5 @@
 # Discussion
+High level questions that shaped the homelab's requirements and design.
 
 1. Why self host?
 1. Why prefer open source software?

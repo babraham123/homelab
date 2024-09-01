@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Run from root of project directory
-# tools/update_src.sh
+# Renders the source code and copies it to other servers.
+# Run from root of the project directory on PVE1.
+# Usage:
+#   tools/update_src.sh
 
 set -euo pipefail
 

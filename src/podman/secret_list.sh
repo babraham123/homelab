@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/secret_list.sh
+# Prints out all custom secrets for podman.
+# Usage:
+#   /usr/local/bin/secret_list.sh
 
 set -euo pipefail
 

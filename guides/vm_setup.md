@@ -1,4 +1,5 @@
 # General Proxmox VM setup
+Guide to create and manage a VM. Includes optimal Proxmox settings, network configuration and backup setup.
 
 ## VM creation
 [ref](https://www.youtube.com/watch?v=sZcOlW-DwrU)
@@ -24,7 +25,7 @@ Reference links:
 Maintenance:
 - [Resize disks](https://pve.proxmox.com/wiki/Resize_disks#Online_for_Linux_guests_without_LVM)
 
-## pfSense
+## pfSense config
 - Create a static DHCP lease
   - Go to Services >> DHCP Server >> PVE# >> DHCP Static Mappings
 

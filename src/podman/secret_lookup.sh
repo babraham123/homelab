@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/secret_lookup.sh
+# Prints out the value of a custom secret by ID (for podman).
+# Usage:
+#   /usr/local/bin/secret_lookup.sh
 
 set -euo pipefail
 

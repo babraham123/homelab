@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# src/vpn/install_certs.sh
+# Moves the certificates into their respective locations. VPN only.
+# Usage:
+#   src/vpn/install_certs.sh
 
 set -euo pipefail
 

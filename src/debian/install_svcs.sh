@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# src/debian/install_svcs.sh SERVICE_NAME
+# Installs a variety of general purpose systemd services.
+# Usage:
+#   src/debian/install_svcs.sh SERVICE_NAME
 
 set -euo pipefail
 

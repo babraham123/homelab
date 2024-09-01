@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/self_signed_cert_gen.sh
+# Generate self-signed certificates and distribute them to the secsvcs and websvcs servers.
+# Usage:
+#   /usr/local/bin/self_signed_cert_gen.sh
 set -euo pipefail
 
 if [ "$(id -u)" != "0" ]; then

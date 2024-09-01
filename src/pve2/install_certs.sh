@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# src/pve2/install_certs.sh
+# Moves the certificates into their respective locations and restarts the services.
+# Also configures the PBS cert fingerprint. PVE2 only.
+# Usage:
+#   src/pve2/install_certs.sh
 
 set -euo pipefail
 

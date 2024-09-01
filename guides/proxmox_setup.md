@@ -25,7 +25,7 @@ deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 sudo wget https://enterprise.proxmox.com/debian/proxmox-release-bullseye.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
 sudo apt install -y libguestfs-tools intel-microcode
 ```
-- Remove unnecessary services
+- Remove unnecessary services (not using HA mode)
 ```bash
 sudo systemctl disable --now pve-ha-crm.service
 sudo systemctl disable --now pve-ha-lrm.service
@@ -99,7 +99,7 @@ lspci -s 01:00 && lspci -s 01:00 -n
 ```
 
 ### iGPU
-- Same as above
+- Same as above, [ref](https://3os.org/infrastructure/proxmox/gpu-passthrough/igpu-passthrough-to-vm/#linux-virtual-machine-igpu-passthrough-configuration)
 - `sudo vim /etc/modprobe.d/pve-blacklist.conf`
 ```
 blacklist i915

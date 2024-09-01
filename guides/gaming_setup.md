@@ -1,4 +1,5 @@
 # Gaming setup
+Guide to stream games from the windows VM to my living room TV.
 
 - First stand up the Windows VM: [vm_windows_setup.md](./vm_windows_setup.md)
 - And the Raspberry Pi client for the TV: [rpi_setup.md](./rpi_setup.md)

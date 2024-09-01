@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/get_vm_id.sh VM_NAME
+# Prints out the proxmox VM ID if given it's name.
+# Usage:
+#   /usr/local/bin/get_vm_id.sh VM_NAME
 
 set -euo pipefail
 

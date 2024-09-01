@@ -1,4 +1,5 @@
 # Debian Linux setup
+Initial setup for any Debian Linux instance. Configures the shell, ssh access and useful utilities.
 
 - First do the basic [vm_setup.md](./vm_setup.md)
 

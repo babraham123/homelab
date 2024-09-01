@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# src/secsvcs/install_svcs.sh SERVICE_NAME
+# Installs secsvcs specific systemd services.
+# Usage:
+#   src/secsvcs/install_svcs.sh SERVICE_NAME
 
 set -euo pipefail
 

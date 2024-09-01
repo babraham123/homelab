@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /usr/local/bin/node_exporter_runner.sh
+# Wrapper script to run node_exporter with custom services.
+# Usage:
+#   /usr/local/bin/node_exporter_runner.sh
 set -euo pipefail
 
 # Filter for custom services

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# /etc/opt/fluentbit/prestart.sh
+# Initializes the FluentBit config file to include custom services.
+# Usage:
+#   /etc/opt/fluentbit/prestart.sh
 
 set -euo pipefail
 

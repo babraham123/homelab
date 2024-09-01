@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# /usr/local/bin/acme_transfer.sh
+# Copy the acme.json files from secsvcs and websvcs to pve1. Parse and distribute the
+# ACME certificates to pve1, pve2, pbs2, the vpn UI and pfsense.
+# Usage:
+#   /usr/local/bin/acme_transfer.sh
 set -euo pipefail
 
 if [ "$(id -u)" != "0" ]; then
