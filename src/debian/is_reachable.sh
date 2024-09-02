@@ -5,7 +5,7 @@
 set -euo pipefail
 
 subdomain=$1
-if ! ping -c3 -W3 "$subdomain.{{ site.url }}"; then
+if ! ping -c3 -W3 "$subdomain.{{ site.url }}" > /dev/null; then
   echo "$subdomain is not reachable."
   exit 1
 fi
