@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # Generate self-signed certificates and distribute them to the secsvcs and websvcs servers.
 # Usage:
-#   /usr/local/bin/self_signed_cert_gen.sh
+#   /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 set -euo pipefail
 
-if [ "$(id -u)" != "0" ]; then
-  echo "This script must be run as root" 1>&2
-  exit 1
-fi
+/root/homelab-rendered/src/debian/is_root.sh
+/root/homelab-rendered/src/debian/is_reachable.sh secsvcs
+/root/homelab-rendered/src/debian/is_reachable.sh websvcs
 
 cd /root/ca/intermediate
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B

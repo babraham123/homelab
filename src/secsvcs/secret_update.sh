@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
 # Updates and installs secsvcs custom secrets.
-# TODO: Fix sudo bug, currently requires sudo su first
 # Usage:
-#   /usr/local/bin/secret_secsvcs_update.sh
+#   /root/homelab-rendered/src/secsvcs/secret_update.sh
 
 set -euo pipefail
 
-if [ "$(id -u)" != "0" ]; then
-  echo "This script must be run as root" 1>&2
-  exit 1
-fi
+/root/homelab-rendered/src/debian/is_root.sh
+/root/homelab-rendered/src/debian/is_reachable.sh secsvcs
 
 # Record secrets, see template for commands
 sops /root/secrets/secsvcs.yaml
 # SOPS doesn't support SSH keys, must convert before exporting
-sops -d /root/secrets/secsvcs.yaml | age -e -R /root/secrets/age.pub -R /root/secrets/secsvcs_id_ed25519.pub -o /root/secrets/secsvcs.yaml.age
+sops -d /root/secrets/secsvcs.yaml | sudo age -e -R /root/secrets/age.pub -R /root/secrets/secsvcs_id_ed25519.pub -o /root/secrets/secsvcs.yaml.age
 chmod 600 /root/secrets/secsvcs.yaml
 chmod 400 /root/secrets/secsvcs.yaml.age
 scp /root/secrets/secsvcs.yaml.age {{ username }}@secsvcs.{{ site.url }}:/home/{{ username }}/secrets.yaml.age

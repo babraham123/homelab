@@ -73,20 +73,18 @@ sops /root/secrets/pve1.yaml
 ```bash
 scp {{ username }}@secsvcs.{{ site.url }}:/home/{{ username }}/.ssh/id_ed25519.pub secsvcs_id_ed25519.pub
 chmod 400 secsvcs_id_ed25519.pub
-cp /root/homelab-rendered/src/secsvcs/secret_update.sh /usr/local/bin/secret_secsvcs_update.sh
 ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo mkdir -p /etc/opt/secrets'
 # Fill in all of the secrets you can based on `src/secsvcs/secrets_template.yaml`
-/usr/local/bin/secret_secsvcs_update.sh
+/root/homelab-rendered/src/secsvcs/secret_update.sh
 ```
 
 - Generate the SOPS/AGE websvcs secrets file
 ```bash
 scp {{ username }}@websvcs.{{ site.url }}:/home/{{ username }}/.ssh/id_ed25519.pub websvcs_id_ed25519.pub
 chmod 400 websvcs_id_ed25519.pub
-cp /root/homelab-rendered/src/websvcs/secret_update.sh /usr/local/bin/secret_websvcs_update.sh
 ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo mkdir -p /etc/opt/secrets'
 # Fill in all of the secrets you can based on `src/websvcs/secrets_template.yaml`
-/usr/local/bin/secret_websvcs_update.sh
+/root/homelab-rendered/src/websvcs/secret_update.sh
 ```
 
 ## Self-Signed Certificates
@@ -170,12 +168,9 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/w
 ### Manage certs
 - Create keys
 ```bash
-# Renewal
-cp /root/homelab-rendered/src/certificates/self_signed_key_gen.sh /usr/local/bin
-cp /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh /usr/local/bin
 # Wait until the services in VPN and websvcs are setup but not yet started
-/usr/local/bin/self_signed_key_gen.sh
-/usr/local/bin/self_signed_cert_gen.sh
+/root/homelab-rendered/src/certificates/self_signed_key_gen.sh
+/root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 ```
 
 ## ACME Certificates
@@ -188,9 +183,8 @@ cd /root/acme
 TCD_VERSION=$(curl -s "https://api.github.com/repos/ldez/traefik-certs-dumper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
 wget "https://github.com/ldez/traefik-certs-dumper/releases/download/v${TCD_VERSION}/traefik-certs-dumper_v${TCD_VERSION}_linux_amd64.tar.gz" -O - | tar xz
 mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
-cp /root/homelab-rendered/src/certificates/acme_transfer.sh /usr/local/bin
 # Wait until the services in VPN and websvcs are started
-/usr/local/bin/acme_transfer.sh
+/root/homelab-rendered/src/certificates/acme_transfer.sh
 ```
 
 ## SMTP
@@ -199,7 +193,7 @@ cp /root/homelab-rendered/src/certificates/acme_transfer.sh /usr/local/bin
 - Generate app passwords for lldap, authelia and msmtp, [Ref](https://support.google.com/accounts/answer/185833?hl=en)
 ```bash
 # Update sops files
-/usr/local/bin/secret_secsvcs_update.sh
+/root/homelab-rendered/src/secsvcs/secret_update.sh
 sops /root/secrets/pve1.yaml
 ```
 - Setup cert notifications

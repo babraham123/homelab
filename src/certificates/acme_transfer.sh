@@ -2,13 +2,15 @@
 # Copy the acme.json files from secsvcs and websvcs to pve1. Parse and distribute the
 # ACME certificates to pve1, pve2, pbs2, the vpn UI and pfsense.
 # Usage:
-#   /usr/local/bin/acme_transfer.sh
+#   /root/homelab-rendered/src/certificates/acme_transfer.sh
 set -euo pipefail
 
-if [ "$(id -u)" != "0" ]; then
-  echo "This script must be run as root" 1>&2
-  exit 1
-fi
+/root/homelab-rendered/src/debian/is_root.sh
+/root/homelab-rendered/src/debian/is_reachable.sh secsvcs
+/root/homelab-rendered/src/debian/is_reachable.sh websvcs
+/root/homelab-rendered/src/debian/is_reachable.sh vpn
+/root/homelab-rendered/src/debian/is_reachable.sh pve2
+/root/homelab-rendered/src/debian/is_reachable.sh router
 
 cd /root/acme
 
