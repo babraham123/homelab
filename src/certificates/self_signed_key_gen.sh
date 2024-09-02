@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # Generate SSL keys and distribute them to the secsvcs and websvcs servers.
 # Usage:
-#   /usr/local/bin/self_signed_key_gen.sh
+#   /root/homelab-rendered/src/certificates/self_signed_key_gen.sh
 set -euo pipefail
 
-if [ "$(id -u)" != "0" ]; then
-  echo "This script must be run as root" 1>&2
-  exit 1
-fi
+/root/homelab-rendered/src/debian/is_root.sh
+/root/homelab-rendered/src/debian/is_reachable.sh secsvcs
+/root/homelab-rendered/src/debian/is_reachable.sh websvcs
 
 cd /root/ca/intermediate
 

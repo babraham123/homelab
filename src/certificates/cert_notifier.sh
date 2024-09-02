@@ -18,7 +18,7 @@ mime='MIME-Version: 1.0\nContent-Type: text/html\n'
 # 1 year
 if (( self_signed_age_s > 31536000 )); then
   subject='Reminder: renew your self-signed certificates'
-  body='<h1>Renew your self-signed certs!</h1>\n<p>Use this command on the PVE1 host:</p>\n<code>sudo /usr/local/bin/self_signed_cert_gen.sh</code>'
+  body='<h1>Renew your self-signed certs!</h1>\n<p>Use this command on the PVE1 host:</p>\n<code>sudo /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh</code>'
   echo -e "To: $recipient\nFrom: $from\nSubject: $subject\n$mime\n\n$body" | msmtp -t
   sleep 10
 fi
@@ -26,6 +26,6 @@ fi
 # 2 months
 if (( acme_age_s > 5184000 )); then
   subject='Reminder: renew your acme certificates'
-  body='<h1>Renew your ACME certs!</h1>\n<p>Use this command on the PVE1 host:</p>\n<code>sudo /usr/local/bin/acme_transfer.sh</code>'
+  body='<h1>Renew your ACME certs!</h1>\n<p>Use this command on the PVE1 host:</p>\n<code>sudo /root/homelab-rendered/src/certificates/acme_transfer.sh</code>'
   echo -e "To: $recipient\nFrom: $from\nSubject: $subject\n$mime\n\n$body" | msmtp -t
 fi

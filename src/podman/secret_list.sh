@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prints out all custom secrets for podman.
+# Prints out all custom secret names (for podman).
 # Usage:
 #   /usr/local/bin/secret_list.sh
 
