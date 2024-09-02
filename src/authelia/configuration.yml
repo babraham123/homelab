@@ -1,7 +1,7 @@
 # yamllint disable rule:comments-indentation
 # /etc/opt/authelia/config/configuration.yml
 ---
-# v4.38.8
+# v4.38.10
 ###############################################################################
 ##                           Authelia Configuration                          ##
 ###############################################################################
@@ -362,7 +362,7 @@ authentication_backend:
     ## Square brackets indicate optional portions of the format. Scheme must be 'ldap', 'ldaps', or 'ldapi`.
     ## The default scheme is 'ldapi' if the address is an absolute path otherwise it's 'ldaps'.
     ## The default port is '636', unless the scheme is 'ldap' in which case it's '389'.
-    url: ldaps://ldap.{{ site.url }}:6360
+    address: 'ldaps://ldap.{{ site.url }}:6360'
 
     ## The LDAP implementation, this affects elements like the attribute utilised for resetting a password.
     ## Acceptable options are as follows:
@@ -386,7 +386,7 @@ authentication_backend:
     tls:
       ## The server subject name to check the servers certificate against during the validation process.
       ## This option is not required if the certificate has a SAN which matches the address options hostname.
-      server_name: ldap.{{ site.url }}
+      server_name: 'ldap.{{ site.url }}'
 
       ## Skip verifying the server certificate entirely. In preference to setting this we strongly recommend you add the
       ## certificate or the certificate of the authority signing the certificate to the certificates directory which is
@@ -421,7 +421,7 @@ authentication_backend:
 
     ## The distinguished name of the container searched for objects in the directory information tree.
     ## See also: additional_users_dn, additional_groups_dn.
-    base_dn: dc={{ site.url.replace('.', ',dc=') }}
+    base_dn: 'dc={{ site.url.replace('.', ',dc=') }}'
 
     ## The additional_users_dn is prefixed to base_dn and delimited by a comma when searching for users.
     ## i.e. with this set to OU=Users and base_dn set to DC=a,DC=com; OU=Users,DC=a,DC=com is searched for users.
@@ -439,7 +439,7 @@ authentication_backend:
     ##
     ## To allow sign in both with username and email, one can use a filter like
     ## (&(|({username_attribute}={input})({mail_attribute}={input}))(objectClass=person))
-    users_filter: (&({username_attribute}={input})(objectClass=person))
+    users_filter: '(&({username_attribute}={input})(objectClass=person))'
 
     ## The additional_groups_dn is prefixed to base_dn and delimited by a comma when searching for groups.
     ## i.e. with this set to OU=Groups and base_dn set to DC=a,DC=com; OU=Groups,DC=a,DC=com is searched for groups.
@@ -453,7 +453,7 @@ authentication_backend:
     ##    (&(uniqueMember={dn})(objectClass=groupOfUniqueNames))
     # groups_filter: '(&(member={dn})(objectClass=groupOfNames))'
     ## In LLDAP, only this filter is supported right now
-    groups_filter: "(member={dn})"
+    groups_filter: '(member={dn})'
 
     ## The group search mode to use. Options are 'filter' or 'memberof'. It's essential to read the docs if you wish to
     ## use 'memberof'. Also 'filter' is the best choice for most use cases.
@@ -464,7 +464,7 @@ authentication_backend:
     permit_referrals: false
 
     ## The username and password of the admin user.
-    user: cn=admin,ou=people,dc={{ site.url.replace('.', ',dc=') }}
+    user: 'cn=admin,ou=people,dc={{ site.url.replace('.', ',dc=') }}'
 
     ## Password can also be set using a secret: https://www.authelia.com/c/secrets
     # password: 'password'
@@ -626,44 +626,44 @@ privacy_policy:
 access_control:
   ## Default policy can either be 'bypass', 'one_factor', 'two_factor' or 'deny'. It is the policy applied to any
   ## resource if there is no policy to be applied to the user.
-  default_policy: deny
+  default_policy: 'deny'
 
   networks:
-    - name: internal
+    - name: 'internal'
       networks:
-        - {{ wifi.mask }}
-        - {{ pve1.mask }}
-        - {{ pve2.mask }}
-        - {{ iot.mask }}
-    - name: vpn
-      networks: 100.64.0.0/16
+        - '{{ wifi.mask }}'
+        - '{{ pve1.mask }}'
+        - '{{ pve2.mask }}'
+        - '{{ iot.mask }}'
+    - name: 'vpn'
+      networks: '100.64.0.0/16'
 
+  ## Rules applied to everyone
   rules:
-    ## Rules applied to everyone
     - domain:
       - '{{ site.url }}'
       - 'auth.{{ site.url }}'
       - 'www.{{ site.url }}'
       - 'blog.{{ site.url }}'
-      policy: bypass
+      policy: 'bypass'
 
     - domain: '*.{{ site.url }}'
       networks:
-        - internal
-        - vpn
+        - 'internal'
+        - 'vpn'
       subject:
         - 'group:authelia_gen_access'
-      policy: one_factor
+      policy: 'one_factor'
     
     - domain: '*.{{ site.url }}'
       subject:
         - 'group:authelia_gen_access'
-      policy: two_factor
+      policy: 'two_factor'
 
     - domain: '*.{{ site.url }}'
       subject:
         - 'group:uptime_robot'
-      policy: one_factor
+      policy: 'one_factor'
 
     ## Domain Regex examples. Generally we recommend just using a standard domain.
     # - domain_regex: '^(?P<User>\w+)\.example\.com$'
@@ -1182,23 +1182,23 @@ identity_providers:
     ## The JWK's issuer option configures multiple JSON Web Keys. It's required that at least one of the JWK's
     ## configured has the RS256 algorithm. For RSA keys (RS or PS) the minimum is a 2048 bit key.
     jwks:
-    -
-      ## Key ID embedded into the JWT header for key matching. Must be an alphanumeric string with 7 or less characters.
-      ## This value is automatically generated if not provided. It's recommended to not configure this.
-      # key_id: 'example'
+      -
+        ## Key ID embedded into the JWT header for key matching. Must be an alphanumeric string with 7 or less characters.
+        ## This value is automatically generated if not provided. It's recommended to not configure this.
+        # key_id: 'example'
 
-      ## The key algorithm used with this key.
-      algorithm: 'RS256'
+        ## The key algorithm used with this key.
+        algorithm: 'RS256'
 
-      ## The key use expected with this key. Currently only 'sig' is supported.
-      use: 'sig'
+        ## The key use expected with this key. Currently only 'sig' is supported.
+        use: 'sig'
 
-      ## Required Private Key in PEM DER form.
-      key: {% raw %}{{ secret "/certificates/auth.key" | mindent 8 "|" | msquote }}{% endraw %}
+        ## Required Private Key in PEM DER form.
+        key: {% raw %}{{ secret "/certificates/auth.key" | mindent 10 "|" | msquote }}{% endraw %}
 
-      ## Optional matching certificate chain in PEM DER form that matches the key. All certificates within the chain
-      ## must be valid and current, and from top to bottom each certificate must be signed by the subsequent one.
-      certificate_chain: {% raw %}{{ secret "/certificates/auth.cert.pem" | mindent 8 "|" | msquote }}{% endraw %}
+        ## Optional matching certificate chain in PEM DER form that matches the key. All certificates within the chain
+        ## must be valid and current, and from top to bottom each certificate must be signed by the subsequent one.
+        certificate_chain: {% raw %}{{ secret "/certificates/auth.cert.pem" | mindent 10 "|" | msquote }}{% endraw %}
 
     ## Enables additional debug messages.
     # enable_client_debug_messages: false
@@ -1267,15 +1267,14 @@ identity_providers:
       -
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
         ## configuration.
-        '{% raw %}{{ env "HEADSCALE_UI_OIDC_ID" }}{% endraw %}'
+        client_id: '{% raw %}{{ mustEnv "HEADSCALE_UI_OIDC_ID" }}{% endraw %}'
 
         ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
         client_name: 'Headscale UI'
 
         ## The client secret is a shared secret between Authelia and the consumer of this client.
         # yamllint disable-line rule:line-length
-        # The digest of 'insecure_secret'.
-        secret: '{% raw %}{{ env "HEADSCALE_UI_OIDC_SECRET" }}{% endraw %}'
+        client_secret: '{% raw %}{{ mustEnv "HEADSCALE_UI_OIDC_HASH" }}{% endraw %}'
 
         ## Sector Identifiers are occasionally used to generate pairwise subject identifiers. In most cases this is not
         ## necessary. It is critical to read the documentation for more information.
@@ -1286,7 +1285,7 @@ identity_providers:
 
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
         redirect_uris:
-          - https://vpn-ui.{{ site.url }}/oidc_callback
+          - 'https://vpn-ui.{{ site.url }}/oidc_callback'
 
         ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
         ## URIs to fetch Request Objects.
@@ -1435,19 +1434,19 @@ identity_providers:
               # -----BEGIN CERTIFICATE-----
               # ...
               # -----END CERTIFICATE-----
+
       -
         # Ref: https://www.authelia.com/integration/openid-connect/grafana/
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
         ## configuration.
-        client_id: '{% raw %}{{ env "GRAFANA_OIDC_ID" }}{% endraw %}'
+        client_id: '{% raw %}{{ mustEnv "GRAFANA_OIDC_ID" }}{% endraw %}'
 
         ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
         client_name: 'Grafana'
 
         ## The client secret is a shared secret between Authelia and the consumer of this client.
         # yamllint disable-line rule:line-length
-        # The digest of 'insecure_secret'.
-        secret: '{% raw %}{{ env "GRAFANA_OIDC_SECRET" }}{% endraw %}'
+        client_secret: '{% raw %}{{ mustEnv "GRAFANA_OIDC_HASH" }}{% endraw %}'
 
         ## Sector Identifiers are occasionally used to generate pairwise subject identifiers. In most cases this is not
         ## necessary. It is critical to read the documentation for more information.
@@ -1458,7 +1457,7 @@ identity_providers:
 
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
         redirect_uris:
-          - https://graph.{{ site.url }}/oidc_callback
+          - 'https://graph.{{ site.url }}/oidc_callback'
 
         ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
         ## URIs to fetch Request Objects.

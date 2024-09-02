@@ -25,7 +25,9 @@ Volume=/etc/opt/authelia/config:/config
 Volume=/etc/opt/authelia/certificates:/certificates
 
 Environment=TZ={{ personal.timezone }}
-Environment=X_AUTHELIA_CONFIG=template
+# https://www.authelia.com/configuration/methods/files/
+Environment=X_AUTHELIA_CONFIG=/config/configuration.yml
+Environment=X_AUTHELIA_CONFIG_FILTERS=template
 # https://www.authelia.com/configuration/methods/secrets/
 Environment=AUTHELIA_AUTHENTICATION_BACKEND_LDAP_TLS_PRIVATE_KEY_FILE=/certificates/auth.key
 Environment=AUTHELIA_AUTHENTICATION_BACKEND_LDAP_TLS_CERTIFICATE_CHAIN_FILE=/certificates/auth.cert.pem
@@ -42,9 +44,9 @@ Secret=authelia_smtp_password,type=env,target=AUTHELIA_NOTIFIER_SMTP_PASSWORD
 Secret=oidc_hmac_secret,type=env,target=AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET
 # https://www.authelia.com/reference/guides/templating/
 Secret=hs_ui_oidc_id,type=env,target=HEADSCALE_UI_OIDC_ID
-Secret=hs_ui_oidc_secret_hash,type=env,target=HEADSCALE_UI_OIDC_SECRET
+Secret=hs_ui_oidc_secret_hash,type=env,target=HEADSCALE_UI_OIDC_HASH
 Secret=grafana_oidc_id,type=env,target=GRAFANA_OIDC_ID
-Secret=grafana_oidc_secret_hash,type=env,target=GRAFANA_OIDC_SECRET
+Secret=grafana_oidc_secret_hash,type=env,target=GRAFANA_OIDC_HASH
 
 [Service]
 Restart=on-failure
