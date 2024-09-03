@@ -1224,12 +1224,15 @@ identity_providers:
 
     ## Authorization Policies which can be utilized by clients. The 'policy_name' is an arbitrary value that you pick
     ## which is utilized as the value for the 'authorization_policy' on the client.
+    # Ref: https://www.authelia.com/configuration/identity-providers/openid-connect/provider/#authorization_policies
     authorization_policies:
-      policy_name:
+      gen_access:
         default_policy: 'two_factor'
         rules:
           - policy: 'one_factor'
-            subject: 'group:services'
+            subject: 'group:authelia_gen_access'
+          - policy: 'one_factor'
+            subject: 'group:uptime_robot'
 
     ## The lifespans configure the expiration for these token types in the duration common syntax. In addition to this
     ## syntax the lifespans can be customized per-client.
@@ -1255,12 +1258,13 @@ identity_providers:
       ## List of allowed origins.
       ## Any origin with https is permitted unless this option is configured or the
       ## allowed_origins_from_client_redirect_uris option is enabled.
+      # Add to list if using Authelia for an external service
       allowed_origins:
         - 'https://{{ site.url }}'
 
       ## Automatically adds the origin portion of all redirect URI's on all clients to the list of allowed_origins,
       ## provided they have the scheme http or https and do not have the hostname of localhost.
-      allowed_origins_from_client_redirect_uris: false
+      # allowed_origins_from_client_redirect_uris: false
 
     ## Clients is a list of known clients and their configuration.
     clients:
@@ -1298,7 +1302,6 @@ identity_providers:
         ## Scopes this client is allowed to request.
         scopes:
           - 'openid'
-          - 'groups'
           - 'email'
           - 'profile'
 
@@ -1457,7 +1460,7 @@ identity_providers:
 
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
         redirect_uris:
-          - 'https://graph.{{ site.url }}/oidc_callback'
+          - 'https://graph.{{ site.url }}/login/generic_oauth'
 
         ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
         ## URIs to fetch Request Objects.
@@ -1476,7 +1479,7 @@ identity_providers:
 
         ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
         ## authorization policies section.
-        authorization_policy: 'two_factor'
+        authorization_policy: 'gen_access'
 
         ## Enforces the use of PKCE for this client when set to true.
         require_pkce: true

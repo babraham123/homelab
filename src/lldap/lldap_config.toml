@@ -1,5 +1,6 @@
 # /etc/opt/lldap/lldap_config.toml
 # Ref: https://github.com/lldap/lldap/blob/main/example_configs/authelia_config.yml
+# For user controls, mainly use the group `lldap_strict_readonly` or `lldap_password_manager`
 
 ## Default configuration for Docker.
 ## All the values can be overridden through environment variables, prefixed

@@ -2,6 +2,10 @@
 # of Grafana. See https://grafana.com/docs/grafana/latest/auth/ldap/#enable-ldap
 # You can test that it is working correctly by trying usernames at: https://graph.{{ site.url }}/admin/ldap
 # Ref: https://github.com/lldap/lldap/blob/main/example_configs/grafana_ldap_config.toml
+# Not currently in use (OIDC supplies auth and group info)
+
+# TODO: fix auth error
+# log: Cause: bind failed with error: LDAP Result Code 49 \"Invalid Credentials\": " method=POST
 
 [[servers]]
 # Ldap server host (specify multiple hosts space separated)
@@ -45,6 +49,6 @@ username = "uid"
 # If you want to map your ldap groups to grafana's groups, see: https://grafana.com/docs/grafana/latest/auth/ldap/#group-mappings
 # Map lldap's admin group to grafana's admin
 [[servers.group_mappings]]
-group_dn = "cn=lldap_admin,ou=groups,dc={{ site.url.replace('.', ',dc=') }}"
+group_dn = "cn=lldap_password_manager,ou=groups,dc={{ site.url.replace('.', ',dc=') }}"
 org_role = "Admin"
 grafana_admin = true

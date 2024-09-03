@@ -22,7 +22,7 @@ Environment=SCRIPT_NAME=""
 # AUTH_TYPE is either Basic or OIDC.  Empty for no authentication
 Environment=AUTH_TYPE=OIDC
 # Log level.  "DEBUG", "ERROR", "WARNING", or "INFO".  Default "INFO"
-Environment=LOG_LEVEL=WARNING
+Environment=LOG_LEVEL=INFO
 Environment=DATA_DIRECTORY=/var/opt/headscale-ui/data
 # About section on the Settings page
 Environment=GIT_COMMIT=""
