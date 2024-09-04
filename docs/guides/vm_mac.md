@@ -2,7 +2,7 @@
 Guide to create a MacOS VM.
 TODO: finish this guide
 
-- First do the basic [vm_setup.md](./vm_setup.md)
+- First do the basic [VM setup](./vm.md)
 
 ### Image
 [Ref](https://i12bretro.github.io/tutorials/0566.html)

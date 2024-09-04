@@ -1,7 +1,7 @@
 # Windows VM setup
 Guide to create a Windows VM. 
 
-- First do the basic [vm_setup.md](./vm_setup.md)
+- First do the basic [VM setup](./vm.md)
 
 ### Images
 - Download the Windows [ISO](https://www.microsoft.com/software-download/windows11)
@@ -47,7 +47,7 @@ Set-Service -Name sshd -StartupType 'Automatic'
 
 ### GPU Passthrough
 [src](https://3os.org/infrastructure/proxmox/gpu-passthrough/gpu-passthrough-to-vm/#proxmox-configuration-for-gpu-passthrough), [vid](https://www.youtube.com/watch?v=fgx3NMk6F54)
-- Follow the steps listed in [proxmox_setup.md](./proxmox_setup.md#pci-passthrough)
+- Follow the steps in [Proxmox > PCI passthrough](./proxmox.md#pci-passthrough)
 - Create VM, add PCI Device
 - Install Geforce Experience
 	- Open NVIDIA Control Panel, test 3D acceleration

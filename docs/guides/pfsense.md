@@ -42,7 +42,7 @@ ip addr
 systemctl start lightdm
 # login, reboot
 ```
-- [Basic debian setup](./debian_setup.md)
+- Basic [debian setup](./debian.md)
 
 ## Install pfSense
 - Connect to pve console: https://HOST_IP_ADDR:8006/

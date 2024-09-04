@@ -1,6 +1,6 @@
 # Development
 TODO: fill in
 
-[MAC setup](./mac_setup.md)
+[MAC setup](./guides/mac.md)
 
 Render source

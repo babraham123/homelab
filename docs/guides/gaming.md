@@ -1,8 +1,8 @@
 # Gaming setup
 Guide to stream games from the windows VM to my living room TV.
 
-- First stand up the Windows VM: [vm_windows_setup.md](./vm_windows_setup.md)
-- And the Raspberry Pi client for the TV: [rpi_setup.md](./rpi_setup.md)
+- First stand up the [Windows VM](./vm_windows.md)
+- And the [Raspberry Pi](./rpi.md) client for the TV
 
 ### Windows streaming server and game platforms
 - Install [ViGEmBus](https://github.com/ViGEm/ViGEmBus)

@@ -19,7 +19,7 @@
 # Not recommended for production use
 deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 ```
-- [Basic debian setup](./debian_setup.md)
+- Basic [Debian Linux setup](./debian.md)
 - Install special tools
 ```bash
 sudo wget https://enterprise.proxmox.com/debian/proxmox-release-bullseye.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
