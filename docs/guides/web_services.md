@@ -1,7 +1,7 @@
 # Web Services setup
 Guide to setup websvcs on PVE2. Just service installation.
 
-- Setup Podman using [podman_setup.md](./podman_setup.md)
+- Setup [Podman](./podman.md)
 
 ## Setup containers
 - Install and start services

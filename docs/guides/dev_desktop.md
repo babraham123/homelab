@@ -2,7 +2,7 @@
 Guide to create the devtop VM. It's intended as an environment for general software development and the execution of AI models.
 TODO: Add vscode, language scripts, remote desktop, model management
 
-- First setup Linux using [debian_setup.md](./debian_setup.md)
+- First setup [Debian Linux](./debian.md)
 
 ## Install GPU firmware
 - Disable secure boot, [vid](https://www.youtube.com/watch?v=js_Xoa0f8zM)

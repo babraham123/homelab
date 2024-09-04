@@ -5,7 +5,8 @@
 
 ## Linode
 - Setup smallest, CPU shared VM in [Linode](https://www.linode.com/)
-- [Basic setup](./debian_setup.md), `ssh root@{{ vpn.ip }}`
+- Basic [Debian Linux setup](./debian.md)
+  - `ssh root@{{ vpn.ip }}`
 - Firewall rules
 ```bash
 sudo su

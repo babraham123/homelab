@@ -4,7 +4,7 @@ Configuration and bootstrapping scripts for a local, private cloud (aka a homela
 
 Note, this setup is just one way to implement a homelab. I've configured things with a certain set of goals in mind that might not fit everyone. Also there are probably great tools and best practices  that I'm simply unaware of. Either way, treat these guides and bash scripts as more of a source of inspiration.
 
-For more details see the [Architecture](./guides/architecture.md), [Terminology](./guides/terminology.md) and [Discussion](./guides/discussion.md).
+For more details see the [Architecture](./docs/architecture.md), [Terminology](./docs/terminology.md) and [Discussion](./docs/discussion.md).
 
 ## Guide order of execution
 

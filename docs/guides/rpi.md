@@ -34,7 +34,7 @@ ssh-keygen -R raspberrypi.local
 ssh pi@raspberrypi.local
 ip addr
 ```
-- [Basic debian setup](./debian_setup.md)
+- Basic [Debian Linux setup](./debian.md)
 - Add DNS host override in pfSense
 - Disable GUI, autologin ([src](https://linuxhint.com/disable-gui-raspberry-pi/)), expand fs
 ```bash
