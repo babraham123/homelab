@@ -19,13 +19,20 @@ NoNewPrivileges=true
 Network=net.network
 HostName=metrics.{{ site.url }}
 
+# https://docs.victoriametrics.com/#capacity-planning
 Exec=--storageDataPath="/storage" \
      --graphiteListenAddr=":2003" \
      --opentsdbListenAddr=":4242" \
      --httpListenAddr=":8428" \
      --influxListenAddr=":8089" \
      --promscrape.config="/etc/prometheus/prometheus.yml" \
-     --vmalert.proxyURL="http://alert.{{ site.url }}:8880"
+     --vmalert.proxyURL="http://alert.{{ site.url }}:8880" \
+     --retentionPeriod=31d \
+     --minFreeDiskSpaceBytes=8GiB \
+     --memory.allowedBytes=512MiB \
+     --search.maxMemoryPerQuery=64MiB \
+     --search.maxConcurrentRequests=10
+
 
 Environment=TZ={{ personal.timezone }}
 Volume=/etc/opt/victoriametrics/prometheus.yml:/etc/prometheus/prometheus.yml:ro

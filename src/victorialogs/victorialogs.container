@@ -19,11 +19,14 @@ NoNewPrivileges=true
 Network=net.network
 HostName=logs.{{ site.url }}
 
-Exec=--storageDataPath="/vlogs" \
-     --httpListenAddr=":9428"
+# https://docs.victoriametrics.com/victorialogs/#retention
+Exec=--storageDataPath="/storage" \
+     --httpListenAddr=":9428" \
+     --retention.maxDiskSpaceUsageBytes=24GiB \
+     --retentionPeriod=31d
 
 Environment=TZ={{ personal.timezone }}
-Volume=vldata.volume:/vlogs
+Volume=vldata.volume:/storage
 
 [Service]
 Restart=on-failure
