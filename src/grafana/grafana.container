@@ -26,6 +26,7 @@ HostName=graph.{{ site.url }}
 PodmanArgs=--entrypoint='["/bin/sh", "-c", "/download.sh && /run.sh"]'
 
 Environment=TZ={{ personal.timezone }}
+# Consider GF_INSTALL_PLUGINS=<plugin download url>
 # https://www.postgresql.org/docs/14/libpq-envars.html
 Secret=grafana_pg_password,type=env,target=PGPASSWORD
 Secret=grafana_oidc_id,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_ID
@@ -36,7 +37,7 @@ Volume=/etc/opt/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
 Volume=/etc/opt/grafana/ldap.toml:/etc/grafana/ldap.toml:ro
 Volume=/etc/opt/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
 Volume=/etc/opt/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml:ro
-Volume=/etc/opt/grafana/dashboards:/var/lib/grafana/dashboards:ro
+Volume=/etc/opt/grafana/dashboards:/var/lib/grafana/dashboards
 Volume=/etc/opt/grafana/vm_download.sh:/download.sh:ro
 Volume=/etc/opt/grafana/certificates:/certificates:ro
 

@@ -16,9 +16,11 @@ scrape_configs:
     static_configs:
       - targets: ['log-collector.{{ site.url }}:2020/api/v1/metrics/prometheus']
   - job_name: gatus
+    # https://github.com/TwiN/gatus?tab=readme-ov-file#metrics
     static_configs:
       - targets: ['uptime.{{ site.url }}:8080']
   - job_name: pve
+    # https://github.com/prometheus-pve/prometheus-pve-exporter?tab=readme-ov-file#exported-metrics
     static_configs:
       - targets:  # Proxmox VE nodes
         - pve1.{{ site.url }}
@@ -36,5 +38,6 @@ scrape_configs:
       - target_label: __address__
         replacement: pve_exporter.{{ site.url }}:9221
   - job_name: 'node_exporter'
+    # https://github.com/prometheus/node_exporter?tab=readme-ov-file#collectors
     static_configs:
       - targets: ['{{ pve1.ip }}:9100']
