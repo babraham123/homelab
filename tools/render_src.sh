@@ -17,7 +17,7 @@ rm -rf "$1/.git" "$1/.gitignore" "$1/vars.yml" "$1/.vscode"
 
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"
-$fdfind . --type f --exec jinjanate --quiet -o "$1/{}" "{}" vars.yml
+$fdfind . --type f --exclude docs/diagrams --exec jinjanate --quiet -o "$1/{}" "{}" vars.yml
 $fdfind . --extension sh --exec chmod +x "$1/{}"
 $fdfind . --extension pl --exec chmod +x "$1/{}"
 

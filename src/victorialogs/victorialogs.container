@@ -10,7 +10,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/victoriametrics/victoria-logs:stable
+Image=docker.io/victoriametrics/victoria-logs:latest
 ContainerName=victorialogs
 AutoUpdate=registry
 NoNewPrivileges=true
@@ -22,8 +22,11 @@ HostName=logs.{{ site.url }}
 # https://docs.victoriametrics.com/victorialogs/#retention
 Exec=--storageDataPath="/storage" \
      --httpListenAddr=":9428" \
-     --retention.maxDiskSpaceUsageBytes=24GiB \
-     --retentionPeriod=31d
+     --retention.maxDiskSpaceUsageBytes="24GiB" \
+     --retentionPeriod="31d" \
+     --storage.minFreeDiskSpaceBytes="8GiB" \
+     --memory.allowedBytes="512MiB" \
+     --search.maxConcurrentRequests="3"
 
 Environment=TZ={{ personal.timezone }}
 Volume=vldata.volume:/storage
