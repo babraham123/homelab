@@ -21,6 +21,9 @@ HostName=log-collector.{{ site.url }}
 
 Environment=TZ={{ personal.timezone }}
 Volume=/etc/opt/fluentbit/config.conf:/fluent-bit/etc/fluent-bit.conf:ro
+Volume=/etc/machine-id:/etc/machine-id:ro
+Volume=/run/log/journal:/run/log/journal
+Volume=/var/log/journal:/var/log/journal
 
 [Service]
 Restart=on-failure
