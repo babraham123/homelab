@@ -1,7 +1,0 @@
-# /etc/opt/alertmanager/config.yml
-
-route:
-  receiver: blackhole
-
-receivers:
-  - name: blackhole

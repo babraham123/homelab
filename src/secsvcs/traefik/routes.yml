@@ -43,12 +43,42 @@ http:
       service: victorialogs@file
     vmalert:
       <<: *service
-      rule: Host(`alert.{{ site.url }}`)
+      rule: Host(`vmalert.{{ site.url }}`)
       service: vmalert@file
-    alertmanager:
+    alertmanager-ui:
       <<: *service
-      rule: Host(`alertmanager.{{ site.url }}`)
+      rule: Host(`alert.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
       service: alertmanager@file
+      middlewares:
+        - authelia@file
+        - alertmanager-auth@file
+        - secure-headers@file
+    alertmanager-api:
+      <<: *service
+      # Ref: https://doc.traefik.io/traefik/routing/routers/#priority
+      rule: Host(`alert.{{ site.url }}`)
+      service: alertmanager@file
+      middlewares: []
+    ntfy-ui:
+      <<: *service
+      # Ref: https://github.com/binwiederhier/ntfy/issues/893#issuecomment-1731314679
+      rule: Host(`push.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`) && !PathPrefix(`/file/`)
+      service: ntfy@file
+      middlewares:
+        - authelia@file
+        - ntfy-auth@file
+        - secure-headers@file
+    ntfy-api:
+      <<: *service
+      # Ref: https://doc.traefik.io/traefik/routing/routers/#priority
+      rule: Host(`push.{{ site.url }}`)
+      service: ntfy@file
+      middlewares: []
+    ntfy-alertmanager:
+      <<: *service
+      rule: Host(`ntfy-alertmanager.{{ site.url }}`)
+      service: ntfy-alertmanager@file
+      middlewares: []
     # vault:
     #   <<: *service
     #   rule: Host(`vault.{{ site.url }}`)
@@ -86,11 +116,19 @@ http:
     vmalert:
       loadBalancer:
         servers:
-          - url: http://alert.{{ site.url }}:8880/
+          - url: http://vmalert.{{ site.url }}:8880/
     alertmanager:
       loadBalancer:
         servers:
-          - url: http://alertmanager.{{ site.url }}:9093/
+          - url: http://alert.{{ site.url }}:9093/
+    ntfy:
+      loadBalancer:
+        servers:
+          - url: http://push.{{ site.url }}:2586/
+    ntfy-alertmanager:
+      loadBalancer:
+        servers:
+          - url: http://ntfy-alertmanager.{{ site.url }}:2588/
     # vault:
     #   loadBalancer:
     #     servers:

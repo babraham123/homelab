@@ -1,0 +1,33 @@
+# /etc/containers/systemd/alertmanager.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Convert notifications from alertmanager to ntfy"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/xenrox/ntfy-alertmanager:latest
+ContainerName=ntfy-alertmanager
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=ntfy-alertmanager.{{ site.url }}
+# port 2588
+
+Exec=--config="/etc/ntfy-alertmanager/config.scfg"
+
+Environment=TZ={{ personal.timezone }}
+Volume=/etc/opt/ntfy-alertmanager/config.scfg:/etc/ntfy-alertmanager/config.scfg:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/ntfy-alertmanager/config.scfg ntfy_alertmanager_admin_password,ntfy_alert_password,alertmanager_admin_password
+
+[Install]
+WantedBy=multi-user.target

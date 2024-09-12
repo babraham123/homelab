@@ -7,5 +7,5 @@ crash.*.log
 
 # Personal details
 vars.yml
+all_vars.yml
 notes
-

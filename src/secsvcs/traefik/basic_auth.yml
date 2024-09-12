@@ -1,0 +1,13 @@
+# /etc/opt/traefik/config/dynamic/ntfy.yml
+# Ref:
+#   https://github.com/binwiederhier/ntfy/blob/main/server/server.go#L1957
+#   https://stackoverflow.com/a/74016307/1937592
+#   https://masterminds.github.io/sprig/
+http:
+  middlewares:
+    ntfy-auth:
+      customRequestHeaders:
+        Authorization: 'Basic {% raw %}{{ expandenv "admin:$NTFY_ADMIN_PASSWORD" | b64enc }}{% endraw %}'
+    alertmanager-auth:
+      customRequestHeaders:
+        Authorization: 'Basic {% raw %}{{ expandenv "admin:$AM_ADMIN_PASSWORD" | b64enc }}{% endraw %}'

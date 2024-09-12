@@ -7,18 +7,25 @@
 # Ref:
 # https://manpages.debian.org/buster/fd-find/fdfind.1.en.html
 # https://github.com/kpfleming/jinjanator
+# Note:
+# The *.j2 extension indicates that the file will go thru a second pass of jinjanate,
+# usually during service startup. See src/podman/render_secrets.sh for an example.
 
 set -euo pipefail
 
-rm -rf "$1"
+rm -rf "$1" all_vars.yml
 mkdir -p "$1"
 cp -R . "$1"
 rm -rf "$1/.git" "$1/.gitignore" "$1/vars.yml" "$1/.vscode"
 
+cp vars.yml all_vars.yml
+tools/parse_secsvcs_routes.sh >> all_vars.yml
+
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"
-$fdfind . --type f --exclude docs/diagrams --exec jinjanate --quiet -o "$1/{}" "{}" vars.yml
+$fdfind . --type f --exec jinjanate --quiet -o "$1/{}" "{}" all_vars.yml
 $fdfind . --extension sh --exec chmod +x "$1/{}"
 $fdfind . --extension pl --exec chmod +x "$1/{}"
 
 echo "Rendered the repo into $1"
+rm -f all_vars.yml

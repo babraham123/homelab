@@ -7,6 +7,7 @@ set -euo pipefail
 
 cd /root/homelab-rendered/src
 mkdir -p /etc/containers/systemd
+cp podman/*.sh /usr/local/bin
 
 case $1 in
   postgres)
@@ -67,16 +68,29 @@ case $1 in
     # https://github.com/prometheus-pve/prometheus-pve-exporter/blob/main/Dockerfile
     cp exporter/pve_exporter.container /etc/containers/systemd
     ;;
-  alertmanager)
-    mkdir -p /etc/opt/alertmanager
-    cp alert/alertmanager.yml /etc/opt/alertmanager/config.yml
-    cp alert/alertmanager.container /etc/containers/systemd
-    ;;
   vmalert)
     mkdir -p /etc/opt/vmalert
     rm -f /etc/opt/vmalert/*.yml
-    cp alert/configs/*.yml /etc/opt/vmalert
-    cp alert/vmalert.container /etc/containers/systemd
+    cp vmalert/configs/*.yml /etc/opt/vmalert
+    cp vmalert/vmalert.container /etc/containers/systemd
+    ;;
+  alertmanager)
+    mkdir -p /etc/opt/alertmanager
+    cp alertmanager/config.yml.j2 /etc/opt/alertmanager
+    cp alertmanager/web_config.yml.j2 /etc/opt/alertmanager
+    cp alertmanager/alertmanager.container /etc/containers/systemd
+    ;;
+  ntfy-alertmanager)
+    mkdir -p /etc/opt/ntfy-alertmanager
+    cp alertmanager/ntfy-alertmanager.scfg.j2 /etc/opt/ntfy-alertmanager/config.scfg.j2
+    cp alertmanager/ntfy-alertmanager.container /etc/containers/systemd
+    ;;
+  ntfy)
+    mkdir -p /etc/opt/ntfy
+    mkdir -p /var/opt/ntfy
+    cp ntfy/config.yml.j2 /etc/opt/ntfy
+    cp ntfy/ntfy.container /etc/containers/systemd
+    cp ntfy/ntfydb.volume /etc/containers/systemd
     ;;
   grafana)
     mkdir -p /etc/opt/grafana/certificates
@@ -104,7 +118,7 @@ case $1 in
     cp victorialogs/fluentbit.container /etc/containers/systemd
     ;;
   *)
-    echo "Unknown service: $1"
+    echo "error: unknown service: $1" >&2
     exit 1
     ;;
 esac

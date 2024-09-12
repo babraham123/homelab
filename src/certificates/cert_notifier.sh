@@ -11,8 +11,8 @@ self_signed_age_s=$(( now - last_update ))
 last_update=$(date -r /root/acme/date_acme_certs.txt +%s || echo 0)
 acme_age_s=$(( now - last_update ))
 
-recipient='{{ site.email }}'
-from='{{ site.email }}'
+recipient='{{ site.email.replace('@', '+cert@') }}'
+from='Cert Notifier <admin@{{ site.url }}>'
 mime='MIME-Version: 1.0\nContent-Type: text/html\n'
 
 # 1 year

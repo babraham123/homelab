@@ -1,0 +1,8 @@
+# /etc/opt/alertmanager/web_config.yml.j2
+---
+# Usernames and hashed passwords that have full access to the web
+# server via basic authentication. If empty, no basic authentication is
+# required. Passwords are hashed with bcrypt.
+basic_auth_users:
+  [ admin: {% raw %}{{ env('alertmanager_admin_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %} ]
+...

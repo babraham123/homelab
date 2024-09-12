@@ -35,4 +35,8 @@ endpoints:
   - name: LDAP Frontend
     <<: *internal
     url: "https://ldap.{{ site.url }}"
+
+  - name: ntfy health check
+    <<: *internal
+    url: "https://push.{{ site.url }}/v1/health"
 ...

@@ -18,7 +18,7 @@ case $1 in
     networksetup -switchtolocation Automatic > /dev/null
     ;;
   *)
-    echo "Unknown cmd: $1"
+    echo "error: unknown cmd: $1" >&2
     exit 1
     ;;
 esac

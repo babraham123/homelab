@@ -1,0 +1,119 @@
+# /etc/ntfy-alertmanager/config.scfg.j2
+# Ref: https://git.xenrox.net/~xenrox/ntfy-alertmanager
+
+# Public facing base URL of the service (e.g. https://ntfy-alertmanager.xenrox.net)
+# This setting is required for the "Silence" feature.
+base-url https://ntfy-alertmanager.{{ site.url }}
+# http listen address
+http-address :2588
+# Log level (either debug, info, warning, error)
+log-level info
+# Log format (either text or json)
+log-format text
+# When multiple alerts are grouped together by Alertmanager, they can either be sent
+# each on their own (single mode) or be kept together (multi mode) (either single or multi; default is multi)
+alert-mode multi
+# Optionally protect with HTTP basic authentication
+user admin
+password {% raw %}{{ env('ntfy_alertmanager_admin_password') }}{% endraw %}
+
+labels {
+  order "severity"
+
+  severity "critical" {
+    priority 5
+    tags "rotating_light"
+    # icon "https://example.com/critical.png"
+    # Forward messages which severity "critical" to the specified email address.
+    # email-address yes
+    # Call the specified number. Use `yes` to pick the first of your verified numbers.
+    # call yes
+  }
+  severity "error" {
+    priority 4
+    tags "triangular_flag_on_post"
+  }
+  severity "warning" {
+    priority 3
+    tags "warning"
+  }
+  severity "info" {
+    priority 1
+  }
+
+  instance "sevsvcs.{{ site.url }}" {
+    tags "computer,secsvcs"
+  }
+  instance "websvcs.{{ site.url }}" {
+    tags "computer,websvcs"
+  }
+  instance "pve1.{{ site.url }}" {
+    tags "computer,pve1"
+  }
+  instance "pve2.{{ site.url }}" {
+    tags "computer,pve2"
+  }
+}
+
+# Settings for resolved alerts
+resolved {
+  tags "resolved,tada"
+  # icon "https://example.com/resolved.png"
+  priority 1
+}
+
+ntfy {
+  # URL of the ntfy topic - required
+  topic https://push.{{ site.url }}/alert
+  # ntfy authentication via Basic Auth (https://docs.ntfy.sh/publish/#username-password)
+  user alert
+  password {% raw %}{{ env('ntfy_alert_password') }}{% endraw %}
+  # ntfy authentication via access tokens (https://docs.ntfy.sh/publish/#access-tokens)
+  # Either access-token or a user/password combination can be used - not both.
+  # access-token foobar
+  # When using (self signed) certificates that cannot be verified, you can instead specify
+  # the SHA512 fingerprint.
+  # openssl can be used to obtain it:
+  # openssl s_client -connect HOST:PORT | openssl x509 -fingerprint -sha512 -noout
+  # For convenience ntfy-alertmanager will convert the certificate to lower case and remove all colons.
+  # certificate-fingerprint 13:6D:2B:88:9C:57:36:D0:81:B4:B2:9C:79:09:27:62:92:CF:B8:6A:6B:D3:AD:46:35:CB:70:17:EB:99:6E:28:08:2A:B8:C6:79:4B:F6:2E:81:79:41:98:1D:53:C8:07:B3:5C:24:5F:B1:8E:B6:FB:66:B5:DD:B4:D0:5C:29:91
+  # Forward all messages to the specified email address.
+  email-address {{ site.email.replace('@', '+alert2@') }}
+  # Call the specified number for all alerts. Use `yes` to pick the first of your verified numbers.
+  # call +123456789
+}
+
+alertmanager {
+  # If set, the ntfy message will contain a "Silence" button, which can be used
+  # to create a silence via the Alertmanager API. Because of limitations in ntfy,
+  # the request will be proxied through ntfy-alertmanager. Therefore ntfy-alertmanager
+  # needs to be exposed to external network requests and base-url has to be set.
+  #
+  # When alert-mode is set to "single" all alert labels will be used to create the silence.
+  # When it is "multi" common labels between all the alerts will be used. WARNING: This
+  # could silence unwanted alerts.
+  silence-duration 24h
+  # Basic authentication (https://prometheus.io/docs/alerting/latest/https/)
+  user admin
+  password {% raw %}{{ env('alertmanager_admin_password') }}{% endraw %}
+  # By default the Alertmanager URL gets parsed from the webhook. In case that
+  # Alertmanger is not reachable under that URL, it can be overwritten here.
+  url https://alert.{{ site.url }}
+}
+
+# When the alert-mode is set to single, ntfy-alertmanager will cache each single alert
+# to avoid sending recurrences.
+cache {
+  # The type of cache that will be used (either disabled, memory or redis; default is disabled).
+  type memory
+  # How long messages stay in the cache for
+  duration 24h
+
+  # Memory cache settings
+  # Interval in which the cache is cleaned up
+  cleanup-interval 1h
+
+  # Redis cache settings
+  # URL to connect to redis (default: redis://localhost:6379)
+  # redis-url redis://user:password@localhost:6789/3
+}

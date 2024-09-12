@@ -19,6 +19,8 @@ src/secsvcs/install_svcs.sh pve_exporter
 src/secsvcs/install_svcs.sh alertmanager
 src/secsvcs/install_svcs.sh vmalert
 src/secsvcs/install_svcs.sh grafana
+src/secsvcs/install_svcs.sh ntfy
+src/secsvcs/install_svcs.sh ntfy-alertmanager
 # src/secsvcs/install_svcs.sh vault
 src/secsvcs/install_svcs.sh fluentbit
 
@@ -45,17 +47,38 @@ journalctl -eu authelia
     `vim /etc/opt/traefik/config/dynamic/traefik.yml`
   - Navigate to `ldap.{{ site.url }}` and login
     User = admin, get the password below
-    `src/podman/get_secret.sh lldap_admin_password`
+    `/usr/local/bin/get_secret.sh lldap_admin_password`
   - Add some users, add them to the `lldap_password_manager` group
   - Create the `authelia_gen_access` group, add users to it
   - Create robot users. Use `{{ site.email.replace('@', '+USER@') }}` for the email. Use the stored passwords: 
-    `src/podman/get_secret.sh USER_lldap_password`
+    `/usr/local/bin/get_secret.sh USER_lldap_password`
     - Add `gatus` user, create `uptime_robot` group, add `gatus` to it
     - Add `grafana` user, add to `lldap_strict_readonly` group
   - Uncomment out the authelia middleware
     `vim /etc/opt/traefik/config/dynamic/traefik.yml`
 
 - Confirm that authelia is working
+
+## Ntfy
+
+- Create users, [ref](https://docs.ntfy.sh/config/#users-and-roles)
+```bash
+chmod 600 /var/opt/ntfy/user.db
+/usr/local/bin/get_secret.sh ntfy_admin_password
+/usr/local/bin/get_secret.sh ntfy_alert_password
+/usr/local/bin/get_secret.sh ntfy_hass_password
+/usr/local/bin/get_secret.sh ntfy_person_password
+podman exec -it ntfy sh
+```
+```bash
+ntfy user add --role=admin admin
+ntfy user add alert
+ntfy access alert "alert*" rw
+ntfy user add hass
+ntfy access hass "hass*" rw
+ntfy access person "hass*" ro
+ntfy access person "chat*" rw
+```
 
 ## Debugging (optional)
 - Find container image name

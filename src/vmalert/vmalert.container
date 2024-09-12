@@ -18,7 +18,7 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 Network=net.network
-HostName=alert.{{ site.url }}
+HostName=vmalert.{{ site.url }}
 # https://docs.victoriametrics.com/vmalert/#web
 # metrics at :8880/metrics
 # api at :8880/api/v1
@@ -27,9 +27,10 @@ HostName=alert.{{ site.url }}
 Exec=--datasource.url="http://metrics.{{ site.url }}:8428/" \
      --remoteRead.url="http://metrics.{{ site.url }}:8428/" \
      --remoteWrite.url="http://metrics.{{ site.url }}:8428/" \
-     --notifier.url="http://alertmanager.{{ site.url }}:9093/" \
+     --notifier.url="http://alert.{{ site.url }}:9093/" \
      --rule="/etc/alerts/*.yml" \
-     --external.url="http://graph.{{ site.url }}:3000" \
+     --external.url="https://vmalert.{{ site.url }}" \
+     --external.label="grafana_url=https://graph.{{ site.url }},vm_dash=G7Z9GzMGz,vg_dash=wNf0q_kZk,va_dash=LzldHAVnz" \
      {% raw %}--external.alert.source='explore?orgId=1&left={"datasource":"VictoriaMetrics","queries":[{"expr":{{$$expr|jsonEscape|queryEscape}},"refId":"A"}],"range":{"from":"now-1h","to":"now"}}'{% endraw %}
 
 Environment=TZ={{ personal.timezone }}

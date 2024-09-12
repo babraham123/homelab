@@ -1,0 +1,39 @@
+# /etc/containers/systemd/ntfy.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: ntfy push notification service"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/binwiederhier/ntfy:latest
+ContainerName=ntfy
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# port 2586, web UI at /, /<topic> for pubsub
+# port 2587 for metrics
+Network=net.network
+HostName=push.{{ site.url }}
+
+Exec=serve --config="/etc/ntfy/server.yml"
+
+Environment=TZ={{ personal.timezone }}
+Secret=ntfy_webpush_public_key,type=env,target=NTFY_WEB_PUSH_PUBLIC_KEY
+Secret=ntfy_webpush_private_key,type=env,target=NTFY_WEB_PUSH_PRIVATE_KEY
+
+Volume=/etc/opt/ntfy/config.yml:/etc/ntfy/server.yml:ro
+Volume=/var/opt/ntfy:/var/cache/ntfy
+Volume=ntfy.volume:/var/lib/ntfy
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/ntfy/config.yml alert_smtp_password,ntfy_webpush_public_key,ntfy_webpush_private_key
+
+[Install]
+WantedBy=multi-user.target

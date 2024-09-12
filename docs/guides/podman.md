@@ -2,14 +2,15 @@
 Initial setup to install Proxmox and configure it with the relevant scripts and services.
 
 - Setup [Debian Linux](./debian.md)
-- Make sure [VM Host setup](./vm_host.md) has been mostly completed.
+- Make sure to do VM Host setup for [PVE1](./pve1.md) and [PVE2](./pve2.md).
 - Review container security measures, for example [ref](https://www.panoptica.app/research/7-ways-to-escape-a-container)
 
 ## Install Podman
 - Install dependencies
 ```bash
 sudo su
-apt install -y age jq
+apt install -y age jq python3-pip
+pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible
 
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
 wget "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" -O - | tar xz
@@ -67,13 +68,12 @@ chmod 700 /etc/opt/secrets
 cp /home/{{ username }}/.ssh/id_ed25519* /etc/opt/secrets
 chmod 600 /etc/opt/secrets/*
 cd /root/homelab-rendered
-cp src/podman/secret_lookup.sh /usr/local/bin
-cp src/podman/secret_list.sh /usr/local/bin
+cp src/podman/*.sh /usr/local/bin
 cp src/podman/containers.conf /etc/containers
 
 echo "placeholder" > /root/placeholder.txt
 podman secret rm --all
-/usr/local/bin/secret_list.sh | xargs -I% podman secret create "%" /root/placeholder.txt
+/usr/local/bin/list_secrets.sh | xargs -I% podman secret create "%" /root/placeholder.txt
 podman secret ls
 ```
 
