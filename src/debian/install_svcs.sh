@@ -48,7 +48,7 @@ case $1 in
     cp exporter/node_exporter.service /etc/systemd/system
     ;;
   *)
-    echo "Unknown service: $1"
+    echo "error: unknown service: $1" >&2
     exit 1
     ;;
 esac

@@ -53,6 +53,7 @@ headscale routes enable -r 1
 {% for user in users %}
 headscale users create {{ user }}
 {% endfor %}
+# add_more_users
 headscale users create guest1
 ```
 - For MacOS, use Tailscale app ([src](https://github.com/juanfont/headscale/blob/main/hscontrol/templates/apple.html)), or

@@ -1,9 +1,9 @@
-# Host setup for Debian VMs running containers
-Initial setup for the primary VM host, PVE1. Handles the self signed CA and other certificates, secrets management, notifications and VM management services (these can also run on PVE2).
+# PVE1 setup specific for hosting secsvcs
+Initial setup for the primary VM host, PVE1. Handles the self signed CA and other certificates, secrets management, notifications and VM management services.
 
 - Make sure that [Proxmox setup](./proxmox.md) has been completed.
-- Create the secsvcs (on pve1) and websvcs (on pve2) VMs with the desired resources and devices attached. secsvcs holds a select group of services that have higher security and uptime requirements. websvcs runs the rest of the web apps on a beefier machine. All services are containerized.
-- The rest of these steps only apply to pve1 (ie the master host). It is the source of all user initiated actions, such as updating service configs or refreshing TLS certs.
+- Create the secsvcs VM with the desired resources and devices attached. secsvcs holds a select group of services that have higher security and uptime requirements. All services are containerized.
+- PVE1 is the location of all user initiated actions, such as updating service configs or refreshing TLS certs.
 
 ## Configs
 - Get access
@@ -20,7 +20,7 @@ ssh-copy-id {{ username }}@vpn.{{ site.url }}
 ```bash
 cd /root
 apt install -y fd-find python3-pip git
-pip3 install --break-system-packages jinjanator
+pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible
 
 # Install yq
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
@@ -211,21 +211,9 @@ src/debian/install_svcs.sh cert_notifier
 ```
 
 ## VM management
-Also run on PVE2. [docs](https://pve.proxmox.com/pve-docs/qm.1.html)
+[Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
 
 - Watchdog to prevent stuck VM
 ```bash
 src/debian/install_svcs.sh vm_watchdog
-```
-
-- Ensure mutual exclusion between VMs that use the GPU (PVE2 only)
-  - Install hook script
-```bash
-cp src/pve2/get_vm_id.sh /usr/local/bin
-mkdir -p /var/lib/vz/snippets
-cp src/pve2/gpu_hookscript.pl /var/lib/vz/snippets
-# get IDs of GPU VMs, devtop and gaming
-qm list
-qm set 100 --hookscript local:snippets/gpu_hookscript.pl
-qm set 102 --hookscript local:snippets/gpu_hookscript.pl
 ```

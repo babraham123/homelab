@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Prints out a custom secret by name.
 # Usage:
-#   /root/homelab-rendered/src/podman/get_secret.sh SECRET_NAME
+#   /usr/local/bin/get_secret.sh SECRET_NAME
 
 set -euo pipefail
 

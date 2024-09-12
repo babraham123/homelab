@@ -16,17 +16,20 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 Network=net.network
-HostName=alertmanager.{{ site.url }}
+HostName=alert.{{ site.url }}
 # port 9093
 
-Exec=--config.file="/config/alertmanager.yml"
+Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.yml"
 
 Environment=TZ={{ personal.timezone }}
-Volume=/etc/opt/alertmanager/config.yml:/config/alertmanager.yml:ro
+Volume=/etc/opt/alertmanager:/config:ro
 
 [Service]
 Restart=on-failure
 TimeoutStartSec=300
+
+ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/alertmanager/config.yml alert_smtp_password,ntfy_alertmanager_admin_password
+ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/alertmanager/web_config.yml alertmanager_admin_password,bcrypt_salt
 
 [Install]
 WantedBy=multi-user.target

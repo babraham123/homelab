@@ -49,7 +49,7 @@ case $1 in
     cp headscale/headscale-ui.service /etc/systemd/system
     ;;
   *)
-    echo "Unknown service: $1"
+    echo "error: unknown service: $1" >&2
     exit 1
     ;;
 esac

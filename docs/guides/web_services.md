@@ -13,7 +13,6 @@ cd /root/homelab-rendered
 src/websvcs/install_svcs.sh traefik
 src/websvcs/install_svcs.sh vmagent
 src/websvcs/install_svcs.sh nginx
-src/websvcs/install_svcs.sh dashy
 src/websvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter

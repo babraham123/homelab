@@ -11,7 +11,7 @@
 {% for user in users %}
       "{{ user }}",
 {% endfor %}
-    ], // add more family members
+    ], add_more_users
     // "group:guests": ["guest1"],
   },
   // hosts should be defined using its IP addresses and a subnet mask.
@@ -88,7 +88,7 @@
 {% for user in users %}
     { "action": "accept", "src": ["{{ user }}"], "dst": ["{{ user }}:*"] },
 {% endfor %}
-    // add more family members
+    // add_more_users
     // { "action": "accept", "src": ["guest1"], "dst": ["guest1:*"] },
   ],
   "tests": [

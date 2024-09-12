@@ -13,5 +13,8 @@ notes
 # Project
 vars.yml
 vars.template.yml
+all_vars.yml
+docs/diagrams
+tools
 src/grafana/dashboards/*.json
-src/alert/configs/*.yml
+src/vmalert/configs/*.yml

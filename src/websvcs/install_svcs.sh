@@ -7,6 +7,7 @@ set -euo pipefail
 
 cd /root/homelab-rendered/src
 mkdir -p /etc/containers/systemd
+cp podman/*.sh /usr/local/bin
 
 case $1 in
   traefik)
@@ -33,11 +34,6 @@ case $1 in
     cp nginx/404.html /var/opt/nginx/www/error
     cp nginx/nginx.container /etc/containers/systemd
     ;;
-  dashy)
-    mkdir -p /etc/opt/dashy/config
-    cp dashy/dashy.yml /etc/opt/dashy/config
-    cp dashy/dashy.container /etc/containers/systemd
-    ;;
   fluentbit)
     cp debian/list_services.sh /usr/local/bin
     mkdir -p /etc/opt/fluentbit
@@ -46,7 +42,7 @@ case $1 in
     cp victorialogs/fluentbit.container /etc/containers/systemd
     ;;
   *)
-    echo "Unknown service: $1"
+    echo "error: unknown service: $1" >&2
     exit 1
     ;;
 esac
