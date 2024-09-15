@@ -3,6 +3,9 @@
 ---
 metrics: true
 
+web:
+  port: 8080
+
 storage:
   type: postgres
   path: "postgres://gatus@pgdb.{{ site.url }}:5432/gatus"

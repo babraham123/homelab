@@ -5,13 +5,14 @@
 
 set -euo pipefail
 
-rm -f /etc/opt/fluentbit/config.conf
+# TODO: Convert to j2 template
 
 line_num=$(sed -n '/PLACEHOLDER/=' /etc/opt/fluentbit/config_template.conf)
 if ! [[ $line_num =~ ^[0-9]+$ ]]; then
   echo "error: could not locate end of input section" >&2
   exit 1
 fi
+rm -f /etc/opt/fluentbit/config.conf
 
 head -n $((line_num - 1)) /etc/opt/fluentbit/config_template.conf > /etc/opt/fluentbit/config.conf
 

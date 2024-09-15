@@ -63,7 +63,8 @@ journalctl -eu authelia
 
 - Create users, [ref](https://docs.ntfy.sh/config/#users-and-roles)
 ```bash
-chmod 600 /var/opt/ntfy/user.db
+chmod 600 /var/opt/ntfy/*.db*
+chmod 600 /var/lib/containers/storage/volumes/systemd-ntfydb/_data/*.db*
 /usr/local/bin/get_secret.sh ntfy_admin_password
 /usr/local/bin/get_secret.sh ntfy_alert_password
 /usr/local/bin/get_secret.sh ntfy_hass_password
@@ -76,8 +77,10 @@ ntfy user add alert
 ntfy access alert "alert*" rw
 ntfy user add hass
 ntfy access hass "hass*" rw
+ntfy user add person
 ntfy access person "hass*" ro
 ntfy access person "chat*" rw
+exit
 ```
 
 ## Debugging (optional)

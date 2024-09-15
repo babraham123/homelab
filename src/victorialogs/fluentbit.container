@@ -17,7 +17,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=log-collector.{{ site.url }}
-# port 5140
+# port 2020, metrics
 
 Environment=TZ={{ personal.timezone }}
 Volume=/etc/opt/fluentbit/config.conf:/fluent-bit/etc/fluent-bit.conf:ro

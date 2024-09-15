@@ -27,7 +27,7 @@ Secret=ntfy_webpush_private_key,type=env,target=NTFY_WEB_PUSH_PRIVATE_KEY
 
 Volume=/etc/opt/ntfy/config.yml:/etc/ntfy/server.yml:ro
 Volume=/var/opt/ntfy:/var/cache/ntfy
-Volume=ntfy.volume:/var/lib/ntfy
+Volume=ntfydb.volume:/var/lib/ntfy
 
 [Service]
 Restart=on-failure

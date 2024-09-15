@@ -1496,4 +1496,8 @@ identity_providers:
         ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
         ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
         # token_endpoint_auth_signing_alg: 'RS256'
+
+        ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
+        ## available. Has no effect if userinfo_signing_key_id is configured.
+        userinfo_signed_response_alg: 'none'
 ...

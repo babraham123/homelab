@@ -1,4 +1,6 @@
 # /etc/opt/victoriametrics/prometheus.yml
+# Ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration
+
 global:
   scrape_interval: 10s
 
@@ -6,22 +8,28 @@ scrape_configs:
   - job_name: 'vmalert'
     static_configs:
       - targets: ['vmalert.{{ site.url }}:8880']
+    metrics_path: /metrics
   - job_name: 'victoriametrics'
     static_configs:
       - targets: ['metrics.{{ site.url }}:8428']
+    metrics_path: /metrics
   - job_name: 'victorialogs'
     static_configs:
       - targets: ['logs.{{ site.url }}:9428']
+    metrics_path: /metrics
   - job_name: 'fluentbit'
     static_configs:
-      - targets: ['log-collector.{{ site.url }}:2020/api/v1/metrics/prometheus']
+      - targets: ['log-collector.{{ site.url }}:2020']
+    metrics_path: /api/v1/metrics/prometheus
   - job_name: gatus
     # https://github.com/TwiN/gatus?tab=readme-ov-file#metrics
     static_configs:
       - targets: ['uptime.{{ site.url }}:8080']
+    metrics_path: /metrics
   - job_name: 'ntfy'
     static_configs:
       - targets: ['push.{{ site.url }}:2587']
+    metrics_path: /metrics
   - job_name: pve
     # https://github.com/prometheus-pve/prometheus-pve-exporter?tab=readme-ov-file#exported-metrics
     static_configs:
@@ -41,6 +49,8 @@ scrape_configs:
       - target_label: __address__
         replacement: pve_exporter.{{ site.url }}:9221
   - job_name: 'node_exporter'
-    # https://github.com/prometheus/node_exporter?tab=readme-ov-file#collectors
     static_configs:
-      - targets: ['{{ pve1.ip }}:9100']
+      - targets:
+        - pve1.{{ site.url }}:9100
+        - pve2.{{ site.url }}:9100
+    metrics_path: /metrics

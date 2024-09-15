@@ -33,6 +33,7 @@
         "msmtprc",
         "ntfy",
         "OVMF",
+        "passlib",
         "passwordeval",
         "pfsense",
         "pgdb",

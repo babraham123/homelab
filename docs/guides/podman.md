@@ -10,7 +10,7 @@ Initial setup to install Proxmox and configure it with the relevant scripts and 
 ```bash
 sudo su
 apt install -y age jq python3-pip
-pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible
+pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib
 
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
 wget "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" -O - | tar xz
