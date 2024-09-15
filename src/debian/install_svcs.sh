@@ -33,8 +33,6 @@ case $1 in
     cp olive_tin/olive_tin.service /etc/systemd/system
     ;;
   node_exporter)
-    cp debian/list_services.sh /usr/local/bin
-
     NE_VERSION=$(curl -s "https://api.github.com/repos/prometheus/node_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
     wget "https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}/node_exporter-${NE_VERSION}.linux-amd64.tar.gz" -O - | tar xz
     mv "node_exporter-${NE_VERSION}.linux-amd64/node_exporter" /usr/local/bin/

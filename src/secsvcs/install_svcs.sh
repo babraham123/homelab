@@ -111,11 +111,9 @@ case $1 in
     exit 0
     ;;
   fluentbit)
-    cp debian/list_services.sh /usr/local/bin
     mkdir -p /etc/opt/fluentbit
-    cp victorialogs/fluentbit.conf /etc/opt/fluentbit/config_template.conf
-    cp victorialogs/fluentbit_prestart.sh /etc/opt/fluentbit/prestart.sh
-    cp victorialogs/fluentbit.container /etc/containers/systemd
+    cp fluentbit/config.conf.j2 /etc/opt/fluentbit
+    cp fluentbit/fluentbit.container /etc/containers/systemd
     ;;
   *)
     echo "error: unknown service: $1" >&2
