@@ -20,7 +20,7 @@ ssh-copy-id {{ username }}@vpn.{{ site.url }}
 ```bash
 cd /root
 apt install -y fd-find python3-pip git
-pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible
+pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib
 
 # Install yq
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
