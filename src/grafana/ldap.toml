@@ -4,9 +4,6 @@
 # Ref: https://github.com/lldap/lldap/blob/main/example_configs/grafana_ldap_config.toml
 # Not currently in use (OIDC supplies auth and group info)
 
-# TODO: fix auth error
-# log: Cause: bind failed with error: LDAP Result Code 49 \"Invalid Credentials\": " method=POST
-
 [[servers]]
 # Ldap server host (specify multiple hosts space separated)
 host = "ldap.{{ site.url }}"

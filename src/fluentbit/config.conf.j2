@@ -1,7 +1,5 @@
-# /etc/opt/fluentbit/config_template.conf
+# /etc/opt/fluentbit/config.conf.j2
 # Ref: https://docs.fluentbit.io/manual/pipeline/inputs/systemd
-
-# TODO: convert to a j2 template
 
 [SERVICE]
     Flush        1
@@ -19,7 +17,8 @@
     # In memory (/run) vs persistent (/var) journaling in systemd
     Path                /var/log/journal
     Systemd_Filter_Type Or
-    Systemd_filter      _SYSTEMD_UNIT=PLACEHOLDER.service
+{% raw %}{% for svc in homelab_services %}
+    Systemd_filter      _SYSTEMD_UNIT={{ svc }}.service{% endfor %}{% endraw %}
 
 [OUTPUT]
     name       loki

@@ -29,7 +29,7 @@ Volume=/var/log/journal:/var/log/journal
 Restart=on-failure
 TimeoutStartSec=300
 
-ExecStartPre=/etc/opt/fluentbit/prestart.sh
+ExecStartPre=/usr/local/bin/render_services.sh /etc/opt/fluentbit/config.conf
 
 [Install]
 WantedBy=multi-user.target
