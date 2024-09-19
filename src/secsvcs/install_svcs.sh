@@ -114,6 +114,7 @@ case $1 in
     mkdir -p /etc/opt/fluentbit
     cp fluentbit/config.conf.j2 /etc/opt/fluentbit
     cp fluentbit/fluentbit.container /etc/containers/systemd
+    cp fluentbit/fbdata.volume /etc/containers/systemd
     ;;
   *)
     echo "error: unknown service: $1" >&2
