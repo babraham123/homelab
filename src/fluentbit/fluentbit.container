@@ -24,6 +24,7 @@ Volume=/etc/opt/fluentbit/config.conf:/fluent-bit/etc/fluent-bit.conf:ro
 Volume=/etc/machine-id:/etc/machine-id:ro
 Volume=/run/log/journal:/run/log/journal
 Volume=/var/log/journal:/var/log/journal
+Volume=fbdata.volume:/data
 
 [Service]
 Restart=on-failure

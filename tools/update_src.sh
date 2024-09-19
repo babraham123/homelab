@@ -34,7 +34,7 @@ sudo mv homelab-rendered /root/homelab-rendered
 '
 }
 
-upload "pve2" || true
 upload "secsvcs" || true
 upload "websvcs" || true
+upload "pve2" || true
 upload "vpn" || true

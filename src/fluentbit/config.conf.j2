@@ -6,7 +6,6 @@
     Log_Level    info
     Daemon       off
     # https://docs.fluentbit.io/manual/pipeline/parsers/configuring-parser
-    Parsers_File parsers.conf
     HTTP_Server  On
     HTTP_Listen  0.0.0.0
     HTTP_PORT    2020
@@ -16,17 +15,21 @@
     Tag                 host.*
     # In memory (/run) vs persistent (/var) journaling in systemd
     Path                /var/log/journal
+    Mem_Buf_Limit       10MB
+    DB                  /data/fb_journald.db
+    # https://www.freedesktop.org/software/systemd/man/latest/systemd.journal-fields.html
+    Strip_Underscores   On
+    Lowercase           On
     Systemd_Filter_Type Or
 {% raw %}{% for svc in homelab_services %}
     Systemd_filter      _SYSTEMD_UNIT={{ svc }}.service{% endfor %}{% endraw %}
 
-[OUTPUT]
-    name       loki
-    match      *
-    host       logs.{{ site.url }}
-    uri        /insert/loki/api/v1/push
-    port       9428
-    label_keys $path,$log,$time
-    header     VL-Msg-Field log
-    header     VL-Time-Field time
-    header     VL-Stream-Fields path
+[Output]
+    Name             http
+    Match            *
+    Host             logs.{{ site.url }}
+    Port             9428
+    # Compress         gzip
+    URI              /insert/jsonline?_stream_fields=stream,path&_msg_field=log&_time_field=date
+    Format           json_lines
+    Json_Date_Format iso8601
