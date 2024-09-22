@@ -63,10 +63,10 @@ case $1 in
     ;;
   pve_exporter)
     mkdir -p /etc/opt/pve_exporter
-    cp exporter/pve.yml /etc/opt/pve_exporter
+    cp exporters/pve.yml /etc/opt/pve_exporter
     # chown 101:101 /etc/opt/pve_exporter/*
     # https://github.com/prometheus-pve/prometheus-pve-exporter/blob/main/Dockerfile
-    cp exporter/pve_exporter.container /etc/containers/systemd
+    cp exporters/pve_exporter.container /etc/containers/systemd
     ;;
   vmalert)
     mkdir -p /etc/opt/vmalert

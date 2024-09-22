@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Renders the given file in the same directory as it's template (FILENAME.j2).
 # Includes the given secrets as env vars while rendering.
-# Assumes the rendered file will only be read by the user running the script.
+# The rendered file will be owned by root.
 # Usage:
 #   /usr/local/bin/render_secrets.sh FILENAME SECRET1,SECRET2
 # Ref:
@@ -24,7 +24,13 @@ for secret in "${secrets[@]}"; do
   export "${secret?}"
 done
 
+if [ -f "$file" ]; then
+  # Reset ownership and permissions
+  chown root:root "$file"
+  chmod 600 "$file"
+fi
+
 jinjanate --quiet -o "$file" "$file.j2"
-chmod 600 "$file"
+chmod 400 "$file"
 
 echo "Rendered the file $file"

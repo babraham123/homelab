@@ -18,6 +18,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=metric-collector.{{ site.url }}
+IP={{ websvcs.container_subnet }}.3
 # port 8429
 # https://docs.victoriametrics.com/vmagent/#how-to-push-data-to-vmagent
 

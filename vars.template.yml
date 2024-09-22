@@ -25,9 +25,11 @@ router:
 secsvcs:
   ip: 192.168.4.20
   interface: "enp6s18"
+  container_subnet: 10.88.0
 websvcs:
   ip: 192.168.2.20
   interface: "enp6s18"
+  container_subnet: 10.89.0
 homesvcs:
   ip: 192.168.4.21
   interface: "enp6s18"
