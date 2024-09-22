@@ -4,3 +4,5 @@
 
 [Network]
 Driver=bridge
+Subnet={{ secsvcs.container_subnet }}.0/24
+IPRange={{ secsvcs.container_subnet }}.100-{{ secsvcs.container_subnet }}.254

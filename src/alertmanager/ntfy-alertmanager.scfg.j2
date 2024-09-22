@@ -18,6 +18,7 @@ user admin
 password {% raw %}{{ env('ntfy_alertmanager_admin_password') }}{% endraw %}
 
 labels {
+  # https://docs.ntfy.sh/publish/#message-priority
   order "severity"
 
   severity "critical" {

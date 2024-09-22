@@ -44,7 +44,7 @@ ufw allow http
 ufw allow https
 
 cd /root/homelab-rendered
-cp src/traefik/net.network /etc/containers/systemd
+cp src/$HOST/net.network /etc/containers/systemd
 systemctl daemon-reload
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,443 proto tcp
@@ -53,7 +53,8 @@ ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,4
 - Allow access from container to host
 ```bash
 # scrape node_exporter
-ufw allow in from 10.0.0.0/8 to any port 9100 proto tcp
+# use {{ websvcs.container_subnet }}.3 on websvcs
+ufw allow in from {{ {{ secsvcs.container_subnet }}.3 }} to any port 9100 proto tcp
 ufw route allow in on $NET_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
 ```
 

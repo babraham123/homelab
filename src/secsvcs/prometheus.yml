@@ -33,9 +33,7 @@ scrape_configs:
   - job_name: pve
     # https://github.com/prometheus-pve/prometheus-pve-exporter?tab=readme-ov-file#exported-metrics
     static_configs:
-      - targets:  # Proxmox VE nodes
-        - pve1.{{ site.url }}
-        - pve2.{{ site.url }}
+      - targets: ['pve1.{{ site.url }}']
     metrics_path: /pve
     params:
       module: [default]
@@ -51,6 +49,9 @@ scrape_configs:
   - job_name: 'node_exporter'
     static_configs:
       - targets:
-        - pve1.{{ site.url }}:9100
-        - pve2.{{ site.url }}:9100
+        - host.containers.internal:9100
+        # - pve1.{{ site.url }}:9100
     metrics_path: /metrics
+    relabel_configs:
+      - target_label: instance
+        replacement: secsvcs.{{ site.url }}:9100
