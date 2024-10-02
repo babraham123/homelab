@@ -1,6 +1,7 @@
 # File contains default list of alerts for vmalert service.
 # The alerts below are just recommendations and may require some updates
 # and threshold calibration according to every specific setup.
+---
 groups:
   # Alerts group for vmalert assumes that Grafana dashboard
   # https://grafana.com/grafana/dashboards/14950/ is installed.
@@ -83,3 +84,4 @@ groups:
           summary: "vmalert instance {{ $labels.instance }} is failing to send notifications to Alertmanager"
           description: "vmalert instance {{ $labels.instance }} is failing to send alert notifications to \"{{ $labels.addr }}\".
             Check vmalert's logs for detailed error message."
+...

@@ -214,15 +214,15 @@ totp:
 
   ## The allowed algorithms for a user to pick from.
   allowed_algorithms:
-  - 'SHA1'
+    - 'SHA1'
 
   ## The allowed digits for a user to pick from.
   allowed_digits:
-  - 6
+    - 6
 
   ## The allowed periods for a user to pick from.
   allowed_periods:
-  - 30
+    - 30
 
   ## Disable the reuse security policy which prevents replays of one-time password code values.
   disable_reuse_security_policy: false
@@ -641,10 +641,10 @@ access_control:
   ## Rules applied to everyone
   rules:
     - domain:
-      - '{{ site.url }}'
-      - 'auth.{{ site.url }}'
-      - 'www.{{ site.url }}'
-      - 'blog.{{ site.url }}'
+        - '{{ site.url }}'
+        - 'auth.{{ site.url }}'
+        - 'www.{{ site.url }}'
+        - 'blog.{{ site.url }}'
       policy: 'bypass'
 
     - domain: '*.{{ site.url }}'
@@ -1248,12 +1248,12 @@ identity_providers:
     cors:
       ## List of endpoints in addition to the metadata endpoints to permit cross-origin requests on.
       endpoints:
-         - 'authorization'
-         - 'pushed-authorization-request'
-         - 'token'
-         - 'revocation'
-         - 'introspection'
-         - 'userinfo'
+        - 'authorization'
+        - 'pushed-authorization-request'
+        - 'token'
+        - 'revocation'
+        - 'introspection'
+        - 'userinfo'
 
       ## List of allowed origins.
       ## Any origin with https is permitted unless this option is configured or the

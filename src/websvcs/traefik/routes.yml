@@ -20,6 +20,10 @@ http:
       service: nginx@file
       middlewares:
         - www-redirect@file
+    homepage:
+      <<: *service
+      rule: Host(`dash.{{ site.url }}`)
+      service: homepage@file
     static-files:
       <<: *service
       rule: Host(`www.{{ site.url }}`, `static.{{ site.url }}`, `blog.{{ site.url }}`, `wifi.{{ site.url }}`)
@@ -35,6 +39,10 @@ http:
     #     - gzip@file
     #     - static-strip-prefix@file
   services:
+    homepage:
+      loadBalancer:
+        servers:
+          - url: http://dash.{{ site.url }}:3000/
     nginx:
       loadBalancer:
         servers:

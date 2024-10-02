@@ -1,0 +1,254 @@
+# /etc/opt/homepage/services.yaml
+# Ref: https://gethomepage.dev/configs/services/
+---
+# - Group A:
+#   - Service A:
+#     icon: service.png
+#     href: http://service.host/
+#     description: Foo management
+#     ping: service.host
+#     siteMonitor: http://service.host/
+#     container: my-container
+#     widget:
+#       type: service-a
+#       url: http://service.host
+#       key: demo
+
+# Icons:
+# NAME.[png|svg]
+# https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/
+# mdi-NAME
+# https://pictogrammers.com/library/mdi/
+# si-NAME
+# https://simpleicons.org/
+# sh-NAME.[svg|png|webp]
+# https://selfh.st/icons/
+
+# Widgets: https://gethomepage.dev/widgets/
+# iFrame: https://gethomepage.dev/widgets/services/iframe/#full-example
+#   - internally public grafana dashboard, uptime?
+#   - home assistant dashbard
+# Custom API: https://gethomepage.dev/widgets/services/customapi/
+
+- Calendar:
+  - Google Calendar:
+    href: https://calendar.google.com/
+    widget:
+      type: calendar
+      firstDayInWeek: {{ personal.firstDayInWeek }} # optional - defaults to monday
+      view: monthly # optional - possible values monthly, agenda
+      maxEvents: 10 # optional - defaults to 10
+      showTime: true # optional - show time for event happening today - defaults to false
+      # timezone: {{ personal.timezone }} # optional - defaults to browser timezone
+      integrations: # optional
+{% for cal in personal.calendars %}
+        - type: ical # Show calendar events from another service
+          # Google: go to Settings, select specific calendar, go to Integrate calendar, copy URL from Public Address in iCal format
+          url: {{ cal.ics }} # URL with calendar events
+          name: {{ cal.name }} # required - name for these calendar events
+          color: zinc # see color pallette for options
+          params:
+            showName: false
+{% endfor %}
+
+- Media:
+#   - Jellyfin:
+#     icon: jellyfin.svg
+#     href: https://media.{{ site.url }}/
+#     description: Media server for movies and TV shows
+#     # widget:
+#     #   type: jellyfin
+#     #   url: http://jellyfin.host.or.ip
+#     #   key: demo
+#     #   enableBlocks: true # optional, defaults to false
+#     #   enableNowPlaying: true # optional, defaults to true
+#     #   enableUser: true # optional, defaults to false
+#     #   showEpisodeNumber: true # optional, defaults to false
+#     #   expandOneStreamToTwoRows: false # optional, defaults to true
+#   - Calibre:
+#     icon: calibre.svg
+#     href: https://books.{{ site.url }}/
+#     description: eBook server
+#     # widget:
+#     #   type: calibreweb
+#     #   url: http://your.calibreweb.host:port
+#     #   username: username
+#     #   password: password
+#   - Audiobookshelf:
+#     icon: audiobookshelf.svg
+#     href: https://audiobooks.{{ site.url }}/
+#     description: Audiobook server
+#     # widget:
+#     #   type: audiobookshelf
+#     #   url: http://audiobookshelf.host.or.ip:port
+#     #   key: demo
+#   - Immich:
+#     icon: immich.svg
+#     href: https://photos.{{ site.url }}/
+#     description: Photo server
+#     # widget:
+#     #   type: immich
+#     #   url: http://immich.host.or.ip
+#     #   key: demo
+#   - FreshRSS:
+#     icon: freshrss.svg
+#     href: https://rss.{{ site.url }}/
+#     description: RSS reader
+#     # widget:
+#     #   type: freshrss
+#     #   url: http://freshrss.host.or.ip:port
+#     #   username: username
+#     #   password: password
+
+- Home:
+#   - Home Assistant:
+#     icon: home-assistant-alt.svg
+#     href: https://home.{{ site.url }}/
+#     description: Home automation dashboard
+#     # widget:
+#     #   type: homeassistant
+#     #   url: http://homeassistant.host.or.ip:port
+#     #   key: access_token
+#     #   custom:
+#     #     - state: sensor.total_power
+#     #     - state: sensor.total_energy_today
+#     #       label: energy today
+#     #     - template: "{% raw %}{{ states.switch|selectattr('state','equalto','on')|list|length }}{% endraw %}"
+#     #       label: switches on
+#     #     - state: weather.forecast_home
+#     #       label: wind speed
+#     #       value: "{attributes.wind_speed} {attributes.wind_speed_unit}"
+#   - Frigate:
+#     icon: frigate.svg
+#     href: https://cameras.{{ site.url }}/
+#     description: Camera server
+#     # widget:
+#     #   type: frigate
+#     #   url: http://frigate.host.or.ip:port
+#     #   enableRecentEvents: true # Optional, defaults to false
+
+- Life:
+#   - Mealie:
+#     icon: mealie.svg
+#     href: https://recipes.{{ site.url }}/
+#     description: Recipe server
+#     # widget:
+#     #   type: mealie
+#     #   url: http://mealie.host.or.ip
+#     #   key: demo
+#     #   version: 2 # only required if version > 1, defaults to 1
+#   - Ghostfolio:
+#     icon: sh-ghostfolio.svg
+#     href: https://wealth.{{ site.url }}/
+#     description: Portfolio tracker
+#     # widget:
+#     #   type: ghostfolio
+#     #   url: http://ghostfolio.host.or.ip
+#     #   key: demo
+
+- Dev:
+#   - Forgejo:
+#     icon: forgejo.svg
+#     href: https://git.{{ site.url }}/
+#     description: Git server and CI/CD
+#     # widget:
+#     #   type: gitea
+#     #   url: http://forgejo.host.or.ip:port
+#     #   key: demo
+
+- Infra:
+  - TP-Link:
+    icon: tplink.svg
+    href: https://wifi.{{ site.url }}/
+    description: WiFi AP
+  - pfSense:
+    icon: pfsense.svg
+    href: https://router.{{ site.url }}/
+    description: Router and firewall
+    # widget:
+      # type: pfsense
+      # url: http://pfsense.host.or.ip:port
+      # username: user # optional, or API key
+      # password: pass # optional, or API key
+      # headers: # optional, or username/password
+      #   X-API-Key: key
+      # wan: igb0
+      # version: 2 # optional, defaults to 1 for api v1
+      # fields: ["load", "memory", "temp", "wanStatus"] # optional
+  - Proxmox 1:
+    icon: proxmox.svg
+    href: https://pve1.{{ site.url }}:8006/
+    description: VM hypervisor 1
+    # widget:
+    #   type: proxmox
+    #   url: https://pve1.{{ site.url }}:8006
+    #   username: api_token_id
+    #   password: api_token_secret
+  - Proxmox 2:
+    icon: proxmox.svg
+    href: https://pve2.{{ site.url }}:8006/
+    description: VM hypervisor 2
+    # widget:
+    #   type: proxmox
+    #   url: https://pve2.{{ site.url }}:8006
+    #   username: api_token_id
+    #   password: api_token_secret
+  - Proxmox Backup:
+    icon: mdi-cloud-upload
+    href: https://pbs2.{{ site.url }}:8007/
+    description: VM backup server
+    # widget:
+    #   type: proxmoxbackupserver
+    #   url: https://pbs2.{{ site.url }}:8007
+    #   username: api_token_id
+    #   password: api_token_secret
+  - LLDAP:
+    icon: mdi-account-group
+    href: https://ldap.{{ site.url }}/
+    description: User management
+  - Traefik Secsvcs:
+    icon: traefik-proxy.svg
+    href: https://secproxy.{{ site.url }}/
+    description: Proxy dashboard for secsvcs
+  - Traefik Websvcs:
+    icon: traefik-proxy.svg
+    href: https://webproxy.{{ site.url }}/
+    description: Proxy dashboard for websvcs
+
+- Telemetry:
+  - Grafana:
+    icon: grafana.svg
+    href: https://graph.{{ site.url }}/
+    description: Metric dashboards
+  - Victoria Logs:
+    icon: sh-victoriametrics.svg
+    href: https://logs.{{ site.url }}/
+    description: Logs
+  - Gatus:
+    icon: gatus.svg
+    href: https://uptime.{{ site.url }}/
+    description: Uptime monitoring
+    # widget:
+    #   type: gatus
+    #   url: http://gatus.host.or.ip:port
+  - Alertmanager:
+    icon: alertmanager.svg
+    href: https://alert.{{ site.url }}/
+    description: Alerts
+  - Victoria Metrics:
+    icon: sh-victoriametrics-light.svg
+    href: https://metrics.{{ site.url }}/
+    description: Metrics
+    # widget:
+    #   type: prometheus
+    #   url: http://prometheushost:port
+  - VM Alert:
+    icon: sh-victoriametrics.svg
+    href: https://vmalert.{{ site.url }}/
+    description: Alerting rules
+  - Ntfy:
+    icon: ntfy.svg
+    href: https://push.{{ site.url }}/
+    description: Notifications
+
+...

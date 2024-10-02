@@ -34,6 +34,12 @@ case $1 in
     cp nginx/404.html /var/opt/nginx/www/error
     cp nginx/nginx.container /etc/containers/systemd
     ;;
+  homepage)
+    mkdir -p /etc/opt/homepage/config
+    cp homepage/*.yaml /etc/opt/homepage/config
+    cp -r homepage/images /etc/opt/homepage
+    cp homepage/homepage.container /etc/containers/systemd
+    ;;
   fluentbit)
     mkdir -p /etc/opt/fluentbit
     cp fluentbit/config.conf.j2 /etc/opt/fluentbit

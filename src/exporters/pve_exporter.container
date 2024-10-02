@@ -20,9 +20,8 @@ HostName=pve_exporter.{{ site.url }}
 
 Environment=TZ={{ personal.timezone }}
 Environment=PVE_USER=prometheus@pve
+Environment=PVE_VERIFY_SSL=true
 Secret=pve_prom_password,type=env,target=PVE_PASSWORD
-
-Volume=/etc/opt/pve_exporter/pve.yml:/etc/prometheus/pve.yml:ro
 
 [Service]
 Restart=on-failure

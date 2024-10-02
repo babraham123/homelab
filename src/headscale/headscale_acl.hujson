@@ -7,11 +7,8 @@
   // groups cannot be composed of groups
   "groups": {
     "group:admin": ["{{ username }}"], // treated as the admin / machine user
-    "group:family": [
-{% for user in users %}
-      "{{ user }}",
-{% endfor %}
-    ], add_more_users
+    "group:family": ["{{ users | join('","') }}"],
+    // add_more_users
     // "group:guests": ["guest1"],
   },
   // hosts should be defined using its IP addresses and a subnet mask.
@@ -86,8 +83,7 @@
     { "action": "accept", "src": ["{{ username }}"], "dst": ["{{ username }}:*"] },
     { "action": "accept", "src": ["public"], "dst": ["public:*"] },
 {% for user in users %}
-    { "action": "accept", "src": ["{{ user }}"], "dst": ["{{ user }}:*"] },
-{% endfor %}
+    { "action": "accept", "src": ["{{ user }}"], "dst": ["{{ user }}:*"] },{% endfor %}
     // add_more_users
     // { "action": "accept", "src": ["guest1"], "dst": ["guest1:*"] },
   ],

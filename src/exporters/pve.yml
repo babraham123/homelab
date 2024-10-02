@@ -1,2 +1,0 @@
-default:
-  verify_ssl: true

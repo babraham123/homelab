@@ -1,4 +1,6 @@
 # /etc/opt/vmagent/prometheus.yml
+# Ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration
+---
 global:
   scrape_interval: 10s
 
@@ -13,3 +15,4 @@ scrape_configs:
     # https://github.com/prometheus/node_exporter?tab=readme-ov-file#collectors
     static_configs:
       - targets: ['{{ pve2.ip }}:9100']
+...
