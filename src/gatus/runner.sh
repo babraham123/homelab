@@ -11,6 +11,7 @@ set -eu
 echo "Started Gatus runner script"
 
 /authelia_login.sh &
+sleep 2
 /gatus &
 
 # shellcheck disable=SC2064

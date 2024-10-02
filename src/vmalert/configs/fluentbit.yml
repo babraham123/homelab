@@ -1,3 +1,4 @@
+---
 groups:
   - name: fluentbit
     rules:
@@ -11,3 +12,4 @@ groups:
         for: 15m
         labels:
           severity: critical
+...

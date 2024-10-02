@@ -18,8 +18,10 @@ mkdir -p "$1"
 cp -R . "$1"
 rm -rf "$1/.git" "$1/.gitignore" "$1/vars.yml" "$1/.vscode"
 
-cp vars.yml all_vars.yml
+# Exclude the ending ...
+head -n -1 vars.yml > all_vars.yml
 tools/parse_secsvcs_routes.sh >> all_vars.yml
+echo -e "...\n" >> all_vars.yml
 
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"

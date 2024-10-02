@@ -1,0 +1,108 @@
+# /etc/opt/homepage/settings.yaml
+# Ref: https://gethomepage.dev/configs/settings/
+---
+title: {{ site.name }}
+
+startUrl: https://dash.{{ site.url }}/ # default is "/"
+
+background:
+  image: /images/background.png
+  blur: sm # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
+  saturate: 50 # 0, 50, 100... see https://tailwindcss.com/docs/backdrop-saturate
+  brightness: 50 # 0, 50, 75... see https://tailwindcss.com/docs/backdrop-brightness
+  opacity: 50 # 0-100
+
+# cardBlur: sm # sm, "", md, etc... see https://tailwindcss.com/docs/backdrop-blur
+
+# favicon: https://www.google.com/favicon.ico
+
+# theme: dark # or light
+
+# color: slate
+# slate, gray, zinc, neutral, stone, amber, yellow, lime, green, emerald, teal,
+# cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose, red, white
+
+# layout:
+#   Media:
+    # tab: First
+    # style: row
+    # columns: 4
+    # header: false
+    # icon: home-assistant.png # See https://github.com/walkxcode/dashboard-icons
+    # disableCollapse: true
+    # useEqualHeights: true
+  # Other:
+  #   style: column
+  #   fiveColumns: true
+  #   initiallyCollapsed: true
+
+# groupsInitiallyCollapsed: true
+# useEqualHeights: true
+
+layout:
+  Media:
+    tab: First
+    style: row
+    columns: 4
+  Calendar:
+    tab: First
+  Home:
+    tab: First
+  Life:
+    tab: First
+  Dev:
+    tab: Second
+    style: row
+    columns: 4
+  Infra:
+    tab: Second
+    style: row
+    columns: 4
+  Telemetry:
+    tab: Second
+    style: row
+    columns: 4
+
+# iconStyle: theme # optional, defaults to gradient
+
+headerStyle: clean # default is underlined, options include boxed, clean, boxedWidgets
+
+base: https://dash.{{ site.url }}/homepage
+
+# supported languages: ca, de, en, es, fr, he, hr, hu, it, nb-NO, nl, pt, ru, sv, vi, zh-CN, zh-Hant
+# can include locale as well: en-US, en-GB, etc.
+language: {{ personal.language }}
+
+target: _self # Possible options include _blank, _self, and _top
+
+# providers:
+#   finnhub: yourfinnhubapikeyhere
+#   openweathermap: openweathermapapikey
+#   weatherapi: weatherapiapikey
+
+quicklaunch:
+  searchDescriptions: true
+  # hideInternetSearch: true
+  showSearchSuggestions: true
+  # hideVisitURL: true
+  provider: google # google, duckduckgo, bing, baidu, brave or custom
+  # provider: custom
+  # url: https://www.ecosia.org/search?q=
+  # target: _blank
+  # suggestionUrl: https://ac.ecosia.org/autocomplete?type=list&q=
+
+hideVersion: true
+
+# logpath: /logfile/path
+
+# showStats: true
+
+# default is no value, display response time and container status
+# dot shows a green dot for a successful monitor ping or healthy status.
+# basic shows either UP or DOWN for monitor & ping
+statusStyle: "dot"
+
+instanceName: main_dashboard
+
+# hideErrors: true
+...

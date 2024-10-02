@@ -1,27 +1,27 @@
-# /etc/containers/systemd/pve_exporter.container
+# /etc/containers/systemd/homepage.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
 [Unit]
-Description="Homelab: Expose metrics gathered from a Proxmox VE node"
+Description="Homelab: homepage dashboard for internal users"
 StartLimitIntervalSec=30
 StartLimitBurst=10
 Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/prompve/prometheus-pve-exporter:latest
-ContainerName=pve_exporter
+Image=ghcr.io/gethomepage/homepage:latest
+ContainerName=homepage
 AutoUpdate=registry
 NoNewPrivileges=true
 
-# port = 9221
 Network=net.network
-HostName=pve_exporter.{{ site.url }}
+HostName=dash.{{ site.url }}
+# port 3000
 
 Environment=TZ={{ personal.timezone }}
-Environment=PVE_USER=prometheus@pve
-Environment=PVE_VERIFY_SSL=true
-Secret=pve_prom_password,type=env,target=PVE_PASSWORD
+Environment=LOG_TARGETS=stdout
+Volume=/etc/opt/homepage/images:/app/public/images:ro
+Volume=/etc/opt/homepage/config:/app/config:ro
 
 [Service]
 Restart=on-failure

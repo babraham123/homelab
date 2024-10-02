@@ -5,7 +5,22 @@ personal:
   state: "California"
   country_code: "US"
   timezone: "America/Los_Angeles"
+  language: "en-US"
+  units: "imperial" # or metric
+  firstDayInWeek: "sunday" # or monday
+  # Used for weather data, doesn't have to be exact.
+  location:
+    lat: 40.0001
+    long: -120.0001
+  calendars:
+    - ics: "https://calendar.google.com/calendar/ical/.../basic.ics"
+      name: "Events"
+  ticker_symbols:
+    - "AAPL"
+    - "GOOGL"
+    - "MSFT"
 
+repo: "https://github.com/babraham123/homelab"
 username: "jdoe"
 site:
   url: "janedoe.com"
@@ -15,7 +30,6 @@ users:
   - jane
   - jayden
   - jasper
-repo: "https://github.com/babraham123/homelab"
 
 vpn:
   ip: 12.34.56.78
@@ -62,7 +76,6 @@ iot:
   gateway: 192.168.3.1
   mask: 192.168.3.0/24
 
-# Don't end file (...) in order to append derived values.
 # The following content will be dynamically parsed at compile time:
-#   secsvcs_subdomains: list derived from src/secsvcs/traefik/routes.yml
-
+# secsvcs_subdomains: list derived from src/secsvcs/traefik/routes.yml
+...

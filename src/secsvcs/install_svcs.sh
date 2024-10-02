@@ -62,10 +62,6 @@ case $1 in
     cp gatus/gatus.container /etc/containers/systemd
     ;;
   pve_exporter)
-    mkdir -p /etc/opt/pve_exporter
-    cp exporters/pve.yml /etc/opt/pve_exporter
-    # chown 101:101 /etc/opt/pve_exporter/*
-    # https://github.com/prometheus-pve/prometheus-pve-exporter/blob/main/Dockerfile
     cp exporters/pve_exporter.container /etc/containers/systemd
     ;;
   vmalert)

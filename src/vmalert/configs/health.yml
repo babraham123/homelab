@@ -2,6 +2,7 @@
 # The following alerts are recommended for use for any VM installation.
 # The alerts below are just recommendations and may require some updates
 # and threshold calibration according to every specific setup.
+---
 groups:
   - name: vm-health
     # note the `job` filter and update accordingly to your setup
@@ -87,3 +88,4 @@ groups:
             In some cases for components like vmagent or vminsert the alert might trigger if there are too many clients
             making write attempts. If vmagent's or vminsert's CPU usage and network saturation are at normal level, then 
             it might be worth adjusting `-maxConcurrentInserts` cmd-line flag."
+...

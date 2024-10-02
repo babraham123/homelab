@@ -51,8 +51,7 @@ headscale routes list
 headscale routes enable -r 1
 # Create users
 {% for user in users %}
-headscale users create {{ user }}
-{% endfor %}
+headscale users create {{ user }}{% endfor %}
 # add_more_users
 headscale users create guest1
 ```

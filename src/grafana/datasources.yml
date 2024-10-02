@@ -1,4 +1,5 @@
 # /etc/opt/grafana/datasources.yml
+---
 apiVersion: 1
 
 datasources:
@@ -21,3 +22,4 @@ datasources:
   #   jsonData:
   #     prometheusType: Prometheus
   #     prometheusVersion: 2.24.0
+...

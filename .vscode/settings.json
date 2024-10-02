@@ -2,6 +2,8 @@
     "cSpell.words": [
         "adduser",
         "alertmanager",
+        "Audiobook",
+        "audiobookshelf",
         "autoupdate",
         "behaviour",
         "blackhole",
@@ -13,11 +15,14 @@
         "expandenv",
         "fluentbit",
         "Gatus",
+        "Ghostfolio",
         "grafanadata",
         "hass",
         "homesvcs",
         "hookscript",
         "hujson",
+        "Immich",
+        "Jellyfin",
         "jinjanator",
         "journalctl",
         "JWK's",
@@ -59,11 +64,19 @@
         "vmagent",
         "vmalert",
         "vmdata",
+        "webp",
+        "webproxy",
         "webpush",
         "websecure",
         "websvcs"
     ],
     "systemd.customDirectiveKeys": [
         "/^[A-Z_]+$/"
-    ]
+    ],
+    "files.associations": {
+        "*.yaml": "jinja-yaml",
+        "*.yml": "jinja-yaml",
+        "*.json": "jinja-json",
+        "*.hujson": "jinja-json"
+    }
 }

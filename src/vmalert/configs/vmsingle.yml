@@ -1,6 +1,7 @@
 # File contains default list of alerts for VictoriaMetrics single server.
 # The alerts below are just recommendations and may require some updates
 # and threshold calibration according to every specific setup.
+---
 groups:
   # Alerts group for VM single assumes that Grafana dashboard
   # https://grafana.com/grafana/dashboards/10229 is installed.
@@ -131,3 +132,4 @@ groups:
           description: "VictoriaMetrics limits the number of labels per each metric with `-maxLabelsPerTimeseries` command-line flag.\n
            This prevents from ingesting metrics with too many labels. Please verify that `-maxLabelsPerTimeseries` is configured
            correctly or that clients which send these metrics aren't misbehaving."
+...
