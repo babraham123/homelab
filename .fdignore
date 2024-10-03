@@ -18,3 +18,9 @@ docs/diagrams
 tools
 src/grafana/dashboards/*.json
 src/vmalert/configs/*.yml
+
+# Invalid file types
+*.png
+*.svg
+*.jpg
+*.jpeg

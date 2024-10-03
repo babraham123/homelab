@@ -19,7 +19,7 @@ ssh-copy-id {{ username }}@vpn.{{ site.url }}
 - Install tools
 ```bash
 cd /root
-apt install -y fd-find python3-pip git
+apt install -y fd-find python3-pip git yamllint
 pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib
 
 # Install yq

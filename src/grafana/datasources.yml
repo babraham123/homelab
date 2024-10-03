@@ -12,7 +12,7 @@ datasources:
   - name: VictoriaLogs
     type: victorialogs-datasource
     access: proxy
-    url:  http://logs.{{ site.url }}:9428
+    url: http://logs.{{ site.url }}:9428
 
   # - name: VictoriaMetrics
   #   type: prometheus

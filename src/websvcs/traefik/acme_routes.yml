@@ -1,5 +1,6 @@
 # /etc/opt/traefik/config/dynamic/acme_routes.yml
 # Ref: https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+# yamllint disable rule:document-start rule:document-end
 http:
   routers:
     pve1: &acme_service

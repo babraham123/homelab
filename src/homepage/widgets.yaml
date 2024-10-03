@@ -2,14 +2,14 @@
 # Ref: https://gethomepage.dev/widgets
 ---
 - openmeteo:
-  label: {{ personal.city }}
-  latitude: {{ personal.location.lat }}
-  longitude: {{ personal.location.long }}
-  cache: 5 # Time in minutes to cache API responses, to stay within limits
-  timezone: {{ personal.timezone }} # optional
-  units: {{ personal.units }} # imperial, metric
-  format: # optional, Intl.NumberFormat options
-    maximumFractionDigits: 1
+    label: {{ personal.city }}
+    latitude: {{ personal.location.lat }}
+    longitude: {{ personal.location.long }}
+    cache: 5 # Time in minutes to cache API responses, to stay within limits
+    timezone: {{ personal.timezone }} # optional
+    units: {{ personal.units }} # imperial, metric
+    format: # optional, Intl.NumberFormat options
+      maximumFractionDigits: 1
 
 - search:
     provider: google # google, duckduckgo, bing, baidu, brave or custom

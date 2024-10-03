@@ -1,4 +1,3 @@
-# yamllint disable rule:comments-indentation
 # /etc/opt/authelia/config/configuration.yml
 ---
 # v4.38.10
@@ -654,7 +653,7 @@ access_control:
       subject:
         - 'group:authelia_gen_access'
       policy: 'one_factor'
-    
+
     - domain: '*.{{ site.url }}'
       subject:
         - 'group:authelia_gen_access'
@@ -1194,10 +1193,12 @@ identity_providers:
         use: 'sig'
 
         ## Required Private Key in PEM DER form.
+        # yamllint disable-line rule:braces
         key: {% raw %}{{ secret "/certificates/auth.key" | mindent 10 "|" | msquote }}{% endraw %}
 
         ## Optional matching certificate chain in PEM DER form that matches the key. All certificates within the chain
         ## must be valid and current, and from top to bottom each certificate must be signed by the subsequent one.
+        # yamllint disable-line rule:braces
         certificate_chain: {% raw %}{{ secret "/certificates/auth.cert.pem" | mindent 10 "|" | msquote }}{% endraw %}
 
     ## Enables additional debug messages.
@@ -1277,7 +1278,6 @@ identity_providers:
         client_name: 'Headscale UI'
 
         ## The client secret is a shared secret between Authelia and the consumer of this client.
-        # yamllint disable-line rule:line-length
         client_secret: '{% raw %}{{ mustEnv "HEADSCALE_UI_OIDC_HASH" }}{% endraw %}'
 
         ## Sector Identifiers are occasionally used to generate pairwise subject identifiers. In most cases this is not
@@ -1448,7 +1448,6 @@ identity_providers:
         client_name: 'Grafana'
 
         ## The client secret is a shared secret between Authelia and the consumer of this client.
-        # yamllint disable-line rule:line-length
         client_secret: '{% raw %}{{ mustEnv "GRAFANA_OIDC_HASH" }}{% endraw %}'
 
         ## Sector Identifiers are occasionally used to generate pairwise subject identifiers. In most cases this is not

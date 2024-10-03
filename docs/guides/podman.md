@@ -54,7 +54,7 @@ ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,4
 ```bash
 # scrape node_exporter
 # use {{ websvcs.container_subnet }}.3 on websvcs
-ufw allow in from {{ {{ secsvcs.container_subnet }}.3 }} to any port 9100 proto tcp
+ufw allow in from {{ secsvcs.container_subnet }}.3 to any port 9100 proto tcp
 ufw route allow in on $NET_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
 ```
 

@@ -1,5 +1,6 @@
 # /etc/opt/traefik/config/dynamic/nginx.yml
 # Ref: https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+# yamllint disable rule:document-start rule:document-end
 http:
   middlewares:
     gzip:

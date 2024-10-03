@@ -1,4 +1,5 @@
 # /etc/opt/traefik/config/dynamic/headers.yml
+# yamllint disable rule:document-start rule:document-end
 http:
   middlewares:
     secure-headers:

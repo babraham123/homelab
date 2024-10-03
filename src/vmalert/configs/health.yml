@@ -86,6 +86,6 @@ groups:
           description: "The limit of concurrent inserts on instance {{ $labels.instance }} depends on the number of CPUs.\n
             Usually, when component constantly hits the limit it is likely the component is overloaded and requires more CPU.
             In some cases for components like vmagent or vminsert the alert might trigger if there are too many clients
-            making write attempts. If vmagent's or vminsert's CPU usage and network saturation are at normal level, then 
+            making write attempts. If vmagent's or vminsert's CPU usage and network saturation are at normal level, then
             it might be worth adjusting `-maxConcurrentInserts` cmd-line flag."
 ...

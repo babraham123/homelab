@@ -48,8 +48,8 @@ groups:
         annotations:
           dashboard: "{{ $externalLabels.grafana_url }}/d/{{ $externalLabels.va_dash }}?viewPanel=33&var-group={{ $labels.group }}"
           summary: "Recording rule {{ $labels.recording }} ({ $labels.group }}) produces no data"
-          description: "Recording rule \"{{ $labels.recording }}\" from group \"{{ $labels.group }}\" 
-            produces 0 samples over the last 30min. It might be caused by a misconfiguration 
+          description: "Recording rule \"{{ $labels.recording }}\" from group \"{{ $labels.group }}\"
+            produces 0 samples over the last 30min. It might be caused by a misconfiguration
             or incorrect query expression."
 
       - alert: TooManyMissedIterations
@@ -60,9 +60,9 @@ groups:
         annotations:
           summary: "vmalert instance {{ $labels.instance }} is missing rules evaluations"
           description: "vmalert instance {{ $labels.instance }} is missing rules evaluations for group \"{{ $labels.group }}\".
-            The group evaluation time takes longer than the configured evaluation interval. This may result in missed 
+            The group evaluation time takes longer than the configured evaluation interval. This may result in missed
             alerting notifications or recording rules samples. Try increasing evaluation interval or concurrency of
-            group \"{{ $labels.group }}\". See https://docs.victoriametrics.com/vmalert.html#groups. 
+            group \"{{ $labels.group }}\". See https://docs.victoriametrics.com/vmalert.html#groups.
             If rule expressions are taking longer than expected, please see https://docs.victoriametrics.com/Troubleshooting.html#slow-queries."
 
       - alert: RemoteWriteErrors
@@ -72,7 +72,7 @@ groups:
           severity: warning
         annotations:
           summary: "vmalert instance {{ $labels.instance }} is failing to push metrics to remote write URL"
-          description: "vmalert instance {{ $labels.instance }} is failing to push metrics generated via alerting 
+          description: "vmalert instance {{ $labels.instance }} is failing to push metrics generated via alerting
             or recording rules to the configured remote write URL. Check vmalert's logs for detailed error message."
 
       - alert: AlertmanagerErrors
