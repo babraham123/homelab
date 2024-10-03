@@ -28,7 +28,7 @@ groups:
           severity: warning
         annotations:
           dashboard: "{{ $externalLabels.grafana_url }}/d/{{ $externalLabels.vg_dash }}?viewPanel=79&var-instance={{ $labels.instance }}"
-          summary: "Job \"{{ $labels.job }}\" on instance {{ $labels.instance }} drops the rejected by 
+          summary: "Job \"{{ $labels.job }}\" on instance {{ $labels.instance }} drops the rejected by
             remote-write server data blocks. Check the logs to find the reason for rejects."
 
       - alert: TooManyScrapeErrors
@@ -67,8 +67,7 @@ groups:
         expr: |
           (
            rate(vmagent_remotewrite_send_duration_seconds_total[5m])
-           / 
-           vmagent_remotewrite_queues
+           / vmagent_remotewrite_queues
           ) > 0.9
         for: 15m
         labels:
@@ -78,8 +77,7 @@ groups:
           summary: "Remote write connection from \"{{ $labels.job }}\" (instance {{ $labels.instance }}) to {{ $labels.url }} is saturated"
           description: "The remote write connection between vmagent \"{{ $labels.job }}\" (instance {{ $labels.instance }}) and destination \"{{ $labels.url }}\"
             is saturated by more than 90% and vmagent won't be able to keep up.\n
-            This usually means that `-remoteWrite.queues` command-line flag must be increased in order to increase
-            the number of connections per each remote storage."
+            This usually means that `-remoteWrite.queues` command-line flag must be increased in order to increase the number of connections per each remote storage."
 
       - alert: PersistentQueueForWritesIsSaturated
         expr: rate(vm_persistentqueue_write_duration_seconds_total[5m]) > 0.9
@@ -90,7 +88,7 @@ groups:
           dashboard: "{{ $externalLabels.grafana_url }}/d/{{ $externalLabels.vg_dash }}?viewPanel=98&var-instance={{ $labels.instance }}"
           summary: "Persistent queue writes for instance {{ $labels.instance }} are saturated"
           description: "Persistent queue writes for vmagent \"{{ $labels.job }}\" (instance {{ $labels.instance }})
-            are saturated by more than 90% and vmagent won't be able to keep up with flushing data on disk. 
+            are saturated by more than 90% and vmagent won't be able to keep up with flushing data on disk.
             In this case, consider to decrease load on the vmagent or improve the disk throughput."
 
       - alert: PersistentQueueForReadsIsSaturated
@@ -102,7 +100,7 @@ groups:
           dashboard: "{{ $externalLabels.grafana_url }}/d/{{ $externalLabels.vg_dash }}?viewPanel=99&var-instance={{ $labels.instance }}"
           summary: "Persistent queue reads for instance {{ $labels.instance }} are saturated"
           description: "Persistent queue reads for vmagent \"{{ $labels.job }}\" (instance {{ $labels.instance }})
-            are saturated by more than 90% and vmagent won't be able to keep up with reading data from the disk. 
+            are saturated by more than 90% and vmagent won't be able to keep up with reading data from the disk.
             In this case, consider to decrease load on the vmagent or improve the disk throughput."
 
       - alert: SeriesLimitHourReached
@@ -112,7 +110,7 @@ groups:
         annotations:
           dashboard: "{{ $externalLabels.grafana_url }}/d/{{ $externalLabels.vg_dash }}?viewPanel=88&var-instance={{ $labels.instance }}"
           summary: "Instance {{ $labels.instance }} reached 90% of the limit"
-          description: "Max series limit set via -remoteWrite.maxHourlySeries flag is close to reaching the max value. 
+          description: "Max series limit set via -remoteWrite.maxHourlySeries flag is close to reaching the max value.
             Then samples for new time series will be dropped instead of sending them to remote storage systems."
 
       - alert: SeriesLimitDayReached
@@ -122,7 +120,7 @@ groups:
         annotations:
           dashboard: "{{ $externalLabels.grafana_url }}/d/{{ $externalLabels.vg_dash }}?viewPanel=90&var-instance={{ $labels.instance }}"
           summary: "Instance {{ $labels.instance }} reached 90% of the limit"
-          description: "Max series limit set via -remoteWrite.maxDailySeries flag is close to reaching the max value. 
+          description: "Max series limit set via -remoteWrite.maxDailySeries flag is close to reaching the max value.
             Then samples for new time series will be dropped instead of sending them to remote storage systems."
 
       - alert: ConfigurationReloadFailure

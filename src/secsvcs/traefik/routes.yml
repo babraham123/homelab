@@ -3,6 +3,7 @@
 #   - https://www.authelia.com/integration/proxies/traefik/
 #   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
 #   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+# yamllint disable rule:document-start rule:document-end
 http:
   routers:
     traefik: &service

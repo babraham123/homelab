@@ -1,5 +1,6 @@
 # /etc/opt/traefik/config/dynamic/tls.yml
 # Ref: https://ssl-config.mozilla.org/#server=traefik&version=2.10&config=intermediate&guideline=5.7
+# yamllint disable rule:document-start rule:document-end
 tls:
   options:
     modern:

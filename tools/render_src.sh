@@ -29,5 +29,10 @@ $fdfind . --type f --exec jinjanate --quiet -o "$1/{}" "{}" all_vars.yml
 $fdfind . --extension sh --exec chmod +x "$1/{}"
 $fdfind . --extension pl --exec chmod +x "$1/{}"
 
+if ! yamllint -c "$1/lint.yaml" "$1"; then
+  echo "error: yaml linting failed" >&2
+  exit 1
+fi
+
 echo "Rendered the repo into $1"
 rm -f all_vars.yml

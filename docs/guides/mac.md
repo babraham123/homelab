@@ -37,7 +37,7 @@ wget -O .vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.
 ## Source code
 - Install tools
 ```bash
-brew install fd yq
+brew install fd yq yamllint
 pip3 install jinjanator jinjanator-plugin-ansible passlib
 ```
 

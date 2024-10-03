@@ -12,8 +12,8 @@ logLevel: "INFO"
 
 # Actions (buttons) to show up on the WebUI:
 actions:
-- title: Start Gaming Server
-  icon: <iconify-icon icon="maki:gaming"></iconify-icon>
-  popupOnStart: default
-  shell: ssh root@pve2.{{ site.url }} 'qm start $(/usr/local/bin/get_vm_id.sh gaming)'
+  - title: Start Gaming Server
+    icon: <iconify-icon icon="maki:gaming"></iconify-icon>
+    popupOnStart: default
+    shell: ssh root@pve2.{{ site.url }} 'qm start $(/usr/local/bin/get_vm_id.sh gaming)'
 ...
