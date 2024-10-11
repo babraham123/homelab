@@ -237,7 +237,7 @@
         description: Alerts
     - Victoria Metrics:
         icon: sh-victoriametrics-light.svg
-        href: https://metrics.{{ site.url }}/
+        href: https://metrics.{{ site.url }}/vmui/
         description: Metrics
         # widget:
         #   type: prometheus

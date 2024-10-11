@@ -30,22 +30,6 @@ scrape_configs:
     static_configs:
       - targets: ['push.{{ site.url }}:2587']
     metrics_path: /metrics
-  - job_name: pve
-    # https://github.com/prometheus-pve/prometheus-pve-exporter?tab=readme-ov-file#exported-metrics
-    static_configs:
-      - targets: ['pve1.{{ site.url }}']
-    metrics_path: /pve
-    params:
-      module: [default]
-      cluster: ['0']
-      node: ['1']
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: pve_exporter.{{ site.url }}:9221
   - job_name: 'node_exporter'
     static_configs:
       - targets:

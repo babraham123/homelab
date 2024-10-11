@@ -15,7 +15,6 @@ src/secsvcs/install_svcs.sh traefik
 src/secsvcs/install_svcs.sh victoriametrics
 src/secsvcs/install_svcs.sh victorialogs
 src/secsvcs/install_svcs.sh gatus
-src/secsvcs/install_svcs.sh pve_exporter
 src/secsvcs/install_svcs.sh alertmanager
 src/secsvcs/install_svcs.sh vmalert
 src/secsvcs/install_svcs.sh grafana
