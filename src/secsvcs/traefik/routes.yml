@@ -34,10 +34,20 @@ http:
       <<: *service
       rule: Host(`graph.{{ site.url }}`)
       service: grafana@file
-    victoriametrics:
+    victoriametrics-ui:
       <<: *service
+      rule: Host(`metrics.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
+      service: victoriametrics@file
+      middlewares:
+        - authelia@file
+        - vm-auth@file
+        - secure-headers@file
+    victoriametrics-api:
+      <<: *service
+      # Ref: https://doc.traefik.io/traefik/routing/routers/#priority
       rule: Host(`metrics.{{ site.url }}`)
       service: victoriametrics@file
+      middlewares: []
     victorialogs:
       <<: *service
       rule: Host(`logs.{{ site.url }}`)

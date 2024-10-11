@@ -27,6 +27,7 @@ Exec="--configFile=/config/static/traefik.yml"
 Environment=TZ={{ personal.timezone }}
 Secret=ntfy_admin_password,type=env,target=NTFY_ADMIN_PASSWORD
 Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
+Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
 Volume=/etc/opt/traefik/config:/config
 Volume=/etc/opt/traefik/certificates:/certificates
 

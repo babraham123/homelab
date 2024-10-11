@@ -165,10 +165,14 @@ sudo tar -czf "etc-backup-$(date -I).tar.gz" /etc
 ```
 
 ## Monitoring
-- Prep for the PVE exporter, [src](https://github.com/prometheus-pve/prometheus-pve-exporter?tab=readme-ov-file), [ref](https://forum.proxmox.com/threads/proxmox-prometheus-exporter-questions.74862/#post-334340)
-  - Add a new user (`prometheus`), Permissions >> Users >> Add
-  - Assign `prometheus` the "/" path permission with read-only access (PVEAuditor role). Permissions >> Add
-  - Later, store the password in the secsvcs secrets file
+[Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
+- Get the metrics admin password from the secsvcs secrets file
+- Go to metric Datacenter >> Metric Server >> Add >> InfluxDB 
+- Set:
+  - protocol = https
+  - organization = proxmox
+  - bucket = proxmox
+  - token = admin:PASSWORD
 
 ## Upgrade from PVE 7 to 8 (bullseye to bookworm)
 - [PVE guide](https://pve.proxmox.com/wiki/Upgrade_from_7_to_8)

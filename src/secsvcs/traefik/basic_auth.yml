@@ -14,3 +14,7 @@ http:
       headers:
         customRequestHeaders:
           Authorization: 'Basic {% raw %}{{ expandenv "admin:$AM_ADMIN_PASSWORD" | b64enc }}{% endraw %}'
+    vm-auth:
+      headers:
+        customRequestHeaders:
+          Authorization: 'Basic {% raw %}{{ expandenv "admin:$VM_ADMIN_PASSWORD" | b64enc }}{% endraw %}'

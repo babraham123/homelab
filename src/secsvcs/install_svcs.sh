@@ -61,9 +61,6 @@ case $1 in
     chmod +x /var/opt/gatus/curl
     cp gatus/gatus.container /etc/containers/systemd
     ;;
-  pve_exporter)
-    cp exporters/pve_exporter.container /etc/containers/systemd
-    ;;
   vmalert)
     mkdir -p /etc/opt/vmalert
     rm -f /etc/opt/vmalert/*.yml
