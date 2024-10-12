@@ -105,7 +105,7 @@ case $1 in
     ;;
   fluentbit)
     mkdir -p /etc/opt/fluentbit
-    cp fluentbit/config.conf.j2 /etc/opt/fluentbit
+    cp fluentbit/config.yaml.j2 /etc/opt/fluentbit
     cp fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd
     ;;
