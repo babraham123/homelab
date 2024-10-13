@@ -45,6 +45,8 @@ Secret=oidc_hmac_secret,type=env,target=AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SE
 # https://www.authelia.com/reference/guides/templating/
 Secret=hs_ui_oidc_id,type=env,target=HEADSCALE_UI_OIDC_ID
 Secret=hs_ui_oidc_secret_hash,type=env,target=HEADSCALE_UI_OIDC_HASH
+Secret=gatus_oidc_id,type=env,target=GATUS_OIDC_ID
+Secret=gatus_oidc_secret_hash,type=env,target=GATUS_OIDC_HASH
 Secret=grafana_oidc_id,type=env,target=GRAFANA_OIDC_ID
 Secret=grafana_oidc_secret_hash,type=env,target=GRAFANA_OIDC_HASH
 

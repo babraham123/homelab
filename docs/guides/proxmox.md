@@ -166,7 +166,8 @@ sudo tar -czf "etc-backup-$(date -I).tar.gz" /etc
 
 ## Monitoring
 [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
-- Get the metrics admin password from the secsvcs secrets file
+- Get the metrics admin password from secsvcs
+  `/usr/local/bin/get_secret.sh victoriametrics_admin_password`
 - Go to metric Datacenter >> Metric Server >> Add >> InfluxDB 
 - Set:
   - protocol = https

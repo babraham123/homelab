@@ -76,6 +76,10 @@ iot:
   gateway: 192.168.3.1
   mask: 192.168.3.0/24
 
+# homepage suppored colors
+hp_colors: [teal, cyan, slate, sky, emerald, purple, yellow, pink, fuchsia, red, blue, zinc, neutral, green, gray, violet, lime, stone, amber, white, rose, indigo]
+
 # The following content will be dynamically parsed at compile time:
-# secsvcs_subdomains: list derived from src/secsvcs/traefik/routes.yml
+# secsvcs_subdomains: list of subdomains being served by secsvcs
+# uptime_internal_urls: list of internal urls being monitored by the uptime service, gatus
 ...

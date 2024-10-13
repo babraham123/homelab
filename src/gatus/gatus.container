@@ -19,22 +19,18 @@ Network=net.network
 HostName=uptime.{{ site.url }}
 DNS=1.1.1.1
 
-PodmanArgs=--entrypoint='["/bin/busybox", "sh", "-c", "/runner.sh"]'
-
 Environment=TZ={{ personal.timezone }}
-Environment=GATUS_DELAY_START_SECONDS=10
+Environment=GATUS_DELAY_START_SECONDS=5
 # https://www.postgresql.org/docs/14/libpq-envars.html
 Environment=PGSSLMODE=verify-full
 Environment=PGSSLROOTCERT=/etc/ssl/certs/ca.chain.pem
 Secret=gatus_pg_password,type=env,target=PGPASSWORD
 Secret=gatus_ldap_password,type=env,target=LDAP_PASSWORD
+Secret=gatus_oidc_id,type=env,target=OIDC_CLIENT_ID
+Secret=gatus_oidc_secret,type=env,target=OIDC_CLIENT_SECRET
 
 Volume=/etc/opt/gatus/config.yaml:/config/config.yaml
 Volume=/etc/opt/gatus/certificates:/etc/ssl/certs:ro
-Volume=/etc/opt/gatus/authelia_login.sh:/authelia_login.sh:ro
-Volume=/etc/opt/gatus/runner.sh:/runner.sh:ro
-Volume=/var/opt/gatus/busybox:/bin/busybox:ro
-Volume=/var/opt/gatus/curl:/bin/curl:ro
 
 [Service]
 Restart=on-failure

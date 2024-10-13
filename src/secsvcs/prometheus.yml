@@ -13,6 +13,9 @@ scrape_configs:
     static_configs:
       - targets: ['metrics.{{ site.url }}:8428']
     metrics_path: /metrics
+    basic_auth:
+      username: 'admin'
+      password: '${VM_ADMIN_PASSWORD}'
   - job_name: 'victorialogs'
     static_configs:
       - targets: ['logs.{{ site.url }}:9428']

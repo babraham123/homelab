@@ -28,6 +28,9 @@ if ($phase eq 'pre-start') {
         system("qm stop $devtop");
         system("qm wait $devtop --timeout 20");
     }
+    # system("echo 1 > /sys/bus/pci/devices/0000:01:00.0/remove");
+    # system("echo 1 > /sys/bus/pci/devices/0000:01:00.1/remove");
+    # system("sleep 5");
 
 } elsif ($phase eq 'post-start') {
     # Second phase 'post-start' will be executed after the guest

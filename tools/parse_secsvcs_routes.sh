@@ -3,10 +3,10 @@
 # Run from root of the project directory.
 # Usage:
 #   cd project/dir
-#   tools/parse_secsvcs_routes.sh
+#   tools/parse_secsvcs_routes.sh src/secsvcs/traefik/routes.yml
 
 set -euo pipefail
 
 echo "secsvcs_subdomains:"
-yq '.http.routers | to_entries | .[].value.rule' src/secsvcs/traefik/routes.yml | \
-  sed -r 's/^.*Host\(`([^.]+)\..*$/  - \1/' | sort | uniq 
+yq '.http.routers | to_entries | .[].value.rule' "$1" | \
+  sed -r 's/^.*Host\(`([^.]+)\..*$/  - \1/' | sort | uniq
