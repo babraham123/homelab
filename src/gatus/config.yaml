@@ -10,11 +10,20 @@ storage:
   type: postgres
   path: "postgres://gatus@pgdb.{{ site.url }}:5432/gatus"
 
+# PBS VM backups
+maintenance:
+  start: 01:00
+  duration: 2h
+  timezone: "{{ personal.timezone }}"
+  every: [Sunday]
+
 public-endpoint: &public
   group: public
   interval: 10m
   client:
     timeout: 30s
+  headers:
+    robot: "gatus"
   conditions:
     - "[STATUS] == 200"
     - "[RESPONSE_TIME] < 300"
@@ -24,22 +33,90 @@ internal-endpoint: &internal
   interval: 10m
   client:
     timeout: 30s
+    # https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage
+    # https://www.authelia.com/integration/openid-connect/uptime-kuma/
+    oauth2:
+      # Don't use :9091, gatus uses external DNS
+      token-url: https://auth.{{ site.url }}/api/oidc/token
+      client-id: ${OIDC_CLIENT_ID}
+      client-secret: ${OIDC_CLIENT_SECRET}
+      scopes: ['authelia.bearer.authz']
   headers:
-    cookie: "$AUTH_COOKIE"
+    robot: "gatus"
   conditions:
     - "[STATUS] == 200"
     - "[RESPONSE_TIME] < 300"
 
 endpoints:
-  - name: Homepage
-    <<: *public
-    url: "https://{{ site.url }}"
+  # - name: personal site
+    # <<: *public
+    # url: "https://{{ site.url }}"
 
-  - name: LDAP Frontend
+  - name: homepage
     <<: *internal
-    url: "https://ldap.{{ site.url }}"
+    url: "https://dash.{{ site.url }}"
+
+  - name: traefik secsvcs
+    <<: *internal
+    url: "https://secproxy.{{ site.url }}"
+
+  - name: traefik websvcs
+    <<: *internal
+    url: "https://webproxy.{{ site.url }}"
+
+  - name: grafana
+    <<: *internal
+    url: "https://graph.{{ site.url }}"
+
+  - name: victorialogs
+    <<: *internal
+    url: "https://logs.{{ site.url }}"
+
+  - name: alertmanager
+    <<: *internal
+    url: "https://alert.{{ site.url }}"
+
+  - name: victoriametrics
+    <<: *internal
+    url: "https://metrics.{{ site.url }}/vmui"
+
+  - name: vmalert
+    <<: *internal
+    url: "https://vmalert.{{ site.url }}"
 
   - name: ntfy health check
     <<: *internal
     url: "https://push.{{ site.url }}/v1/health"
+
+  # - name: jellyfin
+    # <<: *internal
+    # url: "https://media.{{ site.url }}"
+
+  # - name: calibre
+    # <<: *internal
+    # url: "https://books.{{ site.url }}"
+
+  # - name: audiobookshelf
+    # <<: *internal
+    # url: "https://audiobooks.{{ site.url }}"
+
+  # - name: immich
+    # <<: *internal
+    # url: "https://photos.{{ site.url }}"
+
+  # - name: freshrss
+    # <<: *internal
+    # url: "https://rss.{{ site.url }}"
+
+  # - name: home assistant
+    # <<: *internal
+    # url: "https://home.{{ site.url }}"
+
+  # - name: frigate
+    # <<: *internal
+    # url: "https://cameras.{{ site.url }}"
+
+  # - name: mealie
+    # <<: *internal
+    # url: "https://recipes.{{ site.url }}"
 ...

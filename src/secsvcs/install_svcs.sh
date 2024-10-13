@@ -51,14 +51,6 @@ case $1 in
     mkdir -p /etc/opt/gatus/certificates
     mkdir -p /var/opt/gatus
     cp gatus/config.yaml /etc/opt/gatus
-    chmod 600 /etc/opt/gatus/config.yaml
-    cp gatus/runner.sh /etc/opt/gatus
-    cp gatus/authelia_login.sh /etc/opt/gatus
-    wget --output-document=/var/opt/gatus/busybox "https://www.busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox"
-    chmod +x /var/opt/gatus/busybox
-    CU_VERSION=$(curl -s "https://api.github.com/repos/moparisthebest/static-curl/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    wget --output-document=/var/opt/gatus/curl "https://github.com/moparisthebest/static-curl/releases/download/v$CU_VERSION/curl-amd64"
-    chmod +x /var/opt/gatus/curl
     cp gatus/gatus.container /etc/containers/systemd
     ;;
   vmalert)

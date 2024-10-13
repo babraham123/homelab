@@ -46,7 +46,7 @@
               # Google: go to Settings, select specific calendar, go to Integrate calendar, copy URL from Public Address in iCal format
               url: {{ cal.ics }} # URL with calendar events
               name: {{ cal.name }} # required - name for these calendar events
-              color: zinc # see color pallette for options
+              color: {{ hp_colors[loop.index0 % hp_colors | length] }}
               params:
                 showName: false
 {% endfor %}

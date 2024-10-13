@@ -96,7 +96,7 @@ server:
 
   ## Server Endpoints configuration.
   ## This section is considered advanced and it SHOULD NOT be configured unless you've read the relevant documentation.
-  # endpoints:
+  endpoints:
     ## Enables the pprof endpoint.
     # enable_pprof: false
 
@@ -104,19 +104,41 @@ server:
     # enable_expvars: false
 
     ## Configure the authz endpoints.
-    # authz:
-      # forward-auth:
-        # implementation: 'ForwardAuth'
-        # authn_strategies: []
+    # Ref:
+    # https://www.authelia.com/configuration/miscellaneous/server-endpoints-authz/
+    # https://www.authelia.com/reference/guides/proxy-authorization
+    # Needed for https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage/#general-protections
+    authz:
+      # Used by Traefik proxy
+      forward-auth:
+        implementation: 'ForwardAuth'
+        authn_strategies:
+          - name: 'HeaderAuthorization'
+            schemes:
+              - 'Basic'
+              - 'Bearer'
+          - name: 'CookieSession'
       # ext-authz:
         # implementation: 'ExtAuthz'
-        # authn_strategies: []
+        # authn_strategies:
+          # - name: 'HeaderAuthorization'
+            # schemes:
+              # - 'Basic'
+              # - 'Bearer'
+          # - name: 'CookieSession'
       # auth-request:
         # implementation: 'AuthRequest'
-        # authn_strategies: []
+        # authn_strategies:
+          # - name: 'HeaderAuthRequestProxyAuthorization'
+            # schemes:
+              # - 'Basic'
+              # - 'Bearer'
+          # - name: 'CookieSession'
       # legacy:
         # implementation: 'Legacy'
-        # authn_strategies: []
+        # authn_strategies:
+          # - name: 'HeaderLegacy'
+          # - name: 'CookieSession'
 
 ##
 ## Log Configuration
@@ -660,8 +682,7 @@ access_control:
       policy: 'two_factor'
 
     - domain: '*.{{ site.url }}'
-      subject:
-        - 'group:uptime_robot'
+      subject: 'oauth2:client:{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
       policy: 'one_factor'
 
     ## Domain Regex examples. Generally we recommend just using a standard domain.
@@ -1232,8 +1253,6 @@ identity_providers:
         rules:
           - policy: 'one_factor'
             subject: 'group:authelia_gen_access'
-          - policy: 'one_factor'
-            subject: 'group:uptime_robot'
 
     ## The lifespans configure the expiration for these token types in the duration common syntax. In addition to this
     ## syntax the lifespans can be customized per-client.
@@ -1450,13 +1469,6 @@ identity_providers:
         ## The client secret is a shared secret between Authelia and the consumer of this client.
         client_secret: '{% raw %}{{ mustEnv "GRAFANA_OIDC_HASH" }}{% endraw %}'
 
-        ## Sector Identifiers are occasionally used to generate pairwise subject identifiers. In most cases this is not
-        ## necessary. It is critical to read the documentation for more information.
-        # sector_identifier_uri: 'https://example.com/sector.json'
-
-        ## Sets the client to public. This should typically not be set, please see the documentation for usage.
-        # public: false
-
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
         redirect_uris:
           - 'https://graph.{{ site.url }}/login/generic_oauth'
@@ -1499,4 +1511,43 @@ identity_providers:
         ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
         ## available. Has no effect if userinfo_signing_key_id is configured.
         userinfo_signed_response_alg: 'none'
+
+      -
+        # Ref:
+        # https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage
+        # https://www.authelia.com/integration/openid-connect/uptime-kuma/
+        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
+        ## configuration.
+        client_id: '{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
+
+        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
+        client_name: 'Gatus'
+
+        ## The client secret is a shared secret between Authelia and the consumer of this client.
+        client_secret: '{% raw %}{{ mustEnv "GATUS_OIDC_HASH" }}{% endraw %}'
+
+        ## Sets the client to public. This should typically not be set, please see the documentation for usage.
+        public: false
+
+        ## Audience this client is allowed to request.
+        audience:{% for url in uptime_internal_urls %}
+          - '{{ url }}'{% endfor %}
+
+        ## Scopes this client is allowed to request.
+        scopes:
+          - 'authelia.bearer.authz'
+
+        ## Grant Types configures which grants this client can obtain.
+        ## It's not recommended to define this unless you know what you're doing.
+        grant_types:
+          - 'client_credentials'
+
+        ## The permitted client authentication method for the Token Endpoint for this client.
+        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
+        ## defaults to 'none' per the specifications.
+        token_endpoint_auth_method: 'client_secret_basic'
+
+        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
+        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
+        # token_endpoint_auth_signing_alg: 'RS256'
 ...
