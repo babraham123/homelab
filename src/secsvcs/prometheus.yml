@@ -37,7 +37,6 @@ scrape_configs:
     static_configs:
       - targets:
           - host.containers.internal:9100
-          # - pve1.{{ site.url }}:9100
     metrics_path: /metrics
     relabel_configs:
       - target_label: instance
