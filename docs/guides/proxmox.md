@@ -133,8 +133,16 @@ lspci -nnv | grep TPU
 - If doesn't work, consider `pcie_aspm=off`
   [ref1](https://github.com/blakeblackshear/frigate/issues/1020), [ref2](https://forum.proxmox.com/threads/guest-internal-error-when-passing-through-pcie.99239/), [ref3](https://www.derekseaman.com/2023/06/home-assistant-frigate-vm-on-proxmox-with-pcie-coral-tpu.html)
 
+## VM management
+[Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
+
+- Watchdog to prevent stuck VM
+```bash
+src/debian/install_svcs.sh vm_watchdog
+```
+
 ## Backups
-Install on pve2 but can support both. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
+Only installed on PVE2. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
 
 - Update deb repository
   - `sudo vim /etc/apt/sources.list.d/pbs-enterprise.list`
@@ -153,19 +161,22 @@ sudo apt install -y proxmox-backup-server
   - Datastore >> backup1 >> Prune & GC tab, [options](https://pbs.proxmox.com/docs/maintenance.html)
     - Prune Jobs >> Add >> Last weekly: 3, last monthly: 3, daily
     - Garbage Collection >> Edit >> daily
+
 - PVE setup
   - Datacenter >> Storage >> Add >> Proxmox Backup Server
   - VM >> Backup >> Backup now
   - Datacenter >> Backup >> Add
     - Exclude fingerprint for Let's Encrypt derived PBS certs
+    - For the schedule I picked Sunday at 1am (pve1), 2am (pve2)
 
 - PVE / PBS backups
+TODO: flesh this out
 ```bash
 sudo tar -czf "etc-backup-$(date -I).tar.gz" /etc
 ```
 
 ## Monitoring
-[Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
+Perform these steps after pve1, secsvcs and victoriametrics is configured. [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
 - Get the metrics admin password from secsvcs
   `/usr/local/bin/get_secret.sh victoriametrics_admin_password`
 - Go to metric Datacenter >> Metric Server >> Add >> InfluxDB 

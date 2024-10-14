@@ -30,6 +30,7 @@ case $1 in
   traefik)
     mkdir -p /etc/opt/traefik/config/dynamic
     mkdir -p /etc/opt/traefik/config/static
+    mkdir -p /etc/opt/traefik/certificates
     rm -rf /etc/opt/traefik/config/dynamic/*
     cp secsvcs/traefik/*.yml /etc/opt/traefik/config/dynamic
     cp traefik/dynamic/*.yml /etc/opt/traefik/config/dynamic

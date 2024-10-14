@@ -7,11 +7,6 @@ Initial setup for the secondary VM host, PVE2. Handles VM management services.
 ## VM management
 [Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
 
-- Watchdog to prevent stuck VM
-```bash
-src/debian/install_svcs.sh vm_watchdog
-```
-
 - Ensure mutual exclusion between VMs that use the GPU
   - Install hook script
 ```bash

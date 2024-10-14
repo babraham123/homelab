@@ -209,11 +209,3 @@ cp src/pve1/msmtp_password.sh /usr/local/bin
 cp src/certificates/msmtprc /etc
 src/debian/install_svcs.sh cert_notifier
 ```
-
-## VM management
-[Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
-
-- Watchdog to prevent stuck VM
-```bash
-src/debian/install_svcs.sh vm_watchdog
-```

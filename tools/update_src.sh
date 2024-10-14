@@ -21,7 +21,7 @@ cd /root
 function upload() {
   subdomain=$1
   if ! ping -c3 -W3 "$subdomain.$url" > /dev/null; then
-    echo "$subdomain is not reachable."
+    echo "error: $subdomain is not reachable" >&2
     return
   fi
 
