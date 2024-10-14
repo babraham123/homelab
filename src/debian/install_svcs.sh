@@ -34,9 +34,10 @@ case $1 in
     ;;
   node_exporter)
     NE_VERSION=$(curl -s "https://api.github.com/repos/prometheus/node_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    wget "https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}/node_exporter-${NE_VERSION}.linux-amd64.tar.gz" -O - | tar xz
+    wget --output-document=ne.tar.gz "https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}/node_exporter-${NE_VERSION}.linux-amd64.tar.gz"
+    tar xzf ne.tar.gz
     mv "node_exporter-${NE_VERSION}.linux-amd64/node_exporter" /usr/local/bin/
-    rm -rf "node_exporter-${NE_VERSION}.linux-amd64"
+    rm -rf "node_exporter-${NE_VERSION}.linux-amd64" ne.tar.gz
 
     mkdir -p /var/lib/node_exporter/textfile_collector
     chown -R node_exporter:node_exporter /var/lib/node_exporter

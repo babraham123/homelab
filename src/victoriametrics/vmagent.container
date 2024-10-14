@@ -27,8 +27,9 @@ Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      --promscrape.config="/etc/prometheus/prometheus.yml" \
      --remoteWrite.url="https://metrics.{{ site.url }}/api/v1/write" \
      --remoteWrite.basicAuth.username="admin" \
-     --remoteWrite.basicAuth.password=${VM_ADMIN_PASSWORD} \
-     --usePromCompatibleNaming
+     --remoteWrite.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
+     --usePromCompatibleNaming \
+     --loggerLevel="WARN"
      # --influxListenAddr=":8089" \
      # --graphiteListenAddr=":2003" \
      # --opentsdbListenAddr=":4242" \

@@ -90,6 +90,8 @@ exit
 
 - Check unit generation
 ```bash
+/usr/lib/systemd/system-generators/podman-system-generator -v --dryrun
+
 /usr/lib/systemd/system-generators/podman-system-generator
 ls /run/systemd/generator/
 ```
@@ -97,18 +99,8 @@ ls /run/systemd/generator/
 - Confirm generator ran successfully
   - `journalctl -e`
 
-- Write podman unit files
-  - Generate unit files from compose examples, [src](https://github.com/k9withabone/podlet/tree/main#usage), [ref](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-```bash
-curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-mkdir -p ~/.cargo/bin
-cargo-binstall podlet
-vim docker_compose.yml
-podlet compose docker_compose.yml > all_services.unit
-
-# Flesh out unit files with volumes, secrets and network
-vim all_services.unit
-```
-
 - List services and status
-  - `systemctl --type=service`
+```
+systemctl list-unit-files
+systemctl --type=service
+```
