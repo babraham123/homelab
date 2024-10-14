@@ -37,6 +37,8 @@ case $1 in
   homepage)
     mkdir -p /etc/opt/homepage/config
     cp homepage/*.yaml /etc/opt/homepage/config
+    chown -R 1000:1000 /etc/opt/homepage/config
+    chmod -R 744 /etc/opt/homepage/config
     cp -r homepage/images /etc/opt/homepage
     cp homepage/homepage.container /etc/containers/systemd
     ;;
@@ -44,6 +46,15 @@ case $1 in
     mkdir -p /etc/opt/fluentbit
     cp fluentbit/config.yaml.j2 /etc/opt/fluentbit
     cp fluentbit/fluentbit.container /etc/containers/systemd
+    ;;
+  finance_exporter)
+    mkdir -p /etc/opt/finance_exporter/src
+    cp finance_exporter/config.yaml /etc/opt/finance_exporter
+    cp finance_exporter/finance_exporter.container /etc/containers/systemd
+    # Build image, TODO: generalize this
+    wget "https://github.com/babraham123/finance-exporter/archive/refs/heads/main.tar.gz" -O - | \
+      tar -xz -C /etc/opt/finance_exporter/src --strip-components=1
+    podman build -t finance_exporter /etc/opt/finance_exporter/src
     ;;
   *)
     echo "error: unknown service: $1" >&2
