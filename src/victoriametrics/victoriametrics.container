@@ -32,7 +32,8 @@ Exec=--storageDataPath="/storage" \
      --search.maxConcurrentRequests="10" \
      --usePromCompatibleNaming \
      --httpAuth.username="admin" \
-     --httpAuth.password=${VM_ADMIN_PASSWORD}
+     --httpAuth.password="%{VM_ADMIN_PASSWORD}" \
+     --loggerLevel="WARN"
      # --influxListenAddr=":8089" \
      # --graphiteListenAddr=":2003" \
      # --opentsdbListenAddr=":4242" \

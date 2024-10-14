@@ -14,7 +14,7 @@ scrape_configs:
       - targets: ['metrics.{{ site.url }}:8428']
     basic_auth:
       username: 'admin'
-      password: '${VM_ADMIN_PASSWORD}'
+      password: '%{VM_ADMIN_PASSWORD}'
     metrics_path: /metrics
   - job_name: 'victorialogs'
     static_configs:
@@ -37,7 +37,6 @@ scrape_configs:
     static_configs:
       - targets:
           - host.containers.internal:9100
-          # - pve1.{{ site.url }}:9100
     metrics_path: /metrics
     relabel_configs:
       - target_label: instance

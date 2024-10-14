@@ -40,8 +40,8 @@ apt -y install podman libgpgme11-dev buildah libyajl2
 ## Networking
 - Account for conflicts between the podman network and the firewall, [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
 ```bash
-ufw allow http
-ufw allow https
+ufw reset
+ufw allow in from any to any port 22,80,443 proto tcp
 
 cd /root/homelab-rendered
 cp src/$HOST/net.network /etc/containers/systemd
@@ -56,7 +56,9 @@ ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,4
 # scrape node_exporter
 # use {{ websvcs.container_subnet }}.3, {{ websvcs.interface }} on websvcs
 ufw allow in from {{ secsvcs.container_subnet }}.3 to any port 9100 proto tcp
-ufw route allow in on $NET_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
+# ufw route allow in on $NET_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
+
+ufw enable
 ```
 
 ## Secrets

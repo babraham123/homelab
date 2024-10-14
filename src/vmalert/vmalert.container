@@ -25,18 +25,26 @@ HostName=vmalert.{{ site.url }}
 # web frontend at :8880
 
 Exec=--datasource.url="http://metrics.{{ site.url }}:8428/" \
+     --datasource.basicAuth.username="admin" \
+     --datasource.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
      --remoteRead.url="http://metrics.{{ site.url }}:8428/" \
+     --remoteRead.basicAuth.username="admin" \
+     --remoteRead.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
      --remoteWrite.url="http://metrics.{{ site.url }}:8428/" \
+     --remoteWrite.basicAuth.username="admin" \
+     --remoteWrite.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
      --notifier.url="http://alert.{{ site.url }}:9093/" \
      --notifier.basicAuth.username="admin" \
-     --envflag.enable \
+     --notifier.basicAuth.password="%{AM_ADMIN_PASSWORD}" \
      --rule="/etc/alerts/*.yml" \
+     --loggerLevel="WARN" \
      --external.url="https://vmalert.{{ site.url }}" \
      --external.label="grafana_url=https://graph.{{ site.url }},vm_dash=G7Z9GzMGz,vg_dash=wNf0q_kZk,va_dash=LzldHAVnz" \
      {% raw %}--external.alert.source='explore?orgId=1&left={"datasource":"VictoriaMetrics","queries":[{"expr":{{$$expr|jsonEscape|queryEscape}},"refId":"A"}],"range":{"from":"now-1h","to":"now"}}'{% endraw %}
 
 Environment=TZ={{ personal.timezone }}
-Secret=alertmanager_admin_password,type=env,target=notifier_basicAuth_password
+Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
+Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
 
 Volume=/etc/opt/vmalert:/etc/alerts:ro
 

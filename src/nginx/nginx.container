@@ -2,7 +2,7 @@
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
 [Unit]
-Description="Nginx reverse proxy, used to serve static content"
+Description="Homelab: Nginx reverse proxy, used to serve static content"
 StartLimitIntervalSec=30
 StartLimitBurst=10
 Wants=network.target
