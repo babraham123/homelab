@@ -41,9 +41,9 @@ case $1 in
     mkdir -p /var/lib/node_exporter/textfile_collector
     chown -R node_exporter:node_exporter /var/lib/node_exporter
 
-    cp exporters/node_runner.sh /usr/local/bin/node_exporter_runner.sh
+    cp node_exporter/node_runner.sh /usr/local/bin/node_exporter_runner.sh
     chown node_exporter:node_exporter /usr/local/bin/node_exporter*
-    cp exporters/node_exporter.service /etc/systemd/system
+    cp node_exporter/node_exporter.service /etc/systemd/system
     ;;
   *)
     echo "error: unknown service: $1" >&2

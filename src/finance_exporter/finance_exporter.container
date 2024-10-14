@@ -1,0 +1,28 @@
+# /etc/containers/systemd/finance_exporter.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: export finance data to VictoriaMetrics"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=localhost/finance_exporter:latest
+ContainerName=finance_exporter
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=finance_exporter.{{ site.url }}
+# port 8002
+
+Volume=/etc/opt/finance_exporter/config.yaml:/usr/src/app/finance-exporter.yaml:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
