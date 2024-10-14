@@ -23,12 +23,19 @@ IP={{ websvcs.container_subnet }}.3
 # https://docs.victoriametrics.com/vmagent/#how-to-push-data-to-vmagent
 
 Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
-     --graphiteListenAddr=":2003" \
-     --opentsdbListenAddr=":4242" \
-     --influxListenAddr=":8089" \
-     --remoteWrite.url="http://metrics.{{ site.url }}:8428/api/v1/write"
+     --httpListenAddr=":8429" \
+     --promscrape.config="/etc/prometheus/prometheus.yml" \
+     --remoteWrite.url="https://metrics.{{ site.url }}/api/v1/write" \
+     --remoteWrite.basicAuth.username="admin" \
+     --remoteWrite.basicAuth.password=${VM_ADMIN_PASSWORD} \
+     --usePromCompatibleNaming
+     # --influxListenAddr=":8089" \
+     # --graphiteListenAddr=":2003" \
+     # --opentsdbListenAddr=":4242" \
+     # --metrics.exposeMetadata \
 
 Environment=TZ={{ personal.timezone }}
+Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
 Volume=/etc/opt/vmagent/prometheus.yml:/etc/prometheus/prometheus.yml:ro
 Volume=vmagentdata.volume:/vmagentdata
 
