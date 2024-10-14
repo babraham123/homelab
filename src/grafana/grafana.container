@@ -31,7 +31,6 @@ Environment=TZ={{ personal.timezone }}
 Secret=grafana_pg_password,type=env,target=PGPASSWORD
 Secret=grafana_oidc_id,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_ID
 Secret=grafana_oidc_secret,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
-Secret=grafana_ldap_password,type=env,target=LDAP_BIND_PASSWORD
 
 Volume=/etc/opt/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
 Volume=/etc/opt/grafana/ldap.toml:/etc/grafana/ldap.toml:ro

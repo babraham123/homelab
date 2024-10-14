@@ -25,7 +25,6 @@ Environment=GATUS_DELAY_START_SECONDS=5
 Environment=PGSSLMODE=verify-full
 Environment=PGSSLROOTCERT=/etc/ssl/certs/ca.chain.pem
 Secret=gatus_pg_password,type=env,target=PGPASSWORD
-Secret=gatus_ldap_password,type=env,target=LDAP_PASSWORD
 Secret=gatus_oidc_id,type=env,target=OIDC_CLIENT_ID
 Secret=gatus_oidc_secret,type=env,target=OIDC_CLIENT_SECRET
 

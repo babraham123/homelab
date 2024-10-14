@@ -15,7 +15,7 @@ AutoUpdate=registry
 NoNewPrivileges=true
 
 Network=net.network
-HostName=finance_exporter.{{ site.url }}
+HostName=finance-exporter.{{ site.url }}
 # port 8002
 
 Volume=/etc/opt/finance_exporter/config.yaml:/usr/src/app/finance-exporter.yaml:ro

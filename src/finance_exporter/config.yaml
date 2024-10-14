@@ -11,7 +11,7 @@ min_interval: 15
 # provide all labels.
 update_cache_on_startup: false
 
-tickers:{% for ticker in ticker_symbols %}
+tickers:{% for ticker in personal.ticker_symbols %}
   - '{{ ticker }}'{% endfor %}
 
 sources:
