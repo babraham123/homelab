@@ -18,23 +18,19 @@ mv yq_linux_amd64 /usr/bin/yq
 ./install-man-page.sh
 rm yq* install-man-page.sh
 ```
-- Install podman: [ref](https://podman.io/docs/installation#linux-distributions)
-```bash
-# POD_VERSION=$(curl -s "https://api.github.com/repos/containers/podman/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-# wget "https://github.com/containers/podman/releases/download/v${POD_VERSION}/podman-remote-static-linux_amd64.tar.gz"
-# tar -vxf podman-remote-static-linux_amd64.tar.gz
 
-curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Testing/Release.key \
+- Install podman: [ref](https://podman.io/docs/installation#linux-distributions), [ref2](https://computingforgeeks.com/how-to-install-podman-on-debian/)
+```bash
+source /etc/os-release
+curl -fsSL https://download.opensuse.org/repositories/home:/alvistack/Debian_$VERSION_ID/Release.key \
   | gpg --dearmor \
-  | tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
-    https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/Debian_Testing/ /" \
-  | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null
+  | tee /etc/apt/trusted.gpg.d/alvistack.gpg > /dev/null
+echo "deb http://downloadcontent.opensuse.org/repositories/home:/alvistack/Debian_$VERSION_ID/ /" \
+  | tee /etc/apt/sources.list.d/alvistack.list > /dev/null
 
 apt update
 apt -y upgrade
-apt -y install podman libgpgme11-dev buildah libyajl2
+apt -y install podman podman-netavark podman-compose libgpgme11-dev buildah libyajl2
 ```
 
 ## Networking
@@ -46,6 +42,7 @@ ufw allow in from any to any port 22,80,443 proto tcp
 cd /root/homelab-rendered
 cp src/$HOST/net.network /etc/containers/systemd
 systemctl daemon-reload
+systemctl start net-network
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 # use {{ websvcs.interface }} on websvcs
 ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,443 proto tcp
@@ -54,9 +51,8 @@ ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,4
 - Allow access from container to host
 ```bash
 # scrape node_exporter
-# use {{ websvcs.container_subnet }}.3, {{ websvcs.interface }} on websvcs
-ufw allow in from {{ secsvcs.container_subnet }}.3 to any port 9100 proto tcp
-# ufw route allow in on $NET_IFACE out on {{ secsvcs.interface }} to any port 9100 proto tcp
+# On websvcs, use {{ websvcs.container_subnet }}.7, {{ websvcs.interface }}
+ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
 
 ufw enable
 ```

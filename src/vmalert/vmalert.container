@@ -19,6 +19,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=vmalert.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.11
 # https://docs.victoriametrics.com/vmalert/#web
 # metrics at :8880/metrics
 # api at :8880/api/v1

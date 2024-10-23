@@ -17,6 +17,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=alert.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.10
 # port 9093
 
 Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.yml"

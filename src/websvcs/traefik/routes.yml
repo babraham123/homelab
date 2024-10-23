@@ -47,4 +47,4 @@ http:
     nginx:
       loadBalancer:
         servers:
-          - url: http://nginx:8100/
+          - url: http://static.{{ site.url }}:8100/

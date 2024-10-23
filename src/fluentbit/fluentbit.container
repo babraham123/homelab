@@ -17,6 +17,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=log-collector.{{ site.url }}
+# Intentionally don't set the IP address, can be random
 # port 2020, metrics
 
 Environment=TZ={{ personal.timezone }}

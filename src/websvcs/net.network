@@ -5,4 +5,3 @@
 [Network]
 Driver=bridge
 Subnet={{ websvcs.container_subnet }}.0/24
-IPRange={{ websvcs.container_subnet }}.100-{{ websvcs.container_subnet }}.254

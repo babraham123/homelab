@@ -18,7 +18,7 @@ NoNewPrivileges=true
 # http web front-end, ":8428/vmui"
 Network=net.network
 HostName=metrics.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.3
+IP={{ secsvcs.container_subnet }}.7
 
 # https://docs.victoriametrics.com/#capacity-planning
 Exec=--storageDataPath="/storage" \

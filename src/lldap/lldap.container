@@ -20,6 +20,7 @@ NoNewPrivileges=true
 # http web front-end, port = 17170
 Network=net.network
 HostName=ldap.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.4
 # hostPort:containerPort
 PublishPort=6360:6360
 

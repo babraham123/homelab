@@ -18,6 +18,7 @@ NoNewPrivileges=true
 # port 2587 for metrics
 Network=net.network
 HostName=push.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.13
 
 Exec=serve --config="/etc/ntfy/server.yml"
 

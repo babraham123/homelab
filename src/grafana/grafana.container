@@ -22,6 +22,7 @@ NoNewPrivileges=true
 # http web front-end, port = 3000
 Network=net.network
 HostName=graph.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.12
 
 PodmanArgs=--entrypoint='["/bin/sh", "-c", "/download.sh && /run.sh"]'
 
