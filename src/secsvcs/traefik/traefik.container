@@ -18,6 +18,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=secproxy.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.6
 # hostPort:containerPort
 PublishPort=80:80
 PublishPort=443:443

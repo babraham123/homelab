@@ -17,6 +17,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=webproxy.{{ site.url }}
+IP={{ websvcs.container_subnet }}.6
 # hostPort:containerPort
 PublishPort=80:80
 PublishPort=443:443

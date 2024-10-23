@@ -18,6 +18,7 @@ NoNewPrivileges=true
 # http web front-end, ":9428/select/vmui"
 Network=net.network
 HostName=logs.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.8
 
 # https://docs.victoriametrics.com/victorialogs/#retention
 Exec=--storageDataPath="/storage" \

@@ -18,6 +18,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=auth.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.5
 # hostPort:containerPort
 PublishPort=9091:9091
 

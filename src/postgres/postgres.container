@@ -16,6 +16,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=pgdb.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.3
 # hostPort:containerPort
 PublishPort=5432:5432
 
@@ -27,7 +28,7 @@ Exec=-c "ssl=on" \
      -c "ssl_min_protocol_version=TLSv1.2" \
      -c "ssl_ciphers=HIGH:+3DES:!aNULL"
 
-Environment=TZ={{ personal.timezone }}
+Environment=PGTZ={{ personal.timezone }}
 
 Secret=postgres_password,type=env,target=POSTGRES_PASSWORD
 Secret=lldap_pg_password,type=env,target=LLDAP_POSTGRES_PASSWORD
