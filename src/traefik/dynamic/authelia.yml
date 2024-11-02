@@ -1,5 +1,7 @@
 # /etc/opt/traefik/config/dynamic/authelia.yml
-# Ref: https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+# Ref:
+#   https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+#   https://www.authelia.com/integration/proxies/traefik/
 # yamllint disable rule:document-start rule:document-end
 http:
   serversTransports:
@@ -12,7 +14,7 @@ http:
   middlewares:
     authelia:
       forwardAuth:
-        address: https://auth.{{ site.url }}:9091/api/verify?rd=https%3A%2F%2Fauth.{{ site.url }}%2F
+        address: https://auth.{{ site.url }}:9091/api/authz/forward-auth
         trustForwardHeader: true
         authResponseHeaders:
           - "Remote-User"

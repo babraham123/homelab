@@ -7,7 +7,8 @@ Guide to setup a Raspberry PI device.
 diskutil
 ```
 - Install [macports](https://www.macports.org/install.php)
-- Add the credentials to the boot image: [src](https://www.raspberrypi.com/documentation/computers/configuration.html), [notes](https://desertbot.io/blog/headless-raspberry-pi-4-ssh-wifi-setup), [WPA](https://android.googlesource.com/platform/external/wpa_supplicant_8/+/master-soong/wpa_supplicant/wpa_supplicant.conf#662), [wifi pass](https://android.googlesource.com/platform/external/wpa_supplicant_8/+/master/wpa_supplicant/wpa_supplicant.conf#1243)
+- Add the credentials to the boot image, [src](https://raspberrypi.stackexchange.com/a/145010/22576)
+- old: [src](https://www.raspberrypi.com/documentation/computers/configuration.html), [notes](https://desertbot.io/blog/headless-raspberry-pi-4-ssh-wifi-setup), [WPA](https://android.googlesource.com/platform/external/wpa_supplicant_8/+/master-soong/wpa_supplicant/wpa_supplicant.conf#662), [wifi pass](https://android.googlesource.com/platform/external/wpa_supplicant_8/+/master/wpa_supplicant/wpa_supplicant.conf#1243)
 ```bash
 touch /Volumes/bootfs/ssh
 # Setup username and password (just openssl on Linux)
@@ -19,6 +20,9 @@ sudo port install wpa_passphrase
 wpa_passphrase "{{ wifi.ssid5 }}" # then enter password
 # Fill in the password hash
 vim /Volumes/bootfs/wpa_supplicant.conf
+
+
+# TODO: replace with custom.toml
 ```
 - Add WPA2/3 support: [ref](https://github.com/raspberrypi/linux/issues/4976)
     - `vim /Volumes/bootfs/cmdline.txt`

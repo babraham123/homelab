@@ -134,11 +134,11 @@ server:
               # - 'Basic'
               # - 'Bearer'
           # - name: 'CookieSession'
-      # legacy:
-        # implementation: 'Legacy'
-        # authn_strategies:
-          # - name: 'HeaderLegacy'
-          # - name: 'CookieSession'
+      legacy:
+        implementation: 'Legacy'
+        authn_strategies:
+          - name: 'HeaderLegacy'
+          - name: 'CookieSession'
 
 ##
 ## Log Configuration
