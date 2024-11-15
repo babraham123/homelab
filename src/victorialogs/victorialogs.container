@@ -24,7 +24,7 @@ IP={{ secsvcs.container_subnet }}.8
 Exec=--storageDataPath="/storage" \
      --httpListenAddr=":9428" \
      --retention.maxDiskSpaceUsageBytes="24GiB" \
-     --retentionPeriod="31d" \
+     --retentionPeriod="{{ log_retention_days }}d" \
      --storage.minFreeDiskSpaceBytes="8GiB" \
      --memory.allowedBytes="512MiB" \
      --search.maxConcurrentRequests="3" \

@@ -1,7 +1,7 @@
 # /etc/opt/fluentbit/config.yaml.j2
 # Ref:
 #   https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/yaml/configuration-file
-#   https://docs.fluentbit.io/manual/pipeline/inputs/systemd
+#   https://docs.victoriametrics.com/victorialogs/data-ingestion/fluentbit/
 
 service:
   flush: 1
@@ -13,13 +13,13 @@ service:
   http_port: 2020
 pipeline:
   inputs:
+    # https://docs.fluentbit.io/manual/pipeline/inputs/systemd
     - name: systemd
       tag: host.*
       # In memory (/run) vs persistent (/var) journaling in systemd
       path: /var/log/journal
       mem_buf_limit: 10MB
       db: /data/fb_journald.db
-      # https://www.freedesktop.org/software/systemd/man/latest/systemd.journal-fields.html
       strip_underscores: on
       lowercase: on
       systemd_filter_type: or
@@ -27,25 +27,18 @@ pipeline:
         - _SYSTEMD_UNIT={{ svc }}.service{% endfor %}{% endraw %}
       processors:
         logs:
-          # https://docs.fluentbit.io/manual/pipeline/filters/lua
           - name: lua
             match: '*'
-            call:  process_msg
-            code: |
-              function process_msg(tag, timestamp, record)
-                new_record = {}
-                new_record["hostname"] = record["hostname"] or ""
-                new_record["service"] = record["container_name"] or ""
-                new_record["message"] = record["message"] or ""
-                new_record["code"] = (record["code_func"] or "") .. " " .. (record["code_file"] or "") .. ":" .. (record["code_line"] or "")
-                return 2, timestamp, new_record
-              end
+            script: /fluent-bit/etc/journald.lua
+            call: process_msg
   outputs:
+    # https://docs.fluentbit.io/manual/pipeline/outputs/http
     - name: http
       match: '*'
       host: logs.{{ site.url }}
       port: 9428
       # compress: gzip
-      uri: /insert/jsonline?_stream_fields=stream,path&_msg_field=log&_time_field=date
+      uri: /insert/jsonline?_stream_fields=service,hostname&_msg_field=message&_time_field=date
       format: json_lines
-      json_date_format: iso8601
+      json_date_key: date
+      json_date_format: double
