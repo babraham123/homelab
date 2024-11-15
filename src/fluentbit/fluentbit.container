@@ -10,7 +10,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/fluent/fluent-bit:latest
+Image=docker.io/fluent/fluent-bit:3.2
 ContainerName=fluentbit
 AutoUpdate=registry
 NoNewPrivileges=true
@@ -20,8 +20,11 @@ HostName=log-collector.{{ site.url }}
 # Intentionally don't set the IP address, can be random
 # port 2020, metrics
 
+# https://github.com/fluent/fluent-bit/blob/v3.2.0/dockerfiles/Dockerfile
+Exec=--config="/fluent-bit/etc/config.yaml"
+
 Environment=TZ={{ personal.timezone }}
-Volume=/etc/opt/fluentbit/config.yaml:/fluent-bit/etc/fluent-bit.yaml:ro
+Volume=/etc/opt/fluentbit:/fluent-bit/etc:ro
 Volume=/etc/machine-id:/etc/machine-id:ro
 Volume=/run/log/journal:/run/log/journal
 Volume=/var/log/journal:/var/log/journal

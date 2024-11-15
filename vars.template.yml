@@ -1,4 +1,4 @@
-# Personal details and network information used for templating.
+# Personal details and system configuration used for templating.
 ---
 personal:
   city: "Middletown"
@@ -75,6 +75,9 @@ iot:
   subnet: 192.168.3
   gateway: 192.168.3.1
   mask: 192.168.3.0/24
+
+log_retention_days: 14
+metric_retention_days: 14
 
 # homepage suppored colors
 hp_colors: [teal, cyan, slate, sky, emerald, purple, yellow, pink, fuchsia, red, blue, zinc, neutral, green, gray, violet, lime, stone, amber, white, rose, indigo]
