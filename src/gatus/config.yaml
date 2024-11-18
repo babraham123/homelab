@@ -24,10 +24,10 @@ public-endpoint: &public
     timeout: 10s
     dns-resolver: udp://1.1.1.1:53
   headers:
-    robot: "gatus"
+    User-Agent: "Mozilla/5.0 (gatus-robot; Linux x86_64)"
   conditions:
     - "[STATUS] == 200"
-    - "[RESPONSE_TIME] < 500"
+    - "[RESPONSE_TIME] < 1000"
 
 internal-endpoint: &internal
   group: internal
@@ -44,10 +44,10 @@ internal-endpoint: &internal
       client-secret: ${OIDC_CLIENT_SECRET}
       scopes: ['authelia.bearer.authz']
   headers:
-    robot: "gatus"
+    User-Agent: "Mozilla/5.0 (gatus-robot; Linux x86_64)"
   conditions:
     - "[STATUS] == 200"
-    - "[RESPONSE_TIME] < 500"
+    - "[RESPONSE_TIME] < 1000"
 
 endpoints:
   # - name: personal site
@@ -80,7 +80,7 @@ endpoints:
 
   - name: victoriametrics
     <<: *internal
-    url: "https://metrics.{{ site.url }}/vmui"
+    url: "https://metrics.{{ site.url }}"
 
   - name: vmalert
     <<: *internal
