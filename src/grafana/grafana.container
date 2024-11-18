@@ -32,6 +32,7 @@ Environment=TZ={{ personal.timezone }}
 Secret=grafana_pg_password,type=env,target=PGPASSWORD
 Secret=grafana_oidc_id,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_ID
 Secret=grafana_oidc_secret,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
 
 Volume=/etc/opt/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
 Volume=/etc/opt/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro

@@ -1,4 +1,7 @@
 # /etc/opt/grafana/datasources.yml
+# Ref:
+#   https://github.com/VictoriaMetrics/victoriametrics-datasource
+#   https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
 ---
 apiVersion: 1
 
@@ -7,6 +10,10 @@ datasources:
     type: victoriametrics-datasource
     access: proxy
     url: http://metrics.{{ site.url }}:8428
+    basicAuth: true
+    basicAuthUser: admin
+    secureJsonData:
+      basicAuthPassword: '${VM_ADMIN_PASSWORD}'
     isDefault: true
 
   - name: VictoriaLogs
