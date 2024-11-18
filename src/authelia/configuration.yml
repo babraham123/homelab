@@ -1531,7 +1531,7 @@ identity_providers:
 
         ## Audience this client is allowed to request.
         audience:{% for url in uptime_internal_urls %}
-          - '{{ url }}'{% endfor %}
+          - 'https://{{ url | urlsplit("hostname") }}'{% endfor %}
 
         requested_audience_mode: 'implicit'
 

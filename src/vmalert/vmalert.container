@@ -39,6 +39,7 @@ Exec=--datasource.url="http://metrics.{{ site.url }}:8428/" \
      --notifier.basicAuth.password="%{AM_ADMIN_PASSWORD}" \
      --rule="/etc/alerts/*.yml" \
      --loggerLevel="WARN" \
+     --loggerTimezone="{{ personal.timezone }}" \
      --external.url="https://vmalert.{{ site.url }}" \
      --external.label="grafana_url=https://graph.{{ site.url }},vm_dash=G7Z9GzMGz,vg_dash=wNf0q_kZk,va_dash=LzldHAVnz" \
      {% raw %}--external.alert.source='explore?orgId=1&left={"datasource":"VictoriaMetrics","queries":[{"expr":{{$$expr|jsonEscape|queryEscape}},"refId":"A"}],"range":{"from":"now-1h","to":"now"}}'{% endraw %}

@@ -29,7 +29,8 @@ Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      --remoteWrite.basicAuth.username="admin" \
      --remoteWrite.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
      --usePromCompatibleNaming \
-     --loggerLevel="WARN"
+     --loggerLevel="WARN" \
+     --loggerTimezone="{{ personal.timezone }}"
      # --influxListenAddr=":8089" \
      # --graphiteListenAddr=":2003" \
      # --opentsdbListenAddr=":4242" \
