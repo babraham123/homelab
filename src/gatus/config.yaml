@@ -21,18 +21,20 @@ public-endpoint: &public
   group: public
   interval: 10m
   client:
-    timeout: 30s
+    timeout: 10s
+    dns-resolver: udp://1.1.1.1:53
   headers:
     robot: "gatus"
   conditions:
     - "[STATUS] == 200"
-    - "[RESPONSE_TIME] < 300"
+    - "[RESPONSE_TIME] < 500"
 
 internal-endpoint: &internal
   group: internal
   interval: 10m
   client:
-    timeout: 30s
+    timeout: 10s
+    dns-resolver: udp://1.1.1.1:53
     # https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage
     # https://www.authelia.com/integration/openid-connect/uptime-kuma/
     oauth2:
@@ -45,7 +47,7 @@ internal-endpoint: &internal
     robot: "gatus"
   conditions:
     - "[STATUS] == 200"
-    - "[RESPONSE_TIME] < 300"
+    - "[RESPONSE_TIME] < 500"
 
 endpoints:
   # - name: personal site

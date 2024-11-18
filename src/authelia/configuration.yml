@@ -669,6 +669,10 @@ access_control:
       policy: 'bypass'
 
     - domain: '*.{{ site.url }}'
+      subject: 'oauth2:client:{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
+      policy: 'one_factor'
+
+    - domain: '*.{{ site.url }}'
       networks:
         - 'internal'
         - 'vpn'
@@ -680,10 +684,6 @@ access_control:
       subject:
         - 'group:authelia_gen_access'
       policy: 'two_factor'
-
-    - domain: '*.{{ site.url }}'
-      subject: 'oauth2:client:{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
-      policy: 'one_factor'
 
     ## Domain Regex examples. Generally we recommend just using a standard domain.
     # - domain_regex: '^(?P<User>\w+)\.example\.com$'
@@ -1532,6 +1532,8 @@ identity_providers:
         ## Audience this client is allowed to request.
         audience:{% for url in uptime_internal_urls %}
           - '{{ url }}'{% endfor %}
+
+        requested_audience_mode: 'implicit'
 
         ## Scopes this client is allowed to request.
         scopes:
