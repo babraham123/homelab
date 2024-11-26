@@ -20,7 +20,7 @@ cd "C:\Program Files\Sunshine\scripts"
 - Install Oculus App
   - Run as admin: `C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe`
   - Start the App
-  - On pfSense, install Avahi service and enable mDNS reflection ([src](https://forums.lawrencesystems.com/t/avahi-with-google-chromecast-on-pfsense/2074/4))
+  - [Enable mDNS reflection](./pfsense.md)
   - On Quest 2, Settings > System > Link, enable Air link, pair with computer
 - Install Yuzu, Ryujinx
   - Download [keys](https://theprodkeys.com/yuzu-encryption-keys-are-missing/) and copy to correct folder location

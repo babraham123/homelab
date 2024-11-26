@@ -71,15 +71,19 @@ pve2:
   gateway: 192.168.2.1
   mask: 192.168.2.0/24
   ip: 192.168.2.10
-iot:
+lan:
   subnet: 192.168.3
   gateway: 192.168.3.1
   mask: 192.168.3.0/24
+iot:
+  subnet: 192.168.4
+  gateway: 192.168.4.1
+  mask: 192.168.4.0/24
 
 log_retention_days: 14
 metric_retention_days: 14
 
-# homepage suppored colors
+# homepage supported colors
 hp_colors: [teal, cyan, slate, sky, emerald, purple, yellow, pink, fuchsia, red, blue, zinc, neutral, green, gray, violet, lime, stone, amber, white, rose, indigo]
 
 # The following content will be dynamically parsed at compile time:

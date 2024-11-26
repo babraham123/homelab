@@ -3,7 +3,7 @@
 ## Hardware & Network
 - Setup dedicated LAN in pfSense
   - Open admin console: https://{{ router.ip }}/
-  - Configure new interface, record gateway details
+  - Configure new interface (PVE#), record gateway details
   - Setup DHCP in `[100,200]` range, add static IP based on MAC
   - Copy firewall rules from LAN
 - Make a [flash drive](https://www.lewan.com/blog/2012/02/10/making-a-bootable-usb-stick-on-an-apple-mac-os-x-from-an-iso) with proxmox [iso](https://www.proxmox.com/en/downloads/category/iso-images-pve) and install
@@ -11,12 +11,12 @@
 - Test connection: https://{{ pve2.ip }}:8006/ 
 
 ## PVE setup
-- Shell in with root, pswd
+- Shell in with root, password
 - Update deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/) 
   - `nano /etc/apt/sources.list`, add `contrib non-free non-free-firmware` to all 3 sources
   - `nano /etc/apt/sources.list.d/pve-enterprise.list`
 ```
-# Not recommended for production use
+#deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
 deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 ```
 - Basic [Debian Linux setup](./debian.md)
