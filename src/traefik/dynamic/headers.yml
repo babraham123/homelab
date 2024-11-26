@@ -14,5 +14,5 @@ http:
         contentTypeNosniff: true
         referrerPolicy: "same-origin"
         # Setting CSP is more secure but it can break apps. Consider script-src 'self';
-        contentSecurityPolicy: "frame-ancestors https://*.{{ site.url }} https://{{ site.url }}; object-src 'none';"
+        contentSecurityPolicy: "frame-ancestors https://*.{{ site.url }} https://{{ site.url }}; object-src 'none'"
         permissionsPolicy: "camera=(), geolocation=(), microphone=(), payment=(), usb=()"

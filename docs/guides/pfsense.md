@@ -14,7 +14,7 @@ diskutil eject /dev/disk2
 ```
 - Change boot order to favor USB via BIOS (press F2)
 - Boot and run thru installer
-- Shell in with root, pswd
+- Shell in with root, password
 - Connect to network directly for installs, plug eth0 into existing router, [src](https://www.cyberciti.biz/faq/setting-up-an-network-interfaces-file/)
   - `sudo nano /etc/network/interfaces`
 ```
@@ -27,7 +27,6 @@ iface enp2s0 inet dhcp
   - `sudo nano /etc/apt/sources.list.d/pve-enterprise.list`
 ```
 #deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
-# Not recommended for production use
 deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 ```
 - Install desktop env, [src](https://pve.proxmox.com/wiki/Developer_Workstations_with_Proxmox_VE_and_X11)
@@ -116,7 +115,7 @@ service qemu-guest-agent start
   - `sudo nano /etc/resolv.conf`
 - In pfSense,
 	- Attach `vmbr0` as a network device
-	- Enable the interface as a LAN with a static address
+	- Enable the interface as a LAN with a static address (PVE1)
 	- Enable the DHCP service, create a static lease for each PVE host
     - Go to Services >> DHCP Server >> DHCP Static Mappings
 	- Copy the firewall rules from an existing LAN and apply them
@@ -166,3 +165,51 @@ Other ref:
 - https://www.servethehome.com/new-fanless-4x-2-5gbe-intel-n5105-i226-v-firewall-tested/ 
 - https://pve.proxmox.com/wiki/Pci_passthrough 
 - https://pve.proxmox.com/wiki/SPICE 
+
+### mDNS
+[src](https://forums.lawrencesystems.com/t/avahi-with-google-chromecast-on-pfsense/2074/4)
+- Go to System >> Package Manager
+- Install the pfBlockerNG-devel package
+- Go to Services >> Avahi
+- Enable daemon, Action = allow, select internal interfaces, Enable reflection
+
+### Ad Block
+[ref](https://www.youtube.com/watch?v=xizAeAqYde4)
+- Go to System >> Package Manager
+- Install the pfBlockerNG-devel package
+- Go to Firewall >> pfBlockerNG
+- Run thru wizard
+  - inbound interface = internet facing, outbound = internal LAN ones
+  - Ensure the VIP Address does not lie within any networks
+- Geo data:
+  - Register for a MaxMind acct
+  - Go to IP, add license key and account id
+
+## Monitoring
+Upload to Victoria Metrics:
+- Get the metrics admin password from secsvcs
+  `/usr/local/bin/get_secret.sh victoriametrics_admin_password`
+- Install the plugins
+```bash
+cd src/pfsense/plugins
+chmod 555 telegraf_*
+scp telegraf_* admin@router.{{ site.url }}:/usr/local/bin
+```
+- Go to System >> Package Manager
+- Install the Telegraf package
+- Go to Services >> Telegraf
+- Set Enable, Telegraf Output = `InfluxDB`, InfluxDB Server = `https://metrics.{{ site.url }}`, InfluxDB Database = pfsense, InfluxDB Username = admin, InfluxDB Password
+- In Additional configuration, paste in `telegraf.conf` 
+
+Monitor traffic flows, [ref](https://www.youtube.com/watch?v=P8oxTUoF2Nw):
+- Go to System >> Package Manager
+- Install the ntopng, ntopng-data package
+- Go to Diagnostics >> ntopng Settings
+- Set ntopng Admin Password, select all interfaces
+- Use MAxMind key from above
+
+Watchdog:
+- Go to System >> Package Manager
+- Install the Service Watchdog package
+- Go to Services >> Service Watchdog
+- Add all of the services present (especially Tailscale and sshd)

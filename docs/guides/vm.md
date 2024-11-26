@@ -1,5 +1,6 @@
 # General Proxmox VM setup
 Guide to create and manage a VM. Includes optimal Proxmox settings, network configuration and backup setup.
+Docs: [config files](https://pve.proxmox.com/wiki/Proxmox_Cluster_File_System_(pmxcfs)),
 
 ## VM creation
 [ref](https://www.youtube.com/watch?v=sZcOlW-DwrU)
