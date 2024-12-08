@@ -79,7 +79,7 @@ lspci
   - UFS, GPT
   - Assign Interfaces: WAN=igc0, LAN=igc1, rest as optional
   - Optional: Set Interface IPs (LAN)
-    - `{{ wifi.subnet }}.[100 - 200]/24`
+    - `{{ lan.subnet }}.[100 - 200]/24`
 - Log into pfSense GUI
   - Connect eth1 (LAN) directly to laptop
   - Connect to admin console via LAN ip address (192.168.1.1)
@@ -115,9 +115,9 @@ service qemu-guest-agent start
   - `sudo nano /etc/resolv.conf`
 - In pfSense,
 	- Attach `vmbr0` as a network device
-	- Enable the interface as a LAN with a static address (PVE1)
+	- Enable the interface as a LAN with a static address
 	- Enable the DHCP service, create a static lease for each PVE host
-    - Go to Services >> DHCP Server >> DHCP Static Mappings
+    - Go to Services >> DHCP Server >> PVE1 >> DHCP Static Mappings
 	- Copy the firewall rules from an existing LAN and apply them
 - Reboot the host
 

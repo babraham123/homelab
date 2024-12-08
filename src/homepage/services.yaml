@@ -30,6 +30,8 @@
 #   - home assistant dashbard
 # Custom API: https://gethomepage.dev/widgets/services/customapi/
 
+{% set hp_colors = [teal, cyan, slate, sky, emerald, purple, yellow, pink, fuchsia, red, blue, zinc, neutral, green, gray, violet, lime, stone, amber, white, rose, indigo] %}
+
 - Calendar:
     - Google Calendar:
         href: https://calendar.google.com/

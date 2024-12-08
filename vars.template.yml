@@ -53,12 +53,15 @@ devtop:
   ip: 192.168.2.22
   interface: "enp6s18"
 rpigame:
-  ip: 192.168.1.101
+  ip: 192.168.1.10
+  interface: "wlan0"
 
-wifi:
+lan:
+  # Used for WiFi network
   subnet: 192.168.1
   gateway: 192.168.1.1
   mask: 192.168.1.0/24
+wifi:
   ssid24: "cool-house"
   ssid5: "cool-house5"
 pve1:
@@ -71,20 +74,13 @@ pve2:
   gateway: 192.168.2.1
   mask: 192.168.2.0/24
   ip: 192.168.2.10
-lan:
+lan2:
   subnet: 192.168.3
   gateway: 192.168.3.1
   mask: 192.168.3.0/24
-iot:
-  subnet: 192.168.4
-  gateway: 192.168.4.1
-  mask: 192.168.4.0/24
 
 log_retention_days: 14
 metric_retention_days: 14
-
-# homepage supported colors
-hp_colors: [teal, cyan, slate, sky, emerald, purple, yellow, pink, fuchsia, red, blue, zinc, neutral, green, gray, violet, lime, stone, amber, white, rose, indigo]
 
 # The following content will be dynamically parsed at compile time:
 # secsvcs_subdomains: list of subdomains being served by secsvcs

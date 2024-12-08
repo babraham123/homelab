@@ -19,7 +19,8 @@
     "router": "{{ router.ip }}/32",
     "pve1": "{{ pve1.mask }}",
     "pve2": "{{ pve2.mask }}",
-    "wifi": "{{ wifi.mask }}",
+    "lan": "{{ lan.mask }}",
+    "lan2": "{{ lan2.mask }}",
     "websvcs": "{{ websvcs.ip }}/32",
     "gaming": "{{ gaming.ip }}/32",
     "secsvcs": "{{ secsvcs.ip }}/32",
@@ -55,7 +56,8 @@
     //     "*:0",
     //     "pve1:*",
     //     "pve2:*",
-    //     "wifi:*"
+    //     "lan:*",
+    //     "lan2:*"
     //   ]
     // },
     // // guests can access useful services
@@ -64,7 +66,8 @@
     //   "src": ["group:guests"],
     //   "dst": [
     //     "*:0",
-    //     "wifi:*"
+    //     "lan:*",
+    //     "lan2:*"
     //   ]
     // },
     // // public endpoint can access web services

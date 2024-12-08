@@ -4,12 +4,14 @@ Docs: [config files](https://pve.proxmox.com/wiki/Proxmox_Cluster_File_System_(p
 
 ## VM creation
 [ref](https://www.youtube.com/watch?v=sZcOlW-DwrU)
-- Upload OS ISO image, use net install version
+- Upload OS ISO image, use net install version 
 - For UEFI host:
   - Machine: q35
   - BIOS: OVMF
+  - EFI Storage: local-lvm
 - SCSI controller: VirtIO SCSI single
 - Disk (host SSD)
+  - Check node's lvm-thin pool for total available disk
   - SSD emulation
   - Discard (if storage supports thin provisioning and zeroing of unused space: ZFS, Ceph, thin LVM)
 - CPU
@@ -27,13 +29,13 @@ Maintenance:
 - [Resize disks](https://pve.proxmox.com/wiki/Resize_disks#Online_for_Linux_guests_without_LVM)
 
 ## pfSense config
-- Create a static DHCP lease
+- Record the MAC address from Proxmox, Hardware >> Network Device
+- Create a static DHCP lease in pfSense
   - Go to Services >> DHCP Server >> PVE# >> DHCP Static Mappings
-
 - Add a DNS record
   - Update `unbound.conf`
   - Go to Services >> DNS Resolver >> Custom options, paste in config
 
 ## Backups
 - VM >> Backup >> Backup now
-- Datacenter >> Backup >> Add
+- Datacenter >> Backup >> Add / Edit

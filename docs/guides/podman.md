@@ -33,6 +33,11 @@ apt -y upgrade
 apt -y install podman podman-netavark podman-compose libgpgme11-dev buildah libyajl2
 ```
 
+- Enable container auto updating
+```bash
+systemctl enable --now podman-auto-update.timer
+```
+
 ## Networking
 - Account for conflicts between the podman network and the firewall, [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
 ```bash
@@ -46,13 +51,6 @@ systemctl start net-network
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 # use {{ websvcs.interface }} on websvcs
 ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,443 proto tcp
-```
-
-- Allow access from container to host
-```bash
-# scrape node_exporter
-# On websvcs, use {{ websvcs.container_subnet }}.7, {{ websvcs.interface }}
-ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
 
 ufw enable
 ```
@@ -85,4 +83,10 @@ groupadd node_exporter
 usermod -a -G node_exporter node_exporter
 cd /root/homelab-rendered
 src/debian/install_svcs.sh node_exporter
+```
+
+- Allow access from metrics container to host in order to scrape node_exporter
+```bash
+# On websvcs, use {{ websvcs.container_subnet }}.7
+ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
 ```
