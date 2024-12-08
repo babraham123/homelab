@@ -141,6 +141,22 @@ lspci -nnv | grep TPU
 src/debian/install_svcs.sh vm_watchdog
 ```
 
+## Firewall
+[Ref](https://pve.proxmox.com/wiki/Firewall), [vid](https://www.youtube.com/watch?v=GiOjFJGGzuw)
+
+- Go to Datacenter >> Firewall >> Add
+  - ACCEPT, Source: {{ secsvcs.container_subnet }}.7, Protocol: tcp, Dest port: 9100
+  - {{ websvcs.container_subnet }}.7 for PVE2
+- Go to Datacenter >> Firewall >> IPSet >> Create
+  - Name: management
+  - Go To IP/CIDR >> Add
+    - {{ lan.mask }}
+    - {{ pve1.mask }}
+    - {{ pve2.mask }}
+    - {{ lan2.mask }}
+  - This should enable normal PVE traffic over the local networks.
+- Go to Datacenter >> Firewall >> Options >> Firewall, Yes
+
 ## Backups
 Only installed on PVE2. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
 
@@ -176,11 +192,22 @@ sudo tar -czf "etc-backup-$(date -I).tar.gz" /etc
 ```
 
 ## Monitoring
+- Install Node Exporter
+```bash
+adduser node_exporter --system
+groupadd node_exporter
+usermod -a -G node_exporter node_exporter
+cd /root/homelab-rendered
+src/debian/install_svcs.sh node_exporter
+```
+
 Perform these steps after pve1, secsvcs and victoriametrics is configured. [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
 - Get the metrics admin password from secsvcs
   `/usr/local/bin/get_secret.sh victoriametrics_admin_password`
-- Go to metric Datacenter >> Metric Server >> Add >> InfluxDB 
+- Go to Datacenter >> Metric Server >> Add >> InfluxDB 
 - Set:
+  - server = metrics.{{ site.url }}
+  - port = 443
   - protocol = https
   - organization = proxmox
   - bucket = proxmox

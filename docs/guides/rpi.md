@@ -32,14 +32,14 @@ vim /Volumes/bootfs/wpa_supplicant.conf
 - Eject SD card and plug into Pi
 - Power on Pi (LED [status codes](https://pimylifeup.com/raspberry-pi-red-green-lights))
 
-## Configure
+## Configure the OS
+- Log in
 ```bash
 ssh-keygen -R raspberrypi.local
 ssh pi@raspberrypi.local
 ip addr
 ```
 - Basic [Debian Linux setup](./debian.md)
-- Add DNS host override in pfSense
 - Disable GUI, autologin ([src](https://linuxhint.com/disable-gui-raspberry-pi/)), expand fs
 ```bash
 sudo raspi-config
@@ -49,3 +49,12 @@ sudo reboot
 ssh-keygen -R raspberrypi.local
 ssh {{ username }}@rpi-USAGE.{{ site.url }}
 ```
+
+## Networking
+- Record the MAC address, `ip addr`
+- In pfSense, create a static DHCP lease
+  - Go to Services >> DHCP Server >> LAN >> DHCP Static Mappings
+
+- Add a DNS record
+  - Update `unbound.conf`
+  - Go to Services >> DNS Resolver >> Custom options, paste in config

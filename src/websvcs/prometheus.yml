@@ -25,4 +25,8 @@ scrape_configs:
     relabel_configs:
       - target_label: instance
         replacement: websvcs.{{ site.url }}:9100
+  - job_name: 'node_exporter_pve'
+    static_configs:
+      - targets: ['pve2.{{ site.url }}:9100']
+    metrics_path: /metrics
 ...

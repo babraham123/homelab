@@ -652,10 +652,10 @@ access_control:
   networks:
     - name: 'internal'
       networks:
-        - '{{ wifi.mask }}'
+        - '{{ lan.mask }}'
         - '{{ pve1.mask }}'
         - '{{ pve2.mask }}'
-        - '{{ iot.mask }}'
+        - '{{ lan2.mask }}'
     - name: 'vpn'
       networks: '100.64.0.0/16'
 

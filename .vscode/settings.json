@@ -9,6 +9,7 @@
         "blackhole",
         "concat",
         "CUDA",
+        "datasource",
         "devtop",
         "endfor",
         "endraw",
