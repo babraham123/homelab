@@ -13,6 +13,7 @@ ssh-copy-id admin@router.{{ site.url }}
 ssh-copy-id {{ username }}@pve2.{{ site.url }}
 ssh-copy-id {{ username }}@secsvcs.{{ site.url }}
 ssh-copy-id {{ username }}@websvcs.{{ site.url }}
+ssh-copy-id {{ username }}@homesvcs.{{ site.url }}
 ssh-copy-id {{ username }}@vpn.{{ site.url }}
 ```
 
@@ -87,6 +88,15 @@ ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo mkdir -p /etc/opt/secrets'
 /root/homelab-rendered/src/websvcs/secret_update.sh
 ```
 
+- Generate the SOPS/AGE homesvcs secrets file
+```bash
+scp {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}/.ssh/id_ed25519.pub homesvcs_id_ed25519.pub
+chmod 400 homesvcs_id_ed25519.pub
+ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo mkdir -p /etc/opt/secrets'
+# Fill in all of the secrets you can based on `src/homesvcs/secrets_template.yaml`
+/root/homelab-rendered/src/homesvcs/secret_update.sh
+```
+
 ## Self-Signed Certificates
 Use self-signed certs for server to server traffic. Use Let's Encrypt certs for user facing sites.
 
@@ -147,6 +157,8 @@ scp intermediate/certs/ca-chain.cert.pem {{ username }}@vpn.{{ site.url }}:/home
 ssh -t {{ username }}@vpn.{{ site.url }} 'sudo mv /home/{{ username }}/{{ site.url }}.ca_chain.cert.pem /etc/ssl/certs'
 scp intermediate/certs/ca-chain.cert.pem {{ username }}@websvcs.{{ site.url }}:/home/{{ username }}/{{ site.url }}.ca_chain.cert.pem
 ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo mv /home/{{ username }}/{{ site.url }}.ca_chain.cert.pem /etc/ssl/certs'
+scp intermediate/certs/ca-chain.cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}/{{ site.url }}.ca_chain.cert.pem
+ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo mv /home/{{ username }}/{{ site.url }}.ca_chain.cert.pem /etc/ssl/certs'
 ```
 
 - Example cert, normally done via gen script
@@ -168,7 +180,7 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/w
 ### Manage certs
 - Create keys
 ```bash
-# Wait until the services in VPN and websvcs are setup but not yet started
+# Wait until the services in VPN, websvcs and homesvcs are setup but not yet started
 /root/homelab-rendered/src/certificates/self_signed_key_gen.sh
 /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 ```
@@ -183,7 +195,7 @@ cd /root/acme
 TCD_VERSION=$(curl -s "https://api.github.com/repos/ldez/traefik-certs-dumper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
 wget "https://github.com/ldez/traefik-certs-dumper/releases/download/v${TCD_VERSION}/traefik-certs-dumper_v${TCD_VERSION}_linux_amd64.tar.gz" -O - | tar xz
 mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
-# Wait until the services in VPN and websvcs are started
+# Wait until the services in VPN, websvcs and homesvcs are started
 /root/homelab-rendered/src/certificates/acme_transfer.sh
 ```
 

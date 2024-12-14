@@ -141,12 +141,14 @@ lspci -nnv | grep TPU
 src/debian/install_svcs.sh vm_watchdog
 ```
 
+- Other tools
+```bash
+cp src/pve2/get_vm_id.sh /usr/local/bin
+```
+
 ## Firewall
 [Ref](https://pve.proxmox.com/wiki/Firewall), [vid](https://www.youtube.com/watch?v=GiOjFJGGzuw)
 
-- Go to Datacenter >> Firewall >> Add
-  - ACCEPT, Source: {{ secsvcs.container_subnet }}.7, Protocol: tcp, Dest port: 9100
-  - {{ websvcs.container_subnet }}.7 for PVE2
 - Go to Datacenter >> Firewall >> IPSet >> Create
   - Name: management
   - Go To IP/CIDR >> Add
@@ -155,6 +157,11 @@ src/debian/install_svcs.sh vm_watchdog
     - {{ pve2.mask }}
     - {{ lan2.mask }}
   - This should enable normal PVE traffic over the local networks.
+- Go to Datacenter >> Firewall >> Add
+  - ACCEPT, Enable, Source: {{ secsvcs.container_subnet }}.7, Protocol: tcp, Dest port: 9100
+    - {{ websvcs.container_subnet }}.7 for PVE2
+- For PVE2, enable access to PBS2
+  - ACCEPT, Enable, Source: +management, Protocol: tcp, Dest port: 8007
 - Go to Datacenter >> Firewall >> Options >> Firewall, Yes
 
 ## Backups

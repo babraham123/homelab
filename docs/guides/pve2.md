@@ -10,7 +10,6 @@ Initial setup for the secondary VM host, PVE2. Handles VM management services.
 - Ensure mutual exclusion between VMs that use the GPU
   - Install hook script
 ```bash
-cp src/pve2/get_vm_id.sh /usr/local/bin
 mkdir -p /var/lib/vz/snippets
 cp src/pve2/gpu_hookscript.pl /var/lib/vz/snippets
 # get IDs of GPU VMs, devtop and gaming

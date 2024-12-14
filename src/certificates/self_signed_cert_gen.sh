@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate self-signed certificates and distribute them to the secsvcs and websvcs servers.
+# Generate self-signed certificates and distribute them to the secsvcs, websvcs and homesvcs servers.
 # Usage:
 #   /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 set -euo pipefail
@@ -7,6 +7,7 @@ set -euo pipefail
 /root/homelab-rendered/src/debian/is_root.sh
 /root/homelab-rendered/src/debian/is_reachable.sh secsvcs
 /root/homelab-rendered/src/debian/is_reachable.sh websvcs
+/root/homelab-rendered/src/debian/is_reachable.sh homesvcs
 
 cd /root/ca/intermediate
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
@@ -23,8 +24,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/wildcard.{{ site.url }}.csr.pem \
   -out certs/wildcard.{{ site.url }}.cert.pem
 chmod 444 certs/wildcard.{{ site.url }}.cert.pem
-scp certs/wildcard.{{ site.url }}.cert.pem {{ username }}@secsvcs.{{ site.url }}:/home/{{ username }}
-scp certs/wildcard.{{ site.url }}.cert.pem {{ username }}@websvcs.{{ site.url }}:/home/{{ username }}
 
 openssl req -config openssl.cnf \
   -key private/ldap.{{ site.url }}.key.pem \
@@ -103,11 +102,35 @@ chmod 444 certs/webproxy.{{ site.url }}.client_cert.pem
 scp certs/webproxy.{{ site.url }}.client_cert.pem {{ username }}@secsvcs.{{ site.url }}:/home/{{ username }}
 scp certs/webproxy.{{ site.url }}.client_cert.pem {{ username }}@websvcs.{{ site.url }}:/home/{{ username }}
 
+openssl req -config openssl.cnf \
+  -key private/homeproxy.{{ site.url }}.key.pem \
+  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=homesvcs/CN=homeproxy.{{ site.url }}' \
+  -addext 'subjectAltName = DNS:homeproxy.{{ site.url }}' \
+  -new -sha256 -out csr/homeproxy.{{ site.url }}.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions server_cert -days 395 -notext -md sha256 \
+  -in csr/homeproxy.{{ site.url }}.csr.pem \
+  -out certs/homeproxy.{{ site.url }}.cert.pem
+chmod 444 certs/homeproxy.{{ site.url }}.cert.pem
+scp certs/homeproxy.{{ site.url }}.cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
+scp certs/ca-chain.cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
+
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions usr_cert -days 395 -notext -md sha256 \
+  -in csr/homeproxy.{{ site.url }}.csr.pem \
+  -out certs/homeproxy.{{ site.url }}.client_cert.pem
+chmod 444 certs/homeproxy.{{ site.url }}.client_cert.pem
+scp certs/homeproxy.{{ site.url }}.client_cert.pem {{ username }}@secsvcs.{{ site.url }}:/home/{{ username }}
+scp certs/homeproxy.{{ site.url }}.client_cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
+
 echo "secsvcs root password:"
 ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_certs.sh'
 
 echo "websvcs root password:"
 ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/websvcs/install_certs.sh'
+
+echo "homesvcs root password:"
+ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/homesvcs/install_certs.sh'
 
 date -u > /root/ca/date_self_signed_certs.txt
 echo -e '\nMake sure to restart all secure services'

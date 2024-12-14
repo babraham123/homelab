@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copy the acme.json files from secsvcs and websvcs to pve1. Parse and distribute the
+# Copy the acme.json files from secsvcs, websvcs and homesvcs to pve1. Parse and distribute the
 # ACME certificates to pve1, pve2, pbs2, the vpn UI and pfsense.
 # Usage:
 #   /root/homelab-rendered/src/certificates/acme_transfer.sh
@@ -8,6 +8,7 @@ set -euo pipefail
 /root/homelab-rendered/src/debian/is_root.sh
 /root/homelab-rendered/src/debian/is_reachable.sh secsvcs
 /root/homelab-rendered/src/debian/is_reachable.sh websvcs
+/root/homelab-rendered/src/debian/is_reachable.sh homesvcs
 /root/homelab-rendered/src/debian/is_reachable.sh vpn
 /root/homelab-rendered/src/debian/is_reachable.sh pve2
 /root/homelab-rendered/src/debian/is_reachable.sh router
@@ -39,6 +40,19 @@ chmod 400 websvcs.acme.json
 # Certificate is the full chain (I think)
 /usr/local/bin/traefik-certs-dumper file --domain-subdir \
   --source websvcs.acme.json --dest /root/acme --version v2
+
+echo "homesvcs root password:"
+ssh -t {{ username }}@homesvcs.{{ site.url }} '
+sudo cp /etc/opt/traefik/certificates/acme.json /home/{{ username }}/acme.json
+sudo chown {{ username }}:{{ username }} /home/{{ username }}/acme.json
+'
+scp {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}/acme.json /root/acme/homesvcs.acme.json
+ssh {{ username }}@homesvcs.{{ site.url }} 'rm -f /home/{{ username }}/acme.json'
+chmod 400 homesvcs.acme.json
+# Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
+# Certificate is the full chain (I think)
+/usr/local/bin/traefik-certs-dumper file --domain-subdir \
+  --source homesvcs.acme.json --dest /root/acme --version v2
 
 # Ref: https://www.tecmint.com/configure-ssl-certificate-haproxy/
 cat vpn-ui.{{ site.url }}/privatekey.key vpn-ui.{{ site.url }}/certificate.crt > vpn-ui.{{ site.url }}/vpnui.all.pem

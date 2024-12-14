@@ -60,7 +60,7 @@ server:
 
     ## The list of certificates for client authentication.
     # TODO: debug issue and re-enable mutual TLS
-    # client_certificates: ["/certificates/secproxy.client.pem", "/certificates/webproxy.client.pem"]
+    # client_certificates: ["/certificates/secproxy.client.pem", "/certificates/webproxy.client.pem", "/certificates/homeproxy.client.pem"]
 
   ## Server headers configuration/customization.
   # headers:
