@@ -27,10 +27,11 @@
 # Widgets: https://gethomepage.dev/widgets/
 # iFrame: https://gethomepage.dev/widgets/services/iframe/#full-example
 #   - internally public grafana dashboard, uptime?
-#   - home assistant dashbard
+#   - home assistant dashboard
 # Custom API: https://gethomepage.dev/widgets/services/customapi/
-
-{% set hp_colors = [teal, cyan, slate, sky, emerald, purple, yellow, pink, fuchsia, red, blue, zinc, neutral, green, gray, violet, lime, stone, amber, white, rose, indigo] %}
+{% set hp_colors = ['teal', 'cyan', 'slate', 'sky', 'emerald', 'purple', 'yellow', 'pink', 'fuchsia', 
+                    'red', 'blue', 'zinc', 'neutral', 'green', 'gray', 'violet', 'lime', 'stone', 'amber', 
+                    'white', 'rose', 'indigo'] %}
 
 - Calendar:
     - Google Calendar:

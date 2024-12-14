@@ -141,6 +141,9 @@ wget https://raw.githubusercontent.com/stompro/pfsense-import-certificate/master
 scp pfsense-import-certificate.php admin@router.{{ site.url }}:/root
 rm pfsense-import-certificate.php
 ```
+  - Remove the default cert
+    - Go to System >> Certificates >> Certificates
+    - delete `webConfigurator default`
 - Setup API access, [Ref](https://github.com/jaredhendrickson13/pfsense-api)
 ```bash
 # Reinstall after update

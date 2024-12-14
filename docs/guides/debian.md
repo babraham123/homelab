@@ -3,12 +3,27 @@ Initial setup for any Debian Linux instance. Configures the shell, ssh access an
 
 - First do the basic [VM setup](./vm.md)
 
-## Packages
-- If graphical install, open Terminal app. Otherwise just ssh in as root.
+## OS
+[Vid](https://www.youtube.com/watch?v=XEoO1FgIel4)
+- If running, temporarily stop the vm_watchdog service on PVE1.
+- Use graphical install, run through the options.
+  - Leave name blank, username: {{ username }}
+  - Partition disks: Guided - use entire disk
+  - All files in one partition
+  - If not a desktop VM, make sure to uncheck the GUI packages.
+- Go to Hardware >> CD/DVD Drive >> Remove
+- Go to Console
+  - If desktop VM, open Terminal app. Otherwise login as root.
 ```bash
-su
+apt install -y ssh sudo
 usermod -aG sudo {{ username }}
-apt install -y ssh
+```
+
+## Packages
+- SSH in
+```bash
+ssh {{ username }}@HOSTNAME.{{ site.url }}
+sudo su
 ```
 - Fix deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/) 
 	- `nano /etc/apt/sources.list`
@@ -16,41 +31,39 @@ apt install -y ssh
 - Install basics
 ```bash
 apt update && apt upgrade
-apt install -y sudo zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw
+apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw
 chsh -s /bin/zsh
 
 # enable firewall
 ufw allow ssh
 ufw enable
-
-adduser {{ username }}
-usermod -aG sudo {{ username }}
-exit
 ```
-- Reconnect as {{ username }}
 - Configure updates
-	- Uncomment "-updates": `sudo vim /etc/apt/apt.conf.d/50unattended-upgrades`
+	- `vim /etc/apt/apt.conf.d/50unattended-upgrades`
+  - Uncomment `-updates`
 
 ## SSH
 - Set timezone
-  - `sudo timedatectl set-timezone {{ personal.timezone }}`
+  - `timedatectl set-timezone {{ personal.timezone }}`
 - Change hostname
-	- `sudo hostnamectl set-hostname SUBDOMAIN`
-	- `sudo vim /etc/hosts`, add `127.0.1.1    SUBDOMAIN.{{ site.url }}    SUBDOMAIN`
+	- `hostnamectl set-hostname SUBDOMAIN`
+	- `vim /etc/hosts`, add `127.0.1.1    SUBDOMAIN.{{ site.url }}    SUBDOMAIN`
 - Lock down SSH
-	- `sudo vim /etc/ssh/sshd_config`
+	- `vim /etc/ssh/sshd_config`
 ```
 PermitRootLogin no
 ```
 - Generate SSH key, set correct SUBDOMAIN
 ```bash
+exit
+cd ~
 ssh-keygen -t ed25519 -C "{{ username }}@SUBDOMAIN.{{ site.url }}"
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 ```
 
 ## ZSH
-- Install tools ([src](https://gist.github.com/sinadarvi/7b7178cb3cf9a605ab04700cae05287a))
+- Install tools, [src](https://gist.github.com/sinadarvi/7b7178cb3cf9a605ab04700cae05287a)
 ```bash
 sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 

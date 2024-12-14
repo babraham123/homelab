@@ -1,0 +1,26 @@
+# /etc/opt/traefik/config/dynamic/routes.yml
+# References:
+#   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+#   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+# yamllint disable rule:document-start rule:document-end
+http:
+  routers:
+    traefik: &service
+      rule: Host(`homeproxy.{{ site.url }}`)
+      entryPoints: websecure
+      service: api@internal
+      middlewares:
+        - authelia@file
+        - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    hass:
+      <<: *service
+      rule: Host(`home.{{ site.url }}`)
+      service: hass@file
+  services:
+    hass:
+      loadBalancer:
+        servers:
+          - url: http://host.containers.internal:8123/
