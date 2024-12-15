@@ -1,4 +1,6 @@
 # /etc/network/interfaces
+auto lo
+iface lo inet loopback
 
 auto vmbr0
 iface vmbr0 inet static

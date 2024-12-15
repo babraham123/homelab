@@ -34,7 +34,7 @@ deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 sudo su
 rm /etc/apt/sources.list.d/ceph.list
 apt update && apt upgrade
-apt install -y xfce4 chromium lightdm sudo
+apt install -y xfce4 chromium lightdm sudo ufw
 adduser {{ username }}
 usermod -aG sudo {{ username }}
 ip addr
@@ -110,9 +110,11 @@ service qemu-guest-agent start
 ## Networking
 
 ### Share connectivity with the PVE host and other VMs
-- Configure `vmbr0` to be static, use the LAN network and have no physical interface.
-  - `sudo nano /etc/network/interfaces`
-  - `sudo nano /etc/resolv.conf`
+- Configure `vmbr0` to be static, use the LAN network and have no physical interface. 
+  - Paste in `src/pve1/interfaces`
+    - `sudo nano /etc/network/interfaces`
+  - Paste in `src/pve1/resolv.conf`
+    - `sudo nano /etc/resolv.conf`
 - In pfSense,
 	- Attach `vmbr0` as a network device
 	- Enable the interface as a LAN with a static address
@@ -187,6 +189,12 @@ Other ref:
 - Geo data:
   - Register for a MaxMind acct
   - Go to IP, add license key and account id
+
+## PVE1 remaining setup
+Execute the following sections from the [proxmox guide](./proxmox.md):
+- VM Management
+- Networking
+- Monitoring
 
 ## Monitoring
 Upload to Victoria Metrics:

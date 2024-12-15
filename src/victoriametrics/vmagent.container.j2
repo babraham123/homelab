@@ -1,4 +1,4 @@
-# /etc/containers/systemd/vmagent.container
+# /etc/containers/systemd/vmagent.container.j2
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
 # On secsvcs just use VictoriaMetrics
@@ -18,7 +18,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=metric-collector.{{ site.url }}
-IP={{ websvcs.container_subnet }}.7
+IP={% raw %}{{ subnet }}{% endraw %}.7
 # port 8429
 # https://docs.victoriametrics.com/vmagent/#how-to-push-data-to-vmagent
 
@@ -34,7 +34,7 @@ Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      # --influxListenAddr=":8089" \
      # --graphiteListenAddr=":2003" \
      # --opentsdbListenAddr=":4242" \
-     # --metrics.exposeMetadata \
+     # --metrics.exposeMetadata
 
 Environment=TZ={{ personal.timezone }}
 Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD

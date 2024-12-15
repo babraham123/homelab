@@ -10,9 +10,9 @@ Guide to setup Home Assistant and related services on PVE1.
 ```bash
 sudo su
 cd /root/homelab-rendered
-src/websvcs/install_svcs.sh traefik
-src/websvcs/install_svcs.sh vmagent
-src/websvcs/install_svcs.sh fluentbit
+src/homesvcs/install_svcs.sh traefik
+src/homesvcs/install_svcs.sh vmagent
+src/homesvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
 ```

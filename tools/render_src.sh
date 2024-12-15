@@ -20,9 +20,10 @@ cp -R . "$1"
 rm -rf "$1/.git" "$1/.gitignore" "$1/vars.yml" "$1/.vscode" "$1/.fdignore"
 
 # Assemble jinja2 config file
+cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
 {
   # Exclude the ending "..."
-  head -n -1 vars.yml
+  head -n "$((cut_line-1))" vars.yml
   
   tools/parse_secsvcs_routes.sh src/secsvcs/traefik/routes.yml
   tools/parse_uptime_urls.sh src/gatus/config.yaml

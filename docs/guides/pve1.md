@@ -74,27 +74,24 @@ sops /root/secrets/pve1.yaml
 ```bash
 scp {{ username }}@secsvcs.{{ site.url }}:/home/{{ username }}/.ssh/id_ed25519.pub secsvcs_id_ed25519.pub
 chmod 400 secsvcs_id_ed25519.pub
-ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo mkdir -p /etc/opt/secrets'
 # Fill in all of the secrets you can based on `src/secsvcs/secrets_template.yaml`
-/root/homelab-rendered/src/secsvcs/secret_update.sh
+/root/homelab-rendered/src/pve1/secret_update.sh secsvcs
 ```
 
 - Generate the SOPS/AGE websvcs secrets file
 ```bash
 scp {{ username }}@websvcs.{{ site.url }}:/home/{{ username }}/.ssh/id_ed25519.pub websvcs_id_ed25519.pub
 chmod 400 websvcs_id_ed25519.pub
-ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo mkdir -p /etc/opt/secrets'
 # Fill in all of the secrets you can based on `src/websvcs/secrets_template.yaml`
-/root/homelab-rendered/src/websvcs/secret_update.sh
+/root/homelab-rendered/src/pve1/secret_update.sh secsvcs
 ```
 
 - Generate the SOPS/AGE homesvcs secrets file
 ```bash
 scp {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}/.ssh/id_ed25519.pub homesvcs_id_ed25519.pub
 chmod 400 homesvcs_id_ed25519.pub
-ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo mkdir -p /etc/opt/secrets'
 # Fill in all of the secrets you can based on `src/homesvcs/secrets_template.yaml`
-/root/homelab-rendered/src/homesvcs/secret_update.sh
+/root/homelab-rendered/src/pve1/secret_update.sh homesvcs
 ```
 
 ## Self-Signed Certificates
@@ -153,12 +150,12 @@ openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pe
 cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
 chmod 444 intermediate/certs/ca-chain.cert.pem
 
-scp intermediate/certs/ca-chain.cert.pem {{ username }}@vpn.{{ site.url }}:/home/{{ username }}/{{ site.url }}.ca_chain.cert.pem
-ssh -t {{ username }}@vpn.{{ site.url }} 'sudo mv /home/{{ username }}/{{ site.url }}.ca_chain.cert.pem /etc/ssl/certs'
-scp intermediate/certs/ca-chain.cert.pem {{ username }}@websvcs.{{ site.url }}:/home/{{ username }}/{{ site.url }}.ca_chain.cert.pem
-ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo mv /home/{{ username }}/{{ site.url }}.ca_chain.cert.pem /etc/ssl/certs'
-scp intermediate/certs/ca-chain.cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}/{{ site.url }}.ca_chain.cert.pem
-ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo mv /home/{{ username }}/{{ site.url }}.ca_chain.cert.pem /etc/ssl/certs'
+cp intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
+/root/homelab-rendered/src/debian/copy_to.sh pve2 intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
+/root/homelab-rendered/src/debian/copy_to.sh vpn intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
+/root/homelab-rendered/src/debian/copy_to.sh secsvcs intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
+/root/homelab-rendered/src/debian/copy_to.sh websvcs intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
+/root/homelab-rendered/src/debian/copy_to.sh homesvcs intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
 ```
 
 - Example cert, normally done via gen script
@@ -205,7 +202,7 @@ mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
 - Generate app passwords for lldap, authelia and msmtp, [Ref](https://support.google.com/accounts/answer/185833?hl=en)
 ```bash
 # Update sops files
-/root/homelab-rendered/src/secsvcs/secret_update.sh
+/root/homelab-rendered/src/pve1/secret_update.sh secsvcs
 sops /root/secrets/pve1.yaml
 ```
 - Setup cert notifications
