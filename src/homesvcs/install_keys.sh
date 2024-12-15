@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Moves the SSL keys into their respective locations. Websvcs only.
 # Usage:
-#   src/websvcs/install_keys.sh
+#   src/homesvcs/install_keys.sh
 
 set -euo pipefail
 

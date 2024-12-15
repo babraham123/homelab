@@ -141,7 +141,7 @@ ssh {{ username }}@secsvcs.{{ site.url }}
 sudo podman run --rmi docker.io/authelia/authelia:latest authelia crypto rand --length 72 --charset rfc3986
 sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986
 # Store hashed and raw version of secret under hs_ui_oidc_secret(_hash). id under hs_ui_oidc_id
-ssh -t {{ username }}@pve1.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/secret_update.sh'
+ssh -t {{ username }}@pve1.{{ site.url }} 'sudo /root/homelab-rendered/src/pve1/secret_update.sh secsvcs'
 # Restart authelia to pick up hashed secret version
 sudo systemctl restart authelia
 exit

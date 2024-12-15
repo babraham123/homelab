@@ -6,53 +6,34 @@
 set -euo pipefail
 
 /root/homelab-rendered/src/debian/is_root.sh
-/root/homelab-rendered/src/debian/is_reachable.sh secsvcs
-/root/homelab-rendered/src/debian/is_reachable.sh websvcs
-/root/homelab-rendered/src/debian/is_reachable.sh homesvcs
 /root/homelab-rendered/src/debian/is_reachable.sh vpn
 /root/homelab-rendered/src/debian/is_reachable.sh pve2
 /root/homelab-rendered/src/debian/is_reachable.sh router
 
 cd /root/acme
 
-echo "secsvcs root password:"
-ssh -t {{ username }}@secsvcs.{{ site.url }} '
-sudo cp /etc/opt/traefik/certificates/acme.json /home/{{ username }}/acme.json
-sudo chown {{ username }}:{{ username }} /home/{{ username }}/acme.json
-'
-scp {{ username }}@secsvcs.{{ site.url }}:/home/{{ username }}/acme.json /root/acme/secsvcs.acme.json
-ssh {{ username }}@secsvcs.{{ site.url }} 'rm -f /home/{{ username }}/acme.json'
-chmod 400 secsvcs.acme.json
-# Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
-# Certificate is the full chain (I think)
-/usr/local/bin/traefik-certs-dumper file --domain-subdir \
-  --source secsvcs.acme.json --dest /root/acme --version v2
+function download() {
+  host=$1
+  addr="{{ username }}@$host.{{ site.url }}"
+  /root/homelab-rendered/src/debian/is_reachable.sh "$host"
 
-echo "websvcs root password:"
-ssh -t {{ username }}@websvcs.{{ site.url }} '
+  echo "$host root password:"
+  ssh -t "$addr" '
 sudo cp /etc/opt/traefik/certificates/acme.json /home/{{ username }}/acme.json
 sudo chown {{ username }}:{{ username }} /home/{{ username }}/acme.json
 '
-scp {{ username }}@websvcs.{{ site.url }}:/home/{{ username }}/acme.json /root/acme/websvcs.acme.json
-ssh {{ username }}@websvcs.{{ site.url }} 'rm -f /home/{{ username }}/acme.json'
-chmod 400 websvcs.acme.json
-# Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
-# Certificate is the full chain (I think)
-/usr/local/bin/traefik-certs-dumper file --domain-subdir \
-  --source websvcs.acme.json --dest /root/acme --version v2
+  scp "$addr:/home/{{ username }}/acme.json" "/root/acme/$host.acme.json"
+  ssh "$addr" 'rm -f /home/{{ username }}/acme.json'
+  chmod 400 "$host.acme.json"
+  # Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
+  # Certificate is the full chain (I think)
+  /usr/local/bin/traefik-certs-dumper file --domain-subdir \
+    --source "$host.acme.json" --dest /root/acme --version v2
+}
 
-echo "homesvcs root password:"
-ssh -t {{ username }}@homesvcs.{{ site.url }} '
-sudo cp /etc/opt/traefik/certificates/acme.json /home/{{ username }}/acme.json
-sudo chown {{ username }}:{{ username }} /home/{{ username }}/acme.json
-'
-scp {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}/acme.json /root/acme/homesvcs.acme.json
-ssh {{ username }}@homesvcs.{{ site.url }} 'rm -f /home/{{ username }}/acme.json'
-chmod 400 homesvcs.acme.json
-# Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
-# Certificate is the full chain (I think)
-/usr/local/bin/traefik-certs-dumper file --domain-subdir \
-  --source homesvcs.acme.json --dest /root/acme --version v2
+download "secsvcs"
+download "homesvcs"
+download "websvcs"
 
 # Ref: https://www.tecmint.com/configure-ssl-certificate-haproxy/
 cat vpn-ui.{{ site.url }}/privatekey.key vpn-ui.{{ site.url }}/certificate.crt > vpn-ui.{{ site.url }}/vpnui.all.pem

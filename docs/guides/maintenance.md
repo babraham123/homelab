@@ -9,7 +9,7 @@ sudo su
 
 ## Update secrets
 ```bash
-/root/homelab-rendered/src/secsvcs/secret_update.sh
+/root/homelab-rendered/src/pve1/secret_update.sh secsvcs
 # if a new secret was added
 ssh {{ username }}@secsvcs.{{ site.url }}
 sudo podman secret create "SECRET_NAME" /root/placeholder.txt

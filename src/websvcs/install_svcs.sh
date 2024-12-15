@@ -23,7 +23,8 @@ case $1 in
   vmagent)
     mkdir -p /etc/opt/vmagent
     cp websvcs/prometheus.yml /etc/opt/vmagent
-    cp victoriametrics/vmagent.container /etc/containers/systemd
+    /usr/local/bin/render_host.sh websvcs victoriametrics/vmagent.container
+    mv victoriametrics/vmagent.container /etc/containers/systemd
     cp victoriametrics/vmagentdata.volume /etc/containers/systemd
     ;;
   nginx)
@@ -55,7 +56,8 @@ case $1 in
     mkdir -p /etc/opt/fluentbit
     cp fluentbit/config.yaml.j2 /etc/opt/fluentbit
     cp fluentbit/journald.lua /etc/opt/fluentbit
-    cp fluentbit/fluentbit.container /etc/containers/systemd
+    /usr/local/bin/render_host.sh websvcs fluentbit/fluentbit.container
+    mv fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd
     ;;
   *)

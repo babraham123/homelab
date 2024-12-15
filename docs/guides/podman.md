@@ -45,11 +45,12 @@ ufw reset
 ufw allow in from any to any port 22,80,443 proto tcp
 
 cd /root/homelab-rendered
+mkdir /etc/containers/systemd
 cp src/$HOST/net.network /etc/containers/systemd
 systemctl daemon-reload
 systemctl start net-network
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-# use {{ websvcs.interface }} on websvcs
+# Use {{ websvcs.interface }} on websvcs, {{ homesvcs.interface }} on homesvcs
 ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,443 proto tcp
 
 ufw enable
@@ -87,6 +88,6 @@ src/debian/install_svcs.sh node_exporter
 
 - Allow access from metrics container to host in order to scrape node_exporter
 ```bash
-# On websvcs, use {{ websvcs.container_subnet }}.7
+# Use {{ websvcs.container_subnet }}.7 on websvcs, {{ homesvcs.container_subnet }}.7 on homesvcs
 ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
 ```

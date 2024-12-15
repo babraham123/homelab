@@ -99,7 +99,8 @@ case $1 in
     mkdir -p /etc/opt/fluentbit
     cp fluentbit/config.yaml.j2 /etc/opt/fluentbit
     cp fluentbit/journald.lua /etc/opt/fluentbit
-    cp fluentbit/fluentbit.container /etc/containers/systemd
+    /usr/local/bin/render_host.sh secsvcs fluentbit/fluentbit.container
+    mv fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd
     ;;
   *)

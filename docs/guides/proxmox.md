@@ -25,12 +25,6 @@ deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 sudo wget https://enterprise.proxmox.com/debian/proxmox-release-bullseye.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
 sudo apt install -y libguestfs-tools intel-microcode
 ```
-- Remove unnecessary services (not using HA mode)
-```bash
-sudo systemctl disable --now pve-ha-crm.service
-sudo systemctl disable --now pve-ha-lrm.service
-sudo systemctl disable --now corosync.service
-```
 - Collect system stats to help with VM selection 
 ```bash
 # Show which CPUs are P (performance) vs E (efficiency)
@@ -138,6 +132,7 @@ lspci -nnv | grep TPU
 
 - Watchdog to prevent stuck VM
 ```bash
+sudo su
 src/debian/install_svcs.sh vm_watchdog
 ```
 
@@ -146,37 +141,38 @@ src/debian/install_svcs.sh vm_watchdog
 cp src/pve2/get_vm_id.sh /usr/local/bin
 ```
 
-## Firewall
-[Ref](https://pve.proxmox.com/wiki/Firewall), [vid](https://www.youtube.com/watch?v=GiOjFJGGzuw)
+## Networking
+- Remove unnecessary services (not using HA mode)
+```bash
+systemctl disable --now pve-ha-crm.service
+systemctl disable --now pve-ha-lrm.service
+systemctl disable --now corosync.service
+```
 
-- Go to Datacenter >> Firewall >> IPSet >> Create
-  - Name: management
-  - Go To IP/CIDR >> Add
-    - {{ lan.mask }}
-    - {{ pve1.mask }}
-    - {{ pve2.mask }}
-    - {{ lan2.mask }}
-  - This should enable normal PVE traffic over the local networks.
-- Go to Datacenter >> Firewall >> Add
-  - ACCEPT, Enable, Source: {{ secsvcs.container_subnet }}.7, Protocol: tcp, Dest port: 9100
-    - {{ websvcs.container_subnet }}.7 for PVE2
-- For PVE2, enable access to PBS2
-  - ACCEPT, Enable, Source: +management, Protocol: tcp, Dest port: 8007
-- Go to Datacenter >> Firewall >> Options >> Firewall, Yes
+- Firewall setup, [PVE ports](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#_ports_used_by_proxmox_ve)
+```bash
+ufw default allow routed
+ufw allow in from any to any port 22,8006,3128 proto tcp
+ufw allow in from any to any port 5900:5999 proto tcp
+ufw allow in from any to any port 111 proto udp
+# Excludes corosync and live migration ports
+ufw enable
+```
 
 ## Backups
 Only installed on PVE2. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
 
 - Update deb repository
-  - `sudo vim /etc/apt/sources.list.d/pbs-enterprise.list`
+  - `vim /etc/apt/sources.list.d/pbs-enterprise.list`
 ```
 # NOT recommended for production use
 deb http://download.proxmox.com/debian/pbs bookworm pbs-no-subscription
 ```
 - Install PBS, [ref](https://pbs.proxmox.com/docs/installation.html)
 ```bash
-sudo apt update
-sudo apt install -y proxmox-backup-server
+apt update
+apt install -y proxmox-backup-server
+ufw allow in from any to any port 8007 proto tcp
 ```
 - Connect to console: https://{{ pve2.ip }}:8007/ 
 - Further [setup](https://www.youtube.com/watch?v=33ubleU4OFc), [setup2](https://www.youtube.com/watch?v=Px5eHcUKbbQ)
@@ -195,7 +191,7 @@ sudo apt install -y proxmox-backup-server
 - PVE / PBS backups
 TODO: flesh this out
 ```bash
-sudo tar -czf "etc-backup-$(date -I).tar.gz" /etc
+tar -czf "etc-backup-$(date -I).tar.gz" /etc
 ```
 
 ## Monitoring

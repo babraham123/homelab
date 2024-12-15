@@ -20,11 +20,19 @@ case $1 in
     cp traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
     cp homesvcs/traefik/traefik.container /etc/containers/systemd
     ;;
+  vmagent)
+    mkdir -p /etc/opt/vmagent
+    cp homesvcs/prometheus.yml /etc/opt/vmagent
+    /usr/local/bin/render_host.sh homesvcs victoriametrics/vmagent.container
+    mv victoriametrics/vmagent.container /etc/containers/systemd
+    cp victoriametrics/vmagentdata.volume /etc/containers/systemd
+    ;;
   fluentbit)
     mkdir -p /etc/opt/fluentbit
     cp fluentbit/config.yaml.j2 /etc/opt/fluentbit
     cp fluentbit/journald.lua /etc/opt/fluentbit
-    cp fluentbit/fluentbit.container /etc/containers/systemd
+    /usr/local/bin/render_host.sh homesvcs fluentbit/fluentbit.container
+    mv fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd
     ;;
   *)
