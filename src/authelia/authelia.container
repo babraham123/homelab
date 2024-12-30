@@ -50,6 +50,8 @@ Secret=gatus_oidc_id,type=env,target=GATUS_OIDC_ID
 Secret=gatus_oidc_secret_hash,type=env,target=GATUS_OIDC_HASH
 Secret=grafana_oidc_id,type=env,target=GRAFANA_OIDC_ID
 Secret=grafana_oidc_secret_hash,type=env,target=GRAFANA_OIDC_HASH
+Secret=hass_oidc_id,type=env,target=HASS_OIDC_ID
+Secret=hass_oidc_secret_hash,type=env,target=HASS_OIDC_HASH
 
 [Service]
 Restart=on-failure

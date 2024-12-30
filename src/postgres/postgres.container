@@ -35,6 +35,7 @@ Secret=lldap_pg_password,type=env,target=LLDAP_POSTGRES_PASSWORD
 Secret=authelia_pg_password,type=env,target=AUTHELIA_POSTGRES_PASSWORD
 Secret=gatus_pg_password,type=env,target=GATUS_POSTGRES_PASSWORD
 Secret=grafana_pg_password,type=env,target=GRAFANA_POSTGRES_PASSWORD
+Secret=hass_pg_password,type=env,target=HASS_POSTGRES_PASSWORD
 
 Volume=postgresdb.volume:/var/lib/postgresql/data
 # https://hub.docker.com/_/postgres#:~:text=and%20POSTGRES_DB.-,Initialization%20scripts,-If%20you%20would

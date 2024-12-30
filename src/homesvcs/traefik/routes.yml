@@ -19,8 +19,26 @@ http:
       <<: *service
       rule: Host(`home.{{ site.url }}`)
       service: hass@file
+    z2m:
+      <<: *service
+      rule: Host(`zigbee.{{ site.url }}`)
+      service: z2m@file
+    esphome:
+      <<: *service
+      rule: Host(`iot.{{ site.url }}`)
+      service: esphome@file
   services:
     hass:
       loadBalancer:
         servers:
-          - url: http://host.containers.internal:8123/
+          - url: http://home.{{ site.url }}:8123/
+          # TODO: add extension then enable
+          # - url: http://home.{{ site.url }}:8123/auth/oidc/welcome
+    z2m:
+      loadBalancer:
+        servers:
+          - url: http://zigbee.{{ site.url }}:8080/
+    esphome:
+      loadBalancer:
+        servers:
+          - url: http://iot.{{ site.url }}:6052/

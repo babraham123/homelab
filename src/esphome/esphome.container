@@ -1,0 +1,40 @@
+# /etc/containers/systemd/esphome.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: ESPHome IoT device manager"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/esphome/esphome:stable
+ContainerName=esphome
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=iot.{{ site.url }}
+IP={{ homesvcs.container_subnet }}.10
+# ports: 6053 (native API), 6052 (dashboard)
+# OTA ports:
+#   3232 for the ESP32
+#   8266 for the ESP8266
+#   2040 for the RP2040
+#   8892 for Beken chips
+
+Environment=TZ={{ personal.timezone }}
+Environment=ESPHOME_DASHBOARD_USE_PING=true
+
+Volume=/etc/opt/esphome/config:/config
+
+# TODO: Add usb to flash devices
+# AddDevice=/dev/ttyUSB0:/dev/ttyUSB0
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

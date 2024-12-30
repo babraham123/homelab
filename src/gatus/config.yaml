@@ -66,6 +66,10 @@ endpoints:
     <<: *internal
     url: "https://webproxy.{{ site.url }}"
 
+  - name: traefik homesvcs
+    <<: *internal
+    url: "https://homeproxy.{{ site.url }}"
+
   - name: grafana
     <<: *internal
     url: "https://graph.{{ site.url }}"
@@ -90,6 +94,18 @@ endpoints:
     <<: *internal
     url: "https://push.{{ site.url }}/v1/health"
 
+  - name: home assistant
+    <<: *internal
+    url: "https://home.{{ site.url }}"
+
+  - name: zigbee2mqtt
+    <<: *internal
+    url: "https://zigbee.{{ site.url }}"
+
+  - name: esphome
+    <<: *internal
+    url: "https://iot.{{ site.url }}"
+
   # - name: jellyfin
     # <<: *internal
     # url: "https://media.{{ site.url }}"
@@ -109,10 +125,6 @@ endpoints:
   # - name: freshrss
     # <<: *internal
     # url: "https://rss.{{ site.url }}"
-
-  # - name: home assistant
-    # <<: *internal
-    # url: "https://home.{{ site.url }}"
 
   # - name: frigate
     # <<: *internal

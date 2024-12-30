@@ -104,23 +104,23 @@
 #         #   password: password
 
 - Home:
-#     - Home Assistant:
-#         icon: home-assistant-alt.svg
-#         href: https://home.{{ site.url }}/
-#         description: Home automation dashboard
-#         # widget:
-#         #   type: homeassistant
-#         #   url: http://homeassistant.host.or.ip:port
-#         #   key: access_token
-#         #   custom:
+    - Home Assistant:
+        icon: home-assistant-alt.svg
+        href: https://home.{{ site.url }}/
+        description: Home automation dashboard
+        # widget:
+        #   type: homeassistant
+        #   url: http://homeassistant.host.or.ip:port
+        #   key: access_token
+        #   custom:
+        #     - state: weather
+        #       label: Apparent Temperature
+        #       value: "{attributes.apparent_temperature} {attributes.temperature_unit}"
 #         #     - state: sensor.total_power
 #         #     - state: sensor.total_energy_today
 #         #       label: energy today
 #         #     - template: "{% raw %}{{ states.switch|selectattr('state','equalto','on')|list|length }}{% endraw %}"
 #         #       label: switches on
-#         #     - state: weather.forecast_home
-#         #       label: wind speed
-#         #       value: "{attributes.wind_speed} {attributes.wind_speed_unit}"
 #     - Frigate:
 #         icon: frigate.svg
 #         href: https://cameras.{{ site.url }}/
@@ -129,6 +129,14 @@
 #         #   type: frigate
 #         #   url: http://frigate.host.or.ip:port
 #         #   enableRecentEvents: true # Optional, defaults to false
+    - Zigbee2MQTT:
+        icon: zigbee2mqtt.svg
+        href: https://zigbee.{{ site.url }}/
+        description: Zigbee network manager
+    - ESPHome:
+        icon: esphome.svg
+        href: https://iot.{{ site.url }}/
+        description: IoT device framework
 
 - Life:
 #     - Mealie:

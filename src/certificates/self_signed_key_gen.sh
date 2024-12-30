@@ -39,6 +39,14 @@ openssl genrsa -out private/homeproxy.{{ site.url }}.key.pem 2048
 chmod 400 private/homeproxy.{{ site.url }}.key.pem
 scp private/homeproxy.{{ site.url }}.key.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
 
+openssl genrsa -out private/mqtt.{{ site.url }}.key.pem 2048
+chmod 400 private/mqtt.{{ site.url }}.key.pem
+scp private/mqtt.{{ site.url }}.key.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
+
+openssl genrsa -out private/zigbee.{{ site.url }}.key.pem 2048
+chmod 400 private/zigbee.{{ site.url }}.key.pem
+scp private/zigbee.{{ site.url }}.key.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
+
 echo "secsvcs server password:"
 ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_keys.sh'
 

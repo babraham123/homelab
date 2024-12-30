@@ -1,0 +1,4 @@
+# /etc/opt/home_assistant/config/custom_sentences/en/commands.yaml
+# Ref: https://www.home-assistant.io/integrations/conversation/
+---
+...

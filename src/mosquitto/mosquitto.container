@@ -1,0 +1,34 @@
+# /etc/containers/systemd/mosquitto.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Mosquitto MQTT Broker"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/eclipse-mosquitto:latest
+ContainerName=mosquitto
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=mqtt.{{ site.url }}
+IP={{ homesvcs.container_subnet }}.8
+# hostPort:containerPort
+PublishPort=1883:1883
+
+Environment=TZ={{ personal.timezone }}
+
+Volume=/etc/opt/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+Volume=/etc/opt/mosquitto/certificates:/mosquitto/certs:ro
+Volume=mqttdata.volume:/mosquitto/data
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

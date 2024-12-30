@@ -1,0 +1,4 @@
+# /etc/opt/zigbee2mqtt/config/groups.yaml
+# Ref: https://www.zigbee2mqtt.io/guide/configuration/devices-groups.html
+---
+...
