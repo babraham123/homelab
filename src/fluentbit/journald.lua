@@ -5,7 +5,7 @@
 --   https://www.freedesktop.org/software/systemd/man/latest/systemd.journal-fields.html
 
 function process_msg(tag, timestamp, record)
-  local retention_period = {{ log_retention_days }} * 24 * 60 * 60
+  local retention_period = {{ retention.log_days }} * 24 * 60 * 60
   local now = os.time()
   local new_timestamp = timestamp
   if record["source_realtime_timestamp"] then

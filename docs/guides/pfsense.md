@@ -174,9 +174,9 @@ Other ref:
 ### mDNS
 [src](https://forums.lawrencesystems.com/t/avahi-with-google-chromecast-on-pfsense/2074/4)
 - Go to System >> Package Manager
-- Install the pfBlockerNG-devel package
+- Install the Avahi package
 - Go to Services >> Avahi
-- Enable daemon, Action = allow, select internal interfaces, Enable reflection
+- Enable daemon, Action = allow, select internal interfaces (not WAN), Enable reflection
 
 ### Ad Block
 [ref](https://www.youtube.com/watch?v=xizAeAqYde4)

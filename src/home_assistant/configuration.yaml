@@ -1,0 +1,106 @@
+# /etc/opt/home_assistant/config/configuration.yaml
+# Triggers: https://www.home-assistant.io/docs/automation/trigger
+---
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Ref: https://www.home-assistant.io/integrations/http/
+http:
+  server_port: 8123
+  cors_allowed_origins:
+    - https://home.{{ site.url }}
+    - https://auth.{{ site.url }}
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - {{ homesvcs.container_subnet }}.6
+  ip_ban_enabled: true
+  login_attempts_threshold: 3
+
+# Ref: https://github.com/christiaangoossens/hass-oidc-auth
+auth_oidc:
+  client_id: !env_var OIDC_CLIENT_ID
+  client_secret: !env_var OIDC_CLIENT_SECRET
+  discovery_url: "https://auth.{{ site.url }}/.well-known/openid-configuration"
+  display_name: "Authelia OpenID Connect (SSO)"
+  id_token_signing_alg: RS256
+  features:
+    automatic_user_linking: false
+    automatic_person_creation: true
+    disable_rfc7636: false
+  claims:
+    display_name: name
+    username: preferred_username
+    groups: groups
+
+# Ref: https://www.home-assistant.io/integrations/homeassistant/
+homeassistant:
+  name: Home
+  latitude: {{ personal.location.lat }}
+  longitude: {{ personal.location.long }}
+  elevation: {{ personal.location.elevation }}
+  radius: 100
+  unit_system: {% if personal.units == "metric" %}metric{% else %}us_customary{% endif %}
+  currency: {{ personal.currency }}
+  country: {{ personal.country_code }}
+  time_zone: !env_var TZ
+  external_url: "https://home.{{ site.url }}"
+  internal_url: "https://home.{{ site.url }}"
+  allowlist_external_dirs: []
+  allowlist_external_urls: []
+  media_dirs:
+    media: "/media"
+    recordings: "/media/recordings"
+  debug: false
+
+# cloud:
+config:
+conversation:
+dhcp:
+# TODO: install on websvcs
+# go2rtc:
+#   url: http://my-go2rtc-instance:1984
+history:
+homeassistant_alerts:
+image_upload:
+logbook:
+media_source: # /media
+# Make sure browsers and Google Cast support the video container and codec
+mobile_app:
+my:
+# UPnP has serious security vulnerabilities (src port 1900)
+# ssdp:
+# Live stream proxy: https://www.home-assistant.io/integrations/stream/
+stream:
+sun:
+# USB discovery: https://www.home-assistant.io/integrations/usb/
+# usb:
+webhook:
+zeroconf:
+
+# Ref: https://www.home-assistant.io/integrations/recorder/
+# recorder:
+  # db_url: "postgresql://hass@pgdb.{{ site.url }}:5432/hass"
+  db_url: "sqlite:////data/hass.db"
+  db_max_retries: 10
+  db_retry_wait: 3 # seconds
+  auto_purge: true
+  auto_repack: true
+  purge_keep_days: {{ retention.hass_days }}
+  commit_interval: 5 # seconds
+  exclude:
+    domains:
+      - automation
+      - updater
+      - sun
+    entity_globs:
+      - sensor.weather_*
+    entities:
+      - sensor.last_boot # From 'systemmonitor' sensor platform
+      - sensor.date
+    event_types:
+      - call_service # Don't record service calls
+
+# Energy: https://www.home-assistant.io/docs/energy
+...

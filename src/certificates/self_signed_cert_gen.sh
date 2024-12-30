@@ -123,6 +123,30 @@ chmod 444 certs/homeproxy.{{ site.url }}.client_cert.pem
 scp certs/homeproxy.{{ site.url }}.client_cert.pem {{ username }}@secsvcs.{{ site.url }}:/home/{{ username }}
 scp certs/homeproxy.{{ site.url }}.client_cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
 
+openssl req -config openssl.cnf \
+  -key private/mqtt.{{ site.url }}.key.pem \
+  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=homesvcs/CN=mqtt.{{ site.url }}' \
+  -addext 'subjectAltName = DNS:mqtt.{{ site.url }}' \
+  -new -sha256 -out csr/mqtt.{{ site.url }}.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions server_cert -days 395 -notext -md sha256 \
+  -in csr/mqtt.{{ site.url }}.csr.pem \
+  -out certs/mqtt.{{ site.url }}.cert.pem
+chmod 444 certs/mqtt.{{ site.url }}.cert.pem
+scp certs/mqtt.{{ site.url }}.cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
+
+openssl req -config openssl.cnf \
+  -key private/zigbee.{{ site.url }}.key.pem \
+  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=homesvcs/CN=zigbee.{{ site.url }}' \
+  -addext 'subjectAltName = DNS:zigbee.{{ site.url }}' \
+  -new -sha256 -out csr/zigbee.{{ site.url }}.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions usr_cert -days 395 -notext -md sha256 \
+  -in csr/zigbee.{{ site.url }}.csr.pem \
+  -out certs/zigbee.{{ site.url }}.client_cert.pem
+chmod 444 certs/zigbee.{{ site.url }}.client_cert.pem
+scp certs/zigbee.{{ site.url }}.client_cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
+
 echo "secsvcs root password:"
 ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_certs.sh'
 

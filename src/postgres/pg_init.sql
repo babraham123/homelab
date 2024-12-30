@@ -25,3 +25,13 @@ GRANT ALL PRIVILEGES ON DATABASE gatus TO gatus;
 CREATE USER grafana WITH ENCRYPTED PASSWORD :pw4;
 CREATE DATABASE grafana;
 GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;
+
+--- Set up Home Assistant DB for first time ---
+-- For now HA uses sqlite
+-- \set pw4 `echo "'$HASS_POSTGRES_PASSWORD'"`
+-- CREATE USER hass WITH ENCRYPTED PASSWORD :pw5;
+-- CREATE DATABASE hass 
+--   ENCODING 'UTF8'
+--   LC_COLLATE = 'en_US.UTF-8'
+--   LC_CTYPE = 'en_US.UTF-8';
+-- GRANT ALL PRIVILEGES ON DATABASE hass TO hass;

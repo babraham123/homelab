@@ -25,7 +25,8 @@ cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
   # Exclude the ending "..."
   head -n "$((cut_line-1))" vars.yml
   
-  tools/parse_secsvcs_routes.sh src/secsvcs/traefik/routes.yml
+  tools/parse_routes.sh secsvcs
+  tools/parse_routes.sh homesvcs
   tools/parse_uptime_urls.sh src/gatus/config.yaml
   echo -e "...\n"
 } > all_vars.yml

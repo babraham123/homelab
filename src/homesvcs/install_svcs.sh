@@ -27,6 +27,31 @@ case $1 in
     mv victoriametrics/vmagent.container /etc/containers/systemd
     cp victoriametrics/vmagentdata.volume /etc/containers/systemd
     ;;
+  mosquitto)
+    mkdir -p /etc/opt/mosquitto/certificates
+    cp mosquitto/mosquitto.conf /etc/opt/mosquitto
+    cp mosquitto/mosquitto.container /etc/containers/systemd
+    cp mosquitto/mqttdata.volume /etc/containers/systemd
+    ;;
+  zigbee2mqtt)
+    mkdir -p /etc/opt/zigbee2mqtt/certificates
+    mkdir -p /etc/opt/zigbee2mqtt/config
+    cp zigbee2mqtt/*.yaml /etc/opt/zigbee2mqtt/config
+    cp zigbee2mqtt/zigbee2mqtt.container /etc/containers/systemd
+    ;;
+  esphome)
+    mkdir -p /etc/opt/esphome
+    cp esphome/esphome.conf /etc/opt/esphome
+    cp esphome/esphome.container /etc/containers/systemd
+    ;;
+  home_assistant)
+    mkdir -p /etc/opt/home_assistant/certs
+    mkdir -p /etc/opt/home_assistant/config
+    mkdir -p /var/opt/home_assistant/media/recordings
+    cp home_assistant/*.yaml /etc/opt/home_assistant/config
+    cp home_assistant/home_assistant.container /etc/containers/systemd
+    cp home_assistant/hassdb.volume /etc/containers/systemd
+    ;;
   fluentbit)
     mkdir -p /etc/opt/fluentbit
     cp fluentbit/config.yaml.j2 /etc/opt/fluentbit
