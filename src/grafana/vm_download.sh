@@ -35,5 +35,5 @@ wget --output-document=${plugin_path}/plugin.tar.gz "https://github.com/Victoria
 rm -rf ${vm_ds_path} || true
 mkdir -p ${vm_ds_path}
 tar -xzf ${plugin_path}/plugin.tar.gz -C ${vm_ds_path}
-echo "VictoriaMetrics datasource verison ${VM_VERSION} has been installed."
+echo "VictoriaMetrics datasource version ${VM_VERSION} has been installed."
 rm ${plugin_path}/plugin.tar.gz

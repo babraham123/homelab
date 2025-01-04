@@ -42,7 +42,10 @@ systemctl enable --now podman-auto-update.timer
 - Account for conflicts between the podman network and the firewall, [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
 ```bash
 ufw reset
+# SSH, HTTP
 ufw allow in from any to any port 22,80,443 proto tcp
+# mDNS
+ufw allow in from any to any port 5353 proto udp
 
 cd /root/homelab-rendered
 mkdir /etc/containers/systemd
@@ -74,6 +77,13 @@ echo "placeholder" > /root/placeholder.txt
 podman secret rm --all
 /usr/local/bin/list_secrets.sh | xargs -I% podman secret create "%" /root/placeholder.txt
 podman secret ls
+```
+
+## mDNS
+- Install dependencies and service
+```bash
+apt install build-essential
+src/debian/install_svcs.sh mdns_repeater
 ```
 
 ## Monitoring
