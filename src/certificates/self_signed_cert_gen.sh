@@ -148,13 +148,13 @@ chmod 444 certs/zigbee.{{ site.url }}.client_cert.pem
 scp certs/zigbee.{{ site.url }}.client_cert.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
 
 echo "secsvcs root password:"
-ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_certs.sh'
+ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_files.sh certs'
 
 echo "websvcs root password:"
-ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/websvcs/install_certs.sh'
+ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/websvcs/install_files.sh certs'
 
 echo "homesvcs root password:"
-ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/homesvcs/install_certs.sh'
+ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/homesvcs/install_files.sh certs'
 
 date -u > /root/ca/date_self_signed_certs.txt
 echo -e '\nMake sure to restart all secure services'

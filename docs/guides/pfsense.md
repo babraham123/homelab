@@ -107,6 +107,21 @@ chmod +x /usr/local/etc/rc.d/qemu-agent.sh
 service qemu-guest-agent start
 ```
 
+### System Patches
+Apply security updates and fixes since the last release
+- Go to System >> Package Manager
+- Install the System_Patches package
+- Go to System >> Patches
+- Click "Apply All Recommended"
+
+### Bufferfloat
+Improve latency when under heavy load
+- Follow all the steps listed [here](https://docs.netgate.com/pfsense/en/latest/recipes/codel-limiters.html). That includes:
+  - Run the load test
+  - Create a download limiter and queue
+  - Repeat for upload
+  - Create a floating rule
+
 ## Networking
 
 ### Share connectivity with the PVE host and other VMs
@@ -214,12 +229,21 @@ scp telegraf_* admin@router.{{ site.url }}:/usr/local/bin
 
 Monitor traffic flows, [ref](https://www.youtube.com/watch?v=P8oxTUoF2Nw):
 - Go to System >> Package Manager
+- Install the nmap package
 - Install the ntopng, ntopng-data package
 - Go to Diagnostics >> ntopng Settings
 - Set ntopng Admin Password, select all interfaces
-- Use MAxMind key from above
+- Use MaxMind key from above
+- Leave this disabled unless you want to investigate an issue
 
-Watchdog:
+Watch for new devices:
+- Go to System >> Package Manager
+- Install the ARPwatch package
+- Go to Service >> ARPwatch
+- Add {{ site.email }} to "Notifications recipient"
+- Set "Enable Arpwatch"
+
+Service Watchdog:
 - Go to System >> Package Manager
 - Install the Service Watchdog package
 - Go to Services >> Service Watchdog

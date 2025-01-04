@@ -2,12 +2,13 @@
 Setup a MacOS based computer to seamlessly access homelab services, both remotely and locally. Also optimizes the Terminal app to access VM hosts and work on homelab code.
 
 ## Dependencies
-- Install homebrew, xcode, pip and other dependencies
+- Install xcode, homebrew, pip, git and other dependencies
 ```bash
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
+git --version
 ```
 
 ## Terminal
