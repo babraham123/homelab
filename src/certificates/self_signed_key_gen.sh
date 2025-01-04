@@ -48,13 +48,13 @@ chmod 400 private/zigbee.{{ site.url }}.key.pem
 scp private/zigbee.{{ site.url }}.key.pem {{ username }}@homesvcs.{{ site.url }}:/home/{{ username }}
 
 echo "secsvcs server password:"
-ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_keys.sh'
+ssh -t {{ username }}@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_files.sh keys'
 
 echo "websvcs server password:"
-ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/websvcs/install_keys.sh'
+ssh -t {{ username }}@websvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/websvcs/install_files.sh keys'
 
 echo "homesvcs server password:"
-ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/homesvcs/install_keys.sh'
+ssh -t {{ username }}@homesvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/homesvcs/install_files.sh keys'
 
 date -u > /root/ca/date_self_signed_keys.txt
 echo -e '\nMake sure to run self_signed_cert_gen.sh next'

@@ -39,7 +39,7 @@ download "websvcs"
 cat vpn-ui.{{ site.url }}/privatekey.key vpn-ui.{{ site.url }}/certificate.crt > vpn-ui.{{ site.url }}/vpnui.all.pem
 scp vpn-ui.{{ site.url }}/vpnui.all.pem {{ username }}@vpn.{{ site.url }}:/home/{{ username }}/vpnui.all.pem
 echo "VPN root password:"
-ssh -t {{ username }}@vpn.{{ site.url }} 'sudo /root/homelab-rendered/src/vpn/install_certs.sh'
+ssh -t {{ username }}@vpn.{{ site.url }} 'sudo /root/homelab-rendered/src/vpn/install_files.sh certs'
 
 # Ref: https://pve.proxmox.com/wiki/Certificate_Management
 cp pve1.{{ site.url }}/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
@@ -52,7 +52,7 @@ scp pve2.{{ site.url }}/privatekey.key {{ username }}@pve2.{{ site.url }}:/home/
 scp pbs2.{{ site.url }}/certificate.crt {{ username }}@pve2.{{ site.url }}:/home/{{ username }}/proxy.pem
 scp pbs2.{{ site.url }}/privatekey.key {{ username }}@pve2.{{ site.url }}:/home/{{ username }}/proxy.key
 echo "PVE2 root password:"
-ssh -t {{ username }}@pve2.{{ site.url }} 'sudo /root/homelab-rendered/src/pve2/install_certs.sh' > pbs2_cert_info.txt
+ssh -t {{ username }}@pve2.{{ site.url }} 'sudo /root/homelab-rendered/src/pve2/install_files.sh certs_and_keys' > pbs2_cert_info.txt
 
 # Update PBS fingerprint for PVE1
 # Ref: https://pbs.proxmox.com/docs/pve-integration.html

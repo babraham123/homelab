@@ -20,7 +20,6 @@ ssh-copy-id {{ username }}@vpn.{{ site.url }}
 - Install tools
 ```bash
 cd /root
-apt install -y fd-find python3-pip git yamllint
 pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib
 
 # Install yq
@@ -29,15 +28,6 @@ wget "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_
 mv yq_linux_amd64 /usr/bin/yq
 ./install-man-page.sh
 rm yq* install-man-page.sh
-```
-
-- Render source
-```bash
-git clone {{ repo }} homelab
-cd /root/homelab
-# Fill in personal details based on vars.template.yml
-vim vars.yml
-tools/update_src.sh
 ```
 
 ## Secrets

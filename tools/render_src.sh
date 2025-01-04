@@ -2,7 +2,7 @@
 # Renders the source code into the given folder. Fills in personal details from vars.yml.
 # Run from root of the project directory.
 # Usage:
-#   cd project/dir
+#   cd ~/project/dir
 #   tools/render_src.sh /dir/to/store/rendered/copy
 # Ref:
 # https://manpages.debian.org/buster/fd-find/fdfind.1.en.html
@@ -14,10 +14,13 @@
 set -euo pipefail
 
 # Prepare the output directory
-rm -rf "$1" all_vars.yml
-mkdir -p "$1"
-cp -R . "$1"
-rm -rf "$1/.git" "$1/.gitignore" "$1/vars.yml" "$1/.vscode" "$1/.fdignore"
+project_dir=$1
+rm -rf "$project_dir" all_vars.yml
+mkdir -p "$project_dir"
+cp -R . "$project_dir"
+pushd "$project_dir"
+rm -rf .git .gitignore vars.yml .vscode .fdignore
+popd
 
 # Assemble jinja2 config file
 cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
@@ -34,10 +37,10 @@ cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
 # Render the files
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"
-$fdfind . --type f --exec jinjanate --quiet -o "$1/{}" "{}" all_vars.yml
+$fdfind . --type f --exec jinjanate --quiet -o "$project_dir/{}" "{}" all_vars.yml
 
 rm -f all_vars.yml
-cd "$1"
+cd "$project_dir"
 
 # Make executable
 $fdfind . --extension sh --exec chmod +x "{}"
@@ -57,4 +60,5 @@ $fdfind . --extension json | xargs -I% \
 $fdfind . --extension container | xargs grep -h "IP=" | \
   sort | uniq -d | grep . && { echo "error: duplicate IPs found" >&2; exit 1; }
 
-echo "Rendered the repo into $1"
+rm -f "$project_dir"/**/.DS_Store
+echo "Rendered the repo into $project_dir"

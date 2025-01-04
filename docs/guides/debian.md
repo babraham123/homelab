@@ -1,7 +1,7 @@
 # Debian Linux setup
 Initial setup for any Debian Linux instance. Configures the shell, ssh access and useful utilities.
 
-- First do the basic [VM setup](./vm.md)
+- First do the basic [VM setup](./vm.md) if it's a VM running on Proxmox.
 
 ## OS
 [Vid](https://www.youtube.com/watch?v=XEoO1FgIel4)
@@ -96,3 +96,13 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 
 - Logout and log back in. Configure oh-my-zsh
 	- Answers: `yyyy211n1311111y1y`
+
+## Homelab Repo
+- Install the homelab source code
+```bash
+exit
+# From your local device
+ssh-copy-id {{ username }}@SUBDOMAIN.{{ site.url }}
+tools/render_src.sh /tmp/homelab-rendered
+tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
+```
