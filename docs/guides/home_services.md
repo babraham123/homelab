@@ -27,8 +27,6 @@ Refs: [ESPHome](https://esphome.io/components/ota/esphome.html), [Shelly](https:
 ```bash
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 # TODO: For iot devices, migrate from LAN to wifi vlan
-# mDNS
-ufw allow in from any to any port 5353 proto udp
 # MQTT broker
 ufw allow in from any to any port 1883 proto tcp
 ufw route allow in on {{ homesvcs.interface }} out on $NET_IFACE to any port 1883

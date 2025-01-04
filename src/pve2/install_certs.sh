@@ -12,8 +12,9 @@ mv pveproxy-ssl.* /etc/pve/nodes/pve2/
 chown root:www-data /etc/pve/nodes/pve2/pveproxy-ssl.pem /etc/pve/nodes/pve2/pveproxy-ssl.key
 chmod 640 /etc/pve/nodes/pve2/pveproxy-ssl.pem /etc/pve/nodes/pve2/pveproxy-ssl.key
 
+# Ref: https://forum.proxmox.com/threads/proxmox-backup-tailscale-proxmox-backup-proxy-service-wont-boot.153204/
 mv proxy.* /etc/proxmox-backup/
-chown root:backup /etc/proxmox-backup/proxy.pem /etc/proxmox-backup/proxy.key
+chown backup:backup /etc/proxmox-backup/proxy.pem /etc/proxmox-backup/proxy.key
 chmod 640 /etc/proxmox-backup/proxy.pem /etc/proxmox-backup/proxy.key
 
 systemctl restart pveproxy.service

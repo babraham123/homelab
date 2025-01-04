@@ -32,6 +32,23 @@ case $1 in
     rm /etc/systemd/system/OliveTin.service
     cp olive_tin/olive_tin.service /etc/systemd/system
     ;;
+  mdns_repeater)
+    wget --output-document=mdns_repeater.zip "https://github.com/devsecurity-io/mdns-repeater/archive/refs/heads/master.zip"
+    unzip mdns_repeater.zip
+    cd mdns-repeater-master
+    make all
+    chmod +x mdns-repeater
+    cp mdns-repeater /usr/local/bin
+    from=$(ip a | grep 'state UP' | sed -r 's/^[0-9]+: ((enp|eth|vmbr)[^:]+): .*/\1/;t;d')
+    to=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+    echo "Confirm that the following interfaces are correct: $from -> $to"
+    echo "# Options to pass to mdns-repeater" > /etc/default/mdns-repeater
+    echo "MDNS_REPEATER_OPTS=\"$from $to\"" >> /etc/default/mdns-repeater
+    chmod 644 mdns-repeater.service
+    mv mdns-repeater.service /etc/systemd/system/mdns_repeater.service
+    cd ..
+    rm -rf mdns*
+    ;;
   node_exporter)
     NE_VERSION=$(curl -s "https://api.github.com/repos/prometheus/node_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
     wget --output-document=ne.tar.gz "https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}/node_exporter-${NE_VERSION}.linux-amd64.tar.gz"
