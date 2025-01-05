@@ -100,7 +100,7 @@ ldap_user_email = "{{ site.email }}"
 ## Alternatively, you can use key_seed to override this instead of relying on
 ## a file.
 ## Env variable: LLDAP_KEY_FILE
-#key_file = "/data/private_key"
+key_file = ""
 
 ## Seed to generate the server private key, see key_file above.
 ## This can be any random string, the recommendation is that it's at least 12

@@ -22,7 +22,7 @@ IP={{ websvcs.container_subnet }}.9
 Environment=PUID=1000 PGID=1000
 Environment=TZ={{ personal.timezone }}
 Environment=LOG_TARGETS=stdout
-Volume=/etc/opt/homepage/images:/app/public/images:ro
+Volume=/etc/opt/homepage/images:/app/public/images
 Volume=/etc/opt/homepage/config:/app/config
 
 [Service]

@@ -14,7 +14,7 @@ src/homesvcs/install_svcs.sh traefik
 src/homesvcs/install_svcs.sh vmagent
 src/homesvcs/install_svcs.sh mosquitto
 src/homesvcs/install_svcs.sh zigbee2mqtt
-src/homesvcs/install_svcs.sh esphome
+# src/homesvcs/install_svcs.sh esphome
 src/homesvcs/install_svcs.sh home_assistant
 src/homesvcs/install_svcs.sh fluentbit
 

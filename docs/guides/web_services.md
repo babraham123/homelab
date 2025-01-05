@@ -14,7 +14,7 @@ src/websvcs/install_svcs.sh traefik
 src/websvcs/install_svcs.sh vmagent
 src/websvcs/install_svcs.sh nginx
 src/websvcs/install_svcs.sh homepage
-src/websvcs/install_svcs.sh finance_exporter
+# src/websvcs/install_svcs.sh finance_exporter
 src/websvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
