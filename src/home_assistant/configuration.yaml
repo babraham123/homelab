@@ -80,7 +80,7 @@ webhook:
 zeroconf:
 
 # Ref: https://www.home-assistant.io/integrations/recorder/
-# recorder:
+recorder:
   # db_url: "postgresql://hass@pgdb.{{ site.url }}:5432/hass"
   db_url: "sqlite:////data/hass.db"
   db_max_retries: 10

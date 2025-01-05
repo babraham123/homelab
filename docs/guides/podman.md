@@ -30,7 +30,7 @@ echo "deb http://downloadcontent.opensuse.org/repositories/home:/alvistack/Debia
 
 apt update
 apt -y upgrade
-apt -y install podman podman-netavark podman-compose libgpgme11-dev buildah libyajl2
+apt -y install podman podman-netavark podman-aardvark-dns podman-compose libgpgme11-dev buildah libyajl2
 ```
 
 - Enable container auto updating

@@ -40,8 +40,8 @@ case $1 in
     cp zigbee2mqtt/zigbee2mqtt.container /etc/containers/systemd
     ;;
   esphome)
-    mkdir -p /etc/opt/esphome
-    cp esphome/esphome.conf /etc/opt/esphome
+    mkdir -p /etc/opt/esphome/config
+    cp esphome/*.yaml /etc/opt/esphome/config
     cp esphome/esphome.container /etc/containers/systemd
     ;;
   home_assistant)

@@ -22,8 +22,8 @@ PublishPort=1883:1883
 
 Environment=TZ={{ personal.timezone }}
 
-Volume=/etc/opt/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-Volume=/etc/opt/mosquitto/certificates:/mosquitto/certs:ro
+Volume=/etc/opt/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+Volume=/etc/opt/mosquitto/certificates:/mosquitto/certs
 Volume=mqttdata.volume:/mosquitto/data
 
 [Service]

@@ -6,6 +6,8 @@
 set -euo pipefail
 
 host="$1"
+addr="{{ username }}@$host.{{ site.url }}"
+
 /root/homelab-rendered/src/debian/is_root.sh
 /root/homelab-rendered/src/debian/is_reachable.sh "$host"
 
@@ -17,7 +19,6 @@ chmod 600 "/root/secrets/$host.yaml"
 chmod 400 "/root/secrets/$host.yaml.age"
 scp "/root/secrets/$host.yaml.age" "$addr:/home/{{ username }}/secrets.yaml.age"
 
-addr="{{ username }}@$host.{{ site.url }}"
 echo "$host root password:"
 ssh -t "$addr" '
 sudo mkdir -p /etc/opt/secrets
