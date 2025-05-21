@@ -51,12 +51,16 @@ sudo systemctl enable moonlight.service
 - In the Moonlight GUI, set resolution to 1080p, refresh rate to 60Hz
 
 - Buy Xbox S/X controllers (model [1914](https://boilingsteam.com/xbox-one-controller-a-perfected-xbox-360-gamepad/)) and [dongle](https://www.newegg.com/p/2NG-015J-00004?item=9SIB5YAK5E3117)
-- Install [xone](https://github.com/medusalix/xone) driver
+- Install [xone](https://github.com/dlundqvist/xone) driver
 ```bash
 # Plugin in dongle
-git clone https://github.com/medusalix/xone
+git clone https://github.com/dlundqvist/xone
 cd xone
 sudo ./install.sh --release
 sudo xow-get-firmware.sh --skip-disclaimer
 ```
 - Power on controllers, [pair](https://support.xbox.com/en-US/help/hardware-network/controller/connect-xbox-wireless-controller-to-pc)
+  - Put dongle into pairing mode
+```bash
+echo 1 | sudo tee /sys/bus/usb/drivers/xone-dongle/*/pairing
+```

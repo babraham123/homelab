@@ -89,6 +89,10 @@ lspci
 - Setup WiFi AP
   - `http://tplinkeap.net/`
   - Set all SSIDs to use WPA-Personal, WPA2-PSK security
+    - Go to Wireless >> Wireless Settings
+    - For each SSID >> Action >> click the edit icon
+  - Backup settings
+    - Go to System >> Backup & Restore >> click Backup
 - Test connectivity / DNS issues, [src](https://docs.netgate.com/pfsense/en/latest/troubleshooting/connectivity.html)
   - Disabled IPv6 and DNSSEC (for now) 
 - Enable auto backup (ACB)
@@ -119,7 +123,7 @@ Improve latency when under heavy load
 - Follow all the steps listed [here](https://docs.netgate.com/pfsense/en/latest/recipes/codel-limiters.html). That includes:
   - Run the load test
   - Create a download limiter and queue
-  - Repeat for upload
+  - Create an upload limiter and queue
   - Create a floating rule
 
 ## Networking
