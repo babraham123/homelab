@@ -39,6 +39,7 @@ entryPoints:
       insecure: false
       trustedIPs: [{{ vpn.ip }}, {{ pve1.gateway }}, {{ pve2.gateway }}]
 certificatesResolvers:
+  # Consider changing cert duration from 90 days to 1 year
   le-http-staging:
     acme:
       email: {{ site.email }}

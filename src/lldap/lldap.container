@@ -10,7 +10,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/nitnelave/lldap:stable
+Image=docker.io/lldap/lldap:stable
 ContainerName=lldap
 AutoUpdate=registry
 NoNewPrivileges=true

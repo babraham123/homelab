@@ -216,7 +216,22 @@ Perform these steps after pve1, secsvcs and victoriametrics is configured. [Ref]
   - bucket = proxmox
   - token = admin:PASSWORD
 
-## Upgrade from PVE 7 to 8 (bullseye to bookworm)
+## Upgrade
+
+### Minor version
+Consider pinning the kernel version
+- [PVE 8.4 guide](https://pve.proxmox.com/wiki/Downloads#Update_a_running_Proxmox_Virtual_Environment_8.x_to_latest_8.4)
+```bash
+sudo su
+apt update
+apt dist-upgrade
+reboot
+pveversion -v
+systemctl status proxmox-backup-proxy.service proxmox-backup.service
+```
+
+### From PVE 7 to 8 (bullseye to bookworm)
+- Make sure the VM backups are up to date
 - [PVE guide](https://pve.proxmox.com/wiki/Upgrade_from_7_to_8)
 - [PBS guide](https://pbs.proxmox.com/wiki/index.php/Upgrade_from_2_to_3#In-place_Upgrade)
 ```bash

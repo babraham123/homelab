@@ -27,7 +27,7 @@ http:
       service: homepage@file
     static-files:
       <<: *service
-      rule: Host(`www.{{ site.url }}`, `static.{{ site.url }}`, `blog.{{ site.url }}`, `wifi.{{ site.url }}`)
+      rule: Host(`www.{{ site.url }}`) || Host(`static.{{ site.url }}`) || Host(`blog.{{ site.url }}`) || Host(`wifi.{{ site.url }}`)
       service: nginx@file
       middlewares:
         - gzip@file

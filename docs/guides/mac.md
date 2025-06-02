@@ -64,7 +64,9 @@ networksetup -createlocation Home populate
 networksetup -switchtolocation Home
 ```
 - Configure the desired DNS settings
-  - Go To System Settings >> Wi-Fi >> details >> DNS
+  - Go To System Settings >> Wi-Fi >> Details >> DNS
+    - Under DNS Servers, add {{ lan.gateway }} and delete other IPs
+    - Under Search Domains, add {{ site.url }}
 - Setup watcher
 ```bash
 networksetup -switchtolocation Automatic
@@ -73,7 +75,8 @@ cp macos/detect_wifi_change.sh /usr/local/bin
 cp macos/com.my.detect.wifi.change.plist ~/Library/LaunchAgents
 launchctl load ~/Library/LaunchAgents/com.my.detect.wifi.change.plist
 ```
-- Test by switching WiFi
+- Test by switching WiFi networks, confirm location changes
+  - `networksetup -getcurrentlocation`
 
 ## Static site tools and generator
 - Install tools

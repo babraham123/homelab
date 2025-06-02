@@ -37,7 +37,7 @@ systemctl restart headscale
 ```bash
 headscale completion bash > /etc/bash_completion.d/headcompletion
 headscale users create {{ username }}
-headscale --user {{ username }} preauthkeys create --reusable --expiration 24h
+headscale --user USER_ID preauthkeys create --reusable --expiration 24h
 ```
 
 ## Clients
@@ -46,14 +46,20 @@ headscale --user {{ username }} preauthkeys create --reusable --expiration 24h
 	- Restart pfSense ([issue](https://github.com/tailscale/tailscale/issues/7780))
 	- On the VPN server, enable pfSense's routes
 ```bash
-headscale routes list
+headscale nodes list-routes
 # Repeat for all desired subnets
-headscale routes enable -r 1
+headscale nodes approve-routes --identifier NODE_ID --routes 0.0.0.0/0,::/0
+headscale nodes approve-routes --identifier NODE_ID --routes 192.168.5.0/24
+headscale nodes approve-routes --identifier NODE_ID --routes 192.168.7.0/24
+
 # Create users
 {% for user in users %}
 headscale users create {{ user }}{% endfor %}
 # add_more_users
 headscale users create guest1
+
+# for each user:
+headscale --user USER_ID preauthkeys create --expiration 2h
 ```
 - For MacOS, use Tailscale app ([src](https://github.com/juanfont/headscale/blob/main/hscontrol/templates/apple.html)), or
 ```bash
@@ -100,9 +106,9 @@ src/vpn/install_svcs.sh haproxy
 ```bash
 # Create user
 headscale users create public
+headscale --user USER_ID preauthkeys create --reusable --expiration 24h
 # Setup client
 src/vpn/install_svcs.sh tailscale
-headscale --user public preauthkeys create --reusable --expiration 24h
 tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --authkey AUTH_KEY
 # Clamp MTU
 iptables -t mangle -A FORWARD -i tailscale0 -o {{ vpn.interface }} -p tcp -m tcp \
@@ -163,3 +169,6 @@ chmod 600 /etc/opt/secrets/*
 ```bash
 src/vpn/install_svcs.sh headscale-ui
 ```
+
+## Upgrade
+[upgrade doc](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)

@@ -3,7 +3,7 @@ alias vi='vim'
 alias result='echo $?'
 alias fdfind='fd'
 
-alias master='git checkout master'
+alias main='git checkout main'
 alias st='git status'
 alias lg='git log --stat'
 alias lastcommit='git commit --amend --no-edit'

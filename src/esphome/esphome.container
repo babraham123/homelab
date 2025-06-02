@@ -23,6 +23,11 @@ IP={{ homesvcs.container_subnet }}.10
 #   8266 for the ESP8266
 #   2040 for the RP2040
 #   8892 for Beken chips
+# hostPort:containerPort
+PublishPort=3232:3232
+PublishPort=8266:8266
+PublishPort=2040:2040
+PublishPort=8892:8892
 
 Environment=TZ={{ personal.timezone }}
 Environment=ESPHOME_DASHBOARD_USE_PING=true

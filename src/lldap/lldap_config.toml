@@ -14,7 +14,9 @@ verbose=false
 ## The host address that the LDAP server will be bound to.
 ## To enable IPv6 support, simply switch "ldap_host" to "::":
 ## To only allow connections from localhost (if you want to restrict to local self-hosted services),
-## change it to "127.0.0.1" ("::1" in case of IPv6)".
+## change it to "127.0.0.1" ("::1" in case of IPv6).
+## If LLDAP server is running in docker, set it to "0.0.0.0" ("::" for IPv6) to allow connections
+## originating from outside the container.
 ldap_host = "0.0.0.0"
 
 ## The port on which to have the LDAP server.
@@ -23,7 +25,9 @@ ldap_port = 3890
 ## The host address that the HTTP server will be bound to.
 ## To enable IPv6 support, simply switch "http_host" to "::".
 ## To only allow connections from localhost (if you want to restrict to local self-hosted services),
-## change it to "127.0.0.1" ("::1" in case of IPv6)".
+## change it to "127.0.0.1" ("::1" in case of IPv6).
+## If LLDAP server is running in docker, set it to "0.0.0.0" ("::" for IPv6) to allow connections
+## originating from outside the container.
 http_host = "0.0.0.0"
 
 ## The port on which to have the HTTP server, for user login and
@@ -32,6 +36,9 @@ http_port = 17170
 
 ## The public URL of the server, for password reset links.
 http_url = "https://ldap.{{ site.url }}"
+
+## The path to the front-end assets (relative to the working directory).
+#assets_path = "./app"
 
 ## Random secret for JWT signature.
 ## This secret should be random, and should be shared with application
@@ -77,6 +84,13 @@ ldap_user_email = "{{ site.email }}"
 ## Note: you can create another admin user for user administration, this
 ## is just the default one.
 #ldap_user_pass = "REPLACE_WITH_PASSWORD"
+
+## Force reset of the admin password.
+## Break glass in case of emergency: if you lost the admin password, you
+## can set this to true to force a reset of the admin password to the value
+## of ldap_user_pass above.
+## Alternatively, you can set it to "always" to reset every time the server starts.
+# force_ldap_user_pass_reset = false
 
 ## Database URL.
 ## This encodes the type of database (SQlite, MySQL, or PostgreSQL)
@@ -136,7 +150,7 @@ user="{{ site.email }}"
 ## is a free-form name, followed by an email between <>.
 from="LLDAP Admin <admin@{{ site.url }}>"
 ## Same for reply-to, optional.
-#reply_to="Do not reply <noreply@localhost>"
+reply_to="Do not reply <noreply@{{ site.url }}>"
 
 ## Options to configure LDAPS.
 ## To set these options from environment variables, use the following format

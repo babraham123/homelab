@@ -41,7 +41,8 @@
       "dst": ["*:*"]
     },
 
-    // ACLs currently don't work for subnets, re-enable in future version
+    // ACLs currently don't work for subnets
+    // TODO: re-enable when Tailscale better supports FreeBSD
     // // admin has access to all nodes
     // {
     //   "action": "accept",
@@ -81,8 +82,8 @@
     //   ]
     // },
 
-    // We still have to allow internal users communications since nothing guarantees that each user have
-    // their own users.
+    // We still have to allow internal users communications since nothing guarantees that each user
+    // has access to themselves.
     { "action": "accept", "src": ["{{ username }}"], "dst": ["{{ username }}:*"] },
     { "action": "accept", "src": ["public"], "dst": ["public:*"] },
 {% for user in users %}
