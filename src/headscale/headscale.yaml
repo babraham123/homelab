@@ -59,7 +59,7 @@ noise:
 # IPv6: https://github.com/tailscale/tailscale/blob/22ebb25e833264f58d7c3f534a8b166894a89536/net/tsaddr/tsaddr.go#LL81C52-L81C71
 # IPv4: https://github.com/tailscale/tailscale/blob/22ebb25e833264f58d7c3f534a8b166894a89536/net/tsaddr/tsaddr.go#L33
 # Any other range is NOT supported, and it will cause unexpected issues.
-ip_prefixes:
+prefixes:
   v4: 100.64.0.0/10
   v6: fd7a:115c:a1e0::/48
 
@@ -279,7 +279,7 @@ dns:
 
   # Whether to use the local DNS settings of a node (default) or override the
   # local DNS settings and force the use of Headscale's DNS configuration.
-  override_local_dns: false
+  override_local_dns: true
 
   # List of DNS servers to expose to clients.
   nameservers:

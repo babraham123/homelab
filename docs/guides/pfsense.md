@@ -172,9 +172,11 @@ pkg-static add https://github.com/jaredhendrickson13/pfsense-api/releases/latest
 ### mDNS
 [src](https://forums.lawrencesystems.com/t/avahi-with-google-chromecast-on-pfsense/2074/4)
 - Go to System >> Package Manager
-- Install the Avahi package
-- Go to Services >> Avahi
-- Enable daemon, Action = allow, select internal interfaces (not WAN), Enable reflection
+- Install the mDNS-Bridge package
+- Go to Services >> mDNS Bridge
+  - Enable daemon
+  - Select all the available interfaces
+  - Save
 
 ### Ad Block
 [ref](https://www.youtube.com/watch?v=xizAeAqYde4)
