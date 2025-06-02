@@ -49,7 +49,8 @@ journalctl -eu authelia
   - Navigate to `ldap.{{ site.url }}` and login
     User = admin, get the password below
     `/usr/local/bin/get_secret.sh lldap_admin_password`
-  - Add some users, add them to the `lldap_password_manager` group
+  - Add regular users, add them to the `lldap_password_manager` group
+    - {% for user in users %}{{ user }}, {% endfor %} (note for future: add_more_users)
   - Create the `authelia_gen_access` group, add users to it
   - Uncomment out the authelia middleware
     `vim /etc/opt/traefik/config/dynamic/traefik.yml`

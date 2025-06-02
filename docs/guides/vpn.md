@@ -36,15 +36,15 @@ systemctl restart headscale
 - Create pre-auth key
 ```bash
 headscale completion bash > /etc/bash_completion.d/headcompletion
-headscale users create {{ username }}
-headscale --user USER_ID preauthkeys create --reusable --expiration 24h
+headscale users create admin@
+headscale --user USER_ID preauthkeys create --expiration 100y
 ```
 
 ## Clients
 - For home network, use Tailscale plugin on pfSense ([src](https://www.wundertech.net/how-to-set-up-tailscale-on-pfsense/))
 	- Setup as an [Exit Node](https://headscale.net/exit-node/) for the desired subnet
 	- Restart pfSense ([issue](https://github.com/tailscale/tailscale/issues/7780))
-	- On the VPN server, enable pfSense's routes
+	- On the VPN server, enable pfSense's routes, [ref](https://headscale.net/stable/ref/routes/)
 ```bash
 headscale nodes list-routes
 # Repeat for all desired subnets
@@ -54,9 +54,9 @@ headscale nodes approve-routes --identifier NODE_ID --routes 192.168.7.0/24
 
 # Create users
 {% for user in users %}
-headscale users create {{ user }}{% endfor %}
+headscale users create {{ user }}@{% endfor %}
 # add_more_users
-headscale users create guest1
+headscale users create guest1@
 
 # for each user:
 headscale --user USER_ID preauthkeys create --expiration 2h
@@ -106,7 +106,7 @@ src/vpn/install_svcs.sh haproxy
 ```bash
 # Create user
 headscale users create public
-headscale --user USER_ID preauthkeys create --reusable --expiration 24h
+headscale --user USER_ID preauthkeys create --expiration 100y
 # Setup client
 src/vpn/install_svcs.sh tailscale
 tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --authkey AUTH_KEY

@@ -6,10 +6,9 @@
   // groups are collections of users having a common scope. A user can be in multiple groups
   // groups cannot be composed of groups
   "groups": {
-    "group:admin": ["{{ username }}"], // treated as the admin / machine user
-    "group:family": ["{{ users | join('","') }}"],
+    "group:family": ["{{ users | join('"@,"') }}@"],
     // add_more_users
-    // "group:guests": ["guest1"],
+    // "group:guests": ["guest1@"],
   },
   // hosts should be defined using its IP addresses and a subnet mask.
   // to define a single host, use a /32 mask. You cannot use DNS entries here,
@@ -32,23 +31,17 @@
   "acls": [
     {
       "action": "accept",
-      "src": ["{{ username }}"],
+      "src": ["admin@"],
       "dst": ["*:*"]
     },
     {
       "action": "accept",
-      "src": ["public"],
+      "src": ["public@"],
       "dst": ["*:*"]
     },
 
     // ACLs currently don't work for subnets
     // TODO: re-enable when Tailscale better supports FreeBSD
-    // // admin has access to all nodes
-    // {
-    //   "action": "accept",
-    //   "src": ["group:admin"],
-    //   "dst": ["*:*"]
-    // },
     // // family can access entire VPN
     // {
     //   "action": "accept",
@@ -74,7 +67,7 @@
     // // public endpoint can access web services
     // {
     //   "action": "accept",
-    //   "src": ["public"],
+    //   "src": ["public@"],
     //   "dst": [
     //     "*:0",
     //     "secsvcs:80,443",
@@ -84,16 +77,17 @@
 
     // We still have to allow internal users communications since nothing guarantees that each user
     // has access to themselves.
-    { "action": "accept", "src": ["{{ username }}"], "dst": ["{{ username }}:*"] },
-    { "action": "accept", "src": ["public"], "dst": ["public:*"] },
+    { "action": "accept", "src": ["admin@"], "dst": ["admin@:*"] },
+    { "action": "accept", "src": ["public@"], "dst": ["public@:*"] },
 {% for user in users %}
-    { "action": "accept", "src": ["{{ user }}"], "dst": ["{{ user }}:*"] },{% endfor %}
+    { "action": "accept", "src": ["{{ user }}@"], "dst": ["{{ user }}@:*"] },{% endfor %}
     // add_more_users
-    // { "action": "accept", "src": ["guest1"], "dst": ["guest1:*"] },
+    // TODO: add support for guests when ACLs work for subnets
+    // { "action": "accept", "src": ["guest1@"], "dst": ["guest1@:*"] },
   ],
   "tests": [
     {
-      "src": "public",
+      "src": "public@",
       "accept": ["{{ websvcs.ip }}:443", "{{ secsvcs.ip }}:80"],
       "deny": ["{{ pve2.ip }}:443", "{{ pve2.gateway }}:443"],
     }

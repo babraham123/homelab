@@ -25,6 +25,7 @@ Once the network, hosts and VMs are setup, you'll download the repo onto the SBC
 1. VPN setup
 1. pve1 host: acme certs
 1. secsvcs
+1. VPN setup: user access
 1. websvcs
 1. gaming
 1. devtop
