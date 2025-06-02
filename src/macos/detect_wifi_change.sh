@@ -6,7 +6,10 @@
 
 set -euo pipefail
 
-if [[ $(networksetup -getairportnetwork en0) == "Current Wi-Fi Network: {{ wifi.ssid24 }}" || $(networksetup -getairportnetwork en0) == "Current Wi-Fi Network: {{ wifi.ssid5 }}" ]]
+iface=$(networksetup -listallhardwareports | awk '/Wi-Fi/{getline; print $2}')
+ssid=$(ipconfig getsummary "$iface" | grep -w SSID | awk '{print $NF}')
+
+if [[ $ssid == "{{ wifi.ssid24 }}" || $ssid == "{{ wifi.ssid5 }}" ]]
 then
   if ! [[ $(networksetup -getcurrentlocation) == "Home" ]]
   then

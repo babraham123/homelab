@@ -30,8 +30,8 @@ case $1 in
     fingerprint=$(proxmox-backup-manager cert info | grep "Fingerprint" | sed -r 's/Fingerprint\s+\(sha256\):\s+([a-f0-9:]+)/\1/')
     pvesm set pbs2 --fingerprint "$fingerprint"
 
-    # Print out the certificate info for PVE1
-    proxmox-backup-manager cert info
+    # Print out the fingerprint for PVE1
+    echo "$fingerprint"
     ;;
   *)
     echo "error: unknown file type: $1" >&2

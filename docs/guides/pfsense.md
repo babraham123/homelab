@@ -47,7 +47,7 @@ systemctl start lightdm
 - Connect to pve console: https://HOST_IP_ADDR:8006/
 - Upload pfSense ISO using USB, [src](https://www.virtualizationhowto.com/2022/08/pfsense-proxmox-install-process-and-configuration/)
 - Create VM
-  - 64GB disk, 4 cores, 4GB memory, no network
+  - 96GB disk, 2 cores, 12GB memory, no network
   - startup order 1, ssd emulation, discard=1, cache=none
 - Enable IOMMU / NIC passthrough, [src](https://www.servethehome.com/how-to-pass-through-pcie-nics-with-proxmox-ve-on-intel-and-amd/)
   - BIOS >> Advanced >> CPU Configuration >> VMX >> Enabled
@@ -92,7 +92,7 @@ lspci
     - Go to Wireless >> Wireless Settings
     - For each SSID >> Action >> click the edit icon
   - Backup settings
-    - Go to System >> Backup & Restore >> click Backup
+    - Go to System >> Backup & Restore >> click Backup (local)
 - Test connectivity / DNS issues, [src](https://docs.netgate.com/pfsense/en/latest/troubleshooting/connectivity.html)
   - Disabled IPv6 and DNSSEC (for now) 
 - Enable auto backup (ACB)
@@ -105,9 +105,7 @@ lspci
 ```bash
 ssh admin@router.{{ site.url }}
 pkg install -y qemu-guest-agent
-nano /etc/rc.conf.local
-nano /usr/local/etc/rc.d/qemu-agent.sh
-chmod +x /usr/local/etc/rc.d/qemu-agent.sh
+sysrc qemu_guest_agent_enable="YES"
 service qemu-guest-agent start
 ```
 
@@ -168,27 +166,8 @@ rm pfsense-import-certificate.php
 - Setup API access, [Ref](https://github.com/jaredhendrickson13/pfsense-api)
 ```bash
 # Reinstall after update
-pkg -C /dev/null add https://github.com/jaredhendrickson13/pfsense-api/releases/latest/download/pfSense-2.7-pkg-API.pkg && /etc/rc.restart_webgui
+pkg-static add https://github.com/jaredhendrickson13/pfsense-api/releases/latest/download/pfSense-2.8.0-pkg-RESTAPI.pkg && /etc/rc.restart_webgui
 ```
-
-Networking ref:
-- https://docs.netgate.com/pfsense/en/latest/recipes/virtualize-proxmox-ve.html#basic-proxmox-ve-networking 
-- https://forum.proxmox.com/threads/proxmox-isp-modem-without-a-router.105338/
-- https://forum.proxmox.com/threads/proxmox-management-interface-and-pfsense.120231/ 
-- https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking# 
-- https://pve.proxmox.com/wiki/Network_Configuration 
-- https://pve.proxmox.com/pve-docs/chapter-sysadmin.html#_choosing_a_network_configuration 
-
-VM sizing ref:
-- https://docs.netgate.com/pfsense/en/latest/hardware/size.html 
-- https://www.intel.com/content/www/us/en/products/sku/212328/intel-celeron-processor-n5105-4m-cache-up-to-2-90-ghz/specifications.html 
-- https://www.reddit.com/r/Proxmox/comments/u3imdm/how_bad_is_the_overcommitting_of_cpu_and_memory/ 
-- https://www.aliexpress.us/item/3256804315368607.html?spm=a2g0o.order_detail.order_detail_item.3.3a7cf19cWI0ORL&gatewayAdapt=glo2usa&_randl_shipto=US 
-
-Other ref:
-- https://www.servethehome.com/new-fanless-4x-2-5gbe-intel-n5105-i226-v-firewall-tested/ 
-- https://pve.proxmox.com/wiki/Pci_passthrough 
-- https://pve.proxmox.com/wiki/SPICE 
 
 ### mDNS
 [src](https://forums.lawrencesystems.com/t/avahi-with-google-chromecast-on-pfsense/2074/4)
@@ -208,6 +187,12 @@ Other ref:
 - Geo data:
   - Register for a MaxMind acct
   - Go to IP, add license key and account id
+- Go to DNSBL
+  - Set DNSBL Mode to "Unbound python mode"
+  - Enable Wildcard Blocking (TLD)
+  - Disable DNS Reply Logging
+  - Go to DNSBL Groups
+    - TODO ???
 
 ## PVE1 remaining setup
 Execute the following sections from the [proxmox guide](./proxmox.md):
@@ -252,3 +237,40 @@ Service Watchdog:
 - Install the Service Watchdog package
 - Go to Services >> Service Watchdog
 - Add all of the services present (especially Tailscale and sshd)
+
+## Updates
+
+- Disable the vm_watchdog in PVE1
+```
+ssh {{ username }}@pve1.{{ site.url }}
+sudo systemctl stop vm_watchdog
+sudo systemctl disable vm_watchdog
+exit
+```
+- Backup the pfsense VM image
+- Backup the pfsense config
+- Uninstall all of the pfsense pkgs if recommended
+- Apply the upgrade and reboot
+- Restore the pfsense config and re-install all pkgs
+- If necessary, manual re-install pkgs
+
+## References
+
+#### Networking
+- https://docs.netgate.com/pfsense/en/latest/recipes/virtualize-proxmox-ve.html#basic-proxmox-ve-networking 
+- https://forum.proxmox.com/threads/proxmox-isp-modem-without-a-router.105338/
+- https://forum.proxmox.com/threads/proxmox-management-interface-and-pfsense.120231/ 
+- https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking# 
+- https://pve.proxmox.com/wiki/Network_Configuration 
+- https://pve.proxmox.com/pve-docs/chapter-sysadmin.html#_choosing_a_network_configuration 
+
+#### VM sizing
+- https://docs.netgate.com/pfsense/en/latest/hardware/size.html 
+- https://www.intel.com/content/www/us/en/products/sku/212328/intel-celeron-processor-n5105-4m-cache-up-to-2-90-ghz/specifications.html 
+- https://www.reddit.com/r/Proxmox/comments/u3imdm/how_bad_is_the_overcommitting_of_cpu_and_memory/ 
+- https://www.aliexpress.us/item/3256804315368607.html?spm=a2g0o.order_detail.order_detail_item.3.3a7cf19cWI0ORL&gatewayAdapt=glo2usa&_randl_shipto=US 
+
+#### Other
+- https://www.servethehome.com/new-fanless-4x-2-5gbe-intel-n5105-i226-v-firewall-tested/ 
+- https://pve.proxmox.com/wiki/Pci_passthrough 
+- https://pve.proxmox.com/wiki/SPICE 

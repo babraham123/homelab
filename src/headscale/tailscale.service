@@ -1,5 +1,5 @@
 # /etc/systemd/system/tailscale.service
-# TODO: test this
+# TODO: test this, not currently in use
 [Unit]
 Description="Homelab: Tailscale client manager"
 StartLimitIntervalSec=30

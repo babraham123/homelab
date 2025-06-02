@@ -22,6 +22,8 @@ IP={{ websvcs.container_subnet }}.9
 Environment=PUID=1000 PGID=1000
 Environment=TZ={{ personal.timezone }}
 Environment=LOG_TARGETS=stdout
+Environment=HOMEPAGE_ALLOWED_HOSTS=dash.{{ site.url }},{{ websvcs.container_subnet }}.9
+
 Volume=/etc/opt/homepage/images:/app/public/images
 Volume=/etc/opt/homepage/config:/app/config
 

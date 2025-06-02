@@ -18,12 +18,7 @@ NoNewPrivileges=true
 Network=net.network
 HostName=zigbee.{{ site.url }}
 IP={{ homesvcs.container_subnet }}.9
-# port 8080
-# hostPort:containerPort
-PublishPort=3232:3232
-PublishPort=8266:8266
-PublishPort=2040:2040
-PublishPort=8892:8892
+# UI: port 8080
 
 Environment=TZ={{ personal.timezone }}
 Secret=zigbee_pan_id,type=env,target=ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID
@@ -32,8 +27,6 @@ Secret=zigbee_network_key,type=env,target=ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KE
 
 Volume=/etc/opt/zigbee2mqtt/config:/app/data
 Volume=/etc/opt/zigbee2mqtt/certificates:/etc/ssl:ro
-
-# AddDevice=/dev/foo
 
 [Service]
 Restart=on-failure

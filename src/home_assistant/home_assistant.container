@@ -23,6 +23,7 @@ Network=net.network
 HostName=home.{{ site.url }}
 IP={{ homesvcs.container_subnet }}.11
 # UI: port 8123
+# Shelly CoIoT protocol:
 # PublishPort=5683:5683
 
 Environment=TZ={{ personal.timezone }}

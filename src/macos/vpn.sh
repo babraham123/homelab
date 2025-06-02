@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Turns the Tailscale VPN on or off and updates the network location accordingly.
 # Usage:
-#   /usr/local/bin/vpn.sh
+#   /usr/local/bin/vpn.sh [up / down]
 
 set -euo pipefail
 

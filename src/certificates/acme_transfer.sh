@@ -56,7 +56,7 @@ ssh -t {{ username }}@pve2.{{ site.url }} 'sudo /root/homelab-rendered/src/pve2/
 
 # Update PBS fingerprint for PVE1
 # Ref: https://pbs.proxmox.com/docs/pve-integration.html
-fingerprint=$(grep "Fingerprint" pbs2_cert_info.txt | sed -r 's/Fingerprint\s+\(sha256\):\s+([a-f0-9:]+)/\1/')
+fingerprint=$(tail -n1 pbs2_cert_info.txt | tr -d '\r')
 pvesm set pbs2 --fingerprint "$fingerprint"
 
 # Ref: https://github.com/stompro/pfsense-import-certificate
