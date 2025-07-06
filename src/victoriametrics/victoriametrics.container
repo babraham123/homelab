@@ -43,6 +43,7 @@ Exec=--storageDataPath="/storage" \
 
 Environment=TZ={{ personal.timezone }}
 Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
 Volume=/etc/opt/victoriametrics/prometheus.yml:/etc/prometheus/prometheus.yml:ro
 Volume=vmdata.volume:/storage
 

@@ -22,7 +22,7 @@ fi
 
 echo "Downloading datasources..."
 
-wget --output-document=${plugin_path}/plugin.tar.gz "https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v${VL_VERSION}/victorialogs-datasource-v${VL_VERSION}.tar.gz"
+wget --output-document=${plugin_path}/plugin.tar.gz "https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v${VL_VERSION}/victoriametrics-logs-datasource-v${VL_VERSION}.tar.gz"
 # shellcheck disable=SC2115
 rm -rf ${vl_ds_path} || true
 mkdir -p ${vl_ds_path}
@@ -30,7 +30,7 @@ tar -xzf ${plugin_path}/plugin.tar.gz -C ${vl_ds_path}
 echo "VictoriaLogs datasource version ${VL_VERSION} has been installed."
 rm ${plugin_path}/plugin.tar.gz
 
-wget --output-document=${plugin_path}/plugin.tar.gz "https://github.com/VictoriaMetrics/victoriametrics-datasource/releases/download/v${VM_VERSION}/victoriametrics-datasource-v${VM_VERSION}.tar.gz"
+wget --output-document=${plugin_path}/plugin.tar.gz "https://github.com/VictoriaMetrics/victoriametrics-datasource/releases/download/v${VM_VERSION}/victoriametrics-metrics-datasource-v${VM_VERSION}.tar.gz"
 # shellcheck disable=SC2115
 rm -rf ${vm_ds_path} || true
 mkdir -p ${vm_ds_path}

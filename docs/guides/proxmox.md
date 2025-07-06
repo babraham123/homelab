@@ -204,6 +204,12 @@ cd /root/homelab-rendered
 src/debian/install_svcs.sh node_exporter
 ```
 
+- Allow access from metrics container in order to scrape node_exporter
+```bash
+# Use {{ secsvcs.ip }} on pve1, {{ websvcs.ip }} on pve2
+ufw allow in from {{ secsvcs.ip }} to any port 9100 proto tcp
+```
+
 Perform these steps after pve1, secsvcs and victoriametrics is configured. [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
 - Get the metrics admin password from secsvcs
   `/usr/local/bin/get_secret.sh victoriametrics_admin_password`

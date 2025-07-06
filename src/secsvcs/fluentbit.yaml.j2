@@ -1,0 +1,46 @@
+# /etc/opt/fluentbit/config.yaml.j2
+# Ref:
+#   https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/yaml/configuration-file
+#   https://docs.victoriametrics.com/victorialogs/data-ingestion/fluentbit/
+
+service:
+  flush: 1
+  log_level: warning
+  daemon: off
+  # https://docs.fluentbit.io/manual/administration/monitoring#http-server
+  http_server: on
+  http_listen: 0.0.0.0
+  http_port: 2020
+pipeline:
+  inputs:
+    # https://docs.fluentbit.io/manual/pipeline/inputs/systemd
+    - name: systemd
+      tag: host.*
+      # In memory (/run) vs persistent (/var) journaling in systemd
+      path: /var/log/journal
+      mem_buf_limit: 10MB
+      db: /data/fb_journald.db
+      strip_underscores: on
+      lowercase: on
+      systemd_filter_type: or
+      systemd_filter:{% raw %}{% for svc in homelab_services %}
+        - _SYSTEMD_UNIT={{ svc }}.service{% endfor %}{% endraw %}
+      processors:
+        logs:
+          - name: lua
+            match: '*'
+            script: /fluent-bit/etc/journald.lua
+            call: process_msg
+  outputs:
+    # https://docs.fluentbit.io/manual/pipeline/outputs/http
+    - name: http
+      match: '*'
+      host: logs.{{ site.url }}
+      port: 9428
+      http_user: admin
+      http_passwd: ${VL_ADMIN_PASSWORD}
+      # compress: gzip
+      uri: /insert/jsonline?_stream_fields=service,hostname&_msg_field=message&_time_field=date
+      format: json_lines
+      json_date_key: date
+      json_date_format: double

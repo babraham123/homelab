@@ -3,6 +3,7 @@
 #   - https://www.authelia.com/integration/proxies/traefik/
 #   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
 #   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+#   - https://doc.traefik.io/traefik/routing/routers/#priority
 # yamllint disable rule:document-start rule:document-end
 http:
   routers:
@@ -44,14 +45,22 @@ http:
         - secure-headers@file
     victoriametrics-api:
       <<: *service
-      # Ref: https://doc.traefik.io/traefik/routing/routers/#priority
       rule: Host(`metrics.{{ site.url }}`)
       service: victoriametrics@file
       middlewares: []
-    victorialogs:
+    victorialogs-ui:
+      <<: *service
+      rule: Host(`logs.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
+      service: victorialogs@file
+      middlewares:
+        - authelia@file
+        - vl-auth@file
+        - secure-headers@file
+    victorialogs-api:
       <<: *service
       rule: Host(`logs.{{ site.url }}`)
       service: victorialogs@file
+      middlewares: []
     vmalert:
       <<: *service
       rule: Host(`vmalert.{{ site.url }}`)
@@ -66,7 +75,6 @@ http:
         - secure-headers@file
     alertmanager-api:
       <<: *service
-      # Ref: https://doc.traefik.io/traefik/routing/routers/#priority
       rule: Host(`alert.{{ site.url }}`)
       service: alertmanager@file
       middlewares: []
@@ -81,7 +89,6 @@ http:
         - secure-headers@file
     ntfy-api:
       <<: *service
-      # Ref: https://doc.traefik.io/traefik/routing/routers/#priority
       rule: Host(`push.{{ site.url }}`)
       service: ntfy@file
       middlewares: []
@@ -115,11 +122,11 @@ http:
     victoriametrics:
       loadBalancer:
         servers:
-          - url: http://metrics.{{ site.url }}:8428/vmui/
+          - url: http://metrics.{{ site.url }}:8428/
     victorialogs:
       loadBalancer:
         servers:
-          - url: http://logs.{{ site.url }}:9428/select/vmui/
+          - url: http://logs.{{ site.url }}:9428/
     vmalert:
       loadBalancer:
         servers:
