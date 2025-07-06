@@ -28,10 +28,13 @@ Exec=--storageDataPath="/storage" \
      --storage.minFreeDiskSpaceBytes="8GiB" \
      --memory.allowedBytes="512MiB" \
      --search.maxConcurrentRequests="3" \
+     --httpAuth.username="admin" \
+     --httpAuth.password="%{VL_ADMIN_PASSWORD}" \
      --loggerLevel="WARN" \
      --loggerTimezone="{{ personal.timezone }}"
 
 Environment=TZ={{ personal.timezone }}
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
 Volume=vldata.volume:/storage
 
 [Service]

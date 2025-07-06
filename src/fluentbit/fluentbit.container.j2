@@ -1,4 +1,4 @@
-# /etc/containers/systemd/fluentbit.container.j2
+# /etc/containers/systemd/fluentbit.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
 
@@ -24,6 +24,8 @@ IP={% raw %}{{ subnet }}{% endraw %}.20
 Exec=--config="/fluent-bit/etc/config.yaml"
 
 Environment=TZ={{ personal.timezone }}
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
+
 Volume=/etc/opt/fluentbit:/fluent-bit/etc:ro
 Volume=/etc/machine-id:/etc/machine-id:ro
 Volume=/run/log/journal:/run/log/journal

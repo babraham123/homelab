@@ -54,7 +54,7 @@ case $1 in
     ;;
   fluentbit)
     mkdir -p /etc/opt/fluentbit
-    cp fluentbit/config.yaml.j2 /etc/opt/fluentbit
+    cp fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
     cp fluentbit/journald.lua /etc/opt/fluentbit
     /usr/local/bin/render_host.sh websvcs fluentbit/fluentbit.container
     mv fluentbit/fluentbit.container /etc/containers/systemd

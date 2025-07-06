@@ -19,6 +19,9 @@ scrape_configs:
   - job_name: 'victorialogs'
     static_configs:
       - targets: ['logs.{{ site.url }}:9428']
+    basic_auth:
+      username: 'admin'
+      password: '%{VL_ADMIN_PASSWORD}'
     metrics_path: /metrics
   - job_name: 'fluentbit'
     static_configs:

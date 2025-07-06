@@ -53,7 +53,7 @@ cp src/$HOST/net.network /etc/containers/systemd
 systemctl daemon-reload
 systemctl start net-network
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-# Use {{ websvcs.interface }} on websvcs, {{ homesvcs.interface }} on homesvcs
+# Use {{ secsvcs.interface }} on secsvcs, {{ websvcs.interface }} on websvcs, {{ homesvcs.interface }} on homesvcs
 ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,443 proto tcp
 
 ufw enable
@@ -82,7 +82,7 @@ podman secret ls
 ## mDNS
 - Install dependencies and service
 ```bash
-apt install build-essential
+apt install -y build-essential
 src/debian/install_svcs.sh mdns_repeater
 ```
 
@@ -98,6 +98,6 @@ src/debian/install_svcs.sh node_exporter
 
 - Allow access from metrics container to host in order to scrape node_exporter
 ```bash
-# Use {{ websvcs.container_subnet }}.7 on websvcs, {{ homesvcs.container_subnet }}.7 on homesvcs
+# Use {{ secsvcs.container_subnet }}.7 on secsvcs, {{ websvcs.container_subnet }}.7 on websvcs, {{ homesvcs.container_subnet }}.7 on homesvcs
 ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
 ```

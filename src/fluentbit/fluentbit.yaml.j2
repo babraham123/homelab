@@ -36,7 +36,12 @@ pipeline:
     - name: http
       match: '*'
       host: logs.{{ site.url }}
-      port: 9428
+      port: 443
+      http_user: admin
+      http_passwd: ${VL_ADMIN_PASSWORD}
+      tls: on
+      tls.verify: on
+      tls.verify_hostname: on
       # compress: gzip
       uri: /insert/jsonline?_stream_fields=service,hostname&_msg_field=message&_time_field=date
       format: json_lines

@@ -1,4 +1,4 @@
-# /etc/ntfy-alertmanager/config.scfg.j2
+# /etc/opt/ntfy-alertmanager/config.scfg.j2
 # Ref: https://git.xenrox.net/~xenrox/ntfy-alertmanager
 
 # Public facing base URL of the service (e.g. https://ntfy-alertmanager.xenrox.net)
@@ -98,7 +98,7 @@ alertmanager {
   user admin
   password {% raw %}{{ env('alertmanager_admin_password') }}{% endraw %}
   # By default the Alertmanager URL gets parsed from the webhook. In case that
-  # Alertmanger is not reachable under that URL, it can be overwritten here.
+  # Alertmanager is not reachable under that URL, it can be overwritten here.
   url https://alert.{{ site.url }}
 }
 
