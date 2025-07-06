@@ -65,7 +65,7 @@ resolved {
 
 ntfy {
   # URL of the ntfy topic - required
-  topic https://push.{{ site.url }}/alert
+  topic http://push.{{ site.url }}/alert
   # ntfy authentication via Basic Auth (https://docs.ntfy.sh/publish/#username-password)
   user alert
   password {% raw %}{{ env('ntfy_alert_password') }}{% endraw %}
