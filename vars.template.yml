@@ -13,9 +13,6 @@ personal:
     lat: 40.0001
     long: -120.0001
     elevation: 0
-  calendars:
-    - ics: "https://calendar.google.com/calendar/ical/abc123/basic.ics"
-      name: "Events"
   ticker_symbols:
     - "AAPL"
     - "GOOGL"

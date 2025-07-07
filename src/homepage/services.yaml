@@ -1,5 +1,6 @@
-# /etc/opt/homepage/services.yaml
+# /etc/opt/homepage/config/services.yaml
 # Ref: https://gethomepage.dev/configs/services/
+#   https://gethomepage.dev/installation/docker/#using-environment-secrets
 ---
 # - Group A:
 #     - Service A:
@@ -44,17 +45,14 @@
           showTime: true # optional - show time for event happening today - defaults to false
           # timezone: {{ personal.timezone }} # optional - defaults to browser timezone
           integrations: # optional
-{% for cal in personal.calendars %}
             - type: ical # Show calendar events from another service
-              # Google: go to Settings, select specific calendar, go to Integrate calendar, copy URL from Public Address in iCal format
-              url: {{ cal.ics }} # URL with calendar events
-              name: {{ cal.name }} # required - name for these calendar events
+              url: {% raw %}{{HOME_ICAL_URL}}{% endraw %} # iCal address, public or secret
+              name: Home # required - name for these calendar events
               color: {{ hp_colors[loop.index0 % hp_colors | length] }}
               params:
                 showName: false
-{% endfor %}
 
-- Media:
+# - Media:
 #     - Jellyfin:
 #         icon: jellyfin.svg
 #         href: https://media.{{ site.url }}/
@@ -138,7 +136,7 @@
         href: https://iot.{{ site.url }}/
         description: IoT device framework
 
-- Life:
+# - Life:
 #     - Mealie:
 #         icon: mealie.svg
 #         href: https://recipes.{{ site.url }}/
@@ -157,7 +155,7 @@
 #         #   url: http://ghostfolio.host.or.ip
 #         #   key: demo
 
-- Dev:
+# - Dev:
 #     - Forgejo:
 #         icon: forgejo.svg
 #         href: https://git.{{ site.url }}/
@@ -169,7 +167,7 @@
 
 - Infra:
     - TP-Link:
-        icon: tplink.svg
+        icon: sh-tp-link.svg
         href: https://wifi.{{ site.url }}/
         description: WiFi AP
     - pfSense:
@@ -221,6 +219,10 @@
         icon: traefik-proxy.svg
         href: https://secproxy.{{ site.url }}/
         description: Proxy dashboard for secsvcs
+    - Traefik Homesvcs:
+        icon: traefik-proxy.svg
+        href: https://homeproxy.{{ site.url }}/
+        description: Proxy dashboard for homesvcs
     - Traefik Websvcs:
         icon: traefik-proxy.svg
         href: https://webproxy.{{ site.url }}/
@@ -254,7 +256,7 @@
         #   type: prometheus
         #   url: http://prometheushost:port
     - VM Alert:
-        icon: sh-victoriametrics.svg
+        icon: mdi-alert-decagram
         href: https://vmalert.{{ site.url }}/
         description: Alerting rules
     - Ntfy:

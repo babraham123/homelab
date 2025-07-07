@@ -1,4 +1,4 @@
-# /etc/opt/homepage/settings.yaml
+# /etc/opt/homepage/config/settings.yaml
 # Ref: https://gethomepage.dev/configs/settings/
 ---
 title: {{ site.name }}
@@ -7,9 +7,9 @@ startUrl: https://dash.{{ site.url }}/ # default is "/"
 
 background:
   image: /images/background.png
-  blur: sm # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
-  saturate: 50 # 0, 50, 100... see https://tailwindcss.com/docs/backdrop-saturate
-  brightness: 50 # 0, 50, 75... see https://tailwindcss.com/docs/backdrop-brightness
+  blur: xs # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
+  saturate: 25 # 0, 50, 100... see https://tailwindcss.com/docs/backdrop-saturate
+  brightness: 75 # 0, 50, 75... see https://tailwindcss.com/docs/backdrop-brightness
   opacity: 50 # 0-100
 
 # cardBlur: sm # sm, "", md, etc... see https://tailwindcss.com/docs/backdrop-blur
