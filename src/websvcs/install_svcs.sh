@@ -38,6 +38,7 @@ case $1 in
     ;;
   homepage)
     mkdir -p /etc/opt/homepage/config
+    rm -rf /etc/opt/homepage/config/*
     cp homepage/*.yaml /etc/opt/homepage/config
     chown -R 1000:1000 /etc/opt/homepage/config
     chmod -R 744 /etc/opt/homepage/config

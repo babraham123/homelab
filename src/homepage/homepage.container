@@ -24,6 +24,8 @@ Environment=TZ={{ personal.timezone }}
 Environment=LOG_TARGETS=stdout
 Environment=HOMEPAGE_ALLOWED_HOSTS=dash.{{ site.url }},{{ websvcs.container_subnet }}.9
 
+Secret=home_ical_url,type=env,target=HOME_ICAL_URL
+
 Volume=/etc/opt/homepage/images:/app/public/images
 Volume=/etc/opt/homepage/config:/app/config
 

@@ -1,4 +1,4 @@
-# /etc/opt/homepage/widgets.yaml
+# /etc/opt/homepage/config/widgets.yaml
 # Ref: https://gethomepage.dev/widgets
 ---
 - openmeteo:
