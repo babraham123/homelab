@@ -1,0 +1,9 @@
+EHLO example.com
+MAIL FROM: user@example.com
+RCPT TO: ntfy-comment+TOKEN@push.{{ site.url }}
+DATA
+Subject: Email for you
+Content-Type: text/plain; charset="UTF-8"
+
+Hello world
+.

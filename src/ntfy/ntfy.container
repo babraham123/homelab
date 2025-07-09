@@ -16,6 +16,7 @@ NoNewPrivileges=true
 
 # port 2586, web UI at /, /<topic> for pubsub
 # port 2587 for metrics
+# port 25 for the basic SMTP server
 Network=net.network
 HostName=push.{{ site.url }}
 IP={{ secsvcs.container_subnet }}.13

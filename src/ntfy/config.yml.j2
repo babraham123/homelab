@@ -152,9 +152,9 @@ smtp-sender-pass: {% raw %}{{ env('alert_smtp_password') }}{% endraw %}
 #   for instance, only e-mails to ntfy-$topic@ntfy.sh will be accepted. If this is not set, all emails to
 #   $topic@ntfy.sh will be accepted (which may obviously be a spam problem).
 #
-# smtp-server-listen:
-# smtp-server-domain:
-# smtp-server-addr-prefix:
+smtp-server-listen: ":25"
+smtp-server-domain: push.{{ site.url }}
+smtp-server-addr-prefix: "ntfy-"
 
 # Web Push support (background notifications for browsers)
 #

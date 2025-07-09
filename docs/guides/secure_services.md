@@ -27,13 +27,13 @@ systemctl restart node_exporter
 ```
 
 ## Networking
-- Enable LAN access to postgres, lldap and authelia
+- Enable LAN access to postgres, lldap, authelia and ntfy smtp
 ```bash
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 
-ufw allow in from {{ websvcs.ip }} to any port 5432,6360,9091 proto tcp
-ufw allow in from {{ homesvcs.ip }} to any port 5432,6360,9091 proto tcp
-ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 5432,6360,9091 proto tcp
+ufw allow in from {{ websvcs.ip }} to any port 5432,6360,9091,465 proto tcp
+ufw allow in from {{ homesvcs.ip }} to any port 5432,6360,9091,465 proto tcp
+ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 5432,6360,9091,465 proto tcp
 ```
 
 - Confirm that the logs for traefik, authelia and lldap look good 
@@ -79,11 +79,23 @@ podman exec -it ntfy sh
 ntfy user add --role=admin admin
 ntfy user add alert
 ntfy access alert "alert*" rw
+ntfy access alert "comment*" rw
 ntfy user add hass
 ntfy access hass "hass*" rw
 ntfy user add person
 ntfy access person "hass*" ro
 ntfy access person "chat*" rw
+# save for later
+ntfy token add alert
+exit
+```
+- Record access token as a secret on pve1
+```bash
+ssh {{ username }}@pve1.{{ site.url }}
+sudo su
+/root/homelab-rendered/src/pve1/secret_update.sh secsvcs
+/root/homelab-rendered/src/pve1/secret_update.sh websvcs
+exit
 exit
 ```
 

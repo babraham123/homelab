@@ -38,6 +38,8 @@ entryPoints:
     forwardedHeaders:
       insecure: false
       trustedIPs: [{{ vpn.ip }}, {{ pve1.gateway }}, {{ pve2.gateway }}]
+  smtp:
+    address: ":465/tcp"
 certificatesResolvers:
   # Consider changing cert duration from 90 days to 1 year
   le-http-staging:

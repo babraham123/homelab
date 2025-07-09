@@ -769,7 +769,6 @@ access_control:
         - '{{ site.url }}'
         - 'auth.{{ site.url }}'
         - 'www.{{ site.url }}'
-        - 'blog.{{ site.url }}'
       policy: 'bypass'
 
     - domain: '*.{{ site.url }}'
