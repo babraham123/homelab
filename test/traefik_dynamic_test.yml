@@ -3,13 +3,13 @@
 http:
   routers:
     static-files:
-      rule: Host(`www.{{ site.url }}`, `static.{{ site.url }}`, `blog.{{ site.url }}`, `wifi.{{ site.url }}`)
+      rule: Host(`www.{{ site.url }}`) || Host(`static.{{ site.url }}`) || Host(`wifi.{{ site.url }}`)
       entryPoints: websecure
       service: nginx@file
       tls:
         options: intermediate@file
     static-files2:
-      rule: Host(`www.{{ site.url }}`, `static.{{ site.url }}`, `blog.{{ site.url }}`, `wifi.{{ site.url }}`)
+      rule: Host(`www.{{ site.url }}`) || Host(`static.{{ site.url }}`) || Host(`wifi.{{ site.url }}`)
       entryPoints: web
       service: nginx@file
   services:

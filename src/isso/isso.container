@@ -1,0 +1,37 @@
+# /etc/containers/systemd/isso.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: commenting server to support blog and other sites"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=ghcr.io/isso-comments/isso:release
+ContainerName=isso
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=comment.{{ site.url }}
+IP={{ websvcs.container_subnet }}.10
+# port 8200
+
+Environment=TZ={{ personal.timezone }}
+Environment=ISSO_SETTINGS="/etc/isso.d/homesite.cfg"
+
+Secret=ntfy_alert_token,type=env,target=NTFY_ALERT_ACCESS_TOKEN
+Secret=isso_email_hash_salt,type=env,target=EMAIL_HASH_SALT
+Secret=isso_admin_password,type=env,target=ADMIN_PASSWORD
+
+Volume=/etc/opt/isso/config:/etc/isso.d:ro
+Volume=issodb.volume:/var/lib/isso
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

@@ -22,6 +22,7 @@ IP={{ secsvcs.container_subnet }}.6
 # hostPort:containerPort
 PublishPort=80:80
 PublishPort=443:443
+PublishPort=465:465
 
 Exec="--configFile=/config/static/traefik.yml"
 

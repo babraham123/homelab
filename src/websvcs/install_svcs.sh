@@ -45,6 +45,12 @@ case $1 in
     cp -r homepage/images /etc/opt/homepage
     cp homepage/homepage.container /etc/containers/systemd
     ;;
+  isso)
+    mkdir -p /etc/opt/isso/config
+    cp isso/homesite.cfg /etc/opt/isso/config
+    cp isso/isso.container /etc/containers/systemd
+    cp isso/issodb.volume /etc/containers/systemd
+    ;;
   finance_exporter)
     mkdir -p /etc/opt/finance_exporter/src
     cp finance_exporter/config.yaml /etc/opt/finance_exporter

@@ -77,14 +77,3 @@ launchctl load ~/Library/LaunchAgents/com.my.detect.wifi.change.plist
 ```
 - Test by switching WiFi networks, confirm location changes
   - `networksetup -getcurrentlocation`
-
-## Static site tools and generator
-- Install tools
-```bash
-brew install sass/sass/sass
-# sass file.sass file.css
-
-pip3 install mkdocs-material
-# mkdocs new blog
-# mkdocs build
-```

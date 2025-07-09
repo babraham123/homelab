@@ -1,0 +1,19 @@
+# /etc/opt/traefik/config/dynamic/smtp.yml
+# References:
+#   - https://doc.traefik.io/traefik/routing/routers/#configuring-tcp-routers
+#   - https://doc.traefik.io/traefik/routing/services/#configuring-tcp-services
+# yamllint disable rule:document-start rule:document-end
+tcp:
+  routers:
+    ntfy-mail:
+      entryPoints: smtp
+      rule: HostSNI(`push.{{ site.url }}`)
+      service: ntfy-mail@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+  services:
+    ntfy-mail:
+      loadBalancer:
+        servers:
+          - address: {{ secsvcs.container_subnet }}.13:25
