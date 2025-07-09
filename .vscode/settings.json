@@ -22,6 +22,7 @@
         "endraw",
         "esphome",
         "expandenv",
+        "fdfind",
         "fdignore",
         "fluentbit",
         "Forgejo",

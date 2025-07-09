@@ -30,9 +30,6 @@
 #   - internally public grafana dashboard, uptime?
 #   - home assistant dashboard
 # Custom API: https://gethomepage.dev/widgets/services/customapi/
-{% set hp_colors = ['teal', 'cyan', 'slate', 'sky', 'emerald', 'purple', 'yellow', 'pink', 'fuchsia', 
-                    'red', 'blue', 'zinc', 'neutral', 'green', 'gray', 'violet', 'lime', 'stone', 'amber', 
-                    'white', 'rose', 'indigo'] %}
 
 - Calendar:
     - Google Calendar:
@@ -48,7 +45,7 @@
             - type: ical # Show calendar events from another service
               url: {% raw %}{{HOME_ICAL_URL}}{% endraw %} # iCal address, public or secret
               name: Home # required - name for these calendar events
-              color: {{ hp_colors[loop.index0 % hp_colors | length] }}
+              color: 'teal' # https://gethomepage.dev/configs/settings/#color-palette
               params:
                 showName: false
 
