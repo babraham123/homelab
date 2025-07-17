@@ -24,17 +24,18 @@ IP={% raw %}{{ subnet }}{% endraw %}.7
 
 Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      --httpListenAddr=":8429" \
-     --promscrape.config="/etc/prometheus/prometheus.yml" \
      --remoteWrite.url="https://metrics.{{ site.url }}/api/v1/write" \
      --remoteWrite.basicAuth.username="admin" \
      --remoteWrite.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
+     --remoteWrite.forceVMProto \
      --usePromCompatibleNaming \
      --loggerLevel="WARN" \
      --loggerTimezone="{{ personal.timezone }}"
      # --influxListenAddr=":8089" \
      # --graphiteListenAddr=":2003" \
      # --opentsdbListenAddr=":4242" \
-     # --metrics.exposeMetadata
+     # --metrics.exposeMetadata \
+     # --remoteWrite.forcePromProto
 
 Environment=TZ={{ personal.timezone }}
 Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
