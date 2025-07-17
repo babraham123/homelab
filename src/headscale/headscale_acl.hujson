@@ -76,11 +76,11 @@
     // },
 
     // We still have to allow internal users communications since nothing guarantees that each user
-    // has access to themselves.
-    { "action": "accept", "src": ["admin@"], "dst": ["admin@:*"] },
-    { "action": "accept", "src": ["public@"], "dst": ["public@:*"] },
+    // has access to themselves or to exit nodes.
+    { "action": "accept", "src": ["admin@"], "dst": ["admin@:*", "autogroup:internet:*"] },
+    { "action": "accept", "src": ["public@"], "dst": ["public@:*", "autogroup:internet:*"] },
 {% for user in users %}
-    { "action": "accept", "src": ["{{ user }}@"], "dst": ["{{ user }}@:*"] },{% endfor %}
+    { "action": "accept", "src": ["{{ user }}@"], "dst": ["{{ user }}@:*", "autogroup:internet:*"] },{% endfor %}
     // add_more_users
     // TODO: add support for guests when ACLs work for subnets
     // { "action": "accept", "src": ["guest1@"], "dst": ["guest1@:*"] },

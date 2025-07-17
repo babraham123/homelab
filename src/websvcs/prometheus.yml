@@ -13,10 +13,10 @@ scrape_configs:
     static_configs:
       - targets: ['log-collector.{{ site.url }}:2020']
     metrics_path: /api/v1/metrics/prometheus
-  - job_name: 'finance_exporter'
-    static_configs:
-      - targets: ['finance-exporter.{{ site.url }}:8002']
-    metrics_path: /
+#   - job_name: 'finance_exporter'
+#     static_configs:
+#       - targets: ['finance-exporter.{{ site.url }}:8002']
+#     metrics_path: /
   - job_name: 'node_exporter'
     static_configs:
       - targets:
