@@ -83,7 +83,7 @@ sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes 
 - In cloud VM, check connected nodes: `sudo headscale nodes list`
 
 ## Add public endpoint
-Summary: Create a public user and a tailscale client on the vpn server. HAProxy forwards the `vpn` subdomain to Headscale on ports 8080, 8443. Vaultwarden, authelia, lldap and home assistant traffic is sent to the secsvcs VM via a local traefik instance (reverse proxy). All other traffic is sent to the websvcs VM also via traefik. Similar to Tailscale Funnel, and fulfills a similar role as a DMZ.
+Summary: Create a public user and a tailscale client on the vpn server. HAProxy forwards the `vpn` subdomain to Headscale on ports 8080, 8443. authelia, lldap, etc traffic is sent to the secsvcs VM, and home assistant traffic to the homesvcs VM. All other traffic is sent to the websvcs VM also via traefik. Similar to Tailscale Funnel, and fulfills a similar role as a DMZ.
 
 Notes: [site-to-site](https://tailscale.com/kb/1214/site-to-site/), [ACLs](https://tailscale.com/kb/1018/acls/#debugging-acls), [troubleshooting](https://tailscale.com/kb/1023/troubleshooting/#unable-to-make-a-tcp-connection-between-two-nodes)
 
@@ -102,8 +102,11 @@ src/vpn/install_svcs.sh haproxy
 - Add a Namecheap CAA record, [ref](https://really-simple-ssl.com/instructions/edit-dns-caa-records-to-allow-lets-encrypt-ssl-certificates/)
 ```
 @ issue      letsencrypt.org
-@ issuewild  letsencrypt.org
+* issue      letsencrypt.org
+@ issuewild  ;
+* issuewild  ;
 @ iodep      mailto:{{ site.email }}
+* iodep      mailto:{{ site.email }}
 ```
 
 - Create public user and connect, [ref](https://tailscale.com/kb/1080/cli/#up), [snat](https://tailscale.com/kb/1214/site-to-site)
