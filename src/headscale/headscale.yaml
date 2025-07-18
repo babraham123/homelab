@@ -126,7 +126,7 @@ derp:
   paths: []
 
   # If enabled, a worker will be set up to periodically
-  # refresh the given sources and update the derpmap
+  # refresh the given sources and update the derp map
   # will be set up.
   auto_update_enabled: true
 
@@ -142,7 +142,7 @@ ephemeral_node_inactivity_timeout: 30m
 database:
   # Database type. Available options: sqlite, postgres
   # Please note that using Postgres is highly discouraged as it is only supported for legacy reasons.
-  # All new development, testing and optimisations are done with SQLite in mind.
+  # All new development, testing and optimizations are done with SQLite in mind.
   type: sqlite
 
   # Enable debug mode. This setting requires the log.level to be set to "debug" or "trace".
@@ -275,7 +275,7 @@ dns:
   # `base_domain` must be a FQDN, without the trailing dot.
   # The FQDN of the hosts will be
   # `hostname.base_domain` (e.g., _myhost.example.com_).
-  base_domain: {{ site.url }}
+  base_domain: {{ tail_domain }}
 
   # Whether to use the local DNS settings of a node (default) or override the
   # local DNS settings and force the use of Headscale's DNS configuration.
@@ -299,7 +299,7 @@ dns:
       {}
       # foo.bar.com:
       #   - 1.1.1.1
-      # darp.headscale.net:
+      # derp.headscale.net:
       #   - 1.1.1.1
       #   - 8.8.8.8
 
@@ -311,12 +311,12 @@ dns:
   # so far only A and AAAA records are supported (on the tailscale side)
   # See: docs/ref/dns.md
   extra_records: []
-  #   - name: "grafana.myvpn.example.com"
+  #   - name: "grafana.vpn.example.com"
   #     type: "A"
   #     value: "100.64.0.3"
   #
   #   # you can also put it in one line
-  #   - { name: "prometheus.myvpn.example.com", type: "A", value: "100.64.0.3" }
+  #   - { name: "prometheus.vpn.example.com", type: "A", value: "100.64.0.3" }
   #
   # Alternatively, extra DNS records can be loaded from a JSON file.
   # Headscale processes this file on each change.
@@ -384,10 +384,10 @@ unix_socket_permission: "0770"
 #     method: S256
 
 # Logtail configuration
-# Logtail is Tailscales logging and auditing infrastructure, it allows the control panel
+# Logtail is Tailscale's logging and auditing infrastructure, it allows the control panel
 # to instruct tailscale nodes to log their activity to a remote server.
 logtail:
-  # Enable logtail for this headscales clients.
+  # Enable logtail for this headscale's clients.
   # As there is currently no support for overriding the log server in headscale, this is
   # disabled by default. Enabling this will make your clients send logs to Tailscale Inc.
   enabled: false

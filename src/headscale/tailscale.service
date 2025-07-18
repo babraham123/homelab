@@ -13,7 +13,7 @@ Type=simple
 
 Environment=TZ={{ personal.timezone }}
 
-ExecStart=/bin/bash -c '/usr/bin/tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --authkey "$(headscale --user public preauthkeys create --reusable --expiration 10m)"'
+ExecStart=/bin/bash -c '/usr/bin/tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --accept-dns=false --authkey "$(headscale --user public preauthkeys create --reusable --expiration 10m)"'
 ExecStop=/usr/bin/tailscale down
 
 Restart=on-failure

@@ -1,7 +1,7 @@
 # VPN setup
 
 - Buy a domain name from a DNS registrar / provider (ie Namecheap)
-	- In the future may need to use Cloudflare as the provider (while using the existing registrar)
+  - In the future may need to use Cloudflare as the provider (while using the existing registrar)
 
 ## Linode
 - Setup smallest, CPU shared VM in [Linode](https://www.linode.com/)
@@ -41,10 +41,13 @@ headscale --user USER_ID preauthkeys create --expiration 100y
 ```
 
 ## Clients
-- For home network, use Tailscale plugin on pfSense ([src](https://www.wundertech.net/how-to-set-up-tailscale-on-pfsense/))
-	- Setup as an [Exit Node](https://headscale.net/exit-node/) for the desired subnet
-	- Restart pfSense ([issue](https://github.com/tailscale/tailscale/issues/7780))
-	- On the VPN server, enable pfSense's routes, [ref](https://headscale.net/stable/ref/routes/)
+- For home network, use Tailscale plugin on pfSense ([src](https://www.wundertech.net/how-to-set-up-tailscale-on-pfsense/), [ref](https://davidisaksson.dev/posts/tailscale-on-pfsense/))
+  - Install the Tailscale package (Go to System >> Package Manager)
+  - Go to VPN >> Tailscale
+  - Setup as an [Exit Node](https://headscale.net/exit-node/) for the desired subnet
+  - Uncheck "Accept DNS" and Save
+  - Restart pfSense ([issue](https://github.com/tailscale/tailscale/issues/7780))
+  - On the VPN server, enable pfSense's routes, [ref](https://headscale.net/stable/ref/routes/)
 ```bash
 headscale nodes list-routes
 # Repeat for all desired subnets
@@ -93,14 +96,14 @@ src/vpn/install_svcs.sh haproxy
 - Update Headscale
   - `src/vpn/install_svcs.sh headscale`
 - Update Namecheap A record
-	- Change the host from `vpn` to all subdomains `*`
-	- Add another A record for the bare domain, host = `@`
+  - Change the host from `vpn` to all subdomains `*`
+  - Add another A record for the bare domain, host = `@`
 
 - Add a Namecheap CAA record, [ref](https://really-simple-ssl.com/instructions/edit-dns-caa-records-to-allow-lets-encrypt-ssl-certificates/)
 ```
-@ issue		letsencrypt.org
-@ issuewild	letsencrypt.org
-@ iodep		mailto:{{ site.email }}
+@ issue      letsencrypt.org
+@ issuewild  letsencrypt.org
+@ iodep      mailto:{{ site.email }}
 ```
 
 - Create public user and connect, [ref](https://tailscale.com/kb/1080/cli/#up), [snat](https://tailscale.com/kb/1214/site-to-site)
@@ -110,7 +113,7 @@ headscale users create public
 headscale --user USER_ID preauthkeys create --expiration 100y
 # Setup client
 src/vpn/install_svcs.sh tailscale
-tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --authkey AUTH_KEY
+tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --accept-dns=false --authkey AUTH_KEY
 # Clamp MTU
 iptables -t mangle -A FORWARD -i tailscale0 -o {{ vpn.interface }} -p tcp -m tcp \
   --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
