@@ -24,6 +24,8 @@ site:
   url: "janedoe.com"
   name: "JD's System"
   email: "jdoe@gmail.com"
+tail_domain: "janedoe.ts.net"
+
 users:
   - jane
   - jayden

@@ -11,6 +11,10 @@ addr="{{ username }}@$host.{{ site.url }}"
 /root/homelab-rendered/src/debian/is_root.sh
 /root/homelab-rendered/src/debian/is_reachable.sh "$host"
 
+SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)
+export SOPS_AGE_RECIPIENTS
+export SOPS_AGE_KEY_FILE="/root/secrets/age.txt"
+
 # Record secrets, see template for commands
 sops "/root/secrets/$host.yaml"
 # SOPS doesn't support SSH keys, must convert before exporting

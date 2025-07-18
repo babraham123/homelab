@@ -6,7 +6,7 @@
   // groups are collections of users having a common scope. A user can be in multiple groups
   // groups cannot be composed of groups
   "groups": {
-    "group:family": ["{{ users | join('"@,"') }}@"],
+    "group:family": ["{{ users | join('"@, "') }}@"],
     // add_more_users
     // "group:guests": ["guest1@"],
   },
@@ -39,6 +39,16 @@
       "src": ["public@"],
       "dst": ["*:*"]
     },
+
+    // autogroup:internet enables public internet access via exit node
+    {
+      "action": "accept",
+      "src": ["{{ users | join('"@, "') }}@"],
+      "dst": [
+        "autogroup:internet:*",
+        "*:*"
+      ]
+    }
 
     // ACLs currently don't work for subnets
     // TODO: re-enable when Tailscale better supports FreeBSD
@@ -77,10 +87,10 @@
 
     // We still have to allow internal users communications since nothing guarantees that each user
     // has access to themselves or to exit nodes.
-    { "action": "accept", "src": ["admin@"], "dst": ["admin@:*", "autogroup:internet:*"] },
-    { "action": "accept", "src": ["public@"], "dst": ["public@:*", "autogroup:internet:*"] },
+    { "action": "accept", "src": ["admin@"], "dst": ["admin@:*"] },
+    { "action": "accept", "src": ["public@"], "dst": ["public@:*"] },
 {% for user in users %}
-    { "action": "accept", "src": ["{{ user }}@"], "dst": ["{{ user }}@:*", "autogroup:internet:*"] },{% endfor %}
+    { "action": "accept", "src": ["{{ user }}@"], "dst": ["{{ user }}@:*"] },{% endfor %}
     // add_more_users
     // TODO: add support for guests when ACLs work for subnets
     // { "action": "accept", "src": ["guest1@"], "dst": ["guest1@:*"] },

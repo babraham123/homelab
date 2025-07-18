@@ -3,6 +3,7 @@
 # Only runs on macOS.
 # Usage:
 #   /usr/local/bin/detect_wifi_change.sh
+#   Normally run automatically by a MacOS LaunchAgent.
 
 set -euo pipefail
 
