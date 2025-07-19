@@ -128,8 +128,9 @@ ufw allow out 53
 ufw allow out on {{ vpn.interface }}
 ufw allow in from any to any port 22,80,443 proto tcp
 ufw allow in from any to any port 3478,41641 proto udp
-ufw allow out on tailscale0 from any to {{ websvcs.ip }} port 80,443 proto tcp
 ufw allow out on tailscale0 from any to {{ secsvcs.ip }} port 80,443 proto tcp
+ufw allow out on tailscale0 from any to {{ homesvcs.ip }} port 80,443 proto tcp
+ufw allow out on tailscale0 from any to {{ websvcs.ip }} port 80,443 proto tcp
 
 # insert before the COMMIT
 vim /etc/ufw/before.rules
