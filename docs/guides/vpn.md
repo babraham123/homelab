@@ -45,7 +45,6 @@ headscale --user USER_ID preauthkeys create --expiration 100y
   - Install the Tailscale package (Go to System >> Package Manager)
   - Go to VPN >> Tailscale
   - Setup as an [Exit Node](https://headscale.net/exit-node/) for the desired subnet
-  - Uncheck "Accept DNS" and Save
   - Restart pfSense ([issue](https://github.com/tailscale/tailscale/issues/7780))
   - On the VPN server, enable pfSense's routes, [ref](https://headscale.net/stable/ref/routes/)
 ```bash
@@ -72,13 +71,13 @@ tailscale login --login-server https://vpn.{{ site.url }}:443 --accept-routes --
 
 tailscale status
 tailscale ping --tsmp other_node
-# sudo tailscale set --exit-node=pfsense
+# sudo tailscale set --exit-node=router
 ```
 - For Debian bookworm ([src](https://tailscale.com/kb/1174/install-debian-bookworm))
 ```bash
 src/vpn/install_svcs.sh tailscale
 sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --authkey AUTH_KEY
-# --exit-node=pfsense
+# --exit-node=router
 ```
 - In cloud VM, check connected nodes: `sudo headscale nodes list`
 
@@ -116,7 +115,7 @@ headscale users create public
 headscale --user USER_ID preauthkeys create --expiration 100y
 # Setup client
 src/vpn/install_svcs.sh tailscale
-tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --accept-dns=false --authkey AUTH_KEY
+tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --authkey AUTH_KEY
 # Clamp MTU
 iptables -t mangle -A FORWARD -i tailscale0 -o {{ vpn.interface }} -p tcp -m tcp \
   --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
