@@ -1,6 +1,8 @@
 // /etc/headscale/acl.hujson
-// Ref: https://tailscale.com/kb/1018/acls/
-// Ref: https://github.com/juanfont/headscale/blob/main/docs/acls.md
+// Not currently in use
+// Ref:
+//   https://tailscale.com/kb/1018/acls/
+//   https://headscale.net/stable/ref/acls/
 // tests: https://github.com/juanfont/headscale/blob/main/hscontrol/policy/acls_test.go
 {
   // groups are collections of users having a common scope. A user can be in multiple groups
