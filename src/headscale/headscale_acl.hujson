@@ -32,12 +32,18 @@
     {
       "action": "accept",
       "src": ["admin@"],
-      "dst": ["*:*"]
+      "dst": ["*:*", "autogroup:internet:*"]
     },
     {
       "action": "accept",
       "src": ["public@"],
-      "dst": ["*:*"]
+      "dst": ["*:*", "autogroup:internet:*"]
+    },
+    // TODO: fix this with machine tags
+    {
+      "action": "accept",
+      "src": ["PUBLIC_TAILNET_IP/32"],
+      "dst": ["*:*", "autogroup:internet:*"]
     },
 
     // autogroup:internet enables public internet access via exit node
