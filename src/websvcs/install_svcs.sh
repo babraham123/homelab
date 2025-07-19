@@ -32,6 +32,7 @@ case $1 in
     mkdir -p /var/opt/nginx/www/www
     mkdir -p /var/opt/nginx/www/error
     cp nginx/nginx.conf /etc/opt/nginx/conf
+    cp nginx/mime.types /etc/opt/nginx/conf
     cp nginx/index.html /var/opt/nginx/www/www
     cp nginx/404.html /var/opt/nginx/www/error
     cp nginx/nginx.container /etc/containers/systemd
