@@ -32,7 +32,7 @@ cp src/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
 ```
 
-- Create an A record in Namecheap that maps your `vpn` subdomain to Linode's public IP ([src](https://www.namecheap.com/support/knowledgebase/article.aspx/9776/2237/how-to-create-a-subdomain-for-my-domain/))
+- Create an A record in your DNS provider that maps the `vpn` subdomain to Linode's public IP ([src](https://www.namecheap.com/support/knowledgebase/article.aspx/9776/2237/how-to-create-a-subdomain-for-my-domain/))
 - Create pre-auth key
 ```bash
 headscale completion bash > /etc/bash_completion.d/headcompletion
@@ -94,11 +94,11 @@ src/vpn/install_svcs.sh haproxy
 ```
 - Update Headscale
   - `src/vpn/install_svcs.sh headscale`
-- Update Namecheap A record
+- Update your DNS A record
   - Change the host from `vpn` to all subdomains `*`
   - Add another A record for the bare domain, host = `@`
 
-- Add a Namecheap CAA record, [ref](https://really-simple-ssl.com/instructions/edit-dns-caa-records-to-allow-lets-encrypt-ssl-certificates/)
+- Add a DNS CAA record, [ref](https://really-simple-ssl.com/instructions/edit-dns-caa-records-to-allow-lets-encrypt-ssl-certificates/)
 ```
 @ issue      letsencrypt.org
 * issue      letsencrypt.org
@@ -145,6 +145,13 @@ ufw enable
 ufw status verbose
 ```
 
+### Optimize search results
+
+- Log into the `Google Search Console` under {{ site.email }} or another gmail account
+- Start verification, enter {{ site.url }}
+- In your DNS provider, add a TXT record with the provided string (use host = @)
+- View the insights report
+
 ## Headscale UI (optional)
 - Create the OIDC credentials
 ```bash
@@ -178,4 +185,4 @@ src/vpn/install_svcs.sh headscale-ui
 ```
 
 ## Upgrade
-[upgrade doc](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)
+[Headscale docs](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)

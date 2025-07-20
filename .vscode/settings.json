@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "AAGUID",
         "adduser",
         "alertmanager",
         "Audiobook",
@@ -33,6 +34,7 @@
         "gitea",
         "gorm",
         "grafanadata",
+        "HACS",
         "haos",
         "hass",
         "homeassistant",
@@ -60,6 +62,7 @@
         "localtime",
         "logfile",
         "logtail",
+        "lsusb",
         "mdns",
         "middlewares",
         "mkdocs",

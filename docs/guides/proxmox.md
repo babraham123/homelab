@@ -127,6 +127,20 @@ lspci -nnv | grep TPU
 - If doesn't work, consider `pcie_aspm=off`
   [ref1](https://github.com/blakeblackshear/frigate/issues/1020), [ref2](https://forum.proxmox.com/threads/guest-internal-error-when-passing-through-pcie.99239/), [ref3](https://www.derekseaman.com/2023/06/home-assistant-frigate-vm-on-proxmox-with-pcie-coral-tpu.html)
 
+## USB Passthrough
+
+- Pass thru physical port, [docs](https://pve.proxmox.com/wiki/USB_Physical_Port_Mapping)
+  - Get the port details
+```bash
+sudo su
+# Get dev number from device description
+lsusb
+# Get bus and port number
+lsusb -t
+```
+  - In PVE UI, Go to VM >> Hardware >> Add USB device
+  - Reboot the VM
+
 ## VM management
 [Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
 

@@ -28,8 +28,9 @@ IP={{ homesvcs.container_subnet }}.11
 
 Environment=TZ={{ personal.timezone }}
 Environment=PACKAGES=iputils
-# Environment=WATCHDOG_USEC=5000000
+Environment=WATCHDOG_USEC=5000000
 
+# Enable if we switch the DB to PostgreSQL
 # https://www.postgresql.org/docs/14/libpq-envars.html
 # Environment=PGSSLMODE=verify-full
 # Environment=PGSSLROOTCERT=/certificates/ca.chain.pem
@@ -37,7 +38,11 @@ Environment=PACKAGES=iputils
 
 Secret=hass_oidc_id,type=env,target=OIDC_CLIENT_ID
 Secret=hass_oidc_secret,type=env,target=OIDC_CLIENT_SECRET
+Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
+Secret=ntfy_hass_password,type=env,target=NTFY_HASS_PASSWORD
 
+# HACS integrations end up in /config/custom_components
+# AppDaemon apps end up in /config/appdaemon/apps
 Volume=/etc/opt/home_assistant/config:/config
 Volume=/var/opt/home_assistant/media:/media
 Volume=hassdb.volume:/data
@@ -45,9 +50,10 @@ Volume=hassdb.volume:/data
 [Service]
 Restart=on-failure
 TimeoutStartSec=300
+# Enable after the sdnotify integration is installed
 # Ref: https://github.com/brianegge/home-assistant-sdnotify
-# Type=notify
-# WatchdogSec=20
+Type=notify
+WatchdogSec=20
 
 [Install]
 WantedBy=multi-user.target
