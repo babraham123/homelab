@@ -79,6 +79,11 @@ lan2:
   subnet: 192.168.3
   gateway: 192.168.3.1
   mask: 192.168.3.0/24
+# Optional
+lan3:
+  subnet: 192.168.4
+  gateway: 192.168.4.1
+  mask: 192.168.4.0/24
 
 retention:
   log_days: 14

@@ -52,14 +52,9 @@ journalctl -eu authelia
   - Add regular users, add them to the `lldap_password_manager` group
     - {% for user in users %}{{ user }}, {% endfor %} (note for future: add_more_users)
   - Create the `authelia_gen_access` group, add users to it
+  - Create the `hass_admin` group
   - Uncomment out the authelia middleware
     `vim /etc/opt/traefik/config/dynamic/traefik.yml`
-
-  - Create robot users (Not currently used, ignore for now. Prefer OIDC client)
-    - Use `{{ site.email.replace('@', '+USER@') }}` for the email.
-    - Use the stored password:
-      `/usr/local/bin/get_secret.sh USER_lldap_password`
-    - Add the new user to the `lldap_strict_readonly` group
 
 - Confirm that authelia is working, open https://auth.{{ site.url }}
 

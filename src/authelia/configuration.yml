@@ -283,8 +283,8 @@ webauthn:
   ## Selection Criteria controls the preferences for registration.
   selection_criteria:
     ## The attachment preference. Either 'cross-platform' for dedicated authenticators, or 'platform' for embedded
-    ## authenticators.
-    attachment: 'cross-platform'
+    ## authenticators. '' means the user can choose.
+    attachment: ''
 
     ## The discoverability preference. Options are 'discouraged', 'preferred', and 'required'.
     discoverability: 'preferred'
@@ -760,6 +760,7 @@ access_control:
         - '{{ pve1.mask }}'
         - '{{ pve2.mask }}'
         - '{{ lan2.mask }}'
+        - '{{ lan3.mask }}'
     - name: 'vpn'
       networks: '100.64.0.0/16'
 

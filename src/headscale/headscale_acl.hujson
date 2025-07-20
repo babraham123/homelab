@@ -22,6 +22,7 @@
     "pve2": "{{ pve2.mask }}",
     "lan": "{{ lan.mask }}",
     "lan2": "{{ lan2.mask }}",
+    "lan3": "{{ lan3.mask }}",
     "websvcs": "{{ websvcs.ip }}/32",
     "gaming": "{{ gaming.ip }}/32",
     "secsvcs": "{{ secsvcs.ip }}/32",
@@ -70,6 +71,7 @@
     //     "pve2:*",
     //     "lan:*",
     //     "lan2:*"
+    //     "lan3:*"
     //   ]
     // },
     // // guests can access useful services
@@ -80,6 +82,7 @@
     //     "*:0",
     //     "lan:*",
     //     "lan2:*"
+    //     "lan3:*"
     //   ]
     // },
     // // public endpoint can access web services

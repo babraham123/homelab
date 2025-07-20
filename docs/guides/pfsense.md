@@ -70,16 +70,17 @@ dmesg | grep -e DMAR -e IOMMU | grep able
 dmesg | grep remapping
 lspci
 ```
-- Add passed thru NICs to VM, via [PCI passthru](https://pve.proxmox.com/wiki/PCI(e)_Passthrough)
+- Add passed thru NICs to VM, via [PCI passthrough](https://pve.proxmox.com/wiki/PCI(e)_Passthrough)
   - VM >> Hardware >> Add >> PCI Device >> Raw Device >> [pick hw id]
   - `lspci -nn -vvv | grep Ethernet` # get hw id
 - Pass in a bridge iface as Network Device (see below)
 - Plug eth0 into modem, eth1 to WiFi AP
 - Start VM and run thru pfSense install via Console, [src](https://www.virtualizationhowto.com/2022/08/pfsense-proxmox-install-process-and-configuration/)
   - UFS, GPT
-  - Assign Interfaces: WAN=igc0, LAN=igc1, rest as optional
-  - Optional: Set Interface IPs (LAN)
+  - Assign Interfaces: WAN=igc0, LAN=igc1, LAN2=igc3, rest as optional
+  - Set LAN Interface IPs
     - `{{ lan.subnet }}.[100 - 200]/24`
+    - `{{ lan2.subnet }}.[100 - 200]/24`
 - Log into pfSense GUI
   - Connect eth1 (LAN) directly to laptop
   - Connect to admin console via LAN ip address (192.168.1.1)
@@ -197,7 +198,7 @@ pkg-static add https://github.com/jaredhendrickson13/pfsense-api/releases/latest
     - TODO ???
 
 ## PVE1 remaining setup
-Execute the following sections from the [proxmox guide](./proxmox.md):
+Do the following sections from the [proxmox guide](./proxmox.md):
 - VM Management
 - Networking
 - Monitoring
@@ -255,6 +256,18 @@ exit
 - Apply the upgrade and reboot
 - Restore the pfsense config and re-install all pkgs
 - If necessary, manual re-install pkgs
+
+## USB Ethernet adapter
+
+- Do the USB Passthrough section the [proxmox guide](./proxmox.md)
+- Do additional setup if it's not autodetected, [ref](https://getlabsdone.com/how-to-fix-usb-ethernet-not-recognized-by-pfsense/)
+- Add the new interface
+  - Go to Interfaces >> Assignments >> Add
+  - Go to Interface >> OPT4. Enable, Description = LAN3, Config Type = Static IPv4, Address = {{ lan3.mask }} 
+  - Go to Firewall >> Rules. Copy existing rules from LAN2
+  - Go to Services >> DHCP Server >> LAN3. Enable, Address Pool Range is {{ lan3.subnet }}.100 - 200
+  - Go to Services >> mDNS Bridge. Add LAN3
+
 
 ## References
 

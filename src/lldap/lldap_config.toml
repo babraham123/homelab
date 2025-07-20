@@ -90,7 +90,7 @@ ldap_user_email = "{{ site.email }}"
 ## can set this to true to force a reset of the admin password to the value
 ## of ldap_user_pass above.
 ## Alternatively, you can set it to "always" to reset every time the server starts.
-# force_ldap_user_pass_reset = false
+force_ldap_user_pass_reset = "always"
 
 ## Database URL.
 ## This encodes the type of database (SQlite, MySQL, or PostgreSQL)
