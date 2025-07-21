@@ -18,6 +18,7 @@
 # Icons:
 # NAME.[png|svg]
 # https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/
+# https://github.com/walkxcode/dashboard-icons/tree/master/svg/
 # mdi-NAME
 # https://pictogrammers.com/library/mdi/
 # si-NAME
@@ -32,7 +33,7 @@
 # Custom API: https://gethomepage.dev/widgets/services/customapi/
 
 - Calendar:
-    - Google Calendar:
+    - Home events:
         href: https://calendar.google.com/
         widget:
           type: calendar
@@ -162,7 +163,7 @@
 #         #   url: http://forgejo.host.or.ip:port
 #         #   key: demo
 
-- Infra:
+- Core Services:
     - TP-Link:
         icon: sh-tp-link.svg
         href: https://wifi.{{ site.url }}/
@@ -181,33 +182,10 @@
           # wan: igb0
           # version: 2 # optional, defaults to 1 for api v1
           # fields: ["load", "memory", "temp", "wanStatus"] # optional
-    - Proxmox 1:
-        icon: proxmox.svg
-        href: https://pve1.{{ site.url }}:8006/
-        description: VM hypervisor 1
-        # widget:
-        #   type: proxmox
-        #   url: https://pve1.{{ site.url }}:8006
-        #   username: api_token_id
-        #   password: api_token_secret
-    - Proxmox 2:
-        icon: proxmox.svg
-        href: https://pve2.{{ site.url }}:8006/
-        description: VM hypervisor 2
-        # widget:
-        #   type: proxmox
-        #   url: https://pve2.{{ site.url }}:8006
-        #   username: api_token_id
-        #   password: api_token_secret
-    - Proxmox Backup:
-        icon: mdi-cloud-upload
-        href: https://pbs2.{{ site.url }}:8007/
-        description: VM backup server
-        # widget:
-        #   type: proxmoxbackupserver
-        #   url: https://pbs2.{{ site.url }}:8007
-        #   username: api_token_id
-        #   password: api_token_secret
+    - Authelia:
+        icon: sh-authelia.svg
+        href: https://auth.{{ site.url }}/
+        description: Authentication and SSO
     - LLDAP:
         icon: mdi-account-group
         href: https://ldap.{{ site.url }}/
@@ -224,6 +202,56 @@
         icon: traefik-proxy.svg
         href: https://webproxy.{{ site.url }}/
         description: Proxy dashboard for websvcs
+
+- Infra:
+    - Proxmox 1:
+        icon: proxmox.svg
+        href: https://pve1.{{ site.url }}:8006/
+        description: VM hypervisor 1
+        widget:
+          type: proxmox
+          url: https://pve1.{{ site.url }}:8006
+          username: api_ro@pam!homepage
+          password: {% raw %}{{DASH_PVE1_TOKEN}}{% endraw %}
+    - Proxmox 2:
+        icon: proxmox.svg
+        href: https://pve2.{{ site.url }}:8006/
+        description: VM hypervisor 2
+        widget:
+          type: proxmox
+          url: https://pve2.{{ site.url }}:8006
+          username: api_ro@pam!homepage
+          password: {% raw %}{{DASH_PVE2_TOKEN}}{% endraw %}
+    - Proxmox Backup:
+        icon: mdi-cloud-upload
+        href: https://pbs2.{{ site.url }}:8007/
+        description: VM backup server
+        widget:
+          type: proxmoxbackupserver
+          url: https://pbs2.{{ site.url }}:8007
+          username: api_ro@pam!homepage
+          password: {% raw %}{{DASH_PBS2_TOKEN}}{% endraw %}
+    - VM pfsense:
+        icon: mdi-server
+        href: https://pve1.{{ site.url }}:8006/#v1:0:=qemu%2F{{ router.vm_id }}:4:::::::6
+        description: VM for the pfSense router
+        proxmoxNode: pve
+        proxmoxVMID: {{ router.vm_id }}
+        proxmoxType: qemu
+    - VM secsvcs:
+        icon: mdi-server
+        href: https://pve1.{{ site.url }}:8006/#v1:0:=qemu%2F{{ secsvcs.vm_id }}:4:::::::6
+        description: VM for secure services
+        proxmoxNode: pve
+        proxmoxVMID: {{ secsvcs.vm_id }}
+        proxmoxType: qemu
+    - VM homesvcs:
+        icon: mdi-server
+        href: https://pve1.{{ site.url }}:8006/#v1:0:=qemu%2F{{ homesvcs.vm_id }}:4:::::::6
+        description: VM for secure services
+        proxmoxNode: pve
+        proxmoxVMID: {{ homesvcs.vm_id }}
+        proxmoxType: qemu
 
 - Telemetry:
     - Grafana:

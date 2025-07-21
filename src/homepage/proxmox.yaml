@@ -1,0 +1,7 @@
+# /etc/opt/homepage/config/proxmox.yaml
+# Ref: https://gethomepage.dev/configs/proxmox
+---
+url: https://pve1.{{ site.url }}:8006
+token: api_ro@pam!homepage
+secret: {% raw %}{{DASH_PVE1_TOKEN}}{% endraw %}
+...

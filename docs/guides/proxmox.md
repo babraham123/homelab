@@ -224,6 +224,16 @@ src/debian/install_svcs.sh node_exporter
 ufw allow in from {{ secsvcs.ip }} to any port 9100 proto tcp
 ```
 
+- Create an API user in the PVE console (for pve1, pve2 and pbs2)
+  - Go to Datacenter >> Permissions >> Users >> Add, name = api_ro
+  - Go to Permissions >> Add >> User Permission
+  - path = /, user = api_ro@pam, role = PVEAuditor, propagate = check
+  - For PBS, Permissions -> Access Control, PVEAuditor -> Audit. Generate a user password:
+```bash
+ssh {{ username }}@pve1.{{ site.url }}
+sudo /root/homelab-rendered/src/pve1/secret_update.sh pve1
+```
+
 Perform these steps after pve1, secsvcs and victoriametrics is configured. [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
 - Get the metrics admin password from secsvcs
   `/usr/local/bin/get_secret.sh victoriametrics_admin_password`
