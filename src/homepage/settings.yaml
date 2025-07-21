@@ -54,6 +54,10 @@ layout:
     tab: Second
     style: row
     columns: 4
+  Core Services:
+    tab: Second
+    style: row
+    columns: 4
   Infra:
     tab: Second
     style: row
