@@ -43,6 +43,12 @@ http:
         - authelia@file
         - vm-auth@file
         - secure-headers@file
+    victoriametrics-hass-api:
+      <<: *service
+      rule: Host(`metrics.{{ site.url }}`) && HeaderRegexp(`Authorization`, `^Token .+$`)
+      service: victoriametrics@file
+      middlewares:
+        - "vm-auth-token@file"
     victoriametrics-api:
       <<: *service
       rule: Host(`metrics.{{ site.url }}`)
