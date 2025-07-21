@@ -99,7 +99,6 @@ recorder:
   exclude:
     domains:
       - automation
-      - alarm_control_panel
       - sun
       - updater
       - media_player
@@ -121,14 +120,15 @@ recorder:
 influxdb:
   api_version: 2
   ssl: true
-  host: "{% raw %}{{{% endraw %} admin: ~ !env_var VM_ADMIN_PASSWORD ~ @metrics.{{ site.url }} {% raw %}}}{% endraw %}"
+  host: metrics.{{ site.url }}
   port: 443
   path: /api/v2/write
+  token: !env_var VM_ADMIN_CREDS_HASH
   organization: hass
   bucket: hass
   precision: ms
   tags:
-    source: HA
+    source: hass
   tags_attributes:
     - entity_id
     - friendly_name
@@ -137,7 +137,6 @@ influxdb:
   exclude:
     domains:
       - automation
-      - alarm_control_panel
       - sun
       - updater
       - media_player
@@ -151,13 +150,40 @@ influxdb:
       - sensor.last_boot # From 'systemmonitor' sensor platform
       - sensor.date
 
-# Ref: https://www.home-assistant.io/integrations/ntfy/
+# Ref:
+#   https://www.home-assistant.io/integrations/notify.rest/
+#   https://docs.ntfy.sh/publish/#publish-as-json
+#   https://www.home-assistant.io/integrations/ntfy/
 notify:
   - name: ntfy
-    platform: ntfy
-    url: push.{{ site.url }}
+    platform: rest
+    method: POST_JSON
+    authentication: basic
     username: hass
     password: !env_var NTFY_HASS_PASSWORD
-    topic: hass
-    icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/home-assistant.png
+    data:
+      topic: hass
+      # priority: 4
+      icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/home-assistant.png
+    title_param_name: title
+    message_param_name: message
+    resource: https://push.{{ site.url }}
+
+# Ref: https://www.home-assistant.io/integrations/shell_command/
+shell_command:
+  ntfy: >
+      password='!env_var NTFY_HASS_PASSWORD';
+      creds='hass:$password';
+      curl
+      -X POST
+      --url 'https://push.{{ site.url }}/hass'
+      -u "$creds"
+      {% raw %}--data '{{ message }}'
+      --header 'X-Title: {{ title }}'
+      --header 'X-Tags: {{ tags }}'
+      --header 'X-Priority: {{ priority }}'
+      --header 'X-Delay: {{ delay }}'
+      --header 'X-Actions: {{ actions }}'
+      --header 'X-Click: {{ click }}'
+      --header 'X-Icon: {{ icon }}'{% endraw %}
 ...

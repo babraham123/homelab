@@ -38,7 +38,7 @@ Environment=WATCHDOG_USEC=5000000
 
 Secret=hass_oidc_id,type=env,target=OIDC_CLIENT_ID
 Secret=hass_oidc_secret,type=env,target=OIDC_CLIENT_SECRET
-Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
+Secret=victoriametrics_admin_creds_hash,type=env,target=VM_ADMIN_CREDS_HASH
 Secret=ntfy_hass_password,type=env,target=NTFY_HASS_PASSWORD
 
 # HACS integrations end up in /config/custom_components

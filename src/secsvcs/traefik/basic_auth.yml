@@ -18,6 +18,13 @@ http:
       headers:
         customRequestHeaders:
           Authorization: 'Basic {% raw %}{{ expandenv "admin:$VM_ADMIN_PASSWORD" | b64enc }}{% endraw %}'
+    vm-auth-token:
+      plugin:
+        rewriteHeaders:
+          rewrites:
+            - header: 'Authorization'
+              regex: '^Token (.+)$'
+              replacement: "Basic $1"
     vl-auth:
       headers:
         customRequestHeaders:
