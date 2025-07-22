@@ -9,6 +9,8 @@ scene: !include scenes.yaml
 # Ref: https://www.home-assistant.io/integrations/http/
 http:
   server_port: 8123
+  # Pass in as a Bearer token. /api/ endpoints are available on the server port
+  api_password: !env_var API_PASSWORD
   cors_allowed_origins:
     - https://home.{{ site.url }}
     - https://auth.{{ site.url }}
@@ -17,10 +19,6 @@ http:
     - {{ homesvcs.container_subnet }}.6
   ip_ban_enabled: true
   login_attempts_threshold: 3
-
-# Enable after the binary sensor integration is installed
-binary_sensor:
-  - platform: sdnotify
 
 # Enable after the OpenID Connect integration is installed
 # Ref: https://github.com/christiaangoossens/hass-oidc-auth
@@ -61,6 +59,8 @@ homeassistant:
     recordings: "/media/recordings"
   debug: false
 
+# Ref: https://developers.home-assistant.io/docs/api/rest
+api:
 # cloud:
 config:
 conversation:
@@ -81,6 +81,7 @@ my:
 # Live stream proxy: https://www.home-assistant.io/integrations/stream/
 stream:
 sun:
+system_health:
 # USB discovery: https://www.home-assistant.io/integrations/usb/
 # usb:
 webhook:
@@ -124,8 +125,8 @@ influxdb:
   port: 443
   path: /api/v2/write
   token: !env_var VM_ADMIN_CREDS_HASH
-  organization: hass
-  bucket: hass
+  organization: "hass"
+  bucket: "hass"
   precision: ms
   tags:
     source: hass

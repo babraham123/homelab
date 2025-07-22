@@ -102,7 +102,7 @@
 - Home:
     - Home Assistant:
         icon: home-assistant-alt.svg
-        href: https://home.{{ site.url }}/
+        href: https://home.{{ site.url }}/auth/oidc/welcome
         description: Home automation dashboard
         # widget:
         #   type: homeassistant

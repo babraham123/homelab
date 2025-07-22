@@ -153,3 +153,7 @@ http:
     #   loadBalancer:
     #     servers:
     #       - url: http://vault.{{ site.url }}:80/
+    # logger:
+    #   loadBalancer:
+    #     servers:
+    #       - url: http://logger.{{ site.url }}:8080/

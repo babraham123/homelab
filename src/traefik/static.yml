@@ -10,7 +10,17 @@ api:
 log:
   level: WARN
   format: common
-# accessLog: {}
+# accessLog:
+#   format: common
+#   filters:
+#     statusCodes:
+#       - "400-499"
+#   fields:
+#     defaultMode: keep
+#     headers:
+#       defaultMode: keep
+#       names:
+#         Authorization: redact
 providers:
   file:
     watch: true
@@ -18,8 +28,8 @@ providers:
 experimental:
   plugins:
     rewriteHeaders:
-      modulename: "github.com/XciD/traefik-plugin-rewrite-headers"
-      version: "v0.0.4"
+      modulename: "github.com/bitrvmpd/traefik-plugin-rewrite-headers"
+      version: "v0.0.1"
 entryPoints:
   web:
     address: ":80/tcp"

@@ -20,14 +20,10 @@ src/homesvcs/install_svcs.sh fluentbit
 systemctl restart node_exporter
 ```
 
-- On initial install, disable HA OIDC, watchdog
+- On initial install, disable HA OIDC
 ```bash
-# Comment out the sections called `auth_oidc` and `binary_sensor`
+# Comment out the sections called `auth_oidc`
 vim /etc/opt/home_assistant/config/configuration.yaml
-# Comment out `notify` and `WatchdogSec`
-vim /etc/containers/systemd/home_assistant.container
-
-systemctl daemon-reload
 systemctl restart home_assistant
 ```
 
@@ -72,16 +68,11 @@ systemctl restart home_assistant
   - Perform device auth with Github
   - Go to Settings >> Devices & services >> Gear icon >> Enable AppDaemon apps
 - Go to HACS >> install the following integrations:
-  - brianegge/home-assistant-sdnotify
   - christiaangoossens/hass-oidc-auth
   - dummylabs/thewatchman
 - Configure the integrations
 ```bash
-# Uncomment the sections called `auth_oidc` and `binary_sensor`
+# Uncomment the sections called `auth_oidc`
 vim /etc/opt/home_assistant/config/configuration.yaml
-# Uncomment `notify` and `WatchdogSec`
-vim /etc/containers/systemd/home_assistant.container
-
-systemctl daemon-reload
 systemctl restart home_assistant
 ```

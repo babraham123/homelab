@@ -234,17 +234,22 @@ ssh {{ username }}@pve1.{{ site.url }}
 sudo /root/homelab-rendered/src/pve1/secret_update.sh pve1
 ```
 
-Perform these steps after pve1, secsvcs and victoriametrics is configured. [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
-- Get the metrics admin password from secsvcs
-  `/usr/local/bin/get_secret.sh victoriametrics_admin_password`
-- Go to Datacenter >> Metric Server >> Add >> InfluxDB 
+Perform these steps after pve1, secsvcs and victoriametrics is configured (do this for pve1, pve2 and pbs2). [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
+- Get the metrics admin password and hash credentials
+```bash
+ssh {{ username }}@secsvcs.{{ site.url }}
+password=$(sudo /usr/local/bin/get_secret.sh victoriametrics_admin_password)
+echo -n "admin:$password" | base64
+```
+- Go to Datacenter >> Metric Server >> Add >> InfluxDB
+- For PBS, go to Configuration >> Metric Server >> Add >> InfluxDB (HTTP)
 - Set:
   - server = metrics.{{ site.url }}
   - port = 443
   - protocol = https
   - organization = proxmox
   - bucket = proxmox
-  - token = admin:PASSWORD
+  - token = CREDS_HASH
 
 ## Upgrade
 
