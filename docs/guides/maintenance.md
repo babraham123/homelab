@@ -10,8 +10,11 @@ tools/deploy_src.sh
 - Re-install the relevant services
 ```bash
 ssh {{ username }}@secsvcs.{{ site.url }}
-# TODO: re-install cmd
+sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh SERVICE
 ```
+
+## Add a new user
+TODO
 
 The rest of the commands take place on PVE1
 ```bash

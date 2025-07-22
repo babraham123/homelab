@@ -22,9 +22,10 @@ http:
       plugin:
         rewriteHeaders:
           rewrites:
-            - header: 'Authorization'
-              regex: '^Token (.+)$'
-              replacement: "Basic $1"
+            request:
+              - header: 'Authorization'
+                regex: '^Token (.+)$'
+                replacement: "Basic $1"
     vl-auth:
       headers:
         customRequestHeaders:
