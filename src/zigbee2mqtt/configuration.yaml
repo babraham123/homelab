@@ -10,7 +10,7 @@ serial:
   # Could be either USB port (/dev/serial/by-id/ or /dev/ttyUSB0),
   # network Zigbee adapters (tcp://192.168.1.1:6638) or
   # mDNS adapter (mdns://my-adapter). Supports slzb-06, uzg-01, czc
-  port: mdns://slzb-06
+  port: mdns://slzb-06m
   # Optional: MQTT base topic for Zigbee2MQTT MQTT messages (default: zigbee2mqtt)
   base_topic: zigbee2mqtt
   # Optional: absolute path to SSL/TLS certificate of CA used to sign server and client certificates (default: nothing)
