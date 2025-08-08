@@ -98,6 +98,15 @@ lspci
   - Disabled IPv6 and DNSSEC (for now) 
 - Enable auto backup (ACB)
 
+### Add an interface
+TODO: integrate these instructions with above
+- Go to Interfaces >> Assignments >> Add
+- Go to Interface >> OPT4. Enable, Description = LAN3, Config Type = Static IPv4, Address = {{ lan3.mask }} 
+- Go to Firewall >> Rules. Copy existing rules from LAN2
+- Go to Services >> DHCP Server >> LAN3. Enable, Address Pool Range is {{ lan3.subnet }}.100 - 200
+- Go to Services >> mDNS Bridge. Add LAN3
+- Reboot the pfSense VM
+
 ### QEMU Agent
 [ref](https://forum.netgate.com/topic/162083/pfsense-vm-on-proxmox-qemu-agent-installation/6)
 - Go to System >> Advanced >> Admin Access >> Secure Shell
@@ -179,24 +188,6 @@ pkg-static add https://github.com/jaredhendrickson13/pfsense-api/releases/latest
   - Select all the available interfaces
   - Save
 
-### Ad Block
-[ref](https://www.youtube.com/watch?v=xizAeAqYde4)
-- Go to System >> Package Manager
-- Install the pfBlockerNG-devel package
-- Go to Firewall >> pfBlockerNG
-- Run thru wizard
-  - inbound interface = internet facing, outbound = internal LAN ones
-  - Ensure the VIP Address does not lie within any networks
-- Geo data:
-  - Register for a MaxMind acct
-  - Go to IP, add license key and account id
-- Go to DNSBL
-  - Set DNSBL Mode to "Unbound python mode"
-  - Enable Wildcard Blocking (TLD)
-  - Disable DNS Reply Logging
-  - Go to DNSBL Groups
-    - TODO ???
-
 ## PVE1 remaining setup
 Do the following sections from the [proxmox guide](./proxmox.md):
 - VM Management
@@ -257,17 +248,12 @@ exit
 - Restore the pfsense config and re-install all pkgs
 - If necessary, manual re-install pkgs
 
-## USB Ethernet adapter
+## USB Ethernet adapter (optional)
+I found the USB passthru to be a little flaky, after which I would have to restart pfsense.
 
 - Do the USB Passthrough section the [proxmox guide](./proxmox.md)
 - Do additional setup if it's not autodetected, [ref](https://getlabsdone.com/how-to-fix-usb-ethernet-not-recognized-by-pfsense/)
-- Add the new interface
-  - Go to Interfaces >> Assignments >> Add
-  - Go to Interface >> OPT4. Enable, Description = LAN3, Config Type = Static IPv4, Address = {{ lan3.mask }} 
-  - Go to Firewall >> Rules. Copy existing rules from LAN2
-  - Go to Services >> DHCP Server >> LAN3. Enable, Address Pool Range is {{ lan3.subnet }}.100 - 200
-  - Go to Services >> mDNS Bridge. Add LAN3
-
+- Add the new interface, see above
 
 ## References
 
@@ -289,3 +275,23 @@ exit
 - https://www.servethehome.com/new-fanless-4x-2-5gbe-intel-n5105-i226-v-firewall-tested/ 
 - https://pve.proxmox.com/wiki/Pci_passthrough 
 - https://pve.proxmox.com/wiki/SPICE 
+
+### Ad Block (optional)
+I found DNS based blocking to be too limiting / finicky. Instead I now use browser extensions. 
+In case you're still interested, see [ref](https://www.youtube.com/watch?v=xizAeAqYde4)
+
+- Go to System >> Package Manager
+- Install the pfBlockerNG-devel package
+- Go to Firewall >> pfBlockerNG
+- Run thru wizard
+  - inbound interface = internet facing, outbound = internal LAN ones
+  - Ensure the VIP Address does not lie within any networks
+- Geo data:
+  - Register for a MaxMind acct
+  - Go to IP, add license key and account id
+- Go to DNSBL
+  - Set DNSBL Mode to "Unbound python mode"
+  - Enable Wildcard Blocking (TLD)
+  - Disable DNS Reply Logging
+  - Go to DNSBL Groups
+    - TODO ???
