@@ -9,6 +9,7 @@ personal:
   currency: "USD"
   units: "imperial" # or metric
   firstDayInWeek: "sunday" # or monday
+  # TODO: make location a secret
   location:
     lat: 40.0001
     long: -120.0001
@@ -30,6 +31,15 @@ users:
   - jane
   - jayden
   - jasper
+
+model:
+  # Supported voice models: https://github.com/rhasspy/piper/blob/master/VOICES.md
+  tts: "en_US-lessac-medium" # 64 MB, CPU only
+  # Supported recognition models: https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages
+  # HW: https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file#gpu
+  stt: "tiny-int8" # ~1 GB VRAM, requires CUDA
+  # Supported wake word models: https://github.com/dscripka/openWakeWord?tab=readme-ov-file#pre-trained-models
+  wake: "hey_jarvis,weather" # 2.5 MB, CPU only
 
 vpn:
   ip: 12.34.56.78

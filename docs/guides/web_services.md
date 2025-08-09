@@ -15,6 +15,12 @@ src/websvcs/install_svcs.sh vmagent
 src/websvcs/install_svcs.sh nginx
 src/websvcs/install_svcs.sh homepage
 src/websvcs/install_svcs.sh isso
+
+# src/websvcs/install_svcs.sh go2rtc
+# src/websvcs/install_svcs.sh piper
+# src/websvcs/install_svcs.sh whisper
+# src/websvcs/install_svcs.sh openwakeword
+
 # src/websvcs/install_svcs.sh finance_exporter
 src/websvcs/install_svcs.sh fluentbit
 

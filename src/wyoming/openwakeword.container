@@ -1,26 +1,28 @@
-# /etc/containers/systemd/finance_exporter.container
+# /etc/containers/systemd/openwakeword.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
 [Unit]
-Description="Homelab: export finance data to VictoriaMetrics"
+Description="Homelab: wake word detection"
 StartLimitIntervalSec=30
 StartLimitBurst=10
 Wants=network.target
 After=network-online.target
 
 [Container]
-Image=localhost/finance_exporter:latest
-ContainerName=finance_exporter
+Image=localhost/openwakeword:latest
+ContainerName=openwakeword
 AutoUpdate=registry
 NoNewPrivileges=true
 
 Network=net.network
-HostName=finance-exporter.{{ site.url }}
-IP={{ websvcs.container_subnet }}.50
-# port 8002
+HostName=wake.{{ site.url }}
+IP={{ websvcs.container_subnet }}.14
+# port 10400: Wyoming protocol for wake word
+
+Exec="--preload-model={{ model.wake }} --noise_suppression"
 
 Environment=TZ={{ personal.timezone }}
-Volume=/etc/opt/finance_exporter/config.yaml:/usr/src/app/finance-exporter.yaml:ro
+Volume=/var/opt/openwakeword:/data
 
 [Service]
 Restart=on-failure
