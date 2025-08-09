@@ -1,0 +1,34 @@
+# /etc/containers/systemd/piper.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: text to speech synthesizer"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=localhost/piper:latest
+ContainerName=piper
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=tts.{{ site.url }}
+IP={{ websvcs.container_subnet }}.12
+# port 10200: Wyoming protocol for tts
+# port 5000: Piper tts server
+
+Exec="--voice={{ model.tts }}"
+# Consider GPU acceleration: https://github.com/rhasspy/piper/tree/4147f9629e88d3c1d4915a127f2d843f98347303?tab=readme-ov-file#running-in-python
+
+Environment=TZ={{ personal.timezone }}
+Volume=/var/opt/piper:/data
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

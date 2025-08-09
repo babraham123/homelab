@@ -1,0 +1,53 @@
+# /etc/opt/go2rtc/config.yaml
+# Ref:
+#   https://github.com/AlexxIT/go2rtc
+#   https://github.com/AlexxIT/WebRTC
+#   https://github.com/AlexxIT/go2rtc/wiki/Hardware-acceleration
+---
+api:
+  listen: ":1984"    # default ":1984", HTTP API port ("" - disabled)
+  username: "admin"  # default "", Basic auth for WebUI
+  password: "{API_PASSWORD}"   # default "", Basic auth for WebUI
+  # base_path: "/rtc"  # default "", API prefix for serving on suburl (/api => /rtc/api)
+  # static_dir: "www"  # default "", folder for static files (custom web interface)
+  # origin: "*"        # default "", allow CORS requests (only * supported)
+  # tls_listen: ":443" # default "", enable HTTPS server
+  # tls_cert: |        # default "", PEM-encoded fullchain certificate for HTTPS
+  #   -----BEGIN CERTIFICATE-----
+  #   ...
+  #   -----END CERTIFICATE-----
+  # tls_key: |         # default "", PEM-encoded private key for HTTPS
+  #   -----BEGIN PRIVATE KEY-----
+  #   ...
+  #   -----END PRIVATE KEY-----
+  # unix_listen: "/tmp/go2rtc.sock"  # default "", unix socket listener for API
+
+# rtsp:
+  # listen: ":8554"    # RTSP Server TCP port, default - 8554
+  # username: "admin"  # optional, default - disabled
+  # password: "pass"   # optional, default - disabled
+  # default_query: "video&audio"  # optional, default codecs filters
+
+# rtmp:
+  # listen: ":1935"  # by default - disabled!
+
+webrtc:
+  listen: ":8555" # external TCP/UDP port
+  candidates:
+    - {{ homesvcs.ip }}:8555  # local access
+  # ice_servers:
+    # - urls: [stun:stun.l.google.com:19302]
+    # TODO: add TURN server to VPN
+    # - urls: [turn:{{ vpn.ip }}:3478]
+      # username: your_user
+      # credential: your_pass
+
+# log:
+  # level: info  # default level
+  # api: trace
+  # exec: debug
+  # ngrok: info
+  # rtsp: warn
+  # streams: error
+  # webrtc: fatal
+...

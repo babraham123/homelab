@@ -5,6 +5,12 @@
 
 set -euo pipefail
 
+function install_wyoming() {
+  rm -rf /etc/opt/wyoming/src
+  wget "https://github.com/rhasspy/wyoming-addons/archive/refs/heads/main.tar.gz" -O - | \
+    tar -xz -C /etc/opt/wyoming/src --strip-components=1
+}
+
 cd /root/homelab-rendered/src
 mkdir -p /etc/containers/systemd
 cp podman/*.sh /usr/local/bin
@@ -53,12 +59,54 @@ case $1 in
     cp isso/issodb.volume /etc/containers/systemd
     ;;
   finance_exporter)
+    rm -rf /etc/opt/finance_exporter/src
     mkdir -p /etc/opt/finance_exporter/src
     cp finance_exporter/config.yaml /etc/opt/finance_exporter
     cp finance_exporter/finance_exporter.container /etc/containers/systemd
     wget "https://github.com/babraham123/finance-exporter/archive/refs/heads/main.tar.gz" -O - | \
       tar -xz -C /etc/opt/finance_exporter/src --strip-components=1
     podman build -t finance_exporter /etc/opt/finance_exporter/src
+    ;;
+  go2rtc)
+    mkdir -p /etc/opt/go2rtc
+    cp go2rtc/config.yaml /etc/opt/go2rtc
+    cp go2rtc/go2rtc.container /etc/containers/systemd
+    ;;
+  piper)
+    mkdir -p /etc/opt/piper
+    mkdir -p /var/opt/piper
+    cp wyoming/piper.container /etc/containers/systemd
+    install_wyoming
+    WP_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-piper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    WY_VERSION=$(curl -s "https://api.github.com/repos/OHF-voice/wyoming/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    # TODO: Watch for migration to https://github.com/OHF-Voice/piper1-gpl
+    PI_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/piper/releases" | grep -Po '"tag_name": "v\K[0-9.]+' | head -1)
+
+    podman build -t piper /etc/opt/wyoming/src/piper \
+      --build-arg WYOMING_PIPER_VERSION="$WP_VERSION" \
+      --build-arg WYOMING_VERSION="$WY_VERSION" \
+      --build-arg BINARY_PIPER_VERSION="$PI_VERSION" \
+      --build-arg TARGETARCH="amd64" --build-arg TARGETVARIANT=""
+    ;;
+  whisper)
+    mkdir -p /etc/opt/whisper
+    mkdir -p /var/opt/whisper
+    cp wyoming/whisper.container /etc/containers/systemd
+    install_wyoming
+    WW_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-faster-whisper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    
+    podman build -t whisper /etc/opt/wyoming/src/whisper \
+      --build-arg WYOMING_WHISPER_VERSION="$WW_VERSION"
+    ;;
+  openwakeword)
+    mkdir -p /etc/opt/openwakeword
+    mkdir -p /var/opt/openwakeword
+    cp wyoming/openwakeword.container /etc/containers/systemd
+    install_wyoming
+    OW_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-openwakeword/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    
+    podman build -t openwakeword /etc/opt/wyoming/src/openwakeword \
+      --build-arg WYOMING_OPENWAKEWORD_VERSION="$OW_VERSION"
     ;;
   fluentbit)
     mkdir -p /etc/opt/fluentbit

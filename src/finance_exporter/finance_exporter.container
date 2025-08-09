@@ -19,6 +19,7 @@ HostName=finance-exporter.{{ site.url }}
 IP={{ websvcs.container_subnet }}.50
 # port 8002
 
+Environment=TZ={{ personal.timezone }}
 Volume=/etc/opt/finance_exporter/config.yaml:/usr/src/app/finance-exporter.yaml:ro
 
 [Service]

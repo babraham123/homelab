@@ -1,0 +1,35 @@
+# /etc/containers/systemd/go2rtc.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Camera streaming and transcoding"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/alexxit/go2rtc:latest
+ContainerName=go2rtc
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=stream.{{ site.url }}
+IP={{ websvcs.container_subnet }}.11
+# port 1984: web UI/API (TCP)
+# port 8554: RTSP (TCP)
+# port 8555: webrtc (TCP/UDP)
+
+AddDevice=/dev/dri:/dev/dri
+
+Environment=TZ={{ personal.timezone }}
+
+Volume=/etc/opt/go2rtc/config.yaml:/config/go2rtc.yaml
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
