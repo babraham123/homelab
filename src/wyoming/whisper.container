@@ -19,6 +19,8 @@ HostName=stt.{{ site.url }}
 IP={{ websvcs.container_subnet }}.13
 # port 10300: Wyoming protocol for stt
 
+PodmanArgs=--gpus=all
+
 Exec="--model={{ model.stt }} --language={{ personal.language.split('-')[0] }}"
 
 Environment=TZ={{ personal.timezone }}
