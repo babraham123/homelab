@@ -38,6 +38,14 @@ lsblk
 ## PCI passthrough
 [src](https://pve.proxmox.com/wiki/PCI_Passthrough)
 
+### Intel NIC
+- Fix crashes
+	- `sudo vim /etc/network/interfaces`
+```
+iface eno1 inet manual
+	post-up ethtool -K eno1 tso off gso off
+```
+
 ### GPU
 - Update grub
 ```bash
@@ -53,20 +61,16 @@ GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt initcall_blacklist=sys
 sudo update-grub
 ```
 - Update modules
-```bash
-sudo vim /etc/modules
-```
+  - `sudo vim /etc/modules`
 ```
 vfio
 vfio_iommu_type1
 vfio_pci
 vfio_virqfd
 ```
-
-```bash
-sudo vim /etc/modprobe.d/pve-blacklist.conf
+  - `sudo vim /etc/modprobe.d/pve-blocklist.conf`
 ```
-```
+# GPU passthru
 blacklist nvidiafb
 blacklist nvidia
 blacklist radeon
@@ -91,30 +95,37 @@ find /sys/kernel/iommu_groups/ -type l | sort
 lspci -nnv | grep VGA
 lspci -s 01:00 && lspci -s 01:00 -n
 ```
+- In the PVE UI, Go to VM >> Hardware >> Add PCI device
+  - Check Raw Device, All Functions, ROM-Bar, PCI-Express. Also Primary GPU if using for display.
+- Reboot the VM
 
 ### iGPU
-- Same as above, [ref](https://3os.org/infrastructure/proxmox/gpu-passthrough/igpu-passthrough-to-vm/#linux-virtual-machine-igpu-passthrough-configuration)
-- `sudo vim /etc/modprobe.d/pve-blacklist.conf`
+Same as GPU, just add the following steps ([ref](https://3os.org/infrastructure/proxmox/gpu-passthrough/igpu-passthrough-to-vm/#linux-virtual-machine-igpu-passthrough-configuration)):
+- Add another driver to the blocklist
+  - `sudo vim /etc/modprobe.d/pve-blocklist.conf`
 ```
+# iGPU passthru
 blacklist i915
 ```
 ```bash
 sudo reboot
 lspci -nnv | grep VGA
 ```
-
-### Intel NIC
-- Fix crashes
-	- `sudo vim /etc/network/interfaces`
-```
-iface eno1 inet manual
-	post-up ethtool -K eno1 tso off gso off
-```
+- Confirm that the iGPU has a dedicated IOMMU group
+  - `/root/homelab-rendered/src/debian/iommu_groups.sh`
+- Change the Display type for all VMs
+  - In the PVE UI, Go to VM >> Hardware >> Display
+  - Set the display to `VirtIO-GPU` or `none`. For the target VM use `none`
+- Disable ACPI
+  - Go to VM >> Options >> ACPI support >> No
+  - Now to turn off the VM, press Shutdown and then Stop
 
 ### Coral TPU
-- Update modules
-  `sudo vim /etc/modprobe.d/blacklist-apex.conf`
+Same as GPU, just add the following steps
+- Block more modules
+  `sudo vim /etc/modprobe.d/pve-blocklist.conf`
 ```
+# Coral TPU passthru
 blacklist gasket
 blacklist apex
 options vfio-pci ids=1ac1:089a
@@ -129,8 +140,8 @@ lspci -nnv | grep TPU
 
 ## USB Passthrough
 
-- Pass thru physical port, [docs](https://pve.proxmox.com/wiki/USB_Physical_Port_Mapping)
-  - Get the port details
+Pass thru physical port, [docs](https://pve.proxmox.com/wiki/USB_Physical_Port_Mapping)
+- Get the port details
 ```bash
 sudo su
 # Get dev number from device description
@@ -138,8 +149,8 @@ lsusb
 # Get bus and port number
 lsusb -t
 ```
-  - In PVE UI, Go to VM >> Hardware >> Add USB device
-  - Reboot the VM
+- In the PVE UI, Go to VM >> Hardware >> Add USB device
+- Reboot the VM
 
 ## VM management
 [Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
