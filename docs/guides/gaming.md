@@ -9,7 +9,7 @@ Guide to stream games from the windows VM to my living room TV.
 - Install [Playnite](https://playnite.link/)
 - Install [ChangeScreenResolution.exe](https://tools.taubenkorb.at/change-screen-resolution/)
 - Install [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/installation.html)
-  - Add Playnite as a cmd: `"C:\Users\{{ username }}\AppData\Local\Playnite\Playnite.FullscreenApp.exe" --hidesplashscreen`
+  - Add Playnite as a cmd: `"C:\Users\admin\AppData\Local\Playnite\Playnite.FullscreenApp.exe" --hidesplashscreen`
   - Run PowerShell cmds:
 ```PowerShell
 cd "C:\Program Files\Sunshine\scripts"
