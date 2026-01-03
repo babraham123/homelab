@@ -11,6 +11,8 @@ serial:
   # network Zigbee adapters (tcp://192.168.1.1:6638) or
   # mDNS adapter (mdns://my-adapter). Supports slzb-06, uzg-01, czc
   port: mdns://slzb-06m
+  # Optional: Baud rate speed for serial port, this can be anything firmware support but default is 115200 for Z-Stack and EZSP, 38400 for Deconz, however note that some EZSP firmware need 57600.
+  # baudrate: 115200
   # Optional: MQTT base topic for Zigbee2MQTT MQTT messages (default: zigbee2mqtt)
   base_topic: zigbee2mqtt
   # Optional: absolute path to SSL/TLS certificate of CA used to sign server and client certificates (default: nothing)
@@ -37,6 +39,8 @@ serial:
   # support retained message (e.g. AWS IoT core, Azure IoT Hub, Google Cloud IoT core, IBM Watson IoT Platform).
   # Enabling will break the Home Assistant integration. (default: false)
   force_disable_retain: false
+  # Optional: disable LED of the adapter if supported (default: false)
+  disable_led: true
 
 # Will run frontend on port 8080
 frontend:

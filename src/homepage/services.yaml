@@ -208,50 +208,29 @@
         icon: proxmox.svg
         href: https://pve1.{{ site.url }}:8006/
         description: VM hypervisor 1
-        widget:
-          type: proxmox
-          url: https://pve1.{{ site.url }}:8006
-          username: api_ro@pam!homepage
-          password: {% raw %}{{DASH_PVE1_TOKEN}}{% endraw %}
+        # widget:
+          # type: proxmox
+          # url: https://pve1.{{ site.url }}:8006
+          # username: api_ro@pam!homepage
+          # password: {% raw %}{{DASH_PVE1_TOKEN}}{% endraw %}
     - Proxmox 2:
         icon: proxmox.svg
         href: https://pve2.{{ site.url }}:8006/
         description: VM hypervisor 2
-        widget:
-          type: proxmox
-          url: https://pve2.{{ site.url }}:8006
-          username: api_ro@pam!homepage
-          password: {% raw %}{{DASH_PVE2_TOKEN}}{% endraw %}
+        # widget:
+          # type: proxmox
+          # url: https://pve2.{{ site.url }}:8006
+          # username: api_ro@pam!homepage
+          # password: {% raw %}{{DASH_PVE2_TOKEN}}{% endraw %}
     - Proxmox Backup:
         icon: mdi-cloud-upload
         href: https://pbs2.{{ site.url }}:8007/
         description: VM backup server
-        widget:
-          type: proxmoxbackupserver
-          url: https://pbs2.{{ site.url }}:8007
-          username: api_ro@pam!homepage
-          password: {% raw %}{{DASH_PBS2_TOKEN}}{% endraw %}
-    - VM pfsense:
-        icon: mdi-server
-        href: https://pve1.{{ site.url }}:8006/#v1:0:=qemu%2F{{ router.vm_id }}:4:::::::6
-        description: VM for the pfSense router
-        proxmoxNode: pve
-        proxmoxVMID: {{ router.vm_id }}
-        proxmoxType: qemu
-    - VM secsvcs:
-        icon: mdi-server
-        href: https://pve1.{{ site.url }}:8006/#v1:0:=qemu%2F{{ secsvcs.vm_id }}:4:::::::6
-        description: VM for secure services
-        proxmoxNode: pve
-        proxmoxVMID: {{ secsvcs.vm_id }}
-        proxmoxType: qemu
-    - VM homesvcs:
-        icon: mdi-server
-        href: https://pve1.{{ site.url }}:8006/#v1:0:=qemu%2F{{ homesvcs.vm_id }}:4:::::::6
-        description: VM for secure services
-        proxmoxNode: pve
-        proxmoxVMID: {{ homesvcs.vm_id }}
-        proxmoxType: qemu
+        # widget:
+          # type: proxmoxbackupserver
+          # url: https://pbs2.{{ site.url }}:8007
+          # username: api_ro@pam!homepage
+          # password: {% raw %}{{DASH_PBS2_TOKEN}}{% endraw %}
 
 - Telemetry:
     - Grafana:

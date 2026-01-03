@@ -1,7 +1,7 @@
 # Development
 TODO: fill in
 
-[MAC setup](./guides/mac.md)
+[MAC setup](./guides/mac_laptop.md)
 
 ## Deploy new configurations
 

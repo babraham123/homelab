@@ -42,9 +42,9 @@ auth_oidc:
 # Ref: https://www.home-assistant.io/integrations/homeassistant/
 homeassistant:
   name: Home
-  latitude: {{ personal.location.lat }}
-  longitude: {{ personal.location.long }}
-  elevation: {{ personal.location.elevation }}
+  latitude: !env_var HOME_LATITUDE
+  longitude: !env_var HOME_LONGITUDE
+  elevation: !env_var HOME_ELEVATION
   radius: 100
   unit_system: {% if personal.units == "metric" %}metric{% else %}us_customary{% endif %}
   currency: {{ personal.currency }}
