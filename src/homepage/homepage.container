@@ -25,6 +25,8 @@ Environment=LOG_TARGETS=stdout
 Environment=HOMEPAGE_ALLOWED_HOSTS=dash.{{ site.url }},{{ websvcs.container_subnet }}.9
 
 Secret=home_ical_url,type=env,target=HOME_ICAL_URL
+Secret=home_latitude,type=env,target=HOME_LATITUDE
+Secret=home_longitude,type=env,target=HOME_LONGITUDE
 Secret=dash_pve1_api_token,type=env,target=DASH_PVE1_TOKEN
 Secret=dash_pve2_api_token,type=env,target=DASH_PVE2_TOKEN
 Secret=dash_pbs2_api_token,type=env,target=DASH_PBS2_TOKEN

@@ -27,7 +27,13 @@ cd "C:\Program Files\Sunshine\scripts"
   - Import into Playnite
 - Install Dolphin, import into Playnite
 
-### Raspberry Pi streaming client and controllers
+### Apple TV client
+- Install Moonlight from the App Store
+- Tweak the [settings](https://www.reddit.com/r/appletv/comments/nklgcl/any_apple_tv_4k_2021_owners_that_have_tried/)
+- Attempt to connect to the gaming VM. Open the Sunshine web UI and enter in the pairing code.
+- Pair xbox controller via bluetooth
+
+### Raspberry Pi client
 - Enable HEVC, HDR
   - `vim /Volumes/bootfs/config.txt`
 ```

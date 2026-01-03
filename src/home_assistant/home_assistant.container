@@ -40,6 +40,9 @@ Secret=hass_oidc_secret,type=env,target=OIDC_CLIENT_SECRET
 Secret=hass_api_password,type=env,target=API_PASSWORD
 Secret=victoriametrics_admin_creds_hash,type=env,target=VM_ADMIN_CREDS_HASH
 Secret=ntfy_hass_password,type=env,target=NTFY_HASS_PASSWORD
+Secret=home_latitude,type=env,target=HOME_LATITUDE
+Secret=home_longitude,type=env,target=HOME_LONGITUDE
+Secret=home_elevation,type=env,target=HOME_ELEVATION
 
 # HACS integrations end up in /config/custom_components
 # AppDaemon apps end up in /config/appdaemon/apps

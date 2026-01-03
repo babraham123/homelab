@@ -37,8 +37,11 @@ wget https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda
 dpkg -i cuda-keyring_1.1-1_all.deb
 apt update
 
-# compute only drivers and tools
-apt -V install nvidia-driver-cuda nvidia-kernel-dkms nvtop
+# Pin the nvidia driver version
+apt install nvidia-driver-pinning-580
+
+# install toolkit and drivers
+apt install -y cuda-drivers nvtop
 reboot
 ```
 - Verify after PCI passthrough

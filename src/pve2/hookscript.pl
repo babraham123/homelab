@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# /var/lib/vz/snippets/gpu_hookscript.pl
+# /var/lib/vz/snippets/hookscript.pl
 # Hook script for PVE guests (hookscript config option)
 # Ref:
 #   https://pve.proxmox.com/pve-docs/pve-admin-guide.html#_hookscripts

@@ -126,7 +126,7 @@ Apply security updates and fixes since the last release
 - Go to System >> Patches
 - Click "Apply All Recommended"
 
-### Bufferfloat
+### Bufferfloat (currently disabled)
 Improve latency when under heavy load
 - Follow all the steps listed [here](https://docs.netgate.com/pfsense/en/latest/recipes/codel-limiters.html). That includes:
   - Run the load test
