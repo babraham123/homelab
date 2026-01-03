@@ -21,6 +21,7 @@ IP={{ websvcs.container_subnet }}.11
 # port 8554: RTSP (TCP)
 # port 8555: webrtc (TCP/UDP)
 
+# https://github.com/AlexxIT/go2rtc/wiki/Hardware-acceleration#intel-igpu
 AddDevice=/dev/dri:/dev/dri
 
 Environment=TZ={{ personal.timezone }}

@@ -51,3 +51,7 @@ sudo reboot
 ```
 TODO: add a password, [ref](https://forum.proxmox.com/threads/setting-vnc-password-permanently.46655/#post-221726), [ref2](https://pve.proxmox.com/wiki/VNC_Client_Access)
 - add a pve2 secrets file, 
+```
+set_password vnc 8_CHAR_PASS -d vnc2
+expire_password vnc +600 -d vnc2
+```

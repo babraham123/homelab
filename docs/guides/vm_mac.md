@@ -4,6 +4,6 @@ TODO: finish this guide
 
 - First do the basic [VM setup](./vm.md)
 
-### Image
+## Image
 [Ref](https://i12bretro.github.io/tutorials/0944.html)
 - Download [Sequoia](https://archive.org/details/macos-collection) image and OpenCore ISOs

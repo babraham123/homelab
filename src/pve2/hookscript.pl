@@ -14,6 +14,14 @@ use warnings;
 my $vmid = shift;
 my $phase = shift;
 
+# Unbind GPU devices
+# https://forum.proxmox.com/threads/recover-gpu-from-vm-after-it-shuts-down.126457/
+sub unbind_gpu {
+    system("sleep 5");
+    system('echo "0000:01:00.0" > "/sys/bus/pci/devices/0000:01:00.0/driver/unbind"');
+    system('echo "0000:01:00.1" > "/sys/bus/pci/devices/0000:01:00.1/driver/unbind"');
+}
+
 if ($phase eq 'pre-start') {
     # First phase 'pre-start' will be executed before the guest
     # is started. Exiting with a code != 0 will abort the start
@@ -24,13 +32,12 @@ if ($phase eq 'pre-start') {
     if ($vmid == $devtop) {
         system("qm stop $gaming");
         system("qm wait $gaming --timeout 20");
+        unbind_gpu();
     } elsif ($vmid == $gaming) {
         system("qm stop $devtop");
         system("qm wait $devtop --timeout 20");
+        unbind_gpu();
     }
-    # system("echo 1 > /sys/bus/pci/devices/0000:01:00.0/remove");
-    # system("echo 1 > /sys/bus/pci/devices/0000:01:00.1/remove");
-    # system("sleep 5");
 
 } elsif ($phase eq 'post-start') {
     # Second phase 'post-start' will be executed after the guest

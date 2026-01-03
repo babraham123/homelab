@@ -3,12 +3,12 @@ Guide to create a Windows VM.
 
 - First do the basic [VM setup](./vm.md)
 
-### Images
+## Images
 - Download the Windows [ISO](https://www.microsoft.com/software-download/windows11)
 - Download the Windows VirtIO [drivers](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso)
 - Upload ISOs to Proxmox on "local"
 
-### Configure VM
+## Configure VM
 [src](https://www.wundertech.net/how-to-install-windows-11-on-proxmox/), [vid](https://www.youtube.com/watch?v=fupuTkkKPDU)
 - Turn on
 	- For driver ISO, if IDE1 doesn't work use SATA0
@@ -22,7 +22,7 @@ Guide to create a Windows VM.
 - Setup RDP
 	- In Start menu search for `remote desktop settings`, enable
 	- On mac, install `Microsoft Remote Desktop`, verify connection
-		- username = `gaming\{{ username }}`, login password
+		- username = `gaming\admin`, login password
   - Disable login, [ref](https://answers.microsoft.com/en-us/windows/forum/all/how-to-login-automatically-to-windows-11/c0e9301e-392e-445a-a5cb-f44d00289715)
 - Install apps
 	- Launch shell (win R, `PowerShell`, ctrl shift enter)
@@ -45,19 +45,19 @@ Set-Service -Name sshd -StartupType 'Automatic'
 ```
 - Shutdown VM
 
-### GPU Passthrough
+## GPU Passthrough
 [src](https://3os.org/infrastructure/proxmox/gpu-passthrough/gpu-passthrough-to-vm/#proxmox-configuration-for-gpu-passthrough), [vid](https://www.youtube.com/watch?v=fgx3NMk6F54)
 - Follow the steps in [Proxmox > PCI passthrough](./proxmox.md#pci-passthrough)
 - Create VM, add PCI Device
 - Install Geforce Experience
 	- Open NVIDIA Control Panel, test 3D acceleration
 
-### SSH
+## SSH
 - `vi ~/.ssh/config`
 - Example commands
-	- `ssh -l "{{ username }}" gaming.{{ site.url }}`
+	- `ssh -l "admin" gaming.{{ site.url }}`
 ```Powershell
 # TODO: add more cmds
 shutdown /r
 ```
-	- `scp file.txt gaming.{{ site.url }}:'"/c:/Users/{{ username }}/Documents/file.txt"'`
+	- `scp file.txt gaming.{{ site.url }}:'"/c:/Users/admin/Documents/file.txt"'`
