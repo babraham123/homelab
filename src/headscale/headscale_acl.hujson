@@ -110,7 +110,7 @@
     {
       "src": "public@",
       "accept": ["{{ websvcs.ip }}:443", "{{ secsvcs.ip }}:80"],
-      "deny": ["{{ pve2.ip }}:443", "{{ pve2.gateway }}:443"],
+      "deny": ["{{ pve2.ip }}:443", "{{ pve2.subnet }}.1:443"],
     }
   ]
 }

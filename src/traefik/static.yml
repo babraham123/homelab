@@ -41,18 +41,18 @@ entryPoints:
     proxyProtocol:
       insecure: false
       # Tailscale subnet IP needed due to https://github.com/tailscale/tailscale/issues/5573
-      trustedIPs: [{{ vpn.ip }}, {{ pve1.gateway }}, {{ pve2.gateway }}]
+      trustedIPs: [{{ vpn.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
     forwardedHeaders:
       insecure: false
-      trustedIPs: [{{ vpn.ip }}, {{ pve1.gateway }}, {{ pve2.gateway }}]
+      trustedIPs: [{{ vpn.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
   websecure:
     address: ":443/tcp"
     proxyProtocol:
       insecure: false
-      trustedIPs: [{{ vpn.ip }}, {{ pve1.gateway }}, {{ pve2.gateway }}]
+      trustedIPs: [{{ vpn.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
     forwardedHeaders:
       insecure: false
-      trustedIPs: [{{ vpn.ip }}, {{ pve1.gateway }}, {{ pve2.gateway }}]
+      trustedIPs: [{{ vpn.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
   smtp:
     address: ":465/tcp"
 certificatesResolvers:

@@ -26,15 +26,7 @@ users:
   - jayden
   - jasper
 
-model:
-  # Supported voice models: https://github.com/rhasspy/piper/blob/master/VOICES.md
-  tts: "en_US-lessac-medium" # 64 MB, CPU only
-  # Supported recognition models: https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages
-  # HW: https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file#gpu
-  stt: "tiny-int8" # ~1 GB VRAM, requires CUDA
-  # Supported wake word models: https://github.com/dscripka/openWakeWord?tab=readme-ov-file#pre-trained-models
-  wake: "hey_jarvis,weather" # 2.5 MB, CPU only
-
+# Hosts
 vpn:
   ip: 12.34.56.78
   interface: "eth0"
@@ -57,37 +49,53 @@ gaming:
 devtop:
   ip: 192.168.2.22
   interface: "enp6s18"
-gameclient:
-  ip: 192.168.1.10
-  interface: "wlan0"
 
-lan:
-  # Used for WiFi network
+# Subnets
+lan: # WiFi interface, split into VLANs below
   subnet: 192.168.1
-  gateway: 192.168.1.1
   mask: 192.168.1.0/24
-wifi:
-  ssid24: "cool-house"
-  ssid5: "cool-house5"
 pve1:
   subnet: 192.168.4
-  gateway: 192.168.4.1
   mask: 192.168.4.0/24
   ip: 192.168.4.10
 pve2:
   subnet: 192.168.2
-  gateway: 192.168.2.1
   mask: 192.168.2.0/24
   ip: 192.168.2.10
 lan2:
   subnet: 192.168.3
-  gateway: 192.168.3.1
   mask: 192.168.3.0/24
-# Optional
-lan3:
+lan3: # Optional, usb adapter
   subnet: 192.168.4
-  gateway: 192.168.4.1
   mask: 192.168.4.0/24
+
+# VLANs
+wifi:
+  trusted:
+    vlan: 10
+    subnet: 192.168.10
+    mask: 192.168.10.0/24
+    ssid24: "cool-house"
+    ssid5: "cool-house5"
+  iot:
+    vlan: 11
+    subnet: 192.168.11
+    mask: 192.168.11.0/24
+    ssid24: "machines"
+  guest:
+    vlan: 12
+    subnet: 192.168.12
+    mask: 192.168.12.0/24
+    ssid5: "welcome"
+
+model:
+  # Supported voice models: https://github.com/rhasspy/piper/blob/master/VOICES.md
+  tts: "en_US-lessac-medium" # 64 MB, CPU only
+  # Supported recognition models: https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages
+  # HW: https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file#gpu
+  stt: "tiny-int8" # ~1 GB VRAM, requires CUDA
+  # Supported wake word models: https://github.com/dscripka/openWakeWord?tab=readme-ov-file#pre-trained-models
+  wake: "hey_jarvis,weather" # 2.5 MB, CPU only
 
 retention:
   log_days: 14

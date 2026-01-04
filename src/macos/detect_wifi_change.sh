@@ -10,7 +10,7 @@ set -euo pipefail
 iface=$(networksetup -listallhardwareports | awk '/Wi-Fi/{getline; print $2}')
 ssid=$(ipconfig getsummary "$iface" | grep -w SSID | awk '{print $NF}')
 
-if [[ $ssid == "{{ wifi.ssid24 }}" || $ssid == "{{ wifi.ssid5 }}" ]]
+if [[ $ssid == "{{ wifi.trusted.ssid24 }}" || $ssid == "{{ wifi.trusted.ssid5 }}" ]]
 then
   if ! [[ $(networksetup -getcurrentlocation) == "Home" ]]
   then

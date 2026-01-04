@@ -17,7 +17,7 @@ brew install openssl
 # Hash your WiFi password
 # sudo apt -y install wpa_passphrase
 sudo port install wpa_passphrase
-wpa_passphrase "{{ wifi.ssid5 }}" # then enter password
+wpa_passphrase "{{ wifi.trusted.ssid5 }}" # then enter password
 # Fill in the password hash
 vim /Volumes/bootfs/wpa_supplicant.conf
 
