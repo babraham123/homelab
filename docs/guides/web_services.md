@@ -34,7 +34,7 @@ systemctl restart node_exporter
   - user = api_ro@pam, token ID = homepage
   - Record the secret
 ```bash
-ssh {{ username }}@pve1.{{ site.url }}
+ssh admin@pve1.{{ site.url }}
 sudo /root/homelab-rendered/src/pve1/secret_update.sh websvcs
 ```
   - Go to Permissions >> Add >> API Token Permission

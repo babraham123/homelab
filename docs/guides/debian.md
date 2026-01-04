@@ -7,7 +7,7 @@ Initial setup for any Debian Linux instance. Configures the shell, ssh access an
 [Vid](https://www.youtube.com/watch?v=XEoO1FgIel4)
 - If running, temporarily stop the vm_watchdog service on PVE1.
 - Use graphical install, run through the options.
-  - Leave name blank, username: {{ username }}
+  - Leave name blank, username: admin
   - Partition disks: Guided - use entire disk
   - All files in one partition
   - If not a desktop VM, make sure to uncheck the GUI packages.
@@ -16,13 +16,13 @@ Initial setup for any Debian Linux instance. Configures the shell, ssh access an
   - If desktop VM, open Terminal app. Otherwise login as root.
 ```bash
 apt install -y ssh sudo
-usermod -aG sudo {{ username }}
+usermod -aG sudo admin
 ```
 
 ## Packages
 - SSH in
 ```bash
-ssh {{ username }}@HOSTNAME.{{ site.url }}
+ssh admin@HOSTNAME.{{ site.url }}
 sudo su
 ```
 - Fix deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/) 
@@ -57,7 +57,7 @@ PermitRootLogin no
 ```bash
 exit
 cd ~
-ssh-keygen -t ed25519 -C "{{ username }}@SUBDOMAIN.{{ site.url }}"
+ssh-keygen -t ed25519 -C "admin@SUBDOMAIN.{{ site.url }}"
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 ```
@@ -102,7 +102,7 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```bash
 exit
 # From your local device
-ssh-copy-id {{ username }}@SUBDOMAIN.{{ site.url }}
+ssh-copy-id admin@SUBDOMAIN.{{ site.url }}
 tools/render_src.sh /tmp/homelab-rendered
 tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 ```

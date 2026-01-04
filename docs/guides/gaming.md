@@ -33,7 +33,7 @@ cd "C:\Program Files\Sunshine\scripts"
 - Attempt to connect to the gaming VM. Open the Sunshine web UI and enter in the pairing code.
 - Pair xbox controller via bluetooth
 
-### Raspberry Pi client
+### Raspberry Pi client (not used, Apple TV preferred)
 - Enable HEVC, HDR
   - `vim /Volumes/bootfs/config.txt`
 ```

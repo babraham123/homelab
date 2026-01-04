@@ -241,14 +241,14 @@ ufw allow in from {{ secsvcs.ip }} to any port 9100 proto tcp
   - path = /, user = api_ro@pam, role = PVEAuditor, propagate = check
   - For PBS, Permissions -> Access Control, PVEAuditor -> Audit. Generate a user password:
 ```bash
-ssh {{ username }}@pve1.{{ site.url }}
+ssh admin@pve1.{{ site.url }}
 sudo /root/homelab-rendered/src/pve1/secret_update.sh pve1
 ```
 
 Perform these steps after pve1, secsvcs and victoriametrics is configured (do this for pve1, pve2 and pbs2). [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
 - Get the metrics admin password and hash credentials
 ```bash
-ssh {{ username }}@secsvcs.{{ site.url }}
+ssh admin@secsvcs.{{ site.url }}
 password=$(sudo /usr/local/bin/get_secret.sh victoriametrics_admin_password)
 echo -n "admin:$password" | base64
 ```

@@ -47,7 +47,7 @@ sudo reboot
 
 # on Mac
 ssh-keygen -R raspberrypi.local
-ssh {{ username }}@SUBDOMAIN.{{ site.url }}
+ssh admin@SUBDOMAIN.{{ site.url }}
 ```
 
 ## Networking
