@@ -1,5 +1,5 @@
 # ~/.ssh/config
 
 Host gaming
-User "{{ username }}"
-HostName {{ gaming.ip }}
+  User "admin"
+  HostName {{ gaming.ip }}

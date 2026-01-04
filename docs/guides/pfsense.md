@@ -26,7 +26,7 @@ iface enp2s0 inet dhcp
 - Add proxmox repo, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
   - `sudo nano /etc/apt/sources.list.d/pve-enterprise.list`
 ```
-#deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
+# deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
 deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 ```
 - Install desktop env, [src](https://pve.proxmox.com/wiki/Developer_Workstations_with_Proxmox_VE_and_X11)
@@ -35,8 +35,8 @@ sudo su
 rm /etc/apt/sources.list.d/ceph.list
 apt update && apt upgrade
 apt install -y xfce4 chromium lightdm sudo ufw
-adduser {{ username }}
-usermod -aG sudo {{ username }}
+adduser admin
+usermod -aG sudo admin
 ip addr
 systemctl start lightdm
 # login, reboot
@@ -236,7 +236,7 @@ Service Watchdog:
 
 - Disable the vm_watchdog in PVE1
 ```
-ssh {{ username }}@pve1.{{ site.url }}
+ssh admin@pve1.{{ site.url }}
 sudo systemctl stop vm_watchdog
 sudo systemctl disable vm_watchdog
 exit

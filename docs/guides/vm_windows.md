@@ -53,7 +53,8 @@ Set-Service -Name sshd -StartupType 'Automatic'
 	- Open NVIDIA Control Panel, test 3D acceleration
 
 ## SSH
-- `vi ~/.ssh/config`
+- On local computer, update ssh config
+  - `vi ~/.ssh/config`
 - Example commands
 	- `ssh -l "admin" gaming.{{ site.url }}`
 ```Powershell

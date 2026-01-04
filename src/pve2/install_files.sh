@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-cd /home/{{ username }}
+cd /home/admin
 
 case $1 in
   certs_and_keys)

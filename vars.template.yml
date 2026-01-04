@@ -15,7 +15,6 @@ personal:
     - "MSFT"
 
 repo: "https://github.com/babraham123/homelab"
-username: "jdoe"
 site:
   url: "janedoe.com"
   name: "JD's System"

@@ -67,7 +67,7 @@ sudo su
 # Read secrets from age-encrypted file
 mkdir -p /etc/opt/secrets
 chmod 700 /etc/opt/secrets
-cp /home/{{ username }}/.ssh/id_ed25519* /etc/opt/secrets
+cp /home/admin/.ssh/id_ed25519* /etc/opt/secrets
 chmod 600 /etc/opt/secrets/*
 cd /root/homelab-rendered
 cp src/podman/*.sh /usr/local/bin
