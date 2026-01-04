@@ -1,8 +1,6 @@
 # Gaming setup
 Guide to stream games from the windows VM to my living room TV.
-
-- First stand up the [Windows VM](./vm_windows.md)
-- And the [Raspberry Pi](./rpi.md) client for the TV
+First stand up the [Windows VM](./vm_windows.md)
 
 ### Windows streaming server and game platforms
 - Install [ViGEmBus](https://github.com/ViGEm/ViGEmBus)
@@ -33,7 +31,8 @@ cd "C:\Program Files\Sunshine\scripts"
 - Attempt to connect to the gaming VM. Open the Sunshine web UI and enter in the pairing code.
 - Pair xbox controller via bluetooth
 
-### Raspberry Pi client (not used, Apple TV preferred)
+### Raspberry Pi client (not used, prefer Apple TV)
+- Stand up the [Raspberry Pi](./rpi.md) client for the TV
 - Enable HEVC, HDR
   - `vim /Volumes/bootfs/config.txt`
 ```

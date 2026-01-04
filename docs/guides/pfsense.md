@@ -43,7 +43,9 @@ systemctl start lightdm
 ```
 - Basic [debian setup](./debian.md)
 
-## Install pfSense
+## pfSense basic setup
+
+### Install pfSense
 - Connect to pve console: https://HOST_IP_ADDR:8006/
 - Upload pfSense ISO using USB, [src](https://www.virtualizationhowto.com/2022/08/pfsense-proxmox-install-process-and-configuration/)
 - Create VM
@@ -101,9 +103,13 @@ lspci
 ### Add an interface
 TODO: integrate these instructions with above
 - Go to Interfaces >> Assignments >> Add
-- Go to Interface >> OPT4. Enable, Description = LAN3, Config Type = Static IPv4, Address = {{ lan3.mask }} 
+- Go to Interface >> OPT4
+  - Enable, Description = LAN3
+  - IPv4 Configuration Type = Static IPv4
+  - IPv4 Address = {{ lan3.mask }}
+- Go to Services >> DHCP Server >> LAN3
+  - Enable, Address Pool Range is {{ lan3.subnet }}.100 - 200
 - Go to Firewall >> Rules. Copy existing rules from LAN2
-- Go to Services >> DHCP Server >> LAN3. Enable, Address Pool Range is {{ lan3.subnet }}.100 - 200
 - Go to Services >> mDNS Bridge. Add LAN3
 - Reboot the pfSense VM
 
@@ -126,7 +132,7 @@ Apply security updates and fixes since the last release
 - Go to System >> Patches
 - Click "Apply All Recommended"
 
-### Bufferfloat (currently disabled)
+### Bufferfloat
 Improve latency when under heavy load
 - Follow all the steps listed [here](https://docs.netgate.com/pfsense/en/latest/recipes/codel-limiters.html). That includes:
   - Run the load test
@@ -187,6 +193,56 @@ pkg-static add https://github.com/jaredhendrickson13/pfsense-api/releases/latest
   - Enable daemon
   - Select all the available interfaces
   - Save
+
+### VLANs
+The goal is to divide up the WiFi interface (LAN) into 3 VLANs:
+- WiFiTrusted: {{ wifi.trusted.vlan }}
+- WiFiIoT: {{ wifi.iot.vlan }}
+- WiFiGuest: {{ wifi.guest.vlan }}
+
+Repeat these steps for each VLAN. This is similar to the "Add an interface" section above.
+- Go to Interfaces >> Assignments >> VLANs >> Add
+  - Set the parent interface to lan, the VLAN tag to the ID # and the description to the VLAN name.
+- Go to Interfaces >> Interface Assignments
+  - Under "Available ...", select the VLAN and click Add
+  - Click the new interface (OPT#).
+    - Enable, Description = VLAN name
+    - IPv4 Configuration Type = Static IPv4
+    - IPv4 Address has the VLAN ID in the 3rd octet (example: {{ wifi.trusted.mask }})
+- Go to Services >> DHCP Server >> VLAN name
+  - Enable, Address Pool Range is SUBNET.10 - SUBNET.254
+- Trusted only: Go to Services >> mDNS Bridge. Add WiFiTrusted
+
+Now work on the firewall rules.
+- Go to Firewall >> Aliases >> IP >> Add
+  - Name, description = RFC1918
+  - Type = Network(s)
+  - 192.168.0.0/16, 172.16.0.0/12, 10.0.0.0/8
+- Create another alias for IPv6Local, fc00::/7, fe80::/10
+- Go to Firewall >> Rules
+  - All: Copy existing rules from LAN
+  - WiFiIoT, WiFiGuest: Create the following rules
+    - Block IPv4+6 TCP WiFiIoT subnets to This Firewall (self) 443
+    - Allow IPv4+6 WiFiIoT subnets to WiFiIoT address
+    - Block IPv4 WiFiIoT subnets to RFC1918
+    - Block IPv6 WiFiIoT subnets to IPv6Local
+    - Move the default allows down here
+
+### WiFi continued
+
+- Open the admin console: `http://tplinkeap.net/` while on one of the trusted SSIDs.
+- Create SSIDs for each of the new VLANs
+  - Go to Wireless >> Wireless Settings
+    - {{ wifi.iot.ssid24 }} - disable broadcast
+    - {{ wifi.guest.ssid5 }} - enable guest
+- Assign the SSIDs to VLANs. For now omit the one you're currently connected to.
+  - Go to Wireless >> VLAN. Enable and set the VLAN ID
+- Enable admin console access
+  - Go to Management >> Management Access >> Management VLAN
+  - Enable on VLAN ID {{ wifi.trusted.vlan }}
+  - Connect to the other trusted SSID and refresh the page
+- Assign the previous trusted SSID to the trusted VLAN
+- Backup
 
 ## PVE1 remaining setup
 Do the following sections from the [proxmox guide](./proxmox.md):
