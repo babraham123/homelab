@@ -33,7 +33,7 @@ case $1 in
     cp olive_tin/olive_tin.service /etc/systemd/system
     ;;
   mdns_repeater)
-    wget --output-document=mdns_repeater.zip "https://github.com/devsecurity-io/mdns-repeater/archive/refs/heads/master.zip"
+    wget --output-document=mdns_repeater.zip "https://github.com/babraham123/mdns-repeater/archive/refs/heads/master.zip"
     unzip mdns_repeater.zip
     cd mdns-repeater-master
     make all
