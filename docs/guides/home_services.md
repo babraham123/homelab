@@ -10,7 +10,6 @@ sudo su
 cd /root/homelab-rendered
 src/homesvcs/install_svcs.sh traefik
 src/homesvcs/install_svcs.sh vmagent
-src/debian/install_svcs.sh mdns_repeater
 src/homesvcs/install_svcs.sh mosquitto
 src/homesvcs/install_svcs.sh zigbee2mqtt
 # src/homesvcs/install_svcs.sh esphome
