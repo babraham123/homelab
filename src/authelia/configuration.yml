@@ -761,6 +761,8 @@ access_control:
         - '{{ pve2.mask }}'
         - '{{ lan2.mask }}'
         - '{{ lan3.mask }}'
+        - '{{ wifi.trusted.mask }}'
+        - '{{ wired.trusted.mask }}'
     - name: 'vpn'
       networks: '100.64.0.0/16'
 

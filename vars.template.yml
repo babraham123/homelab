@@ -70,7 +70,7 @@ lan3: # Optional, usb adapter
   mask: 192.168.4.0/24
 
 # VLANs
-wifi:
+wifi: # Parent: LAN
   trusted:
     vlan: 10
     subnet: 192.168.10
@@ -87,6 +87,15 @@ wifi:
     subnet: 192.168.12
     mask: 192.168.12.0/24
     ssid5: "welcome"
+wired: # Parent: LAN2
+  trusted:
+    vlan: 20
+    subnet: 192.168.20
+    mask: 192.168.20.0/24
+  iot:
+    vlan: 21
+    subnet: 192.168.21
+    mask: 192.168.21.0/24
 
 model:
   # Supported voice models: https://github.com/rhasspy/piper/blob/master/VOICES.md

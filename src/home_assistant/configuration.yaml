@@ -5,6 +5,7 @@ group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
+mqtt: !include mqtt.yaml
 
 # Ref: https://www.home-assistant.io/integrations/http/
 http:
@@ -77,7 +78,7 @@ media_source: # /media
 mobile_app:
 my:
 # UPnP has serious security vulnerabilities (src port 1900)
-# ssdp:
+ssdp:
 # Live stream proxy: https://www.home-assistant.io/integrations/stream/
 stream:
 sun:

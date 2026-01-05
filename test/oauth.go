@@ -19,8 +19,8 @@ import (
 
 const (
 	sslKeyLogFile = "./ssl_key.log"
-	tokenURL      = "https://auth.bket.net/api/oidc/token"
-	testURL       = "https://vmalert.bket.net"
+	tokenURL      = "https://auth.{{ site.url }}/api/oidc/token"
+	testURL       = "https://vmalert.{{ site.url }}"
 
 	dnsResolverIP        = "1.1.1.1:53"
 	dnsResolverProto     = "udp"
