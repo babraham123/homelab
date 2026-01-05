@@ -7,8 +7,8 @@ Description="Homelab: Home Assistant home automation engine"
 StartLimitIntervalSec=30
 StartLimitBurst=10
 Requires=mosquitto.service
-# TODO: fix them
-# Requires=zigbee2mqtt.service
+Requires=zigbee2mqtt.service
+# TODO: fix esphome integration
 # Requires=esphome.service
 Wants=network.target
 After=network-online.target

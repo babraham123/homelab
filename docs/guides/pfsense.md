@@ -228,8 +228,9 @@ Now work on the firewall rules.
     - Block IPv6 WiFiIoT subnets to IPv6Local
     - Move the default allows down here
 
-### WiFi continued
+TODO: configure wired VLANs when I get a proper switch
 
+### WiFi continued
 - Open the admin console: `http://tplinkeap.net/` while on one of the trusted SSIDs.
 - Create SSIDs for each of the new VLANs
   - Go to Wireless >> Wireless Settings

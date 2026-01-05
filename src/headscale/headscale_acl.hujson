@@ -23,6 +23,8 @@
     "lan": "{{ lan.mask }}",
     "lan2": "{{ lan2.mask }}",
     "lan3": "{{ lan3.mask }}",
+    "wifitrusted": "{{ wifi.trusted.mask }}",
+    "wiredtrusted": "{{ wired.trusted.mask }}",
     "websvcs": "{{ websvcs.ip }}/32",
     "gaming": "{{ gaming.ip }}/32",
     "secsvcs": "{{ secsvcs.ip }}/32",
@@ -72,6 +74,8 @@
     //     "lan:*",
     //     "lan2:*"
     //     "lan3:*"
+    //     "wifitrusted:*",
+    //     "wiredtrusted:*",
     //   ]
     // },
     // // guests can access useful services
@@ -80,9 +84,8 @@
     //   "src": ["group:guests"],
     //   "dst": [
     //     "*:0",
-    //     "lan:*",
-    //     "lan2:*"
-    //     "lan3:*"
+    //     "pve1:*",
+    //     "pve2:*"
     //   ]
     // },
     // // public endpoint can access web services

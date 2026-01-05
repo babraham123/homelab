@@ -65,7 +65,7 @@ networksetup -switchtolocation Home
 ```
 - Configure the desired DNS settings
   - Go To System Settings >> Wi-Fi >> Details >> DNS
-    - Under DNS Servers, add {{ lan.subnet }}.1 and delete other IPs
+    - Under DNS Servers, add {{ wifi.trusted.subnet }}.1 and delete other IPs
     - Under Search Domains, add {{ site.url }}
 - Setup watcher
 ```bash
