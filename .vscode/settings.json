@@ -72,6 +72,7 @@
         "moreutils",
         "mosquitto",
         "MQTT",
+        "mqtts",
         "msmtp",
         "msmtprc",
         "ngrok",

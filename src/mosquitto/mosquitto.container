@@ -18,7 +18,7 @@ Network=net.network
 HostName=mqtt.{{ site.url }}
 IP={{ homesvcs.container_subnet }}.8
 # hostPort:containerPort
-PublishPort=1883:1883
+PublishPort=8883:8883
 
 Environment=TZ={{ personal.timezone }}
 

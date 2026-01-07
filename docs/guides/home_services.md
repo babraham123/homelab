@@ -3,6 +3,15 @@ Guide to setup Home Assistant and related services on PVE1.
 
 - Setup [Podman](./podman.md)
 
+## Zigbee Adapter
+I use the SMLight SLZB-06M adapter, it's reasonably priced and very feature rich.
+
+- [Configuration and guide](https://smlight.tech/manual/slzb-06/guide/configuration/)
+- Flash firmware OTA
+  - Go to http://slzb-06m.local >> Settings and Tools >> Firmware update
+  - Flash the SLZB OS and the Zigbee Coordinator images
+- [Flash over USB](https://smlight.tech/flasher/#home) if you get locked out
+
 ## Setup containers
 - Install and start services
 ```bash
@@ -32,8 +41,8 @@ Refs: [ESPHome](https://esphome.io/components/ota/esphome.html), [Shelly](https:
 ```bash
 NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 # MQTT broker
-ufw allow in from any to any port 1883 proto tcp
-ufw route allow in on {{ homesvcs.interface }} out on $NET_IFACE to any port 1883
+ufw allow in from any to any port 8883 proto tcp
+ufw route allow in on {{ homesvcs.interface }} out on $NET_IFACE to any port 8883
 # ESPHome OTA updates
 ufw allow in from {{ wifi.iot.mask }} to any port 3232,8266,2040,8892 proto tcp
 ufw allow in from {{ wired.iot.mask }} to any port 3232,8266,2040,8892 proto tcp
@@ -45,8 +54,8 @@ ufw route allow in on {{ homesvcs.interface }} out on $NET_IFACE to any port 323
 ```
 
 ## Onboarding
-
 [Ref](https://www.home-assistant.io/getting-started/onboarding/)
+
 - Create an `admin` account
 - Go thru the setup wizard
 - Go to Admin >> enable Advanced Mode
@@ -80,3 +89,6 @@ systemctl restart home_assistant
 vim /etc/opt/home_assistant/config/configuration.yaml
 systemctl restart home_assistant
 ```
+
+## Devices
+Check out the [IoT guide](./iot_devices.md) for device specific info.
