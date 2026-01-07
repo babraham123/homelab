@@ -4,7 +4,7 @@
 # Enable in UI when pairing devices
 permit_join: false
 mqtt:
-  server: mqtt://mqtt.{{ site.url }}:1883
+  server: mqtts://mqtt.{{ site.url }}:8883
 
 serial:
   # Could be either USB port (/dev/serial/by-id/ or /dev/ttyUSB0),
