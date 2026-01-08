@@ -7,7 +7,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/library/debian:bookworm-slim
+Image=docker.io/library/debian:trixie-slim
 ContainerName=test
 AutoUpdate=registry
 NoNewPrivileges=true

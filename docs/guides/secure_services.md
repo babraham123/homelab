@@ -114,3 +114,23 @@ ls /run/systemd/generator/
 systemctl list-unit-files
 systemctl --type=service
 ```
+
+## Upgrade postgres
+[Why upgrade](https://why-upgrade.depesz.com/)
+
+- Backup the DB instance
+```bash
+sudo su
+systemctl list-units | grep Homelab
+systemctl stop ALL_OTHER_SERVICES
+podman container ls | grep postgres
+podman exec -it --user 70 CONTAINER_ID pg_dumpall -U postgres > dump.sql
+systemctl stop postgres
+```
+- Upgrade and restore from backup
+```bash
+podman container ls | grep postgres
+src/secsvcs/install_svcs.sh postgres
+cat dump.sql | podman exec -it --user 70 CONTAINER_ID psql -U postgres
+systemctl start ALL_OTHER_SERVICES
+```

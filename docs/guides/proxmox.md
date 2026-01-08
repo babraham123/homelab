@@ -16,8 +16,8 @@
   - `nano /etc/apt/sources.list`, add `contrib non-free non-free-firmware` to all 3 sources
   - `nano /etc/apt/sources.list.d/pve-enterprise.list`
 ```
-#deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
-deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+# deb https://enterprise.proxmox.com/debian/pve trixie pve-enterprise
+deb http://download.proxmox.com/debian/pve trixie pve-no-subscription
 ```
 - Basic [Debian Linux setup](./debian.md)
 - Install special tools
@@ -191,20 +191,23 @@ Only installed on PVE2. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
   - `vim /etc/apt/sources.list.d/pbs-enterprise.list`
 ```
 # NOT recommended for production use
-deb http://download.proxmox.com/debian/pbs bookworm pbs-no-subscription
+deb http://download.proxmox.com/debian/pbs trixie pbs-no-subscription
 ```
 - Install PBS, [ref](https://pbs.proxmox.com/docs/installation.html)
 ```bash
 apt update
-apt install -y proxmox-backup-server
+apt install -y proxmox-backup-server proxmox-backup
 ufw allow in from any to any port 8007 proto tcp
 ```
 - Connect to console: https://{{ pve2.ip }}:8007/ 
 - Further [setup](https://www.youtube.com/watch?v=33ubleU4OFc), [setup2](https://www.youtube.com/watch?v=Px5eHcUKbbQ)
   - Storage >> Directory >> Create: Directory
-  - Datastore >> backup1 >> Prune & GC tab, [options](https://pbs.proxmox.com/docs/maintenance.html)
-    - Prune Jobs >> Add >> Last weekly: 3, last monthly: 3, daily
-    - Garbage Collection >> Edit >> daily
+  - Datastore >> backup1
+    - Content tab >> Add Namespace
+      - Add namespaces for pve1, pve2 under Root
+    - Prune & GC tab, [options](https://pbs.proxmox.com/docs/maintenance.html)
+      - Prune Jobs >> Add >> Last weekly: 3, daily
+      - Garbage Collection >> Edit >> daily
 
 - PVE setup
   - Datacenter >> Storage >> Add >> Proxmox Backup Server
@@ -282,6 +285,7 @@ systemctl status proxmox-backup-proxy.service proxmox-backup.service
 - [PBS guide](https://pbs.proxmox.com/wiki/index.php/Upgrade_from_2_to_3#In-place_Upgrade)
 ```bash
 sudo su
+screen
 pve7to8 --full
 apt update
 apt dist-upgrade
@@ -297,6 +301,40 @@ systemctl reboot
 sudo su
 systemctl status proxmox-backup-proxy.service proxmox-backup.service
 pve7to8 --full
+apt update
+apt upgrade
+```
+
+### From PVE 8 to 9 (bookworm to trixie)
+- Make sure the VM backups are up to date
+- [PVE guide](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9)
+- [PBS guide](https://pbs.proxmox.com/wiki/Upgrade_from_3_to_4)
+```bash
+sudo su
+screen
+tar czf "pve2-backup-$(date -I).tar.gz" -C "/etc" "pve"
+tar czf "pbs2-backup-$(date -I).tar.gz" -C "/etc" "proxmox-backup"
+# Ensure >10GB free disk space
+df -h /
+apt update
+apt dist-upgrade
+pve8to9 --full
+pbs3to4 --full
+pveversion
+proxmox-backup-manager versions
+sed -i 's/bookworm/trixie/g' /etc/apt/sources.list
+sed -i -e 's/bookworm/trixie/g' /etc/apt/sources.list.d/*.list
+apt update
+apt dist-upgrade
+pve8to9 --full
+pbs3to4 --full
+systemctl reboot
+
+sudo su
+systemctl status proxmox-backup-proxy.service proxmox-backup.service
+pve8to9 --full
+pbs3to4 --full
+apt modernize-sources
 apt update
 apt upgrade
 ```

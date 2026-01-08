@@ -26,8 +26,8 @@ iface enp2s0 inet dhcp
 - Add proxmox repo, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
   - `sudo nano /etc/apt/sources.list.d/pve-enterprise.list`
 ```
-# deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
-deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+# deb https://enterprise.proxmox.com/debian/pve trixie pve-enterprise
+deb http://download.proxmox.com/debian/pve trixie pve-no-subscription
 ```
 - Install desktop env, [src](https://pve.proxmox.com/wiki/Developer_Workstations_with_Proxmox_VE_and_X11)
 ```bash
