@@ -9,7 +9,8 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/library/postgres:14-alpine
+# https://why-upgrade.depesz.com/
+Image=docker.io/library/postgres:18-alpine
 ContainerName=postgres
 # No auto-update for data safety
 NoNewPrivileges=true
