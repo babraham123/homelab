@@ -31,7 +31,7 @@ sudo su
 - Install basics
 ```bash
 apt update && apt upgrade
-apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw
+apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw screen
 chsh -s /bin/zsh
 
 # enable firewall
