@@ -337,4 +337,5 @@ pbs3to4 --full
 apt modernize-sources
 apt update
 apt upgrade
+apt install --reinstall pve-manager
 ```

@@ -131,6 +131,6 @@ systemctl stop postgres
 ```bash
 podman container ls | grep postgres
 src/secsvcs/install_svcs.sh postgres
-cat dump.sql | podman exec -it --user 70 CONTAINER_ID psql -U postgres
+podman exec -it --user 70 CONTAINER_ID psql -U postgres < dump.sql
 systemctl start ALL_OTHER_SERVICES
 ```

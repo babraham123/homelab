@@ -31,7 +31,8 @@ apt install -y linux-headers-$(uname -r)
 add-apt-repository contrib
 
 # network repo
-distro="debian12"
+# Use debian12 if legacy 580 drivers are not available
+distro="debian13"
 arch="x86_64"
 wget https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-keyring_1.1-1_all.deb
 dpkg -i cuda-keyring_1.1-1_all.deb

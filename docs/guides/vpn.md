@@ -186,3 +186,10 @@ src/vpn/install_svcs.sh headscale-ui
 
 ## Upgrade
 [Headscale docs](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)
+
+- Backup the headscale DB
+```bash
+cp /var/lib/headscale/db.sqlite /var/lib/headscale/db.sqlite.backup
+cp /var/lib/headscale/db.sqlite-wal /var/lib/headscale/db.sqlite-wal.backup
+cp /var/lib/headscale/db.sqlite-shm /var/lib/headscale/db.sqlite-shm.backup
+```

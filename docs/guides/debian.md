@@ -106,3 +106,31 @@ ssh-copy-id admin@SUBDOMAIN.{{ site.url }}
 tools/render_src.sh /tmp/homelab-rendered
 tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 ```
+
+## Upgrade to Trixie
+```bash
+sudo su
+screen
+# Ensure >10GB, >800MB free disk space
+df -h /
+df -h /boot
+apt update
+apt dist-upgrade
+sed -i 's/bookworm/trixie/g' /etc/apt/sources.list
+sed -i -e 's/bookworm/trixie/g' /etc/apt/sources.list.d/*.list
+# If podman, reinstall apt sources
+apt update
+apt dist-upgrade
+# Re-apply config changes
+vim /etc/ssh/sshd_config
+vim /etc/apt/apt.conf.d/50unattended-upgrades
+# Confirm that the network interface won't change
+ip a
+udevadm test-builtin net_setup_link /sys/class/net/enp6s18 2>/dev/null
+reboot
+
+sudo su
+apt modernize-sources
+apt update
+apt upgrade
+```
