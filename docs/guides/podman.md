@@ -101,3 +101,26 @@ src/debian/install_svcs.sh node_exporter
 # Use {{ secsvcs.container_subnet }}.7 on secsvcs, {{ websvcs.container_subnet }}.7 on websvcs, {{ homesvcs.container_subnet }}.7 on homesvcs
 ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
 ```
+
+## Backups
+- Backup container volumes
+```bash
+cd /root/backups
+systemctl list-units | grep Homelab
+# Stop all homelab services in reserve order of installation
+systemctl stop ALL_SERVICES
+# Archive the relevant volumes
+podman volume ls
+podman volume export VOLUME -o VOLUME-$(date -I).tar
+
+gzip *.tar
+rm *.tar
+```
+
+- Restore a container volume
+```bash
+cd /root/backups
+gunzip FILE.tar.gz
+podman volume import VOLUME < FILE.tar
+systemctl start ALL_SERVICES
+```
