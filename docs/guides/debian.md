@@ -107,6 +107,13 @@ tools/render_src.sh /tmp/homelab-rendered
 tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 ```
 
+## Backups
+- Setup a destination
+```bash
+mkdir /root/backups
+chmod 600 /root/backups
+```
+
 ## Upgrade to Trixie
 ```bash
 sudo su

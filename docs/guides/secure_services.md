@@ -115,22 +115,50 @@ systemctl list-unit-files
 systemctl --type=service
 ```
 
-## Upgrade postgres
+## Upgrade Postgres
 [Why upgrade](https://why-upgrade.depesz.com/)
 
 - Backup the DB instance
 ```bash
 sudo su
+cd /root/backups
 systemctl list-units | grep Homelab
+# Stop all other homelab services in reserve order of installation
 systemctl stop ALL_OTHER_SERVICES
 podman container ls | grep postgres
-podman exec -it --user 70 CONTAINER_ID pg_dumpall -U postgres > dump.sql
+podman exec -it --user 70 CONTAINER_ID pg_dumpall -U postgres > pgdump-$(date -I).sql
 systemctl stop postgres
 ```
 - Upgrade and restore from backup
 ```bash
+cd /root/backups
 podman container ls | grep postgres
 src/secsvcs/install_svcs.sh postgres
-podman exec -it --user 70 CONTAINER_ID psql -U postgres < dump.sql
+podman exec -it --user 70 CONTAINER_ID psql -U postgres < FILE.sql
 systemctl start ALL_OTHER_SERVICES
+```
+
+## Backup Victoriametrics
+[Ref](https://docs.victoriametrics.com/vmbackup/)
+
+- Backup
+  - TODO: fix the 401 returned by VM
+```bash
+sudo su
+mkdir /root/backups/metrics
+podman run --replace -it --name=vmbackup \
+  --network=systemd-net -v /root/backups/metrics:/backup -v systemd-vmdata:/data \
+  --secret victoriametrics_admin_password,type=env,target=httpAuth_password \
+  docker.io/victoriametrics/vmbackup:latest \
+  -envflag.enable -httpAuth.username="admin" -storageDataPath=/data -snapshot.createURL=http://metrics.{{ site.url }}:8428/snapshot/create -dst=fs:///backup
+```
+
+- Restore
+```bash
+systemctl stop victoriametrics
+podman run --replace -it --name=vmrestore \
+  -v /root/backups/metrics:/backup -v systemd-vmdata:/data \
+  docker.io/victoriametrics/vmrestore:latest \
+  -storageDataPath=/data -src=fs:///backup
+systemctl start victoriametrics
 ```
