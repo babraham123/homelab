@@ -111,7 +111,7 @@ tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 - Setup a destination
 ```bash
 mkdir /root/backups
-chmod 600 /root/backups
+chmod 700 /root/backups
 ```
 
 ## Upgrade to Trixie

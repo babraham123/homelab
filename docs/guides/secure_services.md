@@ -51,8 +51,8 @@ journalctl -eu authelia
     `/usr/local/bin/get_secret.sh lldap_admin_password`
   - Add regular users, add them to the `lldap_password_manager` group
     - {% for user in users %}{{ user }}, {% endfor %} (note for future: add_more_users)
-  - Create the `authelia_gen_access` group, add users to it
-  - Create the `hass_admin` group
+  - Create the `authelia_gen_access` and `headscale_access` groups, add users to them
+  - Create the `hass_admin` group, add your user to it
   - Uncomment out the authelia middleware
     `vim /etc/opt/traefik/config/dynamic/traefik.yml`
 

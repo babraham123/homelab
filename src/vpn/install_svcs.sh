@@ -16,6 +16,9 @@ case $1 in
     debian/add_homelab_tag.sh /usr/lib/systemd/system/headscale.service
     cp headscale/headscale.yaml /etc/headscale/config.yaml
     cp headscale/headscale_acl.hujson /etc/headscale/acl.hujson
+    touch /etc/opt/secrets/hs_oidc_id
+    oidc_id=$(cat /etc/opt/secrets/hs_oidc_id | tr -d '\n')
+    sed -i "s#PLACEHOLDER_ID#$oidc_id#g" /etc/headscale/config.yaml
     ;;
   tailscale)
     curl -fsSL https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
@@ -36,17 +39,6 @@ case $1 in
       cat key.pem cert.pem > /etc/haproxy/certs/vpnui.all.pem
       rm ./*.pem
     fi
-    ;;
-  headscale-ui)
-    apt install -y gcc python3-poetry
-    mkdir -p /var/opt/headscale-ui/data
-    pushd /var/opt/headscale-ui
-    HSUI_VERSION=$(curl -s "https://api.github.com/repos/iFargle/headscale-webui/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    wget "https://github.com/iFargle/headscale-webui/archive/refs/tags/v${HSUI_VERSION}.tar.gz" -O - | tar xz
-    mv "headscale-webui-${HSUI_VERSION}"/* .
-    poetry install --only main
-    popd
-    cp headscale/headscale-ui.service /etc/systemd/system
     ;;
   *)
     echo "error: unknown service: $1" >&2
