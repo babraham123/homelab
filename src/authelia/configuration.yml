@@ -1426,7 +1426,7 @@ identity_providers:
       ## provided they have the scheme http or https and do not have the hostname of localhost.
       # allowed_origins_from_client_redirect_uris: false
 
-    # claims_policies:
+    claims_policies:
       # custom_claims_policy:
         # custom_claims:
           ## Gives the 'custom_claims_policy' claim policy access to the 'claim_name' and 'extra_claim_name' claims.
@@ -1434,6 +1434,9 @@ identity_providers:
             # attribute: 'attribute_name'
           # extra_claim_name:
             # attribute: 'extra_example'
+      headscale:
+        id_token: ['email', 'groups']
+
     # scopes:
       ## Gives the arbitrary scope 'scope_name` access to the 'claim_name' and 'extra_claim_name' claims.
       # scope_name:
@@ -1443,16 +1446,16 @@ identity_providers:
 
     ## Clients is a list of known clients and their configuration.
     clients:
-      -
+      # -
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
         ## configuration.
-        client_id: '{% raw %}{{ mustEnv "HEADSCALE_UI_OIDC_ID" }}{% endraw %}'
+        # client_id: 'example_client_id'
 
         ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
-        client_name: 'Headscale UI'
+        # client_name: 'example_name'
 
         ## The client secret is a shared secret between Authelia and the consumer of this client.
-        client_secret: '{% raw %}{{ mustEnv "HEADSCALE_UI_OIDC_HASH" }}{% endraw %}'
+        # client_secret: 'secret_hash'
 
         ## Sector Identifiers are occasionally used to generate pairwise subject identifiers. In most cases this is not
         ## necessary. It is critical to read the documentation for more information.
@@ -1462,8 +1465,8 @@ identity_providers:
         # public: false
 
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
-        redirect_uris:
-          - 'https://vpn-ui.{{ site.url }}/oidc_callback'
+        # redirect_uris:
+          # - 'https://example.{{ site.url }}/oidc_callback'
 
         ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
         ## URIs to fetch Request Objects.
@@ -1477,10 +1480,10 @@ identity_providers:
         # claims_policy: 'custom_claims_policy'
 
         ## Scopes this client is allowed to request.
-        scopes:
-          - 'openid'
-          - 'email'
-          - 'profile'
+        # scopes:
+          # - 'openid'
+          # - 'email'
+          # - 'profile'
 
         ## Grant Types configures which grants this client can obtain.
         ## It's not recommended to define this unless you know what you're doing.
@@ -1499,7 +1502,7 @@ identity_providers:
 
         ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
         ## authorization policies section.
-        authorization_policy: 'two_factor'
+        # authorization_policy: 'two_factor'
 
         ## The custom lifespan name to use for this client. This must be configured independent of the client before
         ## utilization. Custom lifespans are reusable similar to authorization policies.
@@ -1731,6 +1734,74 @@ identity_providers:
               # -----BEGIN CERTIFICATE-----
               # ...
               # -----END CERTIFICATE-----
+      -
+        # Ref: 
+        # https://headscale.net/stable/ref/oidc
+        # https://www.authelia.com/integration/openid-connect/clients/headscale/
+        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
+        ## configuration.
+        client_id: '{% raw %}{{ mustEnv "HEADSCALE_OIDC_ID" }}{% endraw %}'
+
+        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
+        client_name: 'Headscale VPN'
+
+        ## The client secret is a shared secret between Authelia and the consumer of this client.
+        client_secret: '{% raw %}{{ mustEnv "HEADSCALE_OIDC_HASH" }}{% endraw %}'
+
+        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
+        redirect_uris:
+          - 'https://vpn.{{ site.url }}/oidc/callback'
+
+        ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
+        ## URIs to fetch Request Objects.
+        # request_uris:
+          # - 'https://oidc.example.com:8080/oidc/request-object.jwk'
+
+        ## Audience this client is allowed to request.
+        # audience: []
+
+        ## Assigns the 'custom_claims_policy' claims policy to this client.
+        claims_policy: 'headscale'
+
+        ## Scopes this client is allowed to request.
+        scopes:
+          - 'openid'
+          - 'groups'
+          - 'email'
+          - 'profile'
+
+        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
+        ## authorization policies section.
+        authorization_policy: 'two_factor'
+
+        ## Enforces the use of PKCE for this client when set to true.
+        require_pkce: true
+
+        ## Enforces the use of PKCE for this client when configured, and enforces the specified challenge method.
+        ## Options are 'plain' and 'S256'.
+        pkce_challenge_method: 'S256'
+
+        ## The permitted client authentication method for the Token Endpoint for this client.
+        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
+        ## defaults to 'none' per the specifications.
+        token_endpoint_auth_method: 'client_secret_basic'
+
+        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
+        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
+        # token_endpoint_auth_signing_alg: 'RS256'
+
+        ## The signing algorithm used for signing the Access Tokens in Access Request responses.
+        ## Please read the documentation before adjusting this option.
+        ## See: https://www.authelia.com/c/oidc/registered-clients#access_token_signed_response_alg
+        # access_token_signed_response_alg: 'none'
+
+        ## The signing algorithm used for ID Tokens. An issuer JWK with a matching algorithm must be available when
+        ## configured. Has no effect if id_token_signed_response_key_id is configured.
+        # id_token_signed_response_alg: 'RS256'
+
+        ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
+        ## available. Has no effect if userinfo_signing_key_id is configured.
+        # userinfo_signed_response_alg: 'none'
 
       -
         # Ref: https://www.authelia.com/integration/openid-connect/grafana/
@@ -1788,8 +1859,9 @@ identity_providers:
         userinfo_signed_response_alg: 'none'
 
       -
-        # Ref: https://github.com/christiaangoossens/hass-oidc-auth
-        #   https://github.com/christiaangoossens/hass-oidc-auth/blob/main/docs/provider-configurations/authelia.md
+        # Ref: 
+        # https://github.com/christiaangoossens/hass-oidc-auth
+        # https://github.com/christiaangoossens/hass-oidc-auth/blob/main/docs/provider-configurations/authelia.md
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
         ## configuration.
         client_id: '{% raw %}{{ mustEnv "HASS_OIDC_ID" }}{% endraw %}'

@@ -12,7 +12,7 @@ ContainerName=test
 AutoUpdate=registry
 NoNewPrivileges=true
 
-Secret=hs_ui_oidc_secret_hash,type=env,target=HS_UI_HASH
+Secret=hs_oidc_secret_hash,type=env,target=HS_UI_HASH
 Environment=BB=bbb
 PodmanArgs=--env-merge=AA=${BB}-${HS_UI_HASH}
 Volume=/usr/local/bin:/test_bin

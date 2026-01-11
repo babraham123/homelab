@@ -27,6 +27,8 @@ systemctl restart fail2ban
 ```
 - Setup Headscale ([src](https://headscale.net/running-headscale-linux/))
 ```bash
+mkdir -p /etc/opt/secrets
+chmod 700 /etc/opt/secrets
 src/vpn/install_svcs.sh headscale
 cp src/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
@@ -40,7 +42,7 @@ headscale users create admin@
 headscale --user USER_ID preauthkeys create --expiration 100y
 ```
 
-## Clients
+## Remote access
 - For home network, use Tailscale plugin on pfSense ([src](https://www.wundertech.net/how-to-set-up-tailscale-on-pfsense/), [ref](https://davidisaksson.dev/posts/tailscale-on-pfsense/))
   - Install the Tailscale package (Go to System >> Package Manager)
   - Go to VPN >> Tailscale
@@ -53,38 +55,39 @@ headscale nodes list-routes
 headscale nodes approve-routes --identifier NODE_ID --routes 0.0.0.0/0,::/0
 headscale nodes approve-routes --identifier NODE_ID --routes 192.168.5.0/24
 headscale nodes approve-routes --identifier NODE_ID --routes 192.168.7.0/24
-
-# Create users
-{% for user in users %}
-headscale users create {{ user }}@{% endfor %}
-# add_more_users
-headscale users create guest1@
-
-# for each user:
-headscale --user USER_ID preauthkeys create --expiration 2h
 ```
-- For MacOS, use Tailscale app ([src](https://github.com/juanfont/headscale/blob/main/hscontrol/templates/apple.html)), or
-```bash
-brew install tailscale
-sudo /opt/homebrew/opt/tailscale/bin/tailscaled
-tailscale login --login-server https://vpn.{{ site.url }}:443 --accept-routes --auth-key AUTH_KEY
 
-tailscale status
-tailscale ping --tsmp other_node
-# sudo tailscale set --exit-node=router
-```
-- For Debian bookworm ([src](https://tailscale.com/kb/1174/install-debian-bookworm))
-```bash
-src/vpn/install_svcs.sh tailscale
-sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --authkey AUTH_KEY
-# --exit-node=router
-```
-- In cloud VM, check connected nodes: `sudo headscale nodes list`
+- At this point you can connect via "machine" users. Skip farther down if you don't want public access.
 
 ## Add public endpoint
-Summary: Create a public user and a tailscale client on the vpn server. HAProxy forwards the `vpn` subdomain to Headscale on ports 8080, 8443. authelia, lldap, etc traffic is sent to the secsvcs VM, and home assistant traffic to the homesvcs VM. All other traffic is sent to the websvcs VM also via traefik. Similar to Tailscale Funnel, and fulfills a similar role as a DMZ.
+Summary: Create a public user and a tailscale client on the vpn server. HAProxy forwards the `vpn` subdomain to Headscale on ports 8080, 8443. authelia, lldap, etc traffic is sent to the secsvcs VM, and home assistant traffic to the homesvcs VM. All other traffic is sent to the websvcs VM also via traefik. Similar to Tailscale Funnel, and fulfills a similar role as a DMZ. This also enables OIDC access.
 
 Notes: [site-to-site](https://tailscale.com/kb/1214/site-to-site/), [ACLs](https://tailscale.com/kb/1018/acls/#debugging-acls), [troubleshooting](https://tailscale.com/kb/1023/troubleshooting/#unable-to-make-a-tcp-connection-between-two-nodes)
+
+- Create the OIDC credentials
+```bash
+exit
+exit
+ssh admin@secsvcs.{{ site.url }}
+sudo podman run --rmi docker.io/authelia/authelia:latest authelia crypto rand --length 72 --charset rfc3986
+sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986
+# Store hashed and raw version of secret under hs_oidc_secret(_hash). id under hs_oidc_id
+ssh -t admin@pve1.{{ site.url }} 'sudo /root/homelab-rendered/src/pve1/secret_update.sh secsvcs'
+# Restart authelia to pick up hashed secret version
+sudo systemctl restart authelia
+exit
+```
+
+- Store the secrets
+```bash
+ssh admin@{{ vpn.ip }}
+sudo su
+# Grab the oidc client id and the raw version of the client secret from the steps above
+vim /etc/opt/secrets/hs_oidc_id
+vim /etc/opt/secrets/hs_oidc_secret
+chmod 600 /etc/opt/secrets/*
+chown headscale /etc/opt/secrets/hs_oidc_*
+```
 
 - Route traffic via HAProxy
 ```bash
@@ -152,44 +155,45 @@ ufw status verbose
 - In your DNS provider, add a TXT record with the provided string (use host = @)
 - View the insights report
 
-## Headscale UI (optional)
-- Create the OIDC credentials
+## Machine users (optional)
+- Create user and key
 ```bash
-exit
-exit
-ssh admin@secsvcs.{{ site.url }}
-sudo podman run --rmi docker.io/authelia/authelia:latest authelia crypto rand --length 72 --charset rfc3986
-sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986
-# Store hashed and raw version of secret under hs_ui_oidc_secret(_hash). id under hs_ui_oidc_id
-ssh -t admin@pve1.{{ site.url }} 'sudo /root/homelab-rendered/src/pve1/secret_update.sh secsvcs'
-# Restart authelia to pick up hashed secret version
-sudo systemctl restart authelia
-exit
+headscale users create USERNAME@
+headscale --user USER_ID preauthkeys create --expiration 2h
 ```
-- Generate and store the secrets
+
+- For MacOS, use Tailscale app ([src](https://github.com/juanfont/headscale/blob/main/hscontrol/templates/apple.html)), or
 ```bash
-ssh admin@{{ vpn.ip }}
-sudo su
-mkdir -p /etc/opt/secrets
-chmod 700 /etc/opt/secrets
-headscale apikeys create | tail -n 1 > /etc/opt/secrets/headscale_api_key
-openssl rand -base64 32 > /etc/opt/secrets/hs_ui_storage_key
-# Grab the oidc client id and the raw version of the client secret from the steps above
-vim /etc/opt/secrets/hs_ui_oidc_id
-vim /etc/opt/secrets/hs_ui_oidc_secret
-chmod 600 /etc/opt/secrets/*
+brew install tailscale
+sudo /opt/homebrew/opt/tailscale/bin/tailscaled
+tailscale login --login-server https://vpn.{{ site.url }}:443 --accept-routes --auth-key AUTH_KEY
+
+tailscale status
+tailscale ping --tsmp other_node
+# sudo tailscale set --exit-node=router
 ```
-- Deploy on the VPN server
+
+- For an Apple TV, use the Tailscale app. [Ref](https://tailscale.com/kb/1280/appletv)
+
+- For Debian bookworm ([src](https://tailscale.com/kb/1174/install-debian-bookworm))
 ```bash
-src/vpn/install_svcs.sh headscale-ui
+src/vpn/install_svcs.sh tailscale
+sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --authkey AUTH_KEY
+# --exit-node=router
 ```
+
+- In cloud VM, check connected nodes: `sudo headscale nodes list`
 
 ## Upgrade
 [Headscale docs](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)
 
 - Backup the headscale DB
 ```bash
-cp /var/lib/headscale/db.sqlite /var/lib/headscale/db.sqlite.backup
-cp /var/lib/headscale/db.sqlite-wal /var/lib/headscale/db.sqlite-wal.backup
-cp /var/lib/headscale/db.sqlite-shm /var/lib/headscale/db.sqlite-shm.backup
+sudo su
+systemctl stop headscale
+cd /root/backups
+cp /var/lib/headscale/db.sqlite* .
+tar -czf db-$(date -I).tar.gz db.sqlite*
+rm db.sqlite*
+systemctl start headscale
 ```
