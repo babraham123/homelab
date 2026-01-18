@@ -37,7 +37,7 @@ sudo apt install -y build-essential python3-pip g++ freeglut3-dev libx11-dev lib
 - Enable copy paste
 ```bash
 sudo apt -y install spice-vdagent
-ssh admin@pve2.{{ site.url }}
+ssh manualadmin@pve2.{{ site.url }}
 ```
 - Update VM config
 ```bash

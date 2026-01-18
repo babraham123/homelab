@@ -5,9 +5,9 @@
 set -euo pipefail
 
 host="$1"
-addr="admin@$host.{{ site.url }}"
+addr="manualadmin@$host.{{ site.url }}"
 file="$2"
-temp="/home/admin/$(basename "$file")"
+temp="/home/manualadmin/$(basename "$file")"
 path="$3"
 
 scp "$file" "$addr:$temp"

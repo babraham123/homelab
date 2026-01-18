@@ -2,6 +2,7 @@
 
 ## Intel iGPU
 
+- In the VM hardware settings, set the Display to none and add the PCI device. Reboot
 - Install drivers
 ```bash
 sudo su
@@ -9,6 +10,7 @@ sudo su
 apt install -y intel-gpu-tools vainfo intel-media-va-driver
 # Their version of CUDA
 apt install intel-opencl-icd
+# Or install manually if unavailable: https://github.com/intel/compute-runtime/releases
 reboot
 ```
 - Verify after PCI passthrough
@@ -20,6 +22,7 @@ vainfo
 
 ## Nvidia GPU
 
+- In the VM hardware settings, add the PCI device and reboot
 - Find the right [Nvidia version](https://www.nvidia.com/en-in/drivers/)
 - Find the right [CUDA version](https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Debian&target_version=12)
 - Install drivers, [ref](https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html#debian-installation)
@@ -57,6 +60,7 @@ nvtop
 
 ## Coral TPU
 
+- In the VM hardware settings, add the PCI device and reboot
 - Install the driver and TPU runtime, [ref](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime)
 ```bash
 # Confirm apex driver is not already installed

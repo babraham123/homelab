@@ -1,10 +1,12 @@
 {
     "cSpell.words": [
         "AAGUID",
+        "ACPI",
         "adduser",
         "alertmanager",
         "Audiobook",
         "audiobookshelf",
+        "autoadmin",
         "autogroup",
         "autoupdate",
         "Avahi",
@@ -66,6 +68,7 @@
         "logfile",
         "logtail",
         "lsusb",
+        "manualadmin",
         "mdns",
         "middlewares",
         "mkdocs",

@@ -9,12 +9,13 @@ Initial setup for the primary VM host, PVE1. Handles the self signed CA and othe
 - Get access
 ```bash
 sudo su
-ssh-copy-id admin@router.{{ site.url }}
-ssh-copy-id admin@pve2.{{ site.url }}
-ssh-copy-id admin@secsvcs.{{ site.url }}
-ssh-copy-id admin@websvcs.{{ site.url }}
-ssh-copy-id admin@homesvcs.{{ site.url }}
-ssh-copy-id admin@vpn.{{ site.url }}
+# TODO: migrate to autoadmin
+ssh-copy-id manualadmin@router.{{ site.url }}
+ssh-copy-id manualadmin@pve2.{{ site.url }}
+ssh-copy-id manualadmin@secsvcs.{{ site.url }}
+ssh-copy-id manualadmin@websvcs.{{ site.url }}
+ssh-copy-id manualadmin@homesvcs.{{ site.url }}
+ssh-copy-id manualadmin@vpn.{{ site.url }}
 ```
 
 - Install tools
@@ -62,7 +63,7 @@ sops /root/secrets/pve1.yaml
 
 - Generate the SOPS/AGE secsvcs secrets file
 ```bash
-scp admin@secsvcs.{{ site.url }}:/home/admin/.ssh/id_ed25519.pub secsvcs_id_ed25519.pub
+scp manualadmin@secsvcs.{{ site.url }}:/home/manualadmin/.ssh/id_ed25519.pub secsvcs_id_ed25519.pub
 chmod 400 secsvcs_id_ed25519.pub
 # Fill in all of the secrets you can based on `src/secsvcs/secrets_template.yaml`
 /root/homelab-rendered/src/pve1/secret_update.sh secsvcs
@@ -70,7 +71,7 @@ chmod 400 secsvcs_id_ed25519.pub
 
 - Generate the SOPS/AGE websvcs secrets file
 ```bash
-scp admin@websvcs.{{ site.url }}:/home/admin/.ssh/id_ed25519.pub websvcs_id_ed25519.pub
+scp manualadmin@websvcs.{{ site.url }}:/home/manualadmin/.ssh/id_ed25519.pub websvcs_id_ed25519.pub
 chmod 400 websvcs_id_ed25519.pub
 # Fill in all of the secrets you can based on `src/websvcs/secrets_template.yaml`
 /root/homelab-rendered/src/pve1/secret_update.sh secsvcs
@@ -78,7 +79,7 @@ chmod 400 websvcs_id_ed25519.pub
 
 - Generate the SOPS/AGE homesvcs secrets file
 ```bash
-scp admin@homesvcs.{{ site.url }}:/home/admin/.ssh/id_ed25519.pub homesvcs_id_ed25519.pub
+scp manualadmin@homesvcs.{{ site.url }}:/home/manualadmin/.ssh/id_ed25519.pub homesvcs_id_ed25519.pub
 chmod 400 homesvcs_id_ed25519.pub
 # Fill in all of the secrets you can based on `src/homesvcs/secrets_template.yaml`
 /root/homelab-rendered/src/pve1/secret_update.sh homesvcs

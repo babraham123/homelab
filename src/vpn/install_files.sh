@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-cd /home/admin
+cd /home/manualadmin
 
 case $1 in
   repo)

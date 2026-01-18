@@ -9,7 +9,7 @@ tools/deploy_src.sh
 ```
 - Re-install the relevant services
 ```bash
-ssh admin@secsvcs.{{ site.url }}
+ssh manualadmin@secsvcs.{{ site.url }}
 sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh SERVICE
 ```
 
@@ -28,7 +28,7 @@ TODO
 
 The rest of the commands take place on PVE1
 ```bash
-ssh admin@pve1.{{ site.url }}
+ssh manualadmin@pve1.{{ site.url }}
 sudo su
 ```
 
@@ -39,7 +39,7 @@ sudo su
 
 If a new secret was added
 ```bash
-ssh admin@secsvcs.{{ site.url }}
+ssh manualadmin@secsvcs.{{ site.url }}
 sudo podman secret create "SECRET_NAME" /root/placeholder.txt
 ```
 

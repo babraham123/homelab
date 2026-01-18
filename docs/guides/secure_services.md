@@ -86,7 +86,7 @@ exit
 ```
 - Record access token as a secret on pve1
 ```bash
-ssh admin@pve1.{{ site.url }}
+ssh manualadmin@pve1.{{ site.url }}
 sudo su
 /root/homelab-rendered/src/pve1/secret_update.sh secsvcs
 /root/homelab-rendered/src/pve1/secret_update.sh websvcs
