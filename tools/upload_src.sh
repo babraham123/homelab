@@ -16,9 +16,9 @@ if ! ping -c3 -W3 "$host.$url" > /dev/null; then
   return
 fi
 
-scp -qr -o LogLevel=QUIET "$project_dir" "admin@$host.$url:/home/admin"
+scp -qr -o LogLevel=QUIET "$project_dir" "manualadmin@$host.$url:/home/manualadmin"
 echo "$host root password:"
-ssh -t "admin@$host.$url" '
+ssh -t "manualadmin@$host.$url" '
 sudo chown -R root:root homelab-rendered
 sudo rm -rf /root/homelab-rendered
 sudo mv homelab-rendered /root/homelab-rendered

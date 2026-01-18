@@ -7,7 +7,7 @@ Initial setup for any Debian Linux instance. Configures the shell, ssh access an
 [Vid](https://www.youtube.com/watch?v=XEoO1FgIel4)
 - If running, temporarily stop the vm_watchdog service on PVE1.
 - Use graphical install, run through the options.
-  - Leave name blank, username: admin
+  - Leave name blank, username: manualadmin
   - Partition disks: Guided - use entire disk
   - All files in one partition
   - If not a desktop VM, make sure to uncheck the GUI packages.
@@ -16,13 +16,13 @@ Initial setup for any Debian Linux instance. Configures the shell, ssh access an
   - If desktop VM, open Terminal app. Otherwise login as root.
 ```bash
 apt install -y ssh sudo
-usermod -aG sudo admin
+usermod -aG sudo manualadmin
 ```
 
 ## Packages
 - SSH in
 ```bash
-ssh admin@HOSTNAME.{{ site.url }}
+ssh manualadmin@HOSTNAME.{{ site.url }}
 sudo su
 ```
 - Fix deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/) 
@@ -30,7 +30,8 @@ sudo su
 	- add `contrib non-free non-free-firmware` to all Debian sources
 - Install basics
 ```bash
-apt update && apt upgrade
+apt update
+apt upgrade
 apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw screen
 chsh -s /bin/zsh
 
@@ -57,7 +58,7 @@ PermitRootLogin no
 ```bash
 exit
 cd ~
-ssh-keygen -t ed25519 -C "admin@SUBDOMAIN.{{ site.url }}"
+ssh-keygen -t ed25519 -C "manualadmin@SUBDOMAIN.{{ site.url }}"
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 ```
@@ -102,7 +103,7 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```bash
 exit
 # From your local device
-ssh-copy-id admin@SUBDOMAIN.{{ site.url }}
+ssh-copy-id manualadmin@SUBDOMAIN.{{ site.url }}
 tools/render_src.sh /tmp/homelab-rendered
 tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 ```
@@ -110,6 +111,7 @@ tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 ## Backups
 - Setup a destination
 ```bash
+sudo su
 mkdir /root/backups
 chmod 700 /root/backups
 ```

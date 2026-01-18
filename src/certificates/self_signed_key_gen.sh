@@ -17,44 +17,44 @@ chmod 400 private/wildcard.{{ site.url }}.key.pem
 
 openssl genrsa -out private/ldap.{{ site.url }}.key.pem 2048
 chmod 400 private/ldap.{{ site.url }}.key.pem
-scp private/ldap.{{ site.url }}.key.pem admin@secsvcs.{{ site.url }}:/home/admin
+scp private/ldap.{{ site.url }}.key.pem manualadmin@secsvcs.{{ site.url }}:/home/manualadmin
 
 openssl genrsa -out private/auth.{{ site.url }}.key.pem 2048
 chmod 400 private/auth.{{ site.url }}.key.pem
-scp private/auth.{{ site.url }}.key.pem admin@secsvcs.{{ site.url }}:/home/admin
+scp private/auth.{{ site.url }}.key.pem manualadmin@secsvcs.{{ site.url }}:/home/manualadmin
 
 openssl genrsa -out private/pgdb.{{ site.url }}.key.pem 2048
 chmod 400 private/pgdb.{{ site.url }}.key.pem
-scp private/pgdb.{{ site.url }}.key.pem admin@secsvcs.{{ site.url }}:/home/admin
+scp private/pgdb.{{ site.url }}.key.pem manualadmin@secsvcs.{{ site.url }}:/home/manualadmin
 
 openssl genrsa -out private/secproxy.{{ site.url }}.key.pem 2048
 chmod 400 private/secproxy.{{ site.url }}.key.pem
-scp private/secproxy.{{ site.url }}.key.pem admin@secsvcs.{{ site.url }}:/home/admin
+scp private/secproxy.{{ site.url }}.key.pem manualadmin@secsvcs.{{ site.url }}:/home/manualadmin
 
 openssl genrsa -out private/webproxy.{{ site.url }}.key.pem 2048
 chmod 400 private/webproxy.{{ site.url }}.key.pem
-scp private/webproxy.{{ site.url }}.key.pem admin@websvcs.{{ site.url }}:/home/admin
+scp private/webproxy.{{ site.url }}.key.pem manualadmin@websvcs.{{ site.url }}:/home/manualadmin
 
 openssl genrsa -out private/homeproxy.{{ site.url }}.key.pem 2048
 chmod 400 private/homeproxy.{{ site.url }}.key.pem
-scp private/homeproxy.{{ site.url }}.key.pem admin@homesvcs.{{ site.url }}:/home/admin
+scp private/homeproxy.{{ site.url }}.key.pem manualadmin@homesvcs.{{ site.url }}:/home/manualadmin
 
 openssl genrsa -out private/mqtt.{{ site.url }}.key.pem 2048
 chmod 400 private/mqtt.{{ site.url }}.key.pem
-scp private/mqtt.{{ site.url }}.key.pem admin@homesvcs.{{ site.url }}:/home/admin
+scp private/mqtt.{{ site.url }}.key.pem manualadmin@homesvcs.{{ site.url }}:/home/manualadmin
 
 openssl genrsa -out private/zigbee.{{ site.url }}.key.pem 2048
 chmod 400 private/zigbee.{{ site.url }}.key.pem
-scp private/zigbee.{{ site.url }}.key.pem admin@homesvcs.{{ site.url }}:/home/admin
+scp private/zigbee.{{ site.url }}.key.pem manualadmin@homesvcs.{{ site.url }}:/home/manualadmin
 
 echo "secsvcs server password:"
-ssh -t admin@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_files.sh keys'
+ssh -t manualadmin@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_files.sh keys'
 
 echo "websvcs server password:"
-ssh -t admin@websvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/websvcs/install_files.sh keys'
+ssh -t manualadmin@websvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/websvcs/install_files.sh keys'
 
 echo "homesvcs server password:"
-ssh -t admin@homesvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/homesvcs/install_files.sh keys'
+ssh -t manualadmin@homesvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/homesvcs/install_files.sh keys'
 
 date -u > /root/ca/date_self_signed_keys.txt
 echo -e '\nMake sure to run self_signed_cert_gen.sh next'

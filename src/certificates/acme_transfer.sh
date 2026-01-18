@@ -14,16 +14,16 @@ cd /root/acme
 
 function download() {
   host=$1
-  addr="admin@$host.{{ site.url }}"
+  addr="manualadmin@$host.{{ site.url }}"
   /root/homelab-rendered/src/debian/is_reachable.sh "$host"
 
   echo "$host root password:"
   ssh -t "$addr" '
-sudo cp /etc/opt/traefik/certificates/acme.json /home/admin/acme.json
-sudo chown admin:admin /home/admin/acme.json
+sudo cp /etc/opt/traefik/certificates/acme.json /home/manualadmin/acme.json
+sudo chown manualadmin:manualadmin /home/manualadmin/acme.json
 '
-  scp "$addr:/home/admin/acme.json" "/root/acme/$host.acme.json"
-  ssh "$addr" 'rm -f /home/admin/acme.json'
+  scp "$addr:/home/manualadmin/acme.json" "/root/acme/$host.acme.json"
+  ssh "$addr" 'rm -f /home/manualadmin/acme.json'
   chmod 400 "$host.acme.json"
   # Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
   # Certificate is the full chain (I think)
@@ -37,22 +37,22 @@ download "websvcs"
 
 # Ref: https://www.tecmint.com/configure-ssl-certificate-haproxy/
 cat vpn-ui.{{ site.url }}/privatekey.key vpn-ui.{{ site.url }}/certificate.crt > vpn-ui.{{ site.url }}/vpnui.all.pem
-scp vpn-ui.{{ site.url }}/vpnui.all.pem admin@vpn.{{ site.url }}:/home/admin/vpnui.all.pem
+scp vpn-ui.{{ site.url }}/vpnui.all.pem manualadmin@vpn.{{ site.url }}:/home/manualadmin/vpnui.all.pem
 echo "VPN root password:"
-ssh -t admin@vpn.{{ site.url }} 'sudo /root/homelab-rendered/src/vpn/install_files.sh certs'
+ssh -t manualadmin@vpn.{{ site.url }} 'sudo /root/homelab-rendered/src/vpn/install_files.sh certs'
 
 # Ref: https://pve.proxmox.com/wiki/Certificate_Management
 cp pve1.{{ site.url }}/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
 cp pve1.{{ site.url }}/privatekey.key /etc/pve/nodes/pve1/pveproxy-ssl.key
 systemctl restart pveproxy.service
 
-scp pve2.{{ site.url }}/certificate.crt admin@pve2.{{ site.url }}:/home/admin/pveproxy-ssl.pem
-scp pve2.{{ site.url }}/privatekey.key admin@pve2.{{ site.url }}:/home/admin/pveproxy-ssl.key
+scp pve2.{{ site.url }}/certificate.crt manualadmin@pve2.{{ site.url }}:/home/manualadmin/pveproxy-ssl.pem
+scp pve2.{{ site.url }}/privatekey.key manualadmin@pve2.{{ site.url }}:/home/manualadmin/pveproxy-ssl.key
 # Ref: https://pbs.proxmox.com/wiki/index.php/HTTPS_Certificate_Configuration
-scp pbs2.{{ site.url }}/certificate.crt admin@pve2.{{ site.url }}:/home/admin/proxy.pem
-scp pbs2.{{ site.url }}/privatekey.key admin@pve2.{{ site.url }}:/home/admin/proxy.key
+scp pbs2.{{ site.url }}/certificate.crt manualadmin@pve2.{{ site.url }}:/home/manualadmin/proxy.pem
+scp pbs2.{{ site.url }}/privatekey.key manualadmin@pve2.{{ site.url }}:/home/manualadmin/proxy.key
 echo "PVE2 root password:"
-ssh -t admin@pve2.{{ site.url }} 'sudo /root/homelab-rendered/src/pve2/install_files.sh certs_and_keys' > pbs2_cert_info.txt
+ssh -t manualadmin@pve2.{{ site.url }} 'sudo /root/homelab-rendered/src/pve2/install_files.sh certs_and_keys' > pbs2_cert_info.txt
 
 # Update PBS fingerprint for PVE1
 # Ref: https://pbs.proxmox.com/docs/pve-integration.html

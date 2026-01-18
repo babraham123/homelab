@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-cd /home/admin
+cd /home/manualadmin
 
 case $1 in
   certs_and_keys)

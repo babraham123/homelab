@@ -17,6 +17,8 @@ Docs: [config files](https://pve.proxmox.com/wiki/Proxmox_Cluster_File_System_(p
 - CPU
   - type: host
   - max cores = host cores - 1
+- Memory
+  - Ballooning device (ensure the memory is always available, don't overcommit)
 - OS installation
   - Use ext4, no lvm, all files in 1 partition [ref](https://forum.proxmox.com/threads/lvm-or-ext4-on-kvm-guest.39055/)
 
