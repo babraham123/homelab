@@ -74,7 +74,7 @@ chmod 400 secsvcs_id_ed25519.pub
 scp manualadmin@websvcs.{{ site.url }}:/home/manualadmin/.ssh/id_ed25519.pub websvcs_id_ed25519.pub
 chmod 400 websvcs_id_ed25519.pub
 # Fill in all of the secrets you can based on `src/websvcs/secrets_template.yaml`
-/root/homelab-rendered/src/pve1/secret_update.sh secsvcs
+/root/homelab-rendered/src/pve1/secret_update.sh websvcs
 ```
 
 - Generate the SOPS/AGE homesvcs secrets file

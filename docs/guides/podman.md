@@ -9,7 +9,7 @@ Initial setup to install Proxmox and configure it with the relevant scripts and 
 - Install dependencies
 ```bash
 sudo su
-apt install -y age jq python3-pip
+apt install -y age jq python3-pip gnupg2
 pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib
 
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
