@@ -1735,7 +1735,7 @@ identity_providers:
               # ...
               # -----END CERTIFICATE-----
       -
-        # Ref: 
+        # Ref:
         # https://headscale.net/stable/ref/oidc
         # https://www.authelia.com/integration/openid-connect/clients/headscale/
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
@@ -1859,7 +1859,7 @@ identity_providers:
         userinfo_signed_response_alg: 'none'
 
       -
-        # Ref: 
+        # Ref:
         # https://github.com/christiaangoossens/hass-oidc-auth
         # https://github.com/christiaangoossens/hass-oidc-auth/blob/main/docs/provider-configurations/authelia.md
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a

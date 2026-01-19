@@ -9,7 +9,7 @@ set -euo pipefail
 
 host=$1
 project_dir=$2
-url=$(yq ".site.url" vars.yml)
+url=$(yq --yaml-fix-merge-anchor-to-spec=true ".site.url" vars.yml)
 
 if ! ping -c3 -W3 "$host.$url" > /dev/null; then
   echo "error: $host is not reachable" >&2

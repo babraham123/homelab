@@ -8,7 +8,8 @@
 set -euo pipefail
 
 echo "uptime_internal_urls:" > /tmp/parsed.yml
-yq '.endpoints[] | select(.group == "internal") | .url' "$1" | \
+yq --yaml-fix-merge-anchor-to-spec=true \
+  '.endpoints[] | select(.group == "internal") | .url' "$1" | \
   sed 's/^/  - /' | sort | uniq >> /tmp/parsed.yml
 
 jinjanate --quiet /tmp/parsed.yml vars.yml
