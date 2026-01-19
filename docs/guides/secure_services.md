@@ -29,11 +29,12 @@ systemctl restart node_exporter
 ## Networking
 - Enable LAN access to postgres, lldap, authelia and ntfy smtp
 ```bash
-NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
 
 ufw allow in from {{ websvcs.ip }} to any port 5432,6360,9091,465 proto tcp
 ufw allow in from {{ homesvcs.ip }} to any port 5432,6360,9091,465 proto tcp
-ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 5432,6360,9091,465 proto tcp
+ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 5432,6360,9091,465 proto tcp
 ```
 
 - Confirm that the logs for traefik, authelia and lldap look good 

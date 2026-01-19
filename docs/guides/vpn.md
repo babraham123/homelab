@@ -120,7 +120,8 @@ headscale --user USER_ID preauthkeys create --expiration 100y
 src/vpn/install_svcs.sh tailscale
 tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --authkey AUTH_KEY
 # Clamp MTU
-iptables -t mangle -A FORWARD -i tailscale0 -o {{ vpn.interface }} -p tcp -m tcp \
+NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
+iptables -t mangle -A FORWARD -i tailscale0 -o $NET_IFACE -p tcp -m tcp \
   --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
 # Hack ACLs via ufw, order of precedence = ASC 
@@ -128,7 +129,7 @@ ufw reset
 ufw default deny incoming
 ufw default deny outgoing
 ufw allow out 53
-ufw allow out on {{ vpn.interface }}
+ufw allow out on $NET_IFACE
 ufw allow in from any to any port 22,80,443 proto tcp
 ufw allow in from any to any port 3478,41641 proto udp
 ufw allow out on tailscale0 from any to {{ secsvcs.ip }} port 80,443 proto tcp
