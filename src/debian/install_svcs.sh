@@ -39,15 +39,12 @@ case $1 in
     make all
     chmod +x mdns-repeater
     cp mdns-repeater /usr/local/bin
-    from=$(ip a | grep 'state UP' | sed -r 's/^[0-9]+: ((enp|eth|vmbr)[^:]+): .*/\1/;t;d')
+    from=$(ip -j -4 route show to default | jq -r '.[0].dev')
     to=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
     echo "Confirm that the following interfaces are correct: $from -> $to"
-    read -p "Y or N: " -n 1 -r
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-      exit 1
-    fi
     echo "# Options to pass to mdns-repeater" > /etc/default/mdns-repeater
     echo "MDNS_REPEATER_OPTS=\"$from $to\"" >> /etc/default/mdns-repeater
+    cat /etc/default/mdns-repeater
     debian/add_homelab_tag.sh mdns-repeater.service
     chmod 644 mdns-repeater.service
     mv mdns-repeater.service /etc/systemd/system/mdns_repeater.service

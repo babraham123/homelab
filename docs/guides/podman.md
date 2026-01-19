@@ -52,9 +52,9 @@ mkdir /etc/containers/systemd
 cp src/$HOST/net.network /etc/containers/systemd
 systemctl daemon-reload
 systemctl start net-network
-NET_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-# Use {{ secsvcs.interface }} on secsvcs, {{ websvcs.interface }} on websvcs, {{ homesvcs.interface }} on homesvcs
-ufw route allow in on {{ secsvcs.interface }} out on $NET_IFACE to any port 80,443 proto tcp
+POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
+ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 80,443 proto tcp
 
 ufw enable
 ```
@@ -115,11 +115,14 @@ podman volume export VOLUME -o VOLUME-$(date -I).tar
 
 gzip *.tar
 rm *.tar
+# Restart all homelab services in order of installation
+systemctl start ALL_SERVICES
 ```
 
 - Restore a container volume
 ```bash
 cd /root/backups
+systemctl stop ALL_SERVICES
 gunzip FILE.tar.gz
 podman volume import VOLUME < FILE.tar
 systemctl start ALL_SERVICES
