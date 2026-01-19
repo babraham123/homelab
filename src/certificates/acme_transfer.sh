@@ -35,12 +35,6 @@ download "secsvcs"
 download "homesvcs"
 download "websvcs"
 
-# Ref: https://www.tecmint.com/configure-ssl-certificate-haproxy/
-cat vpn-ui.{{ site.url }}/privatekey.key vpn-ui.{{ site.url }}/certificate.crt > vpn-ui.{{ site.url }}/vpnui.all.pem
-scp vpn-ui.{{ site.url }}/vpnui.all.pem manualadmin@vpn.{{ site.url }}:/home/manualadmin/vpnui.all.pem
-echo "VPN root password:"
-ssh -t manualadmin@vpn.{{ site.url }} 'sudo /root/homelab-rendered/src/vpn/install_files.sh certs'
-
 # Ref: https://pve.proxmox.com/wiki/Certificate_Management
 cp pve1.{{ site.url }}/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
 cp pve1.{{ site.url }}/privatekey.key /etc/pve/nodes/pve1/pveproxy-ssl.key
@@ -68,4 +62,3 @@ php /root/pfsense-import-certificate.php /root/router.cert.pem /root/router.key.
 '
 
 date -u > date_acme_certs.txt
-echo -e '\nMake sure to restart haproxy'

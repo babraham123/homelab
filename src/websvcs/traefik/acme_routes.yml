@@ -19,9 +19,6 @@ http:
     router:
       <<: *acme_service
       rule: Host(`router.{{ site.url }}`)
-    vpnui:
-      <<: *acme_service
-      rule: Host(`vpn-ui.{{ site.url }}`)
   services:
     s403:
       loadBalancer:

@@ -30,15 +30,8 @@ case $1 in
   haproxy)
     apt install -y haproxy
     debian/add_homelab_tag.sh /usr/lib/systemd/system/haproxy.service
-    mkdir -p /etc/haproxy/certs
     cp haproxy/haproxy.cfg /etc/haproxy
     curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
-    if [ ! -f /etc/haproxy/certs/vpnui.all.pem ]; then
-      # placeholder cert
-      openssl req -x509 -nodes -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 90 -subj '/CN=vpn-ui.{{ site.url }}'
-      cat key.pem cert.pem > /etc/haproxy/certs/vpnui.all.pem
-      rm ./*.pem
-    fi
     ;;
   *)
     echo "error: unknown service: $1" >&2
