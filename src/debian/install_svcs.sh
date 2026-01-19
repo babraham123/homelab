@@ -41,11 +41,10 @@ case $1 in
     cp mdns-repeater /usr/local/bin
     from=$(ip -j -4 route show to default | jq -r '.[0].dev')
     to=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-    echo "Confirm that the following interfaces are correct: $from -> $to"
+    echo "Enabling mdns over the following interfaces: $from -> $to"
     echo "# Options to pass to mdns-repeater" > /etc/default/mdns-repeater
     echo "MDNS_REPEATER_OPTS=\"$from $to\"" >> /etc/default/mdns-repeater
-    cat /etc/default/mdns-repeater
-    debian/add_homelab_tag.sh mdns-repeater.service
+    ../debian/add_homelab_tag.sh mdns-repeater.service
     chmod 644 mdns-repeater.service
     mv mdns-repeater.service /etc/systemd/system/mdns_repeater.service
     cd ..
