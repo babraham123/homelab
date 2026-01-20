@@ -24,6 +24,8 @@ src/secsvcs/install_svcs.sh ntfy-alertmanager
 src/secsvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
+systemctl restart mdns_repeater
+systemctl list-units | grep Homelab
 ```
 
 ## Networking
@@ -127,7 +129,9 @@ systemctl list-units | grep Homelab
 # Stop all other homelab services in reserve order of installation
 systemctl stop ALL_OTHER_SERVICES
 podman container ls | grep postgres
-podman exec -it --user 70 CONTAINER_ID pg_dumpall -U postgres > pgdump-$(date -I).sql
+now=$(date -I)
+podman exec -it --user 70 CONTAINER_ID pg_dumpall -U postgres --clean --if-exists > pgdump-$now.sql
+gzip *.sql
 systemctl stop postgres
 ```
 - Upgrade and restore from backup
@@ -135,6 +139,7 @@ systemctl stop postgres
 cd /root/backups
 podman container ls | grep postgres
 src/secsvcs/install_svcs.sh postgres
+gunzip FILE.sql.gz
 podman exec -it --user 70 CONTAINER_ID psql -U postgres < FILE.sql
 systemctl start ALL_OTHER_SERVICES
 ```

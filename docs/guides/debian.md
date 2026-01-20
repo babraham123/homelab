@@ -123,11 +123,21 @@ screen
 # Ensure >10GB, >800MB free disk space
 df -h /
 df -h /boot
+# Stop all homelab services
+systemctl list-units | grep Homelab
+systemctl stop ALL_SERVICES
+
 apt update
 apt dist-upgrade
 sed -i 's/bookworm/trixie/g' /etc/apt/sources.list
 sed -i -e 's/bookworm/trixie/g' /etc/apt/sources.list.d/*.list
 # If podman, reinstall apt sources
+curl -fsSL https://download.opensuse.org/repositories/home:/alvistack/Debian_13/Release.key \
+  | gpg --dearmor \
+  | tee /etc/apt/trusted.gpg.d/alvistack.gpg > /dev/null
+echo "deb http://downloadcontent.opensuse.org/repositories/home:/alvistack/Debian_13/ /" \
+  | tee /etc/apt/sources.list.d/alvistack.list > /dev/null
+
 apt update
 apt dist-upgrade
 # Re-apply config changes
@@ -136,8 +146,17 @@ vim /etc/apt/apt.conf.d/50unattended-upgrades
 # Confirm that the network interface won't change
 ip a
 udevadm test-builtin net_setup_link /sys/class/net/enp6s18 2>/dev/null
+sed -i 's/enp6s18/ens18/g' /etc/network/interfaces
 reboot
 
+# May need to remove old dhcp leases
+# log on to root via console
+dhclient -r enp6s18
+dhclient -r ens18
+rm /var/lib/dhcp/dhclient*
+dhclient ens18
+
+# ssh should now work
 sudo su
 apt modernize-sources
 apt update

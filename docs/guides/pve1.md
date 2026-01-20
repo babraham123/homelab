@@ -21,7 +21,7 @@ ssh-copy-id manualadmin@vpn.{{ site.url }}
 - Install tools
 ```bash
 cd /root
-pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib
+pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
 
 # Install yq
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')

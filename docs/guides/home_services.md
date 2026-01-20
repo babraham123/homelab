@@ -26,6 +26,8 @@ src/homesvcs/install_svcs.sh home_assistant
 src/homesvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
+systemctl restart mdns_repeater
+systemctl list-units | grep Homelab
 ```
 
 - On initial install, disable HA OIDC

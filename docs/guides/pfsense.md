@@ -120,9 +120,8 @@ TODO: integrate these instructions with above
 - Install and enable agent
 ```bash
 ssh admin@router.{{ site.url }}
-pkg install -y qemu-guest-agent
-sysrc qemu_guest_agent_enable="YES"
-service qemu-guest-agent start
+fetch https://raw.githubusercontent.com/Weehooey/pfSense-scripts/refs/heads/main/install-qemu-guest-agent.sh
+sh install-qemu-guest-agent.sh
 ```
 
 ### System Patches
