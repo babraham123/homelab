@@ -38,6 +38,7 @@ case $1 in
     mkdir -p /etc/opt/zigbee2mqtt/config
     cp zigbee2mqtt/*.yaml /etc/opt/zigbee2mqtt/config
     cp zigbee2mqtt/zigbee2mqtt.container /etc/containers/systemd
+    cp zigbee2mqtt/z2mdb.volume /etc/containers/systemd
     ;;
   esphome)
     mkdir -p /etc/opt/esphome/config

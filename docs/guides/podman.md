@@ -10,7 +10,7 @@ Initial setup to install Proxmox and configure it with the relevant scripts and 
 ```bash
 sudo su
 apt install -y age jq python3-pip gnupg2
-pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib
+pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
 
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
 wget "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" -O - | tar xz
@@ -82,7 +82,6 @@ podman secret ls
 ## mDNS
 - Install dependencies and service
 ```bash
-apt install -y build-essential
 src/debian/install_svcs.sh mdns_repeater
 ```
 
@@ -103,6 +102,8 @@ ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
 ```
 
 ## Backups
+TODO: turn into a script
+
 - Backup container volumes
 ```bash
 cd /root/backups
@@ -110,11 +111,10 @@ systemctl list-units | grep Homelab
 # Stop all homelab services in reserve order of installation
 systemctl stop ALL_SERVICES
 # Archive the relevant volumes
-podman volume ls
-podman volume export VOLUME -o VOLUME-$(date -I).tar
-
+now=$(date -I)
+podman volume ls --format json | jq -r '.[].Name' | \
+  xargs -I% podman volume export % -o %-$now.tar
 gzip *.tar
-rm *.tar
 # Restart all homelab services in order of installation
 systemctl start ALL_SERVICES
 ```
@@ -124,6 +124,18 @@ systemctl start ALL_SERVICES
 cd /root/backups
 systemctl stop ALL_SERVICES
 gunzip FILE.tar.gz
-podman volume import VOLUME < FILE.tar
+podman volume import VOLUME FILE.tar
 systemctl start ALL_SERVICES
+```
+
+- Backup a container image
+```bash
+cd /root/backups
+podman images --format=json | \
+  jq -r '.[].Names.[0]' | tr '/' '#' | \
+  xargs -I% podman save -o %.tar %
+gzip *.tar
+
+gunzip FILE.tar.gz
+podman load -i IMAGE-NAME.tar
 ```

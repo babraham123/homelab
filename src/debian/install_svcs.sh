@@ -33,9 +33,9 @@ case $1 in
     cp olive_tin/olive_tin.service /etc/systemd/system
     ;;
   mdns_repeater)
-    wget --output-document=mdns_repeater.zip "https://github.com/babraham123/mdns-repeater/archive/refs/heads/master.zip"
-    unzip mdns_repeater.zip
-    cd mdns-repeater-master
+    apt install -y build-essential
+    git clone https://github.com/babraham123/mdns-repeater
+    cd mdns-repeater
     make all
     chmod +x mdns-repeater
     cp mdns-repeater /usr/local/bin

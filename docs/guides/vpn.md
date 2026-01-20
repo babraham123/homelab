@@ -28,7 +28,7 @@ systemctl restart fail2ban
 - Setup Headscale ([src](https://headscale.net/running-headscale-linux/))
 ```bash
 mkdir -p /etc/opt/secrets
-chmod 700 /etc/opt/secrets
+chmod 711 /etc/opt/secrets
 src/vpn/install_svcs.sh headscale
 cp src/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
@@ -85,8 +85,8 @@ sudo su
 # Grab the oidc client id and the raw version of the client secret from the steps above
 vim /etc/opt/secrets/hs_oidc_id
 vim /etc/opt/secrets/hs_oidc_secret
+chown headscale:headscale /etc/opt/secrets/hs_oidc_*
 chmod 600 /etc/opt/secrets/*
-chown headscale /etc/opt/secrets/hs_oidc_*
 ```
 
 - Route traffic via HAProxy
@@ -117,7 +117,7 @@ src/vpn/install_svcs.sh haproxy
 headscale users create public
 headscale --user USER_ID preauthkeys create --expiration 100y
 # Setup client
-src/vpn/install_svcs.sh tailscale
+src/vpn/install_svcs.sh tailscaled
 tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --authkey AUTH_KEY
 # Clamp MTU
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
@@ -176,9 +176,9 @@ tailscale ping --tsmp other_node
 
 - For an Apple TV, use the Tailscale app. [Ref](https://tailscale.com/kb/1280/appletv)
 
-- For Debian bookworm ([src](https://tailscale.com/kb/1174/install-debian-bookworm))
+- For Debian ([src](https://tailscale.com/kb/1626/install-debian-trixie))
 ```bash
-src/vpn/install_svcs.sh tailscale
+src/vpn/install_svcs.sh tailscaled
 sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --authkey AUTH_KEY
 # --exit-node=router
 ```

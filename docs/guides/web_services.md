@@ -25,6 +25,8 @@ src/websvcs/install_svcs.sh isso
 src/websvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
+systemctl restart mdns_repeater
+systemctl list-units | grep Homelab
 ```
 
 ## Setup homepage widgets
@@ -46,9 +48,9 @@ This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other mode
 
 - Disable secure boot, [vid](https://www.youtube.com/watch?v=js_Xoa0f8zM)
 
-- Install Nvidia, Intel and Coral drivers using the [GPU guide](./gpu.md)
-
 - Passthrough the GPU, iGPU and TPU using the [Proxmox guide](./proxmox.md)
+
+- Install Nvidia, Intel and Coral drivers using the [GPU guide](./gpu.md)
 
 - Install the Nvidia container toolkit and CDI, [ref](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 ```bash

@@ -59,6 +59,12 @@ sudo lspci -nnv | grep -i nvidia
 nvidia-smi
 nvtop
 ```
+- Remove an old driver version
+```bash
+apt purge 'nvidia-*'
+apt purge 'libnvidia-*'
+apt autoremove --purge
+```
 
 ## Coral TPU
 
