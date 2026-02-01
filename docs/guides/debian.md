@@ -162,3 +162,4 @@ apt modernize-sources
 apt update
 apt upgrade
 ```
+- If the interface name changes you'll need to recreate your ufw rules

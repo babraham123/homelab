@@ -136,11 +136,20 @@ ufw allow out on tailscale0 from any to {{ secsvcs.ip }} port 80,443 proto tcp
 ufw allow out on tailscale0 from any to {{ homesvcs.ip }} port 80,443 proto tcp
 ufw allow out on tailscale0 from any to {{ websvcs.ip }} port 80,443 proto tcp
 
-# insert before the COMMIT
+# Add permanent iptables rules
+echo "NET_IFACE_REPLACE_ME = $(ip -j -4 route show to default | jq -r '.[0].dev')"
 vim /etc/ufw/before.rules
 ```
 ```
-# allow outbound icmp
+# clamp Tailscale MSS, insert before the *filter
+*mangle
+:FORWARD ACCEPT [0:0]
+-A FORWARD -i tailscale0 -o NET_IFACE_REPLACE_ME -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+COMMIT
+
+...
+
+# allow outbound ICMP, insert before the COMMIT
 -A ufw-before-output -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 -A ufw-before-output -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
 ```
