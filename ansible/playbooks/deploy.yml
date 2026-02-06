@@ -1,0 +1,80 @@
+---
+- name: Render and deploy homelab configuration
+  hosts: all
+  gather_facts: no
+  vars:
+    local_project_dir: "{{ playbook_dir }}/../.."
+    rendered_dir: "/tmp/homelab-rendered-{{ ansible_date_time.epoch | default('manual') }}"
+  
+  tasks:
+    - name: Load variables from vars.yml
+      include_vars:
+        file: "{{ local_project_dir }}/vars.yml"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Clean up any existing rendered directory
+      file:
+        path: "{{ rendered_dir }}"
+        state: absent
+      delegate_to: localhost
+      run_once: true
+
+    - name: Render configuration files locally
+      shell: |
+        cd {{ local_project_dir }}
+        ./tools/render_src.sh {{ rendered_dir }}
+      delegate_to: localhost
+      run_once: true
+      register: render_result
+
+    - name: Display render results
+      debug:
+        msg: "{{ render_result.stdout }}"
+      run_once: true
+
+    - name: Ensure target directory exists on remote host
+      file:
+        path: "{{ remote_config_path | default('/opt/homelab') }}"
+        state: directory
+        mode: '0755'
+      become: yes
+
+    - name: Synchronize rendered files to remote host
+      synchronize:
+        src: "{{ rendered_dir }}/"
+        dest: "{{ remote_config_path | default('/opt/homelab') }}/"
+        delete: yes
+        rsync_opts:
+          - "--exclude=.git*"
+          - "--exclude=ansible/"
+          - "--exclude=tools/"
+          - "--exclude=test/"
+          - "--exclude=docs/"
+          - "--exclude=notes/"
+          - "--exclude=README.md"
+          - "--exclude=LICENSE"
+          - "--exclude=vars*.yml"
+      become: yes
+      notify: Files updated
+
+    - name: Set proper ownership of deployed files
+      file:
+        path: "{{ remote_config_path | default('/opt/homelab') }}"
+        owner: "{{ remote_user | default('root') }}"
+        group: "{{ remote_group | default('root') }}"
+        recurse: yes
+      become: yes
+
+    - name: Clean up rendered directory
+      file:
+        path: "{{ rendered_dir }}"
+        state: absent
+      delegate_to: localhost
+      run_once: true
+      when: cleanup_rendered | default(true)
+
+  handlers:
+    - name: Files updated
+      debug:
+        msg: "Configuration files have been updated on {{ inventory_hostname }}. Files with .j2 extension will be re-rendered at service startup."

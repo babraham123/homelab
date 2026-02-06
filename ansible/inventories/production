@@ -1,0 +1,12 @@
+[homelab]
+secsvcs ansible_host=192.168.7.20 remote_config_path=/opt/homelab/secsvcs
+websvcs ansible_host=192.168.5.20 remote_config_path=/opt/homelab/websvcs  
+homesvcs ansible_host=192.168.7.21 remote_config_path=/opt/homelab/homesvcs
+gaming ansible_host=192.168.5.21 remote_config_path=/opt/homelab/gaming
+devtop ansible_host=192.168.5.22 remote_config_path=/opt/homelab/devtop
+
+[homelab:vars]
+ansible_user=root
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+remote_user=root
+remote_group=root

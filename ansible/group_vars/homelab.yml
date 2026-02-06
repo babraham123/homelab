@@ -1,0 +1,4 @@
+---
+# Common variables for all homelab hosts
+cleanup_rendered: true
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
