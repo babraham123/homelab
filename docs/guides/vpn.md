@@ -172,10 +172,9 @@ headscale users create USERNAME@
 headscale --user USER_ID preauthkeys create --expiration 2h
 ```
 
-- For MacOS, use Tailscale app ([src](https://github.com/juanfont/headscale/blob/main/hscontrol/templates/apple.html)), or
+- For MacOS, use [Tailscale app](https://headscale.net/stable/usage/connect/apple/), then login
 ```bash
-brew install tailscale
-sudo /opt/homebrew/opt/tailscale/bin/tailscaled
+echo 'alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"' >> ~/.zshrc
 tailscale login --login-server https://vpn.{{ site.url }}:443 --accept-routes --auth-key AUTH_KEY
 
 tailscale status

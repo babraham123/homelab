@@ -6,8 +6,8 @@ Setup a MacOS based computer to seamlessly access homelab services, both remotel
 ```bash
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python3 get-pip.py
+python3 --version
+python3 -m ensurepip --upgrade
 git --version
 ```
 
@@ -24,22 +24,23 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```
 - Install [color scheme](https://iterm2colorschemes.com/) and [fonts](https://www.nerdfonts.com/)
 ```bash
+brew install wget
 git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
 wget https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/schemes/Solarized%20Dark%20Higher%20Contrast.itermcolors
-brew tap homebrew/cask-fonts
 brew install --cask font-meslo-lg-nerd-font
 
 wget -O .vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
 ```
-- Configure iTerm ([src](https://medium.com/seokjunhong/customize-the-terminal-zsh-iterm2-powerlevel10k-complete-guide-for-beginners-35c4ba439055))
+- In iTerm, configure [natural key bindings](https://apple.stackexchange.com/questions/136928/using-alt-cmd-right-left-arrow-in-iterm)
 
 ## Source code
 - Install tools
 ```bash
 brew install fd yq yamllint
 pip3 install jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
+curl -fsSL https://claude.ai/install.sh | bash
 ```
 
 - Render source
@@ -49,11 +50,11 @@ git clone {{ repo }} homelab
 cd homelab
 # Fill in personal details based on vars.template.yml
 vim vars.yml
-tools/render_src.sh ~/Documents/homelab-rendered
+tools/render_src.sh ../homelab-rendered
 
-cd ~/Documents/homelab-rendered/src
-cp macos/aliases.zsh ~/.oh-my-zsh/custom
-cp macos/functions.zsh ~/.oh-my-zsh/custom
+cd ../homelab-rendered/src
+cp debian/aliases.zsh ~/.oh-my-zsh/custom
+cp debian/functions.zsh ~/.oh-my-zsh/custom
 ```
 
 ## Auto-switch DNS
@@ -70,8 +71,8 @@ networksetup -switchtolocation Home
 - Setup watcher
 ```bash
 networksetup -switchtolocation Automatic
-cp macos/vpn.sh /usr/local/bin
-cp macos/detect_wifi_change.sh /usr/local/bin
+sudo cp macos/vpn.sh /usr/local/bin
+sudo cp macos/detect_wifi_change.sh /usr/local/bin
 cp macos/com.my.detect.wifi.change.plist ~/Library/LaunchAgents
 launchctl load ~/Library/LaunchAgents/com.my.detect.wifi.change.plist
 ```

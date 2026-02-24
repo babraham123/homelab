@@ -335,7 +335,7 @@ oidc:
   only_start_if_oidc_is_available: false
 
   # OpenID Connect Issuer URL from the identity provider
-  issuer: "https://auth.{{ site.url }}/.well-known/openid-configuration"
+  issuer: "https://auth.{{ site.url }}"
 
   # Client ID from the identity provider
   client_id: "PLACEHOLDER_ID"

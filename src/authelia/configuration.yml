@@ -1751,6 +1751,7 @@ identity_providers:
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
         redirect_uris:
           - 'https://vpn.{{ site.url }}/oidc/callback'
+          - 'https://vpn.{{ site.url }}:443/oidc/callback'
 
         ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
         ## URIs to fetch Request Objects.
