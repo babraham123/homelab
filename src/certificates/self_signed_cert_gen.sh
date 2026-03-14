@@ -147,6 +147,18 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
 chmod 444 certs/zigbee.{{ site.url }}.client_cert.pem
 scp certs/zigbee.{{ site.url }}.client_cert.pem manualadmin@homesvcs.{{ site.url }}:/home/manualadmin
 
+openssl req -config openssl.cnf \
+  -key private/home.{{ site.url }}.key.pem \
+  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=homesvcs/CN=home.{{ site.url }}' \
+  -addext 'subjectAltName = DNS:home.{{ site.url }}' \
+  -new -sha256 -out csr/home.{{ site.url }}.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions usr_cert -days 395 -notext -md sha256 \
+  -in csr/home.{{ site.url }}.csr.pem \
+  -out certs/home.{{ site.url }}.client_cert.pem
+chmod 444 certs/home.{{ site.url }}.client_cert.pem
+scp certs/home.{{ site.url }}.client_cert.pem manualadmin@homesvcs.{{ site.url }}:/home/manualadmin
+
 echo "secsvcs root password:"
 ssh -t manualadmin@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_files.sh certs'
 

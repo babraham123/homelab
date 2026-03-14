@@ -78,3 +78,11 @@ launchctl load ~/Library/LaunchAgents/com.my.detect.wifi.change.plist
 ```
 - Test by switching WiFi networks, confirm location changes
   - `networksetup -getcurrentlocation`
+
+## Other tools
+
+- Helpful addons
+```bash
+brew install maccy
+brew install scroll-reverser
+```

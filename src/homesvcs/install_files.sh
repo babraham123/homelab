@@ -21,6 +21,8 @@ case $1 in
 
     mv zigbee.{{ site.url }}.client_cert.pem /etc/opt/zigbee2mqtt/certificates/client.crt
 
+    mv home.{{ site.url }}.client_cert.pem /etc/opt/home_assistant/certs/client.pem
+
     cp ca-chain.cert.pem /etc/opt/traefik/certificates/ca.chain.crt
     cp ca-chain.cert.pem /etc/opt/mosquitto/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/zigbee2mqtt/certificates/ca.chain.crt
@@ -36,6 +38,8 @@ case $1 in
     mv mqtt.{{ site.url }}.key.pem /etc/opt/mosquitto/certificates/key.pem
 
     mv zigbee.{{ site.url }}.key.pem /etc/opt/zigbee2mqtt/certificates/client.key
+
+    mv home.{{ site.url }}.key.pem /etc/opt/home_assistant/certs/client.key
 
     rm -rf ./*.pem
     ;;

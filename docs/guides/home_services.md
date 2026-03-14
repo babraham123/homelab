@@ -33,7 +33,8 @@ systemctl list-units | grep Homelab
 - On initial install, disable HA OIDC
 ```bash
 # Comment out the sections called `auth_oidc`
-vim /etc/opt/home_assistant/config/configuration.yaml
+volpath=$(podman volume inspect -f '{% raw %}{{ .Mountpoint }}{% endraw %}' systemd-hassconfig)
+vim $volpath/configuration.yaml
 systemctl restart home_assistant
 ```
 
@@ -66,7 +67,10 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 3232,8266,2040,88
   - Go to Settings >> Areas, ... >> create any missing areas
 - Connect to MQTT broker
   - Go to Settings >> Devices & Services
-  - TODO: !!
+  - Set the broker hostname (mqtt.{{ site.url }}) and port (8883). Press Submit
+  - Enable "Use a client certificate", set Broker cert validation to "Auto". Press Submit
+  - From personal computer: `scp 'manualadmin@homesvcs.{{ site.url }}:/home/manualadmin/home.bket.net.*' ~/Downloads`
+  - Upload the client cert and key. Press Submit
 - Install HACS
   - Run the installer script
 ```bash
@@ -89,7 +93,7 @@ systemctl restart home_assistant
 - Configure the integrations
 ```bash
 # Uncomment the sections called `auth_oidc`
-vim /etc/opt/home_assistant/config/configuration.yaml
+vim $volpath/configuration.yaml
 systemctl restart home_assistant
 ```
 
