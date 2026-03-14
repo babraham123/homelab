@@ -62,3 +62,4 @@ php /root/pfsense-import-certificate.php /root/router.cert.pem /root/router.key.
 '
 
 date -u > date_acme_certs.txt
+echo -e '\nDone!'

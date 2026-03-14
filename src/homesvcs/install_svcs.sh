@@ -47,9 +47,22 @@ case $1 in
     ;;
   home_assistant)
     mkdir -p /etc/opt/home_assistant/certs
-    mkdir -p /etc/opt/home_assistant/config
     mkdir -p /var/opt/home_assistant/media/recordings
-    cp home_assistant/*.yaml /etc/opt/home_assistant/config
+    cp home_assistant/hassconfig.volume /etc/containers/systemd
+    systemctl daemon-reload
+    systemctl start hassconfig-volume.service
+    volpath=$(podman volume inspect -f '{% raw %}{{ .Mountpoint }}{% endraw %}' systemd-hassconfig)
+    if [ ! -e $volpath/configuration.yaml ]; then
+      cp home_assistant/*.yaml $volpath
+    else
+      echo $volpath
+      ls $volpath
+      echo -n "Have you manually updated the config files? Y or N: "
+      read reply
+      if [[ ! $reply =~ ^[Yy]$ ]]; then
+        exit 1
+      fi
+    fi
     cp home_assistant/home_assistant.container /etc/containers/systemd
     cp home_assistant/hassdb.volume /etc/containers/systemd
     ;;

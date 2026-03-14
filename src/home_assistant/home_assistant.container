@@ -37,7 +37,6 @@ Environment=PACKAGES=iputils
 
 Secret=hass_oidc_id,type=env,target=OIDC_CLIENT_ID
 Secret=hass_oidc_secret,type=env,target=OIDC_CLIENT_SECRET
-Secret=hass_api_password,type=env,target=API_PASSWORD
 Secret=victoriametrics_admin_creds_hash,type=env,target=VM_ADMIN_CREDS_HASH
 Secret=ntfy_hass_password,type=env,target=NTFY_HASS_PASSWORD
 Secret=home_latitude,type=env,target=HOME_LATITUDE
@@ -46,8 +45,9 @@ Secret=home_elevation,type=env,target=HOME_ELEVATION
 
 # HACS integrations end up in /config/custom_components
 # AppDaemon apps end up in /config/appdaemon/apps
-Volume=/etc/opt/home_assistant/config:/config
+Volume=hassconfig.volume:/config
 Volume=/var/opt/home_assistant/media:/media
+Volume=/etc/opt/home_assistant/certs/ca.chain.pem:/etc/ssl/certs/ca.chain.pem:ro
 Volume=hassdb.volume:/data
 
 [Service]

@@ -47,6 +47,10 @@ openssl genrsa -out private/zigbee.{{ site.url }}.key.pem 2048
 chmod 400 private/zigbee.{{ site.url }}.key.pem
 scp private/zigbee.{{ site.url }}.key.pem manualadmin@homesvcs.{{ site.url }}:/home/manualadmin
 
+openssl genrsa -out private/home.{{ site.url }}.key.pem 2048
+chmod 400 private/home.{{ site.url }}.key.pem
+scp private/home.{{ site.url }}.key.pem manualadmin@homesvcs.{{ site.url }}:/home/manualadmin
+
 echo "secsvcs server password:"
 ssh -t manualadmin@secsvcs.{{ site.url }} 'sudo /root/homelab-rendered/src/secsvcs/install_files.sh keys'
 
