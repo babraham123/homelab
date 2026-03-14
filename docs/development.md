@@ -17,14 +17,11 @@ tools/deploy_src.sh
 ```
 
 ## Add a new service
-- Update traefik config for that VM
-- Internal only route, update unbound config
-- service container and configs
-- install script
-- local cert and key if cross VM communication
-  - if it's the server, update cert and key gen scripts
-  - otherwise the CA cert should be sufficient
-- update guide for that VM
-- Authelia config
-- Gatus config
-- homepage config and icon
+1. Add Traefik route config for the VM
+1. Create service container and config files in `src/<service>/`
+1. If cross-VM TLS is needed, add cert/key gen to `src/certificates/` and update `install_files.sh`
+1. Add service to `install_svcs.sh`
+1. Update Authelia config if OIDC auth is available (`src/authelia/`)
+1. Add Gatus uptime check (`src/gatus/config.yaml`)
+1. Add Homepage dashboard entry (`src/homepage/`)
+1. Update the relevant guide in `docs/guides/`
