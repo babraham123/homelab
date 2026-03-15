@@ -14,7 +14,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/homeassistant/home-assistant:stable
+Image=docker.io/homeassistant/home-assistant:2026.3.1
 ContainerName=home_assistant
 AutoUpdate=registry
 NoNewPrivileges=true
@@ -37,7 +37,6 @@ Environment=PACKAGES=iputils
 
 Secret=hass_oidc_id,type=env,target=OIDC_CLIENT_ID
 Secret=hass_oidc_secret,type=env,target=OIDC_CLIENT_SECRET
-Secret=victoriametrics_admin_creds_hash,type=env,target=VM_ADMIN_CREDS_HASH
 Secret=ntfy_hass_password,type=env,target=NTFY_HASS_PASSWORD
 Secret=home_latitude,type=env,target=HOME_LATITUDE
 Secret=home_longitude,type=env,target=HOME_LONGITUDE
@@ -47,7 +46,7 @@ Secret=home_elevation,type=env,target=HOME_ELEVATION
 # AppDaemon apps end up in /config/appdaemon/apps
 Volume=hassconfig.volume:/config
 Volume=/var/opt/home_assistant/media:/media
-Volume=/etc/opt/home_assistant/certs/ca.chain.pem:/etc/ssl/certs/ca.chain.pem:ro
+Volume=/etc/opt/home_assistant/certs/ca.chain.pem:/ssl/certs/ca.chain.pem:ro
 Volume=hassdb.volume:/data
 
 [Service]

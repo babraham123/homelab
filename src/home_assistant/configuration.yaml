@@ -107,14 +107,6 @@ recorder:
 
 # Ref: https://www.home-assistant.io/integrations/influxdb/#full-configuration-for-2xx-installations
 influxdb:
-  api_version: 2
-  ssl: true
-  host: metrics.{{ site.url }}
-  port: 443
-  path: /api/v2/write
-  token: !env_var VM_ADMIN_CREDS_HASH
-  organization: "hass"
-  bucket: "hass"
   precision: ms
   tags:
     source: hass
