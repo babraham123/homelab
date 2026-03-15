@@ -41,7 +41,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus"
+        "type": "victoriametrics-metrics-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -378,7 +378,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_current_price{ticker=~\"$stocks\"}",
@@ -390,7 +390,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_day_high{ticker=~\"$stocks\"}",
@@ -403,7 +403,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_day_low{ticker=~\"$stocks\"}",
@@ -416,7 +416,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_beta{ticker=~\"$stocks\"}",
@@ -429,7 +429,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_pe_forward{ticker=~\"$stocks\"}",
@@ -442,7 +442,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_pe_trailing{ticker=~\"$stocks\"}",
@@ -455,7 +455,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_volume{ticker=~\"$stocks\"} / finance_avg_10day_volume{ticker=~\"$stocks\"}",
@@ -468,7 +468,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_open_price{ticker=~\"$stocks\"}",
@@ -481,7 +481,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "changes(finance_day_high{ticker=~\"$stocks\"}[$__range])",
@@ -494,7 +494,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "changes(finance_day_low{ticker=~\"$stocks\"}[$__range])",
@@ -507,7 +507,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "finance_rating{ticker=~\"$stocks\"}",
@@ -520,7 +520,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": true,
           "expr": "max(finance_current_price{ticker=~\"$stocks\"} offset 1d) by (ticker)",
@@ -533,7 +533,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "max(finance_previous_close{ticker=~\"$stocks\"}) by (ticker)",
@@ -623,7 +623,8 @@
                 ],
                 "operation": "aggregate"
               },
-              "Value #M": {                "aggregations": [
+              "Value #M": {
+                "aggregations": [
                   "lastNotNull"
                 ],
                 "operation": "aggregate"
@@ -703,7 +704,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus"
+        "type": "victoriametrics-metrics-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -721,7 +722,7 @@
               },
               {
                 "color": "green",
-                "value": 1e-7
+                "value": 1e-07
               }
             ]
           },
@@ -755,7 +756,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": true,
           "expr": "min(finance_current_price{ticker=~\"$stocks\"}) by (ticker) - max(finance_open_price{ticker=~\"$stocks\"}) by (ticker)",
@@ -771,7 +772,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus"
+        "type": "victoriametrics-metrics-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -965,7 +966,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "avg(finance_current_price{ticker=~\"$stocks\"}) by (ticker)",
@@ -976,7 +977,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "avg(finance_day_low{ticker=~\"$stocks\"}) by (ticker)",
@@ -987,7 +988,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "avg(finance_day_high{ticker=~\"$stocks\"}) by (ticker)",
@@ -998,7 +999,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "avg(finance_open_price{ticker=~\"$stocks\"}) by (ticker)",
@@ -1009,7 +1010,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "avg(avg_over_time(finance_current_price{ticker=~\"$stocks\"}[1h])) by (ticker)",
@@ -1043,7 +1044,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus"
+        "type": "victoriametrics-metrics-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1080,7 +1081,7 @@
                     },
                     {
                       "color": "red",
-                      "value": 0.00001
+                      "value": 1e-05
                     }
                   ]
                 }
@@ -1115,7 +1116,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "min(finance_current_price{ticker=~\"$stocks\"}) by (ticker)",
@@ -1125,7 +1126,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
           "expr": "min(finance_current_price{ticker=~\"$stocks\"}) by (ticker) - min(finance_target_median_price{ticker=~\"$stocks\"}) by (ticker)",
@@ -1140,7 +1141,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus"
+        "type": "victoriametrics-metrics-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1232,7 +1233,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": true,
           "expr": "avg(rate(finance_volume{ticker=~\"$stocks\"}[$__interval])) by (ticker)",
@@ -1246,7 +1247,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus"
+        "type": "victoriametrics-metrics-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1263,7 +1264,7 @@
               },
               {
                 "color": "green",
-                "value": 1e-7
+                "value": 1e-07
               }
             ]
           },
@@ -1297,7 +1298,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus"
+            "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": true,
           "expr": "min(finance_current_price{ticker=~\"$stocks\"}) by (ticker) - min(finance_previous_close{ticker=~\"$stocks\"}) by (ticker)",
@@ -1334,7 +1335,7 @@
           ]
         },
         "datasource": {
-          "type": "prometheus"
+          "type": "victoriametrics-metrics-datasource"
         },
         "definition": "label_values(finance_current_price, ticker)",
         "hide": 0,

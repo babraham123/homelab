@@ -5,8 +5,8 @@
       "label": "Prometheus",
       "description": "",
       "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
+      "pluginId": "victoriametrics-metrics-datasource",
+      "pluginName": "VictoriaMetrics Metrics"
     }
   ],
   "__elements": {},
@@ -19,8 +19,8 @@
     },
     {
       "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
+      "id": "victoriametrics-metrics-datasource",
+      "name": "VictoriaMetrics Metrics",
       "version": "1.0.0"
     },
     {
@@ -80,7 +80,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -126,7 +126,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -141,7 +141,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -187,7 +187,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -202,7 +202,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -248,7 +248,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -263,7 +263,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -314,7 +314,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -329,7 +329,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -376,7 +376,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -391,7 +391,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -438,7 +438,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -464,7 +464,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "Number of successfully published messages, and messages that could not be published (due to rate limiting, bad formatting, etc.)",
@@ -558,7 +558,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -569,7 +569,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -585,7 +585,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "Number of messages published since last ntfy server restart",
@@ -679,7 +679,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -690,7 +690,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -706,7 +706,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "Number of messages currently stored in message cache",
@@ -784,7 +784,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -799,7 +799,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -876,7 +876,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -887,7 +887,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -899,7 +899,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -911,7 +911,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -927,7 +927,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1004,7 +1004,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1019,7 +1019,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1100,7 +1100,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1115,7 +1115,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1196,7 +1196,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1211,7 +1211,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1289,7 +1289,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -1305,7 +1305,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1398,7 +1398,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1409,7 +1409,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1425,7 +1425,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1514,7 +1514,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1525,7 +1525,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1541,7 +1541,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1634,7 +1634,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1645,7 +1645,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1661,7 +1661,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1754,7 +1754,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -1765,7 +1765,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -1781,7 +1781,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1874,7 +1874,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -1885,7 +1885,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -1901,7 +1901,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1979,7 +1979,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -2007,7 +2007,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -2084,7 +2084,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -2099,7 +2099,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -2178,7 +2178,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -2189,7 +2189,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -2205,7 +2205,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -2283,7 +2283,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -2294,7 +2294,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
@@ -2319,7 +2319,7 @@
       {
         "current": {},
         "datasource": {
-          "type": "prometheus",
+          "type": "victoriametrics-metrics-datasource",
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(ntfy_visitors_total, job)",
