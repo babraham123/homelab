@@ -8,7 +8,7 @@
 # https://manpages.debian.org/buster/fd-find/fdfind.1.en.html
 # https://github.com/kpfleming/jinjanator
 # Note:
-# The *.j2 extension indicates that the file will go thru a second pass of jinjanate,
+# The *.j2.j2 extension indicates that the file will go thru a second pass of jinjanate,
 # usually during service startup. See src/podman/render_secrets.sh for an example.
 
 set -euo pipefail
@@ -19,7 +19,7 @@ rm -rf "$project_dir" all_vars.yml
 mkdir -p "$project_dir"
 cp -R . "$project_dir"
 pushd "$project_dir"
-rm -rf .git .gitignore vars.yml .vscode .fdignore
+rm -rf .git .gitignore vars.yml .vscode .fdignore notes
 popd
 
 # Assemble jinja2 config file
@@ -27,17 +27,19 @@ cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
 {
   # Exclude the ending "..."
   head -n "$((cut_line-1))" vars.yml
-  
+
   tools/parse_routes.sh secsvcs
   tools/parse_routes.sh homesvcs
-  tools/parse_uptime_urls.sh src/gatus/config.yaml
+  # websvcs doesn't need to be parsed because it is the default route
+  tools/parse_uptime_urls.sh src/gatus/config.yaml.j2
   echo -e "...\n"
 } > all_vars.yml
 
 # Render the files
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"
-$fdfind . --type f --exec jinjanate --quiet -o "$project_dir/{}" "{}" all_vars.yml
+$fdfind . --type f -e j2 --exec rm "${project_dir}/{}"
+$fdfind . --type f -e j2 --exec jinjanate --quiet -o "${project_dir}/{.}" "{}" all_vars.yml
 
 rm -f all_vars.yml
 cd "$project_dir"
@@ -60,5 +62,5 @@ $fdfind . --extension json | xargs -I% \
 $fdfind . --extension container | xargs grep -h "IP=" | \
   sort | uniq -d | grep . && { echo "error: duplicate IPs found" >&2; exit 1; }
 
-rm -f "$project_dir"/**/.DS_Store
-echo "Rendered the repo into $project_dir"
+rm -f "${project_dir}"/**/.DS_Store
+echo "Rendered the repo into ${project_dir}"

@@ -9,15 +9,15 @@ http:
     ntfy-auth:
       headers:
         customRequestHeaders:
-          Authorization: 'Basic {% raw %}{{ expandenv "admin:$NTFY_ADMIN_PASSWORD" | b64enc }}{% endraw %}'
+          Authorization: 'Basic {{ expandenv "admin:$NTFY_ADMIN_PASSWORD" | b64enc }}'
     alertmanager-auth:
       headers:
         customRequestHeaders:
-          Authorization: 'Basic {% raw %}{{ expandenv "admin:$AM_ADMIN_PASSWORD" | b64enc }}{% endraw %}'
+          Authorization: 'Basic {{ expandenv "admin:$AM_ADMIN_PASSWORD" | b64enc }}'
     vm-auth:
       headers:
         customRequestHeaders:
-          Authorization: 'Basic {% raw %}{{ expandenv "admin:$VM_ADMIN_PASSWORD" | b64enc }}{% endraw %}'
+          Authorization: 'Basic {{ expandenv "admin:$VM_ADMIN_PASSWORD" | b64enc }}'
     vm-auth-token:
       plugin:
         rewriteHeaders:
@@ -29,4 +29,4 @@ http:
     vl-auth:
       headers:
         customRequestHeaders:
-          Authorization: 'Basic {% raw %}{{ expandenv "admin:$VL_ADMIN_PASSWORD" | b64enc }}{% endraw %}'
+          Authorization: 'Basic {{ expandenv "admin:$VL_ADMIN_PASSWORD" | b64enc }}'

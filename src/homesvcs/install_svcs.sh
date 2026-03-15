@@ -51,7 +51,7 @@ case $1 in
     cp home_assistant/hassconfig.volume /etc/containers/systemd
     systemctl daemon-reload
     systemctl start hassconfig-volume.service
-    volpath=$(podman volume inspect -f '{% raw %}{{ .Mountpoint }}{% endraw %}' systemd-hassconfig)
+    volpath=$(podman volume inspect -f '{{ .Mountpoint }}' systemd-hassconfig)
     if [ ! -e $volpath/configuration.yaml ]; then
       cp home_assistant/*.yaml $volpath
     else

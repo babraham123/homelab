@@ -16,7 +16,7 @@ echo "${repo}:${tag} has the following corresponding tags:"
 
 # Loop through each tag to get its digest
 while IFS= read -r tag_i; do
-  digest_i=$(skopeo inspect --format '{{.Digest}}' "docker://docker.io/${repo}:${tag_i}")
+  digest_i=$(skopeo inspect --format '{{ .Digest }}' "docker://docker.io/${repo}:${tag_i}")
   if [[ "$digest_i" == "$digest" ]]; then
     printf '%s\n' "$tag_i"
   fi

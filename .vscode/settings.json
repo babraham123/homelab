@@ -149,9 +149,7 @@
         "/^[A-Z_]+$/"
     ],
     "files.associations": {
-        "*.yaml": "jinja-yaml",
-        "*.yml": "jinja-yaml",
-        "*.json": "jinja-json",
-        "*.hujson": "jinja-json"
+        "*.hujson": "json",
+        "*.hujson.j2": "jinja-json"
     }
 }
