@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "WebFetch(domain:docs.victoriametrics.com)",
+      "WebSearch",
+      "WebFetch(domain:docs.guance.com)",
+      "WebFetch(domain:seifrajhi.github.io)",
+      "WebFetch(domain:last9.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:valyala.medium.com)",
+      "WebFetch(domain:docs.opsramp.com)"
     ],
     "deny": [],
     "ask": []

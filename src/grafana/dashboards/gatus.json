@@ -78,7 +78,7 @@
       "pluginVersion": "6.4.4",
       "targets": [
         {
-          "expr": "sum(rate(gatus_results_total{success=\"true\"}[30s])) by (key) / sum(rate(gatus_results_total[30s])) by (key)",
+          "expr": "sum(rate(gatus_results_total{success=\"true\"}[$__rate_interval])) by (key) / sum(rate(gatus_results_total[$__rate_interval])) by (key)",
           "hide": false,
           "legendFormat": "{{key}}",
           "refId": "B"
@@ -225,7 +225,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(gatus_results_total{success=\"true\"}[30s])) by (key) / sum(rate(gatus_results_total[30s])) by (key)",
+          "expr": "sum(rate(gatus_results_total{success=\"true\"}[$__rate_interval])) by (key) / sum(rate(gatus_results_total[$__rate_interval])) by (key)",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -321,7 +321,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(gatus_results_total[5m])*60) by (key)",
+          "expr": "sum(rate(gatus_results_total[$__rate_interval])*60) by (key)",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -413,7 +413,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(gatus_results_total{success=\"true\"}[5m])*60) by (key)",
+          "expr": "sum(rate(gatus_results_total{success=\"true\"}[$__rate_interval])*60) by (key)",
           "instant": false,
           "interval": "30s",
           "legendFormat": "{{key}}",
@@ -502,7 +502,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(gatus_results_total{success=\"false\"}[5m])*60) by (key)",
+          "expr": "sum(rate(gatus_results_total{success=\"false\"}[$__rate_interval])*60) by (key)",
           "interval": "30s",
           "legendFormat": "{{key}} ",
           "refId": "A"

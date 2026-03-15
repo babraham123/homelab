@@ -5,8 +5,8 @@
       "label": "Prometheus",
       "description": "",
       "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
+      "pluginId": "victoriametrics-metrics-datasource",
+      "pluginName": "VictoriaMetrics Metrics"
     }
   ],
   "__elements": {},
@@ -31,8 +31,8 @@
     },
     {
       "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
+      "id": "victoriametrics-metrics-datasource",
+      "name": "VictoriaMetrics Metrics",
       "version": "1.0.0"
     },
     {
@@ -89,7 +89,7 @@
   "panels": [
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -387,7 +387,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -402,7 +402,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -417,7 +417,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -432,7 +432,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -447,7 +447,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -462,7 +462,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -477,7 +477,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -534,7 +534,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -616,7 +616,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -627,7 +627,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -660,7 +660,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -731,7 +731,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "pve_cpu_usage_ratio{instance=\"$instance\"} / pve_cpu_usage_limit and on(id) pve_node_info",
@@ -746,7 +746,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -810,7 +810,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -827,7 +827,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -910,7 +910,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -921,7 +921,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -954,7 +954,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -1024,7 +1024,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "pve_memory_usage_bytes{instance=\"$instance\"} / pve_memory_size_bytes and on(id) pve_node_info",
@@ -1039,7 +1039,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -1131,7 +1131,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1145,7 +1145,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1160,7 +1160,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1192,7 +1192,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1280,7 +1280,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "((pve_cpu_usage_ratio{instance=\"$instance\"} / pve_cpu_usage_limit) * on(id, instance) group_left(name, type) pve_guest_info) and on(id, instance) pve_up == 1",
@@ -1296,7 +1296,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1384,7 +1384,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(pve_memory_usage_bytes{instance=\"$instance\"} / pve_memory_size_bytes * on(id, instance) group_left(name, type) pve_guest_info) and on(id, instance) pve_up == 1",
@@ -1400,7 +1400,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1468,7 +1468,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
@@ -1486,7 +1486,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -1544,7 +1544,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1579,7 +1579,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
@@ -1670,7 +1670,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
@@ -1688,7 +1688,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -1790,10 +1790,10 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(rate(pve_network_receive_bytes{instance=\"$instance\"}[5m]) * on(id, instance) group_left(name, type) pve_guest_info) and on(id, instance) pve_up == 1",
+          "expr": "(rate(pve_network_receive_bytes{instance=\"$instance\"}[$__rate_interval]) * on(id, instance) group_left(name, type) pve_guest_info) and on(id, instance) pve_up == 1",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 3,
@@ -1802,10 +1802,10 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(rate(pve_network_transmit_bytes{instance=\"$instance\"}[5m])* on(id, instance) group_left(name, type) pve_guest_info) and on(id, instance) pve_up == 1",
+          "expr": "(rate(pve_network_transmit_bytes{instance=\"$instance\"}[$__rate_interval])* on(id, instance) group_left(name, type) pve_guest_info) and on(id, instance) pve_up == 1",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 3,
@@ -1818,7 +1818,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
@@ -1907,10 +1907,10 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "((rate(pve_disk_write_bytes{instance=\"$instance\"}[5m]) + rate(pve_disk_read_bytes[5m])) * on(id, instance) group_left(name, type) pve_guest_info) and on(id, instance) pve_up == 1",
+          "expr": "((rate(pve_disk_write_bytes{instance=\"$instance\"}[$__rate_interval]) + rate(pve_disk_read_bytes[$__rate_interval])) * on(id, instance) group_left(name, type) pve_guest_info) and on(id, instance) pve_up == 1",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1934,7 +1934,7 @@
       {
         "current": {},
         "datasource": {
-          "type": "prometheus",
+          "type": "victoriametrics-metrics-datasource",
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(pve_node_info, instance)",

@@ -5,8 +5,8 @@
       "label": "VictoriaMetrics",
       "description": "",
       "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
+      "pluginId": "victoriametrics-metrics-datasource",
+      "pluginName": "VictoriaMetrics Metrics"
     }
   ],
   "__requires": [
@@ -24,8 +24,8 @@
     },
     {
       "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
+      "id": "victoriametrics-metrics-datasource",
+      "name": "VictoriaMetrics Metrics",
       "version": "1.0.0"
     },
     {
@@ -1356,7 +1356,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "irate(system_diskread{nodename=\"$node\", object=\"$obj_types\"}[$__interval] != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"})[$__interval]",
+              "expr": "rate(system_diskread{nodename=\"$node\", object=\"$obj_types\"}[$__interval] != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"})[$__interval]",
               "interval": "0.1s",
               "intervalFactor": 1,
               "legendFormat": "{{host}}",
@@ -1461,7 +1461,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "irate(system_diskwrite{nodename=\"$node\", object=\"$obj_types\"} != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"})[$__interval]",
+              "expr": "rate(system_diskwrite{nodename=\"$node\", object=\"$obj_types\"} != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"})[$__interval]",
               "interval": "0.1s",
               "intervalFactor": 1,
               "legendFormat": "{{host}}",
@@ -1566,7 +1566,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "irate(system_netin{nodename=\"$node\", object=\"$obj_types\"}[$__interval] != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"})[$__interval] * 8",
+              "expr": "rate(system_netin{nodename=\"$node\", object=\"$obj_types\"}[$__interval] != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"})[$__interval] * 8",
               "instant": false,
               "interval": "0.1s",
               "intervalFactor": 1,
@@ -1672,7 +1672,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "irate(system_netout{nodename=\"$node\", object=\"$obj_types\"}[$__interval] != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"})[$__interval] * 8",
+              "expr": "rate(system_netout{nodename=\"$node\", object=\"$obj_types\"}[$__interval] != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"})[$__interval] * 8",
               "instant": false,
               "interval": "0.1s",
               "intervalFactor": 1,
