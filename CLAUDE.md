@@ -47,8 +47,8 @@ Rendering also validates YAML, JSON, and checks for duplicate container IPs.
 
 ### Templating System
 - `vars.yml` contains specific/personal values for rendering (gitignored), `vars.template.yml` is an example
-- All files are processed through Jinja2 via `jinjanate` at render time
-- Files with `.j2` extension undergo a *second* render pass at service startup (e.g., for secrets injection via `src/podman/render_secrets.sh`)
+- All `*.j2` files are processed through Jinja2 via `jinjanate` at render time
+- `*.j2.j2` files undergo a *second* render pass at service startup (e.g., for secrets injection via `src/podman/render_secrets.sh`)
 - `tools/parse_routes.sh` and `tools/parse_uptime_urls.sh` generate additional variables dynamically during rendering
 
 ### Service Structure
@@ -71,7 +71,7 @@ The remaining directories under `src/` typically map to a service. They may cont
 - Internal certs are self-signed (managed in `src/certificates/`). External certs use ACME/Let's Encrypt via Traefik.
 
 ### Secrets
-Secrets use SOPS + AGE encryption. A custom integration injects the secrets into podman containers. The `*.j2` second-pass templates are also used to render secrets at container startup.
+Secrets use SOPS + AGE encryption. A custom integration injects the secrets into podman containers. The `*.j2.j2` second-pass templates are also used to render secrets at container startup.
 
 ## Adding a New Service
 

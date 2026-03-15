@@ -12,15 +12,22 @@ set -euo pipefail
 
 # Prepare the output directory
 project_dir=$1
+cd docs/guides
+if [[ ! "$project_dir" = /* ]]; then
+  project_dir="../../${project_dir}"
+fi
+
 rm -rf "$project_dir"
 mkdir -p "$project_dir"
-cp -R docs/guides/* "$project_dir"
+cp -R . "$project_dir"
 
 # Render the files
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"
 
-cd docs/guides
-$fdfind . --type f --exec jinjanate --quiet -o "../../$project_dir/{}" "{}" ../../vars.template.yml
+$fdfind . --type f -e j2 --exec rm "${project_dir}/{}"
+$fdfind . --type f -e j2 --exec jinjanate --quiet -o "${project_dir}/{.}" "{}" ../../vars.template.yml
 
-echo "Rendered the guides into $project_dir"
+rm -f "${project_dir}"/**/.DS_Store
+
+echo "Rendered the guides into ${1}"

@@ -8,7 +8,7 @@
 set -euo pipefail
 
 host=$1
-file="src/${host}/traefik/routes.yml"
+file="src/${host}/traefik/routes.yml.j2"
 if [ ! -f "$file" ]; then
   echo "error: route file for $host does not exist" >&2
   exit 1
