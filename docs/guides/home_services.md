@@ -66,11 +66,17 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 3232,8266,2040,88
 - Setup areas
   - Go to Settings >> Areas, ... >> create any missing areas
 - Connect to MQTT broker
-  - Go to Settings >> Devices & Services
+  - Go to Settings >> Devices & Services >> Add Integration
+  - Search MQTT and add
   - Set the broker hostname (mqtt.{{ site.url }}) and port (8883). Press Submit
   - Enable "Use a client certificate", set Broker cert validation to "Auto". Press Submit
-  - From personal computer: `scp 'manualadmin@homesvcs.{{ site.url }}:/home/manualadmin/home.bket.net.*' ~/Downloads`
+  - From personal computer: `scp 'manualadmin@homesvcs.{{ site.url }}:/home/manualadmin/home.{{ site.url }}.*' ~/Downloads`
   - Upload the client cert and key. Press Submit
+- Connect to InfluxDB
+  - Go to Settings >> Devices & Services >> Add Integration
+  - Search InfluxDB and add
+  - version = 2.x/3, url = https://metrics.{{ site.url }}:443/api/v2/write, verify SSL, organization = hass, bucket = hass
+  - To get the token, run `/usr/local/bin/get_secret.sh victoriametrics_admin_creds_hash`
 - Install HACS
   - Run the installer script
 ```bash
@@ -84,18 +90,24 @@ exit
 systemctl restart home_assistant
 ```
   - Go to Settings >> Devices & services
-  - Reload the page. Search and install `HACS`
+  - Reload the page. Click `Add Integration`. Search and install `HACS`
   - Perform device auth with Github
-  - Go to Settings >> Devices & services >> Gear icon >> Enable AppDaemon apps
+  - Go to Gear icon >> Enable AppDaemon apps
 - Go to HACS >> install the following integrations:
   - christiaangoossens/hass-oidc-auth
   - dummylabs/thewatchman
-- Configure the integrations
+- Restart and add OIDC
 ```bash
 # Uncomment the sections called `auth_oidc`
 vim $volpath/configuration.yaml
 systemctl restart home_assistant
 ```
+- Add Watchman
+  - Go to Settings >> Devices & services >> Add Integration
+  - Search Watchman and add
+- Generate a configuration report
+  - Go to Settings >> Developer Tools >> Actions
+  - Search Watchman and press `Perform Action`
 
 ## Devices
 Check out the [IoT guide](./iot_devices.md) for device specific info.
