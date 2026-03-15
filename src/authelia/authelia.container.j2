@@ -21,6 +21,7 @@ HostName=auth.{{ site.url }}
 IP={{ secsvcs.container_subnet }}.5
 # hostPort:containerPort
 PublishPort=9091:9091
+# port 9959, metrics
 
 Volume=/etc/opt/authelia/config:/config
 Volume=/etc/opt/authelia/certificates:/certificates
