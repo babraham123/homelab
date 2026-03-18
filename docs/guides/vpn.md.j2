@@ -165,6 +165,38 @@ ufw status verbose
 - In your DNS provider, add a TXT record with the provided string (use host = @)
 - View the insights report
 
+### Geoblock by country
+
+- Download tool to map IPs to country
+```bash
+# build on secsvcs
+exit
+exit
+ssh manualadmin@secsvcs.{{ site.url }}
+git clone https://github.com/babraham123/haproxy-mapper.git
+cd haproxy-mapper
+podman build --platform linux/amd64 -o type=local,dest=. .
+scp haproxy-mapper manualadmin@vpn.{{ site.url }}:/home/manualadmin
+cd ..
+rm -rf haproxy-mapper
+exit
+
+# copy the license key on pve1
+ssh manualadmin@pve1.{{ site.url }}
+sudo sops /root/secrets/pve1.yaml
+exit
+
+# back on vpn
+ssh manualadmin@vpn.{{ site.url }}
+sudo su
+chown root:root haproxy-mapper
+chmod 500 haproxy-mapper
+mv haproxy-mapper /usr/local/bin/
+# paste in the license key
+vim /etc/opt/secrets/maxmind_license_key
+chmod 600 /etc/opt/secrets/maxmind_license_key
+```
+
 ## Machine users (optional)
 - Create user and key
 ```bash

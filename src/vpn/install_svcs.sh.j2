@@ -32,6 +32,21 @@ case $1 in
     debian/add_homelab_tag.sh /usr/lib/systemd/system/haproxy.service
     cp haproxy/haproxy.cfg /etc/haproxy
     curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
+    mkdir -p /etc/haproxy/countries
+    {% for country in site.blocked_countries %}
+    touch /etc/haproxy/countries/{{ country }}.map
+    chmod 644 /etc/haproxy/countries/{{ country }}.map{% endfor %}
+    ;;
+  geoip_generator)
+    cp haproxy/geoip_generator.py /usr/local/bin
+    cp haproxy/geoip_generator.service /etc/systemd/system
+    cp haproxy/geoip_generator.timer /etc/systemd/system
+
+    systemctl daemon-reload
+    systemctl enable geoip_generator.service
+    systemctl enable geoip_generator.timer
+    systemctl restart geoip_generator.timer
+    exit 0
     ;;
   *)
     echo "error: unknown service: $1" >&2

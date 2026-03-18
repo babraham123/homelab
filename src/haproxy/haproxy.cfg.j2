@@ -47,8 +47,13 @@ frontend https_all
     mode tcp
     bind *:443
 
+    # Reject blocked countries
+{% for country in site.blocked_countries %}
+    acl {{ country }} src,map_ip(/etc/haproxy/countries/{{ country }}.map) -m found{% endfor %}
+    tcp-request connection reject if {{ site.blocked_countries | join(' || ') }}
+
     # Rate limiting for HTTPS connections
-    stick-table type ip size 100k expire 30s store conn_rate(3s),conn_cur,sess_rate(3s)
+    stick-table type ip size 100k expire 30s store conn_rate(3s),conn_cur
     tcp-request connection track-sc0 src
     # Limit concurrent connections, connection rate
     tcp-request connection reject if { src_conn_cur(https_all) gt 10 }
@@ -69,17 +74,24 @@ frontend https_all
     acl {{ svc }} req.ssl_sni -i {{ svc }}.{{ site.url }}{% endfor %}
     use_backend homesvcs_https_proxy if {{ homesvcs_subdomains | join(' || ') }}
 
-    acl www_host req.ssl_sni -i {{ site.url }} || www.{{ site.url }}
-    use_backend websvcs_https_proxy if www_host
+    # Let the remaining subdomains fall thru for ACME
+    acl tld req.ssl_sni -i {{ site.url }}
+    acl any_subdomain req.ssl_sni -i -m end .{{ site.url }}
+    use_backend websvcs_https_proxy if tld || any_subdomain
 
-    default_backend websvcs_https_proxy
+    default_backend tarpit_https
 
 frontend http_all
     mode http
     bind *:80
 
+    # Reject blocked countries
+{% for country in site.blocked_countries %}
+    acl {{ country }} src,map_ip(/etc/haproxy/countries/{{ country }}.map) -m found{% endfor %}
+    http-request deny if {{ site.blocked_countries | join(' || ') }}
+
     # Rate limiting tables
-    stick-table type ip size 100k expire 30s store http_req_rate(3s),http_err_rate(3s),conn_rate(3s),conn_cur,sess_rate(3s),gpc0
+    stick-table type ip size 100k expire 30s store http_req_rate(3s),gpc0
     http-request track-sc0 src
     # Define simple conditions
     acl abuse_rate src_http_req_rate(http_all) gt 20
@@ -101,7 +113,11 @@ frontend http_all
     use_backend homesvcs_http_proxy if {{ homesvcs_subdomains | join(' || ') }}
 
     # Let the remaining subdomains fall thru for ACME
-    default_backend websvcs_http_proxy
+    acl tld hdr(host) -i {{ site.url }}
+    acl any_subdomain hdr_end(host) -i .{{ site.url }}
+    use_backend websvcs_http_proxy if tld || any_subdomain
+
+    default_backend tarpit_http
 
 # backends, naming: server_protocol_purpose
 
@@ -137,3 +153,14 @@ backend homesvcs_http_proxy
 backend homesvcs_https_proxy
     mode tcp
     server homesvcs_https {{ homesvcs.ip }}:443 send-proxy-v2
+
+backend tarpit_http
+    mode http
+    timeout tarpit 5s
+    http-request tarpit
+    errorfile 500 /etc/haproxy/errors/503.http
+
+backend tarpit_https
+    mode tcp
+    timeout tarpit 5s
+    tcp-request content tarpit
