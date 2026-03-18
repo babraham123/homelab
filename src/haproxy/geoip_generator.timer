@@ -1,0 +1,15 @@
+# /etc/systemd/system/geoip_generator.timer
+
+[Unit]
+Description="Homelab: Runs geoip_generator.service every week"
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+# Run if machine was off
+Persistent=true
+OnCalendar=Fri *-*-* 06:10:00
+Unit=geoip_generator.service
+
+[Install]
+WantedBy=timers.target

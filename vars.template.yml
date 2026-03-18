@@ -14,17 +14,20 @@ personal:
     - "GOOGL"
     - "MSFT"
 
+users:
+  - jane
+  - jayden
+  - jasper
+
 repo: "https://github.com/babraham123/homelab"
 site:
   url: "janedoe.com"
   name: "JD's System"
   email: "jdoe@gmail.com"
+  blocked_countries:
+    - "RU"
+    - "CN"
 tail_domain: "janedoe.ts.net"
-
-users:
-  - jane
-  - jayden
-  - jasper
 
 # Hosts
 vpn:

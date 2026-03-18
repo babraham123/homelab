@@ -272,7 +272,7 @@ Monitor traffic flows, [ref](https://www.youtube.com/watch?v=P8oxTUoF2Nw):
 - Install the ntopng, ntopng-data package
 - Go to Diagnostics >> ntopng Settings
 - Set ntopng Admin Password, select all interfaces
-- Use MaxMind key from above
+- Use the MaxMind license key from the pve1 secrets file
 - Leave this disabled unless you want to investigate an issue
 
 Watch for new devices:
@@ -343,7 +343,7 @@ In case you're still interested, see [ref](https://www.youtube.com/watch?v=xizAe
   - inbound interface = internet facing, outbound = internal LAN ones
   - Ensure the VIP Address does not lie within any networks
 - Geo data:
-  - Register for a MaxMind acct
+  - Use the MaxMind acct # and license key from the pve1 secrets file
   - Go to IP, add license key and account id
 - Go to DNSBL
   - Set DNSBL Mode to "Unbound python mode"
