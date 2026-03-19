@@ -4,13 +4,29 @@
   - In the future may need to use Cloudflare as the provider (while using the existing registrar)
 
 ## Linode
+
+### Basic setup
 - Setup smallest, CPU shared VM in [Linode](https://www.linode.com/)
 - Basic [Debian Linux setup](./debian.md)
   - `ssh root@{{ vpn.ip }}`
+
+### Security hardening
+- Move the ssh port
+```bash
+ssh manualadmin@vpn.{{ vpn.ip }}
+sudo su
+# write "Port 2202"
+vim /etc/ssh/sshd_config
+ufw allow 2202/tcp
+ufw reload
+systemctl restart ssh
+exit
+```
 - Firewall rules
 ```bash
+ssh -p 2202 manualadmin@vpn.{{ vpn.ip }}
 sudo su
-ufw allow ssh
+ufw deny 22/tcp
 ufw allow http
 ufw allow https
 ufw allow 3478
@@ -22,9 +38,16 @@ ufw enable
 cd /root/homelab-rendered
 apt install -y fail2ban python3-systemd
 cp src/debian/jail.local /etc/fail2ban
+echo "port = 2202" >> /etc/fail2ban/jail.local
 systemctl enable fail2ban
 systemctl restart fail2ban
+
+# Verify that the jail is enabled and configured correctly
+fail2ban-client status sshd
+fail2ban-client -d | grep sshd
 ```
+
+### VPN setup
 - Setup Headscale ([src](https://headscale.net/running-headscale-linux/))
 ```bash
 mkdir -p /etc/opt/secrets
@@ -80,7 +103,7 @@ exit
 
 - Store the secrets
 ```bash
-ssh manualadmin@{{ vpn.ip }}
+ssh -p 2202 manualadmin@{{ vpn.ip }}
 sudo su
 # Grab the oidc client id and the raw version of the client secret from the steps above
 vim /etc/opt/secrets/hs_oidc_id
@@ -130,7 +153,7 @@ ufw default deny incoming
 ufw default deny outgoing
 ufw allow out 53
 ufw allow out on $NET_IFACE
-ufw allow in from any to any port 22,80,443 proto tcp
+ufw allow in from any to any port 2202,80,443 proto tcp
 ufw allow in from any to any port 3478,41641 proto udp
 ufw allow out on tailscale0 from any to {{ secsvcs.ip }} port 80,443 proto tcp
 ufw allow out on tailscale0 from any to {{ homesvcs.ip }} port 80,443 proto tcp
@@ -176,7 +199,7 @@ ssh manualadmin@secsvcs.{{ site.url }}
 git clone https://github.com/babraham123/haproxy-mapper.git
 cd haproxy-mapper
 podman build --platform linux/amd64 -o type=local,dest=. .
-scp haproxy-mapper manualadmin@vpn.{{ site.url }}:/home/manualadmin
+scp -P 2202 haproxy-mapper manualadmin@vpn.{{ site.url }}:/home/manualadmin
 cd ..
 rm -rf haproxy-mapper
 exit
@@ -187,7 +210,7 @@ sudo sops /root/secrets/pve1.yaml
 exit
 
 # back on vpn
-ssh manualadmin@vpn.{{ site.url }}
+ssh -p 2202 manualadmin@vpn.{{ site.url }}
 sudo su
 chown root:root haproxy-mapper
 chmod 500 haproxy-mapper
