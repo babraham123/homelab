@@ -15,7 +15,7 @@ ssh-copy-id manualadmin@pve2.{{ site.url }}
 ssh-copy-id manualadmin@secsvcs.{{ site.url }}
 ssh-copy-id manualadmin@websvcs.{{ site.url }}
 ssh-copy-id manualadmin@homesvcs.{{ site.url }}
-ssh-copy-id manualadmin@vpn.{{ site.url }}
+ssh-copy-id -p 2202 manualadmin@vpn.{{ site.url }}
 ```
 
 - Install tools

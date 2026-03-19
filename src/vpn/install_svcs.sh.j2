@@ -33,7 +33,7 @@ case $1 in
     cp haproxy/haproxy.cfg /etc/haproxy
     curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
     mkdir -p /etc/haproxy/countries
-    {% for country in site.blocked_countries %}
+{% for country in site.blocked_countries %}
     touch /etc/haproxy/countries/{{ country }}.map
     chmod 644 /etc/haproxy/countries/{{ country }}.map{% endfor %}
     ;;
