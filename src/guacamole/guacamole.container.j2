@@ -1,0 +1,62 @@
+# /etc/containers/systemd/guacamole.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Guacamole webserver for remote UI access"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/guacamole/guacamole:1.6
+ContainerName=guacamole
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=remote.{{ site.url }}
+IP={{ websvcs.container_subnet }}.16
+# port 8080
+
+Environment=TZ={{ personal.timezone }}
+# Ref: https://guacamole.apache.org/doc/gug/guacamole-docker.html
+Environment=WEBAPP_CONTEXT=ROOT
+Environment=GUACD_HOSTNAME=remote-proxy.{{ site.url }}
+Environment=GUACD_PORT=4822
+Environment=REMOTE_IP_VALVE_ENABLED=true
+Environment=GUACAMOLE_HOME=/etc/guacamole
+Environment=LOG_LEVEL=warn
+# Ref: https://guacamole.apache.org/doc/gug/postgresql-auth.html
+Environment=POSTGRESQL_ENABLED=true
+Environment=POSTGRES_DATABASE=guacamole
+Environment=POSTGRES_USER=guacamole
+Environment=POSTGRESQL_HOSTNAME=pgdb.{{ site.url }}
+Environment=POSTGRESQL_PORT=5432
+Environment=POSTGRESQL_SSL_MODE=verify-full
+Environment=POSTGRESQL_SSL_ROOT_CERT_FILE=/certs/ca.chain.pem
+# Ref:
+#   https://guacamole.apache.org/doc/gug/openid-auth.html
+#   https://www.authelia.com/integration/openid-connect/clients/apache-guacamole/
+Environment=OPENID_ENABLED=true
+Environment=EXTENSION_PRIORITY=openid
+Environment=OPENID_SCOPE="openid profile groups email"
+Environment=OPENID_ISSUER=https://auth.{{ site.url }}
+Environment=OPENID_JWKS_ENDPOINT=https://auth.{{ site.url }}/jwks.json
+Environment=OPENID_AUTHORIZATION_ENDPOINT=https://auth.{{ site.url }}/api/oidc/authorization?state={% for i in range(16) -%}{{ '0123456789abcdef' | random -}}{%- endfor %}
+Environment=OPENID_REDIRECT_URI=https://remote.{{ site.url }}
+Environment=OPENID_USERNAME_CLAIM_TYPE=preferred_username
+Environment=OPENID_GROUPS_CLAIM_TYPE=groups
+
+Secret=guacamole_pg_password,type=env,target=POSTGRES_PASSWORD
+Secret=guacamole_oidc_id,type=env,target=OPENID_CLIENT_ID
+
+Volume=/etc/opt/guacamole/config:/etc/guacamole:ro
+Volume=/etc/opt/guacamole/certs:/certs:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

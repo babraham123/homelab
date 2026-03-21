@@ -1,0 +1,29 @@
+# /etc/containers/systemd/guacd.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Guacamole proxy server for remote UI access"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/guacamole/guacd:1.6
+ContainerName=guacd
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=remote-proxy.{{ site.url }}
+IP={{ websvcs.container_subnet }}.15
+# port 4822
+
+Environment=TZ={{ personal.timezone }}
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
