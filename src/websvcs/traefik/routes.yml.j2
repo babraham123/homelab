@@ -29,6 +29,14 @@ http:
       <<: *service
       rule: Host(`comment.{{ site.url }}`)
       service: isso@file
+    guacamole:
+      <<: *service
+      rule: Host(`remote.{{ site.url }}`)
+      service: guacamole@file
+      middlewares:
+        - authelia@file
+        - no-buffering@file
+        - secure-headers@file
     static-files:
       <<: *service
       rule: Host(`www.{{ site.url }}`) || Host(`static.{{ site.url }}`) || Host(`wifi.{{ site.url }}`)
@@ -52,6 +60,10 @@ http:
       loadBalancer:
         servers:
           - url: http://comment.{{ site.url }}:8200/
+    guacamole:
+      loadBalancer:
+        servers:
+          - url: http://remote.{{ site.url }}:8080/
     nginx:
       loadBalancer:
         servers:

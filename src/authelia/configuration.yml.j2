@@ -1922,6 +1922,74 @@ identity_providers:
 
       -
         # Ref:
+        # https://www.authelia.com/integration/openid-connect/clients/apache-guacamole/
+        # https://guacamole.apache.org/doc/gug/openid-auth.html
+        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
+        ## configuration.
+        client_id: '{% raw %}{{ mustEnv "GUAC_OIDC_ID" }}{% endraw %}'
+
+        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
+        client_name: 'Guacamole'
+
+        ## Sets the client to public. This should typically not be set, please see the documentation for usage.
+        public: true
+
+        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
+        redirect_uris:
+          - 'https://remote.{{ site.url }}'
+
+        ## Scopes this client is allowed to request.
+        scopes:
+          - 'openid'
+          - 'groups'
+          - 'email'
+          - 'profile'
+
+        ## Grant Types configures which grants this client can obtain.
+        ## It's not recommended to define this unless you know what you're doing.
+        grant_types:
+          - 'implicit'
+
+        ## Response Types configures which responses this client can be sent.
+        ## It's not recommended to define this unless you know what you're doing.
+        response_types:
+          - 'id_token'
+
+        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
+        ## authorization policies section.
+        authorization_policy: 'gen_access'
+
+        ## Enforces the use of PKCE for this client when set to true.
+        require_pkce: false
+
+        ## Enforces the use of PKCE for this client when configured, and enforces the specified challenge method.
+        ## Options are 'plain' and 'S256'.
+        pkce_challenge_method: ''
+
+        ## The permitted client authentication method for the Token Endpoint for this client.
+        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
+        ## defaults to 'none' per the specifications.
+        token_endpoint_auth_method: 'client_secret_basic'
+
+        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
+        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
+        # token_endpoint_auth_signing_alg: 'RS256'
+
+        ## The signing algorithm used for signing the Access Tokens in Access Request responses.
+        ## Please read the documentation before adjusting this option.
+        ## See: https://www.authelia.com/c/oidc/registered-clients#access_token_signed_response_alg
+        access_token_signed_response_alg: 'none'
+
+        ## The signing algorithm used for ID Tokens. An issuer JWK with a matching algorithm must be available when
+        ## configured. Has no effect if id_token_signed_response_key_id is configured.
+        # id_token_signed_response_alg: 'RS256'
+
+        ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
+        ## available. Has no effect if userinfo_signing_key_id is configured.
+        userinfo_signed_response_alg: 'none'
+
+      -
+        # Ref:
         # https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage
         # https://www.authelia.com/integration/openid-connect/uptime-kuma/
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a

@@ -28,10 +28,16 @@ GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;
 
 --- Set up Home Assistant DB for first time ---
 -- For now HA uses sqlite
--- \set pw4 `echo "'$HASS_POSTGRES_PASSWORD'"`
+-- \set pw5 `echo "'$HASS_POSTGRES_PASSWORD'"`
 -- CREATE USER hass WITH ENCRYPTED PASSWORD :pw5;
 -- CREATE DATABASE hass 
 --   ENCODING 'UTF8'
 --   LC_COLLATE = 'en_US.UTF-8'
 --   LC_CTYPE = 'en_US.UTF-8';
 -- GRANT ALL PRIVILEGES ON DATABASE hass TO hass;
+
+--- Set up Guacamole DB for first time ---
+\set pw6 `echo "'$GUAC_POSTGRES_PASSWORD'"`
+CREATE USER guacamole WITH ENCRYPTED PASSWORD :pw6;
+CREATE DATABASE guacamole;
+GRANT ALL PRIVILEGES ON DATABASE guacamole TO guacamole;

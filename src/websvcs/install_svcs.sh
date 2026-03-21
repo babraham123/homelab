@@ -58,6 +58,15 @@ case $1 in
     cp isso/isso.container /etc/containers/systemd
     cp isso/issodb.volume /etc/containers/systemd
     ;;
+  guacamole)
+    mkdir -p /etc/opt/guacamole/certs
+    mkdir -p /etc/opt/guacamole/config
+    cp guacamole/guacamole.container /etc/containers/systemd
+    ;;
+  guacd)
+    mkdir -p /etc/opt/guacd
+    cp guacamole/guacd.container /etc/containers/systemd
+    ;;
   finance_exporter)
     rm -rf /etc/opt/finance_exporter/src
     mkdir -p /etc/opt/finance_exporter/src

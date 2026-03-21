@@ -1,4 +1,4 @@
-# /etc/opt/traefik/config/dynamic/nginx.yml
+# /etc/opt/traefik/config/dynamic/middleware.yml
 # Ref: https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
 # yamllint disable rule:document-start rule:document-end
 http:
@@ -13,3 +13,7 @@ http:
         regex: "^https?://?(.+)"
         replacement: "https://www.${1}"
         permanent: true
+    no-buffering:
+      buffering:
+        maxRequestBodyBytes: 0
+        maxResponseBodyBytes: 0
