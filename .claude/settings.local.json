@@ -9,7 +9,8 @@
       "WebFetch(domain:last9.io)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:valyala.medium.com)",
-      "WebFetch(domain:docs.opsramp.com)"
+      "WebFetch(domain:docs.opsramp.com)",
+      "Bash(git show:*)"
     ],
     "deny": [],
     "ask": []

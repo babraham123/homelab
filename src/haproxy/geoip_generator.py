@@ -21,8 +21,8 @@ maxmind_license_file = "/etc/opt/secrets/maxmind_license_key"
 
 def main():
   try:
-    maxmind_key = Path(maxmind_license_file).read_text()
-  except Execption as e:
+    maxmind_key = Path(maxmind_license_file).read_text().strip()
+  except Exception as e:
     print(f"Error: MaxMind license key not found. ({e})", file=sys.stderr)
     sys.exit(1)
 

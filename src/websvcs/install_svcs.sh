@@ -67,6 +67,18 @@ case $1 in
     mkdir -p /etc/opt/guacd
     cp guacamole/guacd.container /etc/containers/systemd
     ;;
+  archivebox)
+    mkdir -p /var/opt/archivebox
+    chown -R 911:911 /var/opt/archivebox
+    cp archivebox/archivebox.container /etc/containers/systemd
+
+    rm -rf /etc/opt/novnc/src
+    mkdir -p /etc/opt/novnc/src
+    cp archivebox/novnc.container /etc/containers/systemd
+    wget "https://github.com/babraham123/docker-novnc/archive/refs/heads/master.tar.gz" -O - | \
+      tar -xz -C /etc/opt/novnc/src --strip-components=1
+    podman build -t novnc /etc/opt/novnc/src
+    ;;
   finance_exporter)
     rm -rf /etc/opt/finance_exporter/src
     mkdir -p /etc/opt/finance_exporter/src
