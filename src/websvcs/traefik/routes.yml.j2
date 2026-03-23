@@ -37,6 +37,10 @@ http:
         - authelia@file
         - no-buffering@file
         - secure-headers@file
+    archivebox:
+      <<: *service
+      rule: Host(`archive.{{ site.url }}`)
+      service: archivebox@file
     static-files:
       <<: *service
       rule: Host(`www.{{ site.url }}`) || Host(`static.{{ site.url }}`) || Host(`wifi.{{ site.url }}`)
@@ -64,6 +68,10 @@ http:
       loadBalancer:
         servers:
           - url: http://remote.{{ site.url }}:8080/
+    archivebox:
+      loadBalancer:
+        servers:
+          - url: http://archive.{{ site.url }}:8000/
     nginx:
       loadBalancer:
         servers:
