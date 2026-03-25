@@ -12,9 +12,10 @@ set -euo pipefail
 
 cd /root/acme
 
+# TODO: convert to autoadmin
 function download() {
   host=$1
-  addr="manualadmin@$host.{{ site.url }}"
+  addr="manualadmin@$host"
   /root/homelab-rendered/src/debian/is_reachable.sh "$host"
 
   echo "$host root password:"
@@ -40,13 +41,13 @@ cp pve1.{{ site.url }}/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
 cp pve1.{{ site.url }}/privatekey.key /etc/pve/nodes/pve1/pveproxy-ssl.key
 systemctl restart pveproxy.service
 
-scp pve2.{{ site.url }}/certificate.crt manualadmin@pve2.{{ site.url }}:/home/manualadmin/pveproxy-ssl.pem
-scp pve2.{{ site.url }}/privatekey.key manualadmin@pve2.{{ site.url }}:/home/manualadmin/pveproxy-ssl.key
+scp pve2.{{ site.url }}/certificate.crt manualadmin@pve2:/home/manualadmin/pveproxy-ssl.pem
+scp pve2.{{ site.url }}/privatekey.key manualadmin@pve2:/home/manualadmin/pveproxy-ssl.key
 # Ref: https://pbs.proxmox.com/wiki/index.php/HTTPS_Certificate_Configuration
-scp pbs2.{{ site.url }}/certificate.crt manualadmin@pve2.{{ site.url }}:/home/manualadmin/proxy.pem
-scp pbs2.{{ site.url }}/privatekey.key manualadmin@pve2.{{ site.url }}:/home/manualadmin/proxy.key
+scp pbs2.{{ site.url }}/certificate.crt manualadmin@pve2:/home/manualadmin/proxy.pem
+scp pbs2.{{ site.url }}/privatekey.key manualadmin@pve2:/home/manualadmin/proxy.key
 echo "PVE2 root password:"
-ssh -t manualadmin@pve2.{{ site.url }} 'sudo /root/homelab-rendered/src/pve2/install_files.sh certs_and_keys' > pbs2_cert_info.txt
+ssh -t manualadmin@pve2 'sudo /root/homelab-rendered/src/pve2/install_files.sh certs_and_keys' > pbs2_cert_info.txt
 
 # Update PBS fingerprint for PVE1
 # Ref: https://pbs.proxmox.com/docs/pve-integration.html
@@ -54,10 +55,10 @@ fingerprint=$(tail -n1 pbs2_cert_info.txt | tr -d '\r')
 pvesm set pbs2 --fingerprint "$fingerprint"
 
 # Ref: https://github.com/stompro/pfsense-import-certificate
-scp router.{{ site.url }}/certificate.crt admin@router.{{ site.url }}:/root/router.cert.pem
-scp router.{{ site.url }}/privatekey.key admin@router.{{ site.url }}:/root/router.key.pem
+scp router.{{ site.url }}/certificate.crt admin@router:/root/router.cert.pem
+scp router.{{ site.url }}/privatekey.key admin@router:/root/router.key.pem
 echo "router admin password:"
-ssh -t admin@router.{{ site.url }} '
+ssh -t admin@router '
 php /root/pfsense-import-certificate.php /root/router.cert.pem /root/router.key.pem
 '
 

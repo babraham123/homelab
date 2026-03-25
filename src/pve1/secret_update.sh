@@ -6,7 +6,7 @@
 set -euo pipefail
 
 host="$1"
-addr="manualadmin@$host.{{ site.url }}"
+addr="manualadmin@${host}"
 
 /root/homelab-rendered/src/debian/is_root.sh
 /root/homelab-rendered/src/debian/is_reachable.sh "$host"
@@ -16,14 +16,14 @@ export SOPS_AGE_RECIPIENTS
 export SOPS_AGE_KEY_FILE="/root/secrets/age.txt"
 
 # Record secrets, see template for commands
-sops "/root/secrets/$host.yaml"
+sops "/root/secrets/${host}.yaml"
 # SOPS doesn't support SSH keys, must convert before exporting
-sops -d "/root/secrets/$host.yaml" | sudo age -e -R /root/secrets/age.pub -R "/root/secrets/${host}_id_ed25519.pub" -o "/root/secrets/$host.yaml.age"
-chmod 600 "/root/secrets/$host.yaml"
-chmod 400 "/root/secrets/$host.yaml.age"
-scp "/root/secrets/$host.yaml.age" "$addr:/home/manualadmin/secrets.yaml.age"
+sops -d "/root/secrets/${host}.yaml" | sudo age -e -R /root/secrets/age.pub -R "/root/secrets/${host}_id_ed25519.pub" -o "/root/secrets/${host}.yaml.age"
+chmod 600 "/root/secrets/${host}.yaml"
+chmod 400 "/root/secrets/${host}.yaml.age"
+scp "/root/secrets/${host}.yaml.age" "$addr:/home/manualadmin/secrets.yaml.age"
 
-echo "$host root password:"
+echo "${host} root password:"
 ssh -t "$addr" '
 sudo mkdir -p /etc/opt/secrets
 sudo mv /home/manualadmin/secrets.yaml.age /etc/opt/secrets/secrets.yaml.age

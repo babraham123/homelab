@@ -70,7 +70,7 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 3232,8266,2040,88
   - Search MQTT and add
   - Set the broker hostname (mqtt.{{ site.url }}) and port (8883). Press Submit
   - Enable "Use a client certificate", set Broker cert validation to "Auto". Press Submit
-  - From personal computer: `scp 'manualadmin@homesvcs.{{ site.url }}:/home/manualadmin/home.{{ site.url }}.*' ~/Downloads`
+  - From personal computer: `scp 'manualadmin@homesvcs:/home/manualadmin/home.{{ site.url }}.*' ~/Downloads`
   - Upload the client cert and key. Press Submit
 - Connect to InfluxDB
   - Go to Settings >> Devices & Services >> Add Integration

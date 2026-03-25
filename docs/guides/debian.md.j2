@@ -22,7 +22,7 @@ usermod -aG sudo manualadmin
 ## Packages
 - SSH in
 ```bash
-ssh manualadmin@HOSTNAME.{{ site.url }}
+ssh manualadmin@HOSTNAME
 sudo su
 ```
 - Fix deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/) 
@@ -103,7 +103,7 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```bash
 exit
 # From your local device
-ssh-copy-id manualadmin@SUBDOMAIN.{{ site.url }}
+ssh-copy-id manualadmin@SUBDOMAIN
 tools/render_src.sh /tmp/homelab-rendered
 tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 ```

@@ -119,7 +119,7 @@ TODO: integrate these instructions with above
   - Check Enable Secure Shell
 - Install and enable agent
 ```bash
-ssh admin@router.{{ site.url }}
+ssh admin@router
 fetch https://raw.githubusercontent.com/Weehooey/pfSense-scripts/refs/heads/main/install-qemu-guest-agent.sh
 sh install-qemu-guest-agent.sh
 ```
@@ -172,7 +172,7 @@ For local-only overrides of existing routes
 - Setup cert import
 ```bash
 wget https://raw.githubusercontent.com/stompro/pfsense-import-certificate/master/pfsense-import-certificate.php
-scp pfsense-import-certificate.php admin@router.{{ site.url }}:/root
+scp pfsense-import-certificate.php admin@router:/root
 rm pfsense-import-certificate.php
 ```
   - Remove the default cert
@@ -258,7 +258,7 @@ Upload to Victoria Metrics:
 ```bash
 cd src/pfsense/plugins
 chmod 555 telegraf_*
-scp telegraf_* admin@router.{{ site.url }}:/usr/local/bin
+scp telegraf_* admin@router:/usr/local/bin
 ```
 - Go to System >> Package Manager
 - Install the Telegraf package
@@ -291,8 +291,8 @@ Service Watchdog:
 ## Updates
 
 - Disable the vm_watchdog in PVE1
-```
-ssh manualadmin@pve1.{{ site.url }}
+```bash
+ssh manualadmin@pve1
 sudo systemctl stop vm_watchdog
 sudo systemctl disable vm_watchdog
 exit

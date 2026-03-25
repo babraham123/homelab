@@ -7,7 +7,7 @@ Guide to setup websvcs on PVE2. Just service installation.
 
 - Generate init script. [Ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
 ```bash
-ssh manualadmin@secsvcs.{{ site.url }}
+ssh manualadmin@secsvcs
 sudo su
 podman run --rm docker.io/guacamole/guacamole:1.6 /opt/guacamole/bin/initdb.sh --postgresql > initdb.sql
 podman container ls | grep postgres
@@ -51,7 +51,7 @@ systemctl list-units | grep Homelab
   - user = api_ro@pam, token ID = homepage
   - Record the secret
 ```bash
-ssh manualadmin@pve1.{{ site.url }}
+ssh manualadmin@pve1
 sudo /root/homelab-rendered/src/pve1/secret_update.sh websvcs
 ```
   - Go to Permissions >> Add >> API Token Permission
