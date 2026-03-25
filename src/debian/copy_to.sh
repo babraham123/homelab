@@ -5,10 +5,10 @@
 set -euo pipefail
 
 host="$1"
-addr="manualadmin@$host.{{ site.url }}"
+addr="manualadmin@${host}"
 file="$2"
 temp="/home/manualadmin/$(basename "$file")"
 path="$3"
 
-scp "$file" "$addr:$temp"
+scp "$file" "${addr}:${temp}"
 ssh -t "$addr" 'sudo mv '"$temp"' '"$path"''
