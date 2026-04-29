@@ -21,6 +21,7 @@ src/secsvcs/install_svcs.sh grafana
 src/secsvcs/install_svcs.sh ntfy
 src/secsvcs/install_svcs.sh ntfy-alertmanager
 # src/secsvcs/install_svcs.sh vault
+src/secsvcs/install_svcs.sh olive_tin
 src/secsvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
@@ -56,6 +57,7 @@ journalctl -eu authelia
     - {% for user in users %}{{ user }}, {% endfor %} (note for future: add_more_users)
   - Create the `authelia_gen_access` and `headscale_access` groups, add users to them
   - Create the `hass_admin` group, add your user to it
+  - Create the `command_admin` group, add your user to it
   - Uncomment out the authelia middleware
     `vim /etc/opt/traefik/config/dynamic/traefik.yml`
 

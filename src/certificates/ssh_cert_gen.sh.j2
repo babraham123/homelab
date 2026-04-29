@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Generate SSH certificates and distribute them to all servers.
+# Usage:
+#   /root/homelab-rendered/src/certificates/ssh_cert_gen.sh
+set -euo pipefail
+
+/root/homelab-rendered/src/debian/is_root.sh
+/root/homelab-rendered/src/debian/is_reachable.sh pve2
+/root/homelab-rendered/src/debian/is_reachable.sh vpn
+/root/homelab-rendered/src/debian/is_reachable.sh secsvcs
+/root/homelab-rendered/src/debian/is_reachable.sh websvcs
+/root/homelab-rendered/src/debian/is_reachable.sh homesvcs
+/root/homelab-rendered/src/debian/is_reachable.sh devtop
+
+cd /root/ssh
+
+function configure_server() {
+  host=$1
+  port="22"
+  if [[ "$host" == "vpn" ]]; then
+    port="2202"
+  fi
+
+  scp -P "$port" ca_ssh_key.pub "manualadmin@${host}:/home/manualadmin"
+
+  scp -P "$port" "manualadmin@${host}:/etc/ssh/ssh_host_ed25519_key.pub" "public/${host}.ssh_host_key.pub"
+  addr=$(dig "${host}.{{ site.url }}" +short)
+  ssh-keygen -s ca_ssh_host_key -I "$host" -h -n "${host}.{{ site.url }},${addr}" -V +395d "public/${host}.ssh_host_key.pub"
+  chmod 444 "public/${host}.ssh_host_key-cert.pub"
+  scp -P "$port" "public/${host}.ssh_host_key-cert.pub" "manualadmin@${host}:/home/manualadmin/ssh_host_key_cert.pub"
+
+  echo "@cert-authority *.{{ site.url }} $(cat ca_ssh_host_key.pub)" > known_hosts
+  chmod 644 known_hosts
+  scp -P "$port" known_hosts "manualadmin@${host}:/home/manualadmin"
+
+  echo "${host} root password:"
+  ssh -p "$port" -t "manualadmin@${host}" 'sudo /root/homelab-rendered/src/debian/install_files.sh ssh_ca'
+}
+
+configure_server pve2
+configure_server vpn
+configure_server secsvcs
+configure_server websvcs
+configure_server homesvcs
+configure_server devtop
+
+function request_cmd() {
+  echo "Run the following command on your local machine:"
+  echo "$1"
+  read -p "Press any key when done: " -n 1 -r
+  echo "\n"
+}
+
+# SSH clients
+# Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
+echo -n 'Enter SSH CA passphrase: '
+read -r -s CA_PASS
+
+sshpass -p "$CA_PASS" ssh-keygen -s ca_ssh_key -I "pve1" -n "manualadmin,autoadmin" -V +395d /home/root/.ssh/id_ed25519.pub
+chmod 644 /home/root/.ssh/id_ed25519-cert.pub
+
+ssh-keygen -t ed25519 -C "manualadmin@command.{{ site.url }}"
+sshpass -p "$CA_PASS" ssh-keygen -s ca_ssh_key -I "olive_tin" -n "autoadmin" -V +395d id_ed25519.pub
+chmod 644 id_ed25519*.pub
+chmod 600 id_ed25519
+scp id_ed25519* manualadmin@secsvcs:/home/manualadmin
+echo "secsvcs root password:"
+ssh -t manualadmin@secsvcs 'sudo /root/homelab-rendered/src/secsvcs/install_files.sh olive_tin'
+rm id_ed25519*
+
+request_cmd "scp ~/.ssh/id_ed25519.pub manualadmin@pve1:/home/manualadmin/local.id_ed25519.pub"
+sshpass -p "$CA_PASS" ssh-keygen -s ca_ssh_key -I "local" -n "manualadmin,autoadmin" -V +395d /home/manualadmin/local.id_ed25519.pub
+chmod 644 /home/manualadmin/local.id_ed25519-cert.pub
+request_cmd "scp manualadmin@pve1:/home/manualadmin/local.id_ed25519-cert.pub ~/.ssh/id_ed25519-cert.pub"
+rm /home/manualadmin/local.id_ed25519*
+
+echo "Edit ~/.ssh/known_hosts on your local machine to include the following line:"
+echo known_hosts
+
+date -u > /root/ssh/date_ssh_certs.txt

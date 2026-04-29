@@ -5,8 +5,8 @@
 # Moves the certificates into their respective locations and restarts the services.
 # Also configures the PBS cert fingerprint. PVE2 only.
 
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
-
 cd /home/manualadmin
 
 case $1 in

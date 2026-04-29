@@ -21,7 +21,7 @@ Once the network, hosts and VMs are setup, you'll download the repo onto the SBC
 1. pve2 OS install
 1. websvcs VM install, podman setup
 1. VPS VM setup, domain registrar
-1. pve1 host: self-signed certs and secrets
+1. pve1 host: ssh certs, secrets and self-signed certs
 1. VPN setup
 1. pve1 host: acme certs
 1. secsvcs

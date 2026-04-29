@@ -2028,4 +2028,42 @@ identity_providers:
         ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
         ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
         # token_endpoint_auth_signing_alg: 'RS256'
+
+      -
+        # Ref: https://docs.olivetin.app/security/oauth2_authelia.html
+        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
+        ## configuration.
+        client_id: '{% raw %}{{ mustEnv "OLIVE_TIN_OIDC_ID" }}{% endraw %}'
+
+        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
+        client_name: 'Olive Tin'
+
+        ## The client secret is a shared secret between Authelia and the consumer of this client.
+        client_secret: '{% raw %}{{ mustEnv "OLIVE_TIN_OIDC_HASH" }}{% endraw %}'
+
+        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
+        redirect_uris:
+          - 'https://command.{{ site.url }}/oauth/callback'
+
+        ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
+        ## URIs to fetch Request Objects.
+        # request_uris:
+          # - 'https://oidc.example.com:8080/oidc/request-object.jwk'
+
+        ## Audience this client is allowed to request.
+        # audience: []
+
+        ## Scopes this client is allowed to request.
+        scopes:
+          - 'openid'
+          - 'groups'
+          - 'profile'
+
+        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
+        ## authorization policies section.
+        authorization_policy: 'gen_access'
+
+        ## The consent mode controls how consent is obtained.
+        # consent_mode: implicit
+
 ...

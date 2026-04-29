@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# SSH Forced Command Dispatcher
+# This script is triggered by the SSH daemon when the specific automation key is used.
+# It parses $SSH_ORIGINAL_COMMAND to determine which action to take.
+# Usage:
+#   ssh autoadmin@homesvcs CMD
+
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+set -euo pipefail
+
+echo "Request received: '${SSH_ORIGINAL_COMMAND}' from ${SSH_CLIENT}"
+
+case "$SSH_ORIGINAL_COMMAND" in
+  install_keys)
+    sudo /root/homelab-rendered/src/homesvcs/install_files.sh keys
+    ;;
+  install_certs)
+    sudo /root/homelab-rendered/src/homesvcs/install_files.sh certs
+    ;;
+  install_mdns_repeater)
+    sudo /root/homelab-rendered/src/debian/install_svcs.sh mdns_repeater
+    ;;
+  install_node_exporter)
+    sudo /root/homelab-rendered/src/debian/install_svcs.sh node_exporter
+    ;;
+  install_traefik)
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh traefik
+    ;;
+  install_vmagent)
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh vmagent
+    ;;
+  install_mosquitto)
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh mosquitto
+    ;;
+  install_zigbee2mqtt)
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh zigbee2mqtt
+    ;;
+  install_esphome)
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh esphome
+    ;;
+  install_home_assistant)
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh home_assistant
+    ;;
+  install_fluentbit)
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh fluentbit
+    ;;
+  install_all_svcs)
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh traefik
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh vmagent
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh mosquitto
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh zigbee2mqtt
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh esphome
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh home_assistant
+    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh fluentbit
+    ;;
+  *)
+    echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND}'"
+    exit 1
+    ;;
+esac
+exit 0
