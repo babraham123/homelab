@@ -32,7 +32,7 @@ sudo su
 ```bash
 apt update
 apt upgrade
-apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw screen
+apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw screen sshpass
 chsh -s /bin/zsh
 
 # enable firewall
@@ -53,12 +53,14 @@ ufw enable
 	- `vim /etc/ssh/sshd_config`
 ```
 PermitRootLogin no
+TrustedUserCAKeys /etc/ssh/ca_ssh_key.pub
+HostCertificate /etc/ssh/ssh_host_key_cert.pub
 ```
-- Generate SSH key, set correct SUBDOMAIN
+- Generate SSH key
 ```bash
 exit
 cd ~
-ssh-keygen -t ed25519 -C "manualadmin@SUBDOMAIN.{{ site.url }}"
+ssh-keygen -t ed25519 -C "manualadmin@$(hostname).{{ site.url }}"
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 ```
@@ -103,20 +105,38 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```bash
 exit
 # From your local device
-ssh-copy-id manualadmin@SUBDOMAIN
 tools/render_src.sh /tmp/homelab-rendered
 tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
+```
+
+## Automation
+- Create user and setup SSH
+```bash
+ssh manualadmin@SUBDOMAIN
+sudo su
+adduser autoadmin
+usermod -aG sudo autoadmin
+# Install files
+cp "/root/homelab-rendered/src/$(hostname)/dispatcher.sh" /usr/local/bin
+cp /root/homelab-rendered/src/debian/autoadmin_restrictions.conf /etc/ssh/sshd_config.d
+cp "/root/homelab-rendered/src/$(hostname)/sudoers" /etc/sudoers.d/dispatcher
+su - autoadmin
+# Create and add key
+ssh-keygen -t ed25519 -C "autoadmin@$(hostname).{{ site.url }}"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+exit
+systemctl restart sshd
 ```
 
 ## Backups
 - Setup a destination
 ```bash
-sudo su
 mkdir /root/backups
 chmod 700 /root/backups
 ```
 
-## Upgrade to Trixie
+## Upgrade to Trixie (for reference)
 ```bash
 sudo su
 screen
@@ -162,4 +182,4 @@ apt modernize-sources
 apt update
 apt upgrade
 ```
-- If the interface name changes you'll need to recreate your ufw rules
+- If the interface name changes, recreate the ufw rules

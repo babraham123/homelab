@@ -1,0 +1,39 @@
+# /etc/containers/systemd/olive_tin.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: web UI for running configured bash commands"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/jamesread/olivetin:latest-3k
+ContainerName=olive_tin
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=command.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.14
+DNSSearch={{ site.url }}
+# port 1337
+
+# Maps to olivetin internally
+User=1000
+
+Secret=olive_tin_oidc_id,type=env,target=OLIVE_TIN_OIDC_ID
+Secret=olive_tin_oidc_secret,type=env,target=OLIVE_TIN_OIDC_SECRET
+
+Volume=/etc/opt/olive_tin/config.yaml:/etc/OliveTin/config.yaml:ro
+Volume=/etc/opt/olive_tin/ssh:/home/olivetin/.ssh:ro
+Volume=/etc/ssh:/etc/ssh:ro
+Volume=/etc/localtime:/etc/localtime:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

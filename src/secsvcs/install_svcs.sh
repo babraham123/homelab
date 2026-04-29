@@ -95,6 +95,13 @@ case $1 in
     # cp vault/vault.container /etc/containers/systemd
     exit 0
     ;;
+  olive_tin)
+    # ssh keys should already be in place
+    ls /etc/opt/olive_tin/ssh/id_ed25519-cert.pub
+    cp olive_tin/config.yaml /etc/opt/olive_tin
+    chown -R 1000:1000 /etc/opt/olive_tin
+    cp olive_tin/olive_tin.container /etc/containers/systemd
+    ;;
   fluentbit)
     mkdir -p /etc/opt/fluentbit
     cp secsvcs/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2

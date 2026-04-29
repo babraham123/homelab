@@ -6,8 +6,8 @@
 # type = keys
 # Moves the SSL keys into their respective locations. secsvcs only.
 
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
-
 cd /home/manualadmin
 
 case $1 in
@@ -51,6 +51,11 @@ case $1 in
     # https://github.com/docker-library/postgres/blob/master/14/alpine3.19/Dockerfile
 
     rm -rf ./*.pem
+    ;;
+  olive_tin)
+    mkdir -p /etc/opt/olive_tin/ssh
+    ls id_ed25519-cert.pub
+    mv ./id_ed25519* /etc/opt/olive_tin/ssh
     ;;
   *)
     echo "error: unknown file type: $1" >&2

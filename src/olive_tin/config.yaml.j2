@@ -1,8 +1,4 @@
 # /etc/opt/olive-tin/config.yaml
-# Ref:
-# Icons: https://docs.olivetin.app/icons.html
-#   https://iconify.design/
-# Actions: https://docs.olivetin.app/action-container-control.html
 ---
 # Listen on all addresses available, port 1337
 listenAddressSingleHTTPFrontend: 0.0.0.0:1337
@@ -10,11 +6,174 @@ listenAddressSingleHTTPFrontend: 0.0.0.0:1337
 # Choose from INFO (default), WARN and DEBUG
 logLevel: "INFO"
 
-# Actions (buttons) to show up on the WebUI:
-# TODO: convert to autoadmin
-actions:
-  - title: Start Gaming Server
-    icon: <iconify-icon icon="maki:gaming"></iconify-icon>
-    popupOnStart: default
-    shell: ssh root@pve2.{{ site.url }} 'qm start $(/usr/local/bin/get_vm_id.sh gaming)'
+# Ref: https://docs.olivetin.app/advanced_configuration/prometheus.html
+# prometheus:
+#   enabled: true
+#   defaultGoMetrics: false
+
+# Ref: https://docs.olivetin.app/security/oauth2_authelia.html
+authRequireGuestsToLogin: true
+authOAuth2RedirectURL: https://command.{{ site.url }}/oauth/callback
+authOAuth2Providers:
+  authelia:
+    name: authelia
+    title: Authelia
+    clientID: {% raw %}${{ OLIVE_TIN_OIDC_ID }}{% endraw %}
+    clientSecret: {% raw %}${{ OLIVE_TIN_OIDC_SECRET }}{% endraw %}
+    authURL: https://auth.{{ site.url }}/api/oidc/authorization
+    tokenURL: https://auth.{{ site.url }}/api/oidc/token
+    whoamiUrl: https://auth.{{ site.url }}/api/oidc/userinfo
+    scopes:
+      - openid
+      - profile
+      - groups
+    usernameField: preferred_username
+    userGroupField: groups
+    icon: <iconify-icon icon="simple-icons:authelia"></iconify-icon>
+
+accessControlLists:
+  - name: admins
+    matchUsergroups:
+      - command_admin
+    permissions:
+      view: true
+      exec: true
+      logs: true
+    addToEveryAction: true
+
+defaultPopupOnStart: execution-dialog
+
+# Ref: https://docs.olivetin.app/action_customization/intro.html
+# Icons: https://docs.olivetin.app/action_customization/icons.html, https://iconify.design/
+
+dashboards:
+  - title: Main Dashboard
+    contents:
+      - title: General
+        type: fieldset
+        contents:
+          - inlineAction:
+              title: Date
+              shell: date
+              icon: date
+              id: date
+      - title: Gaming
+        type: fieldset
+        contents:
+          - inlineAction:
+              title: Start Gaming Server
+              icon: <iconify-icon icon="maki:gaming"></iconify-icon>
+              shell: ssh autoadmin@pve2 start_gaming
+              id: start_gaming
+              maxConcurrent: 1
+          - inlineAction:
+              title: Stop Gaming Server
+              icon: <iconify-icon icon="maki:gaming"></iconify-icon>
+              shell: ssh autoadmin@pve2 stop_gaming
+              id: stop_gaming
+              maxConcurrent: 1
+
+dashboards:
+  - title: All Commands
+    contents:
+      - title: secsvcs
+        type: fieldset
+        contents:
+{%- for cmd in secsvcs_commands -%}
+          - inlineAction:
+              title: secsvcs {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs {{ cmd }}
+              id: secsvcs_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+      - title: homesvcs
+        type: fieldset
+        contents:
+{%- for cmd in homesvcs_commands -%}
+          - inlineAction:
+              title: homesvcs {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs {{ cmd }}
+              id: homesvcs_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+      - title: websvcs
+        type: fieldset
+        contents:
+{%- for cmd in websvcs_commands -%}
+          - inlineAction:
+              title: websvcs {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs {{ cmd }}
+              id: websvcs_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+      - title: pve1
+        type: fieldset
+        contents:
+{%- for cmd in pve1_commands -%}
+          - inlineAction:
+              title: pve1 {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 {{ cmd }}
+              id: pve1_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+      - title: pve2
+        type: fieldset
+        contents:
+{%- for cmd in pve2_commands -%}
+          - inlineAction:
+              title: pve2 {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 {{ cmd }}
+              id: pve2_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+      - title: vpn
+        type: fieldset
+        contents:
+{%- for cmd in vpn_commands -%}
+          - inlineAction:
+              title: vpn {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn {{ cmd }}
+              id: vpn_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+      - title: router
+        type: fieldset
+        contents:
+{%- for cmd in pfsense_commands -%}
+          - inlineAction:
+              title: router {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:router"></iconify-icon>
+              shell: ssh autoadmin@router {{ cmd }}
+              id: router_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+      - title: gaming
+        type: fieldset
+        contents:
+{%- for cmd in gaming_commands -%}
+          - inlineAction:
+              title: gaming {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:videogame-asset"></iconify-icon>
+              shell: ssh autoadmin@gaming {{ cmd }}
+              id: gaming_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+      - title: devtop
+        type: fieldset
+        contents:
+{%- for cmd in devtop_commands -%}
+          - inlineAction:
+              title: devtop {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
+              shell: ssh autoadmin@devtop {{ cmd }}
+              id: devtop_{{ cmd }}
+              maxConcurrent: 1
+{%- endfor -%}
+
 ...

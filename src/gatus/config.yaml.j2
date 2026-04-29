@@ -94,6 +94,10 @@ endpoints:
     <<: *internal
     url: "https://push.{{ site.url }}/v1/health"
 
+  - name: olive_tin
+    <<: *internal
+    url: "https://command.{{ site.url }}"
+
   - name: home assistant
     <<: *internal
     url: "https://home.{{ site.url }}"
