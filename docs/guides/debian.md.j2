@@ -104,7 +104,7 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 - Install the homelab source code
 ```bash
 exit
-# From your local device
+# From your local machine
 tools/render_src.sh /tmp/homelab-rendered
 tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 ```
@@ -118,7 +118,7 @@ adduser autoadmin
 usermod -aG sudo autoadmin
 # Install files
 cp "/root/homelab-rendered/src/$(hostname)/dispatcher.sh" /usr/local/bin
-cp /root/homelab-rendered/src/debian/autoadmin_restrictions.conf /etc/ssh/sshd_config.d
+cp /root/homelab-rendered/src/debian/autoadmin_sshd.conf /etc/ssh/sshd_config.d
 cp "/root/homelab-rendered/src/$(hostname)/sudoers" /etc/sudoers.d/dispatcher
 su - autoadmin
 # Create and add key

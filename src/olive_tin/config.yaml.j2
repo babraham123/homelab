@@ -63,14 +63,14 @@ dashboards:
           - inlineAction:
               title: Start Gaming Server
               icon: <iconify-icon icon="maki:gaming"></iconify-icon>
-              shell: ssh autoadmin@pve2 start_gaming
-              id: start_gaming
+              shell: ssh autoadmin@router start_pve2; sleep 10; ssh autoadmin@pve2 start_gaming; sleep 10; ssh -l autoadmin gaming Homelab_StartSunshine
+              id: main_start_gaming
               maxConcurrent: 1
           - inlineAction:
               title: Stop Gaming Server
               icon: <iconify-icon icon="maki:gaming"></iconify-icon>
               shell: ssh autoadmin@pve2 stop_gaming
-              id: stop_gaming
+              id: main_stop_gaming
               maxConcurrent: 1
 
 dashboards:
@@ -145,7 +145,7 @@ dashboards:
       - title: router
         type: fieldset
         contents:
-{%- for cmd in pfsense_commands -%}
+{%- for cmd in router_commands -%}
           - inlineAction:
               title: router {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:router"></iconify-icon>
@@ -160,7 +160,7 @@ dashboards:
           - inlineAction:
               title: gaming {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:videogame-asset"></iconify-icon>
-              shell: ssh autoadmin@gaming {{ cmd }}
+              shell: ssh -l autoadmin gaming {{ cmd }}
               id: gaming_{{ cmd }}
               maxConcurrent: 1
 {%- endfor -%}

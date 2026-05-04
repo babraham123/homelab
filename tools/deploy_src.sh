@@ -16,5 +16,7 @@ tools/upload_src.sh homesvcs "$project_dir" || true
 tools/upload_src.sh pve2 "$project_dir" || true
 tools/upload_src.sh websvcs "$project_dir" || true
 tools/upload_src.sh vpn "$project_dir" || true
+tools/upload_src.sh router "$project_dir" || true
+tools/upload_src.sh gaming "$project_dir" || true
 
 rm -rf "$project_dir"

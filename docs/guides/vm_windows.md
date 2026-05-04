@@ -36,12 +36,18 @@ winget install -e -h --accept-source-agreements --accept-package-agreements --id
 winget install -e -h --accept-source-agreements --accept-package-agreements --id PuTTY.PuTTY
 winget install -e -h --accept-source-agreements --accept-package-agreements --id Valve.Steam
 ```
+
+## SSH
 - Install SSH ([src](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell))
 ```powershell
 Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 Start-Service sshd
 Set-Service -Name sshd -StartupType 'Automatic'
+# Use powershell for the default shell
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name "DefaultShell" -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
+# Grant administrator access if available
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "LocalAccountTokenFilterPolicy" -Value 1 -PropertyType DWord -Force
 ```
 - Shutdown VM
 
@@ -52,13 +58,32 @@ Set-Service -Name sshd -StartupType 'Automatic'
 - Install Geforce Experience
 	- Open NVIDIA Control Panel, test 3D acceleration
 
-## SSH
-- On local computer, update ssh config
-  - `vi ~/.ssh/config`
-- Example commands
-	- `ssh -l "admin" gaming.{{ site.url }}`
-```Powershell
-# TODO: add more cmds
-shutdown /r
+## Automation
+Create a mechanism to programmatic execute commands remotely. These commands are specific to the gaming VM but they can be generalized.
+- Start the gaming VM
+- Install the homelab source code
+```bash
+# From your local machine
+tools/render_src.sh /tmp/homelab-rendered
+tools/upload_src.sh gaming /tmp/homelab-rendered
+ssh -l admin gaming
 ```
-	- `scp file.txt gaming:'"/c:/Users/admin/Documents/file.txt"'`
+- Create autoadmin user, enable key based access
+```powershell
+# Create user
+$Password = Read-Host -AsSecureString "Enter the new password"
+New-LocalUser -Name "autoadmin" -Password $Password -FullName "autoadmin" -Description "low privilege user to remotely execute commands" -AccountNeverExpires -PasswordNeverExpires
+# Install files
+Copy-Item -Path "C:\Users\admin\gaming-src\autoadmin_sshd.conf" -Destination "C:\ProgramData\ssh\sshd_config.d"
+icacls "C:\ProgramData\ssh\sshd_config.d\autoadmin_sshd.conf" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"
+
+$Path = "C:\Users\autoadmin\Dispatcher.ps1"
+Copy-Item -Path "C:\Users\admin\gaming-src\Dispatcher.ps1" -Destination $Path
+$Acl = Get-Acl -Path $Path
+$Acl.SetOwner(New-Object System.Security.Principal.NTAccount("autoadmin"))
+Set-Acl -Path $Path -AclObject $Acl
+
+# Install dispatcher commands
+C:\Users\admin\gaming-src\InstallAutomation.ps1
+exit
+```

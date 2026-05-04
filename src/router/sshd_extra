@@ -1,0 +1,12 @@
+TrustedUserCAKeys /etc/ssh/ca_ssh_key.pub
+HostCertificate /etc/ssh/ssh_host_key_cert.pub
+
+Match User autoadmin
+    # Force the dispatcher script for every connection
+    ForceCommand /usr/local/bin/dispatcher.sh
+    # Disable all tunneling and interactive features
+    AllowTcpForwarding no
+    X11Forwarding no
+    PermitTTY no
+    AgentForwarding no
+    PermitTunnel no

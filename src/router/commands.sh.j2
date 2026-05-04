@@ -1,0 +1,20 @@
+#!/bin/sh
+# Usage:
+#   /usr/local/bin/commands.sh CMD
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/bin
+set -eu
+
+case "$1" in
+  install_certs)
+    php /root/pfsense-import-certificate.php /root/router.cert.pem /root/router.key.pem
+    ;;
+  start_pve2)
+    mac=$(cat /root/pve2_mac_address.txt)
+    wol -i {{ pve2.subnet }}.1 "$mac"
+    ;;
+  *)
+    echo "Unauthorized command: $1" >&2
+    exit 1
+    ;;
+esac

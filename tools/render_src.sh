@@ -32,6 +32,16 @@ cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
   tools/parse_routes.sh homesvcs
   # websvcs doesn't need to be parsed because it is the default route
   tools/parse_uptime_urls.sh src/gatus/config.yaml.j2
+
+  tools/parse_dispatcher.sh pve1
+  tools/parse_dispatcher.sh pve2
+  tools/parse_dispatcher.sh secsvcs
+  tools/parse_dispatcher.sh homesvcs
+  tools/parse_dispatcher.sh websvcs
+  tools/parse_dispatcher.sh devtop
+  tools/parse_dispatcher.sh router
+  tools/parse_dispatcher.sh gaming
+
   echo -e "...\n"
 } > all_vars.yml
 

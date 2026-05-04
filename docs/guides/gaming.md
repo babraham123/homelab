@@ -2,6 +2,8 @@
 Guide to stream games from the windows VM to my living room TV.
 First stand up the [Windows VM](./vm_windows.md)
 
+## Streaming
+
 ### Windows streaming server and game platforms
 - Install [ViGEmBus](https://github.com/ViGEm/ViGEmBus)
 - Install [Playnite](https://playnite.link/)

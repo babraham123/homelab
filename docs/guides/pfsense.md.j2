@@ -166,9 +166,9 @@ Improve latency when under heavy load
 For local-only overrides of existing routes
 - Go to Services >> DNS Resolver
 - Set "System Domain Local Zone Type" to "Redirect"
-- Paste `unbound.conf` into "Custom options"
+- Paste `src/dns/unbound.conf` into "Custom options"
 
-### Automations
+### Certificate
 - Setup cert import
 ```bash
 wget https://raw.githubusercontent.com/stompro/pfsense-import-certificate/master/pfsense-import-certificate.php
@@ -250,15 +250,46 @@ Do the following sections from the [proxmox guide](./proxmox.md):
 - Networking
 - Monitoring
 
+## Automation
+Create a mechanism to programmatic execute commands remotely
+- Install the homelab source code
+```bash
+# From your local machine
+tools/render_src.sh /tmp/homelab-rendered
+tools/upload_src.sh router /tmp/homelab-rendered
+```
+- Create autoadmin user
+  - Go to System >> User Manager >> Add
+  - Username = autoadmin, Password
+  - Add Privileges
+    - User - System: Shell account access
+    - User - Config: Deny Config Write
+- Enable key based access
+```bash
+ssh admin@router
+pkg install sudo
+
+cp /root/router-src/sshd_extra /etc
+cp /root/router-src/commands.sh /usr/local/bin
+cp /root/router-src/sudoers /usr/local/etc/sudoers.d/dispatcher
+cp /root/router-src/dispatcher.sh /usr/local/bin
+chown autoadmin /usr/local/bin/dispatcher.sh
+```
+
 ## Monitoring
 Upload to Victoria Metrics:
 - Get the metrics admin password from secsvcs
-  `/usr/local/bin/get_secret.sh victoriametrics_admin_password`
+```bash
+ssh manualadmin@secsvcs
+sudo /usr/local/bin/get_secret.sh victoriametrics_admin_password
+exit
+```
 - Install the plugins
 ```bash
-cd src/pfsense/plugins
-chmod 555 telegraf_*
-scp telegraf_* admin@router:/usr/local/bin
+ssh admin@router
+cd /root/router-src/plugins
+cp telegraf_* /usr/local/bin
+chmod 555 /usr/local/bin/telegraf_*
 ```
 - Go to System >> Package Manager
 - Install the Telegraf package
