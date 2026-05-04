@@ -1,0 +1,2 @@
+# Allow autoadmin to run these specific commands without a password
+autoadmin ALL=(root) NOPASSWD: {{ router_sudo_cmds | join(', ') }}

@@ -17,3 +17,12 @@ qm list
 qm set 100 --hookscript local:snippets/hookscript.pl
 qm set 102 --hookscript local:snippets/hookscript.pl
 ```
+
+## Automation
+
+- Programmatically send WoL packets from the router
+```bash
+ip -br link show | grep -E '^(en|eth)' | awk '{print $3}' > pve2_mac_address.txt
+scp pve2_mac_address.txt admin@router:/root
+rm pve2_mac_address.txt
+```

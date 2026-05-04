@@ -8,6 +8,8 @@ set -eo pipefail
 now=$(date +%s)
 last_update=$(date -r /root/ssh/date_ssh_certs.txt +%s || echo 0)
 ssh_age_s=$(( now - last_update ))
+last_update=$(date -r /root/ssh/date_ssh_certs_windows.txt +%s || echo 0)
+ssh_windows_age_s=$(( now - last_update ))
 last_update=$(date -r /root/ca/date_self_signed_certs.txt +%s || echo 0)
 self_signed_age_s=$(( now - last_update ))
 last_update=$(date -r /root/acme/date_acme_certs.txt +%s || echo 0)
@@ -21,6 +23,14 @@ mime='MIME-Version: 1.0\nContent-Type: text/html\n'
 if (( ssh_age_s > 31536000 )); then
   subject='Reminder: renew your SSH certificates'
   body='<h1>Renew your SSH certs!</h1>\n<p>Use this command on the PVE1 host:</p>\n<code>sudo /root/homelab-rendered/src/certificates/ssh_cert_gen.sh</code>'
+  echo -e "To: $recipient\nFrom: $from\nSubject: $subject\n$mime\n\n$body" | msmtp -t
+  sleep 10
+fi
+
+# 1 year
+if (( ssh_windows_age_s > 31536000 )); then
+  subject='Reminder: renew your Windows SSH certificates'
+  body='<h1>Renew your Windows SSH certs!</h1>\n<p>Use this command on the PVE1 host:</p>\n<code>sudo /root/homelab-rendered/src/certificates/ssh_cert_gen_windows.sh</code>'
   echo -e "To: $recipient\nFrom: $from\nSubject: $subject\n$mime\n\n$body" | msmtp -t
   sleep 10
 fi

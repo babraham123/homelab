@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # SSH Forced Command Dispatcher
 # This script is triggered by the SSH daemon when the specific automation key is used.
 # It parses $SSH_ORIGINAL_COMMAND to determine which action to take.
@@ -17,15 +17,19 @@ case "$SSH_ORIGINAL_COMMAND" in
   install_vm_watchdog)
     sudo /root/homelab-rendered/src/debian/install_svcs.sh vm_watchdog
     ;;
-  start_gaming)
+  start_gaming_vm)
     sudo /root/homelab-rendered/src/pve2/vm_commands.sh start_gaming
     ;;
-  stop_gaming)
+  stop_gaming_vm)
     sudo /root/homelab-rendered/src/pve2/vm_commands.sh stop_gaming
+    ;;
+  shutdown)
+    sudo shutdown -h now
     ;;
   *)
     echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND}'"
     exit 1
     ;;
 esac
+echo "Completed command"
 exit 0

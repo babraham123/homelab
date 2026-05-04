@@ -1,6 +1,0 @@
-# Allow autoadmin to run these specific commands without a password
-{%- set groups = pfsense_sudo_cmds | groupby(0) -%}
-autoadmin ALL=(root) NOPASSWD: {%- for cmd_path, items in groups -%}
-  {{ cmd_path }} ({{ items | map(attribute=1) | join('|') }})
-  {%- if not loop.last %}, {% endif -%}
-{%- endfor -%}

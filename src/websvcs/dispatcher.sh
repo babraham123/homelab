@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # SSH Forced Command Dispatcher
 # This script is triggered by the SSH daemon when the specific automation key is used.
 # It parses $SSH_ORIGINAL_COMMAND to determine which action to take.
@@ -86,4 +86,5 @@ case "$SSH_ORIGINAL_COMMAND" in
     exit 1
     ;;
 esac
+echo "Completed command"
 exit 0

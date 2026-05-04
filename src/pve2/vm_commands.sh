@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Usage:
 #   src/pve2/vm_commands.sh CMD
 
@@ -16,7 +16,7 @@ case $1 in
     qm start "$vm_id"
     ;;
   *)
-    echo "error: unknown file type: $1" >&2
+    echo "error: unknown command: $1" >&2
     exit 1
     ;;
 esac
