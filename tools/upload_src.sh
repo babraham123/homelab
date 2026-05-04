@@ -22,11 +22,8 @@ if [[ "$host" == "vpn" ]]; then
 fi
 
 if [[ "$host" == "router" ]]; then
-  # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
-  echo -n "router admin password: "
-  read -r -s PF_PASS
-  sshpass -p "$PF_PASS" ssh -t admin@router 'rm -rf /root/router-src'
-  sshpass -p "$PF_PASS" scp -qr -o LogLevel=QUIET "${project_dir}/src/router" "admin@router.${url}:/root/router-src"
+  echo "router admin password:"
+  scp -qr -o LogLevel=QUIET "${project_dir}/src/router" "admin@router.${url}:/root/router-src"
   exit 0
 fi
 

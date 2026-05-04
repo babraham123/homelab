@@ -48,16 +48,16 @@ configure_server devtop
 # router
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
 echo -n 'Enter router admin password: '
-read -r -s PF_PASS
+read -r -s SSHPASS
 
-sshpass -p "$PF_PASS" scp ca_ssh_key.pub admin@router:/etc/ssh
-sshpass -p "$PF_PASS" scp admin@router:/etc/ssh/ssh_host_ed25519_key.pub public/router.ssh_host_key.pub
+sshpass -e scp ca_ssh_key.pub admin@router:/etc/ssh
+sshpass -e scp admin@router:/etc/ssh/ssh_host_ed25519_key.pub public/router.ssh_host_key.pub
 addrs="router.{{ site.url }},{{ lan.subnet }}.1,{{ pve1.subnet }}.1,{{ pve2.subnet }}.1"
 ssh-keygen -s ca_ssh_host_key -I router -h -n "$addrs" -V +395d public/router.ssh_host_key.pub
 chmod 444 public/router.ssh_host_key-cert.pub
-sshpass -p "$PF_PASS" scp public/router.ssh_host_key-cert.pub admin@router:/etc/ssh/ssh_host_key_cert.pub
-sshpass -p "$PF_PASS" scp known_hosts admin@router:/etc/ssh/ssh_known_hosts
-
+sshpass -e scp public/router.ssh_host_key-cert.pub admin@router:/etc/ssh/ssh_host_key_cert.pub
+sshpass -e scp known_hosts admin@router:/etc/ssh/ssh_known_hosts
+unset SSHPASS
 
 function request_cmd() {
   echo "Run the following command on your local machine:"
@@ -69,15 +69,15 @@ function request_cmd() {
 # SSH clients
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
 echo -n 'Enter SSH CA passphrase: '
-read -r -s CA_PASS
+read -r -s SSHPASS
 
 # pve1
-sshpass -p "$CA_PASS" ssh-keygen -s ca_ssh_key -I "pve1" -n "manualadmin,autoadmin" -V +395d /home/root/.ssh/id_ed25519.pub
+sshpass -e ssh-keygen -s ca_ssh_key -I "pve1" -n "manualadmin,autoadmin" -V +395d /home/root/.ssh/id_ed25519.pub
 chmod 644 /home/root/.ssh/id_ed25519-cert.pub
 
 # Olive Tin
 ssh-keygen -t ed25519 -C "manualadmin@command.{{ site.url }}"
-sshpass -p "$CA_PASS" ssh-keygen -s ca_ssh_key -I "olive_tin" -n "autoadmin" -V +395d id_ed25519.pub
+sshpass -e ssh-keygen -s ca_ssh_key -I "olive_tin" -n "autoadmin" -V +395d id_ed25519.pub
 chmod 644 id_ed25519*.pub
 chmod 600 id_ed25519
 scp id_ed25519* manualadmin@secsvcs:/home/manualadmin
@@ -87,7 +87,7 @@ rm id_ed25519*
 
 # local machine
 request_cmd "scp ~/.ssh/id_ed25519.pub manualadmin@pve1:/home/manualadmin/local.id_ed25519.pub"
-sshpass -p "$CA_PASS" ssh-keygen -s ca_ssh_key -I "local" -n "manualadmin,autoadmin" -V +395d /home/manualadmin/local.id_ed25519.pub
+sshpass -e ssh-keygen -s ca_ssh_key -I "local" -n "manualadmin,autoadmin" -V +395d /home/manualadmin/local.id_ed25519.pub
 chmod 644 /home/manualadmin/local.id_ed25519-cert.pub
 request_cmd "scp manualadmin@pve1:/home/manualadmin/local.id_ed25519-cert.pub ~/.ssh/id_ed25519-cert.pub"
 rm /home/manualadmin/local.id_ed25519*

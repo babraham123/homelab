@@ -14,19 +14,19 @@ chmod 644 known_hosts
 
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
 echo -n 'Enter gaming admin password: '
-read -r -s PASS
+read -r -s SSHPASS
 
-sshpass -p "$PASS" scp ca_ssh_key.pub admin@gaming:'"/c:/ProgramData/ssh"'
+sshpass -e scp ca_ssh_key.pub admin@gaming:'"/c:/ProgramData/ssh"'
 
-sshpass -p "$PASS" scp admin@gaming:'"/c:/ProgramData/ssh/ssh_host_ed25519_key.pub"' public/gaming.ssh_host_key.pub
+sshpass -e scp admin@gaming:'"/c:/ProgramData/ssh/ssh_host_ed25519_key.pub"' public/gaming.ssh_host_key.pub
 ssh-keygen -s ca_ssh_host_key -I gaming -h -n "gaming.{{ site.url }},{{ gaming.ip }}" -V +395d public/gaming.ssh_host_key.pub
 chmod 444 public/gaming.ssh_host_key-cert.pub
-sshpass -p "$PASS" scp public/gaming.ssh_host_key-cert.pub admin@gaming:'"/c:/ProgramData/ssh/ssh_host_key_cert.pub"'
-sshpass -p "$PASS" scp known_hosts admin@gaming:'"/c:/ProgramData/ssh/ssh_known_hosts"'
+sshpass -e scp public/gaming.ssh_host_key-cert.pub admin@gaming:'"/c:/ProgramData/ssh/ssh_host_key_cert.pub"'
+sshpass -e scp known_hosts admin@gaming:'"/c:/ProgramData/ssh/ssh_known_hosts"'
 
-sshpass -p "$PASS" ssh -l "admin" gaming 'icacls "C:\ProgramData\ssh\ca_ssh_key.pub" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
-sshpass -p "$PASS" ssh -l "admin" gaming 'icacls "C:\ProgramData\ssh\ssh_host_key_cert.pub" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
-sshpass -p "$PASS" ssh -l "admin" gaming 'icacls "C:\ProgramData\ssh\ssh_known_hosts" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
+sshpass -e ssh -l "admin" gaming 'icacls "C:\ProgramData\ssh\ca_ssh_key.pub" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
+sshpass -e ssh -l "admin" gaming 'icacls "C:\ProgramData\ssh\ssh_host_key_cert.pub" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
+sshpass -e ssh -l "admin" gaming 'icacls "C:\ProgramData\ssh\ssh_known_hosts" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
 
 date -u > /root/ssh/date_ssh_certs_windows.txt
 # TODO: validate file locations
