@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Extracts sudo commands from the dispatcher scripts. Outputs as yml.
 # Run from root of the project directory.
 # Usage:

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Prefixes the service's description with "Homelab: "
 # Usage:
 #   src/debian/add_homelab_tag.sh SYSTEMD_FILE.service

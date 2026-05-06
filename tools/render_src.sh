@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Renders the source code into the given folder. Fills in personal details from vars.yml.
 # Run from root of the project directory.
 # Usage:
@@ -38,6 +38,7 @@ cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
   tools/parse_dispatcher.sh secsvcs
   tools/parse_dispatcher.sh homesvcs
   tools/parse_dispatcher.sh websvcs
+  tools/parse_dispatcher.sh vpn
   tools/parse_dispatcher.sh devtop
   tools/parse_dispatcher.sh router
   tools/parse_dispatcher.sh gaming

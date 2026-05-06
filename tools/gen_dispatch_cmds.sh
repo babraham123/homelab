@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Extracts services from install_svcs.sh for dispatcher.sh.
 # Run from root of the project directory.
 # Usage:

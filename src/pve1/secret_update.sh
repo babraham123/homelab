@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Updates and installs custom secrets.
 # Usage:
 #   /root/homelab-rendered/src/pve1/secret_update.sh SUBDOMAIN

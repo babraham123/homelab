@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Renders the source code and copies it to the homelab servers.
 # Run from root of the project directory.
 # Usage:

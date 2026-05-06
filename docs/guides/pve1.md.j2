@@ -40,7 +40,8 @@ ssh-keygen -t ed25519 -f ca_ssh_host_key -C "SSH Host CA for {{ site.url }}"
 chmod 444 ca_ssh_host_key.pub
 chmod 400 ca_ssh_host_key
 
-# Wait until all of the VMs have been created
+# Wait until all of the VMs have been created. On the first run it will
+# ask you for the root password of various hosts.
 /root/homelab-rendered/src/certificates/ssh_cert_gen.sh
 ```
 
@@ -154,13 +155,14 @@ openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pe
 cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
 chmod 444 intermediate/certs/ca-chain.cert.pem
 
-# TODO: convert to autoadmin
-cp intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
-/root/homelab-rendered/src/debian/copy_to.sh pve2 intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
-/root/homelab-rendered/src/debian/copy_to.sh vpn intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
-/root/homelab-rendered/src/debian/copy_to.sh secsvcs intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
-/root/homelab-rendered/src/debian/copy_to.sh websvcs intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
-/root/homelab-rendered/src/debian/copy_to.sh homesvcs intermediate/certs/ca-chain.cert.pem /etc/ssl/certs/{{ site.url }}.ca_chain.cert.pem
+function upload() { scp intermediate/certs/ca-chain.cert.pem "autoadmin@${1}:/home/autoadmin"; ssh "autoadmin@${1}" "install_ca" }
+upload pve1
+upload pve2
+upload vpn
+upload secsvcs
+upload homesvcs
+upload websvcs
+upload devtop
 ```
 
 - Example cert, normally done via gen script

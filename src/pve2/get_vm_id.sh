@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Prints out the proxmox VM ID if given it's name.
 # Usage:
 #   /usr/local/bin/get_vm_id.sh VM_NAME

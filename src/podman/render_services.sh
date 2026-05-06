@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Renders the given file in the same directory as it's template (FILENAME.j2).
 # Includes all configured "Homelab" systemd services as "homelab_services".
 # Usage:

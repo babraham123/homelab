@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Extracts unique subdomains from the *svcs traefik routing config. Outputs as yml.
 # Run from root of the project directory.
 # Usage:

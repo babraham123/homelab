@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Renders the given file in the same directory as it's template (FILENAME.j2).
 # Includes the given secrets as env vars while rendering.
 # The rendered file will be owned by root.

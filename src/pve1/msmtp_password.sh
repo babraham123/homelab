@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Prints out the msmtp password. Needed because msmtprc doesn't support a bash shell.
 # Usage:
 #   /usr/local/bin/msmtp_password.sh

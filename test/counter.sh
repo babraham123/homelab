@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Simple counter to test signal handling.
 
 set -euo pipefail

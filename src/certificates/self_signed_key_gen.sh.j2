@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Generate SSL keys and distribute them to the secsvcs, websvcs and homesvcs servers.
 # Usage:
 #   /root/homelab-rendered/src/certificates/self_signed_key_gen.sh
@@ -17,49 +17,43 @@ chmod 400 private/wildcard.{{ site.url }}.key.pem
 
 openssl genrsa -out private/ldap.{{ site.url }}.key.pem 2048
 chmod 400 private/ldap.{{ site.url }}.key.pem
-scp private/ldap.{{ site.url }}.key.pem manualadmin@secsvcs:/home/manualadmin
+scp private/ldap.{{ site.url }}.key.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl genrsa -out private/auth.{{ site.url }}.key.pem 2048
 chmod 400 private/auth.{{ site.url }}.key.pem
-scp private/auth.{{ site.url }}.key.pem manualadmin@secsvcs:/home/manualadmin
+scp private/auth.{{ site.url }}.key.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl genrsa -out private/pgdb.{{ site.url }}.key.pem 2048
 chmod 400 private/pgdb.{{ site.url }}.key.pem
-scp private/pgdb.{{ site.url }}.key.pem manualadmin@secsvcs:/home/manualadmin
+scp private/pgdb.{{ site.url }}.key.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl genrsa -out private/secproxy.{{ site.url }}.key.pem 2048
 chmod 400 private/secproxy.{{ site.url }}.key.pem
-scp private/secproxy.{{ site.url }}.key.pem manualadmin@secsvcs:/home/manualadmin
+scp private/secproxy.{{ site.url }}.key.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl genrsa -out private/webproxy.{{ site.url }}.key.pem 2048
 chmod 400 private/webproxy.{{ site.url }}.key.pem
-scp private/webproxy.{{ site.url }}.key.pem manualadmin@websvcs:/home/manualadmin
+scp private/webproxy.{{ site.url }}.key.pem autoadmin@websvcs:/home/autoadmin
 
 openssl genrsa -out private/homeproxy.{{ site.url }}.key.pem 2048
 chmod 400 private/homeproxy.{{ site.url }}.key.pem
-scp private/homeproxy.{{ site.url }}.key.pem manualadmin@homesvcs:/home/manualadmin
+scp private/homeproxy.{{ site.url }}.key.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl genrsa -out private/mqtt.{{ site.url }}.key.pem 2048
 chmod 400 private/mqtt.{{ site.url }}.key.pem
-scp private/mqtt.{{ site.url }}.key.pem manualadmin@homesvcs:/home/manualadmin
+scp private/mqtt.{{ site.url }}.key.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl genrsa -out private/zigbee.{{ site.url }}.key.pem 2048
 chmod 400 private/zigbee.{{ site.url }}.key.pem
-scp private/zigbee.{{ site.url }}.key.pem manualadmin@homesvcs:/home/manualadmin
+scp private/zigbee.{{ site.url }}.key.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl genrsa -out private/home.{{ site.url }}.key.pem 2048
 chmod 400 private/home.{{ site.url }}.key.pem
-scp private/home.{{ site.url }}.key.pem manualadmin@homesvcs:/home/manualadmin
+scp private/home.{{ site.url }}.key.pem autoadmin@homesvcs:/home/autoadmin
 
-# TODO: convert to autoadmin
-echo "secsvcs server password:"
-ssh -t manualadmin@secsvcs 'sudo /root/homelab-rendered/src/secsvcs/install_files.sh keys'
-
-echo "websvcs server password:"
-ssh -t manualadmin@websvcs 'sudo /root/homelab-rendered/src/websvcs/install_files.sh keys'
-
-echo "homesvcs server password:"
-ssh -t manualadmin@homesvcs 'sudo /root/homelab-rendered/src/homesvcs/install_files.sh keys'
+ssh autoadmin@secsvcs "install_keys"
+ssh autoadmin@websvcs "install_keys"
+ssh autoadmin@homesvcs "install_keys"
 
 date -u > /root/ca/date_self_signed_keys.txt
 echo -e '\nMake sure to run self_signed_cert_gen.sh next'

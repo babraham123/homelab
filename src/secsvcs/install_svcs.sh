@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Installs secsvcs specific systemd services.
 # Usage:
 #   src/secsvcs/install_svcs.sh SERVICE_NAME

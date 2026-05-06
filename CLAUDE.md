@@ -54,7 +54,7 @@ Rendering also validates YAML, JSON, and checks for duplicate container IPs.
 ### Service Structure
 Some directories under `src/` map to a node. They may contain:
 - `install_svcs.sh` — Copies configs to `/etc/opt/<service>/` and container files to `/etc/containers/systemd/`, then reloads systemd
-- `install_files.sh` - Moves files not present in the repo into their final destination
+- `commands.sh` - Other tasks that run as root and are triggered remotely
 - `traefik/` — Reverse proxy routing rules (HTTP routers, middlewares)
 - `secrets_template.yaml` — Template for SOPS-encrypted secrets
 The remaining directories under `src/` typically map to a service. They may contain:
@@ -78,7 +78,7 @@ Secrets use SOPS + AGE encryption. A custom integration injects the secrets into
 From `docs/development.md`:
 1. Add Traefik route config for the VM
 1. Create service container and config files in `src/<service>/`
-1. If cross-VM TLS is needed, add cert/key gen to `src/certificates/` and update `install_files.sh`
+1. If cross-VM TLS is needed, add cert/key gen to `src/certificates/` and update `commands.sh`
 1. Add service to `install_svcs.sh`
 1. Update Authelia config if OIDC auth is available (`src/authelia/`)
 1. Add Gatus uptime check (`src/gatus/config.yaml`)

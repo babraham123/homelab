@@ -8,9 +8,9 @@
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
 
-echo "Request received: '${SSH_ORIGINAL_COMMAND}' from ${SSH_CLIENT}"
+echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 
-case "$SSH_ORIGINAL_COMMAND" in
+case "${SSH_ORIGINAL_COMMAND:-}" in
   install_headscale)
     sudo /root/homelab-rendered/src/vpn/install_svcs.sh headscale
     ;;
@@ -23,8 +23,14 @@ case "$SSH_ORIGINAL_COMMAND" in
   install_geoip_generator)
     sudo /root/homelab-rendered/src/vpn/install_svcs.sh geoip_generator
     ;;
+  install_ssh_ca)
+    sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca
+    ;;
+  install_ca)
+    sudo /root/homelab-rendered/src/debian/commands.sh install_ca
+    ;;
   *)
-    echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND}'"
+    echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
     exit 1
     ;;
 esac
