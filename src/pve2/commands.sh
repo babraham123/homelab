@@ -12,6 +12,7 @@ case $1 in
     qm start "$vm_id"
     ;;
   stop_gaming)
+    # This is intentional. Starting devtop will stop gaming via the hookscript.
     vm_id=$(/usr/local/bin/get_vm_id.sh devtop)
     qm start "$vm_id"
     ;;

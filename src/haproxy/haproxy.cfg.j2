@@ -90,6 +90,11 @@ frontend http_all
     acl {{ country }} src,map_ip(/etc/haproxy/countries/{{ country }}.map) -m found{% endfor %}
     http-request deny if {{ site.blocked_countries | join(' || ') }}
 
+    # Block sensitive files and directories
+    acl blocked_files path_reg -i \.(env|git|htaccess|htpasswd|config|yml|yaml)$
+    acl blocked_dirs path_beg -i /wp-admin /phpmyadmin /pma /backup /admin /config
+    use_backend tarpit_http if blocked_files || blocked_dirs
+
     # Rate limiting tables
     stick-table type ip size 100k expire 30s store http_req_rate(3s),gpc0
     http-request track-sc0 src
