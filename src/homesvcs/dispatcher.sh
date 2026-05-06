@@ -8,15 +8,9 @@
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
 
-echo "Request received: '${SSH_ORIGINAL_COMMAND}' from ${SSH_CLIENT}"
+echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 
-case "$SSH_ORIGINAL_COMMAND" in
-  install_keys)
-    sudo /root/homelab-rendered/src/homesvcs/install_files.sh keys
-    ;;
-  install_certs)
-    sudo /root/homelab-rendered/src/homesvcs/install_files.sh certs
-    ;;
+case "${SSH_ORIGINAL_COMMAND:-}" in
   install_mdns_repeater)
     sudo /root/homelab-rendered/src/debian/install_svcs.sh mdns_repeater
     ;;
@@ -53,8 +47,23 @@ case "$SSH_ORIGINAL_COMMAND" in
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh home_assistant
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh fluentbit
     ;;
+  install_keys)
+    sudo /root/homelab-rendered/src/homesvcs/commands.sh install_keys
+    ;;
+  install_certs)
+    sudo /root/homelab-rendered/src/homesvcs/commands.sh install_certs
+    ;;
+  install_ssh_ca)
+    sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca
+    ;;
+  install_ca)
+    sudo /root/homelab-rendered/src/debian/commands.sh install_ca
+    ;;
+  copy_acme_certs)
+    sudo /root/homelab-rendered/src/debian/commands.sh copy_acme_certs
+    ;;
   *)
-    echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND}'"
+    echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
     exit 1
     ;;
 esac

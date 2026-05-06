@@ -1,17 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Usage:
-#   src/websvcs/install_files.sh TYPE
-# type = certs
-# Moves the certificates into their respective locations. websvcs only.
-# type = keys
-# Moves the SSL keys into their respective locations. websvcs only.
+#   src/websvcs/commands.sh CMD
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
-cd /home/manualadmin
+cd /home/autoadmin
 
 case $1 in
-  certs)
+  install_certs)
+    # Move the certificates into their respective locations.
     chown root:root ./*.pem
 
     mv webproxy.{{ site.url }}.cert.pem /etc/opt/traefik/certificates/proxy.crt
@@ -21,8 +18,9 @@ case $1 in
     mv ca-chain.cert.pem /etc/opt/traefik/certificates/ca.chain.crt
 
     rm -rf ./*.pem
-    ;;  
-  keys)
+    ;;
+  install_keys)
+    # Move the SSL keys into their respective locations.
     chown root:root ./*.pem
 
     mv webproxy.{{ site.url }}.key.pem /etc/opt/traefik/certificates/proxy.key

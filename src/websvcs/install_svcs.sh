@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Installs websvcs specific systemd services.
 # Usage:
 #   src/websvcs/install_svcs.sh SERVICE_NAME

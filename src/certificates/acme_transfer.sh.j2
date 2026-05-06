@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Copy the acme.json files from secsvcs, websvcs and homesvcs to pve1. Parse and distribute the
 # ACME certificates to pve1, pve2, pbs2 and pfsense.
 # Usage:
@@ -12,24 +12,17 @@ set -euo pipefail
 
 cd /root/acme
 
-# TODO: convert to autoadmin
 function download() {
-  host=$1
-  addr="manualadmin@$host"
+  host="$1"
   /root/homelab-rendered/src/debian/is_reachable.sh "$host"
 
-  echo "$host root password:"
-  ssh -t "$addr" '
-sudo cp /etc/opt/traefik/certificates/acme.json /home/manualadmin/acme.json
-sudo chown manualadmin:manualadmin /home/manualadmin/acme.json
-'
-  scp "$addr:/home/manualadmin/acme.json" "/root/acme/$host.acme.json"
-  ssh "$addr" 'rm -f /home/manualadmin/acme.json'
-  chmod 400 "$host.acme.json"
+  ssh "autoadmin@${host}" copy_acme_certs
+  scp "autoadmin@${host}:/home/autoadmin/acme.json" "/root/acme/${host}.acme.json"
+  chmod 400 "${host}.acme.json"
   # Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
   # Certificate is the full chain (I think)
   /usr/local/bin/traefik-certs-dumper file --domain-subdir \
-    --source "$host.acme.json" --dest /root/acme --version v2
+    --source "${host}.acme.json" --dest /root/acme --version v2
 }
 
 download "secsvcs"
@@ -41,13 +34,13 @@ cp pve1.{{ site.url }}/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
 cp pve1.{{ site.url }}/privatekey.key /etc/pve/nodes/pve1/pveproxy-ssl.key
 systemctl restart pveproxy.service
 
-scp pve2.{{ site.url }}/certificate.crt manualadmin@pve2:/home/manualadmin/pveproxy-ssl.pem
-scp pve2.{{ site.url }}/privatekey.key manualadmin@pve2:/home/manualadmin/pveproxy-ssl.key
+scp pve2.{{ site.url }}/certificate.crt autoadmin@pve2:/home/autoadmin/pveproxy-ssl.pem
+scp pve2.{{ site.url }}/privatekey.key autoadmin@pve2:/home/autoadmin/pveproxy-ssl.key
 # Ref: https://pbs.proxmox.com/wiki/index.php/HTTPS_Certificate_Configuration
-scp pbs2.{{ site.url }}/certificate.crt manualadmin@pve2:/home/manualadmin/proxy.pem
-scp pbs2.{{ site.url }}/privatekey.key manualadmin@pve2:/home/manualadmin/proxy.key
-echo "PVE2 root password:"
-ssh -t manualadmin@pve2 'sudo /root/homelab-rendered/src/pve2/install_files.sh certs_and_keys' > pbs2_cert_info.txt
+scp pbs2.{{ site.url }}/certificate.crt autoadmin@pve2:/home/autoadmin/proxy.pem
+scp pbs2.{{ site.url }}/privatekey.key autoadmin@pve2:/home/autoadmin/proxy.key
+
+ssh autoadmin@pve2 "install_certs_and_keys" > pbs2_cert_info.txt
 
 # Update PBS fingerprint for PVE1
 # Ref: https://pbs.proxmox.com/docs/pve-integration.html

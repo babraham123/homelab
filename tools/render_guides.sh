@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Renders the guide files into the given folder. Fills in fake details from vars.template.yml.
 # Run from root of the project directory.
 # Usage:

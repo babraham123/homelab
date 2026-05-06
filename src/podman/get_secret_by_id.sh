@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Prints out the value of a custom secret by ID (for podman).
 # Usage:
 #   SECRET_ID=XX /usr/local/bin/get_secret_by_id.sh

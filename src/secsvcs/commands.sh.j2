@@ -1,17 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Usage:
-#   src/secsvcs/install_files.sh TYPE
-# type = certs
-# Moves the certificates to their respective directories. secsvcs only.
-# type = keys
-# Moves the SSL keys into their respective locations. secsvcs only.
+#   src/secsvcs/commands.sh CMD
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
-cd /home/manualadmin
+cd /home/autoadmin
 
 case $1 in
-  certs)
+  install_certs)
+    # Move the certificates to their respective directories.
     chown root:root ./*.pem
 
     mv auth.{{ site.url }}.cert.pem /etc/opt/authelia/certificates/auth.cert.pem
@@ -38,7 +35,8 @@ case $1 in
 
     rm -rf ./*.pem
     ;;
-  keys)
+  install_keys)
+    # Move the SSL keys into their respective locations.
     chown root:root ./*.pem
 
     mv auth.{{ site.url }}.key.pem /etc/opt/authelia/certificates/auth.key
@@ -52,7 +50,7 @@ case $1 in
 
     rm -rf ./*.pem
     ;;
-  olive_tin)
+  install_olive_tin_cert)
     mkdir -p /etc/opt/olive_tin/ssh
     ls id_ed25519-cert.pub
     mv ./id_ed25519* /etc/opt/olive_tin/ssh

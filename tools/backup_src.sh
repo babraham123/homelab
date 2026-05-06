@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Backs up the source code to a tarball at the given location.
 # Run from root of the project directory.
 # Usage:

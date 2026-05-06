@@ -1,16 +1,23 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Usage:
-#   src/pve2/install_files.sh TYPE
-# type = certs_and_keys
-# Moves the certificates into their respective locations and restarts the services.
-# Also configures the PBS cert fingerprint. PVE2 only.
+#   src/pve2/commands.sh CMD
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
-cd /home/manualadmin
+cd /home/autoadmin
 
 case $1 in
-  certs_and_keys)
+  start_gaming)
+    vm_id=$(/usr/local/bin/get_vm_id.sh gaming)
+    qm start "$vm_id"
+    ;;
+  stop_gaming)
+    vm_id=$(/usr/local/bin/get_vm_id.sh devtop)
+    qm start "$vm_id"
+    ;;
+  install_certs_and_keys)
+    # Moves the certificates into their respective locations and restarts the services.
+    # Also configures the PBS cert fingerprint.
     mv pveproxy-ssl.* /etc/pve/nodes/pve2/
     chown root:www-data /etc/pve/nodes/pve2/pveproxy-ssl.pem /etc/pve/nodes/pve2/pveproxy-ssl.key
     chmod 640 /etc/pve/nodes/pve2/pveproxy-ssl.pem /etc/pve/nodes/pve2/pveproxy-ssl.key
@@ -34,7 +41,7 @@ case $1 in
     echo "$fingerprint"
     ;;
   *)
-    echo "error: unknown file type: $1" >&2
+    echo "error: unknown command: $1" >&2
     exit 1
     ;;
 esac

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Prints out a custom secret by name.
 # Usage:
 #   /usr/local/bin/get_secret.sh SECRET_NAME

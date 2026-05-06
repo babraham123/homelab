@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Checks if the given server is reachable.
 # Usage:
 #   /root/homelab-rendered/src/debian/is_reachable.sh SUBDOMAIN

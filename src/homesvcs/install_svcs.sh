@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Installs homesvcs specific systemd services.
 # Usage:
 #   src/homesvcs/install_svcs.sh SERVICE_NAME

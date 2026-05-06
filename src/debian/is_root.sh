@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Checks if the current user is root.
 # Usage:
 #   /root/homelab-rendered/src/debian/is_root.sh

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Display the IOMMU Groups the PCI devices are assigned to.
 # Usage:
 #   src/debian/iommu_groups.sh

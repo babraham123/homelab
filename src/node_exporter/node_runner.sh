@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Wrapper script to run node_exporter with custom services.
 # Usage:
 #   /usr/local/bin/node_exporter_runner.sh

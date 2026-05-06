@@ -8,17 +8,23 @@
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
 
-echo "Request received: '${SSH_ORIGINAL_COMMAND}' from ${SSH_CLIENT}"
+echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 
-case "$SSH_ORIGINAL_COMMAND" in
+case "${SSH_ORIGINAL_COMMAND:-}" in
   install_cert_notifier)
     sudo /root/homelab-rendered/src/pve1/install_svcs.sh cert_notifier
     ;;
   install_vm_watchdog)
     sudo /root/homelab-rendered/src/debian/install_svcs.sh vm_watchdog
     ;;
+  install_ssh_ca)
+    sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca
+    ;;
+  install_ca)
+    sudo /root/homelab-rendered/src/debian/commands.sh install_ca
+    ;;
   *)
-    echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND}'"
+    echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
     exit 1
     ;;
 esac

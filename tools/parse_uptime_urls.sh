@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Extracts internal urls from the gatus uptime config. Outputs as yml.
 # Run from root of the project directory.
 # Usage:
