@@ -17,10 +17,10 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_vm_watchdog)
     sudo /root/homelab-rendered/src/debian/install_svcs.sh vm_watchdog
     ;;
-  start_gaming_vm)
+  start_gaming)
     sudo /root/homelab-rendered/src/pve2/commands.sh start_gaming
     ;;
-  stop_gaming_vm)
+  stop_gaming)
     sudo /root/homelab-rendered/src/pve2/commands.sh stop_gaming
     ;;
   shutdown)
