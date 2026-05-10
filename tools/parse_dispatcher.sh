@@ -19,7 +19,7 @@ if [ ! -f "$file" ]; then
 fi
 
 if [[ "$host" == "gaming" ]]; then
-  echo "\ngaming_commands:"
+  echo -e "\ngaming_commands:"
   sed -nE 's/^[[:space:]]+"([a-zA-Z0-9_]+)"[[:space:]]\{.*$/\1/p' "$file" | \
     while read -r cmd; do
       echo "  - ${cmd}"
@@ -27,14 +27,14 @@ if [[ "$host" == "gaming" ]]; then
   exit 0
 fi
 
-echo "${host}_sudo_cmds:"
+echo -e "\n${host}_sudo_cmds:"
 # Extract lines starting with "sudo", isolate the command
 sed -nE 's/^[[:space:]]*sudo[[:space:]]+(.+)$/\1/p' "$file" | \
   sort | uniq | while read -r cmd; do
     echo "  - ${cmd}"
   done
 
-echo "\n${host}_commands:"
+echo -e "\n${host}_commands:"
 sed -nE 's/^[[:space:]]+([a-zA-Z0-9_]+)\).*$/\1/p' "$file" | \
   while read -r cmd; do
     echo "  - ${cmd}"

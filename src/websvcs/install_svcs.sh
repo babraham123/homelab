@@ -145,4 +145,4 @@ esac
 
 systemctl daemon-reload
 systemctl restart "$1"
-systemctl status "$1"
+systemctl status "$1" --no-pager

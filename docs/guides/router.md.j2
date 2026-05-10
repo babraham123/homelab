@@ -269,10 +269,7 @@ tools/upload_src.sh router /tmp/homelab-rendered
 ssh admin@router
 pkg install sudo
 
-cp /root/router-src/sshd_extra /etc
-cp /root/router-src/commands.sh /usr/local/bin
-cp /root/router-src/sudoers /usr/local/etc/sudoers.d/dispatcher
-cp /root/router-src/dispatcher.sh /usr/local/bin
+/root/router-src/commands.sh install_dispatcher
 ```
 
 ## Monitoring
@@ -333,6 +330,13 @@ exit
 - Apply the upgrade and reboot
 - Restore the pfsense config and re-install all pkgs
 - If necessary, manual re-install pkgs
+- re-enable the vm_watchdog
+```bash
+ssh manualadmin@pve1
+sudo systemctl enable vm_watchdog
+sudo systemctl start vm_watchdog
+exit
+```
 
 ## USB Ethernet adapter (optional)
 I found the USB passthru to be a little flaky, after which I would have to restart pfsense.

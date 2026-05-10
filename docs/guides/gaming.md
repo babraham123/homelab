@@ -20,7 +20,7 @@ cd "C:\Program Files\Sunshine\scripts"
 - Install Oculus App
   - Run as admin: `C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe`
   - Start the App
-  - [Enable mDNS reflection](./pfsense.md)
+  - [Enable mDNS reflection](./router.md)
   - On Quest 2, Settings > System > Link, enable Air link, pair with computer
 - Install Yuzu, Ryujinx
   - Download [keys](https://theprodkeys.com/yuzu-encryption-keys-are-missing/) and copy to correct folder location

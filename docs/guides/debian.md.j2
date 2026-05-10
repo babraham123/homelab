@@ -32,7 +32,7 @@ sudo su
 ```bash
 apt update
 apt upgrade
-apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw screen sshpass
+apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw screen
 chsh -s /bin/zsh
 
 # enable firewall
@@ -53,8 +53,6 @@ ufw enable
 	- `vim /etc/ssh/sshd_config`
 ```
 PermitRootLogin no
-TrustedUserCAKeys /etc/ssh/ca_ssh_key.pub
-HostCertificate /etc/ssh/ssh_host_key_cert.pub
 ```
 - Generate SSH key
 ```bash
@@ -112,21 +110,19 @@ tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
 ## Automation
 - Create user and setup SSH
 ```bash
+# Create user
 ssh manualadmin@SUBDOMAIN
 sudo su
 adduser autoadmin
 usermod -aG sudo autoadmin
-# Install files
-cp "/root/homelab-rendered/src/$(hostname)/dispatcher.sh" /usr/local/bin
-cp /root/homelab-rendered/src/debian/autoadmin_sshd.conf /etc/ssh/sshd_config.d
-cp "/root/homelab-rendered/src/$(hostname)/sudoers" /etc/sudoers.d/dispatcher
 su - autoadmin
 # Create and add key
 ssh-keygen -t ed25519 -C "autoadmin@$(hostname).{{ site.url }}"
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 exit
-systemctl restart sshd
+# Install configs
+/root/homelab-rendered/src/debian/commands.sh install_dispatcher
 ```
 
 ## Backups

@@ -155,7 +155,7 @@ openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pe
 cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
 chmod 444 intermediate/certs/ca-chain.cert.pem
 
-function upload() { scp intermediate/certs/ca-chain.cert.pem "autoadmin@${1}:/home/autoadmin"; ssh "autoadmin@${1}" "install_ca" }
+function upload() { scp intermediate/certs/ca-chain.cert.pem "autoadmin@${1}:/home/autoadmin"; ssh "autoadmin@${1}" "install_ca"; }
 upload pve1
 upload pve2
 upload vpn

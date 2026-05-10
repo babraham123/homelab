@@ -17,6 +17,9 @@ tools/upload_src.sh pve2 "$project_dir" || true
 tools/upload_src.sh websvcs "$project_dir" || true
 tools/upload_src.sh vpn "$project_dir" || true
 tools/upload_src.sh router "$project_dir" || true
-tools/upload_src.sh gaming "$project_dir" || true
+tools/upload_src.sh devtop "$project_dir" || true
+
+echo -e "\nStart the gaming VM and run the following cmd:"
+echo "tools/upload_src.sh gaming \"$project_dir\""
 
 rm -rf "$project_dir"

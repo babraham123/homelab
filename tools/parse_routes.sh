@@ -14,7 +14,7 @@ if [ ! -f "$file" ]; then
   exit 1
 fi
 
-echo "${host}_subdomains:"
+echo -e "\n${host}_subdomains:"
 yq --yaml-fix-merge-anchor-to-spec=true \
   '.http.routers | to_entries | .[].value.rule' "$file" | \
   sed -r 's/^.*Host\(`([^.]+)\..*$/  - \1/' | sort | uniq

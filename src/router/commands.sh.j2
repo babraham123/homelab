@@ -9,9 +9,18 @@ case "$1" in
   install_certs)
     php /root/pfsense-import-certificate.php /root/router.cert.pem /root/router.key.pem
     ;;
+  install_dispatcher)
+    cp /root/router-src/sshd_extra /etc
+    cp /root/router-src/sudoers /usr/local/etc/sudoers.d/dispatcher
+    cp /root/router-src/dispatcher.sh /usr/local/bin
+
+    service sshd onerestart
+    service sshd status
+    ;;
   start_pve2)
     mac=$(cat /root/pve2_mac_address.txt)
-    wol -i {{ pve2.subnet }}.1 "$mac"
+    iface=$(ifconfig | grep -B4 "inet {{ pve2.subnet }}.1" | grep "RUNNING" | cut -d: -f1)
+    wake "$iface" "$mac"
     ;;
   *)
     echo "Unauthorized command: $1" >&2
