@@ -23,13 +23,14 @@ fi
 
 if [[ "$host" == "router" ]]; then
   echo "router admin password:"
+  ssh -t "admin@router.${url}" 'rm -rf /root/router-src'
   scp -qr -o LogLevel=QUIET "${project_dir}/src/router" "admin@router.${url}:/root/router-src"
   exit 0
 fi
 
 if [[ "$host" == "gaming" ]]; then
   echo "gaming admin password:"
-  scp -qr -o LogLevel=QUIET "${project_dir}/src/gaming" admin@gaming:'"/c:/Users/admin/gaming-src"'
+  scp -qr -o LogLevel=QUIET "${project_dir}/src/gaming" admin@gaming.${url}:'"/c:/Users/admin/gaming-src"'
   exit 0
 fi
 

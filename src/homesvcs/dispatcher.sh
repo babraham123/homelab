@@ -8,6 +8,10 @@
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
 
+# Modern scp (OpenSSH 9+) uses SFTP protocol by default
+if [[ "${SSH_ORIGINAL_COMMAND:-}" == "/usr/lib/openssh/sftp-server" ]]; then
+  exec /usr/lib/openssh/sftp-server
+fi
 echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 
 case "${SSH_ORIGINAL_COMMAND:-}" in
@@ -55,6 +59,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     ;;
   install_ssh_ca)
     sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca
+    ;;
+  install_dispatcher)
+    sudo /root/homelab-rendered/src/debian/commands.sh install_dispatcher
     ;;
   install_ca)
     sudo /root/homelab-rendered/src/debian/commands.sh install_ca

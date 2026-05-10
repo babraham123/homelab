@@ -6,6 +6,11 @@
 $OriginalCommand = $env:SSH_ORIGINAL_COMMAND
 $SshClient = $env:SSH_CLIENT
 
+# Modern scp (OpenSSH 9+) uses SFTP protocol by default
+if ($OriginalCommand -eq "/usr/lib/openssh/sftp-server") {
+    & "C:\Windows\System32\OpenSSH\sftp-server.exe"
+    exit $LASTEXITCODE
+}
 Write-Host "Request received: '${OriginalCommand}' from ${SshClient}"
 
 switch ($OriginalCommand) {

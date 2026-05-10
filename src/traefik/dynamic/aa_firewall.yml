@@ -1,6 +1,6 @@
 # /etc/opt/traefik/config/dynamic/aa_firewall.yml
 # Ref:
-#   - https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/ratelimit/  
+#   - https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/ratelimit/
 #   - https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/ipallowlist/
 # yamllint disable rule:document-start rule:document-end
 http:

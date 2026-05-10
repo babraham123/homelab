@@ -74,6 +74,7 @@ ssh -l admin gaming
 $Password = Read-Host -AsSecureString "Enter the new password"
 New-LocalUser -Name "autoadmin" -Password $Password -FullName "autoadmin" -Description "low privilege user to remotely execute commands" -AccountNeverExpires -PasswordNeverExpires
 # Install files
+# TODO: Migrate to Dispatcher.ps1 install_dispatcher
 Copy-Item -Path "C:\Users\admin\gaming-src\autoadmin_sshd.conf" -Destination "C:\ProgramData\ssh\sshd_config.d"
 icacls "C:\ProgramData\ssh\sshd_config.d\autoadmin_sshd.conf" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"
 
@@ -86,4 +87,9 @@ Set-Acl -Path $Path -AclObject $Acl
 # Install dispatcher commands
 C:\Users\admin\gaming-src\InstallAutomation.ps1
 exit
+```
+- Generate the SSH certs
+```
+ssh manualadmin@pve1
+sudo /root/homelab-rendered/src/certificates/ssh_cert_gen_windows.sh
 ```

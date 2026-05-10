@@ -19,6 +19,15 @@ case $1 in
     mv known_hosts /etc/ssh/ssh_known_hosts
 
     systemctl restart sshd
+    systemctl status sshd --no-pager
+    ;;
+  install_dispatcher)
+    cp "/root/homelab-rendered/src/$(hostname)/dispatcher.sh" /usr/local/bin
+    cp /root/homelab-rendered/src/debian/autoadmin_sshd.conf /etc/ssh/sshd_config.d
+    cp "/root/homelab-rendered/src/$(hostname)/sudoers" /etc/sudoers.d/dispatcher
+
+    systemctl restart sshd
+    systemctl status sshd --no-pager
     ;;
   install_ca)
     chown root:root ca-chain.cert.pem

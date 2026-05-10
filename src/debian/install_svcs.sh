@@ -53,4 +53,4 @@ esac
 systemctl daemon-reload
 systemctl enable "$1"
 systemctl restart "$1"
-systemctl status "$1"
+systemctl status "$1" --no-pager

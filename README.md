@@ -15,7 +15,7 @@ Once the network, hosts and VMs are setup, you'll download the repo onto the SBC
 1. pve1 computer build
 1. Network build
 1. pve1 OS install
-1. pfSense VM install
+1. router VM install
 1. secsvcs VM install, podman setup
 1. pve2 computer build
 1. pve2 OS install

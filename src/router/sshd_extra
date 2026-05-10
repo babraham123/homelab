@@ -8,5 +8,5 @@ Match User autoadmin
     AllowTcpForwarding no
     X11Forwarding no
     PermitTTY no
-    AgentForwarding no
+    AllowAgentForwarding no
     PermitTunnel no
