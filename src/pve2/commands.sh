@@ -19,14 +19,9 @@ case $1 in
   install_certs_and_keys)
     # Moves the certificates into their respective locations and restarts the services.
     # Also configures the PBS cert fingerprint.
-    mv pveproxy-ssl.* /etc/pve/nodes/pve2/
-    chown root:www-data /etc/pve/nodes/pve2/pveproxy-ssl.pem /etc/pve/nodes/pve2/pveproxy-ssl.key
-    chmod 640 /etc/pve/nodes/pve2/pveproxy-ssl.pem /etc/pve/nodes/pve2/pveproxy-ssl.key
-
+    cp pveproxy-ssl.* /etc/pve/nodes/pve2/
     # Ref: https://forum.proxmox.com/threads/proxmox-backup-tailscale-proxmox-backup-proxy-service-wont-boot.153204/
-    mv proxy.* /etc/proxmox-backup/
-    chown backup:backup /etc/proxmox-backup/proxy.pem /etc/proxmox-backup/proxy.key
-    chmod 640 /etc/proxmox-backup/proxy.pem /etc/proxmox-backup/proxy.key
+    cp proxy.* /etc/proxmox-backup/
 
     systemctl restart pveproxy.service
     systemctl reload proxmox-backup-proxy.service

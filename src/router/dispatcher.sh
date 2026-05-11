@@ -9,8 +9,8 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/b
 set -eu
 
 # Modern scp (OpenSSH 9+) uses SFTP protocol by default
-if [[ "${SSH_ORIGINAL_COMMAND:-}" == "/usr/lib/openssh/sftp-server" ]]; then
-  exec /usr/lib/openssh/sftp-server
+if [ "${SSH_ORIGINAL_COMMAND:-}" = "/usr/libexec/sftp-server" ]; then
+  exec /usr/libexec/sftp-server
 fi
 echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 

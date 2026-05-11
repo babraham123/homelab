@@ -10,6 +10,12 @@ case $1 in
   install_certs)
     # Move the certificates to their respective directories.
     chown root:root ./*.pem
+    mkdir -p /etc/opt/authelia/certificates
+    mkdir -p /etc/opt/lldap/certificates
+    mkdir -p /etc/opt/traefik/certificates
+    mkdir -p /etc/opt/db/certificates
+    mkdir -p /etc/opt/gatus/certificates
+    mkdir -p /etc/opt/grafana/certificates
 
     mv auth.{{ site.url }}.cert.pem /etc/opt/authelia/certificates/auth.cert.pem
     mv ldap.{{ site.url }}.cert.pem /etc/opt/lldap/certificates/ldap.cert.pem
@@ -38,6 +44,10 @@ case $1 in
   install_keys)
     # Move the SSL keys into their respective locations.
     chown root:root ./*.pem
+    mkdir -p /etc/opt/authelia/certificates
+    mkdir -p /etc/opt/lldap/certificates
+    mkdir -p /etc/opt/traefik/certificates
+    mkdir -p /etc/opt/db/certificates
 
     mv auth.{{ site.url }}.key.pem /etc/opt/authelia/certificates/auth.key
     mv ldap.{{ site.url }}.key.pem /etc/opt/lldap/certificates/ldap.key.pem

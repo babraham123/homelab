@@ -7,7 +7,8 @@ $OriginalCommand = $env:SSH_ORIGINAL_COMMAND
 $SshClient = $env:SSH_CLIENT
 
 # Modern scp (OpenSSH 9+) uses SFTP protocol by default
-if ($OriginalCommand -eq "/usr/lib/openssh/sftp-server") {
+Add-Content -Path "$env:TEMP\dispatch.log" -Value "$OriginalCommand from $SshClient"
+if ($OriginalCommand -eq "C:\Windows\System32\OpenSSH\sftp-server.exe") {
     & "C:\Windows\System32\OpenSSH\sftp-server.exe"
     exit $LASTEXITCODE
 }
