@@ -10,6 +10,8 @@ case $1 in
   install_certs)
     # Move the certificates into their respective locations.
     chown root:root ./*.pem
+    mkdir -p /etc/opt/traefik/certificates
+    mkdir -p /etc/opt/guacamole/certs
 
     mv webproxy.{{ site.url }}.cert.pem /etc/opt/traefik/certificates/proxy.crt
     mv webproxy.{{ site.url }}.client_cert.pem /etc/opt/traefik/certificates/proxy.client.crt
@@ -22,6 +24,7 @@ case $1 in
   install_keys)
     # Move the SSL keys into their respective locations.
     chown root:root ./*.pem
+    mkdir -p /etc/opt/traefik/certificates
 
     mv webproxy.{{ site.url }}.key.pem /etc/opt/traefik/certificates/proxy.key
 

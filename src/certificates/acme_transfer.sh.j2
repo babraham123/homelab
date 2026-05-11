@@ -44,16 +44,13 @@ ssh autoadmin@pve2 "install_certs_and_keys" > pbs2_cert_info.txt
 
 # Update PBS fingerprint for PVE1
 # Ref: https://pbs.proxmox.com/docs/pve-integration.html
-fingerprint=$(tail -n1 pbs2_cert_info.txt | tr -d '\r')
+fingerprint=$(grep -E '^(\w\w:)+' pbs2_cert_info.txt | tr -d '\r')
 pvesm set pbs2 --fingerprint "$fingerprint"
 
 # Ref: https://github.com/stompro/pfsense-import-certificate
-scp router.{{ site.url }}/certificate.crt admin@router:/root/router.cert.pem
-scp router.{{ site.url }}/privatekey.key admin@router:/root/router.key.pem
-echo "router admin password:"
-ssh -t admin@router '
-php /root/pfsense-import-certificate.php /root/router.cert.pem /root/router.key.pem
-'
+scp router.{{ site.url }}/certificate.crt autoadmin@router:/home/autoadmin/router.cert.pem
+scp router.{{ site.url }}/privatekey.key autoadmin@router:/home/autoadmin/router.key.pem
+ssh autoadmin@router "install_certs"
 
 date -u > date_acme_certs.txt
 echo -e '\nDone!'

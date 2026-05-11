@@ -26,7 +26,8 @@ User=1000
 Secret=olive_tin_oidc_id,type=env,target=OLIVE_TIN_OIDC_ID
 Secret=olive_tin_oidc_secret,type=env,target=OLIVE_TIN_OIDC_SECRET
 
-Volume=/etc/opt/olive_tin/config.yaml:/etc/OliveTin/config.yaml:ro
+Volume=/etc/opt/olive_tin/config:/config
+Volume=/var/opt/olive_tin:/var/www/olivetin
 Volume=/etc/opt/olive_tin/ssh:/home/olivetin/.ssh:ro
 Volume=/etc/ssh:/etc/ssh:ro
 Volume=/etc/localtime:/etc/localtime:ro

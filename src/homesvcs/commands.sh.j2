@@ -10,6 +10,10 @@ case $1 in
   install_certs)
     # Move the certificates into their respective locations.
     chown root:root ./*.pem
+    mkdir -p /etc/opt/traefik/certificates
+    mkdir -p /etc/opt/mosquitto/certificates
+    mkdir -p /etc/opt/zigbee2mqtt/certificates
+    mkdir -p /etc/opt/home_assistant/certs
 
     mv homeproxy.{{ site.url }}.cert.pem /etc/opt/traefik/certificates/proxy.crt
     mv homeproxy.{{ site.url }}.client_cert.pem /etc/opt/traefik/certificates/proxy.client.crt
@@ -30,6 +34,10 @@ case $1 in
   install_keys)
     # Move the SSL keys into their respective locations.
     chown root:root ./*.pem
+    mkdir -p /etc/opt/traefik/certificates
+    mkdir -p /etc/opt/mosquitto/certificates
+    mkdir -p /etc/opt/zigbee2mqtt/certificates
+    mkdir -p /etc/opt/home_assistant/certs
 
     mv homeproxy.{{ site.url }}.key.pem /etc/opt/traefik/certificates/proxy.key
 

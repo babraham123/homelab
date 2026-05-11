@@ -40,6 +40,18 @@ accessControlLists:
       exec: true
       logs: true
     addToEveryAction: true
+  - name: general
+    matchUsergroups:
+      - command_general
+    permissions:
+      view: true
+      exec: true
+      logs: false
+
+defaultPermissions:
+  view: false
+  exec: false
+  logs: false
 
 defaultPopupOnStart: execution-dialog
 
@@ -66,12 +78,14 @@ dashboards:
               shell: ssh autoadmin@router start_pve2; sleep 10; ssh autoadmin@pve2 start_gaming; sleep 10; ssh -l autoadmin gaming Homelab_StartSunshine
               id: main_start_gaming
               maxConcurrent: 1
+              acls: [general]
           - inlineAction:
               title: Stop Gaming Server
               icon: <iconify-icon icon="maki:gaming"></iconify-icon>
               shell: ssh autoadmin@pve2 stop_gaming
               id: main_stop_gaming
               maxConcurrent: 1
+              acls: [general]
 
   - title: All Commands
     contents:
