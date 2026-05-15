@@ -33,6 +33,7 @@ defaults
     timeout connect 5000
     timeout client  50000
     timeout server  50000
+    # Only applies to http traffic. https must be handled on termination in traefik
     errorfile 400 /etc/haproxy/errors/400.http
     errorfile 403 /etc/haproxy/errors/403.http
     errorfile 408 /etc/haproxy/errors/408.http
@@ -47,20 +48,21 @@ frontend https_all
     mode tcp
     bind *:443
 
-    # Reject blocked countries
-{% for country in site.blocked_countries %}
-    acl {{ country }} src,map_ip(/etc/haproxy/countries/{{ country }}.map) -m found{% endfor %}
-    tcp-request connection reject if {{ site.blocked_countries | join(' || ') }}
+    # Wait for a client hello for at most 5 seconds. Also delays silent-drop
+    tcp-request inspect-delay 5s
 
     # Rate limiting for HTTPS connections
     stick-table type ip size 100k expire 30s store conn_rate(3s),conn_cur
     tcp-request connection track-sc0 src
     # Limit concurrent connections, connection rate
-    tcp-request connection reject if { src_conn_cur(https_all) gt 10 }
-    tcp-request connection reject if { src_conn_rate(https_all) gt 20 }
+    tcp-request content silent-drop if { src_conn_cur(https_all) gt 30 }
+    tcp-request content silent-drop if { src_conn_rate(https_all) gt 50 }
 
-    # Wait for a client hello for at most 5 seconds
-    tcp-request inspect-delay 5s
+    # Reject blocked countries
+{% for country in site.blocked_countries %}
+    acl {{ country }} src,map_ip(/etc/haproxy/countries/{{ country }}.map) -m found{% endfor %}
+    tcp-request content silent-drop if {{ site.blocked_countries | join(' || ') }}
+
     tcp-request content accept if { req.ssl_hello_type 1 }
 
     acl vpn_host req.ssl_sni -i vpn.{{ site.url }}
@@ -79,32 +81,34 @@ frontend https_all
     acl any_subdomain req.ssl_sni -i -m end .{{ site.url }}
     use_backend websvcs_https_proxy if tld || any_subdomain
 
-    default_backend tarpit_https
+    default_backend silent_drop_https
 
 frontend http_all
     mode http
     bind *:80
 
+    timeout tarpit 5s
+
     # Reject blocked countries
 {% for country in site.blocked_countries %}
     acl {{ country }} src,map_ip(/etc/haproxy/countries/{{ country }}.map) -m found{% endfor %}
-    http-request deny if {{ site.blocked_countries | join(' || ') }}
+    http-request silent-drop if {{ site.blocked_countries | join(' || ') }}
 
     # Block sensitive files and directories
-    acl blocked_files path_reg -i \.(env|git|htaccess|htpasswd|config|yml|yaml)$
-    acl blocked_dirs path_beg -i /wp-admin /phpmyadmin /pma /backup /admin /config
-    use_backend tarpit_http if blocked_files || blocked_dirs
+    acl blocked_files path_end -i .env .htaccess .htpasswd .conf .config .cfg .yml .yaml .bak .sql .log .ini .json .old .swp
+    acl blocked_dirs path_dir -i .git .aws .kube .docker wp-admin wp-content wp-includes phpmyadmin pma backup admin config
+    http-request silent-drop if blocked_files || blocked_dirs
 
     # Rate limiting tables
-    stick-table type ip size 100k expire 30s store http_req_rate(3s),gpc0
+    stick-table type ip size 100k expire 30s store http_req_rate(10s),gpc0
     http-request track-sc0 src
     # Define simple conditions
-    acl abuse_rate src_http_req_rate(http_all) gt 20
+    acl abuse_rate src_http_req_rate(http_all) gt 150
     acl is_flagged src_get_gpc0(http_all) gt 0
     # Flag them if rate is high
     http-request sc-inc-gpc0(0) if abuse_rate
     # Deny if they are flagged (sticky ban) or currently abusing
-    http-request deny status 429 if is_flagged
+    http-request silent-drop if is_flagged
 
     acl vpn_host hdr(host) -i vpn.{{ site.url }}
     use_backend local_http_vpn if vpn_host
@@ -117,12 +121,12 @@ frontend http_all
     acl {{ svc }} hdr(host) -i {{ svc }}.{{ site.url }}{% endfor %}
     use_backend homesvcs_http_proxy if {{ homesvcs_subdomains | join(' || ') }}
 
-    # Let the remaining subdomains fall thru for ACME
+    # Let the remaining subdomains fall thru to websvcs
     acl tld hdr(host) -i {{ site.url }}
     acl any_subdomain hdr_end(host) -i .{{ site.url }}
     use_backend websvcs_http_proxy if tld || any_subdomain
 
-    default_backend tarpit_http
+    default_backend silent_drop_http
 
 # backends, naming: server_protocol_purpose
 
@@ -159,13 +163,12 @@ backend homesvcs_https_proxy
     mode tcp
     server homesvcs_https {{ homesvcs.ip }}:443 send-proxy-v2
 
-backend tarpit_http
+backend silent_drop_http
     mode http
     timeout tarpit 5s
-    http-request tarpit
-    errorfile 500 /etc/haproxy/errors/503.http
+    http-request silent-drop
 
-backend tarpit_https
+backend silent_drop_https
     mode tcp
-    timeout tarpit 5s
-    tcp-request content tarpit
+    tcp-request inspect-delay 5s
+    tcp-request content silent-drop

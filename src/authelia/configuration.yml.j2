@@ -1932,6 +1932,7 @@ identity_providers:
         client_name: 'Guacamole'
 
         ## Sets the client to public. This should typically not be set, please see the documentation for usage.
+        # TODO: migrate the private client when available: https://github.com/apache/guacamole-client/pull/1198
         public: true
 
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
@@ -1969,7 +1970,7 @@ identity_providers:
         ## The permitted client authentication method for the Token Endpoint for this client.
         ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
         ## defaults to 'none' per the specifications.
-        token_endpoint_auth_method: 'client_secret_basic'
+        token_endpoint_auth_method: 'none'
 
         ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
         ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.

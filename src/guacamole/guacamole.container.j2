@@ -9,7 +9,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/guacamole/guacamole:1.6
+Image=docker.io/guacamole/guacamole:1.6.0
 ContainerName=guacamole
 AutoUpdate=registry
 NoNewPrivileges=true
@@ -26,11 +26,11 @@ Environment=GUACD_HOSTNAME=remote-proxy.{{ site.url }}
 Environment=GUACD_PORT=4822
 Environment=REMOTE_IP_VALVE_ENABLED=true
 Environment=GUACAMOLE_HOME=/etc/guacamole
-Environment=LOG_LEVEL=warn
+Environment=LOG_LEVEL=info
 # Ref: https://guacamole.apache.org/doc/gug/postgresql-auth.html
 Environment=POSTGRESQL_ENABLED=true
-Environment=POSTGRES_DATABASE=guacamole
-Environment=POSTGRES_USER=guacamole
+Environment=POSTGRESQL_DATABASE=guacamole
+Environment=POSTGRESQL_USERNAME=guacamole
 Environment=POSTGRESQL_HOSTNAME=pgdb.{{ site.url }}
 Environment=POSTGRESQL_PORT=5432
 Environment=POSTGRESQL_SSL_MODE=verify-full
@@ -48,7 +48,7 @@ Environment=OPENID_REDIRECT_URI=https://remote.{{ site.url }}
 Environment=OPENID_USERNAME_CLAIM_TYPE=preferred_username
 Environment=OPENID_GROUPS_CLAIM_TYPE=groups
 
-Secret=guacamole_pg_password,type=env,target=POSTGRES_PASSWORD
+Secret=guacamole_pg_password,type=env,target=POSTGRESQL_PASSWORD
 Secret=guacamole_oidc_id,type=env,target=OPENID_CLIENT_ID
 
 Volume=/etc/opt/guacamole/config:/etc/guacamole:ro

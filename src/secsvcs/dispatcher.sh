@@ -100,6 +100,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   copy_acme_certs)
     sudo /root/homelab-rendered/src/debian/commands.sh copy_acme_certs
     ;;
+  build_haproxy_mapper)
+    /root/homelab-rendered/src/secsvcs/commands.sh build_haproxy_mapper
+    ;;
   *)
     echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
     exit 1

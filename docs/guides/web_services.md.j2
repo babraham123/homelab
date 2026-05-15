@@ -7,11 +7,17 @@ Guide to setup websvcs on PVE2. Just service installation.
 
 - Generate init script. [Ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
 ```bash
-ssh manualadmin@secsvcs
 sudo su
 podman run --rm docker.io/guacamole/guacamole:1.6 /opt/guacamole/bin/initdb.sh --postgresql > initdb.sql
-podman container ls | grep postgres
-cat initdb.sql | podman exec -it --user 70 CONTAINER_ID psql -U guacamole -d guacamole -f -
+scp initdb.sql manualadmin@secsvcs:/home/manualadmin
+
+ssh manualadmin@secsvcs
+sudo su
+container=$(podman container ls | grep postgres | awk '{print $1}')
+cat initdb.sql | podman exec -i -e PGPASSWORD="$(/usr/local/bin/get_secret.sh guacamole_pg_password)" --user 70 "$container" psql -U guacamole -d guacamole
+rm initdb.sql
+exit
+exit
 ```
 - Remember to handle any subsequent upgrades
 
@@ -20,7 +26,6 @@ cat initdb.sql | podman exec -it --user 70 CONTAINER_ID psql -U guacamole -d gua
 ```bash
 - Install and start containers
 ```bash
-sudo su
 cd /root/homelab-rendered
 src/websvcs/install_svcs.sh traefik
 src/websvcs/install_svcs.sh vmagent

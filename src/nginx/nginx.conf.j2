@@ -17,12 +17,18 @@ http {
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
-    add_header X-XSS-Protection "1; mode=block";
 
     # static, wifi, www
     map $host $subdomain_root {
-        ~^(?<subdomain>[^.]+)\.{{ site.url.replace('.', '\.') }}$ /www/$subdomain;
+        ~^(?<subdomain>[a-zA-Z0-9-]+)\.{{ site.url.replace('.', '\.') }}$ /www/$subdomain;
         default /www/static;
+    }
+
+    # Block specific file extensions and sensitive directories
+    map $uri $blocked_access {
+        ~*\.(env|htaccess|htpasswd|conf|config|cfg|yml|yaml|bak|sql|log|ini|json|old|swp|php)$ 1;
+        ~*/(.git|.aws|.kube|.docker|wp-admin|wp-content|wp-includes|phpmyadmin|pma|backup|admin|config)(/|$) 1;
+        default 0;
     }
 
     server {
@@ -36,8 +42,12 @@ http {
         root $subdomain_root;
 
         location /error/ {
-            root /www/error;
+            alias /www/error/;
             internal;
+        }
+        
+        if ($blocked_access) {
+            return 444;
         }
 
         location ~ \.(mp3|mp4) {
