@@ -192,33 +192,19 @@ ufw status verbose
 
 - Download tool to map IPs to country
 ```bash
-# build on secsvcs
-# TODO: automate
-exit
-exit
-ssh manualadmin@secsvcs
-git clone https://github.com/babraham123/haproxy-mapper.git
-cd haproxy-mapper
-podman build --platform linux/amd64 -o type=local,dest=. .
-scp -P 2202 haproxy-mapper manualadmin@vpn:/home/manualadmin
-cd ..
-rm -rf haproxy-mapper
-exit
-
-# copy the license key on pve1
 ssh manualadmin@pve1
-sudo sops /root/secrets/pve1.yaml
+ssh autoadmin@secsvcs build_haproxy_mapper
+scp -3 autoadmin@secsvcs:/home/autoadmin/email.txt scp://autoadmin@vpn:2202//home/autoadmin
+# copy the license key on pve1
+sudo SOPS_AGE_KEY_FILE="/root/secrets/age.txt" sops /root/secrets/pve1.yaml | yq ".maxmind_license_key"
 exit
 
-# back on vpn
-ssh -p 2202 manualadmin@vpn
-sudo su
-chown root:root haproxy-mapper
-chmod 500 haproxy-mapper
-mv haproxy-mapper /usr/local/bin/
-# paste in the license key
+# back on vpn, paste in the license key
 vim /etc/opt/secrets/maxmind_license_key
 chmod 600 /etc/opt/secrets/maxmind_license_key
+# install and run geoip service
+/root/homelab-rendered/src/vpn/install_svcs.sh geoip_generator
+systemctl start geoip_generator.service
 ```
 
 ## Machine users (optional)

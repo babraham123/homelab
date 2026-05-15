@@ -38,7 +38,14 @@ case $1 in
     chmod 644 /etc/haproxy/countries/{{ country }}.map{% endfor %}
     ;;
   geoip_generator)
+    mapper_bin="/home/autoadmin/haproxy-mapper"
+    if [ -f "$mapper_bin" ]; then
+      chown root:root "$mapper_bin"
+      chmod 500 "$mapper_bin"
+      mv "$mapper_bin" /usr/local/bin/
+    fi
     cp haproxy/geoip_generator.py /usr/local/bin
+    chmod +x /usr/local/bin/geoip_generator.py
     cp haproxy/geoip_generator.service /etc/systemd/system
     cp haproxy/geoip_generator.timer /etc/systemd/system
 

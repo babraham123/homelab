@@ -80,8 +80,8 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 3232,8266,2040,88
 - Install HACS
   - Run the installer script
 ```bash
-podman container ls | grep home_assistant
-podman exec -it CONTAINER_ID bash
+container=$(podman container ls | grep home_assistant | awk '{print $1}')
+podman exec -it "$container" bash
 
 # In the new shell
 wget -O - https://get.hacs.xyz | bash -

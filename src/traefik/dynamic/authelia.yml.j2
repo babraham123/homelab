@@ -16,6 +16,7 @@ http:
       forwardAuth:
         address: https://auth.{{ site.url }}:9091/api/authz/forward-auth
         trustForwardHeader: true
+        maxResponseBodySize: 1048576 # 1MB limit
         authResponseHeaders:
           - "Remote-User"
           - "Remote-Groups"
@@ -29,6 +30,7 @@ http:
       forwardAuth:
         address: https://auth.{{ site.url }}:9091/api/verify?auth=basic
         trustForwardHeader: true
+        maxResponseBodySize: 1048576 # 1MB limit
         authResponseHeaders:
           - "Remote-User"
           - "Remote-Groups"

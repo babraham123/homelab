@@ -61,6 +61,7 @@ case $1 in
   guacamole)
     mkdir -p /etc/opt/guacamole/certs
     mkdir -p /etc/opt/guacamole/config
+    chown -R 1001:1001 /etc/opt/guacamole
     cp guacamole/guacamole.container /etc/containers/systemd
     ;;
   guacd)
