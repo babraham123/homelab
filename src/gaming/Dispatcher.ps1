@@ -3,27 +3,24 @@
 # It parses $SSH_ORIGINAL_COMMAND to determine which action to take.
 # Usage:
 #   ssh autoadmin@gaming CMD
-$OriginalCommand = $env:SSH_ORIGINAL_COMMAND
-$SshClient = $env:SSH_CLIENT
+$originalCommand = $env:SSH_ORIGINAL_COMMAND
+$sshClient = $env:SSH_CLIENT
 
 # Modern scp (OpenSSH 9+) uses SFTP protocol by default
-Add-Content -Path "$env:TEMP\dispatch.log" -Value "$OriginalCommand from $SshClient"
-if ($OriginalCommand -eq "C:\Windows\System32\OpenSSH\sftp-server.exe") {
+Add-Content -Path "$env:TEMP\dispatch.log" -Value "$originalCommand from $sshClient"
+if ($originalCommand -eq "C:\Windows\System32\OpenSSH\sftp-server.exe") {
     & "C:\Windows\System32\OpenSSH\sftp-server.exe"
     exit $LASTEXITCODE
 }
-Write-Host "Request received: '${OriginalCommand}' from ${SshClient}"
+Write-Host "Request received: '${originalCommand}' from ${sshClient}"
 
-switch ($OriginalCommand) {
-    "start_sunshine" {
-        Start-ScheduledTask -TaskName "Homelab_StartSunshine"
-    }
-    "stop_sunshine" {
-        Start-ScheduledTask -TaskName "Homelab_StopSunshine"
-    }
-    Default {
-        Write-Error "Unauthorized command: '${OriginalCommand}'"
-        exit 1
-    }
+$whitelist = @("StartSunshine", "StopSunshine", "InstallAutomation")
+if ($originalCommand -notin $whitelist) {
+    Write-Error "Unauthorized command: '${originalCommand}'"
+    exit 1
 }
+
+# Prepend Homelab_ to $originalCommand and create a file with that name
+New-Item -Path "C:\SSH_Triggers\Homelab_${originalCommand}" -ItemType File -Force | Out-Null
+
 Write-Host "Command completed"

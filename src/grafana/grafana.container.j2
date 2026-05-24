@@ -27,7 +27,7 @@ IP={{ secsvcs.container_subnet }}.12
 PodmanArgs=--entrypoint='["/bin/sh", "-c", "/download.sh && /run.sh"]'
 
 Environment=TZ={{ personal.timezone }}
-# Consider GF_INSTALL_PLUGINS=<plugin download url>
+# Consider GF_INSTALL_PLUGINS=plugin_download_url
 # https://www.postgresql.org/docs/14/libpq-envars.html
 Secret=grafana_pg_password,type=env,target=PGPASSWORD
 Secret=grafana_oidc_id,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_ID

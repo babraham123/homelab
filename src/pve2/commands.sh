@@ -7,14 +7,19 @@ set -euo pipefail
 cd /home/autoadmin
 
 case $1 in
-  start_gaming)
-    vm_id=$(/usr/local/bin/get_vm_id.sh gaming)
-    qm start "$vm_id"
-    ;;
-  stop_gaming)
-    # This is intentional. Starting devtop will stop gaming via the hookscript.
+  start_gaming_vm)
     vm_id=$(/usr/local/bin/get_vm_id.sh devtop)
-    qm start "$vm_id"
+    qm shutdown "$vm_id" --timeout 30
+    # If the VM is stuck it will be stopped by the hookscript
+    vm_id=$(/usr/local/bin/get_vm_id.sh gaming)
+    qm start "$vm_id" --timeout 30
+    ;;
+  stop_gaming_vm)
+    vm_id=$(/usr/local/bin/get_vm_id.sh gaming)
+    qm shutdown "$vm_id" --timeout 30
+    # If the VM is stuck it will be stopped by the hookscript
+    vm_id=$(/usr/local/bin/get_vm_id.sh devtop)
+    qm start "$vm_id" --timeout 30
     ;;
   install_certs_and_keys)
     # Moves the certificates into their respective locations and restarts the services.

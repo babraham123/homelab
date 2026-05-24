@@ -75,14 +75,14 @@ dashboards:
           - inlineAction:
               title: Start Gaming Server
               icon: <iconify-icon icon="maki:gaming"></iconify-icon>
-              shell: ssh autoadmin@router start_pve2; sleep 10; ssh autoadmin@pve2 start_gaming; sleep 10; ssh -l autoadmin gaming Homelab_StartSunshine
+              shell: ssh autoadmin@router start_pve2; sleep 10; ssh autoadmin@pve2 start_gaming_vm; sleep 10; ssh autoadmin@gaming StartSunshine
               id: main_start_gaming
               maxConcurrent: 1
               acls: [general]
           - inlineAction:
               title: Stop Gaming Server
               icon: <iconify-icon icon="maki:gaming"></iconify-icon>
-              shell: ssh autoadmin@pve2 stop_gaming
+              shell: ssh autoadmin@pve2 stop_gaming_vm
               id: main_stop_gaming
               maxConcurrent: 1
               acls: [general]
@@ -173,7 +173,7 @@ dashboards:
           - inlineAction:
               title: gaming {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:videogame-asset"></iconify-icon>
-              shell: ssh -l autoadmin gaming {{ cmd }}
+              shell: ssh autoadmin@gaming {{ cmd }}
               id: gaming_{{ cmd }}
               maxConcurrent: 1
 {% endfor %}
