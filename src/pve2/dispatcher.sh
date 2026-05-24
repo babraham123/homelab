@@ -21,11 +21,11 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_vm_watchdog)
     sudo /root/homelab-rendered/src/debian/install_svcs.sh vm_watchdog
     ;;
-  start_gaming)
-    sudo /root/homelab-rendered/src/pve2/commands.sh start_gaming
+  start_gaming_vm)
+    sudo /root/homelab-rendered/src/pve2/commands.sh start_gaming_vm
     ;;
-  stop_gaming)
-    sudo /root/homelab-rendered/src/pve2/commands.sh stop_gaming
+  stop_gaming_vm)
+    sudo /root/homelab-rendered/src/pve2/commands.sh stop_gaming_vm
     ;;
   shutdown)
     sudo /usr/sbin/shutdown -h now

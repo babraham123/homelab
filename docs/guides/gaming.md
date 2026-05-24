@@ -15,6 +15,8 @@ First stand up the [Windows VM](./vm_windows.md)
 cd "C:\Program Files\Sunshine\scripts"
 ./add-firewall-rule.bat
 ./install-service.bat
+# Don't start on boot
+Set-Service -Name SunshineService -StartupType Manual
 ```
 - Install [Moonlight](https://github.com/moonlight-stream/moonlight-qt/releases) on Mac, Raspberry Pi
 - Install Oculus App

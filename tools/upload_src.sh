@@ -30,7 +30,7 @@ fi
 
 if [[ "$host" == "gaming" ]]; then
   echo "gaming admin password:"
-  scp -qr -o LogLevel=QUIET "${project_dir}/src/gaming" admin@gaming.${url}:'"/c:/Users/admin/gaming-src"'
+  scp -qr -o LogLevel=QUIET "${project_dir}/src/gaming" "admin@gaming.${url}:C:/Homelab/gaming-src"
   exit 0
 fi
 

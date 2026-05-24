@@ -14,13 +14,13 @@ if [[ "$host" == "gaming" ]]; then
 fi
 
 if [ ! -f "$file" ]; then
-  echo "error: dispatcher file for $host does not exist" >&2
+  echo "error: dispatcher file for ${host} does not exist" >&2
   exit 1
 fi
 
 if [[ "$host" == "gaming" ]]; then
   echo -e "\ngaming_commands:"
-  sed -nE 's/^[[:space:]]+"([a-zA-Z0-9_]+)"[[:space:]]\{.*$/\1/p' "$file" | \
+  grep "whitelist = " "$file" | awk -F'"' '{for(i=2; i<=NF; i+=2) print $i}' | \
     while read -r cmd; do
       echo "  - ${cmd}"
     done
