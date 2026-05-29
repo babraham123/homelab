@@ -1,13 +1,14 @@
 # /etc/opt/grafana/datasources.yml
 # Ref:
 #   https://github.com/VictoriaMetrics/victoriametrics-datasource
+#   https://github.com/VictoriaMetrics/victorialogs-datasource
 #   https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
 ---
 apiVersion: 1
 
 datasources:
   - name: VictoriaMetrics
-    type: victoriametrics-datasource
+    type: victoriametrics-metrics-datasource
     access: proxy
     url: http://metrics.{{ site.url }}:8428
     basicAuth: true
@@ -17,9 +18,13 @@ datasources:
     isDefault: true
 
   - name: VictoriaLogs
-    type: victorialogs-datasource
+    type: victoriametrics-logs-datasource
     access: proxy
     url: http://logs.{{ site.url }}:9428
+    basicAuth: true
+    basicAuthUser: admin
+    secureJsonData:
+      basicAuthPassword: '${VL_ADMIN_PASSWORD}'
 
   # - name: VictoriaMetrics
   #   type: prometheus
