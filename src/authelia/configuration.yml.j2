@@ -1437,6 +1437,9 @@ identity_providers:
       headscale:
         id_token: ['email', 'groups']
 
+      grafana:
+        id_token: ['email', 'name', 'groups', 'preferred_username']
+
     # scopes:
       ## Gives the arbitrary scope 'scope_name` access to the 'claim_name' and 'extra_claim_name' claims.
       # scope_name:
@@ -1828,6 +1831,9 @@ identity_providers:
         ## Audience this client is allowed to request.
         # audience: []
 
+        ## Assigns the 'custom_claims_policy' claims policy to this client.
+        claims_policy: 'grafana'
+
         ## Scopes this client is allowed to request.
         scopes:
           - 'openid'
@@ -1835,9 +1841,22 @@ identity_providers:
           - 'email'
           - 'profile'
 
+        ## Grant Types configures which grants this client can obtain.
+        ## It's not recommended to define this unless you know what you're doing.
+        grant_types:
+          - 'authorization_code'
+
+        ## Response Types configures which responses this client can be sent.
+        ## It's not recommended to define this unless you know what you're doing.
+        response_types:
+          - 'code'
+
         ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
         ## authorization policies section.
         authorization_policy: 'gen_access'
+
+        ## The consent mode controls how consent is obtained.
+        consent_mode: 'implicit'
 
         ## Enforces the use of PKCE for this client when set to true.
         require_pkce: true
@@ -1849,11 +1868,16 @@ identity_providers:
         ## The permitted client authentication method for the Token Endpoint for this client.
         ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
         ## defaults to 'none' per the specifications.
-        token_endpoint_auth_method: 'client_secret_basic'
+        token_endpoint_auth_method: 'client_secret_post'
 
         ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
         ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
         # token_endpoint_auth_signing_alg: 'RS256'
+
+        ## The signing algorithm used for signing the Access Tokens in Access Request responses.
+        ## Please read the documentation before adjusting this option.
+        ## See: https://www.authelia.com/c/oidc/registered-clients#access_token_signed_response_alg
+        access_token_signed_response_alg: 'none'
 
         ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
         ## available. Has no effect if userinfo_signing_key_id is configured.
