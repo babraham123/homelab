@@ -104,13 +104,13 @@ lspci
 TODO: integrate these instructions with above
 - Go to Interfaces >> Assignments >> Add
 - Go to Interface >> OPT4
-  - Enable, Description = LAN3
+  - Enable, Description = LAN2
   - IPv4 Configuration Type = Static IPv4
-  - IPv4 Address = {{ lan3.mask }}
-- Go to Services >> DHCP Server >> LAN3
-  - Enable, Address Pool Range is {{ lan3.subnet }}.100 - 200
-- Go to Firewall >> Rules. Copy existing rules from LAN2
-- Go to Services >> mDNS Bridge. Add LAN3
+  - IPv4 Address = {{ lan2.mask }}
+- Go to Services >> DHCP Server >> LAN2
+  - Enable, Address Pool Range is {{ lan2.subnet }}.100 - 200
+- Go to Firewall >> Rules. Copy existing rules from LAN
+- Go to Services >> mDNS Bridge. Add LAN2
 - Reboot the pfSense VM
 
 ### QEMU Agent

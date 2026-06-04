@@ -63,9 +63,6 @@ pve2:
 lan2:
   subnet: 192.168.3
   mask: 192.168.3.0/24
-lan3: # Optional, usb adapter
-  subnet: 192.168.4
-  mask: 192.168.4.0/24
 
 # VLANs
 wifi: # Parent: LAN
