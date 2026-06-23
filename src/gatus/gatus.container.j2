@@ -18,6 +18,7 @@ NoNewPrivileges=true
 Network=net.network
 HostName=uptime.{{ site.url }}
 IP={{ secsvcs.container_subnet }}.9
+# AddHost isn't needed, Gatus uses external DNS
 
 Environment=TZ={{ personal.timezone }}
 Environment=GATUS_DELAY_START_SECONDS=5

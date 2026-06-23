@@ -17,6 +17,7 @@ NoNewPrivileges=true
 Network=net.network
 HostName=command.{{ site.url }}
 IP={{ secsvcs.container_subnet }}.15
+AddHost=auth.{{ site.url }}:{{ secsvcs.container_subnet }}.6
 DNSSearch={{ site.url }}
 # port 1337
 
@@ -27,7 +28,6 @@ Secret=olive_tin_oidc_id,type=env,target=OLIVE_TIN_OIDC_ID
 Secret=olive_tin_oidc_secret,type=env,target=OLIVE_TIN_OIDC_SECRET
 
 Volume=/etc/opt/olive_tin/config:/config
-Volume=/var/opt/olive_tin:/var/www/olivetin
 Volume=/etc/opt/olive_tin/ssh:/home/olivetin/.ssh:ro
 Volume=/etc/ssh:/etc/ssh:ro
 Volume=/etc/localtime:/etc/localtime:ro
