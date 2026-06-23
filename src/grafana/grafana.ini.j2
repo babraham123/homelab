@@ -16,6 +16,10 @@ level = warn
 [server]
 root_url = https://graph.{{ site.url }}
 
+[plugins]
+preinstall_sync = victoriametrics-metrics-datasource,victoriametrics-logs-datasource
+disable_plugins = grafana-amazonprometheus-datasource
+
 # Ref: https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/
 [auth]
 disable_login_form = true
@@ -44,6 +48,5 @@ login_attribute_path = preferred_username
 groups_attribute_path = groups
 name_attribute_path = name
 use_pkce = true
-tls_client_ca = /certificates/ca.chain.pem
 role_attribute_path = contains(groups[*], 'grafana_admin') && 'Admin' || 'Viewer'
 role_attribute_strict = true

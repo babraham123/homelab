@@ -12,7 +12,12 @@
       "WebFetch(domain:docs.opsramp.com)",
       "Bash(git show:*)",
       "Bash(git diff:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:docs.olivetin.app)",
+      "Bash(gh api *)",
+      "Bash(gh repo *)",
+      "Bash(gh search *)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": [],
     "ask": []

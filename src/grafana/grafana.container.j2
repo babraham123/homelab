@@ -26,7 +26,6 @@ IP={{ secsvcs.container_subnet }}.12
 AddHost=auth.{{ site.url }}:{{ secsvcs.container_subnet }}.6
 
 Environment=TZ={{ personal.timezone }}
-Environment=GF_PLUGINS_PREINSTALL_SYNC=victoriametrics-metrics-datasource,victoriametrics-logs-datasource
 # https://www.postgresql.org/docs/14/libpq-envars.html
 Secret=grafana_pg_password,type=env,target=PGPASSWORD
 Secret=grafana_oidc_id,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_ID
