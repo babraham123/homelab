@@ -8,11 +8,13 @@ cd /home/autoadmin
 
 case $1 in
   start_gaming_vm)
+    ping -c1 -W1 {{ gaming.ip }} && exit 0
     vm_id=$(/usr/local/bin/get_vm_id.sh devtop)
     qm shutdown "$vm_id" --timeout 30
     # If the VM is stuck it will be stopped by the hookscript
     vm_id=$(/usr/local/bin/get_vm_id.sh gaming)
     qm start "$vm_id" --timeout 30
+    sleep 10
     ;;
   stop_gaming_vm)
     vm_id=$(/usr/local/bin/get_vm_id.sh gaming)

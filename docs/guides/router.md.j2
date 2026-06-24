@@ -111,6 +111,7 @@ TODO: integrate these instructions with above
   - Enable, Address Pool Range is {{ lan2.subnet }}.100 - 200
 - Go to Firewall >> Rules. Copy existing rules from LAN
 - Go to Services >> mDNS Bridge. Add LAN2
+- Go to Services >> DNS Resolver >> Network Interfaces. Add LAN2
 - Reboot the pfSense VM
 
 ### QEMU Agent
@@ -158,6 +159,7 @@ Improve latency when under heavy load
 ### Custom subdomains
 - Go to Services >> DNS Resolver
 - Add host overrides
+- Under Network Interfaces, select all the local ones. Exclude WAN and the "IPv6 Link-Local" ones.
 - On your computer (MacOS), go to Settings >> Network >> Wi-Fi >> Details >> DNS
   - Delete the old DNS Servers
   - Add {{ router.ip }}, 1.1.1.1 (Chrome only uses 8.8.8.8 if it's present in the list)

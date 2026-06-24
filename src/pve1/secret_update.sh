@@ -21,15 +21,16 @@ sops "/root/secrets/${host}.yaml"
 sops -d "/root/secrets/${host}.yaml" | sudo age -e -R /root/secrets/age.pub -R "/root/secrets/${host}_id_ed25519.pub" -o "/root/secrets/${host}.yaml.age"
 chmod 600 "/root/secrets/${host}.yaml"
 chmod 400 "/root/secrets/${host}.yaml.age"
-scp "/root/secrets/${host}.yaml.age" "$addr:/home/manualadmin/secrets.yaml.age"
+scp "/root/secrets/${host}.yaml.age" "${addr}:/home/manualadmin/secrets.yaml.age"
 
 echo "${host} root password:"
 ssh -t "$addr" '
 sudo mkdir -p /etc/opt/secrets
 sudo mv /home/manualadmin/secrets.yaml.age /etc/opt/secrets/secrets.yaml.age
 sudo chown root:root /etc/opt/secrets/secrets.yaml.age
-'
 
-echo -e '\nMake sure to restart the relevant services\n'
-echo 'If creating a new secret, run the following cmd:'
-echo 'sudo podman secret create "SECRET_NAME" /root/placeholder.txt'
+echo "placeholder" > /tmp/placeholder.txt
+sudo podman secret rm --all
+sudo /usr/local/bin/list_secrets.sh | xargs -I% sudo podman secret create "%" /tmp/placeholder.txt
+sudo podman secret ls
+'

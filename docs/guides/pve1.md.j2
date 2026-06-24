@@ -2,8 +2,8 @@
 Initial setup for the primary VM host, PVE1. Handles the self signed CA and other certificates, secrets management, notifications and VM management services.
 
 - Make sure that [Proxmox setup](./proxmox.md) has been completed.
-- Create the secsvcs VM with the desired resources and devices attached. secsvcs holds a select group of services that have higher security and uptime requirements. All services are containerized.
-- PVE1 is the location of all user initiated actions, such as updating service configs or refreshing TLS certs.
+- Create the secsvcs, homesvcs and websvcs VMs. Configure podman on them.
+- PVE1 is where some maintenance actions occur, like refreshing TLS certs.
 
 ## Configs
 - Install tools
@@ -43,6 +43,7 @@ chmod 400 ca_ssh_host_key
 # Wait until all of the VMs have been created. On the first run it will
 # ask you for the root password of various hosts.
 /root/homelab-rendered/src/certificates/ssh_cert_gen.sh
+# The cert for the gaming VM will be generated later
 ```
 
 ## Secrets
