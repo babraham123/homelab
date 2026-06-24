@@ -20,9 +20,11 @@ case "$1" in
     service sshd status
     ;;
   start_pve2)
+    ping -c1 -W1 {{ pve2.ip }} && exit 0
     mac=$(cat /root/pve2_mac_address.txt)
     iface=$(ifconfig | grep -B4 "inet {{ pve2.subnet }}.1" | grep "RUNNING" | cut -d: -f1)
     wake "$iface" "$mac"
+    sleep 10
     ;;
   *)
     echo "Unauthorized command: $1" >&2
