@@ -72,11 +72,6 @@ chmod 600 /etc/opt/secrets/*
 cd /root/homelab-rendered
 cp src/podman/*.sh /usr/local/bin
 cp src/podman/containers.conf /etc/containers
-
-echo "placeholder" > /root/placeholder.txt
-podman secret rm --all
-/usr/local/bin/list_secrets.sh | xargs -I% podman secret create "%" /root/placeholder.txt
-podman secret ls
 ```
 
 ## mDNS

@@ -75,7 +75,7 @@ dashboards:
           - inlineAction:
               title: Start Gaming Server
               icon: <iconify-icon icon="maki:gaming"></iconify-icon>
-              shell: ssh autoadmin@router start_pve2; sleep 10; ssh autoadmin@pve2 start_gaming_vm; sleep 10; ssh autoadmin@gaming StartSunshine
+              shell: ssh autoadmin@router start_pve2; ssh autoadmin@pve2 start_gaming_vm; ssh autoadmin@gaming StartSunshine
               id: main_start_gaming
               maxConcurrent: 1
               acls: [general]
