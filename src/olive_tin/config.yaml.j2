@@ -83,6 +83,7 @@ dashboards:
               id: main_start_gaming
               maxConcurrent: 1
               acls: [general]
+              timeout: 120
           - inlineAction:
               title: Stop Gaming Server
               icon: <iconify-icon icon="maki:gaming"></iconify-icon>
@@ -90,6 +91,7 @@ dashboards:
               id: main_stop_gaming
               maxConcurrent: 1
               acls: [general]
+              timeout: 60
 
   - title: All Commands
     contents:
@@ -103,6 +105,7 @@ dashboards:
               shell: ssh autoadmin@secsvcs {{ cmd }}
               id: secsvcs_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
       - title: homesvcs
         type: fieldset
@@ -114,6 +117,7 @@ dashboards:
               shell: ssh autoadmin@homesvcs {{ cmd }}
               id: homesvcs_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
       - title: websvcs
         type: fieldset
@@ -125,6 +129,7 @@ dashboards:
               shell: ssh autoadmin@websvcs {{ cmd }}
               id: websvcs_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
       - title: pve1
         type: fieldset
@@ -136,6 +141,7 @@ dashboards:
               shell: ssh autoadmin@pve1 {{ cmd }}
               id: pve1_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
       - title: pve2
         type: fieldset
@@ -147,6 +153,7 @@ dashboards:
               shell: ssh autoadmin@pve2 {{ cmd }}
               id: pve2_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
       - title: vpn
         type: fieldset
@@ -158,6 +165,7 @@ dashboards:
               shell: ssh autoadmin@vpn {{ cmd }}
               id: vpn_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
       - title: router
         type: fieldset
@@ -169,6 +177,7 @@ dashboards:
               shell: ssh autoadmin@router {{ cmd }}
               id: router_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
       - title: gaming
         type: fieldset
@@ -180,6 +189,7 @@ dashboards:
               shell: ssh autoadmin@gaming {{ cmd }}
               id: gaming_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
       - title: devtop
         type: fieldset
@@ -191,5 +201,6 @@ dashboards:
               shell: ssh autoadmin@devtop {{ cmd }}
               id: devtop_{{ cmd }}
               maxConcurrent: 1
+              timeout: 60
 {% endfor %}
 ...
