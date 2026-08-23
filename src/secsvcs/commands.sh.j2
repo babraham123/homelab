@@ -64,6 +64,8 @@ case $1 in
     mkdir -p /etc/opt/olive_tin/ssh
     ls id_ed25519-cert.pub
     mv ./id_ed25519* /etc/opt/olive_tin/ssh
+    mv ./known_hosts /etc/opt/olive_tin/ssh
+    chmod 644 /etc/opt/olive_tin/ssh/known_hosts
     ;;
   build_haproxy_mapper)
     # Doesn't need to run as root

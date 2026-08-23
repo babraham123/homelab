@@ -98,6 +98,7 @@ case $1 in
     # ssh keys should already be in place
     ls /etc/opt/olive_tin/ssh/id_ed25519-cert.pub
     cp olive_tin/config.yaml /etc/opt/olive_tin/config
+    cp olive_tin/ssh_config /etc/opt/olive_tin/ssh/config
     touch /etc/opt/olive_tin/config/sessions.yaml
     chown -R 1000:1000 /etc/opt/olive_tin
     cp olive_tin/olive_tin.container /etc/containers/systemd
