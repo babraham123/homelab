@@ -24,6 +24,11 @@ case "$1" in
     mac=$(cat /root/pve2_mac_address.txt)
     iface=$(ifconfig | grep -B4 "inet {{ pve2.subnet }}.1" | grep "RUNNING" | cut -d: -f1)
     wake "$iface" "$mac"
+    # Poll until the host actually boots, BIOS + Proxmox startup can take well over 10s from cold.
+    for i in $(seq 1 60); do
+      ping -c1 -W1 {{ pve2.ip }} > /dev/null 2>&1 && break
+      sleep 5
+    done
     sleep 10
     ;;
   *)

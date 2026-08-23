@@ -14,6 +14,14 @@ case $1 in
     # If the VM is stuck it will be stopped by the hookscript
     vm_id=$(/usr/local/bin/get_vm_id.sh gaming)
     qm start "$vm_id" --timeout 30
+    # Poll until the guest is reachable so callers that chain an SSH command into
+    # it don't race the OS boot (sshd/scheduled tasks aren't up yet).
+    for i in $(seq 1 60); do
+      ping -c1 -W1 {{ gaming.ip }} &>/dev/null && break
+      sleep 5
+    done
+    # Give sshd and the SSH-trigger watcher scheduled task a moment to come
+    # up after the network stack is reachable.
     sleep 10
     ;;
   stop_gaming_vm)

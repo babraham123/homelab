@@ -9,3 +9,7 @@ crash.*.log
 vars.yml
 all_vars.yml
 notes
+
+# AI artifacts
+.scratch
+
