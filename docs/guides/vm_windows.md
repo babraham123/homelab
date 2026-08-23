@@ -96,7 +96,7 @@ icacls "C:\SSH_Triggers" /grant "autoadmin:(OI)(CI)(F)"
 $powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
 $action = New-ScheduledTaskAction -Execute $powershell -Argument "-NoProfile -WindowStyle Hidden -File C:\Homelab\gaming-src\WatchFolder.ps1"
 $trigger = New-ScheduledTaskTrigger -AtStartup
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Days 3650)
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Days 3650) -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1)
 Register-ScheduledTask -TaskName "Homelab_Monitor_SSH_Drop" -Action $action -Trigger $trigger -Settings $settings -User "NT AUTHORITY\SYSTEM" -Force
 Start-ScheduledTask -TaskName "Homelab_Monitor_SSH_Drop"
 

@@ -53,6 +53,10 @@ defaultPermissions:
   exec: false
   logs: false
 
+defaultPolicy:
+  showDiagnostics: true
+  showLogList: true
+
 defaultPopupOnStart: execution-dialog
 
 # Ref: https://docs.olivetin.app/action_customization/intro.html
@@ -75,7 +79,7 @@ dashboards:
           - inlineAction:
               title: Start Gaming Server
               icon: <iconify-icon icon="maki:gaming"></iconify-icon>
-              shell: ssh autoadmin@router start_pve2; ssh autoadmin@pve2 start_gaming_vm; ssh autoadmin@gaming StartSunshine
+              shell: ssh autoadmin@router start_pve2 && ssh autoadmin@pve2 start_gaming_vm && ssh autoadmin@gaming StartSunshine
               id: main_start_gaming
               maxConcurrent: 1
               acls: [general]
