@@ -39,7 +39,7 @@ accessControlLists:
       view: true
       exec: true
       logs: true
-    addToEveryAction: true
+    # addToEveryAction: true
   - name: general
     matchUsergroups:
       - command_general
@@ -48,10 +48,11 @@ accessControlLists:
       exec: true
       logs: false
 
+# TODO: revert with oauth groups are fixed
 defaultPermissions:
-  view: false
-  exec: false
-  logs: false
+  view: true
+  exec: true
+  logs: true
 
 defaultPolicy:
   showDiagnostics: true
@@ -82,7 +83,7 @@ dashboards:
               shell: ssh autoadmin@router start_pve2 && ssh autoadmin@pve2 start_gaming_vm && ssh autoadmin@gaming StartSunshine
               id: main_start_gaming
               maxConcurrent: 1
-              acls: [general]
+              # acls: [general]
               timeout: 120
           - inlineAction:
               title: Stop Gaming Server
@@ -90,7 +91,7 @@ dashboards:
               shell: ssh autoadmin@pve2 stop_gaming_vm
               id: main_stop_gaming
               maxConcurrent: 1
-              acls: [general]
+              # acls: [general]
               timeout: 60
 
   - title: All Commands

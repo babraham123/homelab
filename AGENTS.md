@@ -6,10 +6,14 @@ Infrastructure-as-code for a self-hosted homelab: configuration files, Jinja2 te
 
 ## Reference
 
-- [Architecture](docs/architecture.md)
+- [Architecture overview and hardware](docs/architecture.md)
+- [Networking: topology, VLANs, DNS, ingress](docs/networking.md)
+- [Security: identity, TLS, secrets, host access](docs/security.md)
+- [Services: container catalog, observability, backups](docs/services.md)
 - [Installation](docs/installation.md)
 - [Development and code structure](docs/development.md)
 - [Maintenance commands](docs/maintenance.md)
+- [Domain glossary](CONTEXT.md) and [decision records](docs/adr/)
 
 ## Agent skills
 
