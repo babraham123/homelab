@@ -2,7 +2,7 @@
 
 ## Setup
 
-- Setup your local computer. Here are the instructions for a [Mac](./guides/mac_personal.md)
+- Setup your local computer. Here are the instructions for a [Mac](./guides/mac_personal.md.j2)
 - Create a `vars.yml` file from the `vars.template.yml` example
 
 ## Code structure
@@ -25,6 +25,31 @@ The remaining directories under `src/` typically map to a service. They may cont
 - `*.container` — Podman quadlet systemd unit files
 - `*.volume` — Podman volume definitions
 - Service configuration files
+
+## Deployment pipeline
+
+From template to running container, a change passes through five stages:
+
+```mermaid
+flowchart TB
+    vars["vars.yml<br/>(real values, gitignored)"]
+    parse["Dynamic variables:<br/>parse_routes.sh → per-node subdomains<br/>parse_uptime_urls.sh → Gatus URLs<br/>parse_dispatcher.sh → sudoers command lists"]
+    allvars["all_vars.yml"]
+    render["render_src.sh — jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
+    validate["Validation: yamllint, jq on all JSON,<br/>duplicate container-IP check"]
+    upload["upload_src.sh per node — scp via manualadmin,<br/>sudo mv to /root/homelab-rendered"]
+    dispatch["ssh autoadmin@node install_&lt;svc&gt;<br/>dispatcher.sh whitelist → install_svcs.sh<br/>→ quadlets into /etc/containers/systemd"]
+    second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with SOPS/AGE secrets in memory"]
+
+    vars --> allvars
+    parse --> allvars
+    allvars --> render --> validate --> upload --> dispatch --> second
+```
+
+Only validated output ever ships, and secrets only materialize inside the node at
+container start — the rendered tree on disk still has secret placeholders in its
+`*.j2` files. `deploy_src.sh` runs render + upload for every node in one command
+(the gaming VM is skipped when powered off).
 
 ## Deploy changes
 
