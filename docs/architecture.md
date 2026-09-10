@@ -37,13 +37,14 @@ flowchart TB
             pbs2["pbs2<br/>Proxmox Backup Server"]
         end
         ap["TP-Link EAP660 HD<br/>WiFi AP, VLANs 10/11/12"]
+        other["other devices"]
     end
     inet --> haproxy
     haproxy -- "Tailscale tunnel" --> secsvcs
     haproxy -- "Tailscale tunnel" --> homesvcs
     haproxy -- "Tailscale tunnel" --> websvcs
     router --- ap
-    router --- "other devices"
+    router --- other
 ```
 
 Public traffic enters only through HAProxy on the VPS, which routes by TLS SNI over a
@@ -87,7 +88,7 @@ Custom build in a Phanteks P300A case; ~30 W idle, ~300 W max. Powered on when n
 
 pve2 runs `websvcs`, `devtop`, the Windows `gaming` VM, and Proxmox Backup Server
 (`pbs2`). GPU/PCI passthrough setup is covered in [the GPU guide](guides/gpu.md) and
-[the Proxmox guide](guides/proxmox.md.j2).
+[the Proxmox guide](guides/proxmox.md).
 
 ### vpn — cloud VPS
 

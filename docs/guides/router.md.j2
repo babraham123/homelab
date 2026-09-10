@@ -53,19 +53,20 @@ systemctl start lightdm
   - startup order 1, ssd emulation, discard=1, cache=none
 - Enable IOMMU / NIC passthrough, [src](https://www.servethehome.com/how-to-pass-through-pcie-nics-with-proxmox-ve-on-intel-and-amd/)
   - BIOS >> Advanced >> CPU Configuration >> VMX >> Enabled
-`efibootmgr -v` # is grub or systemd
-`nano /etc/default/grub`
+  - `efibootmgr -v` # is grub or systemd
+  - `nano /etc/default/grub`
 ```
 GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"
 ```
-`update-grub && reboot`
-`nano /etc/modules`
+  - `update-grub && reboot`
+  - `nano /etc/modules`
 ```
 vfio
 vfio_iommu_type1
 vfio_pci
 vfio_virqfd
 ```
+- Check that the drivers are loaded
 ```bash
 reboot
 dmesg | grep -e DMAR -e IOMMU | grep able
