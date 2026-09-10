@@ -152,6 +152,6 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
 - pfSense uses the Auto Config Backup package; PVE/PBS `/etc` is tarballed
   separately.
 - Podman volume backup is a documented manual procedure (stop services in reverse
-  order, archive volumes — see [the Podman guide](guides/podman.md.j2));
+  order, archive volumes — see [the Podman guide](guides/podman.md));
   VictoriaMetrics has its own backup procedure in
-  [the secure services guide](guides/secure_services.md.j2).
+  [the secure services guide](guides/secure_services.md).

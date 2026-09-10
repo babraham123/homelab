@@ -108,12 +108,14 @@ Three trust systems, all rooted on pve1:
 ```mermaid
 flowchart TB
     subgraph x509["Private X.509 CA — internal service TLS"]
+        direction TB
         root["Root CA<br/>src/certificates/openssl.root.cnf"]
         inter["Intermediate CA<br/>pathlen:0, 30-day CRLs"]
         svc["Per-service certs + client certs:<br/>authelia, lldap, postgres, traefik,<br/>gatus, grafana, mosquitto, zigbee2mqtt, guacamole"]
         root --> inter --> svc
     end
     subgraph ssh["SSH CA — host authentication"]
+        direction TB
         sshca["SSH CA key"]
         hosts["Host certs for every node<br/>395-day validity"]
         known["@cert-authority known_hosts<br/>distributed to clients"]
@@ -121,6 +123,7 @@ flowchart TB
         sshca --> known
     end
     subgraph public["Public TLS — browser-facing"]
+        direction TB
         le["Let's Encrypt via Traefik<br/>HTTP-01, cert per subdomain"]
         dumper["traefik-certs-dumper on pve1"]
         xfer["acme_transfer.sh →<br/>other nodes' Traefik instances"]

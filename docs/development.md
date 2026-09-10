@@ -2,7 +2,7 @@
 
 ## Setup
 
-- Setup your local computer. Here are the instructions for a [Mac](./guides/mac_personal.md.j2)
+- Setup your local computer. Here are the instructions for a [Mac](./guides/mac_personal.md)
 - Create a `vars.yml` file from the `vars.template.yml` example
 
 ## Code structure
@@ -21,6 +21,7 @@ Some directories under `src/` map to a node. They may contain:
 - `commands.sh` - Other tasks that run as root and are triggered remotely
 - `traefik/` — Reverse proxy routing rules (HTTP routers, middlewares)
 - `secrets_template.yaml` — Template for SOPS-encrypted secrets
+
 The remaining directories under `src/` typically map to a service. They may contain:
 - `*.container` — Podman quadlet systemd unit files
 - `*.volume` — Podman volume definitions
