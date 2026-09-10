@@ -54,7 +54,7 @@ at the VMs. See [Networking](networking.md) for the full path.
 
 ## Hardware
 
-### pve1 — always-on mini PC
+### pve1: always-on mini PC
 
 Fanless "router box" mini PC from AliExpress; low idle power (~15–20 W) since it runs 24/7.
 
@@ -71,7 +71,7 @@ its gateway). It hosts the router, `secsvcs`, and `homesvcs`, plus the trust roo
 private CA, SSH CA, SOPS/AGE secrets, and provisioning scripts. It should be the most
 secure host in the system.
 
-### pve2 — on-demand tower
+### pve2: on-demand tower
 
 Custom build in a Phanteks P300A case; ~30 W idle, ~300 W max. Powered on when needed
 (gaming, development, GPU workloads) and off otherwise.
@@ -90,7 +90,7 @@ pve2 runs `websvcs`, `devtop`, the Windows `gaming` VM, and Proxmox Backup Serve
 (`pbs2`). GPU/PCI passthrough setup is covered in [the GPU guide](guides/gpu.md) and
 [the Proxmox guide](guides/proxmox.md).
 
-### vpn — cloud VPS
+### vpn: cloud VPS
 
 Smallest Linode shared-CPU instance. The only machine with a public IP. Runs HAProxy,
 Headscale, Tailscale, and the GeoIP map generator directly on the host (no containers).
@@ -126,7 +126,7 @@ a bad deploy stays contained.
 
 ## Key design decisions
 
-Recorded as ADRs in [docs/adr/](adr/):
+Recorded as ADRs in `docs/adr/`:
 
 - [Podman quadlets + systemd instead of Kubernetes or Compose](adr/0001-podman-quadlets-over-kubernetes.md)
 - [HAProxy in TCP/SNI-passthrough mode at the edge](adr/0002-haproxy-sni-passthrough.md)
