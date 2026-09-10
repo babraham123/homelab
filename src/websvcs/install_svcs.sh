@@ -44,7 +44,6 @@ case $1 in
     if [ ! -e /var/opt/nginx/www/www/index.html ]; then
       cp nginx/index.html /var/opt/nginx/www/www
       cp nginx/404.html /var/opt/nginx/www/error
-      cp nginx/50x.html /var/opt/nginx/www/error
     fi
     ;;
   homepage)

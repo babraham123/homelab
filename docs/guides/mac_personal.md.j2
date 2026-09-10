@@ -72,6 +72,7 @@ networksetup -switchtolocation Home
     - Under Search Domains, add {{ site.url }}
 - Setup watcher
 ```bash
+sudo ipconfig setverbose 1
 networksetup -switchtolocation Automatic
 sudo cp macos/vpn.sh /usr/local/bin
 sudo cp macos/detect_wifi_change.sh /usr/local/bin
