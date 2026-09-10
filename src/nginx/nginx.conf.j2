@@ -26,7 +26,7 @@ http {
 
     # Block specific file extensions and sensitive directories
     map $uri $blocked_access {
-        ~*\.(env|htaccess|htpasswd|conf|config|cfg|yml|yaml|bak|sql|log|ini|json|old|swp|php)$ 1;
+        ~*\.(env|htaccess|htpasswd|conf|config|cfg|yml|yaml|bak|sql|log|ini|old|swp|php)$ 1;
         ~*/(.git|.aws|.kube|.docker|wp-admin|wp-content|wp-includes|phpmyadmin|pma|backup|admin|config)(/|$) 1;
         default 0;
     }

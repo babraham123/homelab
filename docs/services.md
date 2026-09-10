@@ -50,6 +50,12 @@ grep -r "IP=" src/*/*.container.j2
 | .20 | fluentbit | fluent-bit | journald → VictoriaLogs forwarder | — |
 | .50 | finance_exporter | built from babraham123/finance-exporter | Stock tickers as Prometheus metrics | — |
 
+`nginx` serves static content out of `/var/opt/nginx/www`, mapped by subdomain
+(`www/`, `wifi/`, and shared `error/` pages — see `src/nginx/nginx.conf.j2`).
+That content is **not** in this repo: one example is the separate
+[homesite](https://github.com/babraham123/homesite) repo, which builds and deploys via
+its own `tools/deploy_src.sh`. This repo owns only the nginx config and quadlet.
+
 ## homesvcs — home automation (pve1, 10.12.0.0/24)
 
 | IP | Service | Image | Purpose | URL |
