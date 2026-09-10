@@ -3,8 +3,8 @@
 How traffic moves: physical topology, VLANs, DNS, and the three-tier ingress chain.
 All addresses below are the placeholder values from `vars.template.yml`.
 
-The ground-truth configs are [`src/dns/unbound.conf.j2`](../src/dns/unbound.conf.j2),
-[`src/haproxy/haproxy.cfg.j2`](../src/haproxy/haproxy.cfg.j2), the per-node
+The ground-truth configs are `src/dns/unbound.conf.j2`,
+`src/haproxy/haproxy.cfg.j2`, the per-node
 `src/<node>/traefik/` directories, and [the router guide](guides/router.md).
 
 ## Physical and logical topology

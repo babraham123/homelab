@@ -15,12 +15,12 @@ IPs and domains are templated.
 Now follow the guides in this specific order:
 
 1. Macbook setup — set up the dev machine: [mac_personal](guides/mac_personal.md)
-1. pve1 computer build — the always-on mini PC: [hardware specs](architecture.md#pve1--always-on-mini-pc)
+1. pve1 computer build — the always-on mini PC: [hardware specs](architecture.md#pve1-always-on-mini-pc)
 1. Network build — AP, cabling, and the physical port plan: [architecture](architecture.md#network-gear-and-peripherals), [networking](networking.md#physical-and-logical-topology)
 1. pve1 OS install — Proxmox with NIC passthrough: [proxmox](guides/proxmox.md)
 1. Router VM install — pfSense, VLANs, DNS, mDNS: [router](guides/router.md)
 1. secsvcs VM install, podman setup — [debian](guides/debian.md), [podman](guides/podman.md)
-1. pve2 computer build — the on-demand tower: [hardware specs](architecture.md#pve2--on-demand-tower)
+1. pve2 computer build — the on-demand tower: [hardware specs](architecture.md#pve2-on-demand-tower)
 1. pve2 OS install — Proxmox, GPU passthrough, PBS: [proxmox](guides/proxmox.md), [pve2](guides/pve2.md), [gpu](guides/gpu.md)
 1. websvcs VM install, podman setup — [debian](guides/debian.md), [podman](guides/podman.md)
 1. VPS VM setup, domain registrar — Linode, hardening, HAProxy: [vpn](guides/vpn.md)

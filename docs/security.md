@@ -20,7 +20,7 @@ Principles:
 ## The edge: HAProxy
 
 HAProxy on the VPS filters before routing (config:
-[`src/haproxy/haproxy.cfg.j2`](../src/haproxy/haproxy.cfg.j2)):
+`src/haproxy/haproxy.cfg.j2`):
 
 - **TLS hardening** — Mozilla intermediate profile: TLS 1.2/1.3 only, custom dhparam,
   session tickets disabled.
@@ -50,14 +50,12 @@ An embedded DERP relay covers peers that can't hole-punch.
 
 **Current state, honestly:** the network layer is not yet zero-trust. The intended
 group-based Headscale ACL matrix exists in
-[`src/headscale/headscale_acl.hujson.j2`](../src/headscale/headscale_acl.hujson.j2)
+`src/headscale/headscale_acl.hujson.j2`
 but is marked "not currently in use" and the active policy is permissive (each
 enrolled user gets broad access). The blocker is narrower than "ACLs don't work on
 FreeBSD" implies: FreeBSD (pfSense) still can't disable SNAT on subnet routes, so
 routed LAN traffic loses real source IPs at the router boundary; Headscale's ACL
-policy engine itself is unaffected. See
-[the tracked issue](../.scratch/architecture-audit/issues/03-headscale-acls-disabled.md)
-for the upstream Tailscale PRs and workaround options. Enforced segmentation today
+policy engine itself is unaffected. Enforced segmentation today
 comes from pfSense VLAN firewall rules and Authelia's application-layer policies,
 not from the mesh.
 
@@ -153,7 +151,7 @@ accounts with sharply different powers:
 - **`manualadmin`** — interactive SSH for a human: file uploads, exploratory work,
   full sudo with password.
 - **`autoadmin`** — the automation account. Its SSH key is bound to a `ForceCommand`
-  script, [`dispatcher.sh`](../src/secsvcs/dispatcher.sh), which whitelists a fixed
+  script, `src/secsvcs/dispatcher.sh`, which whitelists a fixed
   set of `$SSH_ORIGINAL_COMMAND` strings (`install_traefik`, `install_all_svcs`,
   `copy_acme_certs`, …) and rejects everything else. Its sudoers entry, generated at
   render time from the dispatcher's own command list (`tools/parse_dispatcher.sh` →
