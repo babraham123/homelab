@@ -39,9 +39,13 @@ case $1 in
     mkdir -p /var/opt/nginx/www/error
     cp nginx/nginx.conf /etc/opt/nginx/conf
     cp nginx/mime.types /etc/opt/nginx/conf
-    cp nginx/index.html /var/opt/nginx/www/www
-    cp nginx/404.html /var/opt/nginx/www/error
     cp nginx/nginx.container /etc/containers/systemd
+    # placeholder files
+    if [ ! -e /var/opt/nginx/www/www/index.html ]; then
+      cp nginx/index.html /var/opt/nginx/www/www
+      cp nginx/404.html /var/opt/nginx/www/error
+      cp nginx/50x.html /var/opt/nginx/www/error
+    fi
     ;;
   homepage)
     mkdir -p /etc/opt/homepage/config
