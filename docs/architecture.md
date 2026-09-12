@@ -20,37 +20,88 @@ Deep dives: [Networking](networking.md) · [Security](security.md) · [Services]
 ```mermaid
 flowchart TB
     inet(("Internet"))
-    subgraph vps["Linode VPS — vpn (public IP)"]
-        haproxy["HAProxy :80 / :443<br/>SNI routing, rate limiting"]
-        headscale["Headscale coordinator<br/>+ DERP relay"]
+
+    subgraph cloud["Cloud — Linode VPS"]
+        haproxy["HAProxy · vpn<br/>12.34.56.78 :80 / :443<br/>SNI routing · rate limiting"]
+        headscale["Headscale + DERP<br/>mesh coordinator"]
     end
-    subgraph home["Home network"]
-        subgraph pve1["pve1 — mini PC, always on"]
-            router["router VM<br/>pfSense: firewall, VLANs, DNS"]
-            secsvcs["secsvcs VM<br/>identity + observability"]
-            homesvcs["homesvcs VM<br/>home automation"]
-        end
-        subgraph pve2["pve2 — tower, on demand"]
-            websvcs["websvcs VM<br/>user-facing web apps"]
-            devtop["devtop VM<br/>Linux desktop"]
-            gaming["gaming VM<br/>Windows + GPU passthrough"]
-            pbs2["pbs2<br/>Proxmox Backup Server"]
-        end
-        ap["TP-Link EAP660 HD<br/>WiFi AP, VLANs 10/11/12"]
-        other["other devices"]
+
+    fw["pfSense · router VM on pve1<br/>192.168.1.1<br/>firewall · VLANs · Unbound DNS"]
+    mesh{{"Tailscale mesh<br/>WireGuard"}}
+
+    subgraph pve1["pve1 — mini PC, always on · 192.168.4.10"]
+        secsvcs["secsvcs<br/>192.168.4.20<br/>Authelia · lldap · VictoriaMetrics · Grafana"]
+        homesvcs["homesvcs<br/>192.168.4.21<br/>Home Assistant · Mosquitto · Zigbee2MQTT"]
     end
-    inet --> haproxy
-    haproxy -- "Tailscale tunnel" --> secsvcs
-    haproxy -- "Tailscale tunnel" --> homesvcs
-    haproxy -- "Tailscale tunnel" --> websvcs
-    router --- ap
-    router --- other
+
+    subgraph pve2["pve2 — tower, on demand · 192.168.2.10"]
+        websvcs["websvcs<br/>192.168.2.20<br/>nginx · Homepage · Guacamole"]
+        devtop["devtop<br/>192.168.2.22<br/>Linux desktop"]
+        gaming["gaming<br/>192.168.2.21<br/>Windows · RTX 3060 Ti"]
+    end
+
+    subgraph clients["Clients — Wi-Fi and wired"]
+        ap["TP-Link EAP660 HD<br/>WiFi 6 AP · VLAN trunk"]
+        trusted["Trusted devices<br/>192.168.10.0/24"]
+        iot["IoT devices<br/>192.168.11.0/24"]
+        guest["Guest devices<br/>192.168.12.0/24"]
+        zigbee["SMLight SLZB-06<br/>Zigbee coordinator"]
+        wdev["Wired devices<br/>192.168.3.0/24"]
+        sw["24-port PoE+ switch<br/>planned · VLANs 20 / 21"]
+    end
+
+    subgraph store["Storage and backup"]
+        pbs2["pbs2 · Proxmox Backup Server on pve2<br/>VM disks, prune + GC"]
+        hdds["WD HDDs + Blu-ray<br/>bought, not installed in pve2"]
+    end
+
+    inet -- "TLS :443" --> haproxy
+    inet -- "igc0 · WAN — no inbound ports" --> fw
+    haproxy -. "SNI passthrough" .-> mesh
+    headscale -. "coordinates" .-> mesh
+    mesh -. "Traefik" .-> secsvcs
+    mesh -. "Traefik" .-> homesvcs
+    mesh -. "Traefik" .-> websvcs
+    fw -- "vmbr0 · 192.168.4.0/24" --> pve1
+    fw -- "igc2 · 192.168.2.0/24" --> pve2
+    fw -- "igc1 · LAN trunk" --> ap
+    fw -- "igc3 · LAN2" --> wdev
+    ap -. "VLAN 10" .-> trusted
+    ap -. "VLAN 11" .-> iot
+    ap -. "VLAN 12" .-> guest
+    zigbee -. "Zigbee2MQTT" .-> homesvcs
+    sw -.- wdev
+    pve1 -. "backup" .-> pbs2
+    pve2 -. "backup" .-> pbs2
+
+    style cloud stroke:#38bdf8,stroke-width:2px,fill:transparent
+    style pve1 stroke:#a78bfa,stroke-width:2px,fill:transparent
+    style pve2 stroke:#a78bfa,stroke-width:2px,fill:transparent
+    style clients stroke:#4ade80,stroke-width:2px,fill:transparent
+    style store stroke:#22d3ee,stroke-width:2px,fill:transparent
+    style fw stroke:#f87171,stroke-width:2px,fill:transparent
+    style mesh stroke:#38bdf8,stroke-width:2px,fill:transparent
+    classDef ext stroke:#38bdf8,fill:transparent
+    classDef host stroke:#a78bfa,fill:transparent
+    classDef data stroke:#22d3ee,fill:transparent
+    classDef dev stroke:#4ade80,fill:transparent
+    classDef planned stroke:#94a3b8,stroke-dasharray:4 3,fill:transparent
+    class haproxy,headscale ext
+    class secsvcs,homesvcs,websvcs,devtop,gaming host
+    class pbs2 data
+    class ap,trusted,iot,guest,zigbee,wdev dev
+    class hdds,sw planned
 ```
 
 Public traffic enters only through HAProxy on the VPS, which routes by TLS SNI over a
 Tailscale mesh (coordinated by self-hosted Headscale) to a Traefik instance on the
 target VM. Internal clients skip all of that: split-horizon DNS points them straight
 at the VMs. See [Networking](networking.md) for the full path.
+
+Solid links are physical paths: internet transit, NIC ports, the LAN trunk, the
+`vmbr0` bridge. Dotted links are logical, wireless, or not yet built: Tailscale
+tunnels, tagged WiFi VLANs, Zigbee, backup jobs. Grey dashed boxes are hardware that
+is bought or planned but not yet in service.
 
 ## Hardware
 

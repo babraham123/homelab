@@ -90,38 +90,56 @@ Metrics and logs converge on secsvcs; alerts end as phone push notifications.
 
 ```mermaid
 flowchart LR
-    subgraph nodes["Every VM / host"]
+    subgraph sources["Every VM and host"]
         ne["node_exporter"]
         sm["service /metrics endpoints"]
         jd["systemd journal"]
     end
-    tg["Telegraf (pfSense)"]
+
+    tg["Telegraf · pfSense"]
+
     subgraph agents["Per container VM"]
         vmagent["vmagent"]
         fb["Fluent Bit"]
     end
-    subgraph sec["secsvcs"]
-        vm["VictoriaMetrics"]
-        vl["VictoriaLogs"]
-        va["vmalert"]
-        am["Alertmanager"]
-        nam["ntfy-alertmanager"]
-        ntfy["ntfy"]
-        graf["Grafana"]
-        gatus["Gatus"]
+
+    subgraph sec["secsvcs · 10.10.0.0/24"]
+        vm["VictoriaMetrics .7<br/>metrics TSDB"]
+        vl["VictoriaLogs .8<br/>log store"]
+        va["vmalert .11"]
+        am["Alertmanager .10"]
+        nam["ntfy-alertmanager .14"]
+        ntfy["ntfy .13"]
+        graf["Grafana .12<br/>dashboards"]
+        gatus["Gatus .9<br/>uptime + cert checks"]
     end
+
     phone["ntfy mobile app"]
 
-    ne --> vmagent
-    sm --> vmagent
-    jd --> fb
-    vmagent -- remote write --> vm
-    tg --> vm
-    fb --> vl
-    vm --> va --> am --> nam --> ntfy --> phone
-    vm --> graf
-    vl --> graf
-    gatus -- endpoint + cert checks --> ntfy
+    ne -- "scrape" --> vmagent
+    sm -- "scrape" --> vmagent
+    jd -- "tail" --> fb
+    vmagent -- "remote write" --> vm
+    tg -- "remote write" --> vm
+    fb -- "push" --> vl
+    vm -- "rules" --> va
+    va -- "alerts" --> am
+    am -- "route" --> nam
+    nam --> ntfy
+    ntfy -- "push" --> phone
+    vm -- "query" --> graf
+    vl -- "query" --> graf
+    gatus -. "independent checks" .-> ntfy
+
+    style sources stroke:#4ade80,stroke-width:2px,fill:transparent
+    style agents stroke:#fbbf24,stroke-width:2px,fill:transparent
+    style sec stroke:#a78bfa,stroke-width:2px,fill:transparent
+    classDef src stroke:#4ade80,fill:transparent
+    classDef agent stroke:#fbbf24,fill:transparent
+    classDef data stroke:#22d3ee,fill:transparent
+    class ne,sm,jd,phone src
+    class tg,vmagent,fb,va,am,nam,ntfy,gatus agent
+    class vm,vl,graf data
 ```
 
 - Scrape targets are auto-generated at render time from the service configs, so new

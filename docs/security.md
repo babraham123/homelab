@@ -78,22 +78,24 @@ Two integration models:
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant U as Browser
-    participant G as Grafana (OIDC client)
-    participant A as Authelia (secsvcs)
-    participant L as LLDAP
+    participant G as Grafana · OIDC client
+    participant A as Authelia · secsvcs
+    participant L as LLDAP · secsvcs
 
-    U->>G: open graph.janedoe.com
-    G->>U: 302 to auth.janedoe.com (authorization request)
-    U->>A: authorize
-    A->>L: user + group lookup (LDAPS)
-    A->>U: login portal (password, then TOTP/WebAuthn)
+    U->>+G: open graph.janedoe.com
+    G-->>-U: 302 to auth.janedoe.com (authorization request)
+    U->>+A: authorize
+    A->>+L: user + group lookup (LDAPS)
+    L-->>-A: user, groups
+    A-->>U: login portal (password, then TOTP/WebAuthn)
     U->>A: credentials + second factor
-    A->>U: 302 back to Grafana with authorization code
-    U->>G: authorization code
-    G->>A: exchange code (client id + secret, mTLS-adjacent internal TLS)
-    A-->>G: ID token incl. groups
-    G->>U: logged in, role mapped from group
+    A-->>-U: 302 back to Grafana with authorization code
+    U->>+G: authorization code
+    G->>+A: exchange code (client id + secret, internal TLS)
+    A-->>-G: ID token incl. groups
+    G-->>-U: logged in, role mapped from group
 ```
 
 OIDC client secrets are injected at container startup via the secrets pipeline; they
@@ -105,28 +107,46 @@ Three trust systems, all rooted on pve1:
 
 ```mermaid
 flowchart TB
+    pve1(("pve1<br/>trust roots"))
+
     subgraph x509["Private X.509 CA — internal service TLS"]
         direction TB
         root["Root CA<br/>src/certificates/openssl.root.cnf"]
         inter["Intermediate CA<br/>pathlen:0, 30-day CRLs"]
         svc["Per-service certs + client certs:<br/>authelia, lldap, postgres, traefik,<br/>gatus, grafana, mosquitto, zigbee2mqtt, guacamole"]
-        root --> inter --> svc
+        root -- "signs" --> inter -- "issues" --> svc
     end
+
     subgraph ssh["SSH CA — host authentication"]
         direction TB
         sshca["SSH CA key"]
         hosts["Host certs for every node<br/>395-day validity"]
         known["@cert-authority known_hosts<br/>distributed to clients"]
-        sshca --> hosts
-        sshca --> known
+        sshca -- "signs" --> hosts
+        sshca -- "trusted by" --> known
     end
+
     subgraph public["Public TLS — browser-facing"]
         direction TB
         le["Let's Encrypt via Traefik<br/>HTTP-01, cert per subdomain"]
         dumper["traefik-certs-dumper on pve1"]
         xfer["acme_transfer.sh →<br/>other nodes' Traefik instances"]
-        le --> dumper --> xfer
+        le -- "issues" --> dumper -- "distributes" --> xfer
     end
+
+    pve1 -- "private CA keys" --> root
+    pve1 -- "SSH CA key" --> sshca
+    pve1 -- "ACME + cert distribution" --> le
+
+    style x509 stroke:#f87171,stroke-width:2px,fill:transparent
+    style ssh stroke:#a78bfa,stroke-width:2px,fill:transparent
+    style public stroke:#38bdf8,stroke-width:2px,fill:transparent
+    classDef ca stroke:#f87171,fill:transparent
+    classDef dist stroke:#22d3ee,fill:transparent
+    class root,inter,sshca,le ca
+    class svc,hosts,known,dumper,xfer dist
+    class pve1 host
+    classDef host stroke:#a78bfa,fill:transparent
 ```
 
 - **Internal TLS**: service-to-service connections (Authelia↔LLDAP, Authelia↔Traefik

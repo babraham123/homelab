@@ -25,27 +25,42 @@ gateway.
 ```mermaid
 flowchart TB
     isp(("ISP"))
-    subgraph pve1host["pve1 (mini PC)"]
+
+    subgraph pve1host["pve1 — mini PC · 192.168.4.10"]
         pfsense["pfSense VM<br/>gateway .1 on every subnet"]
-        vmbr0["vmbr0 (virtual bridge)<br/>192.168.4.0/24"]
-        secsvcs["secsvcs .20"]
-        homesvcs["homesvcs .21"]
+        vmbr0["vmbr0 · virtual bridge<br/>192.168.4.0/24"]
+        secsvcs["secsvcs<br/>192.168.4.20 · containers 10.10.0.0/24"]
+        homesvcs["homesvcs<br/>192.168.4.21 · containers 10.12.0.0/24"]
     end
+
+    subgraph pve2host["pve2 — tower · 192.168.2.0/24"]
+        pve2["pve2 host<br/>192.168.2.10"]
+        websvcs["websvcs<br/>192.168.2.20 · containers 10.11.0.0/24"]
+        gaming["gaming<br/>192.168.2.21"]
+        devtop["devtop<br/>192.168.2.22"]
+    end
+
     ap["EAP660 HD AP<br/>tagged VLANs 10 / 11 / 12"]
     wired["Wired devices<br/>192.168.3.0/24"]
-    subgraph pve2host["pve2 (tower) — 192.168.2.0/24"]
-        pve2["pve2 host .10"]
-        websvcs["websvcs .20"]
-        gaming["gaming .21"]
-        devtop["devtop .22"]
-    end
-    isp -->|igc0 WAN| pfsense
-    pfsense -->|igc1 LAN| ap
-    pfsense -->|igc2| pve2host
-    pfsense -->|igc3 LAN2| wired
-    pfsense --- vmbr0
-    vmbr0 --- secsvcs
-    vmbr0 --- homesvcs
+
+    isp -- "igc0 · WAN" --> pfsense
+    pfsense -- "igc1 · LAN trunk" --> ap
+    pfsense -- "igc2" --> pve2host
+    pfsense -- "igc3 · LAN2" --> wired
+    pfsense -. "OPT · no physical port" .- vmbr0
+    vmbr0 -. "vNIC" .- secsvcs
+    vmbr0 -. "vNIC" .- homesvcs
+
+    style pve1host stroke:#a78bfa,stroke-width:2px,fill:transparent
+    style pve2host stroke:#a78bfa,stroke-width:2px,fill:transparent
+    classDef ext stroke:#38bdf8,fill:transparent
+    classDef gate stroke:#f87171,fill:transparent
+    classDef host stroke:#a78bfa,fill:transparent
+    classDef dev stroke:#4ade80,fill:transparent
+    class isp ext
+    class pfsense gate
+    class vmbr0,secsvcs,homesvcs,pve2,websvcs,gaming,devtop host
+    class ap,wired dev
 ```
 
 Each VM gets a static IP in its host's subnet via a systemd `net.network` file, and
@@ -135,20 +150,23 @@ External requests cross three layers, each with a distinct job:
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant C as External client
-    participant H as HAProxy (vpn)
-    participant T as Traefik (homesvcs)
-    participant A as Authelia (secsvcs)
-    participant S as Home Assistant
+    participant H as HAProxy · vpn
+    participant T as Traefik · homesvcs
+    participant A as Authelia · secsvcs
+    participant S as Home Assistant · 10.12.0.11
 
-    C->>H: TLS ClientHello — SNI home.janedoe.com
+    C->>+H: TLS ClientHello — SNI home.janedoe.com
     Note over H: 5s inspect-delay, stick-table rate limits,<br/>GeoIP check, SNI ACL match (no TLS termination)
-    H->>T: TCP passthrough + PROXY protocol v2, via Tailscale tunnel
+    H->>+T: TCP passthrough + PROXY protocol v2, via Tailscale tunnel
     Note over T: TLS terminated here (Let's Encrypt cert)
-    T->>A: ForwardAuth: is this session valid?
-    A-->>T: 200 OK (else 302 to auth portal)
-    T->>S: HTTP to container 10.12.0.11
-    S-->>C: response
+    T->>+A: ForwardAuth: is this session valid?
+    A-->>-T: 200 OK (else 302 to auth portal)
+    T->>+S: HTTP to container 10.12.0.11
+    S-->>-T: response
+    T-->>-H: response (TLS)
+    H-->>-C: response
 ```
 
 Plain HTTP (:80) is handled in HTTP mode: HAProxy filters attack paths, then passes
