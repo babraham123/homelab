@@ -17,15 +17,29 @@
 ### Service Structure
 
 Some directories under `src/` map to a node. They may contain:
-- `install_svcs.sh` — Copies configs to `/etc/opt/<service>/` and container files to `/etc/containers/systemd/`, then reloads systemd
+- `install_svcs.sh`: copies configs to `/etc/opt/<service>/` and container files to `/etc/containers/systemd/`, then reloads systemd
 - `commands.sh` - Other tasks that run as root and are triggered remotely
-- `traefik/` — Reverse proxy routing rules (HTTP routers, middlewares)
-- `secrets_template.yaml` — Template for SOPS-encrypted secrets
+- `traefik/`: reverse proxy routing rules (HTTP routers, middlewares)
+- `secrets_template.yaml`: template for SOPS-encrypted secrets
 
 The remaining directories under `src/` typically map to a service. They may contain:
-- `*.container` — Podman quadlet systemd unit files
-- `*.volume` — Podman volume definitions
+- `*.container`: Podman quadlet systemd unit files
+- `*.volume`: Podman volume definitions
 - Service configuration files
+
+### Diagrams
+
+Docs diagrams are Mermaid, rendered inline by GitHub. Conventions kept across all of
+them so they read as one set:
+
+- Box color groups related roles within a diagram; fills are transparent and only the
+  stroke is colored, so diagrams stay legible in both the light and dark GitHub themes.
+- Grey dashed boxes are hardware that is planned but not in service.
+- Most edges carry the link, protocol, or script name as a label.
+- In the two network topology diagrams only, solid edges are physical paths and dotted
+  edges are logical ones (tunnels, tagged VLANs, virtual NICs).
+- Sequence diagrams use `autonumber` and activation bars so the request and its
+  return path are both visible.
 
 ## Deployment pipeline
 
@@ -33,22 +47,42 @@ From template to running container, a change passes through five stages:
 
 ```mermaid
 flowchart TB
-    vars["vars.yml<br/>(real values, gitignored)"]
-    parse["Dynamic variables:<br/>parse_routes.sh → per-node subdomains<br/>parse_uptime_urls.sh → Gatus URLs<br/>parse_dispatcher.sh → sudoers command lists"]
-    allvars["all_vars.yml"]
-    render["render_src.sh — jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
-    validate["Validation: yamllint, jq on all JSON,<br/>duplicate container-IP check"]
-    upload["upload_src.sh per node — scp via manualadmin,<br/>sudo mv to /root/homelab-rendered"]
-    dispatch["ssh autoadmin@node install_&lt;svc&gt;<br/>dispatcher.sh whitelist → install_svcs.sh<br/>→ quadlets into /etc/containers/systemd"]
-    second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with SOPS/AGE secrets in memory"]
+    subgraph local["Local workstation"]
+        vars["vars.yml<br/>real values, gitignored"]
+        parse["Dynamic variables:<br/>parse_routes.sh → per-node subdomains<br/>parse_uptime_urls.sh → Gatus URLs<br/>parse_dispatcher.sh → sudoers command lists"]
+        allvars["all_vars.yml"]
+        render["render_src.sh: jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
+        validate["Validation: yamllint, jq on all JSON,<br/>duplicate container-IP check"]
+        upload["upload_src.sh per node: scp as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
+    end
+
+    subgraph node["On the node"]
+        dispatch["install_&lt;svc&gt; → dispatcher.sh whitelist<br/>→ install_svcs.sh → quadlets into<br/>/etc/containers/systemd"]
+        second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with SOPS/AGE secrets"]
+    end
 
     vars --> allvars
     parse --> allvars
-    allvars --> render --> validate --> upload --> dispatch --> second
+    allvars --> render --> validate --> upload
+    upload -- "ssh autoadmin@node" --> dispatch
+    dispatch -- "systemctl start" --> second
+
+    style local stroke:#38bdf8,stroke-width:2px,fill:transparent
+    style node stroke:#a78bfa,stroke-width:2px,fill:transparent
+    classDef input stroke:#4ade80,fill:transparent
+    classDef step stroke:#22d3ee,fill:transparent
+    classDef onnode stroke:#a78bfa,fill:transparent
+    classDef check stroke:#fbbf24,fill:transparent
+    classDef secret stroke:#f87171,fill:transparent
+    class vars,parse input
+    class allvars,render,upload step
+    class dispatch onnode
+    class validate check
+    class second secret
 ```
 
 Only validated output ever ships, and secrets only materialize inside the node at
-container start — the rendered tree on disk still has secret placeholders in its
+container start; the rendered tree on disk still has secret placeholders in its
 `*.j2` files. `deploy_src.sh` runs render + upload for every node in one command
 (the gaming VM is skipped when powered off).
 

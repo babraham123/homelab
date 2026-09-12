@@ -22,10 +22,10 @@ cases from `install_svcs.sh` so the whitelist tracks the real service list.
 
 ## Consequences
 
-- A stolen automation key can only replay predefined, parameterless actions — no
+- A stolen automation key can only replay predefined, parameterless actions: no
   shell, no arbitrary commands, and the sudo grants can't drift from the whitelist.
 - No agent daemon, no config-management runtime on the nodes; transport is plain SSH.
 - Every new remote action requires touching the dispatcher (or regenerating it) and
-  redeploying — deliberate friction.
+  redeploying, which is deliberate friction.
 - Do not "simplify" a node by giving `autoadmin` broader sudo; the narrow generated
   grant is the security model.

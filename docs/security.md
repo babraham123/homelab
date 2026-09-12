@@ -12,7 +12,7 @@ Principles:
 - **Default deny.** Authelia's access control starts at `default_policy: deny`;
   HAProxy's default backend silently drops; the SSH automation account can run only an
   enumerated command list.
-- **Give attackers nothing.** Blocked traffic is `silent-drop`ped — no RST, no error
+- **Give attackers nothing.** Blocked traffic is `silent-drop`ped: no RST, no error
   page, no signal about what exists.
 - **Trust is minted at home.** All certificates (X.509 and SSH) originate from CAs on
   pve1, the most protected host.
@@ -22,18 +22,18 @@ Principles:
 HAProxy on the VPS filters before routing (config:
 `src/haproxy/haproxy.cfg.j2`):
 
-- **TLS hardening** — Mozilla intermediate profile: TLS 1.2/1.3 only, custom dhparam,
+- **TLS hardening.** Mozilla intermediate profile: TLS 1.2/1.3 only, custom dhparam,
   session tickets disabled.
-- **Layer-4 rate limiting** — per-source stick tables on the :443 TCP frontend:
+- **Layer-4 rate limiting.** Per-source stick tables on the :443 TCP frontend:
   more than 30 concurrent connections or a connection rate over 50/3s → silent-drop.
   A 5s `inspect-delay` waits for the ClientHello and slows port scanners.
-- **Sticky banning** — the :80 HTTP frontend tracks request rate; over 150 requests
+- **Sticky banning.** The :80 HTTP frontend tracks request rate; over 150 requests
   per 10s flags the source IP (`gpc0`), and flagged sources are dropped regardless of
   their subsequent rate until the table entry expires.
-- **Geo-blocking** — countries listed in `vars.yml` are blocked via per-country map
+- **Geo-blocking.** Countries listed in `vars.yml` are blocked via per-country map
   files generated daily from the MaxMind GeoIP database by the `geoip_generator`
   systemd timer.
-- **Attack-path filtering** — HTTP requests for `.env`, `.git`, `.aws`, `wp-admin`,
+- **Attack-path filtering.** HTTP requests for `.env`, `.git`, `.aws`, `wp-admin`,
   `phpmyadmin`, and similar scanner bait are silently dropped.
 
 Because HAProxy never terminates TLS (see
@@ -45,10 +45,10 @@ traffic metadata but not plaintext.
 Headscale (self-hosted Tailscale coordinator, see
 [ADR 0003](adr/0003-self-hosted-headscale.md)) runs the WireGuard mesh that connects
 the VPS, the VMs, and personal devices. HAProxy reaches backend VMs only through this
-mesh — the home network never accepts inbound connections from the internet directly.
+mesh; the home network never accepts inbound connections from the internet directly.
 An embedded DERP relay covers peers that can't hole-punch.
 
-**Current state, honestly:** the network layer is not yet zero-trust. The intended
+**Current state:** the network layer is not yet zero-trust. The intended
 group-based Headscale ACL matrix exists in
 `src/headscale/headscale_acl.hujson.j2`
 but is marked "not currently in use" and the active policy is permissive (each
@@ -70,30 +70,32 @@ Two integration models:
 
 1. **ForwardAuth** (apps with no real auth of their own): Traefik forwards every
    request to Authelia, which returns 200 or a 302 to the login portal. This is the
-   default for all protected routes — the flow is shown in the
+   default for all protected routes; the flow is shown in the
    [networking sequence diagram](networking.md#ingress-the-three-tier-chain).
-2. **OIDC** (apps with native SSO support): Authelia is the issuer for six clients —
+2. **OIDC** (apps with native SSO support): Authelia is the issuer for six clients:
    Headscale (two-factor), Grafana, Home Assistant, Guacamole, Gatus, and OliveTin.
    OIDC gives the app group-based role mapping, not just a yes/no at the proxy.
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant U as Browser
     participant G as Grafana (OIDC client)
-    participant A as Authelia (secsvcs)
-    participant L as LLDAP
+    participant A as Authelia on secsvcs
+    participant L as LLDAP on secsvcs
 
-    U->>G: open graph.janedoe.com
-    G->>U: 302 to auth.janedoe.com (authorization request)
-    U->>A: authorize
-    A->>L: user + group lookup (LDAPS)
-    A->>U: login portal (password, then TOTP/WebAuthn)
+    U->>+G: open graph.janedoe.com
+    G-->>-U: 302 to auth.janedoe.com (authorization request)
+    U->>+A: authorize
+    A->>+L: user + group lookup (LDAPS)
+    L-->>-A: user, groups
+    A-->>U: login portal (password, then TOTP/WebAuthn)
     U->>A: credentials + second factor
-    A->>U: 302 back to Grafana with authorization code
-    U->>G: authorization code
-    G->>A: exchange code (client id + secret, mTLS-adjacent internal TLS)
-    A-->>G: ID token incl. groups
-    G->>U: logged in, role mapped from group
+    A-->>-U: 302 back to Grafana with authorization code
+    U->>+G: authorization code
+    G->>+A: exchange code (client id + secret, internal TLS)
+    A-->>-G: ID token incl. groups
+    G-->>-U: logged in, role mapped from group
 ```
 
 OIDC client secrets are injected at container startup via the secrets pipeline; they
@@ -105,28 +107,46 @@ Three trust systems, all rooted on pve1:
 
 ```mermaid
 flowchart TB
-    subgraph x509["Private X.509 CA — internal service TLS"]
+    pve1(("pve1<br/>trust roots"))
+
+    subgraph x509["Private X.509 CA (internal service TLS)"]
         direction TB
         root["Root CA<br/>src/certificates/openssl.root.cnf"]
         inter["Intermediate CA<br/>pathlen:0, 30-day CRLs"]
         svc["Per-service certs + client certs:<br/>authelia, lldap, postgres, traefik,<br/>gatus, grafana, mosquitto, zigbee2mqtt, guacamole"]
-        root --> inter --> svc
+        root -- "signs" --> inter -- "issues" --> svc
     end
-    subgraph ssh["SSH CA — host authentication"]
+
+    subgraph ssh["SSH CA (host authentication)"]
         direction TB
         sshca["SSH CA key"]
         hosts["Host certs for every node<br/>395-day validity"]
         known["@cert-authority known_hosts<br/>distributed to clients"]
-        sshca --> hosts
-        sshca --> known
+        sshca -- "signs" --> hosts
+        sshca -- "trusted by" --> known
     end
-    subgraph public["Public TLS — browser-facing"]
+
+    subgraph public["Public TLS (browser-facing)"]
         direction TB
         le["Let's Encrypt via Traefik<br/>HTTP-01, cert per subdomain"]
         dumper["traefik-certs-dumper on pve1"]
         xfer["acme_transfer.sh →<br/>other nodes' Traefik instances"]
-        le --> dumper --> xfer
+        le -- "issues" --> dumper -- "distributes" --> xfer
     end
+
+    pve1 -- "private CA keys" --> root
+    pve1 -- "SSH CA key" --> sshca
+    pve1 -- "ACME + cert distribution" --> le
+
+    style x509 stroke:#f87171,stroke-width:2px,fill:transparent
+    style ssh stroke:#a78bfa,stroke-width:2px,fill:transparent
+    style public stroke:#38bdf8,stroke-width:2px,fill:transparent
+    classDef ca stroke:#f87171,fill:transparent
+    classDef dist stroke:#22d3ee,fill:transparent
+    class root,inter,sshca,le ca
+    class svc,hosts,known,dumper,xfer dist
+    class pve1 host
+    classDef host stroke:#a78bfa,fill:transparent
 ```
 
 - **Internal TLS**: service-to-service connections (Authelia↔LLDAP, Authelia↔Traefik
@@ -148,9 +168,9 @@ No config-management agent runs on the nodes (see
 [ADR 0005](adr/0005-ssh-forced-command-dispatcher.md)). Remote administration uses two
 accounts with sharply different powers:
 
-- **`manualadmin`** — interactive SSH for a human: file uploads, exploratory work,
+- **`manualadmin`** is interactive SSH for a human: file uploads, exploratory work,
   full sudo with password.
-- **`autoadmin`** — the automation account. Its SSH key is bound to a `ForceCommand`
+- **`autoadmin`** is the automation account. Its SSH key is bound to a `ForceCommand`
   script, `src/secsvcs/dispatcher.sh`, which whitelists a fixed
   set of `$SSH_ORIGINAL_COMMAND` strings (`install_traefik`, `install_all_svcs`,
   `copy_acme_certs`, …) and rejects everything else. Its sudoers entry, generated at
@@ -164,18 +184,27 @@ commands. `tools/gen_dispatch_cmds.sh` regenerates dispatcher cases from
 
 ## Secrets
 
-SOPS + AGE, written to disk encrypted (see
+SOPS + AGE, kept out of git and written to disk encrypted (see
 [ADR 0004](adr/0004-sops-age-secrets.md)):
 
-- One AGE keypair per VM; private keys live only on the host, never in git.
-- SOPS encrypts YAML *values*, leaving keys readable — diffs stay meaningful.
-- At container startup, `get_secret.sh` decrypts and extracts named values;
-  `render_secrets.sh` renders `*.j2.j2` second-pass templates with those values in
-  memory, writes the final config `chmod 400`, or feeds Podman secrets that surface
-  at `/run/secrets/<name>`.
-- Plaintext secrets never sit on disk between deploy and runtime, and never appear in
-  environment variables or `podman inspect` output.
-- Rotation: `src/pve1/secret_update.sh` re-renders and redistributes per node.
+- Source of truth is on pve1: one SOPS file per host at `/root/secrets/<host>.yaml`,
+  encrypted to pve1's AGE key. SOPS encrypts YAML *values*, leaving keys readable.
+- Each host gets `/etc/opt/secrets/secrets.yaml.age`, encrypted with plain `age` to
+  pve1's key and the host's ed25519 SSH key. The host's private key sits beside it in
+  the root-only `/etc/opt/secrets/`.
+- Git holds only `src/<node>/secrets_template.yaml` (names, no values).
+- Podman uses the `shell` secrets driver: Podman stores placeholders, and at container
+  startup `get_secret_by_id.sh` decrypts the requested value from the host file.
+  Quadlets consume them as env vars (`type=env`) or files under `/run/secrets/`.
+- Apps that only read secrets from a config file use `*.j2.j2` second-pass templates:
+  `render_secrets.sh` (via `get_secret.sh`) renders the final config root-owned
+  `chmod 400`. These rendered configs are the only place plaintext sits on disk; the
+  rendered tree itself only ever holds templates.
+- pve1's AGE key is the single point of failure; a lost VM key can be replaced by
+  rerunning `secret_update.sh`.
+- Rotation: `src/pve1/secret_update.sh <host>` edits the SOPS file, re-encrypts and
+  redistributes it, and recreates the Podman placeholders; then restart affected
+  services.
 
 ## VPS hardening
 
@@ -185,10 +214,10 @@ open. Headscale admin operations happen over localhost, not the public interface
 
 ## Known gaps
 
-- Headscale ACLs disabled (above) — network-layer zero trust is aspirational today.
+- Headscale ACLs disabled (above): network-layer zero trust is not real today.
 - LLDAP↔Authelia mutual TLS is disabled pending a certificate CN fix; the connection
   is still LDAPS.
-- ESP32-class IoT devices talk plaintext on their VLAN — TLS costs too much CPU/RAM
+- ESP32-class IoT devices talk plaintext on their VLAN; TLS costs too much CPU/RAM
   there; containment relies on VLAN firewall rules.
 - Wired VLAN enforcement waits on a managed switch.
 

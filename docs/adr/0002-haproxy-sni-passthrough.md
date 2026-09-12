@@ -21,7 +21,7 @@ attack-path filtering still happen at the edge, before any application is reache
 
 - A VPS compromise exposes traffic metadata (SNI, IPs) but no plaintext and no keys.
 - Certificates live only where the services live; ACME stays with Traefik.
-- The edge cannot inspect HTTPS request contents — no WAF-style layer-7 filtering
+- The edge cannot inspect HTTPS request contents, so there is no WAF-style layer-7 filtering
   for encrypted traffic; those protections exist only on the :80 frontend.
 - Every backend hop must speak PROXY protocol, and Traefik must trust the VPS and
   gateway IPs explicitly.
