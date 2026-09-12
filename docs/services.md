@@ -7,14 +7,14 @@ the placeholder values from `vars.template.yml`.
 Every container is a Podman quadlet (`src/<service>/*.container`) with a static IP on
 its VM's bridge network (see [ADR 0001](adr/0001-podman-quadlets-over-kubernetes.md)).
 This catalog reflects what the repo defines; what is actually *running* on a node is
-whichever services have been installed there via `install_svcs.sh` — check with
+whichever services have been installed there via `install_svcs.sh`; check with
 `systemctl list-units "*.service"` on the node. Regenerate the raw list any time with:
 
 ```bash
 grep -r "IP=" src/*/*.container.j2
 ```
 
-## secsvcs — identity, certificates, observability (pve1, 10.10.0.0/24)
+## secsvcs: identity, certificates, observability (pve1, 10.10.0.0/24)
 
 | IP | Service | Image | Purpose | URL |
 |-----|---------|-------|---------|-----|
@@ -31,42 +31,42 @@ grep -r "IP=" src/*/*.container.j2
 | .13 | ntfy | ntfy | Push notification server | push.janedoe.com |
 | .14 | ntfy-alertmanager | ntfy-alertmanager | Alertmanager → ntfy bridge | ntfy-alertmanager.janedoe.com |
 | .15 | olive_tin | olivetin | Web buttons for admin actions (via SSH dispatcher) | command.janedoe.com |
-| .20 | fluentbit | fluent-bit | Journal → VictoriaLogs forwarder | — |
+| .20 | fluentbit | fluent-bit | Journal → VictoriaLogs forwarder | n/a |
 
 `vault` has an install stub but is not implemented (planned, see below).
 
-## websvcs — user-facing web apps (pve2, 10.11.0.0/24)
+## websvcs: user-facing web apps (pve2, 10.11.0.0/24)
 
 | IP | Service | Image | Purpose | URL |
 |-----|---------|-------|---------|-----|
 | .6 | traefik | traefik | Node ingress, TLS termination | webproxy.janedoe.com |
-| .7 | vmagent | vmagent | Local metrics scraper | — |
+| .7 | vmagent | vmagent | Local metrics scraper | n/a |
 | .8 | nginx | nginx | Static site + error pages | www.janedoe.com, apex |
 | .9 | homepage | homepage | Service dashboard | dash.janedoe.com |
 | .10 | isso | isso | Blog comments | comment.janedoe.com |
-| .11 | go2rtc | go2rtc | Camera restreaming | — |
-| .15 | guacd | guacd | Guacamole protocol daemon | — |
+| .11 | go2rtc | go2rtc | Camera restreaming | n/a |
+| .15 | guacd | guacd | Guacamole protocol daemon | n/a |
 | .16 | guacamole | guacamole | Browser remote desktop | remote.janedoe.com |
-| .20 | fluentbit | fluent-bit | journald → VictoriaLogs forwarder | — |
-| .50 | finance_exporter | built from babraham123/finance-exporter | Stock tickers as Prometheus metrics | — |
+| .20 | fluentbit | fluent-bit | journald → VictoriaLogs forwarder | n/a |
+| .50 | finance_exporter | built from babraham123/finance-exporter | Stock tickers as Prometheus metrics | n/a |
 
 `nginx` serves static content out of `/var/opt/nginx/www`, mapped by subdomain
-(`www/`, `wifi/`, and shared `error/` pages — see `src/nginx/nginx.conf.j2`).
+(`www/`, `wifi/`, and shared `error/` pages; see `src/nginx/nginx.conf.j2`).
 That content is **not** in this repo: one example is the separate
 [homesite](https://github.com/babraham123/homesite) repo, which builds and deploys via
 its own `tools/deploy_src.sh`. This repo owns only the nginx config and quadlet.
 
-## homesvcs — home automation (pve1, 10.12.0.0/24)
+## homesvcs: home automation (pve1, 10.12.0.0/24)
 
 | IP | Service | Image | Purpose | URL |
 |-----|---------|-------|---------|-----|
 | .6 | traefik | traefik | Node ingress, TLS termination | homeproxy.janedoe.com |
-| .7 | vmagent | vmagent | Local metrics scraper | — |
+| .7 | vmagent | vmagent | Local metrics scraper | n/a |
 | .8 | mosquitto | eclipse-mosquitto | MQTT broker | mqtt (internal DNS only) |
 | .9 | zigbee2mqtt | zigbee2mqtt | Zigbee ↔ MQTT bridge | zigbee.janedoe.com |
 | .10 | esphome | esphome | ESP device firmware manager | iot.janedoe.com |
 | .11 | home_assistant | home-assistant | Home automation hub | home.janedoe.com |
-| .20 | fluentbit | fluent-bit:3.2 | Journal → VictoriaLogs forwarder | — |
+| .20 | fluentbit | fluent-bit:3.2 | Journal → VictoriaLogs forwarder | n/a |
 
 ## Host-level services (not containerized)
 
@@ -90,38 +90,56 @@ Metrics and logs converge on secsvcs; alerts end as phone push notifications.
 
 ```mermaid
 flowchart LR
-    subgraph nodes["Every VM / host"]
+    subgraph sources["Every VM and host"]
         ne["node_exporter"]
         sm["service /metrics endpoints"]
         jd["systemd journal"]
     end
-    tg["Telegraf (pfSense)"]
+
+    tg["Telegraf on pfSense"]
+
     subgraph agents["Per container VM"]
         vmagent["vmagent"]
         fb["Fluent Bit"]
     end
-    subgraph sec["secsvcs"]
-        vm["VictoriaMetrics"]
-        vl["VictoriaLogs"]
-        va["vmalert"]
-        am["Alertmanager"]
-        nam["ntfy-alertmanager"]
-        ntfy["ntfy"]
-        graf["Grafana"]
-        gatus["Gatus"]
+
+    subgraph sec["secsvcs (10.10.0.0/24)"]
+        vm["VictoriaMetrics .7<br/>metrics TSDB"]
+        vl["VictoriaLogs .8<br/>log store"]
+        va["vmalert .11"]
+        am["Alertmanager .10"]
+        nam["ntfy-alertmanager .14"]
+        ntfy["ntfy .13"]
+        graf["Grafana .12<br/>dashboards"]
+        gatus["Gatus .9<br/>uptime + cert checks"]
     end
+
     phone["ntfy mobile app"]
 
-    ne --> vmagent
-    sm --> vmagent
-    jd --> fb
-    vmagent -- remote write --> vm
-    tg --> vm
-    fb --> vl
-    vm --> va --> am --> nam --> ntfy --> phone
-    vm --> graf
-    vl --> graf
-    gatus -- endpoint + cert checks --> ntfy
+    ne -- "scrape" --> vmagent
+    sm -- "scrape" --> vmagent
+    jd -- "tail" --> fb
+    vmagent -- "remote write" --> vm
+    tg -- "remote write" --> vm
+    fb -- "push" --> vl
+    vm -- "rules" --> va
+    va -- "alerts" --> am
+    am -- "route" --> nam
+    nam --> ntfy
+    ntfy -- "push" --> phone
+    vm -- "query" --> graf
+    vl -- "query" --> graf
+    gatus -. "independent checks" .-> ntfy
+
+    style sources stroke:#4ade80,stroke-width:2px,fill:transparent
+    style agents stroke:#fbbf24,stroke-width:2px,fill:transparent
+    style sec stroke:#a78bfa,stroke-width:2px,fill:transparent
+    classDef src stroke:#4ade80,fill:transparent
+    classDef agent stroke:#fbbf24,fill:transparent
+    classDef data stroke:#22d3ee,fill:transparent
+    class ne,sm,jd,phone src
+    class tg,vmagent,fb,va,am,nam,ntfy,gatus agent
+    class vm,vl,graf data
 ```
 
 - Scrape targets are auto-generated at render time from the service configs, so new
@@ -133,11 +151,11 @@ flowchart LR
 
 ## Key data flows
 
-**Zigbee** — devices join the mesh through the SMLight SLZB-06 network coordinator,
+**Zigbee.** Devices join the mesh through the SMLight SLZB-06 network coordinator,
 which Zigbee2MQTT bridges onto Mosquitto topics; Home Assistant consumes and records
 them, and entity state is exported onward as metrics to VictoriaMetrics.
 
-**Remote admin** — OliveTin (command.janedoe.com, behind Authelia) presents buttons
+**Remote admin.** OliveTin (command.janedoe.com, behind Authelia) presents buttons
 that execute whitelisted commands over SSH as `autoadmin`, e.g. waking pve2 or
 reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatcher).
 
@@ -145,13 +163,13 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
 
 - Container state lives in named Podman volumes (`postgresdb`, `grafanadata`,
   `vmdata`, `vldata`, `ntfydb`, `hassdb`, `hassconfig`, `mqttdata`, `z2mdb`, …).
-  VM disks are LVM-thin on each host's NVMe; guests use ext4. No ZFS or RAID —
+  VM disks are LVM-thin on each host's NVMe; guests use ext4. No ZFS or RAID;
   backups over redundancy.
 - **Proxmox Backup Server** (`pbs2`, on pve2) backs up VM disks with prune/GC
   schedules.
 - pfSense uses the Auto Config Backup package; PVE/PBS `/etc` is tarballed
   separately.
 - Podman volume backup is a documented manual procedure (stop services in reverse
-  order, archive volumes — see [the Podman guide](guides/podman.md));
+  order, archive volumes; see [the Podman guide](guides/podman.md));
   VictoriaMetrics has its own backup procedure in
   [the secure services guide](guides/secure_services.md).
