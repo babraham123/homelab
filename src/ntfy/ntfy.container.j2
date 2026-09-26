@@ -35,7 +35,7 @@ Volume=ntfydb.volume:/var/lib/ntfy
 Restart=on-failure
 TimeoutStartSec=300
 
-ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/ntfy/config.yml alert_smtp_password,ntfy_webpush_public_key,ntfy_webpush_private_key
+ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/ntfy/config.yml alert_smtp_password,ntfy_webpush_public_key,ntfy_webpush_private_key,ntfy_admin_password,ntfy_alert_password,ntfy_hass_password,ntfy_person_password,ntfy_alert_token,bcrypt_salt
 
 [Install]
 WantedBy=multi-user.target
