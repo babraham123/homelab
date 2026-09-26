@@ -100,7 +100,7 @@
       "collapsed": false,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -114,7 +114,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -1106,7 +1106,7 @@
       "collapsed": false,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -1120,7 +1120,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -2500,7 +2500,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -4586,7 +4586,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -4598,7 +4598,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -10471,7 +10471,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -10483,7 +10483,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -11541,7 +11541,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -11553,7 +11553,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -12067,7 +12067,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -12079,7 +12079,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -12972,7 +12972,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -12984,7 +12984,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -14270,7 +14270,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -14282,7 +14282,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -14733,7 +14733,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -14745,7 +14745,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -15093,7 +15093,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -15105,7 +15105,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -18465,7 +18465,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -18477,7 +18477,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -19079,7 +19079,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -19091,7 +19091,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -21141,7 +21141,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -21153,7 +21153,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -21804,7 +21804,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -21816,7 +21816,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -23014,20 +23014,6 @@
               "legendFormat": "CurrEstab - TCP connections for which the current state is either ESTABLISHED or CLOSE- WAIT",
               "refId": "A",
               "step": 240
-            },
-            {
-              "datasource": {
-                "type": "victoriametrics-metrics-datasource",
-                "uid": "${datasource}"
-              },
-              "expr": "node_netstat_Tcp_MaxConn{instance=\"$node\",job=\"$job\"}",
-              "format": "time_series",
-              "hide": false,
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "MaxConn - Limit on the total number of TCP connections the entity can support (Dynamic is \"-1\")",
-              "refId": "B",
-              "step": 240
             }
           ],
           "title": "TCP Connections",
@@ -23293,163 +23279,13 @@
           ],
           "title": "TCP Direct Transition",
           "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "victoriametrics-metrics-datasource",
-            "uid": "${datasource}"
-          },
-          "description": "Enable with --collector.tcpstat argument on node-exporter",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "connections",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 20,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "links": [],
-              "mappings": [],
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 12,
-            "x": 12,
-            "y": 99
-          },
-          "id": 320,
-          "links": [],
-          "options": {
-            "legend": {
-              "calcs": [
-                "mean",
-                "lastNotNull",
-                "max",
-                "min"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "9.2.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "victoriametrics-metrics-datasource",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "expr": "node_tcp_connection_states{state=\"established\",instance=\"$node\",job=\"$job\"}",
-              "format": "time_series",
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "established - TCP sockets in established state",
-              "range": true,
-              "refId": "A",
-              "step": 240
-            },
-            {
-              "datasource": {
-                "type": "victoriametrics-metrics-datasource",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "expr": "node_tcp_connection_states{state=\"fin_wait2\",instance=\"$node\",job=\"$job\"}",
-              "format": "time_series",
-              "hide": false,
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "fin_wait2 - TCP sockets in fin_wait2 state",
-              "range": true,
-              "refId": "B",
-              "step": 240
-            },
-            {
-              "datasource": {
-                "type": "victoriametrics-metrics-datasource",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "expr": "node_tcp_connection_states{state=\"listen\",instance=\"$node\",job=\"$job\"}",
-              "format": "time_series",
-              "hide": false,
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "listen - TCP sockets in listen state",
-              "range": true,
-              "refId": "C",
-              "step": 240
-            },
-            {
-              "datasource": {
-                "type": "victoriametrics-metrics-datasource",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "expr": "node_tcp_connection_states{state=\"time_wait\",instance=\"$node\",job=\"$job\"}",
-              "format": "time_series",
-              "hide": false,
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "time_wait - TCP sockets in time_wait state",
-              "range": true,
-              "refId": "D",
-              "step": 240
-            }
-          ],
-          "title": "TCP Stat",
-          "type": "timeseries"
         }
       ],
       "targets": [
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }
@@ -23461,7 +23297,7 @@
       "collapsed": true,
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
-        "uid": "000000001"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 1,
@@ -23721,7 +23557,7 @@
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
-            "uid": "000000001"
+            "uid": "${datasource}"
           },
           "refId": "A"
         }

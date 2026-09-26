@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_VICTORIAMETRICS",
-      "label": "VictoriaMetrics",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "victoriametrics-metrics-datasource",
-      "pluginName": "VictoriaMetrics Metrics"
-    }
-  ],
   "__requires": [
     {
       "type": "grafana",
@@ -66,7 +56,10 @@
   "panels": [
     {
       "collapsed": false,
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -79,7 +72,10 @@
       "type": "row"
     },
     {
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -150,7 +146,11 @@
           "interval": "$__interval",
           "intervalFactor": 1,
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "timeFrom": null,
@@ -180,7 +180,10 @@
       "type": "table"
     },
     {
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -239,7 +242,11 @@
           "interval": "$__interval",
           "intervalFactor": 1,
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "timeFrom": null,
@@ -269,7 +276,10 @@
       "type": "table"
     },
     {
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -315,7 +325,11 @@
           "expr": "max by(host) (system_uptime{object=\"nodes\", host=\"$node\"})",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "timeFrom": null,
@@ -325,7 +339,10 @@
       "type": "stat"
     },
     {
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -370,7 +387,11 @@
           "expr": "count(max by (host) (system_uptime{object!=\"nodes\", nodename=\"$node\"}) > 0)",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "timeFrom": null,
@@ -380,7 +401,10 @@
       "type": "stat"
     },
     {
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -427,7 +451,11 @@
           "format": "time_series",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "timeFrom": null,
@@ -437,7 +465,10 @@
       "type": "stat"
     },
     {
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -484,7 +515,11 @@
           "format": "time_series",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "timeFrom": null,
@@ -494,7 +529,10 @@
       "type": "stat"
     },
     {
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -542,7 +580,11 @@
           "format": "time_series",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "timeFrom": null,
@@ -553,7 +595,10 @@
     },
     {
       "collapsed": false,
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -570,7 +615,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -635,14 +683,22 @@
           "interval": "0.1s",
           "intervalFactor": 1,
           "legendFormat": "Load Average (1 Min)",
-          "refId": "B"
+          "refId": "B",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         },
         {
           "expr": "avg by (host) (cpustat_cpu{host=\"$node\"}[$__interval]) * 100",
           "interval": "0.1s",
           "intervalFactor": 1,
           "legendFormat": "CPU Usage",
-          "refId": "C"
+          "refId": "C",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         },
         {
           "expr": "avg by (host) (cpustat_wait{host=\"$node\"}[$__interval]) * 100",
@@ -650,7 +706,11 @@
           "interval": "0.1s",
           "intervalFactor": 1,
           "legendFormat": "I/O Wait",
-          "refId": "D"
+          "refId": "D",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [],
@@ -703,7 +763,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "decimals": 1,
       "description": "",
       "fieldConfig": {
@@ -762,7 +825,11 @@
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "Occupied",
-          "refId": "B"
+          "refId": "B",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         },
         {
           "expr": "avg by (host) (memory_memused{object=\"nodes\", host=\"$node\"} / memory_memtotal{object=\"nodes\", host=\"$node\"} * 100)",
@@ -770,7 +837,11 @@
           "interval": "0.1s",
           "intervalFactor": 1,
           "legendFormat": "Memory Usage",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [
@@ -840,7 +911,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -887,7 +961,11 @@
           "expr": "system_used{object=\"storages\", nodename=\"$node\"} / system_total{object=\"storages\", nodename=\"$node\"} * 100",
           "interval": "",
           "legendFormat": "{{host}}",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [
@@ -963,7 +1041,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "decimals": null,
       "fieldConfig": {
         "defaults": {
@@ -1010,7 +1091,11 @@
           "interval": "1",
           "intervalFactor": 1,
           "legendFormat": "{{ instance }} Rx",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         },
         {
           "expr": "abs(avg by (instance) (rate(nics_transmit{object=\"nodes\", host=\"$node\", instance=~\"(bond|vmbr).*\"})[$__interval])) * 8",
@@ -1018,7 +1103,11 @@
           "interval": "1",
           "intervalFactor": 1,
           "legendFormat": "{{ instance }} Tx",
-          "refId": "B"
+          "refId": "B",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [],
@@ -1066,7 +1155,10 @@
     },
     {
       "collapsed": true,
-      "datasource": "${DS_VICTORIAMETRICS}",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1080,7 +1172,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_VICTORIAMETRICS}",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -1133,7 +1228,11 @@
               "expr": "avg by (host) (system_cpu{object=\"$obj_types\", nodename=\"$node\"}[$__interval] != on(host) system_uptime{nodename=\"$node\", object=\"$obj_types\"}[$__interval]) * 100",
               "interval": "1s",
               "legendFormat": "{{host}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "victoriametrics-metrics-datasource",
+                "uid": "${ds}"
+              }
             }
           ],
           "thresholds": [],
@@ -1184,7 +1283,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_VICTORIAMETRICS}",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -1238,7 +1340,11 @@
               "interval": "1s",
               "intervalFactor": 10,
               "legendFormat": "{{host}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "victoriametrics-metrics-datasource",
+                "uid": "${ds}"
+              }
             }
           ],
           "thresholds": [
@@ -1306,7 +1412,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_VICTORIAMETRICS}",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -1360,7 +1469,11 @@
               "interval": "0.1s",
               "intervalFactor": 1,
               "legendFormat": "{{host}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "victoriametrics-metrics-datasource",
+                "uid": "${ds}"
+              }
             }
           ],
           "thresholds": [],
@@ -1411,7 +1524,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_VICTORIAMETRICS}",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -1465,7 +1581,11 @@
               "interval": "0.1s",
               "intervalFactor": 1,
               "legendFormat": "{{host}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "victoriametrics-metrics-datasource",
+                "uid": "${ds}"
+              }
             }
           ],
           "thresholds": [],
@@ -1516,7 +1636,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_VICTORIAMETRICS}",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -1571,7 +1694,11 @@
               "interval": "0.1s",
               "intervalFactor": 1,
               "legendFormat": "{{host}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "victoriametrics-metrics-datasource",
+                "uid": "${ds}"
+              }
             }
           ],
           "thresholds": [],
@@ -1622,7 +1749,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_VICTORIAMETRICS}",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -1677,7 +1807,11 @@
               "interval": "0.1s",
               "intervalFactor": 1,
               "legendFormat": "{{host}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "victoriametrics-metrics-datasource",
+                "uid": "${ds}"
+              }
             }
           ],
           "thresholds": [],
@@ -1741,9 +1875,25 @@
   "templating": {
     "list": [
       {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "ds",
+        "options": [],
+        "query": "victoriametrics-metrics-datasource",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_VICTORIAMETRICS}",
+        "datasource": {
+          "type": "victoriametrics-metrics-datasource",
+          "uid": "${ds}"
+        },
         "definition": "label_values(system_uptime{object=\"nodes\"}, host)",
         "hide": 0,
         "includeAll": false,
@@ -1765,7 +1915,10 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_VICTORIAMETRICS}",
+        "datasource": {
+          "type": "victoriametrics-metrics-datasource",
+          "uid": "${ds}"
+        },
         "definition": "query_result(cpustat_cpus{host=\"$node\"})",
         "hide": 2,
         "includeAll": false,
@@ -1787,7 +1940,10 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_VICTORIAMETRICS}",
+        "datasource": {
+          "type": "victoriametrics-metrics-datasource",
+          "uid": "${ds}"
+        },
         "definition": "query_result(system_uptime{nodename=\"$node\"} > 0)",
         "hide": 2,
         "includeAll": true,

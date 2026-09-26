@@ -84,6 +84,9 @@ case $1 in
     cp grafana/grafana.ini /etc/opt/grafana
     cp grafana/datasources.yml /etc/opt/grafana
     cp grafana/dashboard.yml /etc/opt/grafana
+    # Clear old dashboards so ones deleted from the repo stop being provisioned
+    mkdir -p /etc/opt/grafana/dashboards
+    rm -f /etc/opt/grafana/dashboards/*.json
     cp -r grafana/dashboards /etc/opt/grafana
     cp grafana/grafana.container /etc/containers/systemd
     cp grafana/grafanadata.volume /etc/containers/systemd
