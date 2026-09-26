@@ -2,12 +2,12 @@
 Setup a MacOS based computer to access homelab services, both remotely and locally. Also optimizes the Terminal app to access VM hosts and work on homelab code.
 
 ## Dependencies
-- Install xcode, homebrew, pip, git and other dependencies
+- Install xcode, homebrew, pipx, git and other dependencies
 ```bash
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install python pipx
 python3 --version
-python3 -m ensurepip --upgrade
 git --version
 ```
 
@@ -39,7 +39,8 @@ wget -O .vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.
 - Install tools
 ```bash
 brew install fd yq yamllint
-pip3 install jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
+pipx install jinjanator
+pipx inject jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 

@@ -10,3 +10,4 @@ For more details see:
 - [Installation](docs/installation.md)
 - [Development and code structure](docs/development.md)
 - [Maintenance commands](docs/maintenance.md)
+- [Debugging](docs/debugging.md)

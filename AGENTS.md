@@ -13,6 +13,7 @@ Infrastructure-as-code for a self-hosted homelab: configuration files, Jinja2 te
 - [Installation](docs/installation.md)
 - [Development and code structure](docs/development.md)
 - [Maintenance commands](docs/maintenance.md)
+- [Debugging](docs/debugging.md)
 - [Domain glossary](CONTEXT.md) and [decision records](docs/adr/)
 
 ## Agent skills
