@@ -107,6 +107,27 @@ auth-startup-queries: |
   pragma busy_timeout = 15000;
   vacuum;
 
+# Declarative users, access control entries and tokens. These are marked as "provisioned" in the
+# auth-file database; removing an entry here deletes it from the database on the next restart.
+#
+# - auth-users is a list of "<username>:<bcrypt-hash>:<role>" entries, role is "admin" or "user"
+# - auth-access is a list of "<username>:<topic-pattern>:<access>" entries, only for "user" roles
+# - auth-tokens is a list of "<username>:<token>[:<label>]" entries, generate with "ntfy token generate"
+#
+auth-users:
+  - "admin:{% raw %}{{ env('ntfy_admin_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:admin"
+  - "alert:{% raw %}{{ env('ntfy_alert_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:user"
+  - "hass:{% raw %}{{ env('ntfy_hass_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:user"
+  - "person:{% raw %}{{ env('ntfy_person_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:user"
+auth-access:
+  - "alert:alert*:rw"
+  - "alert:comment*:rw"
+  - "hass:hass*:rw"
+  - "person:hass*:ro"
+  - "person:chat*:rw"
+auth-tokens:
+  - "alert:{% raw %}{{ env('ntfy_alert_token') }}{% endraw %}:alert"
+
 # If set, the X-Forwarded-For header is used to determine the visitor IP address
 # instead of the remote address of the connection.
 #
