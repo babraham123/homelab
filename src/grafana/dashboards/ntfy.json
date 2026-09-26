@@ -442,7 +442,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "builder",
-          "expr": "ntfy_subscribers_total",
+          "expr": "ntfy_subscribers_total{job=\"$job\"}",
           "legendFormat": "Subscribers",
           "range": true,
           "refId": "A"
@@ -2316,6 +2316,19 @@
   "tags": [],
   "templating": {
     "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "DS_PROMETHEUS",
+        "options": [],
+        "query": "victoriametrics-metrics-datasource",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
       {
         "current": {},
         "datasource": {

@@ -20,7 +20,10 @@
   "panels": [
     {
       "cacheTimeout": null,
-      "datasource": null,
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "description": "Number of successful results compared to the total number of results during the current interval",
       "gridPos": {
         "h": 8,
@@ -81,7 +84,11 @@
           "expr": "sum(rate(gatus_results_total{success=\"true\"}[$__rate_interval])) by (key) / sum(rate(gatus_results_total[$__rate_interval])) by (key)",
           "hide": false,
           "legendFormat": "{{key}}",
-          "refId": "B"
+          "refId": "B",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "timeFrom": null,
@@ -95,7 +102,10 @@
       "cacheTimeout": null,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -138,7 +148,11 @@
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{key}}",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [],
@@ -188,7 +202,10 @@
       "cacheTimeout": null,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -231,7 +248,11 @@
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{key}}",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [],
@@ -280,7 +301,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "description": "Number of results per minute",
       "fill": 1,
       "fillGradient": 0,
@@ -328,7 +352,11 @@
           "interval": "30s",
           "intervalFactor": 1,
           "legendFormat": "{{key}}",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [],
@@ -378,7 +406,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -417,7 +448,11 @@
           "instant": false,
           "interval": "30s",
           "legendFormat": "{{key}}",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [],
@@ -467,7 +502,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -505,7 +543,11 @@
           "expr": "sum(rate(gatus_results_total{success=\"false\"}[$__rate_interval])*60) by (key)",
           "interval": "30s",
           "legendFormat": "{{key}} ",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          }
         }
       ],
       "thresholds": [],
@@ -555,7 +597,21 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "ds",
+        "options": [],
+        "query": "victoriametrics-metrics-datasource",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      }
+    ]
   },
   "time": {
     "from": "now-1h",
