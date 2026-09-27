@@ -136,8 +136,16 @@ derp:
 # Disables the automatic check for headscale updates on startup
 disable_check_updates: false
 
-# Time before an inactive ephemeral node is deleted?
-ephemeral_node_inactivity_timeout: 30m
+# Node lifecycle (headscale >= 0.29; replaces `ephemeral_node_inactivity_timeout` and
+# `oidc.expiry`).
+node:
+  # Default key expiry for every registration method, including OIDC. 0 = never, which
+  # is what pre-auth-key nodes (router, vpn) had before; OIDC logins previously expired
+  # after 30d via `oidc.expiry`, now they don't. Tagged nodes never expire.
+  expiry: 0
+  ephemeral:
+    # Time before an inactive ephemeral node is deleted.
+    inactivity_timeout: 30m
 
 database:
   # Database type. Available options: sqlite, postgres

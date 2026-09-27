@@ -47,8 +47,10 @@ the belief that ACLs don't work for pfSense subnet routes.
 - 2026-09-27: needs headscale >= 0.29 first (`tests` block; `*` now means tailnet
   addresses only, so subnet access must name the `hosts` CIDRs; `*:0` is rejected since
   0.27). The template was rewritten accordingly and `group:admin` reads `tailscale_admin`
-  from `vars.yml`. Today `policy.path` is `""` in `headscale_private.yaml.j2`, so no
-  policy is loaded at all; step 3 must set it to `/etc/headscale/acl.hujson`. Before
+  from `vars.yml`. Today `policy.path` is commented out in `headscale.yaml.j2` (the template
+  the live config comes from; `headscale_private.yaml.j2` is only the pre-OIDC bootstrap
+  config), so no policy is loaded at all; step 3 must set it to
+  `/etc/headscale/acl.hujson`. Before
   that, rename the CLI-created users (`admin@`, `jayden@`, `public@`, `guest1@`,
   `cousin@`) to drop the trailing `@`, or the policy fails to resolve them
   (`headscale users rename -i ID --new-name NAME`). Users were renamed 2026-09-27. `cousin` gets its rule via
