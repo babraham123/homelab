@@ -14,7 +14,7 @@ if [ ! -f "$file" ]; then
   exit 1
 fi
 
-sed -nE 's/^[[:space:]]+([a-zA-Z0-9_]+)\).*$/\1/p' "$file" | \
+sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$file" | \
   while read -r cmd; do
   echo "  install_${cmd})"
   echo "    sudo /root/homelab-rendered/${file} ${cmd}"
@@ -22,7 +22,7 @@ sed -nE 's/^[[:space:]]+([a-zA-Z0-9_]+)\).*$/\1/p' "$file" | \
 done
 
 echo "  install_all_svcs)"
-sed -nE 's/^[[:space:]]+([a-zA-Z0-9_]+)\).*$/\1/p' "$file" | \
+sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$file" | \
   while read -r cmd; do
   echo "    sudo /root/homelab-rendered/${file} ${cmd}"
 done

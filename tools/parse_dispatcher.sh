@@ -35,7 +35,7 @@ sed -nE 's/^[[:space:]]*sudo[[:space:]]+(.+)$/\1/p' "$file" | \
   done
 
 echo -e "\n${host}_commands:"
-sed -nE 's/^[[:space:]]+([a-zA-Z0-9_]+)\).*$/\1/p' "$file" | \
+sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$file" | \
   while read -r cmd; do
     echo "  - ${cmd}"
   done

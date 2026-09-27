@@ -48,6 +48,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_alertmanager)
     sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh alertmanager
     ;;
+  install_ntfy-alertmanager)
+    sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh ntfy-alertmanager
+    ;;
   install_ntfy)
     sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh ntfy
     ;;
@@ -73,6 +76,7 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh gatus
     sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh vmalert
     sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh alertmanager
+    sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh ntfy-alertmanager
     sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh ntfy
     sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh grafana
     sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh vault
@@ -99,6 +103,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     ;;
   copy_acme_certs)
     sudo /root/homelab-rendered/src/debian/commands.sh copy_acme_certs
+    ;;
+  pg_dumpall)
+    sudo /root/homelab-rendered/src/secsvcs/commands.sh pg_dumpall
     ;;
   build_haproxy_mapper)
     /root/homelab-rendered/src/secsvcs/commands.sh build_haproxy_mapper

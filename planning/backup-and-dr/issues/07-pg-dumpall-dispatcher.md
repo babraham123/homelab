@@ -1,6 +1,6 @@
 # 07. pg_dumpall via dispatcher, triggered by the orchestrator
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 6
@@ -30,3 +30,6 @@ captured crash-consistently inside the VM disk image.
   container recreates all roles and databases.
 
 ## Comments
+
+2026-09-27: Added `commands.sh pg_dumpall` (dumps over TCP to the container hostname with `PGPASSWORD` from `get_secret.sh`, so scram applies; atomic `.tmp`→final, keeps 14, `chmod 600`) and the dispatcher case; sudoers/Olive Tin pick it up via render. Added `zstd` to the Podman guide's apt list. The orchestrator call belongs to issue 01, which is blocked on this one.
+Human: `apt install zstd` on secsvcs, deploy, run `ssh autoadmin@secsvcs pg_dumpall`, and test-restore into a scratch container with `psql -f`.
