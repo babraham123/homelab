@@ -167,6 +167,10 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
   backups over redundancy.
 - **Proxmox Backup Server** (`pbs2`, on pve2) backs up VM disks with prune/GC
   schedules.
+- `ssh autoadmin@secsvcs pg_dumpall` writes a logical Postgres dump to
+  `/var/opt/backups/postgres/` on secsvcs (last 14 kept), so the next VM backup carries
+  an application-consistent copy. Restore into a fresh container with
+  `zstd -dc FILE | podman exec -i CONTAINER psql -U postgres`.
 - pfSense uses the Auto Config Backup package; PVE/PBS `/etc` is tarballed
   separately.
 - Podman volume backup is a documented manual procedure (stop services in reverse
