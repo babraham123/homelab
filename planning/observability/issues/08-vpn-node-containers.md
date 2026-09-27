@@ -58,9 +58,8 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
 - The telemetry names resolve to secsvcs through `/etc/hosts`, a manual step in
   `docs/guides/vpn.md.j2`.
 - Secrets pipeline on the VPS (`/etc/opt/secrets/secrets.yaml.age`): check that
-  `secret_update.sh vpn` already works there; add the vmagent remote-write credential.
-  Open: whether that's the admin password or a write-only user (observability/04 open
-  question 1).
+  `secret_update.sh vpn` already works there; add `victoriametrics_admin_password` for
+  vmagent, the same credential the other vmagents use (maintainer decision 2026-09-27).
 - The VPS joins the image-updater rollout (image-updater/05) so its images are scanned
   like the others.
 - Alerts: `src/vmalert/configs/vps.yml` with `VpsMetricsAbsent`

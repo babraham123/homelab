@@ -108,7 +108,7 @@ reachable over the tailnet, so it watches from outside.
   (Alertmanager unreachable / Watchdog missing / ntfy down / tailnet down).
 - If the VPS itself or its tailnet link dies, the checker can't tell, so the check must
   fail *closed*: any error counts as a failure. The mirror image, VPS down, is covered by
-  observability/01 `NodeDown` on the vpn node's node_exporter (via observability/04 or 08).
+  observability/08's `VpsMetricsAbsent` (a pushing host can't raise `NodeDown`).
 
 ## Also
 

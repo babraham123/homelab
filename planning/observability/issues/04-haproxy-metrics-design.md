@@ -60,7 +60,7 @@ reference the VPS by `vpn.ip`.
   - Q3: no `check` on the HAProxy servers; alert on backend connection errors instead.
   - Q4: split. 08 is the VPS containers, 12 is the HAProxy metrics, 11 is the vmagent
     buffer.
-  - Q1 is still open.
+  - Q1: keep the admin password for the VPS vmagent; no write-only route.
 
 ## Answer
 
@@ -263,7 +263,7 @@ Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
 
    This drops 08's `net.network` prerequisite: with no netavark bridge, nftables stays
    untouched. Keep 08's `nft list ruleset` before/after check to confirm.
-5. **Remote-write credential.** Decide per open question 1.
+5. **Remote-write credential.** The admin password, as on the other nodes (maintainer).
 6. **Alerts.** Add `src/vmalert/configs/vps.yml`. Exclude the VPS from `NodeDown` in
    observability/01; `VpsMetricsAbsent` replaces it there.
 7. **Dashboard.** Import Grafana.com 12693 as `src/grafana/dashboards/haproxy.json` and
