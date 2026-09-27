@@ -18,6 +18,15 @@ users:
   - jane
   - jayden
   - jasper
+# Headscale user that gets the admin ACL rules. Must match `headscale users list`.
+tailscale_admin: jane
+# Extra Headscale ACL rules, appended verbatim to `acls` in headscale_acl.hujson.j2.
+# Users not in `users` get nothing unless listed here. Hosts from the template's
+# `hosts` block may be used (lan, pve1, pve2, ...).
+tailscale_extra_acls: []
+#  - action: accept
+#    src: ["cousin@"]
+#    dst: ["cousin@:*", "pve1:*", "pve2:*"]
 
 repo: "https://github.com/babraham123/homelab"
 site:

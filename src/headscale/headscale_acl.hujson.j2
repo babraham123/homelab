@@ -1,16 +1,26 @@
 // /etc/headscale/acl.hujson
-// Not currently in use
+// Not loaded until `policy.path` is set in headscale_private.yaml (planning/router/issues/03).
+// Requires headscale >= 0.29 (`tests` block; `*` means tailnet addresses only, so LAN
+// subnets must be named explicitly via `hosts`).
 // Ref:
 //   https://tailscale.com/kb/1018/acls/
-//   https://headscale.net/stable/ref/acls/
-// tests: https://github.com/juanfont/headscale/blob/main/hscontrol/policy/acls_test.go
+//   https://headscale.net/stable/ref/policy/
+//   https://headscale.net/stable/ref/oidc/#reference-a-user-in-the-policy
+// Users: `name@` refers to a Headscale user. OIDC logins (Authelia) get their username
+// from `preferred_username`, so an LLDAP user `jane` is `jane@`. Headscale strips one trailing
+// `@` and matches the stored name, so a user created as `jane@` never matches: store names
+// without `@`. Guests are the `guest1` user (vpn.md.j2 "Guest users"); one-off rules come from
+// `tailscale_extra_acls` in vars.yml. OIDC groups can't be used in policy rules (juanfont/headscale#2366, see
+// planning/auth/issues/09-headscale-oidc-groups.md); membership is defined in `groups` below.
 {
   // groups are collections of users having a common scope. A user can be in multiple groups
   // groups cannot be composed of groups
   "groups": {
-    "group:family": ["{{ users | join('"@, "') }}@"],
+    "group:admin": ["{{ tailscale_admin }}@"],
+    "group:family": ["{{ users | join('@", "') }}@"],
     // add_more_users
-    // "group:guests": ["guest1@"],
+    // guests: visitors' devices, created per docs/guides/vpn.md.j2 "Guest users"
+    "group:guests": ["guest1@"],
   },
   // hosts should be defined using its IP addresses and a subnet mask.
   // to define a single host, use a /32 mask. You cannot use DNS entries here,
@@ -29,89 +39,119 @@
     "secsvcs": "{{ secsvcs.ip }}/32",
     "homesvcs": "{{ homesvcs.ip }}/32",
   },
-  // There's an additional rule to allow traffic to be
-  // forwarded to the internal subnet. See this issue
-  // https://github.com/juanfont/headscale/issues/502
+  // Subnet routes advertised by pfSense are reached by naming the CIDR in `dst`; the
+  // ACL is enforced on the router before SNAT, in netstack and kernel mode alike.
   "acls": [
+    // admin: every tailnet node, every routed subnet, and the exit node
     {
       "action": "accept",
-      "src": ["admin@"],
-      "dst": ["*:*", "autogroup:internet:*"]
+      "src": ["group:admin"],
+      "dst": [
+        "*:*",
+        "router:*",
+        "pve1:*",
+        "pve2:*",
+        "lan:*",
+        "lan2:*",
+        "wifitrusted:*",
+        "wiredtrusted:*",
+        "autogroup:internet:*",
+      ]
     },
+    // family: the home subnets and the exit node, not other users' devices
+    {
+      "action": "accept",
+      "src": ["group:family"],
+      "dst": [
+        "pve1:*",
+        "pve2:*",
+        "lan:*",
+        "lan2:*",
+        "wifitrusted:*",
+        "wiredtrusted:*",
+        "autogroup:internet:*",
+      ]
+    },
+    // guests: HTTPS (and HTTP redirect) on the service VMs, plus Moonlight streaming
+    // from the gaming VM (Sunshine's default ports, minus the 47990 web UI where pairing
+    // is approved). No exit node, no Proxmox/pfSense GUIs, no LAN. Authelia still gates
+    // each app.
+    {
+      "action": "accept",
+      "src": ["group:guests"],
+      "dst": [
+        "secsvcs:80,443",
+        "websvcs:80,443",
+        "homesvcs:80,443",
+        "gaming:47984,47989,47998-48000,48010",
+      ]
+    },
+    // public endpoint (HAProxy on the VPS, user `public`): only the web front doors.
+    // Mirrors the ufw egress rules in docs/guides/vpn.md.j2.
     {
       "action": "accept",
       "src": ["public@"],
-      "dst": ["*:*", "autogroup:internet:*"]
-    },
-    // TODO: fix this with machine tags
-    {
-      "action": "accept",
-      "src": ["PUBLIC_TAILNET_IP/32"],
-      "dst": ["*:*", "autogroup:internet:*"]
-    },
-
-    // autogroup:internet enables public internet access via exit node
-    {
-      "action": "accept",
-      "src": ["{{ users | join('"@, "') }}@"],
       "dst": [
-        "autogroup:internet:*",
-        "*:*"
+        "secsvcs:80,443",
+        "websvcs:80,443",
+        "homesvcs:80,443",
       ]
-    }
+    },
 
-    // TODO: re-enable. Subnet ACLs are enforced before pfSense's SNAT, so SNAT doesn't block
-    //   this; untested since. See planning/router/issues/03-headscale-acl-matrix.md
-    // // family can access entire VPN
-    // {
-    //   "action": "accept",
-    //   "src": ["group:family"],
-    //   "dst": [
-    //     "*:0",
-    //     "pve1:*",
-    //     "pve2:*",
-    //     "lan:*",
-    //     "lan2:*",
-    //     "wifitrusted:*",
-    //     "wiredtrusted:*",
-    //   ]
-    // },
-    // // guests can access useful services
-    // {
-    //   "action": "accept",
-    //   "src": ["group:guests"],
-    //   "dst": [
-    //     "*:0",
-    //     "pve1:*",
-    //     "pve2:*"
-    //   ]
-    // },
-    // // public endpoint can access web services
-    // {
-    //   "action": "accept",
-    //   "src": ["public@"],
-    //   "dst": [
-    //     "*:0",
-    //     "secsvcs:80,443",
-    //     "websvcs:80,443"
-    //   ]
-    // },
-
-    // We still have to allow internal users communications since nothing guarantees that each user
-    // has access to themselves or to exit nodes.
+    // Each user can reach their own devices; nothing above guarantees that.
+    // `admin@` is the CLI user the router and VM nodes were registered under.
     { "action": "accept", "src": ["admin@"], "dst": ["admin@:*"] },
     { "action": "accept", "src": ["public@"], "dst": ["public@:*"] },
 {% for user in users %}
     { "action": "accept", "src": ["{{ user }}@"], "dst": ["{{ user }}@:*"] },{% endfor %}
-    // add_more_users
-    // TODO: add support for guests when ACLs work for subnets
-    // { "action": "accept", "src": ["guest1@"], "dst": ["guest1@:*"] },
+    { "action": "accept", "src": ["guest1@"], "dst": ["guest1@:*"] },
+
+    // Escape hatch: `tailscale_extra_acls` from vars.yml, appended verbatim.
+{% for rule in tailscale_extra_acls | default([]) %}
+    {{ rule | tojson }},{% endfor %}
   ],
+  // Evaluated by `headscale policy check` and on every policy load (0.29+).
   "tests": [
+    // admin: everything, including management GUIs and every subnet
+    {
+      "src": "{{ tailscale_admin }}@",
+      "accept": [
+        "{{ pve1.ip }}:8006", "{{ pve2.ip }}:22", "{{ router.ip }}:443",
+        "{{ secsvcs.ip }}:22", "{{ lan.subnet }}.50:443", "{{ lan2.subnet }}.50:22",
+        "{{ wifi.trusted.subnet }}.50:80", "{{ wired.trusted.subnet }}.50:80",
+      ],
+    },
+    // family: home subnets but not the IoT/guest VLANs, which aren't advertised
+    {
+      "src": "{{ users[-1] }}@",
+      "accept": [
+        "{{ pve1.ip }}:22", "{{ secsvcs.ip }}:443", "{{ homesvcs.ip }}:8123",
+        "{{ router.ip }}:443", "{{ lan.subnet }}.50:445", "{{ wifi.trusted.subnet }}.50:80",
+      ],
+      "deny": ["{{ wifi.iot.subnet }}.50:80", "{{ wifi.guest.subnet }}.50:80"],
+    },
+    // public endpoint (HAProxy): web front doors only
     {
       "src": "public@",
-      "accept": ["{{ websvcs.ip }}:443", "{{ secsvcs.ip }}:80"],
-      "deny": ["{{ pve2.ip }}:443", "{{ pve2.subnet }}.1:443"],
-    }
+      "accept": ["{{ websvcs.ip }}:443", "{{ secsvcs.ip }}:80", "{{ homesvcs.ip }}:443"],
+      "deny": [
+        "{{ pve2.ip }}:443", "{{ pve2.subnet }}.1:443", "{{ secsvcs.ip }}:22",
+        "{{ homesvcs.ip }}:8123", "{{ router.ip }}:443", "{{ lan.subnet }}.50:443",
+      ],
+    },
+    // guests: web front doors only, nothing else on the subnets
+    {
+      "src": "guest1@",
+      "accept": [
+        "{{ websvcs.ip }}:443", "{{ secsvcs.ip }}:443", "{{ homesvcs.ip }}:80",
+        "{{ gaming.ip }}:47989", "{{ gaming.ip }}:47999", "{{ gaming.ip }}:48010",
+      ],
+      "deny": [
+        "{{ pve1.ip }}:8006", "{{ pve2.ip }}:22", "{{ router.ip }}:443",
+        "{{ secsvcs.ip }}:22", "{{ homesvcs.ip }}:8123", "{{ websvcs.ip }}:5432",
+        "{{ gaming.ip }}:47990", "{{ gaming.ip }}:3389", "{{ gaming.ip }}:22",
+        "{{ lan.subnet }}.50:443", "{{ wifi.trusted.subnet }}.50:80",
+      ],
+    },
   ]
 }
