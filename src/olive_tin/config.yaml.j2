@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/olive_tin/config/config.yaml
 ---
 # Listen on all addresses available, port 1337
@@ -99,7 +100,7 @@ dashboards:
       - title: secsvcs
         type: fieldset
         contents:
-{% for cmd in secsvcs_commands %}
+{% for cmd in inv.commands.secsvcs %}
           - inlineAction:
               title: secsvcs {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
@@ -111,7 +112,7 @@ dashboards:
       - title: homesvcs
         type: fieldset
         contents:
-{% for cmd in homesvcs_commands %}
+{% for cmd in inv.commands.homesvcs %}
           - inlineAction:
               title: homesvcs {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
@@ -123,7 +124,7 @@ dashboards:
       - title: websvcs
         type: fieldset
         contents:
-{% for cmd in websvcs_commands %}
+{% for cmd in inv.commands.websvcs %}
           - inlineAction:
               title: websvcs {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
@@ -135,7 +136,7 @@ dashboards:
       - title: pve1
         type: fieldset
         contents:
-{% for cmd in pve1_commands %}
+{% for cmd in inv.commands.pve1 %}
           - inlineAction:
               title: pve1 {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
@@ -147,7 +148,7 @@ dashboards:
       - title: pve2
         type: fieldset
         contents:
-{% for cmd in pve2_commands %}
+{% for cmd in inv.commands.pve2 %}
           - inlineAction:
               title: pve2 {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
@@ -159,7 +160,7 @@ dashboards:
       - title: vpn
         type: fieldset
         contents:
-{% for cmd in vpn_commands %}
+{% for cmd in inv.commands.vpn %}
           - inlineAction:
               title: vpn {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
@@ -171,7 +172,7 @@ dashboards:
       - title: router
         type: fieldset
         contents:
-{% for cmd in router_commands %}
+{% for cmd in inv.commands.router %}
           - inlineAction:
               title: router {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:router"></iconify-icon>
@@ -183,7 +184,7 @@ dashboards:
       - title: gaming
         type: fieldset
         contents:
-{% for cmd in gaming_commands %}
+{% for cmd in inv.commands.gaming %}
           - inlineAction:
               title: gaming {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:videogame-asset"></iconify-icon>
@@ -195,7 +196,7 @@ dashboards:
       - title: devtop
         type: fieldset
         contents:
-{% for cmd in devtop_commands %}
+{% for cmd in inv.commands.devtop %}
           - inlineAction:
               title: devtop {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>

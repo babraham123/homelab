@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/haproxy/haproxy.cfg
 # Ref: https://www.haproxy.org/download/2.6/doc/configuration.txt
 # Ref: https://www.haproxy.com/blog/the-four-essential-sections-of-an-haproxy-configuration
@@ -68,13 +69,13 @@ frontend https_all
     acl vpn_host req.ssl_sni -i vpn.{{ site.url }}
     use_backend local_https_vpn if vpn_host
 
-{% for svc in secsvcs_subdomains %}
+{% for svc in inv.subdomains.secsvcs %}
     acl {{ svc }} req.ssl_sni -i {{ svc }}.{{ site.url }}{% endfor %}
-    use_backend secsvcs_https_proxy if {{ secsvcs_subdomains | join(' || ') }}
+    use_backend secsvcs_https_proxy if {{ inv.subdomains.secsvcs | join(' || ') }}
 
-{% for svc in homesvcs_subdomains %}
+{% for svc in inv.subdomains.homesvcs %}
     acl {{ svc }} req.ssl_sni -i {{ svc }}.{{ site.url }}{% endfor %}
-    use_backend homesvcs_https_proxy if {{ homesvcs_subdomains | join(' || ') }}
+    use_backend homesvcs_https_proxy if {{ inv.subdomains.homesvcs | join(' || ') }}
 
     # Let the remaining subdomains fall thru for ACME
     acl tld req.ssl_sni -i {{ site.url }}
@@ -113,13 +114,13 @@ frontend http_all
     acl vpn_host hdr(host) -i vpn.{{ site.url }}
     use_backend local_http_vpn if vpn_host
 
-{% for svc in secsvcs_subdomains %}
+{% for svc in inv.subdomains.secsvcs %}
     acl {{ svc }} hdr(host) -i {{ svc }}.{{ site.url }}{% endfor %}
-    use_backend secsvcs_http_proxy if {{ secsvcs_subdomains | join(' || ') }}
+    use_backend secsvcs_http_proxy if {{ inv.subdomains.secsvcs | join(' || ') }}
 
-{% for svc in homesvcs_subdomains %}
+{% for svc in inv.subdomains.homesvcs %}
     acl {{ svc }} hdr(host) -i {{ svc }}.{{ site.url }}{% endfor %}
-    use_backend homesvcs_http_proxy if {{ homesvcs_subdomains | join(' || ') }}
+    use_backend homesvcs_http_proxy if {{ inv.subdomains.homesvcs | join(' || ') }}
 
     # Let the remaining subdomains fall thru to websvcs
     acl tld hdr(host) -i {{ site.url }}

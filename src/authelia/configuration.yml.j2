@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/authelia/config/configuration.yml
 ---
 # v4.38.10
@@ -2030,8 +2031,8 @@ identity_providers:
         public: false
 
         ## Audience this client is allowed to request.
-        audience:{% for url in uptime_internal_urls %}
-          - 'https://{{ url | urlsplit("hostname") }}'{% endfor %}
+        audience:{% for host in inv.uptime | map(attribute='host') | sort %}
+          - 'https://{{ host }}'{% endfor %}
 
         requested_audience_mode: 'implicit'
 

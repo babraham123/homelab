@@ -22,27 +22,14 @@ pushd "$project_dir"
 rm -rf .git .gitignore vars.yml .vscode .fdignore notes planning
 popd
 
-# Assemble jinja2 config file
+# Assemble jinja2 config file. jinjanate takes one data file, so the node inventory
+# is appended to vars.yml rather than passed alongside it.
 cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
 {
   # Exclude the ending "..."
   head -n "$((cut_line-1))" vars.yml
-
-  tools/parse_routes.sh secsvcs
-  tools/parse_routes.sh homesvcs
-  # websvcs doesn't need to be parsed because it is the default route
-  tools/parse_uptime_urls.sh src/gatus/config.yaml.j2
-
-  tools/parse_dispatcher.sh pve1
-  tools/parse_dispatcher.sh pve2
-  tools/parse_dispatcher.sh secsvcs
-  tools/parse_dispatcher.sh homesvcs
-  tools/parse_dispatcher.sh websvcs
-  tools/parse_dispatcher.sh vpn
-  tools/parse_dispatcher.sh devtop
-  tools/parse_dispatcher.sh router
-  tools/parse_dispatcher.sh gaming
-
+  echo
+  cat src/nodes.yml
   echo -e "...\n"
 } > all_vars.yml
 
@@ -73,14 +60,43 @@ $fdfind . --extension json | xargs -I% \
 $fdfind . --extension container | xargs grep -h "IP=" | \
   sort | uniq -d | grep . && { echo "error: duplicate IPs found" >&2; exit 1; }
 
-# Validate every install_svcs.sh case is reachable through the node's dispatcher
-for install_file in src/*/install_svcs.sh; do
-  dispatcher="$(dirname "$install_file")/dispatcher.sh"
-  [ -f "$dispatcher" ] || continue
-  sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$install_file" | while read -r svc; do
-    grep -qE "^[[:space:]]+install_${svc}\)" "$dispatcher" || \
-      { echo "error: ${dispatcher} is missing install_${svc}" >&2; exit 1; }
+# Validate the node inventory against the scripts its dispatcher cases call
+fail() { echo "error: $*" >&2; exit 1; }
+cases() { sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$1" | sort -u; }
+inventory() { node="$1" yq "$2" src/nodes.yml; }
+
+for node in $(yq '.nodes | keys | .[]' src/nodes.yml); do
+  install_file="src/${node}/install_svcs.sh"
+  actual=""
+  [ -f "$install_file" ] && actual=$(cases "$install_file")
+  listed=$(inventory "$node" '.nodes[strenv(node)].services // {} | keys | .[]' | sort -u)
+  [[ "$listed" == "$actual" ]] || \
+    fail "src/nodes.yml ${node}.services doesn't match the cases in ${install_file}"
+
+  for svc in $(inventory "$node" '.nodes[strenv(node)].debian_services // [] | .[]'); do
+    cases src/debian/install_svcs.sh | grep -qx "$svc" || \
+      fail "src/debian/install_svcs.sh has no ${svc} case (src/nodes.yml ${node}.debian_services)"
   done
+
+  inventory "$node" '.nodes[strenv(node)].commands // [] | .[] | select(has("script")) | .name + " " + .script' | \
+    while read -r name script; do
+      [ -f "src/${script}" ] || fail "src/${script} doesn't exist (src/nodes.yml ${node}.commands)"
+      cases "src/${script}" | grep -qx "$name" || fail "src/${script} has no ${name} case"
+    done
+done
+
+subdomains='.nodes[] | select(has("services")) | .services[] | select(has("subdomain")) | .subdomain'
+dups=$(yq "$subdomains" src/nodes.yml | sort | uniq -d)
+[ -z "$dups" ] || fail "subdomains listed more than once in src/nodes.yml: ${dups}"
+
+# The subdomain lists drive DNS and SNI routing, so they must match what Traefik serves.
+# websvcs is the default route and needs no entries.
+for node in secsvcs homesvcs; do
+  routed=$(yq --yaml-fix-merge-anchor-to-spec=true '.http.routers[].rule' "src/${node}/traefik/routes.yml" | \
+    grep -oE 'Host\(`[^.`]+\.' | sed -E 's/^Host\(`//; s/\.$//' | sort -u)
+  listed=$(inventory "$node" '.nodes[strenv(node)].services[] | select(has("subdomain")) | .subdomain' | sort -u)
+  [[ "$routed" == "$listed" ]] || \
+    fail "src/nodes.yml ${node} subdomains don't match the Host() rules in src/${node}/traefik/routes.yml"
 done
 
 rm -f "${project_dir}"/**/.DS_Store
