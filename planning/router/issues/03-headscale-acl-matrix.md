@@ -60,3 +60,4 @@ the belief that ACLs don't work for pfSense subnet routes.
   `docs/guides/vpn.md.j2` "Guest users") gets HTTP/HTTPS on secsvcs, websvcs and homesvcs only, the same surface as
   the public endpoint; no exit node, no LAN, no Proxmox/pfSense GUIs. Policy `tests`
   cover admin, family, public and guest.
+- 2026-09-27: tagging the router/vpn nodes and setting `node.expiry` is router/05, blocked on this.

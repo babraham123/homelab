@@ -15,4 +15,4 @@ Tracked in git since 2026-09-26 (moved from the gitignored `.scratch/`). One dir
 - [Scanned image updater](image-updater/spec.md) — 7 issues (from `notes/image-updater-design.md`, added 2026-09-26)
 - [copyparty and car data upload](copyparty/spec.md) — 4 issues (maintainer request, added 2026-09-26)
 - [Vaultwarden](vaultwarden/spec.md) — 1 issue (maintainer request, added 2026-09-26)
-- [Router and network](router/spec.md) — 4 issues (maintainer request, added 2026-09-26)
+- [Router and network](router/spec.md) — 5 issues (maintainer request, added 2026-09-26)
