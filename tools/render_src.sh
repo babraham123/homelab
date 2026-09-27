@@ -73,5 +73,15 @@ $fdfind . --extension json | xargs -I% \
 $fdfind . --extension container | xargs grep -h "IP=" | \
   sort | uniq -d | grep . && { echo "error: duplicate IPs found" >&2; exit 1; }
 
+# Validate every install_svcs.sh case is reachable through the node's dispatcher
+for install_file in src/*/install_svcs.sh; do
+  dispatcher="$(dirname "$install_file")/dispatcher.sh"
+  [ -f "$dispatcher" ] || continue
+  sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$install_file" | while read -r svc; do
+    grep -qE "^[[:space:]]+install_${svc}\)" "$dispatcher" || \
+      { echo "error: ${dispatcher} is missing install_${svc}" >&2; exit 1; }
+  done
+done
+
 rm -f "${project_dir}"/**/.DS_Store
 echo "Rendered the repo into ${project_dir}"
