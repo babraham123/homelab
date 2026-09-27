@@ -1,2 +1,3 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # Allow autoadmin to run these specific commands without a password
-autoadmin ALL=(root) NOPASSWD: {{ homesvcs_sudo_cmds | join(', ') }}
+autoadmin ALL=(root) NOPASSWD: {{ inv.sudo_cmds.homesvcs | join(', ') }}

@@ -12,7 +12,7 @@
 - `vars.yml` contains specific/personal values for rendering (gitignored), `vars.template.yml` is an example
 - All `*.j2` files are processed through Jinja2 via `jinjanate` at render time
 - `*.j2.j2` files undergo a *second* render pass at service startup (e.g., for secrets injection via `src/podman/render_secrets.sh`)
-- `tools/parse_routes.sh` and `tools/parse_uptime_urls.sh` generate additional variables dynamically during rendering
+- `src/nodes.yml` is the node inventory: each node's dispatcher entries (services in install order, other commands) and each service's subdomain and Gatus endpoint. `render_src.sh` appends it to `vars.yml` as `nodes:`, and templates import `src/nodes.jinja` for the lists derived from it (dispatcher cases, sudoers grants, OliveTin buttons, DNS/SNI subdomains, uptime endpoints). See [ADR 0006](adr/0006-node-inventory.md)
 
 ### Service Structure
 
@@ -49,10 +49,10 @@ From template to running container, a change passes through five stages:
 flowchart TB
     subgraph local["Local workstation"]
         vars["vars.yml<br/>real values, gitignored"]
-        parse["Dynamic variables:<br/>parse_routes.sh → per-node subdomains<br/>parse_uptime_urls.sh → Gatus URLs<br/>parse_dispatcher.sh → sudoers command lists"]
+        inventory["src/nodes.yml inventory:<br/>dispatcher entries, subdomains,<br/>Gatus endpoints"]
         allvars["all_vars.yml"]
         render["render_src.sh: jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
-        validate["Validation: yamllint, jq on all JSON,<br/>duplicate container-IP check"]
+        validate["Validation: yamllint, jq on all JSON,<br/>duplicate container-IP check,<br/>nodes.yml vs install_svcs.sh / routes.yml"]
         upload["upload_src.sh per node: scp as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
     end
 
@@ -62,7 +62,7 @@ flowchart TB
     end
 
     vars --> allvars
-    parse --> allvars
+    inventory --> allvars
     allvars --> render --> validate --> upload
     upload -- "ssh autoadmin@node" --> dispatch
     dispatch -- "systemctl start" --> second
@@ -74,7 +74,7 @@ flowchart TB
     classDef onnode stroke:#a78bfa,fill:transparent
     classDef check stroke:#fbbf24,fill:transparent
     classDef secret stroke:#f87171,fill:transparent
-    class vars,parse input
+    class vars,inventory input
     class allvars,render,upload step
     class dispatch onnode
     class validate check
@@ -97,7 +97,11 @@ Render templates locally:
 ```bash
 tools/render_src.sh /tmp/homelab-rendered
 ```
-Rendering also validates YAML, JSON, and checks for duplicate container IPs.
+Rendering also validates YAML, JSON, checks for duplicate container IPs, and checks
+`src/nodes.yml` against the scripts and routes it describes: each node's `services`
+must be exactly its `install_svcs.sh` cases, every command must be a case in its
+script, subdomains must be unique, and the secsvcs/homesvcs subdomains must match the
+`Host()` rules in their `traefik/routes.yml`.
 
 Upload rendered files to a specific server:
 ```bash
@@ -119,7 +123,10 @@ sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh SERVICE
 1. Create service container and config files in `src/<service>/`
 1. If cross-VM TLS is needed, add cert/key gen to `src/certificates/` and update `commands.sh`
 1. Add service to `install_svcs.sh`
+1. Add it under the node's `services` in `src/nodes.yml`, in install order, with its
+   `subdomain` and, to monitor it in Gatus, `uptime` (and `uptime_path` if the health
+   check isn't `/`). This adds the dispatcher case, sudoers grant, OliveTin button,
+   DNS/SNI routing and uptime check
 1. Update Authelia config if OIDC auth is available (`src/authelia/`)
-1. Add Gatus uptime check (`src/gatus/config.yaml`)
 1. Add Homepage dashboard entry (`src/homepage/`)
 1. Update the relevant guide in `docs/guides/`

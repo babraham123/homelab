@@ -184,6 +184,7 @@ Recorded as ADRs in `docs/adr/`:
 - [Self-hosted Headscale instead of managed Tailscale](adr/0003-self-hosted-headscale.md)
 - [SOPS + AGE for secrets instead of a secrets manager](adr/0004-sops-age-secrets.md)
 - [SSH forced-command dispatcher instead of a config-management agent](adr/0005-ssh-forced-command-dispatcher.md)
+- [Declared node inventory instead of parsing configs at render time](adr/0006-node-inventory.md)
 
 ## Secrets
 

@@ -6,7 +6,8 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 ## Nodes and naming
 
 - **node** — a machine with a directory under `src/` holding its `install_svcs.sh`,
-  `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config. The nodes:
+  `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config, and an entry in
+  `src/nodes.yml`. The nodes:
   `pve1`, `pve2`, `router`, `vpn`, `secsvcs`, `homesvcs`, `websvcs`, `devtop`,
   `gaming`. `src/debian/` and `src/macos/` are shared base setups, not nodes.
 - **service** — any other directory under `src/`; one containerized (or host-level)
@@ -25,14 +26,16 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   **vars.template.yml** — its committed stand-in with fake values; used to render
   the public guides and quoted in all docs.
 - **render** (first pass) — `tools/render_src.sh`: jinjanate every `*.j2` against
-  `vars.yml` plus dynamically parsed variables, stripping one `.j2` extension.
+  `vars.yml` plus the node inventory, stripping one `.j2` extension.
 - **second pass** — files named `*.j2.j2` survive the render as `*.j2` and are
   rendered again *at container startup* by `render_secrets.sh` / `render_host.sh`,
   injecting SOPS/AGE secrets or per-host parameters. Plaintext secrets never sit in
   the rendered tree.
-- **parse scripts** — `tools/parse_routes.sh`, `parse_uptime_urls.sh`,
-  `parse_dispatcher.sh`: derive template variables (subdomain lists, uptime URLs,
-  sudoers command lists) from other configs, so those lists never drift by hand.
+- **node inventory** — `src/nodes.yml`: per node, the dispatcher entries (services
+  in install order, other commands) and each service's subdomain and Gatus endpoint.
+  `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI subdomain
+  lists and uptime endpoints from it; the render checks it against `install_svcs.sh`
+  and `routes.yml`.
 - **rendered tree** — `/root/homelab-rendered` on each node: the uploaded output of
   a render, the only thing scripts on the node execute from.
 
@@ -43,8 +46,8 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 - **autoadmin** — the automation SSH account. Its key is bound to a ForceCommand.
 - **dispatcher** — `src/<node>/dispatcher.sh`, the ForceCommand script that
   whitelists exact `$SSH_ORIGINAL_COMMAND` strings and maps them to `install_svcs.sh`
-  / `commands.sh` invocations. Its command list is parsed into the node's generated
-  sudoers file, so the whitelist and the sudo grants can't diverge.
+  / `commands.sh` invocations. It and the node's sudoers file are rendered from the
+  same node inventory entries, so the whitelist and the sudo grants can't diverge.
 - **commands.sh** — a node's grab-bag of root actions triggered remotely via the
   dispatcher (cert installs, HAProxy map builds, VM start/stop).
 

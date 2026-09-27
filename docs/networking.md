@@ -99,9 +99,10 @@ internet. The AP's management interface lives on the trusted VLAN.
 Unbound on pfSense serves split-horizon DNS for the site domain:
 
 - Every host and VM gets a `local-zone` redirect (e.g. `secsvcs.janedoe.com`).
-- Per-service records are auto-generated at render time: `tools/parse_routes.sh`
-  extracts the subdomains each node's Traefik serves, and the template loops emit
-  records pointing at that node's VM IP (e.g. `auth.janedoe.com → 192.168.4.20`).
+- Per-service records are generated at render time from the `subdomain` of each
+  service in `src/nodes.yml` (checked against the node's Traefik `Host()` rules), and
+  the template loops emit records pointing at that node's VM IP (e.g.
+  `auth.janedoe.com → 192.168.4.20`). HAProxy's SNI routing uses the same lists.
 - A catch-all `janedoe.com A <websvcs>` record makes websvcs the default for the apex
   and anything unlisted.
 - Internal-only names exist for `pgdb.` (Postgres) and `mqtt.` (Mosquitto); these

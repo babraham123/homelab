@@ -14,7 +14,7 @@ if ($originalCommand -eq "C:\Windows\System32\OpenSSH\sftp-server.exe") {
 }
 Write-Host "Request received: '${originalCommand}' from ${sshClient}"
 
-$whitelist = @("StartSunshine", "StopSunshine", "InstallAutomation")
+$whitelist = @("{{ nodes.gaming.triggers | join('", "') }}")
 if ($originalCommand -notin $whitelist) {
     Write-Error "Unauthorized command: '${originalCommand}'"
     exit 1

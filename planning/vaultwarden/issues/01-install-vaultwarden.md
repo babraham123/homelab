@@ -130,3 +130,9 @@ in front of `/admin`, it adds friction for little gain.
 - A `pg_dumpall` run includes the `vaultwarden` database.
 
 ## Comments
+
+- 2026-09-27: restructure/01 landed: the dispatcher, sudoers and
+  `install_all_svcs` come from `src/nodes.yml`. Rename the `vault: {}` entry under
+  secsvcs `services` to `vaultwarden: {subdomain: vault}` (add `uptime` for a Gatus
+  check). There's no `gen_dispatch_cmds.sh` to run, and `secsvcs_subdomains` is now
+  `inv.subdomains.secsvcs`.

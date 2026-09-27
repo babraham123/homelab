@@ -32,3 +32,9 @@ IPs and every guide. The whole network map on the least-trusted VM.
   its services; every `install_<svc>` still works on every node.
 
 ## Comments
+
+- 2026-09-27: restructure/01's `src/nodes.yml` lists each node's services, but
+  a service name isn't always its directory (vmagent → victoriametrics/, guacd →
+  guacamole/, piper/whisper/openwakeword → wyoming/, ntfy-alertmanager → alertmanager/,
+  traefik → traefik/ + <node>/traefik/, fluentbit also uses <node>/). Add the dirs as a
+  per-service attribute rather than parsing `cp` lines.

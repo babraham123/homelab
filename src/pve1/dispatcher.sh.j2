@@ -1,29 +1,22 @@
-#!/bin/sh
+{% import 'src/nodes.jinja' as inv with context -%}
+#!/bin/bash
 # SSH Forced Command Dispatcher
 # This script is triggered by the SSH daemon when the specific automation key is used.
 # It parses $SSH_ORIGINAL_COMMAND to determine which action to take.
 # Usage:
-#   ssh autoadmin@router CMD
+#   ssh autoadmin@pve1 CMD
 
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/bin
-set -eu
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+set -euo pipefail
 
 # Modern scp (OpenSSH 9+) uses SFTP protocol by default
-if [ "${SSH_ORIGINAL_COMMAND:-}" = "/usr/libexec/sftp-server" ]; then
-  exec /usr/libexec/sftp-server
+if [[ "${SSH_ORIGINAL_COMMAND:-}" == "/usr/lib/openssh/sftp-server" ]]; then
+  exec /usr/lib/openssh/sftp-server
 fi
 echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 
 case "${SSH_ORIGINAL_COMMAND:-}" in
-  install_certs)
-    sudo /root/router-src/commands.sh install_certs
-    ;;
-  install_dispatcher)
-    sudo /root/router-src/commands.sh install_dispatcher
-    ;;
-  start_pve2)
-    sudo /root/router-src/commands.sh start_pve2
-    ;;
+{{ inv.cases('pve1') }}
   *)
     echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
     exit 1

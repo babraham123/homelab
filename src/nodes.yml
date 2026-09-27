@@ -1,0 +1,148 @@
+# Node inventory: what each node's dispatcher exposes and which subdomains it serves.
+# render_src.sh appends this file to vars.yml, so templates see it as `nodes`;
+# src/nodes.jinja derives the dispatcher cases, sudoers grants, DNS/SNI subdomain lists
+# and Gatus endpoints from it. See docs/adr/0006-node-inventory.md.
+#
+# Per node, all keys optional:
+#   debian_services: src/debian/install_svcs.sh cases, dispatched as install_<name>
+#   services:        src/<node>/install_svcs.sh cases, dispatched as install_<name>.
+#                    Key order is install order. Per service, all optional:
+#                      subdomain:   host its Traefik router answers on
+#                      uptime:      Gatus endpoint name (keys its history); monitors
+#                                   https://<subdomain>.<site.url><uptime_path>
+#                      uptime_path: default ""
+#   install_all_svcs: true adds install_all_svcs, installing `services` in order
+#   commands:        other dispatcher cases, in order. Either
+#                      {name, script}: runs `sudo <script> <name>`; script is under src/;
+#                                      `sudo: false` drops the sudo
+#                      {name, run}:    runs these lines verbatim
+#   triggers:        gaming only: Dispatcher.ps1 whitelist
+# yamllint disable rule:document-start rule:document-end
+nodes:
+  pve1:
+    debian_services: [vm_watchdog]
+    services:
+      cert_notifier: {}
+    commands:
+      - {name: install_ssh_ca, script: debian/commands.sh}
+      - {name: install_dispatcher, script: debian/commands.sh}
+      - {name: install_ca, script: debian/commands.sh}
+
+  pve2:
+    debian_services: [vm_watchdog]
+    commands:
+      - {name: install_certs_and_keys, script: pve2/commands.sh}
+      - {name: start_gaming_vm, script: pve2/commands.sh}
+      - {name: stop_gaming_vm, script: pve2/commands.sh}
+      - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}
+      - {name: install_ssh_ca, script: debian/commands.sh}
+      - {name: install_dispatcher, script: debian/commands.sh}
+      - {name: install_ca, script: debian/commands.sh}
+
+  router:
+    commands:
+      - {name: install_certs, script: router/commands.sh}
+      - {name: install_dispatcher, script: router/commands.sh}
+      - {name: start_pve2, script: router/commands.sh}
+
+  vpn:
+    services:
+      headscale: {}
+      tailscaled: {}
+      haproxy: {}
+      geoip_generator: {}
+    commands:
+      - {name: install_ssh_ca, script: debian/commands.sh}
+      - {name: install_dispatcher, script: debian/commands.sh}
+      - {name: install_ca, script: debian/commands.sh}
+
+  secsvcs:
+    debian_services: [mdns_repeater, node_exporter]
+    services:
+      postgres: {}
+      lldap: {subdomain: ldap}
+      authelia: {subdomain: auth}
+      traefik: {subdomain: secproxy, uptime: traefik secsvcs}
+      victoriametrics: {subdomain: metrics, uptime: victoriametrics}
+      victorialogs: {subdomain: logs, uptime: victorialogs}
+      gatus: {subdomain: uptime}
+      vmalert: {subdomain: vmalert, uptime: vmalert}
+      alertmanager: {subdomain: alert, uptime: alertmanager}
+      ntfy-alertmanager: {subdomain: ntfy-alertmanager}
+      ntfy: {subdomain: push, uptime: ntfy health check, uptime_path: /v1/health}
+      grafana: {subdomain: graph, uptime: grafana}
+      vault: {}
+      olive_tin: {subdomain: command, uptime: olive_tin}
+      fluentbit: {}
+    install_all_svcs: true
+    commands:
+      - {name: install_keys, script: secsvcs/commands.sh}
+      - {name: install_certs, script: secsvcs/commands.sh}
+      - {name: install_ssh_ca, script: debian/commands.sh}
+      - {name: install_dispatcher, script: debian/commands.sh}
+      - {name: install_olive_tin_cert, script: secsvcs/commands.sh}
+      - {name: install_ca, script: debian/commands.sh}
+      - {name: copy_acme_certs, script: debian/commands.sh}
+      - {name: pg_dumpall, script: secsvcs/commands.sh}
+      - {name: build_haproxy_mapper, script: secsvcs/commands.sh, sudo: false}
+
+  homesvcs:
+    debian_services: [mdns_repeater, node_exporter]
+    services:
+      traefik: {subdomain: homeproxy, uptime: traefik homesvcs}
+      vmagent: {}
+      mosquitto: {}
+      zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt}
+      esphome: {subdomain: iot, uptime: esphome}
+      home_assistant: {subdomain: home, uptime: home assistant}
+      fluentbit: {}
+    install_all_svcs: true
+    commands:
+      - {name: install_keys, script: homesvcs/commands.sh}
+      - {name: install_certs, script: homesvcs/commands.sh}
+      - {name: backup_hass, script: homesvcs/commands.sh}
+      - {name: install_ssh_ca, script: debian/commands.sh}
+      - {name: install_dispatcher, script: debian/commands.sh}
+      - {name: install_ca, script: debian/commands.sh}
+      - {name: copy_acme_certs, script: debian/commands.sh}
+
+  # websvcs is the default route, so its subdomains need no DNS or SNI entries; they
+  # only name the uptime URLs.
+  websvcs:
+    debian_services: [mdns_repeater, node_exporter]
+    services:
+      traefik: {subdomain: webproxy, uptime: traefik websvcs}
+      vmagent: {}
+      nginx: {subdomain: www}
+      homepage: {subdomain: dash, uptime: homepage}
+      isso: {subdomain: comment}
+      guacamole: {subdomain: remote, uptime: guacamole}
+      guacd: {}
+      archivebox: {subdomain: archive, uptime: archivebox}
+      finance_exporter: {}
+      go2rtc: {}
+      piper: {}
+      whisper: {}
+      openwakeword: {}
+      fluentbit: {}
+    install_all_svcs: true
+    commands:
+      - {name: install_keys, script: websvcs/commands.sh}
+      - {name: install_certs, script: websvcs/commands.sh}
+      - {name: install_ssh_ca, script: debian/commands.sh}
+      - {name: install_dispatcher, script: debian/commands.sh}
+      - {name: install_ca, script: debian/commands.sh}
+      - {name: copy_acme_certs, script: debian/commands.sh}
+
+  devtop:
+    commands:
+      - name: check_gpu
+        run:
+          - sudo /usr/bin/systemctl status nvidia-persistenced --no-pager
+          - nvidia-smi
+      - {name: install_ssh_ca, script: debian/commands.sh}
+      - {name: install_dispatcher, script: debian/commands.sh}
+      - {name: install_ca, script: debian/commands.sh}
+
+  gaming:
+    triggers: [StartSunshine, StopSunshine, InstallAutomation]
