@@ -40,3 +40,9 @@ so DNS generation is unaffected.
   expects this).
 
 ## Comments
+
+- 2026-09-27: restructure/01 generates the internal endpoints from
+  `src/nodes.yml` (`uptime`/`uptime_path` on each service); `parse_uptime_urls.sh` is
+  gone. Add a per-service attribute (e.g. `uptime_tier: 1`) and pick the anchor in the
+  `src/gatus/config.yaml.j2` loop. `auth` needs `uptime` + `uptime_path: /api/health` on
+  secsvcs `authelia`, which also adds it to the Gatus OIDC client's audience.
