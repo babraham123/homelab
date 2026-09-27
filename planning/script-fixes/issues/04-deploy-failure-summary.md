@@ -62,3 +62,10 @@ Until decided, keep the array in the script; the other hardcoded list
 ## Comments
 
 - 2026-09-26: `yq '.nodes | keys'` in the original text was wrong; see the section above.
+- 2026-09-27: restructure/01 appends `src/nodes.yml` to `vars.yml` as a
+  top-level `nodes:` key. If `vars.yml` gets the `nodes:` reshape above, switch
+  `render_src.sh` from concatenation to a deep merge
+  (`yq eval-all '. as $f ireduce ({}; . * $f)' vars.yml src/nodes.yml`) so
+  `nodes.<node>.ip` and `nodes.<node>.services` sit side by side. A plain concatenation
+  would give a duplicate key and PyYAML keeps only the last one. The host list can
+  then come from `nodes.yml`, and the `parse_dispatcher.sh` list is already gone.

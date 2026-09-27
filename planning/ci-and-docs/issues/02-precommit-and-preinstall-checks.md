@@ -42,3 +42,8 @@ rollback for service configs too.
 
 - 2026-09-26: shellcheck/yamllint/render steps moved to 08 so they don't wait on
   restructure/01.
+- 2026-09-27: restructure/01 landed. Both local checks now run inside
+  `tools/render_src.sh`: `nodes.yml` `services` must equal the `install_svcs.sh` cases
+  (this supersedes the script-fixes/01 dispatcher check, since dispatchers are generated
+  from that list), commands must be cases in their scripts, subdomains unique and equal
+  to the secsvcs/homesvcs `Host()` rules. The hook only needs to run the render.

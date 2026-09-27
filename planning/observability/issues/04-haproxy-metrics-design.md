@@ -49,3 +49,6 @@ observability/08 (containerising the VPS services). Do this *after* A, when 08 l
 reference the VPS by `vpn.ip`.
 
 ## Comments
+
+- 2026-09-27: ADR 0006 is now the node inventory (restructure/01); use the
+  next free number.
