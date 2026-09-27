@@ -10,7 +10,7 @@ The ground-truth configs are `src/dns/unbound.conf.j2`,
 ## Physical and logical topology
 
 pfSense runs as a VM on pve1 with all four of the mini PC's 2.5 GbE NICs
-(Intel i226, `igc0`–`igc3`) PCI-passed through to it. The Proxmox host itself has no
+(Intel i226, `igc0`–`igc3`, in PCI address order) PCI-passed through to it. The Proxmox host itself has no
 physical uplink: it sits on the virtual bridge `vmbr0`, with the pfSense VM as its
 gateway.
 

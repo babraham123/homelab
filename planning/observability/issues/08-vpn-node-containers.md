@@ -4,7 +4,7 @@ Status: ready-for-agent
 Type: task
 Repo: homelab
 Source: user item 50
-Blocked by: 04
+Blocked by: 04, 11
 
 ## Decision (maintainer, 2026-09-27)
 
@@ -31,40 +31,50 @@ with no resource argument, only uniformity.
 
 ## Scope
 
+Design from observability/04's Answer: every container uses `Network=host` and binds to
+loopback, and vmagent pushes to secsvcs. Nothing new listens off `127.0.0.1`.
+
 Quadlets under `src/vpn/`:
 
 - `node_exporter` (reuse `src/node_exporter/`, textfile collector directory as on the
-  other nodes);
-- `fluentbit` (journald → VictoriaLogs over the tailnet; reuse `src/fluentbit/` with the
-  VPS's unit list);
-- `vmagent` (scrapes HAProxy's built-in exporter on `{{ vpn.tailscale_ip }}:8405` and the
-  local node_exporter, remote-writes to secsvcs over the tailnet — option B of
-  observability/04; local buffering covers secsvcs downtime).
+  other nodes): `--web.listen-address=127.0.0.1:9100`, `--pid=host`, `/` mounted at
+  `/host:ro,rslave` with `--path.rootfs=/host`;
+- `fluentbit` (journald → VictoriaLogs at `logs.SITE`; reuse `src/fluentbit/` with the
+  VPS's unit list): `http_listen: 127.0.0.1`;
+- `vmagent` (the shared template, with a `Network=host` branch and a `vpn)` case in
+  `render_host.sh`): scrapes node_exporter, Headscale (`127.0.0.1:9090`), tailscaled
+  (`100.100.100.100/metrics`) and fluent-bit, and remote-writes to `metrics.SITE` with
+  `--remoteWrite.label=host=vpn.SITE`. The disk buffer from observability/11 covers
+  tailnet and secsvcs outages.
 
 Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `tailscaled`,
-`geoip_generator` (for now).
+`geoip_generator` (for now). HAProxy's own metrics are observability/12.
 
 ## Prerequisites
 
-- `src/vpn/install_svcs.sh.j2` grows a `podman` case that installs Podman, copies
-  `src/podman/*.sh` and `containers.conf`, and creates a `net.network` for the VPS.
+- `src/vpn/install_svcs.sh.j2` grows a `podman` case that installs Podman and copies
+  `src/podman/*.sh` and `containers.conf`. No `net.network`: with host networking,
+  netavark adds no nftables rules. Still compare `nft list ruleset` before and after.
+- The telemetry names resolve to secsvcs through `/etc/hosts`, a manual step in
+  `docs/guides/vpn.md.j2`.
 - Secrets pipeline on the VPS (`/etc/opt/secrets/secrets.yaml.age`): check that
   `secret_update.sh vpn` already works there; add the vmagent remote-write credential.
-- Every container binds to the tailnet IP or the Podman bridge only: no `PublishPort` on
-  the public interface. Verify netavark's nftables rules don't open anything on it
-  (`nft list ruleset` before and after; `nmap` from outside on the published ports).
+  Open: whether that's the admin password or a write-only user (observability/04 open
+  question 1).
 - The VPS joins the image-updater rollout (image-updater/05) so its images are scanned
   like the others.
-- Gatus/vmalert: `NodeDown` for the vpn node once its node_exporter is scraped
-  (observability/01 excludes nothing on the VPS).
+- Alerts: `src/vmalert/configs/vps.yml` with `VpsMetricsAbsent`
+  (`absent_over_time(up{job="node_exporter",host="vpn.SITE"}[5m])`). A pushing host can't raise `up == 0`,
+  so exclude the VPS from observability/01's `NodeDown`.
 
 ## Acceptance
 
 - `systemctl list-units '*.service' | grep Homelab` on the VPS shows the three services.
-- `up{instance="vpn.SITE"}` for node_exporter and haproxy is 1 in VictoriaMetrics; VPS
-  journal lines appear in VictoriaLogs.
-- An external port scan of the VPS shows only 80, 443 and the Headscale/SSH ports it
-  showed before.
+- `up{host="vpn.SITE"} == 1` for every scrape job; VPS journal lines appear in
+  VictoriaLogs.
+- `ss -ltnp` on the VPS shows no new listeners off loopback; an external port scan shows
+  only 80, 443 and the Headscale/SSH ports it showed before.
+- Stop tailscaled for 10 minutes and restart it: the VPS series have no gap.
 - Idle RAM on the VPS grew by less than 100 MB.
 
 ## Follow-up
@@ -77,3 +87,5 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
 - 2026-09-26: triage questions added during ticket review.
 - 2026-09-27 maintainer: Podman for alignment; resource delta (~30 MB RAM, ~400 MB disk)
   accepted. Marked ready-for-agent.
+- 2026-09-27: rescoped to observability/04's Answer. HAProxy metrics are split out as
+  observability/12, and the vmagent buffer fix as observability/11.

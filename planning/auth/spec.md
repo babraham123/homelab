@@ -15,3 +15,4 @@ tools, and fix the LLDAP key-seed coupling.
 | [05](issues/05-olivetin-oidc-groups.md) | Test OliveTin OIDC group claims and drop the allow-everyone workaround | `ready-for-human` | task |
 | [06](issues/06-real-client-ip.md) | Verify the real client IP reaches Traefik and apps through HAProxy | `ready-for-agent` | task |
 | [07](issues/07-guacamole-private-client.md) | Move Guacamole to a private OIDC client with code flow and PKCE | `ready-for-agent` | task |
+| [08](issues/08-password-management-research.md) | Research: manage SSH, sudo, CA and recovery passwords better than offline notes | `ready-for-agent` | research |
