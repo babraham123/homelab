@@ -48,3 +48,6 @@ ssh autoadmin@router start_pve2
 ssh autoadmin@pve2 start_gaming_vm
 sudo /root/homelab-rendered/src/certificates/ssh_cert_gen_windows.sh
 ```
+
+## Disaster recovery
+- pve1's SSD died, or its AGE key, private CA, SSH CA or `vars.yml` is gone: [pve1 disaster recovery](guides/pve1_recovery.md)

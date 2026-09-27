@@ -204,7 +204,8 @@ SOPS + AGE, kept out of git and written to disk encrypted (see
   `chmod 400`. These rendered configs are the only place plaintext sits on disk; the
   rendered tree itself only ever holds templates.
 - pve1's AGE key is the single point of failure; a lost VM key can be replaced by
-  rerunning `secret_update.sh`.
+  rerunning `secret_update.sh`. What must be kept off pve1, and how to recover each
+  trust root, is in [pve1 disaster recovery](guides/pve1_recovery.md).
 - Rotation: `src/pve1/secret_update.sh <host>` edits the SOPS file, re-encrypts and
   redistributes it, and recreates the Podman placeholders; then restart affected
   services.
