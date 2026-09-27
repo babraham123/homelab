@@ -136,12 +136,11 @@ derp:
 # Disables the automatic check for headscale updates on startup
 disable_check_updates: false
 
-# Node lifecycle (headscale >= 0.29; replaces `ephemeral_node_inactivity_timeout` and
-# `oidc.expiry`).
+# Node lifecycle.
 node:
-  # Default key expiry for every registration method, including OIDC. 0 = never, which
-  # is what pre-auth-key nodes (router, vpn) had before; OIDC logins previously expired
-  # after 30d via `oidc.expiry`, now they don't. Tagged nodes never expire.
+  # Default key expiry for every registration method, including OIDC. 0 = never: the
+  # pfSense package re-runs `tailscale up --auth-key` on each restart, and a positive
+  # value would give the router a fresh expiring key each time. Tagged nodes are exempt.
   expiry: 0
   ephemeral:
     # Time before an inactive ephemeral node is deleted.
@@ -325,7 +324,4 @@ logtail:
   # As there is currently no support for overriding the log server in headscale, this is
   # disabled by default. Enabling this will make your clients send logs to Tailscale Inc.
   enabled: false
-
-# `randomize_client_port` moved to the policy file (`randomizeClientPort`) in headscale 0.29;
-# 0.29 refuses to start if it is set here.
 ...
