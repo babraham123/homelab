@@ -131,9 +131,9 @@ flowchart TB
 
     subgraph public["Public TLS (browser-facing)"]
         direction TB
-        le["Let's Encrypt via Traefik<br/>HTTP-01, cert per subdomain"]
+        le["Let's Encrypt via Traefik on each service VM<br/>HTTP-01, cert per subdomain"]
         dumper["traefik-certs-dumper on pve1"]
-        xfer["acme_transfer.sh →<br/>other nodes' Traefik instances"]
+        xfer["acme_transfer.sh →<br/>pve1, pve2, pbs2, pfSense"]
         le -- "issues" --> dumper -- "distributes" --> xfer
     end
 
@@ -159,8 +159,9 @@ flowchart TB
 - **SSH host certs** eliminate trust-on-first-use: clients trust the CA once and every
   node's host key verifies automatically. A separate script handles the Windows
   gaming VM.
-- **Public TLS**: Traefik on pve1 answers ACME challenges; the resulting certs are
-  dumped and redistributed to the other nodes' Traefik instances.
+- **Public TLS**: Traefik on each service VM (secsvcs, homesvcs, websvcs) answers ACME
+  challenges; `acme_transfer.sh` on pve1 pulls their `acme.json` files, dumps the certs
+  and installs them on pve1, pve2, pbs2 and pfSense.
 - **Expiry monitoring**: the `cert_notifier` timer on pve1 emails weeks in advance;
   Gatus and vmalert also alert on approaching expiry. Rotation cadence lives in
   [Maintenance](maintenance.md#refresh-certificates).

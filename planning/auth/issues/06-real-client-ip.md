@@ -2,6 +2,7 @@
 
 Status: ready-for-agent
 Type: task
+Blocked by: router/04
 Repo: homelab
 Source: maintainer request 2026-09-26 (copyparty/01 "keep the client IP check"; needed
 again by vaultwarden/01)
