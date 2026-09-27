@@ -17,7 +17,7 @@ This is the canonical list: `backup-and-dr/04` escrows it and `backup-and-dr/01`
 | Path on pve1 | What | Covered by | If lost |
 |---|---|---|---|
 | `/root/secrets/age.txt`, `age.pub` | AGE identity; every SOPS file and every host's `secrets.yaml.age` is encrypted to it | Escrow | [Only the AGE key is lost](#only-the-age-key-is-lost) |
-| `/root/secrets/pve1.yaml` | pve1's own secrets: `msmtp_password`, `pbs2_api_password`, MaxMind keys, `<host>_root_pswd` sudo passwords | Escrow | No other copy; re-enter by hand from `src/pve1/secrets_template.yaml` |
+| `/root/secrets/pve1.yaml` | pve1's own secrets: `msmtp_password`, `pbs2_api_password`, MaxMind keys | Escrow | No other copy; re-enter by hand from `src/pve1/secrets_template.yaml` |
 | `/root/secrets/{secsvcs,homesvcs,websvcs}.yaml` | SOPS source of each host's secrets | Escrow | Rebuild from the host's own copy ([AGE scenario](#only-the-age-key-is-lost)) |
 | `/root/secrets/<host>.yaml.age` | per-host `age` copy pushed to `/etc/opt/secrets/secrets.yaml.age` | Regenerate | `secret_update.sh <host>` |
 | `/root/secrets/<host>_id_ed25519.pub` | host recipient key | Regenerate | re-`scp` from the host ([pve1 guide](./pve1.md#secrets)) |
@@ -28,7 +28,7 @@ This is the canonical list: `backup-and-dr/04` escrows it and `backup-and-dr/01`
 | `/root/ssh/ca_ssh_key`, `ca_ssh_key.pub` | SSH user CA: signs client keys for `manualadmin`/`autoadmin` | Escrow | [Only the SSH CA is lost](#only-the-ssh-ca-is-lost) |
 | `/root/ssh/ca_ssh_host_key`, `ca_ssh_host_key.pub` | SSH host CA: behind every `@cert-authority` line | Escrow | same |
 | `/root/ssh/known_hosts`, `public/`, `date_ssh_certs*.txt` | host pubkeys and certs, `@cert-authority` line, renewal timestamps | Regenerate | `ssh_cert_gen.sh`, `ssh_cert_gen_windows.sh` |
-| Passphrases of `ca.key.pem`, `intermediate.key.pem`, `ca_ssh_key` | not files; asked for at signing time | TODO: nowhere recorded; escrow or password manager | the escrowed keys are useless without them |
+| Passphrases of `ca.key.pem`, `intermediate.key.pem`, `ca_ssh_key` | not files; asked for at signing time | Offline copy held by the maintainer; a better home is `auth/08` | the escrowed keys are useless without them |
 | `/root/acme/` | copies of each Traefik's `acme.json`, dumped certs, `pbs2_cert_info.txt`, `date_acme_certs.txt` | Regenerate | `acme_transfer.sh` |
 | `/root/.ssh/id_ed25519`, `id_ed25519-cert.pub` | root's client key, signed as `manualadmin,autoadmin`; every pve1 script SSHes with it | Regenerate | new key + re-sign ([step 10](#10-ssh-root-key-and-host-certs)) |
 | `/etc/pve/storage.cfg`, `/etc/pve/priv/storage/pbs2.*` | `pbs2` storage entry and its credentials | Escrow (`/etc/pve` tarball) | re-add the storage ([step 3](#3-reconnect-the-pbs-storage)) |
@@ -47,7 +47,7 @@ This is the canonical list: `backup-and-dr/04` escrows it and `backup-and-dr/01`
 | `/etc/opt/olive_tin/ssh/` on secsvcs | OliveTin's `autoadmin` key + cert | PBS VM backup | `ssh_cert_gen.sh` |
 | `/etc/opt/secrets/id_ed25519`, `secrets.yaml.age` on each host | host decryption key + that host's secrets | PBS VM backup | new key, re-collect pubkey, `secret_update.sh <host>` |
 | pfSense `config.xml` | firewall, VLANs, DHCP leases, DNS | PBS VM backup (router VM), Auto Config Backup; *planned*: Escrow | [Router without a VM backup](#router-without-a-vm-backup) |
-| ACB device key + encryption password | needed to pull an ACB backup onto a fresh pfSense | TODO: not recorded anywhere; add to escrow | ACB backups unusable |
+| ACB device key + encryption password | needed to pull an ACB backup onto a fresh pfSense | Offline copy held by the maintainer; see `auth/08` | ACB backups unusable |
 | PBS datastore `backup1` on pve2 | every VM backup | nothing (single copy); *planned*: offsite (`backup-and-dr/03`) | rebuild VMs from the guides |
 
 ## Rebuild pve1 from bare metal
@@ -57,7 +57,7 @@ All four NICs belong to the router VM, so until it's back there is no LAN, DHCP,
 
 ### 1. Install Proxmox with a temporary link to pve2
 - Install Proxmox as in the [router guide](./router.md#install-proxmox); the user and desktop steps can wait.
-- At the installer's network screen, pick the NIC in the port cabled to pve2 (pfSense's `igc2`) and give it a free static address on pve2's subnet, e.g. `{{ pve2.subnet }}.250/24`, gateway `{{ pve2.subnet }}.1`. TODO: the Linux name of that port isn't recorded; identify it with `ip -br link` and the link lights.
+- At the installer's network screen, pick the NIC in the port cabled to pve2 (pfSense's `igc2`) and give it a free static address on pve2's subnet, e.g. `{{ pve2.subnet }}.250/24`, gateway `{{ pve2.subnet }}.1`. The router's ports are assigned in PCI order: WAN, LAN (WiFi AP), pve2, LAN2 (switch). So pve2's port is the third Ethernet controller in `lspci -nn | grep -i ethernet`; for PCI address `BB:00.0` Linux names it `enpBBs0` (bus number without the leading zero). Confirm with `ip -br link`: only the cabled ports show `UP`.
 - Enable IOMMU and the vfio modules now (router guide, [Install pfSense](./router.md#install-pfsense), "Enable IOMMU / NIC passthrough"). The restored router VM can't start without them.
 
 ### 2. Power on pve2 by hand
@@ -75,7 +75,7 @@ pvesm add pbs pbs2 --server {{ pve2.ip }} --datastore backup1 --namespace pve1 \
   --username 'USER@REALM' --password 'PASSWORD' --fingerprint 'FINGERPRINT'
 pvesm list pbs2
 ```
-- TODO: the repo doesn't record which PBS user pve1's storage authenticates as, or whether the storage was added with an encryption key. If it was, `/etc/pve/priv/storage/pbs2.enc` is required to restore anything and must be escrowed.
+- The storage authenticates as `root@pam` today; `backup-and-dr/11` replaces it with a backup-only user. If the storage has an encryption key (`ls /etc/pve/priv/storage/pbs2.enc` on the old pve1), that file is required to restore anything and must be escrowed; `backup-and-dr/11` decides whether to use one.
 
 ### 4. Restore the VMs
 Restore the router, secsvcs and homesvcs while the temporary link is up. Don't start them yet.
@@ -135,14 +135,14 @@ No escrow: see [Nothing escrowed](#nothing-escrowed).
 ```bash
 sudo su
 # root's client key, signed with the user CA (asks for the ca_ssh_key passphrase)
-ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519
+ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N ""
 ssh-keygen -s /root/ssh/ca_ssh_key -I pve1 -n manualadmin,autoadmin -V +395d /root/.ssh/id_ed25519.pub
 # Trust the host CA before contacting other hosts; same line ssh_cert_gen.sh writes
 echo "@cert-authority *.{{ site.url }} $(cat /root/ssh/ca_ssh_host_key.pub)" > /etc/ssh/ssh_known_hosts
 # Signs pve1's new host key and refreshes the rest; needs pve2, vpn, websvcs, devtop and router up
 /root/homelab-rendered/src/certificates/ssh_cert_gen.sh
 ```
-TODO: how root's key was first created (passphrase or not) isn't in the repo. `ssh_cert_gen_windows.sh` isn't needed: the gaming VM's host cert and the CA are unchanged.
+The key has no passphrase because pve1's scripts use it without a prompt ([pve1 guide](./pve1.md#ca-certs)). `ssh_cert_gen_windows.sh` isn't needed: the gaming VM's host cert and the CA are unchanged.
 
 ### 11. Host services
 - CA chain in pve1's own trust store (the `upload pve1` step of [CA infra](./pve1.md#ca-infra)):
@@ -212,7 +212,7 @@ umask 077
 qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age \
   | jq -r '."out-data"' > /dev/shm/HOST.yaml
 ```
-- `pve1.yaml` has no host copy. Recreate it with `sops /root/secrets/pve1.yaml` from `src/pve1/secrets_template.yaml`: a new Gmail app password ([Notifications](./pve1.md#notifications)), a new `api_ro` password on PBS ([Proxmox guide, Monitoring](./proxmox.md#monitoring)), MaxMind keys from the MaxMind account, and the `<host>_root_pswd` entries from your password manager. TODO: the `<host>_root_pswd` keys used in [debugging](../debugging.md#remote-sudo-non-interactively) aren't in `secrets_template.yaml`.
+- `pve1.yaml` has no host copy. Recreate it with `sops /root/secrets/pve1.yaml` from `src/pve1/secrets_template.yaml`: a new Gmail app password ([Notifications](./pve1.md#notifications)), a new `api_ro` password on PBS ([Proxmox guide, Monitoring](./proxmox.md#monitoring)), and MaxMind keys from the MaxMind account. Host sudo passwords aren't in SOPS; they're in the maintainer's offline copy (`auth/08`).
 - `rm -rf /root/secrets/lost` once every host is done.
 
 ### Only the private CA is lost

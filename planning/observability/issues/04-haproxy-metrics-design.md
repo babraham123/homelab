@@ -54,6 +54,13 @@ reference the VPS by `vpn.ip`.
   option A is dropped and B is done directly in 08.
 - 2026-09-27: ADR 0006 is now the node inventory (restructure/01); use the
   next free number.
+- 2026-09-27: the vmagent `tmpDataPath` bug is split out as observability/11.
+- 2026-09-27 maintainer:
+  - Q2: pin the names in `/etc/hosts`, as a manual step in `docs/guides/vpn.md.j2` (done).
+  - Q3: no `check` on the HAProxy servers; alert on backend connection errors instead.
+  - Q4: split. 08 is the VPS containers, 12 is the HAProxy metrics, 11 is the vmagent
+    buffer.
+  - Q1 is still open.
 
 ## Answer
 
@@ -244,8 +251,8 @@ Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
 
 1. **HAProxy.** Add the `prometheus` frontend on `127.0.0.1:8405` and `check` on the six
    VM servers. Verify with `haproxy -c -f` and `curl -s 127.0.0.1:8405/metrics`.
-2. **Shared vmagent template.** Add `tmpDataPath` and `maxDiskUsagePerURL`, which fixes
-   every node. Add the `Network=host` branch and the `vpn)` case in `render_host.sh`.
+2. **Shared vmagent template.** `tmpDataPath` and `maxDiskUsagePerURL` moved to
+   observability/11. Add the `Network=host` branch and the `vpn)` case in `render_host.sh`.
 3. **VPS scrape config and installer.** Write `src/vpn/prometheus.yml.j2`. Add `vmagent`
    and `hosts` cases to `src/vpn/install_svcs.sh.j2`, alongside 08's `podman`,
    `node_exporter` and `fluentbit` cases.

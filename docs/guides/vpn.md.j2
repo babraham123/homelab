@@ -180,6 +180,16 @@ COMMIT
 ufw enable
 ufw status verbose
 ```
+- Point the telemetry names at secsvcs over the tailnet. Publicly they resolve to the VPS
+  itself, so without this the VPS's metrics and logs would loop through HAProxy's public
+  frontend. The ufw rule above already allows the traffic.
+```bash
+cat >> /etc/hosts <<'EOF'
+# homelab: telemetry endpoints on secsvcs, reached over the tailnet
+{{ secsvcs.ip }} metrics.{{ site.url }} logs.{{ site.url }} alert.{{ site.url }} push.{{ site.url }}
+EOF
+getent hosts metrics.{{ site.url }}   # should print {{ secsvcs.ip }}
+```
 
 ### Optimize search results
 

@@ -769,11 +769,13 @@ Rootless Podman storage breaks after a rename; see
 
 ### Remote sudo non-interactively
 
-Pipe the password from SOPS into `sudo -S`:
+Type the password once and pipe it into `sudo -S`. `read -s` keeps it off the screen
+and `printf` is a builtin, so it never shows up in `ps`:
 
 ```bash
-sops -d /root/secrets/pve1.yaml | yq ".HOST_root_pswd" | head -c -1 | \
-  ssh manualadmin@HOST 'sudo --prompt="" -S whoami'
+read -rs -p "sudo password for HOST: " PW; echo
+printf '%s\n' "$PW" | ssh manualadmin@HOST 'sudo --prompt="" -S whoami'
+unset PW
 ```
 
 ### Hardware overview

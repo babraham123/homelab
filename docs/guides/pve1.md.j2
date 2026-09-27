@@ -40,6 +40,10 @@ ssh-keygen -t ed25519 -f ca_ssh_host_key -C "SSH Host CA for {{ site.url }}"
 chmod 444 ca_ssh_host_key.pub
 chmod 400 ca_ssh_host_key
 
+# root's client key, signed by ssh_cert_gen.sh as manualadmin/autoadmin.
+# No passphrase: pve1's scripts SSH to the other hosts with it unprompted.
+ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N ""
+
 # Wait until all of the VMs have been created. On the first run it will
 # ask you for the root password of various hosts.
 /root/homelab-rendered/src/certificates/ssh_cert_gen.sh
