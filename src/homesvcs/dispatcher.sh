@@ -57,6 +57,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_certs)
     sudo /root/homelab-rendered/src/homesvcs/commands.sh install_certs
     ;;
+  backup_hass)
+    sudo /root/homelab-rendered/src/homesvcs/commands.sh backup_hass
+    ;;
   install_ssh_ca)
     sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca
     ;;

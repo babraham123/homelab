@@ -38,6 +38,11 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 mqtt: !include mqtt.yaml
 
+# Ref: https://www.home-assistant.io/integrations/backup/
+# Core loads it by default; listed because homesvcs `backup_hass` depends on its
+# backup.create action. Archives land in /config/backups.
+backup:
+
 # Ref: https://www.home-assistant.io/integrations/http/
 http:
   server_port: 8123

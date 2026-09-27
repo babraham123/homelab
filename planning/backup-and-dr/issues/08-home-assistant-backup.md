@@ -1,6 +1,6 @@
 # 08. Home Assistant native backup via dispatcher, triggered by the orchestrator
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 7 (user items 7 and 9)
@@ -30,3 +30,6 @@ across versions.
   Settings → System → Backups on a scratch instance.
 
 ## Comments
+
+2026-09-27: Added `backup_hass` (commands.sh + dispatcher/sudoers): blocking REST `backup.create`, copies the new `Custom_backup_*.tar` to `/var/opt/backups/hass/` (keep 8), keeps only the newest in `/config/backups`; `backup:` listed in config (core loads it anyway). Recorder DB is in `hassdb`, outside `/config`, so the archive has no history.
+Human: create an admin long-lived token → `hass_backup_token` in homesvcs secrets, redeploy, run `ssh autoadmin@homesvcs backup_hass`, and restore the archive on a scratch instance to meet Acceptance.

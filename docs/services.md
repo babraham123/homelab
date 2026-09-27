@@ -173,3 +173,7 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
   order, archive volumes; see [the Podman guide](guides/podman.md));
   VictoriaMetrics has its own backup procedure in
   [the secure services guide](guides/secure_services.md).
+- Home Assistant: `ssh autoadmin@homesvcs backup_hass` calls HA's `backup.create`
+  and copies the `.tar` to `/var/opt/backups/hass/` (last 8 kept), so it rides in
+  the VM backup. Restore from Settings >> System >> Backups; recorder history
+  (`hassdb`) is not in the archive.
