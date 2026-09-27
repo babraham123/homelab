@@ -1,6 +1,6 @@
 # 01. Allow hyphens in the dispatcher/sudoers generators; regenerate secsvcs dispatcher
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 25
@@ -28,3 +28,6 @@ therefore from the generated sudoers.
   check passes for all nodes.
 
 ## Comments
+
+2026-09-27: Widened the service-name class to `[a-zA-Z0-9_-]+` in both generators, regenerated the secsvcs cases (adds `install_ntfy-alertmanager` and its `install_all_svcs` entry; sudoers now lists it), and added the install_svcs↔dispatcher check to `tools/render_src.sh` (runs on the rendered tree so vpn's `.j2` is covered; nodes without a dispatcher, e.g. debian, are skipped).
+Human: deploy, then verify `ssh autoadmin@secsvcs install_ntfy-alertmanager` on the node.

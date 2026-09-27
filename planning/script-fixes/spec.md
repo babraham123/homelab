@@ -7,7 +7,7 @@ CI (ci-and-docs/02) prevents the class from recurring.
 
 | # | Title | Status | Type |
 |---|---|---|---|
-| [01](issues/01-dispatcher-regex-hyphen.md) | Allow hyphens in the dispatcher/sudoers generators; regenerate secsvcs dispatcher | `ready-for-agent` | task |
+| [01](issues/01-dispatcher-regex-hyphen.md) | Allow hyphens in the dispatcher/sudoers generators; regenerate secsvcs dispatcher | `resolved` | task |
 | [02](issues/02-mv-comments.md) | Comment the intentional mv of rendered files in install_svcs.sh | `ready-for-agent` | task |
 | [03](issues/03-return-to-exit.md) | Replace top-level `return` with `exit 1` in upload scripts | `ready-for-agent` | task |
 | [04](issues/04-deploy-failure-summary.md) | deploy_src.sh: collect per-host failures and exit non-zero | `ready-for-agent` | task |
