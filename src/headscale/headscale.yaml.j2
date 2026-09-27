@@ -139,8 +139,16 @@ derp:
 # Disables the automatic check for headscale updates on startup
 disable_check_updates: false
 
-# Time before an inactive ephemeral node is deleted?
-ephemeral_node_inactivity_timeout: 30m
+# Node lifecycle (headscale >= 0.29; replaces `ephemeral_node_inactivity_timeout` and
+# `oidc.expiry`).
+node:
+  # Default key expiry for every registration method, including OIDC. 0 = never, which
+  # is what pre-auth-key nodes (router, vpn) had before; OIDC logins previously expired
+  # after 30d via `oidc.expiry`, now they don't. Tagged nodes never expire.
+  expiry: 0
+  ephemeral:
+    # Time before an inactive ephemeral node is deleted.
+    inactivity_timeout: 30m
 
 database:
   # Database type. Available options: sqlite, postgres
@@ -348,15 +356,12 @@ oidc:
   # `LoadCredential` straightforward:
   client_secret_path: "/etc/opt/secrets/hs_oidc_secret"
 
-  # The amount of time a node is authenticated with OpenID until it expires
-  # and needs to reauthenticate.
-  # Setting the value to "0" will mean no expiry.
-  expiry: 30d
+  # `expiry` moved to `node.expiry` in headscale 0.29 (fatal if set here).
 
   # Use the expiry from the token received from OpenID when the user logged
   # in. This will typically lead to frequent need to reauthenticate and should
   # only be enabled if you know what you are doing.
-  # Note: enabling this will cause `oidc.expiry` to be ignored.
+  # Note: enabling this will cause `node.expiry` to be ignored.
   use_expiry_from_token: false
 
   # The OIDC scopes to use, defaults to "openid", "profile" and "email".
