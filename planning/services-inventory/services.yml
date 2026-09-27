@@ -1,0 +1,308 @@
+# src/nodes/secsvcs/services.yml
+#
+# Declarative inventory for one node. This file is the SOURCE OF TRUTH for every
+# cross-cutting fact about the services on secsvcs. Everything listed under
+# "generates" below is a rendered OUTPUT and must not be hand-edited.
+#
+# generates:
+#   src/nodes/secsvcs/install_svcs.sh   (case labels + ordering)
+#   src/nodes/secsvcs/dispatcher.sh     (install_* cases + install_all_svcs)
+#   src/nodes/secsvcs/sudoers           (NOPASSWD list, from the dispatcher)
+#   src/nodes/secsvcs/traefik/routes.yml
+#   src/nodes/secsvcs/prometheus.yml    (scrape_configs)
+#   src/services/gatus/config.yaml      (endpoints)
+#   src/services/homepage/services.yaml (secsvcs groups)
+#   src/services/postgres/pg_init.sql
+#   src/nodes/secsvcs/secrets_template.yaml
+#   src/nodes/secsvcs/commands.sh       (install_certs / install_keys blocks)
+#   src/services/authelia/configuration.yml  (access_control rules + OIDC clients)
+#   unbound.conf local-data records, haproxy SNI ACLs (via the subdomain list)
+#   each service's quadlet Image= / IP= (quadlets reference svc.image, svc.ip)
+#
+# NOT owned here: quadlet bodies (Exec, Volume, Environment). Those stay in
+# src/services/<name>/<name>.container.j2 and pull identity from this file.
+
+apiVersion: homelab/v1
+
+node:
+  name: secsvcs
+  kind: container_vm
+  host: pve1
+  proxy: secproxy            # Traefik instance + its dashboard subdomain
+  subnet_var: secsvcs.container_subnet
+
+# Applied to every service unless overridden.
+defaults:
+  scheme: http
+  auth: authelia             # authelia | oidc | none | public
+  headers: true              # attach secure-headers@file
+  cert_resolver: le-http-production
+  tls_options: intermediate
+  uptime:
+    group: internal
+    interval: 1m
+    path: /
+
+# ---------------------------------------------------------------------------
+# Secret catalog. Generates secrets_template.yaml. CI asserts that every
+# `Secret=<name>` in any quadlet on this node appears here, and that every name
+# here is referenced by at least one quadlet (catches both typos and orphans).
+# `gen` is the command that mints the value; it is documentation today and the
+# hook for a future `secret_update.sh --generate`.
+# ---------------------------------------------------------------------------
+secret_gen:
+  alnum20: &alnum20 "LC_ALL=C tr -dc 'A-Za-z0-9!#%&()*+,-.:;<=>?[]^_{|}~' </dev/urandom | head -c 20"
+  alnum64: &alnum64 "LC_ALL=C tr -cd '[:alnum:]' </dev/urandom | head -c 64"
+  oidc_id: &oidc_id "authelia crypto rand --length 72 --charset rfc3986"
+  oidc_hash: &oidc_hash "authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986"
+  smtp: &smtp "gmail app password: https://support.google.com/accounts/answer/185833"
+
+secrets:
+  postgres_password:        {owner: postgres,     gen: *alnum20}
+  authelia_jwt_secret:      {owner: authelia,     gen: *alnum20}
+  authelia_storage_key:     {owner: authelia,     gen: *alnum64}
+  authelia_pg_password:     {owner: authelia,     gen: *alnum20}
+  authelia_smtp_password:   {owner: authelia,     gen: *smtp}
+  oidc_hmac_secret:         {owner: authelia,     gen: *alnum64}
+  lldap_jwt_secret:         {owner: lldap,        gen: *alnum20}
+  lldap_pg_password:        {owner: lldap,        gen: *alnum20}
+  lldap_db_url:             {owner: lldap,        gen: "postgres://lldap:${lldap_pg_password}@pgdb/lldap"}
+  lldap_admin_password:     {owner: lldap,        gen: *alnum20, shared_with: [authelia]}
+  lldap_smtp_password:      {owner: lldap,        gen: *smtp}
+  # FINDING: lldap_admin_password is currently bound to BOTH LLDAP_LDAP_USER_PASS
+  # and LLDAP_KEY_SEED. The key seed derives LLDAP's server key and should be
+  # independent material. Split into lldap_key_seed when you next rotate.
+  gatus_pg_password:        {owner: gatus,        gen: *alnum20}
+  gatus_oidc_id:            {owner: gatus,        gen: *oidc_id}
+  gatus_oidc_secret:        {owner: gatus,        gen: *oidc_hash}
+  gatus_oidc_secret_hash:   {owner: gatus,        gen: *oidc_hash}
+  grafana_pg_password:      {owner: grafana,      gen: *alnum20}
+  grafana_oidc_id:          {owner: grafana,      gen: *oidc_id}
+  grafana_oidc_secret:      {owner: grafana,      gen: *oidc_hash}
+  grafana_oidc_secret_hash: {owner: grafana,      gen: *oidc_hash}
+  victoriametrics_admin_password: {owner: victoriametrics, gen: *alnum20}
+  victorialogs_admin_password:    {owner: victorialogs,    gen: *alnum20}
+  alertmanager_admin_password:    {owner: alertmanager,    gen: *alnum20}
+  alert_smtp_password:      {owner: alertmanager, gen: *smtp}
+  bcrypt_salt:              {owner: alertmanager, gen: "LC_ALL=C tr -dc '0-9A-Za-z' </dev/urandom | head -c 22"}
+  ntfy_webpush_public_key:  {owner: ntfy,         gen: "ntfy webpush keys"}
+  ntfy_webpush_private_key: {owner: ntfy,         gen: "ntfy webpush keys"}
+  ntfy_admin_password:      {owner: ntfy,         gen: *alnum20}
+  ntfy_hass_password:       {owner: ntfy,         gen: *alnum20}
+  ntfy_alert_password:      {owner: ntfy,         gen: *alnum20}
+  ntfy_person_password:     {owner: ntfy,         gen: *alnum20}
+  ntfy_alert_token:         {owner: ntfy,         gen: "ntfy token add alert"}
+  ntfy_alertmanager_admin_password: {owner: ntfy-alertmanager, gen: *alnum20}
+  olive_tin_oidc_id:          {owner: olive_tin,  gen: *oidc_id}
+  olive_tin_oidc_secret:      {owner: olive_tin,  gen: *oidc_hash}
+  olive_tin_oidc_secret_hash: {owner: olive_tin,  gen: *oidc_hash}
+  # Secrets owned elsewhere but minted on secsvcs because Authelia is the issuer.
+  hs_oidc_id:               {owner: headscale,    gen: *oidc_id,  remote: vpn}
+  hs_oidc_secret:           {owner: headscale,    gen: *oidc_hash, remote: vpn}
+  hs_oidc_secret_hash:      {owner: headscale,    gen: *oidc_hash, remote: vpn}
+  hass_pg_password:         {owner: home_assistant, gen: *alnum20, remote: homesvcs}
+  hass_oidc_id:             {owner: home_assistant, gen: *oidc_id, remote: homesvcs}
+  hass_oidc_secret:         {owner: home_assistant, gen: *oidc_hash, remote: homesvcs}
+  hass_oidc_secret_hash:    {owner: home_assistant, gen: *oidc_hash, remote: homesvcs}
+  guacamole_pg_password:    {owner: guacamole,    gen: *alnum20, remote: websvcs}
+  guacamole_oidc_id:        {owner: guacamole,    gen: *oidc_id, remote: websvcs}
+
+# ---------------------------------------------------------------------------
+# Services. `order` drives install/start sequence and its reverse drives the
+# documented stop order for volume backups. `ip` is the last octet on the node's
+# container subnet; uniqueness is a schema constraint, replacing the grep-based
+# duplicate-IP check in render_src.sh.
+# ---------------------------------------------------------------------------
+services:
+
+  postgres:
+    image: docker.io/library/postgres:14-alpine
+    ip: 3
+    order: 10
+    expose: none                      # no Traefik route
+    dns: pgdb                         # internal-only Unbound record
+    publish: ["5432:5432"]
+    volumes: [postgresdb]
+    tls_internal:
+      cn: pgdb
+      dir: /etc/opt/db/certificates
+      owner: "70:70"
+      cert_name: pgdb.crt
+      key_name: pgdb.key
+      ca_name: ca.chain.crt
+    provides_postgres:                # generates pg_init.sql
+      - {db: lldap,     user: lldap,     secret: lldap_pg_password}
+      - {db: authelia,  user: authelia,  secret: authelia_pg_password}
+      - {db: gatus,     user: gatus,     secret: gatus_pg_password}
+      - {db: grafana,   user: grafana,   secret: grafana_pg_password}
+      - {db: guacamole, user: guacamole, secret: guacamole_pg_password}
+      # - {db: hass, user: hass, secret: hass_pg_password}  # HA still on sqlite
+
+  lldap:
+    image: docker.io/lldap/lldap:stable
+    ip: 4
+    order: 20
+    requires: [postgres]
+    subdomain: ldap
+    port: 17170
+    publish: ["6360:6360"]
+    tls_internal: {cn: ldap, dir: /etc/opt/lldap/certificates}
+    homepage: {group: Security, icon: lldap.png, description: User and group directory}
+
+  authelia:
+    image: docker.io/authelia/authelia:4.39
+    ip: 5
+    order: 30
+    requires: [lldap, postgres]
+    subdomain: auth
+    port: 9091
+    scheme: https
+    publish: ["9091:9091"]
+    auth: public                      # the portal itself must be reachable
+    transport: autheliaMutualTLS
+    tls_internal: {cn: auth, dir: /etc/opt/authelia/certificates, cert_name: auth.cert.pem, key_name: auth.key}
+    metrics: {port: 9959}
+    identity_provider: true           # marks this as the OIDC issuer
+    homepage: {group: Security, icon: authelia.png, description: SSO portal and OIDC provider}
+
+  traefik:
+    image: docker.io/library/traefik:v3.7
+    ip: 6
+    order: 40
+    subdomain: secproxy
+    backend: api@internal             # not a container backend
+    capabilities: [CAP_NET_BIND_SERVICE]
+    publish: ["80:80", "443:443"]
+    auth: authelia
+    auth_group: svc_admin             # see access-control note in README
+    tls_internal:
+      cn: secproxy
+      dir: /etc/opt/traefik/certificates
+      cert_name: proxy.crt
+      key_name: proxy.key
+      ca_name: ca.chain.crt
+      client_cert: true               # also issues secproxy.client_cert.pem
+    homepage: {group: Admin, icon: traefik.png, description: Ingress for secsvcs}
+
+  victoriametrics:
+    image: docker.io/victoriametrics/victoria-metrics:latest   # TODO: pin
+    ip: 7
+    order: 50
+    subdomain: metrics
+    port: 8428
+    volumes: [vmdata]
+    expose:
+      - {id: ui,       match: browser, auth: authelia, middlewares: [vm-auth]}
+      - {id: hass-api, match: 'HeaderRegexp(`Authorization`, `^Token .+$`)', auth: none, middlewares: [vm-auth-token], headers: false}
+      - {id: api,      match: any,     auth: none, headers: false}
+    metrics: {port: 8428, auth: basic, user: admin, secret: victoriametrics_admin_password}
+    homepage: {group: Observability, icon: victoriametrics.png, description: Metrics TSDB}
+
+  victorialogs:
+    image: docker.io/victoriametrics/victoria-logs:latest      # TODO: pin
+    ip: 8
+    order: 50
+    subdomain: logs
+    port: 9428
+    volumes: [vldata]
+    expose:
+      - {id: ui,  match: browser, auth: authelia, middlewares: [vl-auth]}
+      - {id: api, match: any,     auth: none, headers: false}
+    metrics: {port: 9428, auth: basic, user: admin, secret: victorialogs_admin_password}
+    homepage: {group: Observability, icon: victorialogs.png, description: Log store}
+
+  gatus:
+    image: docker.io/twinproduction/gatus:latest               # TODO: pin
+    ip: 9
+    order: 60
+    requires: [postgres]
+    subdomain: uptime
+    port: 8080
+    auth: oidc
+    oidc: {client: gatus, policy: one_factor, bearer_authz: true}
+    tls_internal: {cn: uptime, dir: /etc/opt/gatus/certificates, ca_only: true}
+    metrics: {port: 8080}
+    homepage: {group: Observability, icon: gatus.png, description: Uptime and cert checks}
+
+  alertmanager:
+    image: docker.io/prom/alertmanager:latest                  # TODO: pin
+    ip: 10
+    order: 55
+    subdomain: alert
+    port: 9093
+    expose:
+      - {id: ui,  match: browser, auth: authelia, middlewares: [alertmanager-auth]}
+      - {id: api, match: any,     auth: none, headers: false}
+    homepage: {group: Observability, icon: alertmanager.png, description: Alert routing}
+
+  vmalert:
+    image: docker.io/victoriametrics/vmalert:latest            # TODO: pin
+    ip: 11
+    order: 65
+    requires: [victoriametrics, alertmanager]
+    subdomain: vmalert
+    port: 8880
+    metrics: {port: 8880}
+    homepage: {group: Observability, icon: vmalert.png, description: Alert rule evaluation}
+
+  grafana:
+    image: docker.io/grafana/grafana-oss:latest                # TODO: pin
+    ip: 12
+    order: 70
+    requires: [victoriametrics, victorialogs]
+    subdomain: graph
+    port: 3000
+    volumes: [grafanadata]
+    auth: oidc
+    oidc: {client: grafana, policy: two_factor}
+    uid_gid: "472:0"
+    tls_internal: {cn: graph, dir: /etc/opt/grafana/certificates, ca_only: true}
+    homepage: {group: Observability, icon: grafana.png, description: Dashboards}
+
+  ntfy:
+    image: docker.io/binwiederhier/ntfy:latest                 # TODO: pin
+    ip: 13
+    order: 75
+    subdomain: push
+    port: 2586
+    volumes: [ntfydb]
+    expose:
+      - {id: ui,  match: 'browser && !PathPrefix(`/file/`)', auth: authelia, middlewares: [ntfy-auth]}
+      - {id: api, match: any, auth: none, headers: false}
+    metrics: {port: 2587}
+    uptime: {path: /v1/health}
+    homepage: {group: Observability, icon: ntfy.png, description: Push notifications}
+
+  ntfy-alertmanager:
+    image: docker.io/xenrox/ntfy-alertmanager:latest           # TODO: pin
+    ip: 14
+    order: 76
+    requires: [ntfy, alertmanager]
+    subdomain: ntfy-alertmanager
+    port: 2588
+    auth: none                        # internal bridge, no browser surface
+    headers: false
+    uptime: {enabled: false}
+    # REGRESSION THIS FILE FIXES: absent from dispatcher.sh today because
+    # gen_dispatch_cmds.sh matches [a-zA-Z0-9_]+ and this name has a hyphen.
+
+  olive_tin:
+    image: docker.io/jamesread/olivetin:latest-3k              # TODO: pin
+    ip: 15
+    order: 80
+    subdomain: command
+    port: 1337
+    run_as: "1000"
+    auth: oidc
+    oidc: {client: olive_tin, policy: two_factor}
+    auth_group: svc_admin             # executes root commands over SSH
+    homepage: {group: Admin, icon: olivetin.png, description: Remote admin buttons}
+
+  fluentbit:
+    image: docker.io/fluent/fluent-bit:3.2
+    ip: 20
+    order: 90
+    expose: none
+    dns: log-collector
+    second_pass: true                 # quadlet itself is a *.j2.j2
+    metrics: {port: 2020, path: /api/v1/metrics/prometheus}

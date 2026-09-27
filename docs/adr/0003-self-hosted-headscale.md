@@ -27,4 +27,9 @@ rather than MagicDNS.
   pending that upstream fix (tracked as an issue; see the issue's Comments for the
   2026-08-30 re-investigation, which found the ACL *policy engine* itself is not
   FreeBSD-gated, so the remaining blocker is narrower than originally believed).
+  Verified 2026-09-26 against Tailscale source: ACLs are enforced before netstack
+  SNATs, so SNAT never blocked the matrix (`planning/router/issues/03-headscale-acl-matrix.md`).
+  No-SNAT kernel routing works on pfSense today via `TS_DEBUG_NETSTACK_SUBNETS=0`;
+  tailscale/tailscale#21060 (v1.104) adds the official flag
+  (`planning/router/issues/04-tailscale-no-snat.md`).
 - No Tailscale Funnel or SaaS-side features; public ingress is HAProxy instead.

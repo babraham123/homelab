@@ -1,0 +1,11 @@
+{%- set ordered = services.items() | sort(attribute='1.order') -%}
+{%- for name, svc in ordered %}
+  install_{{ name }})
+    sudo /root/homelab-rendered/src/nodes/{{ node.name }}/install_svcs.sh {{ name }}
+    ;;
+{%- endfor %}
+  install_all_svcs)
+{%- for name, svc in ordered %}
+    sudo /root/homelab-rendered/src/nodes/{{ node.name }}/install_svcs.sh {{ name }}
+{%- endfor %}
+    ;;

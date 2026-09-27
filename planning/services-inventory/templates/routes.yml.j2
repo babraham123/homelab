@@ -1,0 +1,53 @@
+{#- Generates src/nodes/<node>/traefik/routes.yml from services.yml -#}
+{%- macro rule(svc, r) -%}
+{%- if r.match == 'any' -%}
+Host(`{{ svc.subdomain }}.{{ site.url }}`)
+{%- elif r.match == 'browser' -%}
+Host(`{{ svc.subdomain }}.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
+{%- else -%}
+Host(`{{ svc.subdomain }}.{{ site.url }}`) && {{ r.match | replace('browser', 'HeaderRegexp(`User-Agent`, `^Mozilla\\/.*`)') }}
+{%- endif -%}
+{%- endmacro -%}
+{%- macro mws(r) -%}
+{%- set out = [] -%}
+{%- if r.auth in ['authelia', 'oidc'] %}{% set _ = out.append('authelia@file') %}{% endif -%}
+{%- for m in r.middlewares %}{% set _ = out.append(m ~ '@file') %}{% endfor -%}
+{%- if r.headers %}{% set _ = out.append('secure-headers@file') %}{% endif -%}
+{{ out | tojson }}
+{%- endmacro -%}
+# /etc/opt/traefik/config/dynamic/routes.yml
+# GENERATED from services.yml by tools/render_src.sh. Do not edit by hand.
+# yamllint disable rule:document-start rule:document-end
+http:
+  routers:
+{%- for name, svc in services.items() %}
+{%- if svc.expose != 'none' %}
+{%- set routers = svc.expose | default([{'id': '', 'match': 'any'}]) %}
+{%- for r in routers %}
+{%- set d = defaults %}
+{%- set eff = {'auth': r.auth if r.auth is defined else (svc.auth if svc.auth is defined else d.auth),
+               'headers': r.headers if r.headers is defined else (svc.headers if svc.headers is defined else d.headers),
+               'middlewares': r.middlewares | default([])} %}
+    {{ name }}{% if r.id %}-{{ r.id }}{% endif %}:
+      rule: {{ rule(svc, r) }}
+      entryPoints: websecure
+      service: {{ svc.backend if svc.backend is defined else name ~ '@file' }}
+      middlewares: {{ mws(eff) }}
+      tls:
+        options: {{ svc.tls_options | default(d.tls_options) }}@file
+        certResolver: {{ svc.cert_resolver | default(d.cert_resolver) }}
+{%- endfor %}
+{%- endif %}
+{%- endfor %}
+  services:
+{%- for name, svc in services.items() %}
+{%- if svc.expose != 'none' and svc.backend is not defined %}
+    {{ name }}:
+      loadBalancer:
+        servers:
+          - url: {{ svc.scheme | default(defaults.scheme) }}://{{ svc.subdomain }}.{{ site.url }}:{{ svc.port }}/
+{%- if svc.transport is defined %}
+        serversTransport: {{ svc.transport }}
+{%- endif %}
+{%- endif %}
+{%- endfor %}

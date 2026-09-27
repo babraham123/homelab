@@ -1,0 +1,45 @@
+# 03. Re-enable the group-based Headscale ACL matrix
+
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26; tailscale/tailscale#5573 (Brad Fitzpatrick,
+2023-07-18: "ACLs are enforced in shared code that's not OS-specific")
+
+## Problem
+
+The group matrix in `src/headscale/headscale_acl.hujson.j2` (family / guests / public →
+subnets) is commented out, and the policy grants every user `*:*`. It was disabled on
+the belief that ACLs don't work for pfSense subnet routes.
+
+## Finding (verified against tailscale `main`, 2026-09-26)
+
+- `net/tstun/wrap.go` `filterPacketInboundFromWireGuard` runs the ACL filter
+  (`filt.RunIn`) on every packet arriving from a peer. It has no build tag, so it runs
+  on FreeBSD too.
+- netstack takes subnet packets only afterwards, via the
+  `PostFilterPacketInboundFromWireGuard` hook (`wgengine/netstack/netstack.go`). The
+  kernel path gets them after the same filter.
+- So pfSense drops packets the policy denies, matching on the peer's 100.x address and
+  the subnet destination, in both modes. SNAT happens after this and doesn't affect it.
+- Linux's iptables rules (`util/linuxfw`) do only accept, anti-spoof, MASQUERADE and
+  stateful-filtering, not ACLs. So tailscale/tailscale#13851 isn't needed for this.
+
+## Change
+
+1. Uncomment the matrix. Remove the `*:*` grants it replaces, but keep `admin@`, and
+   keep `autogroup:internet` for exit-node users.
+2. Extend `tests`, e.g. a guest is denied `lan:*` but accepted on `pve1:443`, and family
+   is accepted on `lan:*`.
+3. Deploy. `headscale policy check` (or the deploy's validation) must pass.
+4. From a guest device, confirm a LAN host is unreachable and the allowed services
+   work. From a family device, confirm the LAN is reachable.
+5. If a denied flow still gets through, capture `tailscale debug netmap` on pfSense
+   (look for the packet filter rules) and record it here before rolling back.
+6. Update the "Current state" paragraph in `docs/security.md` and ADR 0003.
+
+## Acceptance
+
+- The matrix is live, its policy `tests` pass, and the manual checks in step 4 match.
+
+## Comments
