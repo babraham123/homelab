@@ -20,7 +20,7 @@ Infrastructure-as-code for a self-hosted homelab: configuration files, Jinja2 te
 
 ### Issue tracker
 
-Issues live as markdown files under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+Issues live as markdown files under `planning/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

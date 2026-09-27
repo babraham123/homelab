@@ -19,7 +19,7 @@ rm -rf "$project_dir" all_vars.yml
 mkdir -p "$project_dir"
 cp -R . "$project_dir"
 pushd "$project_dir"
-rm -rf .git .gitignore vars.yml .vscode .fdignore notes
+rm -rf .git .gitignore vars.yml .vscode .fdignore notes planning
 popd
 
 # Assemble jinja2 config file

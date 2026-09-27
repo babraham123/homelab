@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/babraham123/homelab/schema/services.schema.json",
+  "title": "Homelab node service inventory",
+  "type": "object",
+  "required": ["apiVersion", "node", "services"],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": {"const": "homelab/v1"},
+
+    "node": {
+      "type": "object",
+      "required": ["name", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"$ref": "#/$defs/slug"},
+        "kind": {"enum": ["container_vm", "hypervisor", "router", "vps", "desktop", "windows"]},
+        "host": {"$ref": "#/$defs/slug"},
+        "proxy": {"$ref": "#/$defs/slug"},
+        "subnet_var": {"type": "string"}
+      }
+    },
+
+    "defaults": {"$ref": "#/$defs/serviceDefaults"},
+    "secret_gen": {"type": "object", "additionalProperties": {"type": "string"}},
+
+    "secrets": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z0-9_]+$"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["owner", "gen"],
+        "additionalProperties": false,
+        "properties": {
+          "owner": {"$ref": "#/$defs/slug"},
+          "gen": {"type": "string"},
+          "shared_with": {"type": "array", "items": {"$ref": "#/$defs/slug"}},
+          "remote": {"$ref": "#/$defs/slug",
+            "description": "Consumed on another node; minted here because Authelia is the issuer."}
+        }
+      }
+    },
+
+    "services": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/slug"},
+      "additionalProperties": {"$ref": "#/$defs/service"}
+    }
+  },
+
+  "$defs": {
+    "slug": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$"},
+
+    "serviceDefaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scheme": {"enum": ["http", "https"]},
+        "auth": {"$ref": "#/$defs/auth"},
+        "headers": {"type": "boolean"},
+        "cert_resolver": {"type": "string"},
+        "tls_options": {"enum": ["modern", "intermediate"]},
+        "uptime": {"$ref": "#/$defs/uptime"}
+      }
+    },
+
+    "auth": {
+      "enum": ["authelia", "oidc", "none", "public"],
+      "description": "authelia = ForwardAuth at the proxy; oidc = app is an OIDC client; none = NO proxy auth, the app must have its own (document why); public = deliberately unauthenticated."
+    },
+
+    "uptime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean", "default": true},
+        "group": {"enum": ["internal", "public"]},
+        "interval": {"type": "string", "pattern": "^[0-9]+[smh]$"},
+        "path": {"type": "string", "pattern": "^/"}
+      }
+    },
+
+    "router": {
+      "type": "object",
+      "required": ["id", "match"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "match": {
+          "type": "string",
+          "description": "'any' = Host() only; 'browser' = Host() && Mozilla User-Agent; otherwise a raw Traefik matcher ANDed onto Host(). Traefik orders by rule length, so more specific rules win without explicit priority."
+        },
+        "auth": {"$ref": "#/$defs/auth"},
+        "headers": {"type": "boolean"},
+        "middlewares": {"type": "array", "items": {"type": "string"},
+          "description": "Extra @file middlewares appended after the auth middleware."}
+      }
+    },
+
+    "service": {
+      "type": "object",
+      "required": ["image", "order"],
+      "additionalProperties": false,
+      "properties": {
+        "image": {"type": "string", "pattern": "^(localhost|[a-z0-9.-]+\\.[a-z]{2,}/)"},
+        "ip": {"type": "integer", "minimum": 2, "maximum": 254,
+          "description": "Last octet on the node's container subnet. Uniqueness is enforced by the validator, replacing the grep-based check in render_src.sh."},
+        "order": {"type": "integer", "minimum": 0, "maximum": 999,
+          "description": "Install/start order. Reverse is the stop order for volume backups."},
+        "requires": {"type": "array", "items": {"$ref": "#/$defs/slug"}},
+
+        "subdomain": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+        "scheme": {"enum": ["http", "https"]},
+        "backend": {"type": "string", "description": "Traefik service override, e.g. api@internal."},
+        "transport": {"type": "string", "description": "serversTransport name."},
+        "expose": {
+          "oneOf": [
+            {"const": "none"},
+            {"type": "array", "items": {"$ref": "#/$defs/router"}, "minItems": 1}
+          ],
+          "description": "Omit for a single default router. 'none' means no Traefik route at all."
+        },
+        "auth": {"$ref": "#/$defs/auth"},
+        "auth_group": {"type": "string",
+          "description": "Authelia group required. Absent = the node default group."},
+        "headers": {"type": "boolean"},
+        "oidc": {
+          "type": "object",
+          "required": ["client"],
+          "additionalProperties": false,
+          "properties": {
+            "client": {"$ref": "#/$defs/slug"},
+            "policy": {"enum": ["one_factor", "two_factor"]},
+            "bearer_authz": {"type": "boolean"}
+          }
+        },
+        "identity_provider": {"type": "boolean"},
+
+        "dns": {"type": "string", "pattern": "^[a-z0-9-]+$",
+          "description": "Internal-only Unbound record for a service with no public route."},
+        "publish": {"type": "array", "items": {"type": "string", "pattern": "^[0-9]+:[0-9]+$"}},
+        "volumes": {"type": "array", "items": {"type": "string", "pattern": "^[a-z0-9]+$"}},
+        "capabilities": {"type": "array", "items": {"type": "string", "pattern": "^CAP_[A-Z_]+$"}},
+        "run_as": {"type": "string"},
+        "uid_gid": {"type": "string", "pattern": "^[0-9]+:[0-9]+$"},
+        "second_pass": {"type": "boolean",
+          "description": "Quadlet is a *.j2.j2 rendered again at container start."},
+
+        "metrics": {
+          "type": "object",
+          "required": ["port"],
+          "additionalProperties": false,
+          "properties": {
+            "port": {"type": "integer"},
+            "path": {"type": "string", "default": "/metrics"},
+            "auth": {"enum": ["none", "basic"]},
+            "user": {"type": "string"},
+            "secret": {"type": "string"}
+          }
+        },
+
+        "uptime": {"$ref": "#/$defs/uptime"},
+
+        "homepage": {
+          "type": "object",
+          "required": ["group"],
+          "additionalProperties": false,
+          "properties": {
+            "group": {"type": "string"},
+            "icon": {"type": "string"},
+            "description": {"type": "string"}
+          }
+        },
+
+        "tls_internal": {
+          "type": "object",
+          "required": ["cn", "dir"],
+          "additionalProperties": false,
+          "properties": {
+            "cn": {"type": "string"},
+            "dir": {"type": "string", "pattern": "^/"},
+            "owner": {"type": "string", "pattern": "^[0-9]+:[0-9]+$"},
+            "cert_name": {"type": "string"},
+            "key_name": {"type": "string"},
+            "ca_name": {"type": "string"},
+            "ca_only": {"type": "boolean", "description": "Only needs the CA chain, no leaf cert."},
+            "client_cert": {"type": "boolean"}
+          }
+        },
+
+        "provides_postgres": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["db", "user", "secret"],
+            "additionalProperties": false,
+            "properties": {
+              "db": {"type": "string"}, "user": {"type": "string"}, "secret": {"type": "string"}
+            }
+          }
+        }
+      },
+
+      "allOf": [
+        {
+          "if": {"properties": {"expose": {"const": "none"}}, "required": ["expose"]},
+          "then": {"not": {"required": ["subdomain"]}},
+          "else": {"anyOf": [{"required": ["subdomain"]}, {"required": ["backend"]}]}
+        },
+        {
+          "if": {"properties": {"auth": {"const": "oidc"}}, "required": ["auth"]},
+          "then": {"required": ["oidc"]}
+        }
+      ]
+    }
+  }
+}

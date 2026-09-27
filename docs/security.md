@@ -52,10 +52,13 @@ An embedded DERP relay covers peers that can't hole-punch.
 group-based Headscale ACL matrix exists in
 `src/headscale/headscale_acl.hujson.j2`
 but is marked "not currently in use" and the active policy is permissive (each
-enrolled user gets broad access). The blocker is narrower than "ACLs don't work on
-FreeBSD" implies: FreeBSD (pfSense) still can't disable SNAT on subnet routes, so
-routed LAN traffic loses real source IPs at the router boundary; Headscale's ACL
-policy engine itself is unaffected. Enforced segmentation today
+enrolled user gets broad access). SNAT does not block the matrix: Tailscale enforces
+ACLs in its OS-independent packet filter (`net/tstun`) on the tailnet address, before
+netstack SNATs the flow, so it works on pfSense today; re-enabling it is
+`planning/router/issues/03-headscale-acl-matrix.md`. SNAT only hides tailnet clients'
+addresses from the LAN side (pfSense VLAN rules, logs, Traefik). Kernel routing
+without SNAT is available on pfSense now via `TS_DEBUG_NETSTACK_SUBNETS=0`
+(`planning/router/issues/04-tailscale-no-snat.md`). Enforced segmentation today
 comes from pfSense VLAN firewall rules and Authelia's application-layer policies,
 not from the mesh.
 
@@ -221,4 +224,4 @@ open. Headscale admin operations happen over localhost, not the public interface
   there; containment relies on VLAN firewall rules.
 - Wired VLAN enforcement waits on a managed switch.
 
-These are tracked as issues under `.scratch/`.
+These are tracked as issues under `planning/`.

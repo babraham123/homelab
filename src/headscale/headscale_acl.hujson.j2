@@ -60,8 +60,8 @@
       ]
     }
 
-    // ACLs currently don't work for subnets
-    // TODO: re-enable when Tailscale better supports FreeBSD
+    // TODO: re-enable. Subnet ACLs are enforced before pfSense's SNAT, so SNAT doesn't block
+    //   this; untested since. See planning/router/issues/03-headscale-acl-matrix.md
     // // family can access entire VPN
     // {
     //   "action": "accept",
