@@ -260,16 +260,44 @@ headscale --user USER_ID preauthkeys create --expiration 1h
   you approve the pairing PIN in the Sunshine web UI, which guests can't reach.
 - To revoke: `headscale nodes list --user USER_ID`, then `headscale nodes delete -i NODE_ID`.
 
+## Backup and restore
+The VPS isn't a Proxmox VM, so vzdump never sees it. `backup_full` archives its whole
+root filesystem instead, with a consistent snapshot of the Headscale DB, to
+`/var/opt/backups/full/vpn-full-TIMESTAMP.tar.zst` (newest 2 kept). Only the copy
+pulled off the box survives losing the VPS.
+```bash
+# From pve1 (or OliveTin's "vpn Backup Full" button)
+ssh -p 2202 autoadmin@vpn.{{ site.url }} backup_full
+scp -P 2202 'autoadmin@vpn.{{ site.url }}:/var/opt/backups/full/vpn-full-*.tar.zst' /root/backups/
+```
+
+- Restore one file, e.g. the Headscale DB
+```bash
+mkdir /tmp/restore
+zstd -dc vpn-full-TIMESTAMP.tar.zst | tar -x -C /tmp/restore ./var/lib/headscale/db.sqlite
+# on vpn: systemctl stop headscale, replace db.sqlite, delete db.sqlite-wal/-shm, start
+```
+
+- Restore the whole VPS onto a new Linode
+  - Create a Linode with the same Debian release, power it off, and boot it into
+    [Rescue Mode](https://techdocs.akamai.com/cloud-computing/docs/rescue-and-rebuild)
+    with its disk as `/dev/sda`. Keep Network Helper on: it rewrites the restored
+    network config for the new IP at boot.
+  - In the Lish console: `passwd && systemctl start ssh`
+  - From pve1, wipe the fresh image and stream the archive in. It's decompressed on
+    pve1 because the rescue system runs from RAM.
+```bash
+ssh root@NEW_IP 'mkdir -p /media/sda && mount /dev/sda /media/sda && rm -rf /media/sda/*'
+zstd -dc vpn-full-TIMESTAMP.tar.zst | \
+  ssh root@NEW_IP 'tar -x --numeric-owner --acls --xattrs -C /media/sda'
+# The new disk has a new filesystem UUID; regenerate the boot config for it
+ssh root@NEW_IP 'cd /media/sda && for d in dev proc sys; do mount --bind /$d $d; done && chroot . update-grub'
+```
+  - Reboot out of Rescue Mode. If the public IP changed, update `vpn.ip` in
+    `vars.yml`, the `vpn` A record, and redeploy. Tailnet nodes reconnect on their own:
+    the Headscale DB, noise key and SSH host keys are the originals.
+
 ## Upgrade
 [Headscale docs](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)
 
-- Backup the headscale DB
-```bash
-sudo su
-systemctl stop headscale
-cd /root/backups
-cp /var/lib/headscale/db.sqlite* .
-tar -czf db-$(date -I).tar.gz db.sqlite*
-rm db.sqlite*
-systemctl start headscale
-```
+- Back up first: `ssh -p 2202 autoadmin@vpn.{{ site.url }} backup_full`

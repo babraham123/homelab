@@ -56,3 +56,5 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
   and doesn't abort the run.
 
 ## Comments
+
+2026-09-27: vpn is covered by 12's `backup_full` (whole root, consistent Headscale DB). For vpn, step 3 pulls `/var/opt/backups/full/vpn-full-*.tar.zst` after running it, instead of a `backup_files` built from `backup_paths`.

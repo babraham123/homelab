@@ -181,3 +181,7 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
   and copies the `.tar` to `/var/opt/backups/hass/` (last 8 kept), so it rides in
   the VM backup. Restore from Settings >> System >> Backups; recorder history
   (`hassdb`) is not in the archive.
+- VPS: no vzdump covers it, so `ssh autoadmin@vpn backup_full` tars its whole root
+  filesystem, with a consistent Headscale DB snapshot, to `/var/opt/backups/full/` on
+  vpn (last 2 kept) for pve1 to pull. Restore steps in
+  [the VPN guide](guides/vpn.md#backup-and-restore).
