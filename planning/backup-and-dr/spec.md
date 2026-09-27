@@ -21,3 +21,4 @@ offsite, and documents recovery.
 | [09](issues/09-pve1-disaster-recovery-guide.md) | pve1 disaster recovery guide with the complete escrow/backup file list | `resolved` | task |
 | [10](issues/10-host-file-backups.md) | Back up the important files on every host, not only the VM images | `ready-for-agent` | task |
 | [11](issues/11-pbs-backup-user-and-encryption.md) | Back up to PBS as a backup-only user, and decide on client-side encryption | `ready-for-agent` | task |
+| [12](issues/12-vps-full-backup.md) | Full backup of the VPS via dispatcher | `resolved` | task |

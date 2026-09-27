@@ -9,6 +9,8 @@ cd /root/homelab-rendered/src
 
 case $1 in
   headscale)
+    # sqlite3 takes the consistent DB snapshot for backup_full.sh
+    apt install -y sqlite3
     HS_VERSION=$(curl -s "https://api.github.com/repos/juanfont/headscale/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
     wget --output-document=headscale.deb "https://github.com/juanfont/headscale/releases/download/v${HS_VERSION}/headscale_${HS_VERSION}_linux_amd64.deb"
     dpkg --install headscale.deb
