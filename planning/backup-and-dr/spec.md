@@ -18,4 +18,4 @@ offsite, and documents recovery.
 | [06](issues/06-vm-restore-runbook.md) | Restore instructions for VMs on pve1 and pve2, and a quarterly test | `ready-for-agent` | task |
 | [07](issues/07-pg-dumpall-dispatcher.md) | pg_dumpall via dispatcher, triggered by the orchestrator | `resolved` | task |
 | [08](issues/08-home-assistant-backup.md) | Home Assistant native backup via dispatcher, triggered by the orchestrator | `ready-for-agent` | task |
-| [09](issues/09-pve1-disaster-recovery-guide.md) | pve1 disaster recovery guide with the complete escrow/backup file list | `ready-for-agent` | task |
+| [09](issues/09-pve1-disaster-recovery-guide.md) | pve1 disaster recovery guide with the complete escrow/backup file list | `resolved` | task |
