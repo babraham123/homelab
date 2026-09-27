@@ -43,3 +43,18 @@ the belief that ACLs don't work for pfSense subnet routes.
 - The matrix is live, its policy `tests` pass, and the manual checks in step 4 match.
 
 ## Comments
+
+- 2026-09-27: needs headscale >= 0.29 first (`tests` block; `*` now means tailnet
+  addresses only, so subnet access must name the `hosts` CIDRs; `*:0` is rejected since
+  0.27). The template was rewritten accordingly and `group:admin` reads `tailscale_admin`
+  from `vars.yml`. Today `policy.path` is `""` in `headscale_private.yaml.j2`, so no
+  policy is loaded at all; step 3 must set it to `/etc/headscale/acl.hujson`. Before
+  that, rename the CLI-created users (`admin@`, `jayden@`, `public@`, `guest1@`,
+  `cousin@`) to drop the trailing `@`, or the policy fails to resolve them
+  (`headscale users rename -i ID --new-name NAME`). Users were renamed 2026-09-27. `cousin` gets its rule via
+  `tailscale_extra_acls` in `vars.yml`; decide what `jane` (OIDC user) gets. OIDC-group-driven membership is
+  auth/09.
+- 2026-09-27: guest access decided: `group:guests` (the `guest1` user, created per
+  `docs/guides/vpn.md.j2` "Guest users") gets HTTP/HTTPS on secsvcs, websvcs and homesvcs only, the same surface as
+  the public endpoint; no exit node, no LAN, no Proxmox/pfSense GUIs. Policy `tests`
+  cover admin, family, public and guest.

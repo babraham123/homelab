@@ -61,7 +61,7 @@ systemctl restart headscale
 - Create pre-auth key
 ```bash
 headscale completion bash > /etc/bash_completion.d/headcompletion
-headscale users create admin@
+headscale users create admin
 headscale --user USER_ID preauthkeys create --expiration 100y
 ```
 
@@ -220,7 +220,7 @@ systemctl start geoip_generator.service
 ## Machine users (optional)
 - Create user and key
 ```bash
-headscale users create USERNAME@
+headscale users create USERNAME
 headscale --user USER_ID preauthkeys create --expiration 1h
 ```
 
@@ -244,6 +244,21 @@ sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes 
 ```
 
 - In cloud VM, check connected nodes: `sudo headscale nodes list`
+
+## Guest users
+Visitors get the `guest1` user: HTTP/HTTPS to the service VMs and Moonlight streaming
+from the gaming VM (no exit node, no LAN, no Proxmox/pfSense GUIs, no Sunshine web UI),
+per `group:guests` in `src/headscale/headscale_acl.hujson.j2`. Authelia still gates each
+app. Hand out a short-lived key per visit.
+```bash
+headscale users create guest1
+headscale --user USER_ID preauthkeys create --expiration 1h
+```
+- On the guest's device, log in as in "Machine users" but **without** `--accept-routes`
+  unless they need a LAN address directly; the site's web apps resolve to the VPS anyway.
+- Moonlight: the guest adds the gaming VM by its LAN IP (needs `--accept-routes`), then
+  you approve the pairing PIN in the Sunshine web UI, which guests can't reach.
+- To revoke: `headscale nodes list --user USER_ID`, then `headscale nodes delete -i NODE_ID`.
 
 ## Upgrade
 [Headscale docs](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)

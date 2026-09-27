@@ -4,7 +4,7 @@ Tracked in git since 2026-09-26 (moved from the gitignored `.scratch/`). One dir
 
 - [Backups and disaster recovery](backup-and-dr/spec.md) — 11 issues
 - [Supply chain and upgrade safety](supply-chain/spec.md) — 2 issues
-- [Authorization model](auth/spec.md) — 8 issues
+- [Authorization model](auth/spec.md) — 9 issues
 - [Container hardening](container-hardening/spec.md) — 2 issues
 - [Observability gaps](observability/spec.md) — 12 issues
 - [Shell script correctness fixes](script-fixes/spec.md) — 7 issues
