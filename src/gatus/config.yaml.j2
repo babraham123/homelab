@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/gatus/config.yaml
 # Ref: https://github.com/TwiN/gatus?tab=readme-ov-file
 ---
@@ -54,69 +55,12 @@ endpoints:
     # <<: *public
     # url: "https://{{ site.url }}"
 
-  - name: homepage
+  # Internal endpoints come from the uptime entries in src/nodes.yml
+{% for endpoint in inv.uptime %}
+  - name: {{ endpoint.name }}
     <<: *internal
-    url: "https://dash.{{ site.url }}"
-
-  - name: traefik secsvcs
-    <<: *internal
-    url: "https://secproxy.{{ site.url }}"
-
-  - name: traefik websvcs
-    <<: *internal
-    url: "https://webproxy.{{ site.url }}"
-
-  - name: traefik homesvcs
-    <<: *internal
-    url: "https://homeproxy.{{ site.url }}"
-
-  - name: grafana
-    <<: *internal
-    url: "https://graph.{{ site.url }}"
-
-  - name: victorialogs
-    <<: *internal
-    url: "https://logs.{{ site.url }}"
-
-  - name: alertmanager
-    <<: *internal
-    url: "https://alert.{{ site.url }}"
-
-  - name: victoriametrics
-    <<: *internal
-    url: "https://metrics.{{ site.url }}"
-
-  - name: vmalert
-    <<: *internal
-    url: "https://vmalert.{{ site.url }}"
-
-  - name: ntfy health check
-    <<: *internal
-    url: "https://push.{{ site.url }}/v1/health"
-
-  - name: olive_tin
-    <<: *internal
-    url: "https://command.{{ site.url }}"
-
-  - name: home assistant
-    <<: *internal
-    url: "https://home.{{ site.url }}"
-
-  - name: zigbee2mqtt
-    <<: *internal
-    url: "https://zigbee.{{ site.url }}"
-
-  - name: esphome
-    <<: *internal
-    url: "https://iot.{{ site.url }}"
-
-  - name: guacamole
-    <<: *internal
-    url: "https://remote.{{ site.url }}"
-
-  - name: archivebox
-    <<: *internal
-    url: "https://archive.{{ site.url }}"
+    url: "{{ endpoint.url }}"
+{% endfor %}
 
   # - name: jellyfin
     # <<: *internal
