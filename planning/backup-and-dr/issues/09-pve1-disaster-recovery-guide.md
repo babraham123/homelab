@@ -1,6 +1,6 @@
 # 09. pve1 disaster recovery guide with the complete escrow/backup file list
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 8
@@ -46,3 +46,6 @@ Add `docs/guides/pve1_recovery.md`:
   or explicitly marked "regenerate".
 
 ## Comments
+
+- 2026-09-27: Added `docs/guides/pve1_recovery.md.j2` (renders to `pve1_recovery.md`), linked from `security.md#secrets` and `maintenance.md`; its inventory is now the canonical list for 04. Corrected vs. the table above: `acme.json` and the OliveTin key live on the VMs (PBS-covered), `/root/acme` and `/root/.ssh` are regenerable.
+  TODOs for the maintainer: PBS user + encryption key of pve1's `pbs2` storage; where the CA/SSH CA passphrases and ACB device key/password are kept; how root's `/root/.ssh/id_ed25519` was created; Linux name of the NIC cabled to pve2; `<host>_root_pswd` keys missing from `src/pve1/secrets_template.yaml`.
