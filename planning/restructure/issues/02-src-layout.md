@@ -47,3 +47,9 @@ prefixes. Grep the rendered tree for `homelab-rendered/src/[a-z]` paths that don
   container VM succeeds.
 
 ## Comments
+
+- 2026-09-27: restructure/01 added `src/nodes.yml` and `src/nodes.jinja`.
+  Paths to update: `script:` values in `nodes.yml` (relative to `src/`), the
+  `node ~ '/install_svcs.sh'`, `debian/install_svcs.sh` and `router/` prefixes in
+  `nodes.jinja`, the `{% import 'src/nodes.jinja' ... %}` lines, and the
+  `src/${node}/...` paths in `render_src.sh`'s inventory checks.

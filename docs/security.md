@@ -174,16 +174,17 @@ accounts with sharply different powers:
 - **`manualadmin`** is interactive SSH for a human: file uploads, exploratory work,
   full sudo with password.
 - **`autoadmin`** is the automation account. Its SSH key is bound to a `ForceCommand`
-  script, `src/secsvcs/dispatcher.sh`, which whitelists a fixed
+  script, `src/<node>/dispatcher.sh`, which whitelists a fixed
   set of `$SSH_ORIGINAL_COMMAND` strings (`install_traefik`, `install_all_svcs`,
-  `copy_acme_certs`, …) and rejects everything else. Its sudoers entry, generated at
-  render time from the dispatcher's own command list (`tools/parse_dispatcher.sh` →
-  `sudoers.j2`), grants NOPASSWD for exactly those commands.
+  `copy_acme_certs`, …) and rejects everything else. The dispatcher and its sudoers
+  entry are both rendered from the node's entries in `src/nodes.yml`, so sudo grants
+  NOPASSWD for exactly the whitelisted commands.
 
 So automation (OliveTin buttons, deploy scripts, cert distribution) can trigger
 predefined actions remotely, but a stolen `autoadmin` key cannot run arbitrary
-commands. `tools/gen_dispatch_cmds.sh` regenerates dispatcher cases from
-`install_svcs.sh` so the whitelist stays in sync with the services that exist.
+commands. The render fails if a node's `services` in `src/nodes.yml` differ from its
+`install_svcs.sh` cases, so the whitelist stays in sync with the services that exist
+(see [ADR 0006](adr/0006-node-inventory.md)).
 
 ## Secrets
 

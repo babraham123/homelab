@@ -25,3 +25,6 @@ Blocked by: 05, observability/01
   `Pull=newer`, central builds).
 
 ## Comments
+
+- 2026-09-27: ADR 0006 is now the node inventory (restructure/01); use the
+  next free number.

@@ -34,3 +34,10 @@ Blocked by: script-fixes/01
 
 - restructure/01 replaces the other `parse_*` scripts with `src/nodes.yml`; if it lands
   first, derive the list from there instead of writing a new parser.
+- 2026-09-27: restructure/01 landed. Don't write `tools/parse_images.sh`:
+  `nodes.<node>.services` in `src/nodes.yml` is already in install order (the same order
+  `install_all_svcs` uses). Put the image facts on the service entry (e.g. `upstream:` /
+  `build:`, `update_last: true`, and `containers:` for services that install more than
+  `<name>.container`, like archivebox → novnc) and derive `<node>_images` in
+  `src/nodes.jinja`. The quadlet labels then aren't needed, and the `Image=` check
+  compares quadlets against `nodes.yml`.

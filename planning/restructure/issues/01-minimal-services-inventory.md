@@ -1,6 +1,6 @@
 # 01. Minimal per-node inventory that replaces parse_routes/parse_uptime_urls/parse_dispatcher/gen_dispatch_cmds
 
-Status: ready-for-agent
+Status: resolved
 Type: prototype
 Repo: homelab
 Source: user item 57 (previous prototype in planning/services-inventory judged too complex)
@@ -72,3 +72,23 @@ convert: `src/dns/unbound.conf.j2`, `src/haproxy/haproxy.cfg.j2`,
 
 - 2026-09-26: image-updater/02 adds `tools/parse_images.sh`, another script that
   reverse-engineers install order and quadlet labels. Fold it into `nodes.yml` here.
+- 2026-09-27: Done; the four scripts are deleted, and ADR 0006 records the design.
+  Where it differs from the plan above:
+  - `jinjanate` takes one data file, so `render_src.sh` appends `nodes.yml` to
+    `vars.yml`.
+  - `services` is an ordered mapping, with `subdomain`/`uptime`/`uptime_path` on each
+    service, not separate maps.
+  - New keys `debian_services`, `install_all_svcs`, `commands[].run` and gaming
+    `triggers`.
+  - `src/nodes.jinja` derives every list.
+  - An added check compares the secsvcs/homesvcs subdomains with their `routes.yml`
+    `Host()` rules.
+
+  Render diff against main is byte-identical except:
+  - Gatus endpoint order (yq shows the same set);
+  - pve1/pve2 dispatcher and OliveTin order, where `install_vm_watchdog` now comes first;
+  - guacamole's random `state`.
+
+  Follow-ups are noted on image-updater/02 (no `parse_images.sh`), deploy/04,
+  observability/07, vaultwarden/01, restructure/02 and script-fixes/04 (`nodes:` key
+  collision).

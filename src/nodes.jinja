@@ -1,0 +1,77 @@
+{#- Lists derived from src/nodes.yml, keyed by node. Not a .j2, so it is only imported:
+      {% import 'src/nodes.jinja' as inv with context %}
+    dispatch[node]:   dispatcher cases, [{name, run: [line, ...]}], in case order
+    cases(node):      those cases as dispatcher.sh `case` text
+    commands[node]:   case names (OliveTin buttons)
+    sudo_cmds[node]:  sorted commands the dispatcher runs with sudo (sudoers)
+    subdomains[node]: sorted subdomains its Traefik serves (Unbound, HAProxy)
+    uptime:           Gatus internal endpoints, [{name, host, url}] -#}
+{%- set dispatch = {} -%}
+{%- set commands = {} -%}
+{%- set sudo_cmds = {} -%}
+{%- set subdomains = {} -%}
+{%- set uptime = [] -%}
+
+{%- macro path(node, script) -%}
+{#- upload_src.sh ships only src/router to the router, as /root/router-src -#}
+{{- script | replace('router/', '/root/router-src/', 1) if node == 'router'
+    else '/root/homelab-rendered/src/' ~ script -}}
+{%- endmacro -%}
+
+{%- for node, spec in nodes.items() -%}
+  {%- set services = spec.get('services', {}) -%}
+  {%- set entries = [] -%}
+  {%- for svc in spec.get('debian_services', []) -%}
+    {%- do entries.append({'name': 'install_' ~ svc,
+        'run': ['sudo ' ~ path(node, 'debian/install_svcs.sh') ~ ' ' ~ svc]}) -%}
+  {%- endfor -%}
+  {%- set install_all = [] -%}
+  {%- for svc in services -%}
+    {%- do install_all.append('sudo ' ~ path(node, node ~ '/install_svcs.sh') ~ ' ' ~ svc) -%}
+    {%- do entries.append({'name': 'install_' ~ svc, 'run': [install_all[-1]]}) -%}
+  {%- endfor -%}
+  {%- if spec.get('install_all_svcs', false) -%}
+    {%- do entries.append({'name': 'install_all_svcs', 'run': install_all}) -%}
+  {%- endif -%}
+  {%- for cmd in spec.get('commands', []) -%}
+    {%- if cmd.run is defined -%}
+      {%- do entries.append({'name': cmd.name, 'run': cmd.run}) -%}
+    {%- else -%}
+      {%- do entries.append({'name': cmd.name,
+          'run': [('sudo ' if cmd.get('sudo', true) else '') ~ path(node, cmd.script) ~ ' ' ~ cmd.name]}) -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- for trigger in spec.get('triggers', []) -%}
+    {%- do entries.append({'name': trigger, 'run': []}) -%}
+  {%- endfor -%}
+  {%- do dispatch.update({node: entries}) -%}
+  {%- do commands.update({node: entries | map(attribute='name') | list}) -%}
+
+  {%- set sudo = [] -%}
+  {%- for entry in entries -%}
+    {%- for line in entry.run if line.startswith('sudo ') -%}
+      {%- do sudo.append(line[5:]) -%}
+    {%- endfor -%}
+  {%- endfor -%}
+  {%- do sudo_cmds.update({node: sudo | unique | sort}) -%}
+
+  {%- do subdomains.update({node: services.values() | selectattr('subdomain', 'defined')
+      | map(attribute='subdomain') | sort}) -%}
+  {%- for svc in services.values() if svc.uptime is defined -%}
+    {%- set host = svc.subdomain ~ '.' ~ site.url -%}
+    {%- do uptime.append({'name': svc.uptime, 'host': host,
+        'url': 'https://' ~ host ~ svc.get('uptime_path', '')}) -%}
+  {%- endfor -%}
+{%- endfor -%}
+
+{%- macro cases(node) -%}
+  {%- set lines = [] -%}
+  {%- for entry in dispatch[node] -%}
+    {%- do lines.append('  ' ~ entry.name ~ ')') -%}
+    {%- for line in entry.run -%}
+      {%- do lines.append('    ' ~ line) -%}
+    {%- endfor -%}
+    {%- do lines.append('    ;;') -%}
+  {%- endfor -%}
+  {{- lines | join('\n') -}}
+{%- endmacro -%}

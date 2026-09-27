@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # Local DNS settings
 # pfSense admin console >> Services >> DNS Resolver >> General Settings >> Custom options
 # Ref:
@@ -31,7 +32,7 @@ server:
     local-data: "homesvcs.{{ site.url }}. A {{ homesvcs.ip }}"
     
     # secsvcs routes
-{% for svc in secsvcs_subdomains %}
+{% for svc in inv.subdomains.secsvcs %}
     local-zone: "{{ svc }}.{{ site.url }}." redirect
     local-data: "{{ svc }}.{{ site.url }}. A {{ secsvcs.ip }}"{% endfor %}
     # Internal only routes
@@ -41,7 +42,7 @@ server:
     local-data: "push.{{ site.url }}. IN MX 10 push.{{ site.url }}."
 
     # homesvcs routes
-{% for svc in homesvcs_subdomains %}
+{% for svc in inv.subdomains.homesvcs %}
     local-zone: "{{ svc }}.{{ site.url }}." redirect
     local-data: "{{ svc }}.{{ site.url }}. A {{ homesvcs.ip }}"{% endfor %}
     # Internal only routes

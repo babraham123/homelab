@@ -106,8 +106,5 @@ retention:
   metric_days: 14
   hass_days: 14
 
-# The following content will be dynamically parsed at compile time:
-# secsvcs_subdomains: list of subdomains being served by secsvcs
-# homesvcs_subdomains: list derived from src/homesvcs/traefik/routes.yml
-# uptime_internal_urls: list of internal urls being monitored by the uptime service, gatus
+# tools/render_src.sh appends src/nodes.yml (the `nodes:` key) here at render time.
 ...

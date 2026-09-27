@@ -52,6 +52,8 @@ reference the VPS by `vpn.ip`.
 
 - 2026-09-27: researched and resolved; see Answer. It supersedes the Deliverable above:
   option A is dropped and B is done directly in 08.
+- 2026-09-27: ADR 0006 is now the node inventory (restructure/01); use the
+  next free number.
 
 ## Answer
 
@@ -116,7 +118,7 @@ Why not A first:
   `/vmagentdata` but never sets `-remoteWrite.tmpDataPath`. The default is the relative
   path `vmagent-remotewrite-data` in the container rootfs, so the buffer is lost whenever
   the container is recreated.
-- **ADR 0006 is taken** by image-updater/07. Use the next free number.
+- **ADR 0006 is taken** by the node inventory (restructure/01). Use the next free number.
 - **The exporter is already installed.** Debian trixie ships HAProxy 3.0.11, built with
   `USE_PROMEX=1`. Confirm on the VPS with `haproxy -vv | grep -i prometheus`.
 
