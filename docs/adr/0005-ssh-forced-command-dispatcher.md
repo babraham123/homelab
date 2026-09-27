@@ -1,6 +1,8 @@
 # ADR 0005: SSH forced-command dispatcher instead of a config-management agent
 
-Status: accepted (backfilled 2026-08-30; decision predates this record)
+Status: accepted (backfilled 2026-08-30; decision predates this record). The
+generation mechanism is amended by [ADR 0006](0006-node-inventory.md): the dispatcher
+and sudoers are both rendered from `src/nodes.yml`.
 
 ## Context
 
