@@ -104,6 +104,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   copy_acme_certs)
     sudo /root/homelab-rendered/src/debian/commands.sh copy_acme_certs
     ;;
+  pg_dumpall)
+    sudo /root/homelab-rendered/src/secsvcs/commands.sh pg_dumpall
+    ;;
   build_haproxy_mapper)
     /root/homelab-rendered/src/secsvcs/commands.sh build_haproxy_mapper
     ;;
