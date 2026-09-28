@@ -5,6 +5,9 @@ Description="Homelab: Restart VMs if they become unresponsive"
 StartLimitIntervalSec=30
 StartLimitBurst=10
 Requires=pve-guests.service
+# Stops before pve-guests shuts the VMs down, so it can't reset a guest mid-shutdown
+# (backup_orchestrator powers pve2 off after every run).
+After=pve-guests.service
 Wants=network.target
 After=network-online.target
 
