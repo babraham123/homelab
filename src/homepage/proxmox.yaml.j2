@@ -1,7 +1,14 @@
 # /etc/opt/homepage/config/proxmox.yaml
 # Ref: https://gethomepage.dev/configs/proxmox
+# Only read by services that set proxmoxNode/proxmoxVMID; none do yet. Each top-level key
+# must match the PVE node name that services pass as proxmoxNode.
 ---
-url: https://pve1.{{ site.url }}:8006
-token: api_ro@pam!homepage
-secret: {% raw %}{{DASH_PVE1_TOKEN}}{% endraw %}
+# pve1:
+#   url: https://pve1.{{ site.url }}:8006
+#   token: api_ro@pam!homepage
+#   secret: {% raw %}{{HOMEPAGE_VAR_DASH_PVE1_TOKEN}}{% endraw %}
+# pve2:
+#   url: https://pve2.{{ site.url }}:8006
+#   token: api_ro@pam!homepage
+#   secret: {% raw %}{{HOMEPAGE_VAR_DASH_PVE2_TOKEN}}{% endraw %}
 ...
