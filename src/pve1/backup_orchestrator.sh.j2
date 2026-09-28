@@ -1,0 +1,148 @@
+#!/bin/bash
+# Weekly backup run: wakes pve2 (PBS lives there), dumps application data inside the VMs,
+# snapshots every VM on both hosts to PBS, records per-step success metrics, then powers
+# pve2 back off if it was off to begin with. Posts a one-line ntfy summary at the end.
+# Usage:
+#   /usr/local/bin/backup_orchestrator.sh
+# Adding a backup: write a step_<name> function and list it in STEPS.
+
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+set -euo pipefail
+
+storage=pbs2
+metrics=/var/lib/node_exporter/textfile_collector/homelab_backup.prom
+ssh=(ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
+is_reachable=/root/homelab-rendered/src/debian/is_reachable.sh
+
+# wake_pve2 and sleep_pve2 bracket these. Application dumps come first so they land on the VM disks before vzdump reads them.
+STEPS=(pg_dumpall backup_hass vzdump_pve1 vzdump_pve2)
+
+step_wake_pve2() {
+  "${ssh[@]}" autoadmin@router start_pve2
+  wait_for 600 "pbs2 unreachable" "$is_reachable" pbs2
+  wait_for 300 "PBS storage $storage inactive" storage_active
+}
+
+step_pg_dumpall() {
+  "${ssh[@]}" autoadmin@secsvcs pg_dumpall
+}
+
+step_backup_hass() {
+  "${ssh[@]}" autoadmin@homesvcs backup_hass
+}
+
+step_vzdump_pve1() {
+  vzdump --all --storage "$storage" --mode snapshot
+}
+
+step_vzdump_pve2() {
+  "${ssh[@]}" autoadmin@pve2 run_backups
+}
+
+step_sleep_pve2() {
+  # The connection can drop as the host goes down, so the ping check is the real result.
+  "${ssh[@]}" autoadmin@pve2 shutdown || true
+  wait_for 300 "pve2 still up" is_down pve2
+}
+
+storage_active() { pvesm status --storage "$storage" | grep -qw active; }
+is_down() { ! "$is_reachable" "$1"; }
+
+# Usage: wait_for TIMEOUT_S ERROR_MSG CMD...
+wait_for() {
+  local timeout=$1 msg=$2 t=0
+  shift 2
+  until "$@" &>/dev/null; do
+    (( t += 10 ))
+    if (( t >= timeout )); then
+      echo "error: ${msg} after ${timeout}s" >&2
+      return 1
+    fi
+    sleep 10
+  done
+}
+
+ok=()
+failed=()
+declare -A done_at=()
+
+# Runs step_$1 and records the outcome. The subshell re-enables errexit: bash ignores
+# `set -e` inside anything called from an if/&&/|| condition.
+run() {
+  echo "==> $1"
+  set +e
+  ( set -e; "step_$1" )
+  local rc=$?
+  set -e
+  if (( rc == 0 )); then
+    ok+=("$1")
+    done_at[$1]=$(date +%s)
+  else
+    failed+=("$1")
+    echo "error: step $1 failed (exit $rc)" >&2
+  fi
+}
+
+# Keeps the previous timestamp of failed jobs, so staleness alerts fire per job.
+write_metrics() {
+  local name='homelab_backup_last_success_timestamp_seconds' job value
+  declare -A last=()
+  if [[ -f $metrics ]]; then
+    while read -r job value; do
+      [[ $job =~ job=\"([^\"]+)\" ]] && last[${BASH_REMATCH[1]}]=$value
+    done < <(grep "^${name}{" "$metrics")
+  fi
+  for job in "${STEPS[@]}"; do
+    [[ -v done_at[$job] ]] && last[$job]=${done_at[$job]}
+  done
+
+  mkdir -p "$(dirname "$metrics")"
+  {
+    echo "# HELP ${name} Unix time of the last successful backup_orchestrator step."
+    echo "# TYPE ${name} gauge"
+    for job in "${!last[@]}"; do
+      echo "${name}{job=\"${job}\"} ${last[$job]}"
+    done
+  } > "${metrics}.tmp"
+  chmod 644 "${metrics}.tmp"
+  # node_exporter only reads *.prom, and the rename is atomic.
+  mv "${metrics}.tmp" "$metrics"
+}
+
+# Usage: notify TITLE MESSAGE PRIORITY
+notify() {
+  local token
+  # The alert token is a secsvcs secret; pve1 holds every host's secrets file.
+  token=$(SOPS_AGE_KEY_FILE=/root/secrets/age.txt sops -d /root/secrets/secsvcs.yaml | yq '.ntfy_alert_token')
+  curl -fsS -o /dev/null \
+    -H "Authorization: Bearer $token" \
+    -H "X-Title: $1" \
+    -H "X-Priority: $3" \
+    -H "X-Tags: floppy_disk" \
+    -d "$2" "https://push.{{ site.url }}/alert" \
+    || echo "warning: ntfy post failed" >&2
+}
+
+started=$(date +%s)
+pve2_was_on=0
+"$is_reachable" pve2 &>/dev/null && pve2_was_on=1
+echo "pve2 initially $( (( pve2_was_on )) && echo on || echo off )"
+
+run wake_pve2
+if [[ -z "${failed[*]}" ]]; then
+  for step in "${STEPS[@]}"; do
+    run "$step"
+  done
+fi
+write_metrics || failed+=(write_metrics)
+if (( ! pve2_was_on )); then
+  run sleep_pve2
+fi
+
+minutes=$(( ($(date +%s) - started) / 60 ))
+if [[ -z "${failed[*]}" ]]; then
+  notify "Backups OK" "${ok[*]} (${minutes} min)" 2
+  exit 0
+fi
+notify "Backups failed" "failed: ${failed[*]}; ok: ${ok[*]:-none} (${minutes} min)" 4
+exit 1

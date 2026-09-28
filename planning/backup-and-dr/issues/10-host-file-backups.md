@@ -58,3 +58,10 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
 ## Comments
 
 2026-09-27: vpn is covered by 12's `backup_full` (whole root, consistent Headscale DB). For vpn, step 3 pulls `/var/opt/backups/full/vpn-full-*.tar.zst` after running it, instead of a `backup_files` built from `backup_paths`.
+
+- 2026-09-27: 01 landed. Steps are `step_<name>` functions listed in `STEPS` in
+  `src/pve1/backup_orchestrator.sh.j2`. A failing step is recorded and the run continues
+  (only `wake_pve2` aborts), which already covers "unreachable host doesn't abort". Put
+  the pulls before `vzdump_pve1` so pve1's collection lands before the PBS upload, and
+  give each host its own step (e.g. `files_<node>`) so each gets its own
+  `homelab_backup_last_success_timestamp_seconds{job=...}` series.

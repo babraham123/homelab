@@ -19,6 +19,17 @@ case $1 in
     systemctl restart cert_notifier.timer
     exit 0
     ;;
+  backup_orchestrator)
+    cp pve1/backup_orchestrator.sh /usr/local/bin
+    cp pve1/backup_orchestrator.service /etc/systemd/system
+    cp pve1/backup_orchestrator.timer /etc/systemd/system
+
+    # Only the timer is enabled; the service is a oneshot it triggers.
+    systemctl daemon-reload
+    systemctl enable backup_orchestrator.timer
+    systemctl restart backup_orchestrator.timer
+    exit 0
+    ;;
   *)
     echo "error: unknown service: $1" >&2
     exit 1

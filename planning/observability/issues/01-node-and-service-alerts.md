@@ -51,3 +51,10 @@ firing state. Document the list in `docs/services.md#observability`.
   deliberately broken; `DiskAlmostFull` fires with `fallocate` on a test VM.
 
 ## Comments
+
+- 2026-09-27: backup-and-dr/01 landed. The metric is
+  `homelab_backup_last_success_timestamp_seconds{job="pg_dumpall"|"backup_hass"|"vzdump_pve1"|"vzdump_pve2"}`,
+  from `/var/lib/node_exporter/textfile_collector/homelab_backup.prom` on pve1 (scraped
+  as `pve1.<site>:9100`). A failed step keeps its old timestamp, so `BackupStale` fires
+  per job; the run is weekly, so 8 days is right. `backup_orchestrator.service` is a
+  "Homelab:" unit, so `SystemdUnitFailed` also catches a failed run.
