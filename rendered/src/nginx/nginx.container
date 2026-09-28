@@ -20,7 +20,8 @@ HostName=static.janedoe.com
 IP=10.11.0.8
 
 Environment=TZ=America/Los_Angeles
-Volume=/var/opt/nginx/www:/www:ro
+# The whole dir, so the www symlink and the releases/ it points into both resolve.
+Volume=/var/opt/nginx:/srv:ro
 Volume=/etc/opt/nginx/conf:/etc/nginx:ro
 
 [Service]
