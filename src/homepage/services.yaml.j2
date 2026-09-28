@@ -44,7 +44,7 @@
           # timezone: {{ personal.timezone }} # optional - defaults to browser timezone
           integrations: # optional
             - type: ical # Show calendar events from another service
-              url: {% raw %}{{HOME_ICAL_URL}}{% endraw %} # iCal address, public or secret
+              url: {% raw %}{{HOMEPAGE_VAR_HOME_ICAL_URL}}{% endraw %} # iCal address, public or secret
               name: Home # required - name for these calendar events
               color: 'teal' # https://gethomepage.dev/configs/settings/#color-palette
               params:
@@ -104,19 +104,6 @@
         icon: home-assistant-alt.svg
         href: https://home.{{ site.url }}/auth/oidc/welcome
         description: Home automation dashboard
-        # widget:
-        #   type: homeassistant
-        #   url: http://homeassistant.host.or.ip:port
-        #   key: access_token
-        #   custom:
-        #     - state: weather
-        #       label: Apparent Temperature
-        #       value: "{attributes.apparent_temperature} {attributes.temperature_unit}"
-#         #     - state: sensor.total_power
-#         #     - state: sensor.total_energy_today
-#         #       label: energy today
-#         #     - template: "{% raw %}{{ states.switch|selectattr('state','equalto','on')|list|length }}{% endraw %}"
-#         #       label: switches on
 #     - Frigate:
 #         icon: frigate.svg
 #         href: https://cameras.{{ site.url }}/
@@ -216,29 +203,30 @@
         icon: proxmox.svg
         href: https://pve1.{{ site.url }}:8006/
         description: VM hypervisor 1
-        # widget:
-          # type: proxmox
-          # url: https://pve1.{{ site.url }}:8006
-          # username: api_ro@pam!homepage
-          # password: {% raw %}{{DASH_PVE1_TOKEN}}{% endraw %}
+        widget:
+          type: proxmox
+          url: https://pve1.{{ site.url }}:8006
+          username: api_ro@pam!homepage
+          password: {% raw %}{{HOMEPAGE_VAR_DASH_PVE1_TOKEN}}{% endraw %}
     - Proxmox 2:
         icon: proxmox.svg
         href: https://pve2.{{ site.url }}:8006/
         description: VM hypervisor 2
-        # widget:
-          # type: proxmox
-          # url: https://pve2.{{ site.url }}:8006
-          # username: api_ro@pam!homepage
-          # password: {% raw %}{{DASH_PVE2_TOKEN}}{% endraw %}
+        widget:
+          type: proxmox
+          url: https://pve2.{{ site.url }}:8006
+          username: api_ro@pam!homepage
+          password: {% raw %}{{HOMEPAGE_VAR_DASH_PVE2_TOKEN}}{% endraw %}
     - Proxmox Backup:
         icon: mdi-cloud-upload
         href: https://pbs2.{{ site.url }}:8007/
         description: VM backup server
-        # widget:
-          # type: proxmoxbackupserver
-          # url: https://pbs2.{{ site.url }}:8007
-          # username: api_ro@pam!homepage
-          # password: {% raw %}{{DASH_PBS2_TOKEN}}{% endraw %}
+        widget:
+          type: proxmoxbackupserver
+          url: https://pbs2.{{ site.url }}:8007
+          username: api_ro@pam!homepage
+          password: {% raw %}{{HOMEPAGE_VAR_DASH_PBS2_TOKEN}}{% endraw %}
+          datastore: backup1
     - Olive Tin:
         icon: sh-olivetin.svg
         href: https://command.{{ site.url }}/

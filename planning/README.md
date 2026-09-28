@@ -16,3 +16,4 @@ Tracked in git since 2026-09-26 (moved from the gitignored `.scratch/`). One dir
 - [copyparty and car data upload](copyparty/spec.md) — 4 issues (maintainer request, added 2026-09-26)
 - [Vaultwarden](vaultwarden/spec.md) — 1 issue (maintainer request, added 2026-09-26)
 - [Router and network](router/spec.md) — 5 issues (maintainer request, added 2026-09-26)
+- [Homepage dashboard](homepage/spec.md) — 2 issues (maintainer request, added 2026-09-27)
