@@ -1,7 +1,7 @@
 # /etc/opt/homepage/config/settings.yaml
 # Ref: https://gethomepage.dev/configs/settings/
 ---
-title: JD's System
+title: "JD\u0027s System"
 
 startUrl: https://dash.janedoe.com/ # default is "/"
 

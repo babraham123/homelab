@@ -4,8 +4,9 @@
 #   /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 set -euo pipefail
 
-# site.name is free text, so it is shell-quoted once here rather than inside each -subj.
-org={{ site.name | quote }}
+# site.name is free text: backslash-escaped for -subj, where / and + separate fields,
+# then shell-quoted once here rather than inside each -subj.
+org={{ site.name | replace("\\", "\\\\") | replace("/", "\\/") | replace("+", "\\+") | quote }}
 subj="/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O=${org}"
 
 /root/homelab-rendered/src/debian/is_root.sh

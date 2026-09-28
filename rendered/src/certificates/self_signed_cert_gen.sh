@@ -4,7 +4,8 @@
 #   /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 set -euo pipefail
 
-# site.name is free text, so it is shell-quoted once here rather than inside each -subj.
+# site.name is free text: backslash-escaped for -subj, where / and + separate fields,
+# then shell-quoted once here rather than inside each -subj.
 org='JD'"'"'s System'
 subj="/C=US/ST=California/L=Middletown/O=${org}"
 
