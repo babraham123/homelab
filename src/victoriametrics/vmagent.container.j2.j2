@@ -25,6 +25,8 @@ IP={% raw %}{{ subnet }}{% endraw %}.7
 Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      --httpListenAddr=":8429" \
      --remoteWrite.url="https://metrics.{{ site.url }}/api/v1/write" \
+     --remoteWrite.tmpDataPath="/vmagentdata" \
+     --remoteWrite.maxDiskUsagePerURL="1GiB" \
      --remoteWrite.basicAuth.username="admin" \
      --remoteWrite.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
      --remoteWrite.forceVMProto \

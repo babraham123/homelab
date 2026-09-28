@@ -1,6 +1,6 @@
 # 11. Keep vmagent's remote-write buffer on its volume, and cap it
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: found in observability/04 (2026-09-27)
@@ -49,5 +49,23 @@ since this fix no longer rides with 08.
 - Stop VictoriaMetrics on secsvcs for 10 minutes. Restart `vmagent` on websvcs during
   the outage, then start VictoriaMetrics again. The websvcs series have no gap.
 - `du -sh` on the `systemd-vmagentdata` volume shows the queue grew, then drained.
+
+## Answer
+
+Done in `src/victoriametrics/vmagent.container.j2.j2`: the shared `Exec=` now carries
+`--remoteWrite.tmpDataPath="/vmagentdata"` and `--remoteWrite.maxDiskUsagePerURL="1GiB"`.
+homesvcs and websvcs both render from this template, and observability/08's VPS branch
+inherits the flags. `tools/render_src.sh` renders cleanly with both flags in the quadlet.
+
+- **No alert change.** `PersistentQueueIsDroppingData` in `src/vmalert/configs/vmagent.yml`
+  already watches `vm_persistentqueue_bytes_dropped_total`, which vmagent increments when
+  the 1 GiB cap forces it to drop the oldest blocks.
+- **Cutover.** The first restart after deploy still loses whatever sits in the old rootfs
+  queue. From then on, the queue survives `--rm`, reboots and auto-updates.
+- **04 and 08 already point here.** 04's follow-up step 2 and 08's scope and comments
+  were updated when this ticket was split out.
+- **Acceptance is still to run** after deploy (`install_svcs.sh vmagent` on homesvcs and
+  websvcs). While VictoriaMetrics is stopped, record `vmagent_remotewrite_pending_data_bytes`
+  to check the 1 GiB estimate.
 
 ## Comments
