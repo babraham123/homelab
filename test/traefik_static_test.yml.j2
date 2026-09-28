@@ -16,6 +16,8 @@ providers:
 entryPoints:
   web:
     address: ":80/tcp"
+    http:
+      aliasHeadersStrategy: delete
     proxyProtocol:
       insecure: false
       trustedIPs: [{{ vpn.ip }}]
@@ -24,6 +26,8 @@ entryPoints:
       trustedIPs: [{{ vpn.ip }}]
   websecure:
     address: ":443/tcp"
+    http:
+      aliasHeadersStrategy: delete
     proxyProtocol:
       insecure: false
       trustedIPs: [{{ vpn.ip }}]

@@ -34,6 +34,7 @@ entryPoints:
   web:
     address: ":80/tcp"
     http:
+      aliasHeadersStrategy: delete
       redirections:
         entryPoint:
           to: websecure
@@ -47,6 +48,8 @@ entryPoints:
       trustedIPs: [{{ vpn.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
   websecure:
     address: ":443/tcp"
+    http:
+      aliasHeadersStrategy: delete
     proxyProtocol:
       insecure: false
       trustedIPs: [{{ vpn.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
@@ -55,6 +58,8 @@ entryPoints:
       trustedIPs: [{{ vpn.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
   smtp:
     address: ":465/tcp"
+    http:
+      aliasHeadersStrategy: delete
 certificatesResolvers:
   # Consider changing cert duration from 90 days to 1 year
   le-http-staging:
