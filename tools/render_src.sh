@@ -3,7 +3,8 @@
 # Run from root of the project directory.
 # Usage:
 #   cd ~/project/dir
-#   tools/render_src.sh /dir/to/store/rendered/copy
+#   tools/render_src.sh [/dir/to/store/rendered/homelab-rendered]
+# Without an argument it renders into a private temp dir and prints the path.
 # Ref:
 # https://manpages.debian.org/buster/fd-find/fdfind.1.en.html
 # https://github.com/kpfleming/jinjanator
@@ -13,17 +14,24 @@
 
 set -euo pipefail
 
-# Prepare the output directory
-project_dir=$1
-rm -rf "$project_dir" all_vars.yml
+# Prepare the output directory. The default is a mktemp (0700) parent; the name
+# homelab-rendered is kept because upload_src.sh moves the tree into place by it.
+project_dir=${1:-"$(mktemp -d)/homelab-rendered"}
 mkdir -p "$project_dir"
-cp -R . "$project_dir"
-pushd "$project_dir"
-rm -rf .git .gitignore vars.yml .vscode .fdignore notes planning
-popd
+# An exclude list rather than copy-then-delete, so personal details never touch the
+# output, even briefly
+rsync -a --delete \
+  --exclude /.git --exclude /.gitignore --exclude /.vscode --exclude /.fdignore \
+  --exclude /.claude --exclude /.scratch --exclude /planning --exclude /notes \
+  --exclude vars.yml --exclude all_vars.yml --exclude .DS_Store \
+  ./ "$project_dir/"
 
 # Assemble jinja2 config file. jinjanate takes one data file, so the node inventory
-# is appended to vars.yml rather than passed alongside it.
+# is appended to vars.yml rather than passed alongside it. It holds everything in
+# vars.yml, so it lives in its own private temp dir, outside the repo and the output.
+vars_dir=$(mktemp -d)
+trap 'rm -rf "$vars_dir"' EXIT
+all_vars="${vars_dir}/all_vars.yml"
 cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
 {
   # Exclude the ending "..."
@@ -31,15 +39,14 @@ cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
   echo
   cat src/nodes.yml
   echo -e "...\n"
-} > all_vars.yml
+} > "$all_vars"
 
 # Render the files
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"
 $fdfind . --type f -e j2 --exec rm "${project_dir}/{}"
-$fdfind . --type f -e j2 --exec jinjanate --quiet -o "${project_dir}/{.}" "{}" all_vars.yml
+$fdfind . --type f -e j2 --exec jinjanate --quiet -o "${project_dir}/{.}" "{}" "$all_vars"
 
-rm -f all_vars.yml
 cd "$project_dir"
 
 # Make executable
