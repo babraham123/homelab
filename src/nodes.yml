@@ -112,7 +112,7 @@ nodes:
     commands:
       - {name: install_keys, script: homesvcs/commands.sh}
       - {name: install_certs, script: homesvcs/commands.sh}
-      - {name: backup_hass, script: homesvcs/commands.sh}
+      - {name: backup_hass, run: [sudo /root/homelab-rendered/src/homesvcs/backup_hass.sh]}
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
       - {name: install_ca, script: debian/commands.sh}
