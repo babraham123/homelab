@@ -1,6 +1,6 @@
 # 01. Backup orchestrator on pve1 that wakes pve2
 
-Status: ready-for-agent
+Status: claimed
 Type: task
 Repo: homelab
 Source: review finding 1, 2
