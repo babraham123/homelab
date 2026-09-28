@@ -48,6 +48,13 @@ PR and may change before merge.
    - `require_pkce: true`, `pkce_challenge_method: 'S256'`
    - `access_token_signed_response_alg`: keep `none` unless the extension validates a JWT
      access token
+   - add a `guacamole` entry under `claims_policies` with
+     `id_token: ['email', 'groups', 'preferred_username']`, and set
+     `claims_policy: 'guacamole'` on the client, like `grafana`. The extension reads the
+     username and groups from the ID token. The implicit `id_token`-only flow puts scope
+     claims there, but with code flow Authelia moves them to userinfo by default. Without
+     this policy, `preferred_username` and `groups` drop out of the ID token and group
+     permissions stop mapping.
 3. **Guacamole** (`src/guacamole/guacamole.container.j2`):
    - bump `Image=` to the release that includes the PR
    - `Secret=guacamole_oidc_secret,type=env,target=OPENID_CLIENT_SECRET`
@@ -68,7 +75,9 @@ PR and may change before merge.
 - Authelia logs show a token-endpoint exchange authenticated with the client secret. The
   browser URL never contains an `id_token`.
 - Authelia rejects a login attempt without PKCE, or with the client set back to `public`.
-- Group-based permissions (`OPENID_GROUPS_CLAIM_TYPE=groups`) still map as before.
+- The decoded ID token contains `preferred_username` and `groups`. Group-based
+  permissions (`OPENID_GROUPS_CLAIM_TYPE=groups`) still map as before, e.g. a member of
+  a database user group with `ADMINISTER` still sees Settings → Connections.
 - No `grant_types: implicit` client remains in `configuration.yml.j2`.
 
 ## Comments
