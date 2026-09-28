@@ -1,6 +1,6 @@
 # 01. Bring configuration.yml.j2 up to the Authelia 4.39 template
 
-Status: ready-for-agent
+Status: claimed
 Type: task
 Repo: homelab
 Source: review finding 32 (maintainer wants the full annotated template kept)
