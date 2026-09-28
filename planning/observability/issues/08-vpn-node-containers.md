@@ -88,3 +88,7 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   accepted. Marked ready-for-agent.
 - 2026-09-27: rescoped to observability/04's Answer. HAProxy metrics are split out as
   observability/12, and the vmagent buffer fix as observability/11.
+- 2026-09-27: observability/11 resolved. The shared vmagent template now sets
+  `tmpDataPath=/vmagentdata` and `maxDiskUsagePerURL=1GiB`, so the VPS branch inherits
+  them. Both blockers (04, 11) are resolved, so this ticket is unblocked. observability/12
+  follows it.
