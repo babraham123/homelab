@@ -44,9 +44,9 @@ Done 2026-09-28 at the maintainer's request, ahead of 02.
   `.fdignore` lists it, so it isn't re-rendered or deployed. `.gitattributes` marks
   `rendered/**` `linguist-generated`.
 - Documented in `docs/development.md` "Pre-commit hook and `rendered/`" and AGENTS.md.
-- Not deterministic: `src/guacamole/guacamole.container.j2` renders
-  `OPENID_AUTHORIZATION_ENDPOINT`'s `state` with `random`, so that one line changes in
-  `rendered/` on every commit.
+- Deterministic: the Guacamole OIDC `state` was the only random value; it is now
+  `random(seed=site.url)` (maintainer decision), so a commit touches `rendered/` only
+  where the templates changed.
 
 ## Comments
 
