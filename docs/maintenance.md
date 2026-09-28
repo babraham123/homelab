@@ -40,8 +40,7 @@ cp "$S/new.yml" src/authelia/config.template.yml
 ```
 - Resolve the conflicts: keep local values, take upstream's comment text
 - Set the `# v<version>` header in `configuration.yml.j2` and the `Image=` tag in
-  `authelia.container.j2` to the new minor version; rendering fails if their minor versions
-  differ
+  `authelia.container.j2` to the new minor version
 - Render and upload, then validate with the new image before installing. The `sed`
   passes the quadlet's secrets and environment so the template filter can run:
 ```bash

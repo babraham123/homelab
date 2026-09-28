@@ -40,12 +40,12 @@ Done 2026-09-27.
   render-time check runs, including the nodes.yml checks), then
   `shellcheck -x --severity=warning` over the rendered `*.sh` (covers `tools/`, `src/`,
   `test/` and rendered `*.sh.j2`). Info/style findings don't block.
-- `tools/validate_rendered.sh`: yamllint, `jq -e`, duplicate `IP=`, Authelia
-  header-vs-image check; `render_src.sh` calls it.
+- `tools/validate_rendered.sh`: yamllint, `jq -e`, duplicate `IP=`; `render_src.sh`
+  calls it. Item 4, the Authelia header-vs-image check, was dropped (maintainer decision).
 - Documented in `docs/development.md` "Pre-commit hook"; the Mac setup guide installs
   `jq shellcheck` and sets `core.hooksPath`.
-- Acceptance: runs in ~6 s. A shellcheck warning, a yamllint error in rendered YAML, a
-  duplicate container IP and an Authelia version mismatch each exit 1 (tested with
+- Acceptance: runs in ~6 s. A shellcheck warning, a yamllint error in rendered YAML and a
+  duplicate container IP each exit 1 (tested with
   patched temp indexes).
 - Open findings the hook currently rejects (outside this ticket's files, so not fixed):
   - `src/certificates/self_signed_cert_gen.sh.j2`: SC1011/SC1078, `O={{ site.name }}`
