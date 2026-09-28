@@ -18,7 +18,6 @@ users:
   - jane
   - jayden
   - jasper
-# Headscale user that gets the admin ACL rules. Must match `headscale users list`.
 tailscale_admin: jane
 # Extra Headscale ACL rules, appended verbatim to `acls` in headscale_acl.hujson.j2.
 # Users not in `users` get nothing unless listed here. Hosts from the template's

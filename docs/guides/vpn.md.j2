@@ -245,6 +245,25 @@ sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes 
 
 - In cloud VM, check connected nodes: `sudo headscale nodes list`
 
+## ACL policy
+`src/headscale/headscale_acl.hujson.j2` is installed as `/etc/headscale/acl.hujson` by
+`src/vpn/install_svcs.sh headscale`. Membership comes from `vars.yml` (`users`,
+`tailscale_admin`, `tailscale_extra_acls`). Every user referenced must exist in
+`headscale users list` with that exact name (no trailing `@`; the `@` is only in the
+policy).
+```bash
+# after tools/upload_src.sh vpn ...
+cd /root/homelab-rendered/src
+cp headscale/headscale_acl.hujson /etc/headscale/acl.hujson
+headscale policy check --file /etc/headscale/acl.hujson --bypass-grpc-and-access-database-directly
+systemctl reload headscale        # SIGHUP reloads the policy; a failing check is rejected
+journalctl -eu headscale --no-pager | tail -20
+```
+- `policy check` with the bypass flag resolves users against the database and runs the
+  policy's `tests` block. Without the flag it only parses.
+- Spot-check from a node: `tailscale debug netmap | jq '.PacketFilter'` shows the
+  rules that node received; `nc -zv HOST PORT` from an allowed and a denied source.
+
 ## Guest users
 Visitors get the `guest1` user: HTTP/HTTPS to the service VMs and Moonlight streaming
 from the gaming VM (no exit node, no LAN, no Proxmox/pfSense GUIs, no Sunshine web UI),

@@ -53,8 +53,9 @@ journalctl -eu authelia
   - Navigate to `ldap.{{ site.url }}` and login
     User = admin, get the password below
     `/usr/local/bin/get_secret.sh lldap_admin_password`
-  - Add regular users, add them to the `lldap_password_manager` group
-    - {% for user in users %}{{ user }}, {% endfor %} (note for future: add_more_users)
+  - Add regular users, add them to the `lldap_password_manager` group, (note for future: add_more_users)
+    - {{ tailscale_admin }}
+    - {% for user in users %}{{ user }}, {% endfor %}
   - Create the `authelia_gen_access`, `headscale_access` and `command_general` groups, add users to them
   - Create the `grafana_admin`, `hass_admin` and `command_admin` groups, add your user to it
   - Uncomment out the authelia middleware
