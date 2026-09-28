@@ -86,7 +86,8 @@ emailAddress                    = Email Address
 countryName_default             = US
 stateOrProvinceName_default     = California
 localityName_default            = Middletown
-0.organizationName_default      = JD's System
+# Quoted: OpenSSL drops bare quote characters and expands $ in unquoted values.
+0.organizationName_default      = "JD's System"
 organizationalUnitName_default  =
 emailAddress_default            = jdoe@gmail.com
 
