@@ -25,7 +25,7 @@ do
     then
       touch "/tmp/$vmid.lastup"
     else
-      timestamp="$(date -r /tmp/$vmid.lastup +%s)" 
+      timestamp="$(date -r "/tmp/$vmid.lastup" +%s)"
       lookback="$(date -d "1 minute ago" +%s)"
       if [[ "${timestamp}" -lt "${lookback}" ]]
       then
