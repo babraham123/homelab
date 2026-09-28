@@ -10,7 +10,7 @@ offsite, and documents recovery.
 
 | # | Title | Status | Type |
 |---|---|---|---|
-| [01](issues/01-backup-orchestrator-on-pve1.md) | Backup orchestrator on pve1 that wakes pve2 | `ready-for-agent` | task |
+| [01](issues/01-backup-orchestrator-on-pve1.md) | Backup orchestrator on pve1 that wakes pve2 | `resolved` | task |
 | [02](issues/02-backup-schedule-in-code.md) | Own the backup schedule from the repo, not the PVE UI | `ready-for-agent` | task |
 | [03](issues/03-offsite-datastore-copy.md) | Copy the PBS datastore offsite after each run | `ready-for-human` | task |
 | [04](issues/04-key-escrow-plan.md) | Escrow plan for the AGE key, CAs and other trust roots | `ready-for-human` | task |

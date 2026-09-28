@@ -1,0 +1,15 @@
+# /etc/systemd/system/backup_orchestrator.timer
+
+[Unit]
+Description="Homelab: Runs backup_orchestrator.service every week"
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+# Run if machine was off. Keep src/gatus/config.yaml.j2's maintenance window aligned.
+Persistent=true
+OnCalendar=Sun *-*-* 01:00:00
+Unit=backup_orchestrator.service
+
+[Install]
+WantedBy=timers.target
