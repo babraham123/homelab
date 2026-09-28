@@ -1,0 +1,42 @@
+# /etc/containers/systemd/homepage.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: homepage dashboard for internal users"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=ghcr.io/gethomepage/homepage:latest
+ContainerName=homepage
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=dash.janedoe.com
+IP=10.11.0.9
+# port 3000
+
+Environment=PUID=1000 PGID=1000
+Environment=TZ=America/Los_Angeles
+Environment=LOG_TARGETS=stdout
+Environment=HOMEPAGE_ALLOWED_HOSTS=dash.janedoe.com,10.11.0.9:3000
+
+Secret=home_ical_url,type=env,target=HOMEPAGE_VAR_HOME_ICAL_URL
+Secret=home_latitude,type=env,target=HOMEPAGE_VAR_HOME_LATITUDE
+Secret=home_longitude,type=env,target=HOMEPAGE_VAR_HOME_LONGITUDE
+Secret=dash_pve1_api_token,type=env,target=HOMEPAGE_VAR_DASH_PVE1_TOKEN
+Secret=dash_pve2_api_token,type=env,target=HOMEPAGE_VAR_DASH_PVE2_TOKEN
+Secret=dash_pbs2_api_token,type=env,target=HOMEPAGE_VAR_DASH_PBS2_TOKEN
+
+Volume=/etc/opt/homepage/images:/app/public/images
+Volume=/etc/opt/homepage/config:/app/config
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

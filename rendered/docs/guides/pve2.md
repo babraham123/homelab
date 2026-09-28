@@ -1,0 +1,28 @@
+# PVE2 setup specific for hosting secsvcs
+Initial setup for the secondary VM host, PVE2. Handles VM management services.
+
+- Make sure that [Proxmox setup](./proxmox.md) has been completed.
+- Create the websvcs VM with the desired resources and devices attached. websvcs runs the rest of the web apps on a beefier machine. All services are containerized.
+
+## VM management
+[Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
+
+- Ensure mutual exclusion between VMs that use the GPU
+  - Install hook script
+```bash
+mkdir -p /var/lib/vz/snippets
+cp src/pve2/hookscript.pl /var/lib/vz/snippets
+# get IDs of GPU VMs, devtop and gaming
+qm list
+qm set 100 --hookscript local:snippets/hookscript.pl
+qm set 102 --hookscript local:snippets/hookscript.pl
+```
+
+## Automation
+
+- Programmatically send WoL packets from the router
+```bash
+ip -br link show | grep -E '^(en|eth)' | awk '{print $3}' > pve2_mac_address.txt
+scp pve2_mac_address.txt admin@router:/root
+rm pve2_mac_address.txt
+```

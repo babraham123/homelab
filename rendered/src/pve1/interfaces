@@ -1,0 +1,11 @@
+# /etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto vmbr0
+iface vmbr0 inet static
+	address 192.168.4.10/24
+	gateway 192.168.4.1
+	bridge-ports none
+	bridge-stp off
+	bridge-fd 0

@@ -1,0 +1,270 @@
+# /etc/opt/homepage/config/services.yaml
+# Ref: https://gethomepage.dev/configs/services/
+#   https://gethomepage.dev/installation/docker/#using-environment-secrets
+---
+# - Group A:
+#     - Service A:
+#         icon: service.png
+#         href: http://service.host/
+#         description: Foo management
+#         ping: service.host
+#         siteMonitor: http://service.host/
+#         container: my-container
+#         widget:
+#           type: service-a
+#           url: http://service.host
+#           key: demo
+
+# Icons:
+# NAME.[png|svg]
+# https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/
+# https://github.com/walkxcode/dashboard-icons/tree/master/svg/
+# mdi-NAME
+# https://pictogrammers.com/library/mdi/
+# si-NAME
+# https://simpleicons.org/
+# sh-NAME.[svg|png|webp]
+# https://selfh.st/icons/
+
+# Widgets: https://gethomepage.dev/widgets/
+# iFrame: https://gethomepage.dev/widgets/services/iframe/#full-example
+#   - internally public grafana dashboard, uptime?
+#   - home assistant dashboard
+# Custom API: https://gethomepage.dev/widgets/services/customapi/
+
+- Calendar:
+    - Home events:
+        href: https://calendar.google.com/
+        widget:
+          type: calendar
+          firstDayInWeek: sunday # optional - defaults to monday
+          view: monthly # optional - possible values monthly, agenda
+          maxEvents: 10 # optional - defaults to 10
+          showTime: true # optional - show time for event happening today - defaults to false
+          # timezone: America/Los_Angeles # optional - defaults to browser timezone
+          integrations: # optional
+            - type: ical # Show calendar events from another service
+              url: {{HOMEPAGE_VAR_HOME_ICAL_URL}} # iCal address, public or secret
+              name: Home # required - name for these calendar events
+              color: 'teal' # https://gethomepage.dev/configs/settings/#color-palette
+              params:
+                showName: false
+
+# - Media:
+#     - Jellyfin:
+#         icon: jellyfin.svg
+#         href: https://media.janedoe.com/
+#         description: Media server for movies and TV shows
+#         # widget:
+#         #   type: jellyfin
+#         #   url: http://jellyfin.host.or.ip
+#         #   key: demo
+#         #   enableBlocks: true # optional, defaults to false
+#         #   enableNowPlaying: true # optional, defaults to true
+#         #   enableUser: true # optional, defaults to false
+#         #   showEpisodeNumber: true # optional, defaults to false
+#         #   expandOneStreamToTwoRows: false # optional, defaults to true
+#     - Calibre:
+#         icon: calibre.svg
+#         href: https://books.janedoe.com/
+#         description: eBook server
+#         # widget:
+#         #   type: calibreweb
+#         #   url: http://your.calibreweb.host:port
+#         #   username: username
+#         #   password: password
+#     - Audiobookshelf:
+#         icon: audiobookshelf.svg
+#         href: https://audiobooks.janedoe.com/
+#         description: Audiobook server
+#         # widget:
+#         #   type: audiobookshelf
+#         #   url: http://audiobookshelf.host.or.ip:port
+#         #   key: demo
+#     - Immich:
+#         icon: immich.svg
+#         href: https://photos.janedoe.com/
+#         description: Photo server
+#         # widget:
+#         #   type: immich
+#         #   url: http://immich.host.or.ip
+#         #   key: demo
+#     - FreshRSS:
+#         icon: freshrss.svg
+#         href: https://rss.janedoe.com/
+#         description: RSS reader
+#         # widget:
+#         #   type: freshrss
+#         #   url: http://freshrss.host.or.ip:port
+#         #   username: username
+#         #   password: password
+
+- Home:
+    - Home Assistant:
+        icon: home-assistant-alt.svg
+        href: https://home.janedoe.com/auth/oidc/welcome
+        description: Home automation dashboard
+#     - Frigate:
+#         icon: frigate.svg
+#         href: https://cameras.janedoe.com/
+#         description: Camera server
+#         # widget:
+#         #   type: frigate
+#         #   url: http://frigate.host.or.ip:port
+#         #   enableRecentEvents: true # Optional, defaults to false
+    - Zigbee2MQTT:
+        icon: zigbee2mqtt.svg
+        href: https://zigbee.janedoe.com/
+        description: Zigbee network manager
+    - ESPHome:
+        icon: esphome.svg
+        href: https://iot.janedoe.com/
+        description: IoT device framework
+
+# - Life:
+#     - Mealie:
+#         icon: mealie.svg
+#         href: https://recipes.janedoe.com/
+#         description: Recipe server
+#         # widget:
+#         #   type: mealie
+#         #   url: http://mealie.host.or.ip
+#         #   key: demo
+#         #   version: 2 # only required if version > 1, defaults to 1
+#     - Ghostfolio:
+#         icon: sh-ghostfolio.svg
+#         href: https://wealth.janedoe.com/
+#         description: Portfolio tracker
+#         # widget:
+#         #   type: ghostfolio
+#         #   url: http://ghostfolio.host.or.ip
+#         #   key: demo
+
+- Productivity:
+    - Guacamole:
+        icon: guacamole.svg
+        href: https://remote.janedoe.com/
+        description: Remote UI access
+    - ArchiveBox:
+        icon: si-internetarchive
+        href: https://archive.janedoe.com/
+        description: Archive websites and web content
+#     - Forgejo:
+#         icon: forgejo.svg
+#         href: https://git.janedoe.com/
+#         description: Git server and CI/CD
+#         # widget:
+#         #   type: gitea
+#         #   url: http://forgejo.host.or.ip:port
+#         #   key: demo
+
+- Core Services:
+    - TP-Link:
+        icon: sh-tp-link.svg
+        href: https://wifi.janedoe.com/
+        description: WiFi AP
+    - pfSense:
+        icon: pfsense.svg
+        href: https://router.janedoe.com/
+        description: Router and firewall
+        # widget:
+          # type: pfsense
+          # url: http://pfsense.host.or.ip:port
+          # username: user # optional, or API key
+          # password: pass # optional, or API key
+          # headers: # optional, or username/password
+          #   X-API-Key: key
+          # wan: igb0
+          # version: 2 # optional, defaults to 1 for api v1
+          # fields: ["load", "memory", "temp", "wanStatus"] # optional
+    - Authelia:
+        icon: sh-authelia.svg
+        href: https://auth.janedoe.com/
+        description: Authentication and SSO
+    - LLDAP:
+        icon: mdi-account-group
+        href: https://ldap.janedoe.com/
+        description: User management
+    - Traefik Secsvcs:
+        icon: traefik-proxy.svg
+        href: https://secproxy.janedoe.com/
+        description: Proxy dashboard for secsvcs
+    - Traefik Homesvcs:
+        icon: traefik-proxy.svg
+        href: https://homeproxy.janedoe.com/
+        description: Proxy dashboard for homesvcs
+    - Traefik Websvcs:
+        icon: traefik-proxy.svg
+        href: https://webproxy.janedoe.com/
+        description: Proxy dashboard for websvcs
+
+- Infra:
+    - Proxmox 1:
+        icon: proxmox.svg
+        href: https://pve1.janedoe.com:8006/
+        description: VM hypervisor 1
+        widget:
+          type: proxmox
+          url: https://pve1.janedoe.com:8006
+          username: api_ro@pam!homepage
+          password: {{HOMEPAGE_VAR_DASH_PVE1_TOKEN}}
+    - Proxmox 2:
+        icon: proxmox.svg
+        href: https://pve2.janedoe.com:8006/
+        description: VM hypervisor 2
+        widget:
+          type: proxmox
+          url: https://pve2.janedoe.com:8006
+          username: api_ro@pam!homepage
+          password: {{HOMEPAGE_VAR_DASH_PVE2_TOKEN}}
+    - Proxmox Backup:
+        icon: mdi-cloud-upload
+        href: https://pbs2.janedoe.com:8007/
+        description: VM backup server
+        widget:
+          type: proxmoxbackupserver
+          url: https://pbs2.janedoe.com:8007
+          username: api_ro@pam!homepage
+          password: {{HOMEPAGE_VAR_DASH_PBS2_TOKEN}}
+          datastore: backup1
+    - Olive Tin:
+        icon: sh-olivetin.svg
+        href: https://command.janedoe.com/
+        description: Bash Commands
+
+- Telemetry:
+    - Grafana:
+        icon: grafana.svg
+        href: https://graph.janedoe.com/
+        description: Metric dashboards
+    - Victoria Logs:
+        icon: sh-victoriametrics.svg
+        href: https://logs.janedoe.com/
+        description: Logs
+    - Gatus:
+        icon: gatus.svg
+        href: https://uptime.janedoe.com/
+        description: Uptime monitoring
+        # widget:
+        #   type: gatus
+        #   url: http://gatus.host.or.ip:port
+    - Alertmanager:
+        icon: alertmanager.svg
+        href: https://alert.janedoe.com/
+        description: Alerts
+    - Victoria Metrics:
+        icon: sh-victoriametrics-light.svg
+        href: https://metrics.janedoe.com/vmui/
+        description: Metrics
+        # widget:
+        #   type: prometheus
+        #   url: http://prometheushost:port
+    - VM Alert:
+        icon: mdi-alert-decagram
+        href: https://vmalert.janedoe.com/
+        description: Alerting rules
+    - Ntfy:
+        icon: ntfy.svg
+        href: https://push.janedoe.com/
+        description: Notifications
+...

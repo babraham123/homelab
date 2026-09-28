@@ -1,0 +1,2 @@
+# Allow autoadmin to run these specific commands without a password
+autoadmin ALL=(root) NOPASSWD: /root/homelab-rendered/src/debian/commands.sh install_ca, /root/homelab-rendered/src/debian/commands.sh install_dispatcher, /root/homelab-rendered/src/debian/commands.sh install_ssh_ca, /usr/bin/systemctl status nvidia-persistenced --no-pager

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Prints out a custom secret by name.
+# Usage:
+#   /usr/local/bin/get_secret.sh SECRET_NAME
+
+set -euo pipefail
+
+secret_name="$1"
+/usr/bin/age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age | NAME="$secret_name" /usr/bin/yq '.[strenv(NAME)]'

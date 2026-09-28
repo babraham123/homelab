@@ -1,0 +1,57 @@
+# /etc/containers/systemd/home_assistant.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://sequr.be/blog/2022/12/home-assistant-container-part-12-migrating-to-podman/
+
+[Unit]
+Description="Homelab: Home Assistant home automation engine"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=mosquitto.service
+Requires=zigbee2mqtt.service
+# TODO: fix esphome integration
+# Requires=esphome.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/homeassistant/home-assistant:2026.3.1
+ContainerName=home_assistant
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=home.janedoe.com
+IP=10.12.0.11
+# UI: port 8123
+# Shelly CoIoT protocol:
+# PublishPort=5683:5683
+
+Environment=TZ=America/Los_Angeles
+Environment=PACKAGES=iputils
+
+# Enable if we switch the DB to PostgreSQL
+# https://www.postgresql.org/docs/14/libpq-envars.html
+# Environment=PGSSLMODE=verify-full
+# Environment=PGSSLROOTCERT=/certificates/ca.chain.pem
+# Secret=hass_pg_password,type=env,target=PGPASSWORD
+
+Secret=hass_oidc_id,type=env,target=OIDC_CLIENT_ID
+Secret=hass_oidc_secret,type=env,target=OIDC_CLIENT_SECRET
+Secret=ntfy_hass_password,type=env,target=NTFY_HASS_PASSWORD
+Secret=home_latitude,type=env,target=HOME_LATITUDE
+Secret=home_longitude,type=env,target=HOME_LONGITUDE
+Secret=home_elevation,type=env,target=HOME_ELEVATION
+
+# HACS integrations end up in /config/custom_components
+# AppDaemon apps end up in /config/appdaemon/apps
+Volume=hassconfig.volume:/config
+Volume=/var/opt/home_assistant/media:/media
+Volume=/etc/opt/home_assistant/certs/ca.chain.pem:/ssl/certs/ca.chain.pem:ro
+Volume=hassdb.volume:/data
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

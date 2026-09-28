@@ -1,0 +1,118 @@
+# Personal details and system configuration used for templating.
+---
+personal:
+  city: "Middletown"
+  state: "California"
+  country_code: "US"
+  timezone: "America/Los_Angeles"
+  language: "en-US"
+  currency: "USD"
+  units: "imperial" # or metric
+  firstDayInWeek: "sunday" # or monday
+  ticker_symbols:
+    - "AAPL"
+    - "GOOGL"
+    - "MSFT"
+
+users:
+  - jane
+  - jayden
+  - jasper
+tailscale_admin: jane
+# Extra Headscale ACL rules, appended verbatim to `acls` in headscale_acl.hujson.j2.
+# Users not in `users` get nothing unless listed here. Hosts from the template's
+# `hosts` block may be used (lan, pve1, pve2, ...).
+tailscale_extra_acls: []
+#  - action: accept
+#    src: ["cousin@"]
+#    dst: ["cousin@:*", "pve1:*", "pve2:*"]
+
+repo: "https://github.com/babraham123/homelab"
+site:
+  url: "janedoe.com"
+  name: "JD's System"
+  email: "jdoe@gmail.com"
+  blocked_countries:
+    - "RU"
+    - "CN"
+tail_domain: "janedoe.ts.net"
+
+# Hosts
+vpn:
+  ip: 12.34.56.78
+router:
+  ip: 192.168.1.1
+secsvcs:
+  ip: 192.168.4.20
+  container_subnet: 10.10.0
+websvcs:
+  ip: 192.168.2.20
+  container_subnet: 10.11.0
+homesvcs:
+  ip: 192.168.4.21
+  container_subnet: 10.12.0
+gaming:
+  ip: 192.168.2.21
+devtop:
+  ip: 192.168.2.22
+
+# Subnets
+lan: # WiFi interface, split into VLANs below
+  subnet: 192.168.1
+  mask: 192.168.1.0/24
+pve1:
+  subnet: 192.168.4
+  mask: 192.168.4.0/24
+  ip: 192.168.4.10
+pve2:
+  subnet: 192.168.2
+  mask: 192.168.2.0/24
+  ip: 192.168.2.10
+lan2:
+  subnet: 192.168.3
+  mask: 192.168.3.0/24
+
+# VLANs
+wifi: # Parent: LAN
+  trusted:
+    vlan: 10
+    subnet: 192.168.10
+    mask: 192.168.10.0/24
+    ssid24: "cool-house"
+    ssid5: "cool-house5"
+  iot:
+    vlan: 11
+    subnet: 192.168.11
+    mask: 192.168.11.0/24
+    ssid24: "machines"
+  guest:
+    vlan: 12
+    subnet: 192.168.12
+    mask: 192.168.12.0/24
+    ssid5: "welcome"
+wired: # Parent: LAN2
+  trusted:
+    vlan: 20
+    subnet: 192.168.20
+    mask: 192.168.20.0/24
+  iot:
+    vlan: 21
+    subnet: 192.168.21
+    mask: 192.168.21.0/24
+
+model:
+  # Supported voice models: https://github.com/rhasspy/piper/blob/master/VOICES.md
+  tts: "en_US-lessac-medium" # 64 MB, CPU only
+  # Supported recognition models: https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages
+  # HW: https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file#gpu
+  stt: "tiny-int8" # ~1 GB VRAM, requires CUDA
+  # Supported wake word models: https://github.com/dscripka/openWakeWord?tab=readme-ov-file#pre-trained-models
+  wake: "hey_jarvis,weather" # 2.5 MB, CPU only
+
+retention:
+  log_days: 14
+  metric_days: 14
+  hass_days: 14
+
+# tools/render_src.sh appends src/nodes.yml (the `nodes:` key) here at render time.
+...

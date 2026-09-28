@@ -1,0 +1,36 @@
+#!/bin/bash
+# Renders the documentation into the given folder. Fills in fake details from vars.template.yml.
+# Run from root of the project directory.
+# Usage:
+#   cd ~/project/dir
+#   tools/render_docs.sh /dir/to/store/rendered/copy
+# Ref:
+# https://manpages.debian.org/buster/fd-find/fdfind.1.en.html
+# https://github.com/kpfleming/jinjanator
+
+set -euo pipefail
+
+# Prepare the output directory
+project_dir=$1
+cd docs
+if [[ ! "$project_dir" = /* ]]; then
+  project_dir="../${project_dir}"
+fi
+
+rm -rf "$project_dir"
+mkdir -p "$project_dir"
+cp ./*.md "$project_dir"
+cp -R guides "$project_dir"
+cp -R adr "$project_dir"
+sed 's/(docs\/\([^)]*\)\.md)/(\1.md)/g' ../README.md > "${project_dir}/index.md"
+
+# Render the files
+fdfind="fdfind"
+$fdfind -h &> /dev/null || fdfind="fd"
+
+$fdfind . --type f -e j2 --exec rm "${project_dir}/{}"
+$fdfind . --type f -e j2 --exec jinjanate --quiet -o "${project_dir}/{.}" "{}" ../vars.template.yml
+
+rm -f "${project_dir}"/**/.DS_Store
+
+echo "Rendered the docs into ${1}"

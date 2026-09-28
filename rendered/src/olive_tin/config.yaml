@@ -1,0 +1,919 @@
+# /etc/opt/olive_tin/config/config.yaml
+---
+# Listen on all addresses available, port 1337
+listenAddressSingleHTTPFrontend: 0.0.0.0:1337
+
+# Choose from INFO (default), WARN and DEBUG
+logLevel: "INFO"
+
+# Ref: https://docs.olivetin.app/advanced_configuration/prometheus.html
+# prometheus:
+#   enabled: true
+#   defaultGoMetrics: false
+
+# Ref: https://docs.olivetin.app/security/oauth2_authelia.html
+authRequireGuestsToLogin: true
+authOAuth2RedirectURL: https://command.janedoe.com/oauth/callback
+authOAuth2Providers:
+  authelia:
+    name: authelia
+    title: Authelia
+    clientID: ${{ OLIVE_TIN_OIDC_ID }}
+    clientSecret: ${{ OLIVE_TIN_OIDC_SECRET }}
+    authURL: https://auth.janedoe.com/api/oidc/authorization
+    tokenURL: https://auth.janedoe.com/api/oidc/token
+    whoamiUrl: https://auth.janedoe.com/api/oidc/userinfo
+    scopes:
+      - openid
+      - profile
+      - groups
+    usernameField: preferred_username
+    userGroupField: groups
+    icon: <iconify-icon icon="simple-icons:authelia"></iconify-icon>
+
+accessControlLists:
+  - name: admins
+    matchUsergroups:
+      - command_admin
+    permissions:
+      view: true
+      exec: true
+      logs: true
+    # addToEveryAction: true
+  - name: general
+    matchUsergroups:
+      - command_general
+    permissions:
+      view: true
+      exec: true
+      logs: false
+
+# TODO: revert with oauth groups are fixed
+defaultPermissions:
+  view: true
+  exec: true
+  logs: true
+
+defaultPolicy:
+  showDiagnostics: true
+  showLogList: true
+
+defaultPopupOnStart: execution-dialog
+
+# Ref: https://docs.olivetin.app/action_customization/intro.html
+# Icons: https://docs.olivetin.app/action_customization/icons.html, https://iconify.design/
+
+dashboards:
+  - title: Main Dashboard
+    contents:
+      - title: General
+        type: fieldset
+        contents:
+          - inlineAction:
+              title: Date
+              shell: date
+              icon: date
+              id: date
+      - title: Gaming
+        type: fieldset
+        contents:
+          - inlineAction:
+              title: Start Gaming Server
+              icon: <iconify-icon icon="maki:gaming"></iconify-icon>
+              shell: ssh autoadmin@router start_pve2 && ssh autoadmin@pve2 start_gaming_vm && ssh autoadmin@gaming StartSunshine
+              id: main_start_gaming
+              maxConcurrent: 1
+              # acls: [general]
+              timeout: 120
+          - inlineAction:
+              title: Stop Gaming Server
+              icon: <iconify-icon icon="maki:gaming"></iconify-icon>
+              shell: ssh autoadmin@pve2 stop_gaming_vm
+              id: main_stop_gaming
+              maxConcurrent: 1
+              # acls: [general]
+              timeout: 60
+
+  - title: All Commands
+    contents:
+      - title: secsvcs
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: secsvcs Install Mdns Repeater
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_mdns_repeater
+              id: secsvcs_install_mdns_repeater
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Node Exporter
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_node_exporter
+              id: secsvcs_install_node_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Postgres
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_postgres
+              id: secsvcs_install_postgres
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Lldap
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_lldap
+              id: secsvcs_install_lldap
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Authelia
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_authelia
+              id: secsvcs_install_authelia
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Traefik
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_traefik
+              id: secsvcs_install_traefik
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Victoriametrics
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_victoriametrics
+              id: secsvcs_install_victoriametrics
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Victorialogs
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_victorialogs
+              id: secsvcs_install_victorialogs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Gatus
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_gatus
+              id: secsvcs_install_gatus
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Vmalert
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_vmalert
+              id: secsvcs_install_vmalert
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Alertmanager
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_alertmanager
+              id: secsvcs_install_alertmanager
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Ntfy-Alertmanager
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_ntfy-alertmanager
+              id: secsvcs_install_ntfy-alertmanager
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Ntfy
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_ntfy
+              id: secsvcs_install_ntfy
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Grafana
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_grafana
+              id: secsvcs_install_grafana
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Vault
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_vault
+              id: secsvcs_install_vault
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Olive Tin
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_olive_tin
+              id: secsvcs_install_olive_tin
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Fluentbit
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_fluentbit
+              id: secsvcs_install_fluentbit
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install All Svcs
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_all_svcs
+              id: secsvcs_install_all_svcs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Keys
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_keys
+              id: secsvcs_install_keys
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Certs
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_certs
+              id: secsvcs_install_certs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Ssh Ca
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_ssh_ca
+              id: secsvcs_install_ssh_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Dispatcher
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_dispatcher
+              id: secsvcs_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Olive Tin Cert
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_olive_tin_cert
+              id: secsvcs_install_olive_tin_cert
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Ca
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_ca
+              id: secsvcs_install_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Copy Acme Certs
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs copy_acme_certs
+              id: secsvcs_copy_acme_certs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Pg Dumpall
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs pg_dumpall
+              id: secsvcs_pg_dumpall
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Build Haproxy Mapper
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs build_haproxy_mapper
+              id: secsvcs_build_haproxy_mapper
+              maxConcurrent: 1
+              timeout: 60
+
+      - title: homesvcs
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: homesvcs Install Mdns Repeater
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_mdns_repeater
+              id: homesvcs_install_mdns_repeater
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Node Exporter
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_node_exporter
+              id: homesvcs_install_node_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Traefik
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_traefik
+              id: homesvcs_install_traefik
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Vmagent
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_vmagent
+              id: homesvcs_install_vmagent
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Mosquitto
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_mosquitto
+              id: homesvcs_install_mosquitto
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Zigbee2mqtt
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_zigbee2mqtt
+              id: homesvcs_install_zigbee2mqtt
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Esphome
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_esphome
+              id: homesvcs_install_esphome
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Home Assistant
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_home_assistant
+              id: homesvcs_install_home_assistant
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Fluentbit
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_fluentbit
+              id: homesvcs_install_fluentbit
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install All Svcs
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_all_svcs
+              id: homesvcs_install_all_svcs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Keys
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_keys
+              id: homesvcs_install_keys
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Certs
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_certs
+              id: homesvcs_install_certs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Backup Hass
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs backup_hass
+              id: homesvcs_backup_hass
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Ssh Ca
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_ssh_ca
+              id: homesvcs_install_ssh_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Dispatcher
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_dispatcher
+              id: homesvcs_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Install Ca
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_ca
+              id: homesvcs_install_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: homesvcs Copy Acme Certs
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs copy_acme_certs
+              id: homesvcs_copy_acme_certs
+              maxConcurrent: 1
+              timeout: 60
+
+      - title: websvcs
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: websvcs Install Mdns Repeater
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_mdns_repeater
+              id: websvcs_install_mdns_repeater
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Node Exporter
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_node_exporter
+              id: websvcs_install_node_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Traefik
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_traefik
+              id: websvcs_install_traefik
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Vmagent
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_vmagent
+              id: websvcs_install_vmagent
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Nginx
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_nginx
+              id: websvcs_install_nginx
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Homepage
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_homepage
+              id: websvcs_install_homepage
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Isso
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_isso
+              id: websvcs_install_isso
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Guacamole
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_guacamole
+              id: websvcs_install_guacamole
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Guacd
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_guacd
+              id: websvcs_install_guacd
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Archivebox
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_archivebox
+              id: websvcs_install_archivebox
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Finance Exporter
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_finance_exporter
+              id: websvcs_install_finance_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Go2rtc
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_go2rtc
+              id: websvcs_install_go2rtc
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Piper
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_piper
+              id: websvcs_install_piper
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Whisper
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_whisper
+              id: websvcs_install_whisper
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Openwakeword
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_openwakeword
+              id: websvcs_install_openwakeword
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Fluentbit
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_fluentbit
+              id: websvcs_install_fluentbit
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install All Svcs
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_all_svcs
+              id: websvcs_install_all_svcs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Keys
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_keys
+              id: websvcs_install_keys
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Certs
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_certs
+              id: websvcs_install_certs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Ssh Ca
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_ssh_ca
+              id: websvcs_install_ssh_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Dispatcher
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_dispatcher
+              id: websvcs_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Ca
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_ca
+              id: websvcs_install_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Copy Acme Certs
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs copy_acme_certs
+              id: websvcs_copy_acme_certs
+              maxConcurrent: 1
+              timeout: 60
+
+      - title: pve1
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: pve1 Install Vm Watchdog
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 install_vm_watchdog
+              id: pve1_install_vm_watchdog
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve1 Install Cert Notifier
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 install_cert_notifier
+              id: pve1_install_cert_notifier
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve1 Install Ssh Ca
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 install_ssh_ca
+              id: pve1_install_ssh_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve1 Install Dispatcher
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 install_dispatcher
+              id: pve1_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve1 Install Ca
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 install_ca
+              id: pve1_install_ca
+              maxConcurrent: 1
+              timeout: 60
+
+      - title: pve2
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: pve2 Install Vm Watchdog
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 install_vm_watchdog
+              id: pve2_install_vm_watchdog
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Install Certs And Keys
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 install_certs_and_keys
+              id: pve2_install_certs_and_keys
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Start Gaming Vm
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 start_gaming_vm
+              id: pve2_start_gaming_vm
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Stop Gaming Vm
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 stop_gaming_vm
+              id: pve2_stop_gaming_vm
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Shutdown
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 shutdown
+              id: pve2_shutdown
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Install Ssh Ca
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 install_ssh_ca
+              id: pve2_install_ssh_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Install Dispatcher
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 install_dispatcher
+              id: pve2_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Install Ca
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 install_ca
+              id: pve2_install_ca
+              maxConcurrent: 1
+              timeout: 60
+
+      - title: vpn
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: vpn Install Headscale
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn install_headscale
+              id: vpn_install_headscale
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpn Install Tailscaled
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn install_tailscaled
+              id: vpn_install_tailscaled
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpn Install Haproxy
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn install_haproxy
+              id: vpn_install_haproxy
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpn Install Geoip Generator
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn install_geoip_generator
+              id: vpn_install_geoip_generator
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpn Backup Full
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn backup_full
+              id: vpn_backup_full
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpn Install Ssh Ca
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn install_ssh_ca
+              id: vpn_install_ssh_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpn Install Dispatcher
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn install_dispatcher
+              id: vpn_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpn Install Ca
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpn install_ca
+              id: vpn_install_ca
+              maxConcurrent: 1
+              timeout: 60
+
+      - title: router
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: router Install Certs
+              icon: <iconify-icon icon="material-symbols:router"></iconify-icon>
+              shell: ssh autoadmin@router install_certs
+              id: router_install_certs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: router Install Dispatcher
+              icon: <iconify-icon icon="material-symbols:router"></iconify-icon>
+              shell: ssh autoadmin@router install_dispatcher
+              id: router_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: router Start Pve2
+              icon: <iconify-icon icon="material-symbols:router"></iconify-icon>
+              shell: ssh autoadmin@router start_pve2
+              id: router_start_pve2
+              maxConcurrent: 1
+              timeout: 60
+
+      - title: gaming
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: gaming Startsunshine
+              icon: <iconify-icon icon="material-symbols:videogame-asset"></iconify-icon>
+              shell: ssh autoadmin@gaming StartSunshine
+              id: gaming_StartSunshine
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: gaming Stopsunshine
+              icon: <iconify-icon icon="material-symbols:videogame-asset"></iconify-icon>
+              shell: ssh autoadmin@gaming StopSunshine
+              id: gaming_StopSunshine
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: gaming Installautomation
+              icon: <iconify-icon icon="material-symbols:videogame-asset"></iconify-icon>
+              shell: ssh autoadmin@gaming InstallAutomation
+              id: gaming_InstallAutomation
+              maxConcurrent: 1
+              timeout: 60
+
+      - title: devtop
+        type: fieldset
+        contents:
+
+          - inlineAction:
+              title: devtop Check Gpu
+              icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
+              shell: ssh autoadmin@devtop check_gpu
+              id: devtop_check_gpu
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: devtop Install Ssh Ca
+              icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
+              shell: ssh autoadmin@devtop install_ssh_ca
+              id: devtop_install_ssh_ca
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: devtop Install Dispatcher
+              icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
+              shell: ssh autoadmin@devtop install_dispatcher
+              id: devtop_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: devtop Install Ca
+              icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
+              shell: ssh autoadmin@devtop install_ca
+              id: devtop_install_ca
+              maxConcurrent: 1
+              timeout: 60
+
+...

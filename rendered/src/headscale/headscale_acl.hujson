@@ -1,0 +1,159 @@
+// /etc/headscale/acl.hujson
+// Loaded via `policy.path` in headscale.yaml.j2; reloaded with `systemctl reload headscale`.
+// Requires headscale >= 0.29 (`tests` block; `*` means tailnet addresses only, so LAN
+// subnets must be named explicitly via `hosts`).
+// Ref:
+//   https://tailscale.com/kb/1018/acls/
+//   https://headscale.net/stable/ref/policy/
+//   https://headscale.net/stable/ref/oidc/#reference-a-user-in-the-policy
+// Users: `name@` refers to a Headscale user. OIDC logins (Authelia) get their username
+// from `preferred_username`, so an LLDAP user `jane` is `jane@`. Headscale strips one trailing
+// `@` and matches the stored name, so a user created as `jane@` never matches: store names
+// without `@`. Guests are the `guest1` user (vpn.md.j2 "Guest users"); one-off rules come from
+// `tailscale_extra_acls` in vars.yml. OIDC groups can't be used in policy rules (juanfont/headscale#2366, see
+// planning/auth/issues/09-headscale-oidc-groups.md); membership is defined in `groups` below.
+{
+  // groups are collections of users having a common scope. A user can be in multiple groups
+  // groups cannot be composed of groups
+  "groups": {
+    "group:admin": ["jane@"],
+    "group:family": ["jane@", "jayden@", "jasper@"], // note for future: add_more_users
+    // guests: visitors' devices, created per docs/guides/vpn.md.j2 "Guest users"
+    "group:guests": ["guest1@"],
+  },
+  // hosts should be defined using its IP addresses and a subnet mask.
+  // to define a single host, use a /32 mask. You cannot use DNS entries here,
+  // as they're prone to be hijacked by replacing their IP addresses.
+  // see https://github.com/tailscale/tailscale/issues/3800 for more information.
+  "hosts": {
+    "router": "192.168.1.1/32",
+    "pve1": "192.168.4.0/24",
+    "pve2": "192.168.2.0/24",
+    "lan": "192.168.1.0/24",
+    "lan2": "192.168.3.0/24",
+    "wifitrusted": "192.168.10.0/24",
+    "wiredtrusted": "192.168.20.0/24",
+    "websvcs": "192.168.2.20/32",
+    "gaming": "192.168.2.21/32",
+    "secsvcs": "192.168.4.20/32",
+    "homesvcs": "192.168.4.21/32",
+  },
+  // Subnet routes advertised by pfSense are reached by naming the CIDR in `dst`; the
+  // ACL is enforced on the router before SNAT, in netstack and kernel mode alike.
+  "acls": [
+    // admin: every tailnet node, every routed subnet, and the exit node
+    {
+      "action": "accept",
+      "src": ["group:admin"],
+      "dst": [
+        "*:*",
+        "router:*",
+        "pve1:*",
+        "pve2:*",
+        "lan:*",
+        "lan2:*",
+        "wifitrusted:*",
+        "wiredtrusted:*",
+        "autogroup:internet:*",
+      ]
+    },
+    // family: the home subnets and the exit node, not other users' devices
+    {
+      "action": "accept",
+      "src": ["group:family"],
+      "dst": [
+        "pve1:*",
+        "pve2:*",
+        "lan:*",
+        "lan2:*",
+        "wifitrusted:*",
+        "wiredtrusted:*",
+        "autogroup:internet:*",
+      ]
+    },
+    // guests: HTTPS (and HTTP redirect) on the service VMs, plus Moonlight streaming
+    // from the gaming VM (Sunshine's default ports, minus the 47990 web UI where pairing
+    // is approved). No exit node, no Proxmox/pfSense GUIs, no LAN. Authelia still gates
+    // each app.
+    {
+      "action": "accept",
+      "src": ["group:guests"],
+      "dst": [
+        "secsvcs:80,443",
+        "websvcs:80,443",
+        "homesvcs:80,443",
+        "gaming:47984,47989,47998-48000,48010",
+      ]
+    },
+    // public endpoint (HAProxy on the VPS, user `public`): only the web front doors.
+    // Mirrors the ufw egress rules in docs/guides/vpn.md.j2.
+    {
+      "action": "accept",
+      "src": ["public@"],
+      "dst": [
+        "secsvcs:80,443",
+        "websvcs:80,443",
+        "homesvcs:80,443",
+      ]
+    },
+
+    // Each user can reach their own devices; nothing above guarantees that.
+    // `admin@` is the CLI user the router and VM nodes were registered under.
+    { "action": "accept", "src": ["admin@"], "dst": ["admin@:*"] },
+    { "action": "accept", "src": ["public@"], "dst": ["public@:*"] },
+    { "action": "accept", "src": ["jane@"], "dst": ["jane@:*"] },
+    // note for future: add_more_users
+
+    { "action": "accept", "src": ["jane@"], "dst": ["jane@:*"] },
+    { "action": "accept", "src": ["jayden@"], "dst": ["jayden@:*"] },
+    { "action": "accept", "src": ["jasper@"], "dst": ["jasper@:*"] },
+    { "action": "accept", "src": ["guest1@"], "dst": ["guest1@:*"] },
+
+    // Escape hatch: `tailscale_extra_acls` from vars.yml, appended verbatim.
+
+  ],
+  // Evaluated by `headscale policy check` and on every policy load (0.29+).
+  "tests": [
+    // admin: everything, including management GUIs and every subnet
+    {
+      "src": "jane@",
+      "accept": [
+        "192.168.4.10:8006", "192.168.2.10:22", "192.168.1.1:443",
+        "192.168.4.20:22", "192.168.1.50:443", "192.168.3.50:22",
+        "192.168.10.50:80", "192.168.20.50:80",
+      ],
+    },
+    // family: home subnets but not the IoT/guest VLANs, which aren't advertised
+    {
+      "src": "jasper@",
+      "accept": [
+        "192.168.4.10:22", "192.168.4.20:443", "192.168.4.21:8123",
+        "192.168.1.1:443", "192.168.1.50:445", "192.168.10.50:80",
+      ],
+      "deny": ["192.168.11.50:80", "192.168.12.50:80"],
+    },
+    // public endpoint (HAProxy): web front doors only
+    {
+      "src": "public@",
+      "accept": ["192.168.2.20:443", "192.168.4.20:80", "192.168.4.21:443"],
+      "deny": [
+        "192.168.2.10:443", "192.168.2.1:443", "192.168.4.20:22",
+        "192.168.4.21:8123", "192.168.1.1:443", "192.168.1.50:443",
+      ],
+    },
+    // guests: web front doors only, nothing else on the subnets
+    {
+      "src": "guest1@",
+      "accept": [
+        "192.168.2.20:443", "192.168.4.20:443", "192.168.4.21:80",
+        "192.168.2.21:47989", "192.168.2.21:47999", "192.168.2.21:48010",
+      ],
+      "deny": [
+        "192.168.4.10:8006", "192.168.2.10:22", "192.168.1.1:443",
+        "192.168.4.20:22", "192.168.4.21:8123", "192.168.2.20:5432",
+        "192.168.2.21:47990", "192.168.2.21:3389", "192.168.2.21:22",
+        "192.168.1.50:443", "192.168.10.50:80",
+      ],
+    },
+  ]
+}

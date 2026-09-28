@@ -1,0 +1,33 @@
+#!/bin/bash
+# Generate SSH certificates and distribute them to all servers.
+# Usage:
+#   /root/homelab-rendered/src/certificates/ssh_cert_gen_windows.sh
+set -euo pipefail
+
+/root/homelab-rendered/src/debian/is_root.sh
+/root/homelab-rendered/src/debian/is_reachable.sh gaming
+
+cd /root/ssh
+
+echo "@cert-authority *.janedoe.com $(cat ca_ssh_host_key.pub)" > known_hosts
+chmod 644 known_hosts
+
+ssh -M -S ~/.ssh/ssh-socket-%r-%h-%p -f -N admin@gaming
+function sshsoc() { ssh -o ControlPath=~/.ssh/ssh-socket-%r-%h-%p "$@"; }
+function scpsoc() { scp -o ControlPath=~/.ssh/ssh-socket-%r-%h-%p "$@"; }
+
+scpsoc ca_ssh_key.pub admin@gaming:"c:/ProgramData/ssh"
+
+scpsoc admin@gaming:"c:/ProgramData/ssh/ssh_host_ed25519_key.pub" public/gaming.ssh_host_key.pub
+ssh-keygen -s ca_ssh_host_key -I gaming -h -n "gaming.janedoe.com,192.168.2.21" -V +395d public/gaming.ssh_host_key.pub
+chmod 444 public/gaming.ssh_host_key-cert.pub
+scpsoc public/gaming.ssh_host_key-cert.pub admin@gaming:"c:/ProgramData/ssh/ssh_host_key_cert.pub"
+scpsoc known_hosts admin@gaming:"c:/ProgramData/ssh/ssh_known_hosts"
+
+sshsoc admin@gaming 'icacls "C:\ProgramData\ssh\ca_ssh_key.pub" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
+sshsoc admin@gaming 'icacls "C:\ProgramData\ssh\ssh_host_key_cert.pub" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
+sshsoc admin@gaming 'icacls "C:\ProgramData\ssh\ssh_known_hosts" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
+
+ssh -S ~/.ssh/ssh-socket-%r-%h-%p -O exit admin@gaming
+
+date -u > /root/ssh/date_ssh_certs_windows.txt
