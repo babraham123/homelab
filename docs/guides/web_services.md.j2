@@ -22,8 +22,6 @@ exit
 - Remember to handle any subsequent upgrades
 
 ## Setup containers
-- Install and start services
-```bash
 - Install and start containers
 ```bash
 cd /root/homelab-rendered
@@ -48,6 +46,34 @@ systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
 ```
+
+## Bootstrap the Guacamole admin
+
+The OpenID extension only proves who a user is. Their permissions come from Postgres, and
+`initdb.sql` grants permissions only to the default `guacadmin` user. Map an LLDAP group to
+an admin group once, then delete `guacadmin`. [Ref](https://guacamole.apache.org/doc/gug/administration.html)
+
+- In LLDAP, create the `guacamole_admin` group and add yourself to it
+- Temporarily show the password login form next to SSO
+```bash
+sudo su
+sed -i 's/^Environment=EXTENSION_PRIORITY=openid$/Environment=EXTENSION_PRIORITY=*, openid/' /etc/containers/systemd/guacamole.container
+systemctl daemon-reload
+systemctl restart guacamole
+```
+- At `https://remote.{{ site.url }}`, log in as `guacadmin` / `guacadmin`
+- Go to Settings >> Groups >> New Group
+  - Group name = `guacamole_admin` (must match the LLDAP group exactly)
+  - Permissions: check Administer system and all the Create boxes
+  - Save
+- Go to Settings >> Users, delete `guacadmin`
+- Restore SSO-only login from the rendered quadlet
+```bash
+cd /root/homelab-rendered
+src/websvcs/install_svcs.sh guacamole
+exit
+```
+- Log in through Authelia and confirm that Settings >> Connections >> New Connection appears
 
 ## Setup homepage widgets
 
