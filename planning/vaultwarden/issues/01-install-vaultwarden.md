@@ -136,3 +136,8 @@ in front of `/admin`, it adds friction for little gain.
   secsvcs `services` to `vaultwarden: {subdomain: vault}` (add `uptime` for a Gatus
   check). There's no `gen_dispatch_cmds.sh` to run, and `secsvcs_subdomains` is now
   `inv.subdomains.secsvcs`.
+- 2026-09-27: backup-and-dr/01 landed, so this is now blocked only on auth/06. The
+  weekly orchestrator runs `pg_dumpall` on secsvcs before snapshotting the VM, so a
+  Postgres-backed Vaultwarden is covered with no extra step. Data kept outside Postgres
+  (attachments, `rsa_key*`) is in the secsvcs VM snapshot only; backup-and-dr/10 is where
+  it gets a file-level copy.

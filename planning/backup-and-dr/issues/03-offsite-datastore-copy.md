@@ -39,3 +39,9 @@ Human decision needed on the remote provider and monthly cost before an agent ca
 finish this.
 
 ## Comments
+
+- 2026-09-27: 01 landed. Add `step_offsite_copy` to `src/pve1/backup_orchestrator.sh.j2`
+  and append `offsite_copy` to `STEPS` after `vzdump_pve2`: it then gets a
+  `homelab_backup_last_success_timestamp_seconds{job="offsite_copy"}` series and a
+  place in the ntfy summary with no further wiring. pve2 is powered off after the last
+  step, so the copy must finish inside the step (or keep pve2 up until it does).

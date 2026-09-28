@@ -23,6 +23,7 @@ nodes:
     debian_services: [vm_watchdog]
     services:
       cert_notifier: {}
+      backup_orchestrator: {}
     commands:
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
@@ -34,6 +35,7 @@ nodes:
       - {name: install_certs_and_keys, script: pve2/commands.sh}
       - {name: start_gaming_vm, script: pve2/commands.sh}
       - {name: stop_gaming_vm, script: pve2/commands.sh}
+      - {name: run_backups, script: pve2/commands.sh}
       - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
