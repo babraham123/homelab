@@ -13,7 +13,7 @@ url=$(yq --yaml-fix-merge-anchor-to-spec=true ".site.url" vars.yml)
 
 if ! ping -c3 -W3 "${host}.${url}" > /dev/null; then
   echo "error: ${host} is not reachable" >&2
-  return
+  exit 1
 fi
 
 port="22"

@@ -5,6 +5,12 @@
 
 set -euo pipefail
 
-SECRET_NAME=$(jq -r '.idToName."'$SECRET_ID'"' /var/lib/containers/storage/secrets/secrets.json)
+[[ -n "${SECRET_ID:-}" ]] || { echo "SECRET_ID unset" >&2; exit 1; }
 
-/usr/bin/age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age | /usr/bin/yq ".$SECRET_NAME" | head -c -1
+SECRET_NAME=$(jq -r --arg id "$SECRET_ID" '.idToName[$id]' /var/lib/containers/storage/secrets/secrets.json)
+if [[ "$SECRET_NAME" == "null" ]]; then
+  echo "no secret with ID ${SECRET_ID}" >&2
+  exit 1
+fi
+
+/usr/bin/age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age | NAME="$SECRET_NAME" /usr/bin/yq '.[strenv(NAME)]' | head -c -1
