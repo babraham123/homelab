@@ -50,9 +50,11 @@ Done 2026-09-27, merged onto the v4.39.28 template.
   the template, and `AutoUpdate=registry` keeps picking them up.
 - Pristine upstream copy at `src/authelia/config.template.yml`. It isn't in `.fdignore`:
   that only affects `*.j2` rendering, and a non-`.j2` file is copied unrendered anyway.
-- No header-vs-image render check (maintainer decision): the bump procedure sets both.
-- Bump procedure (normalise, `git merge-file`, validate on secsvcs with the quadlet's
-  secrets) in `docs/maintenance.md` "Upgrade Authelia to a new minor version".
+- Dropped (maintainer decision): the header-vs-image render check and the
+  `docs/maintenance.md` procedure. For the next bump: comment out every uncommented key
+  in both upstream templates (`perl -pe 's/^(\s*)(?![#\s]|---|\.\.\.)(\S)/$1# $2/'`;
+  upstream leaves `session.secret` and `reset_password.jwt_secret` uncommented), then
+  `git merge-file configuration.yml.j2 <old-normalised> <new-normalised>`.
 - Not yet done: `authelia config validate` with the 4.39.28 image and the
   login/OIDC/ForwardAuth checks, which need secsvcs (no podman locally).
 
