@@ -24,8 +24,3 @@ case $1 in
     exit 1
     ;;
 esac
-
-systemctl daemon-reload
-systemctl enable "$1"
-systemctl restart "$1"
-systemctl status "$1" --no-pager
