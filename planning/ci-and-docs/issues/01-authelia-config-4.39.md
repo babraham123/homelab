@@ -46,7 +46,8 @@ Done 2026-09-27, merged onto the v4.39.28 template.
   rendered config (real `vars.yml`) is key-for-key identical to before.
 - `webauthn.display_name` is now `{{ site.name | tojson }}`: an apostrophe in
   `site.name` (as in `vars.template.yml`) broke the YAML.
-- `Image=docker.io/authelia/authelia:4.39.28` (pinned to the patch).
+- `Image=` stays on the `4.39` minor tag (maintainer decision): patch releases don't change
+  the template, and `AutoUpdate=registry` keeps picking them up.
 - Pristine upstream copy at `src/authelia/config.template.yml`. It isn't in `.fdignore`:
   that only affects `*.j2` rendering, and a non-`.j2` file is copied unrendered anyway.
 - `tools/validate_rendered.sh` fails the render when the header's major.minor differs

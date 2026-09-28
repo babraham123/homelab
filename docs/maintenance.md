@@ -20,8 +20,8 @@ TODO: router, all VMs, pinned docker images
 ## Upgrade Authelia to a new minor version
 `src/authelia/configuration.yml.j2` is the upstream `config.template.yml` with local
 values uncommented, and `src/authelia/config.template.yml` is the pristine upstream
-copy it was last merged from, so a bump is a three-way merge. Patch releases don't
-change the template meaningfully; only the `Image=` tag moves.
+copy it was last merged from, so a bump is a three-way merge. `Image=` is pinned to the minor
+version, so patch releases arrive through auto-update without a merge.
 
 - Read the release notes for renamed or removed keys
 - Merge the new template. Upstream leaves a few example keys uncommented
@@ -40,7 +40,7 @@ cp "$S/new.yml" src/authelia/config.template.yml
 ```
 - Resolve the conflicts: keep local values, take upstream's comment text
 - Set the `# v<version>` header in `configuration.yml.j2` and the `Image=` tag in
-  `authelia.container.j2` to the new version; rendering fails if their minor versions
+  `authelia.container.j2` to the new minor version; rendering fails if their minor versions
   differ
 - Render and upload, then validate with the new image before installing. The `sed`
   passes the quadlet's secrets and environment so the template filter can run:
