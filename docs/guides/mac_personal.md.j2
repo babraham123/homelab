@@ -38,7 +38,7 @@ wget -O .vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.
 ## Source code
 - Install tools
 ```bash
-brew install fd yq yamllint shellcheck
+brew install fd yq yamllint jq shellcheck
 pipx install jinjanator
 pipx inject jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
 curl -fsSL https://claude.ai/install.sh | bash
@@ -49,6 +49,7 @@ curl -fsSL https://claude.ai/install.sh | bash
 cd ~/Documents
 git clone {{ repo }} homelab
 cd homelab
+git config core.hooksPath .githooks
 # Fill in personal details based on vars.template.yml
 vim vars.yml
 tools/render_src.sh /tmp/homelab-rendered

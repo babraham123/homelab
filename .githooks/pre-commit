@@ -1,0 +1,34 @@
+#!/bin/bash
+# Renders the staged tree against vars.template.yml, which runs every render-time check
+# (see tools/validate_rendered.sh), then shellchecks the rendered scripts so *.sh.j2
+# files are checked without their Jinja.
+# Activate with: git config core.hooksPath .githooks
+# Skip once with: git commit --no-verify
+
+set -uo pipefail
+
+for tool in jinjanate fd yq yamllint jq shellcheck; do
+  command -v "$tool" > /dev/null || { echo "pre-commit: ${tool} not installed" >&2; exit 1; }
+done
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# The index, not the working tree, is what gets committed.
+git checkout-index --all --prefix="${tmp}/src/"
+cd "${tmp}/src" || exit 1
+cp vars.template.yml vars.yml
+
+status=0
+tools/render_src.sh "${tmp}/rendered" > "${tmp}/render.log" 2>&1 || {
+  status=1
+  cat "${tmp}/render.log" >&2
+}
+
+# A failed render may stop before every file is rendered; check what exists.
+if [ -d "${tmp}/rendered" ]; then cd "${tmp}/rendered" || exit 1; fi
+fd . --type f --extension sh --exec-batch \
+  shellcheck -x --source-path=SCRIPTDIR --severity=warning .githooks/pre-commit || status=1
+
+[ "$status" -eq 0 ] || echo "pre-commit: checks failed (paths are relative to the repo root)" >&2
+exit "$status"
