@@ -66,7 +66,6 @@ systemctl restart guacamole
   - Group name = `guacamole_admin` (must match the LLDAP group exactly)
   - Permissions: check Administer system and all the Create boxes
   - Save
-- Go to Settings >> Users, delete `guacadmin`
 - Restore SSO-only login from the rendered quadlet
 ```bash
 cd /root/homelab-rendered
@@ -74,6 +73,7 @@ src/websvcs/install_svcs.sh guacamole
 exit
 ```
 - Log in through Authelia and confirm that Settings >> Connections >> New Connection appears
+- Go to Settings >> Users, delete `guacadmin`
 
 ## Setup homepage widgets
 
