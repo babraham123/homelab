@@ -1,6 +1,6 @@
 # 04. deploy_src.sh: collect per-host failures and exit non-zero
 
-Status: ready-for-agent
+Status: wontfix
 Type: task
 Repo: homelab
 Source: review finding 28
@@ -69,3 +69,5 @@ Until decided, keep the array in the script; the other hardcoded list
   `nodes.<node>.ip` and `nodes.<node>.services` sit side by side. A plain concatenation
   would give a duplicate key and PyYAML keeps only the last one. The host list can
   then come from `nodes.yml`, and the `parse_dispatcher.sh` list is already gone.
+
+- 2026-09-27 maintainer: continuing past a failed host with an exit status of 0 is the intended behaviour (e.g. pve2 is often powered off). Commit 5013764 already names the host that failed, which covers the silent-continue concern.
