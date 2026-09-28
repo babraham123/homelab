@@ -32,10 +32,10 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   injecting SOPS/AGE secrets or per-host parameters. Plaintext secrets never sit in
   the rendered tree.
 - **node inventory** — `src/nodes.yml`: per node, the dispatcher entries (services
-  in install order, other commands) and each service's subdomain and Gatus endpoint.
-  `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI subdomain
-  lists and uptime endpoints from it; the render checks it against `install_svcs.sh`
-  and `routes.yml`.
+  in install order, other commands) and each service's subdomain, Gatus endpoint and
+  image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI
+  subdomain lists, uptime endpoints and image update order from it; the render checks
+  it against `install_svcs.sh`, `routes.yml` and the quadlets' `Image=`.
 - **rendered tree** — `/root/homelab-rendered` on each node: the uploaded output of
   a render, the only thing scripts on the node execute from.
 
