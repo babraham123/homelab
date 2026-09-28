@@ -11,6 +11,15 @@
 #                      uptime:      Gatus endpoint name (keys its history); monitors
 #                                   https://<subdomain>.<site.url><uptime_path>
 #                      uptime_path: default ""
+#                      upstream:    pulled image, full ref with registry host and
+#                                   namespace (docker.io/library/nginx:stable); the
+#                                   quadlet's Image= must be localhost/ + the ref
+#                                   without its host
+#                      build:       built image name; Image= must be localhost/<build>:latest
+#                      update_last: true moves the image to the end of the update run
+#                      containers:  {<quadlet name>: {upstream | build, update_last}}, in
+#                                   place of the keys above, when the case installs
+#                                   other quadlets than <service>.container
 #   install_all_svcs: true adds install_all_svcs, installing `services` in order
 #   commands:        other dispatcher cases, in order. Either
 #                      {name, script}: runs `sudo <script> <name>`; script is under src/;

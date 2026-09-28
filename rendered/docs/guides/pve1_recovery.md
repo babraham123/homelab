@@ -249,14 +249,15 @@ ssh autoadmin@pve2 start_gaming_vm
 ```bash
 # On the workstation, repo root, ideally at the last deployed commit
 cp vars.template.yml vars.yml
-tools/render_src.sh /tmp/homelab-template
+work=$(mktemp -d)
+tools/render_src.sh "$work/homelab-template"
 ssh -t manualadmin@pve1 'sudo tar -C /root -czf /tmp/homelab-rendered.tgz homelab-rendered && sudo chown manualadmin /tmp/homelab-rendered.tgz'
-scp manualadmin@pve1:/tmp/homelab-rendered.tgz /tmp/
+scp manualadmin@pve1:/tmp/homelab-rendered.tgz "$work/"
 ssh manualadmin@pve1 'rm /tmp/homelab-rendered.tgz'
-mkdir -p /tmp/homelab-real && tar -C /tmp/homelab-real -xzf /tmp/homelab-rendered.tgz
-diff -r /tmp/homelab-template /tmp/homelab-real/homelab-rendered
+tar -C "$work" -xzf "$work/homelab-rendered.tgz"
+diff -r "$work/homelab-template" "$work/homelab-rendered"
 ```
-- Edit `vars.yml` and repeat the render + `diff` until it's empty, then `rm -rf /tmp/homelab-*`. A value no template uses can't be recovered, but nothing needs it.
+- Edit `vars.yml` and repeat the render + `diff` until it's empty, then `rm -rf "$work"`. A value no template uses can't be recovered, but nothing needs it.
 
 ### Nothing escrowed
 Today's situation for a dead SSD. Do the bare-metal steps 1–8, then, in place of step 9:

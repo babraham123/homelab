@@ -3,7 +3,8 @@
 # Run from root of the project directory.
 # Usage:
 #   cd ~/project/dir
-#   tools/render_src.sh /dir/to/store/rendered/copy
+#   tools/render_src.sh [/dir/to/store/rendered/homelab-rendered]
+# Without an argument it renders into a private temp dir and prints the path.
 # Ref:
 # https://manpages.debian.org/buster/fd-find/fdfind.1.en.html
 # https://github.com/kpfleming/jinjanator
@@ -13,17 +14,25 @@
 
 set -euo pipefail
 
-# Prepare the output directory
-project_dir=$1
-rm -rf "$project_dir" all_vars.yml
+# Prepare the output directory. The default is a mktemp (0700) parent; the name
+# homelab-rendered is kept because upload_src.sh moves the tree into place by it.
+project_dir=${1:-"$(mktemp -d)/homelab-rendered"}
 mkdir -p "$project_dir"
-cp -R . "$project_dir"
-pushd "$project_dir"
-rm -rf .git .gitignore .gitattributes vars.yml .vscode .fdignore notes planning rendered
-popd
+# An exclude list rather than copy-then-delete, so personal details never touch the
+# output, even briefly
+rsync -a --delete \
+  --exclude /.git --exclude /.gitignore --exclude /.vscode --exclude /.fdignore \
+  --exclude /.claude --exclude /.scratch --exclude /planning --exclude /notes \
+  --exclude /rendered --exclude /.gitattributes \
+  --exclude vars.yml --exclude all_vars.yml --exclude .DS_Store \
+  ./ "$project_dir/"
 
 # Assemble jinja2 config file. jinjanate takes one data file, so the node inventory
-# is appended to vars.yml rather than passed alongside it.
+# is appended to vars.yml rather than passed alongside it. It holds everything in
+# vars.yml, so it lives in its own private temp dir, outside the repo and the output.
+vars_dir=$(mktemp -d)
+trap 'rm -rf "$vars_dir"' EXIT
+all_vars="${vars_dir}/all_vars.yml"
 cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
 {
   # Exclude the ending "..."
@@ -31,15 +40,14 @@ cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
   echo
   cat src/nodes.yml
   echo -e "...\n"
-} > all_vars.yml
+} > "$all_vars"
 
 # Render the files
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"
 $fdfind . --type f -e j2 --exec rm "${project_dir}/{}"
-$fdfind . --type f -e j2 --exec jinjanate --quiet -o "${project_dir}/{.}" "{}" all_vars.yml
+$fdfind . --type f -e j2 --exec jinjanate --quiet -o "${project_dir}/{.}" "{}" "$all_vars"
 
-rm -f all_vars.yml
 cd "$project_dir"
 
 # Make executable
@@ -48,8 +56,37 @@ $fdfind . --extension pl --exec chmod +x "{}"
 
 tools/validate_rendered.sh .
 
-# Validate the node inventory against the scripts its dispatcher cases call
 fail() { echo "error: $*" >&2; exit 1; }
+
+# Validate each image in src/nodes.yml against the quadlet its install case copies. The
+# image updater loads images under these names, so a mismatch would never be updated.
+upstreams='.. | select(tag == "!!map" and has("upstream")) | .upstream'
+bad=$(yq "$upstreams" src/nodes.yml | grep -vE '^[^/]+\.[^/]+/[^/]+/[^/]+' || true)
+[ -z "$bad" ] || fail "src/nodes.yml upstream refs need a registry host and namespace: ${bad}"
+
+cat > "${vars_dir}/images.j2" <<'EOF'
+{% import 'src/nodes.jinja' as inv with context -%}
+{% for node, list in inv.images.items() -%}
+{% for i in list -%}
+{{ node }} {{ i.service }} {{ i.container }} {{ i.image }}
+{% endfor -%}
+{% endfor -%}
+EOF
+jinjanate --quiet "${vars_dir}/images.j2" "$all_vars" | \
+  while read -r node svc container image; do
+    quadlet=$(awk -v c="${svc})" '$1 == c {f=1; next} f && /;;/ {exit} f' "src/${node}/install_svcs.sh" | \
+      grep -oE "[a-zA-Z0-9_./-]+/${container}\.container" | head -n 1 || true)
+    [ -n "$quadlet" ] || \
+      fail "the ${svc} case in src/${node}/install_svcs.sh copies no ${container}.container (src/nodes.yml)"
+    # A *.container.j2.j2 source is still *.container.j2 until install time
+    file="src/${quadlet}"
+    [ -f "$file" ] || file+=".j2"
+    actual=$(sed -n 's/^Image=//p' "$file")
+    [[ "$actual" == "$image" ]] || \
+      fail "${file}: Image=${actual}, expected Image=${image} (src/nodes.yml ${node}.services.${svc})"
+  done
+
+# Validate the node inventory against the scripts its dispatcher cases call
 cases() { sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$1" | sort -u; }
 inventory() { node="$1" yq "$2" src/nodes.yml; }
 
@@ -87,5 +124,5 @@ for node in secsvcs homesvcs; do
     fail "src/nodes.yml ${node} subdomains don't match the Host() rules in src/${node}/traefik/routes.yml"
 done
 
-rm -f "${project_dir}"/**/.DS_Store
+find . -name .DS_Store -delete
 echo "Rendered the repo into ${project_dir}"
