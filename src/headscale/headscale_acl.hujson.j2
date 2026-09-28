@@ -102,6 +102,7 @@
     // `admin@` is the CLI user the router and VM nodes were registered under.
     { "action": "accept", "src": ["admin@"], "dst": ["admin@:*"] },
     { "action": "accept", "src": ["public@"], "dst": ["public@:*"] },
+    { "action": "accept", "src": ["{{ tailscale_admin }}@"], "dst": ["{{ tailscale_admin }}@:*"] },
 {% for user in users %}
     { "action": "accept", "src": ["{{ user }}@"], "dst": ["{{ user }}@:*"] },{% endfor %}
     { "action": "accept", "src": ["guest1@"], "dst": ["guest1@:*"] },
