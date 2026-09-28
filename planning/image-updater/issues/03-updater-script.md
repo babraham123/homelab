@@ -41,3 +41,7 @@ Blocked by: 02
 - A forced failing update points the name back at `:rollback` and sends priority 4.
 
 ## Comments
+
+- 2026-09-27: unblocked; 02 is resolved. The list is `inv.images[node]` from
+  `{% import 'src/nodes.jinja' as inv with context %}` (not `<node>_images` in
+  `all_vars.yml`): `[{service, container, image, upstream | build}]`, update order.

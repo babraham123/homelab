@@ -5,12 +5,15 @@
     commands[node]:   case names (OliveTin buttons)
     sudo_cmds[node]:  sorted commands the dispatcher runs with sudo (sudoers)
     subdomains[node]: sorted subdomains its Traefik serves (Unbound, HAProxy)
-    uptime:           Gatus internal endpoints, [{name, host, url}] -#}
+    uptime:           Gatus internal endpoints, [{name, host, url}]
+    images[node]:     container images in update order (install order, update_last
+                      entries last), [{service, container, image, upstream | build}] -#}
 {%- set dispatch = {} -%}
 {%- set commands = {} -%}
 {%- set sudo_cmds = {} -%}
 {%- set subdomains = {} -%}
 {%- set uptime = [] -%}
+{%- set images = {} -%}
 
 {%- macro path(node, script) -%}
 {#- upload_src.sh ships only src/router to the router, as /root/router-src -#}
@@ -62,6 +65,23 @@
     {%- do uptime.append({'name': svc.uptime, 'host': host,
         'url': 'https://' ~ host ~ svc.get('uptime_path', '')}) -%}
   {%- endfor -%}
+
+  {%- set first = [] -%}
+  {%- set last = [] -%}
+  {%- for name, svc in services.items() -%}
+    {%- for container, c in svc.get('containers', {name: svc}).items()
+        if c.upstream is defined or c.build is defined -%}
+      {%- set entry = {'service': name, 'container': container} -%}
+      {%- if c.upstream is defined -%}
+        {%- do entry.update({'upstream': c.upstream,
+            'image': 'localhost/' ~ c.upstream.split('/', 1)[-1]}) -%}
+      {%- else -%}
+        {%- do entry.update({'build': c.build, 'image': 'localhost/' ~ c.build ~ ':latest'}) -%}
+      {%- endif -%}
+      {%- do (last if c.get('update_last', false) else first).append(entry) -%}
+    {%- endfor -%}
+  {%- endfor -%}
+  {%- do images.update({node: first + last}) -%}
 {%- endfor -%}
 
 {%- macro cases(node) -%}
