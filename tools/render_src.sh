@@ -23,6 +23,7 @@ mkdir -p "$project_dir"
 rsync -a --delete \
   --exclude /.git --exclude /.gitignore --exclude /.vscode --exclude /.fdignore \
   --exclude /.claude --exclude /.scratch --exclude /planning --exclude /notes \
+  --exclude /rendered --exclude /.gitattributes \
   --exclude vars.yml --exclude all_vars.yml --exclude .DS_Store \
   ./ "$project_dir/"
 

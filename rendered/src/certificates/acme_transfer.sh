@@ -1,0 +1,56 @@
+#!/bin/bash
+# Copy the acme.json files from secsvcs, websvcs and homesvcs to pve1. Parse and distribute the
+# ACME certificates to pve1, pve2, pbs2 and pfsense.
+# Usage:
+#   /root/homelab-rendered/src/certificates/acme_transfer.sh
+set -euo pipefail
+
+/root/homelab-rendered/src/debian/is_root.sh
+/root/homelab-rendered/src/debian/is_reachable.sh pve1
+/root/homelab-rendered/src/debian/is_reachable.sh pve2
+/root/homelab-rendered/src/debian/is_reachable.sh router
+
+cd /root/acme
+
+function download() {
+  host="$1"
+  /root/homelab-rendered/src/debian/is_reachable.sh "$host"
+
+  ssh "autoadmin@${host}" copy_acme_certs
+  scp "autoadmin@${host}:/home/autoadmin/acme.json" "/root/acme/${host}.acme.json"
+  chmod 400 "${host}.acme.json"
+  # Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
+  # Certificate is the full chain (I think)
+  /usr/local/bin/traefik-certs-dumper file --domain-subdir \
+    --source "${host}.acme.json" --dest /root/acme --version v2
+}
+
+download "secsvcs"
+download "homesvcs"
+download "websvcs"
+
+# Ref: https://pve.proxmox.com/wiki/Certificate_Management
+cp pve1.janedoe.com/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
+cp pve1.janedoe.com/privatekey.key /etc/pve/nodes/pve1/pveproxy-ssl.key
+systemctl restart pveproxy.service
+
+scp pve2.janedoe.com/certificate.crt autoadmin@pve2:/home/autoadmin/pveproxy-ssl.pem
+scp pve2.janedoe.com/privatekey.key autoadmin@pve2:/home/autoadmin/pveproxy-ssl.key
+# Ref: https://pbs.proxmox.com/wiki/index.php/HTTPS_Certificate_Configuration
+scp pbs2.janedoe.com/certificate.crt autoadmin@pve2:/home/autoadmin/proxy.pem
+scp pbs2.janedoe.com/privatekey.key autoadmin@pve2:/home/autoadmin/proxy.key
+
+ssh autoadmin@pve2 "install_certs_and_keys" > pbs2_cert_info.txt
+
+# Update PBS fingerprint for PVE1
+# Ref: https://pbs.proxmox.com/docs/pve-integration.html
+fingerprint=$(grep -E '^(\w\w:)+' pbs2_cert_info.txt | tr -d '\r')
+pvesm set pbs2 --fingerprint "$fingerprint"
+
+# Ref: https://github.com/stompro/pfsense-import-certificate
+scp router.janedoe.com/certificate.crt autoadmin@router:/home/autoadmin/router.cert.pem
+scp router.janedoe.com/privatekey.key autoadmin@router:/home/autoadmin/router.key.pem
+ssh autoadmin@router "install_certs"
+
+date -u > date_acme_certs.txt
+echo -e '\nDone!'

@@ -1,0 +1,116 @@
+# Web Services setup
+Guide to setup websvcs on PVE2. Just service installation.
+
+- Setup [Podman](./podman.md)
+
+## Initialize Guacamole DB
+
+- Generate init script. [Ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
+```bash
+sudo su
+podman run --rm docker.io/guacamole/guacamole:1.6 /opt/guacamole/bin/initdb.sh --postgresql > initdb.sql
+scp initdb.sql manualadmin@secsvcs:/home/manualadmin
+
+ssh manualadmin@secsvcs
+sudo su
+container=$(podman container ls | grep postgres | awk '{print $1}')
+cat initdb.sql | podman exec -i -e PGPASSWORD="$(/usr/local/bin/get_secret.sh guacamole_pg_password)" --user 70 "$container" psql -U guacamole -d guacamole
+rm initdb.sql
+exit
+exit
+```
+- Remember to handle any subsequent upgrades
+
+## Setup containers
+- Install and start containers
+```bash
+cd /root/homelab-rendered
+src/websvcs/install_svcs.sh traefik
+src/websvcs/install_svcs.sh vmagent
+src/websvcs/install_svcs.sh nginx
+src/websvcs/install_svcs.sh homepage
+src/websvcs/install_svcs.sh isso
+src/websvcs/install_svcs.sh guacd
+src/websvcs/install_svcs.sh guacamole
+src/websvcs/install_svcs.sh archivebox
+
+# src/websvcs/install_svcs.sh go2rtc
+# src/websvcs/install_svcs.sh piper
+# src/websvcs/install_svcs.sh whisper
+# src/websvcs/install_svcs.sh openwakeword
+
+# src/websvcs/install_svcs.sh finance_exporter
+src/websvcs/install_svcs.sh fluentbit
+
+systemctl restart node_exporter
+systemctl restart mdns_repeater
+systemctl list-units | grep Homelab
+```
+
+## Bootstrap the Guacamole admin
+
+The OpenID extension only proves who a user is. Their permissions come from Postgres, and
+`initdb.sql` grants permissions only to the default `guacadmin` user. Map an LLDAP group to
+an admin group once, then delete `guacadmin`. [Ref](https://guacamole.apache.org/doc/gug/administration.html)
+
+- In LLDAP, create the `guacamole_admin` group and add yourself to it
+- Temporarily show the password login form next to SSO
+```bash
+sudo su
+sed -i 's/^Environment=EXTENSION_PRIORITY=openid$/Environment=EXTENSION_PRIORITY=*, openid/' /etc/containers/systemd/guacamole.container
+systemctl daemon-reload
+systemctl restart guacamole
+```
+- At `https://remote.janedoe.com`, log in as `guacadmin` / `guacadmin`
+- Go to Settings >> Groups >> New Group
+  - Group name = `guacamole_admin` (must match the LLDAP group exactly)
+  - Permissions: check Administer system and all the Create boxes
+  - Save
+- Restore SSO-only login from the rendered quadlet
+```bash
+cd /root/homelab-rendered
+src/websvcs/install_svcs.sh guacamole
+exit
+```
+- Log in through Authelia and confirm that Settings >> Connections >> New Connection appears
+- Go to Settings >> Users, delete `guacadmin`
+
+## Setup homepage widgets
+
+- Create an API token in the PVE console (for pve1, pve2 and pbs2)
+  - Go to Datacenter >> Permissions >> API Tokens >> Add
+  - user = api_ro@pam, token ID = homepage
+  - Record the secret
+```bash
+ssh manualadmin@pve1
+sudo /root/homelab-rendered/src/pve1/secret_update.sh websvcs
+```
+  - Go to Permissions >> Add >> API Token Permission
+  - path = /, token = api_ro@..., role = PVEAuditor, propagate = check
+  - For PBS, Permissions -> Access Control, PVEAuditor -> Audit
+
+## Hardware acceleration
+This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other models), an Intel iGPU (video transcoding) and a Coral TPU (Frigate object detection).
+
+- Disable secure boot, [vid](https://www.youtube.com/watch?v=js_Xoa0f8zM)
+
+- Passthrough the GPU, iGPU and TPU using the [Proxmox guide](./proxmox.md)
+
+- Install Nvidia, Intel and Coral drivers using the [GPU guide](./gpu.md)
+
+- Install the Nvidia container toolkit and CDI, [ref](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+```bash
+sudo su
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+apt update
+apt install -y nvidia-container-toolkit nvidia-container-toolkit-base libnvidia-container-tools libnvidia-container1
+
+# Generate the CDI spec
+nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+# Check the names of the generated devices
+nvidia-ctk cdi list
+```

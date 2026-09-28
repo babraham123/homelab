@@ -1,0 +1,26 @@
+# /etc/opt/traefik/config/dynamic/acme_routes.yml
+# Ref: https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+# yamllint disable rule:document-start rule:document-end
+http:
+  routers:
+    pve1: &acme_service
+      rule: Host(`pve1.janedoe.com`)
+      entryPoints: websecure
+      service: s403@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    pve2:
+      <<: *acme_service
+      rule: Host(`pve2.janedoe.com`)
+    pbs2:
+      <<: *acme_service
+      rule: Host(`pbs2.janedoe.com`)
+    router:
+      <<: *acme_service
+      rule: Host(`router.janedoe.com`)
+  services:
+    s403:
+      loadBalancer:
+        servers:
+          - url: https://www.janedoe.com/error/403.html

@@ -1,0 +1,163 @@
+# /etc/opt/traefik/config/dynamic/routes.yml
+# References:
+#   - https://www.authelia.com/integration/proxies/traefik/
+#   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+#   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+#   - https://doc.traefik.io/traefik/routing/routers/#priority
+# yamllint disable rule:document-start rule:document-end
+http:
+  routers:
+    traefik: &service
+      rule: Host(`secproxy.janedoe.com`)
+      entryPoints: websecure
+      service: api@internal
+      middlewares:
+        - authelia@file
+        - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    authelia:
+      <<: *service
+      rule: Host(`auth.janedoe.com`)
+      service: authelia@file
+      middlewares:
+        - secure-headers@file
+    lldap:
+      <<: *service
+      rule: Host(`ldap.janedoe.com`)
+      service: lldap@file
+    gatus:
+      <<: *service
+      rule: Host(`uptime.janedoe.com`)
+      service: gatus@file
+    grafana:
+      <<: *service
+      rule: Host(`graph.janedoe.com`)
+      service: grafana@file
+    victoriametrics-ui:
+      <<: *service
+      rule: Host(`metrics.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
+      service: victoriametrics@file
+      middlewares:
+        - authelia@file
+        - vm-auth@file
+        - secure-headers@file
+    victoriametrics-hass-api:
+      <<: *service
+      rule: Host(`metrics.janedoe.com`) && HeaderRegexp(`Authorization`, `^Token .+$`)
+      service: victoriametrics@file
+      middlewares:
+        - "vm-auth-token@file"
+    victoriametrics-api:
+      <<: *service
+      rule: Host(`metrics.janedoe.com`)
+      service: victoriametrics@file
+      middlewares: []
+    victorialogs-ui:
+      <<: *service
+      rule: Host(`logs.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
+      service: victorialogs@file
+      middlewares:
+        - authelia@file
+        - vl-auth@file
+        - secure-headers@file
+    victorialogs-api:
+      <<: *service
+      rule: Host(`logs.janedoe.com`)
+      service: victorialogs@file
+      middlewares: []
+    vmalert:
+      <<: *service
+      rule: Host(`vmalert.janedoe.com`)
+      service: vmalert@file
+    alertmanager-ui:
+      <<: *service
+      rule: Host(`alert.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
+      service: alertmanager@file
+      middlewares:
+        - authelia@file
+        - alertmanager-auth@file
+        - secure-headers@file
+    alertmanager-api:
+      <<: *service
+      rule: Host(`alert.janedoe.com`)
+      service: alertmanager@file
+      middlewares: []
+    ntfy-ui:
+      <<: *service
+      # Ref: https://github.com/binwiederhier/ntfy/issues/893#issuecomment-1731314679
+      rule: Host(`push.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`) && !PathPrefix(`/file/`)
+      service: ntfy@file
+      middlewares:
+        - authelia@file
+        - ntfy-auth@file
+        - secure-headers@file
+    ntfy-api:
+      <<: *service
+      rule: Host(`push.janedoe.com`)
+      service: ntfy@file
+      middlewares: []
+    ntfy-alertmanager:
+      <<: *service
+      rule: Host(`ntfy-alertmanager.janedoe.com`)
+      service: ntfy-alertmanager@file
+      middlewares: []
+    # vault:
+    #   <<: *service
+    #   rule: Host(`vault.janedoe.com`)
+    #   service: vault@file
+    olive_tin:
+      <<: *service
+      rule: Host(`command.janedoe.com`)
+      service: olive_tin@file
+  services:
+    authelia:
+      loadBalancer:
+        servers:
+          - url: https://auth.janedoe.com:9091/
+        serversTransport: autheliaMutualTLS
+    lldap:
+      loadBalancer:
+        servers:
+          - url: http://ldap.janedoe.com:17170/
+    gatus:
+      loadBalancer:
+        servers:
+          - url: http://uptime.janedoe.com:8080/
+    grafana:
+      loadBalancer:
+        servers:
+          - url: http://graph.janedoe.com:3000/
+    victoriametrics:
+      loadBalancer:
+        servers:
+          - url: http://metrics.janedoe.com:8428/
+    victorialogs:
+      loadBalancer:
+        servers:
+          - url: http://logs.janedoe.com:9428/
+    vmalert:
+      loadBalancer:
+        servers:
+          - url: http://vmalert.janedoe.com:8880/
+    alertmanager:
+      loadBalancer:
+        servers:
+          - url: http://alert.janedoe.com:9093/
+    ntfy:
+      loadBalancer:
+        servers:
+          - url: http://push.janedoe.com:2586/
+    ntfy-alertmanager:
+      loadBalancer:
+        servers:
+          - url: http://ntfy-alertmanager.janedoe.com:2588/
+    # vault:
+    #   loadBalancer:
+    #     servers:
+    #       - url: http://vault.janedoe.com:80/
+    olive_tin:
+      loadBalancer:
+        servers:
+          - url: http://command.janedoe.com:1337/

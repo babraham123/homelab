@@ -1,0 +1,45 @@
+# /etc/containers/systemd/victorialogs.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Time series database and monitoring system"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/victoriametrics/victoria-logs:latest
+ContainerName=victorialogs
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# http web front-end, ":9428/select/vmui"
+Network=net.network
+HostName=logs.janedoe.com
+IP=10.10.0.8
+
+# https://docs.victoriametrics.com/victorialogs/#retention
+Exec=--storageDataPath="/storage" \
+     --httpListenAddr=":9428" \
+     --retention.maxDiskSpaceUsageBytes="24GiB" \
+     --retentionPeriod="14d" \
+     --storage.minFreeDiskSpaceBytes="8GiB" \
+     --memory.allowedBytes="512MiB" \
+     --search.maxConcurrentRequests="3" \
+     --httpAuth.username="admin" \
+     --httpAuth.password="%{VL_ADMIN_PASSWORD}" \
+     --loggerLevel="WARN" \
+     --loggerTimezone="America/Los_Angeles"
+
+Environment=TZ=America/Los_Angeles
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
+Volume=vldata.volume:/storage
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

@@ -113,21 +113,26 @@ script, subdomains must be unique, the secsvcs/homesvcs subdomains must match th
 service's case) must have `Image=localhost/` + its `upstream` ref without the registry
 host, or `Image=localhost/<build>:latest`.
 
-### Pre-commit hook
-
-`.githooks/pre-commit` renders the staged tree against `vars.template.yml` in a temp
-dir, which runs every check above, then runs `shellcheck -x --severity=warning` over
-the rendered `*.sh` files (so `*.sh.j2` scripts are checked with their Jinja filled
-in). It takes about 6 s. Activate it once per clone:
-```bash
-git config core.hooksPath .githooks
-```
-Skip it for one commit with `git commit --no-verify`.
-
 Upload rendered files to a specific server:
 ```bash
 tools/upload_src.sh <hostname> "$out"
 ```
+
+### Pre-commit hook and `rendered/`
+
+`.githooks/pre-commit` renders the staged tree against `vars.template.yml` in a temp
+dir, which runs every check above, then runs `shellcheck -x --severity=warning` over
+the rendered `*.sh` files (so `*.sh.j2` scripts are checked with their Jinja filled
+in). If everything passes it replaces `rendered/` with that render and stages it, so
+every commit carries a readable copy of what the nodes get, with example values.
+`rendered/` is generated: edit the templates, never the copy. It is left out of the
+deploy render and marked `linguist-generated` so GitHub collapses it in diffs. The
+hook takes about 7 s. Activate it once per clone:
+```bash
+git config core.hooksPath .githooks
+```
+Skip it for one commit with `git commit --no-verify`; `rendered/` is then stale until
+the next commit that runs the hook.
 
 ### Update a web service
 

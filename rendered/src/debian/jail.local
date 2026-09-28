@@ -1,0 +1,10 @@
+# /etc/fail2ban/jail.local
+# Debian bug: https://github.com/fail2ban/fail2ban/issues/3292
+
+[DEFAULT]
+# Debian 12 has no log files, just journalctl
+backend = systemd
+logtarget = SYSTEMD-JOURNAL
+
+[sshd]
+enabled = true

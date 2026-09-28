@@ -1,0 +1,42 @@
+# /etc/containers/systemd/fluentbit.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Logs collector"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/fluent/fluent-bit:3.2
+ContainerName=fluentbit
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=log-collector.janedoe.com
+IP={{ subnet }}.20
+# port 2020, metrics
+
+# https://github.com/fluent/fluent-bit/blob/v3.2.0/dockerfiles/Dockerfile
+Exec=--config="/fluent-bit/etc/config.yaml"
+
+Environment=TZ=America/Los_Angeles
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
+
+Volume=/etc/opt/fluentbit:/fluent-bit/etc:ro
+Volume=/etc/machine-id:/etc/machine-id:ro
+Volume=/run/log/journal:/run/log/journal
+Volume=/var/log/journal:/var/log/journal
+Volume=fbdata.volume:/data
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+ExecStartPre=/usr/local/bin/render_services.sh /etc/opt/fluentbit/config.yaml
+
+[Install]
+WantedBy=multi-user.target

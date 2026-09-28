@@ -1,0 +1,95 @@
+#!/bin/bash
+# Generate SSH certificates and distribute them to all servers.
+# Usage:
+#   /root/homelab-rendered/src/certificates/ssh_cert_gen.sh
+set -euo pipefail
+
+/root/homelab-rendered/src/debian/is_root.sh
+/root/homelab-rendered/src/debian/is_reachable.sh pve2
+/root/homelab-rendered/src/debian/is_reachable.sh vpn
+/root/homelab-rendered/src/debian/is_reachable.sh secsvcs
+/root/homelab-rendered/src/debian/is_reachable.sh websvcs
+/root/homelab-rendered/src/debian/is_reachable.sh homesvcs
+/root/homelab-rendered/src/debian/is_reachable.sh devtop
+/root/homelab-rendered/src/debian/is_reachable.sh router
+
+cd /root/ssh
+
+echo "@cert-authority *.janedoe.com $(cat ca_ssh_host_key.pub)" > known_hosts
+chmod 644 known_hosts
+
+function configure_server() {
+  host=$1
+  port="22"
+  if [[ "$host" == "vpn" ]]; then
+    port="2202"
+  fi
+  echo "Configuring SSH CA for ${host}"
+  scp -P "$port" ca_ssh_key.pub "autoadmin@${host}:/home/autoadmin"
+
+  scp -P "$port" "autoadmin@${host}:/etc/ssh/ssh_host_ed25519_key.pub" "public/${host}.ssh_host_key.pub"
+  addr=$(dig "${host}.janedoe.com" +short)
+  ssh-keygen -s ca_ssh_host_key -I "$host" -h -n "${host}.janedoe.com,${addr}" -V +395d "public/${host}.ssh_host_key.pub"
+  chmod 444 "public/${host}.ssh_host_key-cert.pub"
+  scp -P "$port" "public/${host}.ssh_host_key-cert.pub" "autoadmin@${host}:/home/autoadmin/ssh_host_key_cert.pub"
+  scp -P "$port" known_hosts "autoadmin@${host}:/home/autoadmin"
+
+  ssh -p "$port" "autoadmin@${host}" "install_ssh_ca"
+}
+
+configure_server pve1
+configure_server secsvcs
+configure_server homesvcs
+configure_server pve2
+configure_server websvcs
+configure_server vpn
+configure_server devtop
+
+# router
+ssh -M -S ~/.ssh/ssh-socket-%r-%h-%p -f -N admin@router
+function scpsoc() { scp -o ControlPath=~/.ssh/ssh-socket-%r-%h-%p "$@"; }
+
+scpsoc ca_ssh_key.pub admin@router:/etc/ssh
+scpsoc admin@router:/etc/ssh/ssh_host_ed25519_key.pub public/router.ssh_host_key.pub
+addrs="router.janedoe.com,192.168.1.1,192.168.4.1,192.168.2.1"
+ssh-keygen -s ca_ssh_host_key -I router -h -n "$addrs" -V +395d public/router.ssh_host_key.pub
+chmod 444 public/router.ssh_host_key-cert.pub
+scpsoc public/router.ssh_host_key-cert.pub admin@router:/etc/ssh/ssh_host_key_cert.pub
+scpsoc known_hosts admin@router:/etc/ssh/ssh_known_hosts
+
+ssh -S ~/.ssh/ssh-socket-%r-%h-%p -O exit admin@router
+
+
+# SSH clients
+
+function request_cmd() {
+  echo "Run the following command on your local machine:"
+  echo "$1"
+  read -p "Press any key when done: " -n 1 -r
+  echo -e "\n"
+}
+
+# pve1
+ssh-keygen -s ca_ssh_key -I "pve1" -n "manualadmin,autoadmin" -V +395d /root/.ssh/id_ed25519.pub
+chmod 644 /root/.ssh/id_ed25519-cert.pub
+
+# Olive Tin
+ssh-keygen -t ed25519 -C "olive_tin@command.janedoe.com" -f /root/ssh/id_ed25519 -N ""
+ssh-keygen -s ca_ssh_key -I "olive_tin" -n "autoadmin" -V +395d id_ed25519.pub
+chmod 644 id_ed25519*.pub
+chmod 600 id_ed25519
+scp id_ed25519* known_hosts autoadmin@secsvcs:/home/autoadmin
+ssh autoadmin@secsvcs "install_olive_tin_cert"
+rm id_ed25519*
+
+# local machine
+request_cmd "scp ~/.ssh/id_ed25519.pub autoadmin@pve1:/home/autoadmin/local.id_ed25519.pub"
+ssh-keygen -s ca_ssh_key -I "local" -n "manualadmin,autoadmin" -V +395d /home/autoadmin/local.id_ed25519.pub
+chmod 644 /home/autoadmin/local.id_ed25519-cert.pub
+request_cmd "scp autoadmin@pve1:/home/autoadmin/local.id_ed25519-cert.pub ~/.ssh/id_ed25519-cert.pub"
+rm /home/autoadmin/local.id_ed25519*
+
+echo "Edit ~/.ssh/known_hosts on your local machine to include the following line:"
+cat known_hosts
+
+date -u > /root/ssh/date_ssh_certs.txt
