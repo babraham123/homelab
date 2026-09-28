@@ -48,7 +48,7 @@ fail2ban-client -d | grep sshd
 ```
 
 ### VPN setup
-- Setup Headscale ([src](https://headscale.net/running-headscale-linux/))
+- Setup Headscale ([src](https://headscale.net/stable/setup/install/official/))
 ```bash
 mkdir -p /etc/opt/secrets
 chmod 711 /etc/opt/secrets
@@ -69,7 +69,7 @@ headscale --user USER_ID preauthkeys create --expiration 100y
 - For home network, use Tailscale plugin on pfSense ([src](https://www.wundertech.net/how-to-set-up-tailscale-on-pfsense/), [ref](https://davidisaksson.dev/posts/tailscale-on-pfsense/))
   - Install the Tailscale package (Go to System >> Package Manager)
   - Go to VPN >> Tailscale
-  - Setup as an [Exit Node](https://headscale.net/exit-node/) for the desired subnet
+  - Setup as an [Exit Node](https://headscale.net/stable/ref/routes/#exit-node) for the desired subnet
   - Restart pfSense ([issue](https://github.com/tailscale/tailscale/issues/7780))
   - On the VPN server, enable pfSense's routes, [ref](https://headscale.net/stable/ref/routes/)
 ```bash

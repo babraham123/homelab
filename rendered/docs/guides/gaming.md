@@ -8,7 +8,7 @@ First stand up the [Windows VM](./vm_windows.md)
 - Install [ViGEmBus](https://github.com/ViGEm/ViGEmBus)
 - Install [Playnite](https://playnite.link/)
 - Install [ChangeScreenResolution.exe](https://tools.taubenkorb.at/change-screen-resolution/)
-- Install [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/installation.html)
+- Install [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/latest/md_docs_2getting__started.html)
   - Add Playnite as a cmd: `"C:\Users\admin\AppData\Local\Playnite\Playnite.FullscreenApp.exe" --hidesplashscreen`
   - Run PowerShell cmds:
 ```PowerShell
@@ -59,7 +59,7 @@ sudo systemctl enable moonlight.service
 ```
 - In the Moonlight GUI, set resolution to 1080p, refresh rate to 60Hz
 
-- Buy Xbox S/X controllers (model [1914](https://boilingsteam.com/xbox-one-controller-a-perfected-xbox-360-gamepad/)) and [dongle](https://www.newegg.com/p/2NG-015J-00004?item=9SIB5YAK5E3117)
+- Buy Xbox S/X controllers (model [1914](https://boilingsteam.com/xbox-one-controller-a-perfected-xbox-360-gamepad/)) and [dongle](https://www.microsoft.com/en-us/d/xbox-wireless-adapter-for-windows/91dqrb97l130)
 - Install [xone](https://github.com/dlundqvist/xone) driver
 ```bash
 # Plugin in dongle
