@@ -31,6 +31,6 @@ $fdfind -h &> /dev/null || fdfind="fd"
 $fdfind . --type f -e j2 --exec rm "${project_dir}/{}"
 $fdfind . --type f -e j2 --exec jinjanate --quiet -o "${project_dir}/{.}" "{}" ../vars.template.yml
 
-rm -f "${project_dir}"/**/.DS_Store
+find "$project_dir" -name .DS_Store -delete
 
 echo "Rendered the docs into ${1}"
