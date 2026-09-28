@@ -4,6 +4,10 @@
 #   /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 set -euo pipefail
 
+# site.name is free text, so it is shell-quoted once here rather than inside each -subj.
+org={{ site.name | quote }}
+subj="/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O=${org}"
+
 /root/homelab-rendered/src/debian/is_root.sh
 /root/homelab-rendered/src/debian/is_reachable.sh secsvcs
 /root/homelab-rendered/src/debian/is_reachable.sh websvcs
@@ -16,7 +20,7 @@ read -r -s CA_PASS
 
 openssl req -config openssl.cnf \
   -key private/wildcard.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=svcs/CN=*.{{ site.url }}' \
+  -subj "${subj}/OU=svcs/CN=*.{{ site.url }}" \
   -addext 'subjectAltName = DNS:*.{{ site.url }},DNS:{{ site.url }}' \
   -new -sha256 -out csr/wildcard.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -27,7 +31,7 @@ chmod 444 certs/wildcard.{{ site.url }}.cert.pem
 
 openssl req -config openssl.cnf \
   -key private/ldap.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=secsvcs/CN=ldap.{{ site.url }}' \
+  -subj "${subj}/OU=secsvcs/CN=ldap.{{ site.url }}" \
   -addext 'subjectAltName = DNS:ldap.{{ site.url }}' \
   -new -sha256 -out csr/ldap.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -39,7 +43,7 @@ scp certs/ldap.{{ site.url }}.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/auth.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=secsvcs/CN=auth.{{ site.url }}' \
+  -subj "${subj}/OU=secsvcs/CN=auth.{{ site.url }}" \
   -addext 'subjectAltName = DNS:auth.{{ site.url }}' \
   -new -sha256 -out csr/auth.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -51,7 +55,7 @@ scp certs/auth.{{ site.url }}.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/pgdb.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=secsvcs/CN=pgdb.{{ site.url }}' \
+  -subj "${subj}/OU=secsvcs/CN=pgdb.{{ site.url }}" \
   -addext 'subjectAltName = DNS:pgdb.{{ site.url }}' \
   -new -sha256 -out csr/pgdb.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -63,7 +67,7 @@ scp certs/pgdb.{{ site.url }}.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/secproxy.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=secsvcs/CN=secproxy.{{ site.url }}' \
+  -subj "${subj}/OU=secsvcs/CN=secproxy.{{ site.url }}" \
   -addext 'subjectAltName = DNS:secproxy.{{ site.url }}' \
   -new -sha256 -out csr/secproxy.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -83,7 +87,7 @@ scp certs/secproxy.{{ site.url }}.client_cert.pem autoadmin@secsvcs:/home/autoad
 
 openssl req -config openssl.cnf \
   -key private/webproxy.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=websvcs/CN=webproxy.{{ site.url }}' \
+  -subj "${subj}/OU=websvcs/CN=webproxy.{{ site.url }}" \
   -addext 'subjectAltName = DNS:webproxy.{{ site.url }}' \
   -new -sha256 -out csr/webproxy.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -104,7 +108,7 @@ scp certs/webproxy.{{ site.url }}.client_cert.pem autoadmin@websvcs:/home/autoad
 
 openssl req -config openssl.cnf \
   -key private/homeproxy.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=homesvcs/CN=homeproxy.{{ site.url }}' \
+  -subj "${subj}/OU=homesvcs/CN=homeproxy.{{ site.url }}" \
   -addext 'subjectAltName = DNS:homeproxy.{{ site.url }}' \
   -new -sha256 -out csr/homeproxy.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -125,7 +129,7 @@ scp certs/homeproxy.{{ site.url }}.client_cert.pem autoadmin@homesvcs:/home/auto
 
 openssl req -config openssl.cnf \
   -key private/mqtt.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=homesvcs/CN=mqtt.{{ site.url }}' \
+  -subj "${subj}/OU=homesvcs/CN=mqtt.{{ site.url }}" \
   -addext 'subjectAltName = DNS:mqtt.{{ site.url }}' \
   -new -sha256 -out csr/mqtt.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -137,7 +141,7 @@ scp certs/mqtt.{{ site.url }}.cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/zigbee.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=homesvcs/CN=zigbee.{{ site.url }}' \
+  -subj "${subj}/OU=homesvcs/CN=zigbee.{{ site.url }}" \
   -addext 'subjectAltName = DNS:zigbee.{{ site.url }}' \
   -new -sha256 -out csr/zigbee.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
@@ -149,7 +153,7 @@ scp certs/zigbee.{{ site.url }}.client_cert.pem autoadmin@homesvcs:/home/autoadm
 
 openssl req -config openssl.cnf \
   -key private/home.{{ site.url }}.key.pem \
-  -subj '/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city }}/O={{ site.name }}/OU=homesvcs/CN=home.{{ site.url }}' \
+  -subj "${subj}/OU=homesvcs/CN=home.{{ site.url }}" \
   -addext 'subjectAltName = DNS:home.{{ site.url }}' \
   -new -sha256 -out csr/home.{{ site.url }}.csr.pem
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
