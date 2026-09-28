@@ -67,8 +67,37 @@ $fdfind . --extension json | xargs -I% \
 $fdfind . --extension container | xargs grep -h "IP=" | \
   sort | uniq -d | grep . && { echo "error: duplicate IPs found" >&2; exit 1; }
 
-# Validate the node inventory against the scripts its dispatcher cases call
 fail() { echo "error: $*" >&2; exit 1; }
+
+# Validate each image in src/nodes.yml against the quadlet its install case copies. The
+# image updater loads images under these names, so a mismatch would never be updated.
+upstreams='.. | select(tag == "!!map" and has("upstream")) | .upstream'
+bad=$(yq "$upstreams" src/nodes.yml | grep -vE '^[^/]+\.[^/]+/[^/]+/[^/]+' || true)
+[ -z "$bad" ] || fail "src/nodes.yml upstream refs need a registry host and namespace: ${bad}"
+
+cat > "${vars_dir}/images.j2" <<'EOF'
+{% import 'src/nodes.jinja' as inv with context -%}
+{% for node, list in inv.images.items() -%}
+{% for i in list -%}
+{{ node }} {{ i.service }} {{ i.container }} {{ i.image }}
+{% endfor -%}
+{% endfor -%}
+EOF
+jinjanate --quiet "${vars_dir}/images.j2" "$all_vars" | \
+  while read -r node svc container image; do
+    quadlet=$(awk -v c="${svc})" '$1 == c {f=1; next} f && /;;/ {exit} f' "src/${node}/install_svcs.sh" | \
+      grep -oE "[a-zA-Z0-9_./-]+/${container}\.container" | head -n 1 || true)
+    [ -n "$quadlet" ] || \
+      fail "the ${svc} case in src/${node}/install_svcs.sh copies no ${container}.container (src/nodes.yml)"
+    # A *.container.j2.j2 source is still *.container.j2 until install time
+    file="src/${quadlet}"
+    [ -f "$file" ] || file+=".j2"
+    actual=$(sed -n 's/^Image=//p' "$file")
+    [[ "$actual" == "$image" ]] || \
+      fail "${file}: Image=${actual}, expected Image=${image} (src/nodes.yml ${node}.services.${svc})"
+  done
+
+# Validate the node inventory against the scripts its dispatcher cases call
 cases() { sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$1" | sort -u; }
 inventory() { node="$1" yq "$2" src/nodes.yml; }
 
