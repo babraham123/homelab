@@ -1,6 +1,6 @@
 # 06. Document every step to rename the vpn node to vpnsvcs
 
-Status: ready-for-agent
+Status: resolved
 Type: research
 Repo: homelab
 Source: user item 48
@@ -48,5 +48,36 @@ rename the node, keep `vpn.SITE` as a DNS alias (or add `vpnsvcs.SITE` and keep
   be verified before the next.
 - It states the Headscale `server_url` decision explicitly.
 - Execution is restructure/08.
+
+## Answer
+
+Runbook: [`planning/restructure/vpn-rename-runbook.md`](../vpn-rename-runbook.md). It has
+9 phases, each ending in a check: preflight, repo commit, LAN DNS, SSH cert, hostname,
+deploy, dispatcher, other consumers, monitoring. It also covers rollback.
+
+- **Headscale `server_url`:** it stays `https://vpn.SITE` permanently, with no
+  re-enrolment campaign. `vpn.SITE` becomes a service name for the Headscale endpoint,
+  not the node name. The HAProxy `vpn_host` SNI, the Unbound `vpn.` transparent zone,
+  the Authelia redirect URIs and `--login-server` stay too.
+- **No registrar record.** The public `*` wildcard already resolves `vpnsvcs.SITE`.
+  The LAN does need an Unbound `transparent` entry. Without it, pfSense's redirect zone
+  sends `vpnsvcs.SITE` to websvcs, and `upload_src.sh`'s ping check passes against the
+  wrong host.
+- **SSH cert chicken-and-egg.** `ssh_cert_gen.sh` would connect to `vpnsvcs.SITE`
+  before any cert names it. The first cert is signed by hand from pve1, connecting by
+  the old name, with principals `vpnsvcs.SITE,vpn.SITE,IP`. The script keeps both
+  names from then on.
+- **Don't reinstall headscale.** Its install case upgrades to the latest release and
+  overwrites the config. The rendered service configs don't change (same IP), so only
+  `install_dispatcher` is needed.
+- **Corrections to Steps:**
+  - `render_src.sh` has no parse list anymore; it iterates over `nodes.yml`
+    (restructure/01).
+  - The SSH configs have no vpn entries. They need a new `Port 2202` block, which also
+    fixes OliveTin's vpn buttons: they SSH to port 22, which ufw denies.
+  - Gatus, Homepage and Grafana don't reference vpn today.
+  - There's no `node_exporter_vpn` job (observability/04).
+  - `secret_update.sh` keys its files by host name, and it lacks port 2202.
+- **Guide:** rename `vpn.md.j2` → `vpnsvcs.md.j2` to follow restructure/04's rule.
 
 ## Comments

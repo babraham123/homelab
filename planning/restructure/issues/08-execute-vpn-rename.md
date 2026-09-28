@@ -8,7 +8,7 @@ Blocked by: 06
 
 ## Change
 
-Follow the runbook from 06, in its order.
+Follow [the runbook from 06](../vpn-rename-runbook.md), in its order.
 
 - **Repo (agent):**
   - `vars.yml`/`vars.template.yml` key `vpn:` → `vpnsvcs:`, and every `{{ vpn.` in
@@ -42,3 +42,12 @@ Follow the runbook from 06, in its order.
   report under the new name, with no gap longer than the rename window.
 
 ## Comments
+
+2026-09-27 (restructure/06): the runbook is `planning/restructure/vpn-rename-runbook.md`.
+It changes the Host steps above:
+
+- No registrar record: the `*` wildcard covers `vpnsvcs.SITE`.
+- Add an Unbound transparent entry instead.
+- The first host cert is signed by hand from pve1, connecting by the old name.
+- Reinstall only the dispatcher, not the services: the headscale case upgrades
+  Headscale.
