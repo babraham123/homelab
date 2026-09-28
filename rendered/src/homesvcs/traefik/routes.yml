@@ -1,0 +1,44 @@
+# /etc/opt/traefik/config/dynamic/routes.yml
+# References:
+#   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+#   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+# yamllint disable rule:document-start rule:document-end
+http:
+  routers:
+    traefik: &service
+      rule: Host(`homeproxy.janedoe.com`)
+      entryPoints: websecure
+      service: api@internal
+      middlewares:
+        - authelia@file
+        - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    hass:
+      <<: *service
+      rule: Host(`home.janedoe.com`)
+      service: hass@file
+    z2m:
+      <<: *service
+      rule: Host(`zigbee.janedoe.com`)
+      service: z2m@file
+    esphome:
+      <<: *service
+      rule: Host(`iot.janedoe.com`)
+      service: esphome@file
+  services:
+    hass:
+      loadBalancer:
+        servers:
+          - url: http://home.janedoe.com:8123/
+          # TODO: add extension then enable
+          # - url: http://home.janedoe.com:8123/auth/oidc/welcome
+    z2m:
+      loadBalancer:
+        servers:
+          - url: http://zigbee.janedoe.com:8080/
+    esphome:
+      loadBalancer:
+        servers:
+          - url: http://iot.janedoe.com:6052/

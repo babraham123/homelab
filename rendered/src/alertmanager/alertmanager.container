@@ -1,0 +1,38 @@
+# /etc/containers/systemd/alertmanager.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Sends alerting notifications"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/prom/alertmanager:latest
+ContainerName=alertmanager
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=alert.janedoe.com
+IP=10.10.0.10
+# port 9093
+
+Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.yml"
+
+Environment=TZ=America/Los_Angeles
+Volume=/etc/opt/alertmanager:/config:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/alertmanager/config.yml alert_smtp_password,ntfy_alertmanager_admin_password
+ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/alertmanager/web_config.yml alertmanager_admin_password,bcrypt_salt
+# User defined in the AM dockerfile
+ExecStartPre=chown nobody:nogroup /etc/opt/alertmanager/config.yml /etc/opt/alertmanager/web_config.yml
+
+[Install]
+WantedBy=multi-user.target

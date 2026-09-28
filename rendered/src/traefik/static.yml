@@ -1,0 +1,91 @@
+# /etc/opt/traefik/config/static/traefik.yml
+# Ref: https://doc.traefik.io/traefik/reference/static-configuration/file/
+---
+global:
+  sendAnonymousUsage: false
+  checkNewVersion: true
+api:
+  dashboard: true
+  insecure: false
+log:
+  level: WARN
+  format: common
+# accessLog:
+#   format: common
+#   filters:
+#     statusCodes:
+#       - "400-499"
+#   fields:
+#     defaultMode: keep
+#     headers:
+#       defaultMode: keep
+#       names:
+#         Authorization: redact
+providers:
+  file:
+    watch: false
+    directory: /config/dynamic
+experimental:
+  plugins:
+    rewriteHeaders:
+      modulename: "github.com/bitrvmpd/traefik-plugin-rewrite-headers"
+      version: "v0.0.1"
+entryPoints:
+  web:
+    address: ":80/tcp"
+    http:
+      aliasHeadersStrategy: delete
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+    proxyProtocol:
+      insecure: false
+      # Tailscale subnet IP needed due to https://github.com/tailscale/tailscale/issues/5573
+      trustedIPs: [12.34.56.78, 192.168.4.1, 192.168.2.1]
+    forwardedHeaders:
+      insecure: false
+      trustedIPs: [12.34.56.78, 192.168.4.1, 192.168.2.1]
+  websecure:
+    address: ":443/tcp"
+    http:
+      aliasHeadersStrategy: delete
+    proxyProtocol:
+      insecure: false
+      trustedIPs: [12.34.56.78, 192.168.4.1, 192.168.2.1]
+    forwardedHeaders:
+      insecure: false
+      trustedIPs: [12.34.56.78, 192.168.4.1, 192.168.2.1]
+  smtp:
+    address: ":465/tcp"
+    http:
+      aliasHeadersStrategy: delete
+certificatesResolvers:
+  # Consider changing cert duration from 90 days to 1 year
+  le-http-staging:
+    acme:
+      email: jdoe@gmail.com
+      storage: /certificates/acme.staging.json
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      httpChallenge:
+        entryPoint: web
+  le-http-production:
+    acme:
+      email: jdoe@gmail.com
+      storage: /certificates/acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      httpChallenge:
+        entryPoint: web
+  le-tls-staging:
+    acme:
+      email: jdoe@gmail.com
+      storage: /certificates/acme.staging.json
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      tlsChallenge: {}
+  le-tls-production:
+    acme:
+      email: jdoe@gmail.com
+      storage: /certificates/acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      tlsChallenge: {}
+...

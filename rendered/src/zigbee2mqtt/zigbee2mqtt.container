@@ -1,0 +1,42 @@
+# /etc/containers/systemd/zigbee2mqtt.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Zigbee 2 MQTT bridge"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=mosquitto.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=ghcr.io/koenkk/zigbee2mqtt:latest
+ContainerName=zigbee2mqtt
+AutoUpdate=registry
+NoNewPrivileges=true
+
+Network=net.network
+HostName=zigbee.janedoe.com
+IP=10.12.0.9
+# UI: port 8080
+
+Environment=TZ=America/Los_Angeles
+# default retry delays: 1min, 5min, 15min, 30min, 60min
+Environment=Z2M_WATCHDOG=default
+
+Secret=zigbee_pan_id,type=env,target=ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID
+Secret=zigbee_ext_pan_id,type=env,target=ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID
+Secret=zigbee_network_key,type=env,target=ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY
+
+Volume=z2mdb.volume:/app/data
+Volume=/etc/opt/zigbee2mqtt/config/configuration.yaml:/app/data/configuration.yaml
+Volume=/etc/opt/zigbee2mqtt/config/devices.yaml:/app/data/devices.yaml
+Volume=/etc/opt/zigbee2mqtt/config/groups.yaml:/app/data/groups.yaml
+Volume=/etc/opt/zigbee2mqtt/certificates:/etc/ssl:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

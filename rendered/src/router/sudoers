@@ -1,0 +1,2 @@
+# Allow autoadmin to run these specific commands without a password
+autoadmin ALL=(root) NOPASSWD: /root/router-src/commands.sh install_certs, /root/router-src/commands.sh install_dispatcher, /root/router-src/commands.sh start_pve2

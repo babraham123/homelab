@@ -1,7 +1,7 @@
 # /etc/opt/homepage/config/settings.yaml
 # Ref: https://gethomepage.dev/configs/settings/
 ---
-title: {{ site.name }}
+title: {{ site.name | tojson }}
 
 startUrl: https://dash.{{ site.url }}/ # default is "/"
 

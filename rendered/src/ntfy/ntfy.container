@@ -1,0 +1,43 @@
+# /etc/containers/systemd/ntfy.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: ntfy push notification service"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/binwiederhier/ntfy:latest
+ContainerName=ntfy
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# port 2586, web UI at /, /<topic> for pubsub
+# port 2587 for metrics
+# port 25 for the basic SMTP server
+Network=net.network
+HostName=push.janedoe.com
+IP=10.10.0.13
+
+Exec=serve --config="/etc/ntfy/server.yml"
+
+Environment=TZ=America/Los_Angeles
+Secret=ntfy_webpush_public_key,type=env,target=NTFY_WEB_PUSH_PUBLIC_KEY
+Secret=ntfy_webpush_private_key,type=env,target=NTFY_WEB_PUSH_PRIVATE_KEY
+
+Volume=/etc/opt/ntfy/config.yml:/etc/ntfy/server.yml:ro
+Volume=/var/opt/ntfy:/var/cache/ntfy
+Volume=ntfydb.volume:/var/lib/ntfy
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+# ntfy doesn't trap SIGTERM, so a normal stop exits 128+15
+SuccessExitStatus=143
+
+ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/ntfy/config.yml alert_smtp_password,ntfy_webpush_public_key,ntfy_webpush_private_key,ntfy_admin_password,ntfy_alert_password,ntfy_hass_password,ntfy_person_password,ntfy_alert_token,bcrypt_salt
+
+[Install]
+WantedBy=multi-user.target

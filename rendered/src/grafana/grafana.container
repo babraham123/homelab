@@ -1,0 +1,50 @@
+# /etc/containers/systemd/grafana.container
+# Ref:
+# https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/grafana/grafana/blob/main/Dockerfile
+# https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
+
+[Unit]
+Description="Homelab: Graphs and alerts for time series data"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=victoriametrics.service
+Requires=victorialogs.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=docker.io/grafana/grafana-oss:latest
+ContainerName=grafana
+AutoUpdate=registry
+NoNewPrivileges=true
+
+# http web front-end, port = 3000
+Network=net.network
+HostName=graph.janedoe.com
+IP=10.10.0.12
+AddHost=auth.janedoe.com:10.10.0.6
+
+Environment=TZ=America/Los_Angeles
+# https://www.postgresql.org/docs/14/libpq-envars.html
+Secret=grafana_pg_password,type=env,target=PGPASSWORD
+Secret=grafana_oidc_id,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+Secret=grafana_oidc_secret,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
+
+Volume=/etc/opt/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+Volume=/etc/opt/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+Volume=/etc/opt/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml:ro
+Volume=/etc/opt/grafana/dashboards:/var/lib/grafana/dashboards
+Volume=/etc/opt/grafana/certificates:/certificates:ro
+
+Volume=grafanadata.volume:/var/lib/grafana
+# Expects the user's uid to be 472, the gid to be 0
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

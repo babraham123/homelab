@@ -1,0 +1,78 @@
+# /etc/opt/traefik/config/dynamic/routes.yml
+# References:
+#   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+#   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+# yamllint disable rule:document-start rule:document-end
+http:
+  routers:
+    traefik: &service
+      rule: Host(`webproxy.janedoe.com`)
+      entryPoints: websecure
+      service: api@internal
+      middlewares:
+        - authelia@file
+        - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    root:
+      <<: *service
+      rule: Host(`janedoe.com`)
+      service: nginx@file
+      middlewares:
+        - www-redirect@file
+    homepage:
+      <<: *service
+      rule: Host(`dash.janedoe.com`)
+      service: homepage@file
+    isso:
+      <<: *service
+      rule: Host(`comment.janedoe.com`)
+      service: isso@file
+    guacamole:
+      <<: *service
+      rule: Host(`remote.janedoe.com`)
+      service: guacamole@file
+      middlewares:
+        - authelia@file
+        - no-buffering@file
+        - secure-headers@file
+    archivebox:
+      <<: *service
+      rule: Host(`archive.janedoe.com`)
+      service: archivebox@file
+    static-files:
+      <<: *service
+      rule: Host(`www.janedoe.com`) || Host(`wifi.janedoe.com`)
+      service: nginx@file
+      middlewares:
+        - gzip@file
+        - secure-headers@file
+    # example-static:
+    #   <<: *service
+    #   rule: (Host(`example.janedoe.com`) && PathPrefix(`/static`))
+    #   service: nginx@file
+    #   middlewares:
+    #     - gzip@file
+    #     - static-strip-prefix@file
+  services:
+    homepage:
+      loadBalancer:
+        servers:
+          - url: http://dash.janedoe.com:3000/
+    isso:
+      loadBalancer:
+        servers:
+          - url: http://comment.janedoe.com:8200/
+    guacamole:
+      loadBalancer:
+        servers:
+          - url: http://remote.janedoe.com:8080/
+    archivebox:
+      loadBalancer:
+        servers:
+          - url: http://archive.janedoe.com:8000/
+    nginx:
+      loadBalancer:
+        servers:
+          - url: http://static.janedoe.com:8100/

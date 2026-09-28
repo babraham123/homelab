@@ -1,0 +1,151 @@
+# /etc/opt/gatus/config.yaml
+# Ref: https://github.com/TwiN/gatus?tab=readme-ov-file
+---
+metrics: true
+
+web:
+  port: 8080
+
+storage:
+  type: postgres
+  path: "postgres://gatus@pgdb.janedoe.com:5432/gatus"
+
+# PBS VM backups: src/pve1/backup_orchestrator.timer
+maintenance:
+  start: 01:00
+  duration: 2h
+  timezone: "America/Los_Angeles"
+  every: [Sunday]
+
+public-endpoint: &public
+  group: public
+  interval: 10m
+  client:
+    timeout: 10s
+    dns-resolver: udp://1.1.1.1:53
+  headers:
+    User-Agent: "Mozilla/5.0 (gatus-robot; Linux x86_64)"
+  conditions:
+    - "[STATUS] == 200"
+    - "[RESPONSE_TIME] < 1000"
+
+internal-endpoint: &internal
+  group: internal
+  interval: 10m
+  client:
+    timeout: 10s
+    dns-resolver: udp://1.1.1.1:53
+    # https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage
+    # https://www.authelia.com/integration/openid-connect/uptime-kuma/
+    oauth2:
+      # Don't use :9091, gatus uses external DNS
+      token-url: https://auth.janedoe.com/api/oidc/token
+      client-id: ${OIDC_CLIENT_ID}
+      client-secret: ${OIDC_CLIENT_SECRET}
+      scopes: ['authelia.bearer.authz']
+  headers:
+    User-Agent: "Mozilla/5.0 (gatus-robot; Linux x86_64)"
+  conditions:
+    - "[STATUS] == 200"
+    - "[RESPONSE_TIME] < 1000"
+
+endpoints:
+  # - name: personal site
+    # <<: *public
+    # url: "https://janedoe.com"
+
+  # Internal endpoints come from the uptime entries in src/nodes.yml
+
+  - name: traefik secsvcs
+    <<: *internal
+    url: "https://secproxy.janedoe.com"
+
+  - name: victoriametrics
+    <<: *internal
+    url: "https://metrics.janedoe.com"
+
+  - name: victorialogs
+    <<: *internal
+    url: "https://logs.janedoe.com"
+
+  - name: vmalert
+    <<: *internal
+    url: "https://vmalert.janedoe.com"
+
+  - name: alertmanager
+    <<: *internal
+    url: "https://alert.janedoe.com"
+
+  - name: ntfy health check
+    <<: *internal
+    url: "https://push.janedoe.com/v1/health"
+
+  - name: grafana
+    <<: *internal
+    url: "https://graph.janedoe.com"
+
+  - name: olive_tin
+    <<: *internal
+    url: "https://command.janedoe.com"
+
+  - name: traefik homesvcs
+    <<: *internal
+    url: "https://homeproxy.janedoe.com"
+
+  - name: zigbee2mqtt
+    <<: *internal
+    url: "https://zigbee.janedoe.com"
+
+  - name: esphome
+    <<: *internal
+    url: "https://iot.janedoe.com"
+
+  - name: home assistant
+    <<: *internal
+    url: "https://home.janedoe.com"
+
+  - name: traefik websvcs
+    <<: *internal
+    url: "https://webproxy.janedoe.com"
+
+  - name: homepage
+    <<: *internal
+    url: "https://dash.janedoe.com"
+
+  - name: guacamole
+    <<: *internal
+    url: "https://remote.janedoe.com"
+
+  - name: archivebox
+    <<: *internal
+    url: "https://archive.janedoe.com"
+
+
+  # - name: jellyfin
+    # <<: *internal
+    # url: "https://media.janedoe.com"
+
+  # - name: calibre
+    # <<: *internal
+    # url: "https://books.janedoe.com"
+
+  # - name: audiobookshelf
+    # <<: *internal
+    # url: "https://audiobooks.janedoe.com"
+
+  # - name: immich
+    # <<: *internal
+    # url: "https://photos.janedoe.com"
+
+  # - name: freshrss
+    # <<: *internal
+    # url: "https://rss.janedoe.com"
+
+  # - name: frigate
+    # <<: *internal
+    # url: "https://cameras.janedoe.com"
+
+  # - name: mealie
+    # <<: *internal
+    # url: "https://recipes.janedoe.com"
+...

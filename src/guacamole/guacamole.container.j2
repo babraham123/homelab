@@ -43,7 +43,8 @@ Environment=EXTENSION_PRIORITY=openid
 Environment=OPENID_SCOPE="openid profile groups email"
 Environment=OPENID_ISSUER=https://auth.{{ site.url }}
 Environment=OPENID_JWKS_ENDPOINT=https://auth.{{ site.url }}/jwks.json
-Environment=OPENID_AUTHORIZATION_ENDPOINT=https://auth.{{ site.url }}/api/oidc/authorization?state={{ '%016x' | format((2 ** 64) | random) }}
+# Seeded so the value is stable across renders; it is sent to every browser anyway.
+Environment=OPENID_AUTHORIZATION_ENDPOINT=https://auth.{{ site.url }}/api/oidc/authorization?state={{ '%016x' | format((2 ** 64) | random(seed=site.url)) }}
 Environment=OPENID_REDIRECT_URI=https://remote.{{ site.url }}
 Environment=OPENID_USERNAME_CLAIM_TYPE=preferred_username
 Environment=OPENID_GROUPS_CLAIM_TYPE=groups
