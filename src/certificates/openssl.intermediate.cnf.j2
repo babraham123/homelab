@@ -86,7 +86,8 @@ emailAddress                    = Email Address
 countryName_default             = {{ personal.country_code }}
 stateOrProvinceName_default     = {{ personal.state }}
 localityName_default            = {{ personal.city }}
-0.organizationName_default      = {{ site.name }}
+# Quoted: OpenSSL drops bare quote characters and expands $ in unquoted values.
+0.organizationName_default      = "{{ site.name | replace("\\", "\\\\") | replace("\"", "\\\"") }}"
 organizationalUnitName_default  =
 emailAddress_default            = {{ site.email }}
 

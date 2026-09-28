@@ -1,0 +1,42 @@
+# /etc/opt/traefik/config/dynamic/authelia.yml
+# Ref:
+#   https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
+#   https://www.authelia.com/integration/proxies/traefik/
+# yamllint disable rule:document-start rule:document-end
+http:
+  serversTransports:
+    autheliaMutualTLS:
+      certificates:
+        - certFile: /certificates/proxy.client.crt
+          keyFile: /certificates/proxy.key
+      rootCAs:
+        - /certificates/ca.chain.crt
+  middlewares:
+    authelia:
+      forwardAuth:
+        address: https://auth.janedoe.com:9091/api/authz/forward-auth
+        trustForwardHeader: true
+        maxResponseBodySize: 1048576 # 1MB limit
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Email"
+          - "Remote-Name"
+        tls:
+          ca: /certificates/ca.chain.crt
+          cert: /certificates/proxy.client.crt
+          key: /certificates/proxy.key
+    authelia-basic:
+      forwardAuth:
+        address: https://auth.janedoe.com:9091/api/verify?auth=basic
+        trustForwardHeader: true
+        maxResponseBodySize: 1048576 # 1MB limit
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Email"
+          - "Remote-Name"
+        tls:
+          ca: /certificates/ca.chain.crt
+          cert: /certificates/proxy.crt
+          key: /certificates/proxy.key

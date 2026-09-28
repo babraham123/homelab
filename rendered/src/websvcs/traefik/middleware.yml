@@ -1,0 +1,19 @@
+# /etc/opt/traefik/config/dynamic/middleware.yml
+# Ref: https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
+# yamllint disable rule:document-start rule:document-end
+http:
+  middlewares:
+    gzip:
+      compress: {}
+    static-strip-prefix:
+      stripPrefix:
+        prefixes: "/static"
+    www-redirect:
+      redirectRegex:
+        regex: "^https?://?(.+)"
+        replacement: "https://www.${1}"
+        permanent: true
+    no-buffering:
+      buffering:
+        maxRequestBodyBytes: 0
+        maxResponseBodyBytes: 0

@@ -1,7 +1,11 @@
 {% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/authelia/config/configuration.yml
 ---
-# v4.38.10
+# v4.39.28
+# SPDX-FileCopyrightText: 2026 Authelia
+#
+# SPDX-License-Identifier: Apache-2.0
+
 ###############################################################################
 ##                           Authelia Configuration                          ##
 ###############################################################################
@@ -38,7 +42,7 @@ server:
   ## Formats:
   ##  - [<scheme>://]<hostname>[:<port>][/<path>]
   ##  - [<scheme>://][hostname]:<port>[/<path>]
-  ## Square brackets indicate optional portions of the format. Scheme must be 'tcp', 'tcp4', 'tcp6', or 'unix'.
+  ## Square brackets indicate optional portions of the format. Scheme must be 'tcp', 'tcp4', 'tcp6', 'unix', or 'fd'.
   ## The default scheme is 'unix' if the address is an absolute path otherwise it's 'tcp'. The default port is '9091'.
   ## If the path is specified this configures the router to handle both the `/` path and the configured path.
   address: 'tcp://:9091/'
@@ -51,7 +55,7 @@ server:
   ## This is disabled by default if either /app/.healthcheck.env or /app/healthcheck.sh do not exist.
   # disable_healthcheck: false
 
-  ## Authelia by default doesn't accept TLS communication on the server port. This section overrides this behaviour.
+  ## Authelia by default doesn't accept TLS communication on the server port. This section overrides this behavior.
   tls:
     ## The path to the DER base64/PEM format private key.
     key: "/certificates/auth.key"
@@ -173,7 +177,7 @@ telemetry:
     ## Formats:
     ##  - [<scheme>://]<hostname>[:<port>][/<path>]
     ##  - [<scheme>://][hostname]:<port>[/<path>]
-    ## Square brackets indicate optional portions of the format. Scheme must be 'tcp', 'tcp4', 'tcp6', or 'unix'.
+    ## Square brackets indicate optional portions of the format. Scheme must be 'tcp', 'tcp4', 'tcp6', 'unix', or 'fd'.
     ## The default scheme is 'unix' if the address is an absolute path otherwise it's 'tcp'. The default port is '9959'.
     ## If the path is not specified it defaults to `/metrics`.
     address: 'tcp://:9959/metrics'
@@ -261,7 +265,7 @@ webauthn:
   enable_passkey_login: true
 
   ## The display name the browser should show the user for when using WebAuthn to login/register.
-  display_name: '{{ site.name }}'
+  display_name: {{ site.name | tojson }}
 
   ## Conveyance preference controls if we collect the attestation statement including the AAGUID from the device.
   ## Options are none, indirect, direct.
@@ -297,8 +301,11 @@ webauthn:
   ## Metadata Service validation via MDS3.
   # metadata:
 
-    ## Enable the metadata fetch behaviour.
+    ## Enable the metadata fetch behavior.
     # enabled: false
+
+    ## Configure the Cache Policy for the Metadata Service.
+    # cache_policy: 'strict'
 
     ## Enable Validation of the Trust Anchor. This generally should be enabled if you're using the metadata. It
     ## ensures the attestation certificate presented by the authenticator is valid against the MDS3 certificate that
@@ -471,13 +478,13 @@ authentication_backend:
     ## The default port is '636', unless the scheme is 'ldap' in which case it's '389'.
     address: 'ldaps://ldap.{{ site.url }}:6360'
 
-    ## The LDAP implementation, this affects elements like the attribute utilised for resetting a password.
+    ## The LDAP implementation, this affects elements like the attribute utilized for resetting a password.
     ## Acceptable options are as follows:
     ## - 'activedirectory' - for Microsoft Active Directory.
     ## - 'freeipa' - for FreeIPA.
     ## - 'lldap' - for lldap.
     ## - 'custom' - for custom specifications of attributes and filters.
-    ## This currently defaults to 'custom' to maintain existing behaviour.
+    ## This currently defaults to 'custom' to maintain existing behavior.
     ##
     ## Depending on the option here certain other values in this section have a default value, notably all of the
     ## attribute mappings have a default value that this config overrides, you can read more about these default values
@@ -490,6 +497,7 @@ authentication_backend:
     ## Use StartTLS with the LDAP connection.
     start_tls: false
 
+    ## TLS configuration.
     tls:
       ## The server subject name to check the servers certificate against during the validation process.
       ## This option is not required if the certificate has a SAN which matches the address options hostname.
@@ -522,9 +530,9 @@ authentication_backend:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
     ## Connection Pooling configuration.
     pooling:
@@ -654,6 +662,7 @@ authentication_backend:
         # key_length: 32
         # salt_length: 16
       # scrypt:
+        # variant: 'scrypt'
         # iterations: 16
         # block_size: 8
         # parallelism: 1
@@ -727,8 +736,8 @@ privacy_policy:
 ##
 ## Access control is a list of rules defining the authorizations applied for one resource to users or group of users.
 ##
-## If 'access_control' is not defined, ACL rules are disabled and the 'bypass' rule is applied, i.e., access is allowed
-## to anyone. Otherwise restrictions follow the rules defined.
+## If 'access_control' is not defined, ACL rules are disabled and the 'deny' rule is applied, i.e., access is denied
+## to everyone. Otherwise restrictions follow the rules defined.
 ##
 ## Note: One can use the wildcard * to match any subdomain.
 ## It must stand at the beginning of the pattern. (example: *.example.com)
@@ -892,7 +901,7 @@ session:
       authelia_url: 'https://auth.{{ site.url }}'
 
       ## Optional. The fully qualified URI used as the redirection location if the portal is accessed directly. Not
-      ## configuring this option disables the automatic redirection behaviour.
+      ## configuring this option disables the automatic redirection behavior.
       ##
       ## Note: this parameter is optional. If not provided, user won't be redirected upon successful authentication
       ## unless they were redirected to Authelia by the proxy.
@@ -1041,7 +1050,7 @@ session:
 ##
 ## Regulation Configuration
 ##
-## This mechanism prevents attackers from brute forcing the first factor. It bans the user if too many attempts are made
+## This mechanism prevents attackers from brute-forcing the first factor. It bans the user if too many attempts are made
 ## in a short period of time.
 regulation:
   ## Regulation Mode.
@@ -1136,9 +1145,9 @@ storage:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
   ##
   ## PostgreSQL (Storage Provider)
@@ -1223,9 +1232,9 @@ storage:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
 ##
 ## Notification Provider
@@ -1321,9 +1330,9 @@ notifier:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
 ##
 ## Identity Providers
@@ -1332,8 +1341,8 @@ identity_providers:
   ##
   ## OpenID Connect (Identity Provider)
   ##
-  ## It's recommended you read the documentation before configuration of this section:
-  ## https://www.authelia.com/c/oidc
+  ## It's recommended you read the documentation before configuration of this section.
+  ## See: https://www.authelia.com/c/oidc/provider
   oidc:
     ## The hmac_secret is used to sign OAuth2 tokens (authorization code, access tokens and refresh tokens).
     ## HMAC Secret can also be set using a secret: https://www.authelia.com/c/secrets
@@ -1397,8 +1406,8 @@ identity_providers:
     ## The lifespans configure the expiration for these token types in the duration common syntax. In addition to this
     ## syntax the lifespans can be customized per-client.
     lifespans:
-      ## Configures the default/fallback lifespan for given token types. This behaviour applies to all clients and all
-      ## grant types but you can override this behaviour using the custom lifespans.
+      ## Configures the default/fallback lifespan for given token types. This behavior applies to all clients and all
+      ## grant types but you can override this behavior using the custom lifespans.
       access_token: '1 hour'
       authorize_code: '1 minute'
       id_token: '1 hour'
@@ -1447,7 +1456,9 @@ identity_providers:
           # - 'claim_name'
           # - 'extra_claim_name'
 
-    ## Clients is a list of known clients and their configuration.
+    ## Clients is a list of registered clients and their configuration.
+    ## It's recommended you read the documentation before configuration of a registered client.
+    ## See: https://www.authelia.com/c/oidc/registered-clients
     clients:
       # -
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
@@ -1531,7 +1542,7 @@ identity_providers:
         ## The signing algorithm used for signing the authorization responses.
         ## Please read the documentation before adjusting this option.
         ## See: https://www.authelia.com/c/oidc/registered-clients#authorization_signed_response_alg
-        # authorization_signed_response_alg: 'none'
+        # authorization_signed_response_alg: 'RS256'
 
         ## The signing key id used for signing the authorization responses.
         ## Please read the documentation before adjusting this option.

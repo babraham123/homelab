@@ -1,0 +1,55 @@
+# /etc/opt/victoriametrics/prometheus.yml
+# Ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration
+---
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  - job_name: 'authelia'
+    static_configs:
+      - targets: ['auth.janedoe.com:9959']
+    metrics_path: /metrics
+  - job_name: 'vmalert'
+    static_configs:
+      - targets: ['vmalert.janedoe.com:8880']
+    metrics_path: /metrics
+  - job_name: 'victoriametrics'
+    static_configs:
+      - targets: ['metrics.janedoe.com:8428']
+    basic_auth:
+      username: 'admin'
+      password: '%{VM_ADMIN_PASSWORD}'
+    metrics_path: /metrics
+  - job_name: 'victorialogs'
+    static_configs:
+      - targets: ['logs.janedoe.com:9428']
+    basic_auth:
+      username: 'admin'
+      password: '%{VL_ADMIN_PASSWORD}'
+    metrics_path: /metrics
+  - job_name: 'fluentbit'
+    static_configs:
+      - targets: ['log-collector.janedoe.com:2020']
+    metrics_path: /api/v1/metrics/prometheus
+  - job_name: gatus
+    # https://github.com/TwiN/gatus?tab=readme-ov-file#metrics
+    static_configs:
+      - targets: ['uptime.janedoe.com:8080']
+    metrics_path: /metrics
+  - job_name: 'ntfy'
+    static_configs:
+      - targets: ['push.janedoe.com:2587']
+    metrics_path: /metrics
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets:
+          - host.containers.internal:9100
+    metrics_path: /metrics
+    relabel_configs:
+      - target_label: instance
+        replacement: secsvcs.janedoe.com:9100
+  - job_name: 'node_exporter_pve'
+    static_configs:
+      - targets: ['pve1.janedoe.com:9100']
+    metrics_path: /metrics
+...

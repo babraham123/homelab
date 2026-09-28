@@ -1,0 +1,13 @@
+# Ref: https://yamllint.readthedocs.io/en/stable/configuration.html
+---
+extends: default
+
+rules:
+  line-length:
+    max: 180
+    level: warning
+  document-end:
+    level: warning
+  comments: disable
+  comments-indentation: disable
+...

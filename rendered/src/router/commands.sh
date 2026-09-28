@@ -1,0 +1,40 @@
+#!/bin/sh
+# Usage:
+#   /usr/local/bin/commands.sh CMD
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/bin
+set -eu
+
+case "$1" in
+  install_certs)
+    mv /home/autoadmin/router.* /root
+    php /root/pfsense-import-certificate.php /root/router.cert.pem /root/router.key.pem
+    ;;
+  install_dispatcher)
+    cp /root/router-src/sshd_extra /etc
+    cp /root/router-src/sudoers /usr/local/etc/sudoers.d/dispatcher
+    # Rename, not overwrite: see install_dispatcher in src/debian/commands.sh.j2
+    cp /root/router-src/dispatcher.sh /usr/local/bin/dispatcher.sh.new
+    mv /usr/local/bin/dispatcher.sh.new /usr/local/bin/dispatcher.sh
+
+    php /etc/sshd
+    service sshd onerestart
+    service sshd status
+    ;;
+  start_pve2)
+    ping -c1 -W1 192.168.2.10 && exit 0
+    mac=$(cat /root/pve2_mac_address.txt)
+    iface=$(ifconfig | grep -B4 "inet 192.168.2.1" | grep "RUNNING" | cut -d: -f1)
+    wake "$iface" "$mac"
+    # Poll until the host actually boots, BIOS + Proxmox startup can take well over 10s from cold.
+    for _ in $(seq 1 60); do
+      ping -c1 -W1 192.168.2.10 > /dev/null 2>&1 && break
+      sleep 5
+    done
+    sleep 10
+    ;;
+  *)
+    echo "Unauthorized command: $1" >&2
+    exit 1
+    ;;
+esac

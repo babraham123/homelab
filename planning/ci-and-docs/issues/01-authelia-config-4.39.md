@@ -1,6 +1,6 @@
 # 01. Bring configuration.yml.j2 up to the Authelia 4.39 template
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 32 (maintainer wants the full annotated template kept)
@@ -33,5 +33,29 @@ Source: review finding 32 (maintainer wants the full annotated template kept)
 ## Acceptance
 
 - `authelia config validate` passes; login, OIDC to Grafana, and ForwardAuth still work.
+
+## Answer
+
+Done 2026-09-27, merged onto the v4.39.28 template.
+
+- The `# v4.38.10` header was stale: the file was already on the 4.39.0 template
+  (passkeys, `definitions`, `password_change`, `regulation.modes`), so the 4.38.10
+  diff overstated the customisations. Three-way merge against 4.39.0 → 4.39.28 had four
+  conflicts; all upstream changes since 4.39.0 are comment text ("behavior", `fd`
+  scheme, `PRIVATE KEY` examples, docs links). No keys were renamed or removed, and the
+  rendered config (real `vars.yml`) is key-for-key identical to before.
+- `webauthn.display_name` is now `{{ site.name | tojson }}`: an apostrophe in
+  `site.name` (as in `vars.template.yml`) broke the YAML.
+- `Image=` stays on the `4.39` minor tag (maintainer decision): patch releases don't change
+  the template, and `AutoUpdate=registry` keeps picking them up.
+- Pristine upstream copy at `src/authelia/config.template.yml`. It isn't in `.fdignore`:
+  that only affects `*.j2` rendering, and a non-`.j2` file is copied unrendered anyway.
+- Dropped (maintainer decision): the header-vs-image render check and the
+  `docs/maintenance.md` procedure. For the next bump: comment out every uncommented key
+  in both upstream templates (`perl -pe 's/^(\s*)(?![#\s]|---|\.\.\.)(\S)/$1# $2/'`;
+  upstream leaves `session.secret` and `reset_password.jwt_secret` uncommented), then
+  `git merge-file configuration.yml.j2 <old-normalised> <new-normalised>`.
+- Not yet done: `authelia config validate` with the 4.39.28 image and the
+  login/OIDC/ForwardAuth checks, which need secsvcs (no podman locally).
 
 ## Comments

@@ -1,0 +1,175 @@
+# /etc/opt/home_assistant/config/configuration.yaml
+# Triggers: https://www.home-assistant.io/docs/automation/trigger
+---
+
+# Ref: https://www.home-assistant.io/integrations/homeassistant/
+homeassistant:
+  name: Home
+  latitude: !env_var HOME_LATITUDE
+  longitude: !env_var HOME_LONGITUDE
+  elevation: !env_var HOME_ELEVATION
+  radius: 100
+  unit_system: us_customary
+  currency: USD
+  country: US
+  time_zone: !env_var TZ
+  external_url: "https://home.janedoe.com:443"
+  internal_url: "https://home.janedoe.com:443"
+  allowlist_external_dirs: []
+  allowlist_external_urls: []
+  media_dirs:
+    media: "/media"
+    recordings: "/media/recordings"
+  debug: false
+
+# Ref:
+#   https://www.home-assistant.io/integrations/default_config/
+#   https://www.home-assistant.io/integrations/conversation/#adding-custom-sentences
+#   https://developers.home-assistant.io/docs/api/rest/
+#   https://developers.home-assistant.io/docs/api/websocket/
+#   https://www.home-assistant.io/docs/energy
+# UPnP has serious security vulnerabilities (src port 1900)
+# Make sure browsers and Google Cast support the video container and codec
+default_config:
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+mqtt: !include mqtt.yaml
+
+# Ref: https://www.home-assistant.io/integrations/backup/
+# Core loads it by default; listed because homesvcs `backup_hass` depends on its
+# backup.create action. Archives land in /config/backups.
+backup:
+
+# Ref: https://www.home-assistant.io/integrations/http/
+http:
+  server_port: 8123
+  # Pass in as a Bearer token. /api/ endpoints are available on the server port
+  cors_allowed_origins:
+    - https://home.janedoe.com
+    - https://auth.janedoe.com
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 10.12.0.6
+    - 10.12.0.1
+    - 127.0.0.1
+    - ::1
+  ip_ban_enabled: true
+  login_attempts_threshold: 5
+
+# Comment out on first installation. Enable after the OpenID Connect integration is installed
+# Ref: https://github.com/christiaangoossens/hass-oidc-auth
+auth_oidc:
+  client_id: !env_var OIDC_CLIENT_ID
+  client_secret: !env_var OIDC_CLIENT_SECRET
+  discovery_url: "https://auth.janedoe.com/.well-known/openid-configuration"
+  display_name: "Authelia OpenID Connect (SSO)"
+  id_token_signing_alg: RS256
+  features:
+    automatic_user_linking: false
+    automatic_person_creation: true
+    disable_rfc7636: false
+  claims:
+    display_name: name
+    username: preferred_username
+    groups: groups
+  roles:
+    admin: "hass_admin"
+
+# TODO: install on websvcs
+# go2rtc:
+#   url: http://my-go2rtc-instance:1984
+
+# Ref: https://www.home-assistant.io/integrations/recorder/
+recorder:
+  # db_url: "postgresql://hass@pgdb.janedoe.com:5432/hass"
+  db_url: "sqlite:////data/hass.db"
+  db_max_retries: 10
+  db_retry_wait: 3 # seconds
+  auto_purge: true
+  auto_repack: true
+  purge_keep_days: 14
+  commit_interval: 5 # seconds
+  exclude:
+    domains:
+      - automation
+      - sun
+      - updater
+      - media_player
+      - zone
+      - device_tracker
+      - remote
+      - weather
+    entity_globs:
+      - sensor.weather_*
+    entities:
+      - sensor.last_boot # From 'systemmonitor' sensor platform
+      - sensor.date
+    event_types:
+      - call_service # Don't record service calls
+
+# Ref: https://www.home-assistant.io/integrations/influxdb/#full-configuration-for-2xx-installations
+influxdb:
+  precision: ms
+  tags:
+    source: hass
+  tags_attributes:
+    - entity_id
+    - friendly_name
+  measurement_attr: unit_of_measurement
+  default_measurement: units
+  exclude:
+    domains:
+      - automation
+      - sun
+      - updater
+      - media_player
+      - zone
+      - device_tracker
+      - remote
+      - weather
+    entity_globs:
+      - sensor.weather_*
+    entities:
+      - sensor.last_boot # From 'systemmonitor' sensor platform
+      - sensor.date
+
+# Ref:
+#   https://www.home-assistant.io/integrations/notify.rest/
+#   https://docs.ntfy.sh/publish/#publish-as-json
+#   https://www.home-assistant.io/integrations/ntfy/
+notify:
+  - name: ntfy
+    platform: rest
+    method: POST_JSON
+    authentication: basic
+    username: hass
+    password: !env_var NTFY_HASS_PASSWORD
+    data:
+      topic: hass
+      # priority: 4
+      icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/home-assistant.png
+    title_param_name: title
+    message_param_name: message
+    resource: https://push.janedoe.com
+
+# Ref: https://www.home-assistant.io/integrations/shell_command/
+shell_command:
+  ntfy: >
+      password='!env_var NTFY_HASS_PASSWORD';
+      creds='hass:$password';
+      curl
+      -X POST
+      --url 'https://push.janedoe.com/hass'
+      -u "$creds"
+      --data '{{ message }}'
+      --header 'X-Title: {{ title }}'
+      --header 'X-Tags: {{ tags }}'
+      --header 'X-Priority: {{ priority }}'
+      --header 'X-Delay: {{ delay }}'
+      --header 'X-Actions: {{ actions }}'
+      --header 'X-Click: {{ click }}'
+      --header 'X-Icon: {{ icon }}'
+...

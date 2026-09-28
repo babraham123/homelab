@@ -1,6 +1,6 @@
 # 07. Commit a rendered copy of the repo (example values) for humans and agents
 
-Status: ready-for-agent
+Status: resolved
 Type: prototype
 Repo: homelab
 Source: user item 49
@@ -29,6 +29,24 @@ copy by mistake.
 ## Acceptance
 
 - Fresh clone contains `rendered/`; hook rejects a commit where it is stale.
+
+## Answer
+
+Done 2026-09-28 at the maintainer's request, ahead of 02.
+
+- `.githooks/pre-commit` renders the staged tree (`vars.template.yml`), and once every
+  check passes, replaces `rendered/` with it and runs `git add --all rendered`. Left out
+  of the copy: `.claude`, `.githooks`, `AGENTS.md`/`CLAUDE.md`, `LICENSE` and the
+  top-level `README.md`, replaced by a generated-do-not-edit `rendered/README.md`.
+- Freshness: the hook regenerates on every commit instead of diffing and rejecting,
+  so it can't be stale unless a commit used `--no-verify`.
+- `render_src.sh` deletes `rendered/` (and `.gitattributes`) from its output and
+  `.fdignore` lists it, so it isn't re-rendered or deployed. `.gitattributes` marks
+  `rendered/**` `linguist-generated`.
+- Documented in `docs/development.md` "Pre-commit hook and `rendered/`" and AGENTS.md.
+- Deterministic: the Guacamole OIDC `state` was the only random value; it is now
+  `random(seed=site.url)` (maintainer decision), so a commit touches `rendered/` only
+  where the templates changed.
 
 ## Comments
 
