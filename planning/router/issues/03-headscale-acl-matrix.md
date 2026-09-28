@@ -54,7 +54,7 @@ the belief that ACLs don't work for pfSense subnet routes.
   that, rename the CLI-created users (`admin@`, `jayden@`, `public@`, `guest1@`,
   `cousin@`) to drop the trailing `@`, or the policy fails to resolve them
   (`headscale users rename -i ID --new-name NAME`). Users were renamed 2026-09-27. `cousin` gets its rule via
-  `tailscale_extra_acls` in `vars.yml`; decide what `jane` (OIDC user) gets. OIDC-group-driven membership is
+  `tailscale_extra_acls` in `vars.yml`; `jane` (OIDC user) is `tailscale_admin`; `jayden` is family. OIDC-group-driven membership is
   auth/09.
 - 2026-09-27: guest access decided: `group:guests` (the `guest1` user, created per
   `docs/guides/vpn.md.j2` "Guest users") gets HTTP/HTTPS on secsvcs, websvcs and homesvcs only, the same surface as
