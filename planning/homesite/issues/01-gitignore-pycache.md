@@ -1,6 +1,6 @@
 # 01. Stop tracking __pycache__
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homesite
 Source: review finding 39

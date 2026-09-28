@@ -1,6 +1,6 @@
 # 03. Release-directory deploy with a bounded rollback history
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homesite
 Source: review finding 41
@@ -30,3 +30,10 @@ interrupted copy leaves the public site broken with nothing to roll back to.
   directories under `releases/`.
 
 ## Comments
+
+- Scripts done (`tools/deploy_src.sh`, `tools/rollback.sh`, shared `tools/server.sh`) and
+  exercised against a local simulation of the server. Homelab side: nginx mount moved to
+  `/var/opt/nginx:/srv`, roots to `/srv/www/...`, and `install_svcs.sh` seeds a placeholder
+  release. The first homesite deploy migrates an existing plain `www` dir into
+  `releases/00000000T000000Z`. Homelab side is committed (18124cd). Remaining for a human: redeploy nginx on
+  websvcs, then run the acceptance check live.
