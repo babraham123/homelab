@@ -279,15 +279,24 @@ headscale --user USER_ID preauthkeys create --expiration 1h
   you approve the pairing PIN in the Sunshine web UI, which guests can't reach.
 - To revoke: `headscale nodes list --user USER_ID`, then `headscale nodes delete -i NODE_ID`.
 
+## Telemetry
+- Enable routing over tailnet
+```bash
+tee -a /etc/hosts <<'EOF'
+
+# homelab: telemetry endpoints on secsvcs, reached over the tailnet
+{{ secsvcs.ip }} metrics.{{ site.url }} logs.{{ site.url }} alert.{{ site.url }} push.{{ site.url }}
+EOF
+```
+
 ## Backup and restore
-The VPS isn't a Proxmox VM, so vzdump never sees it. `backup_full` archives its whole
-root filesystem instead, with a consistent snapshot of the Headscale DB, to
+Archive the whole root filesystem, with a consistent snapshot of the Headscale DB, to
 `/var/opt/backups/full/vpn-full-TIMESTAMP.tar.zst` (newest 2 kept). Only the copy
 pulled off the box survives losing the VPS.
 ```bash
-# From pve1 (or OliveTin's "vpn Backup Full" button)
-ssh -p 2202 autoadmin@vpn.{{ site.url }} backup_full
-scp -P 2202 'autoadmin@vpn.{{ site.url }}:/var/opt/backups/full/vpn-full-*.tar.zst' /root/backups/
+# From pve1
+ssh -p 2202 autoadmin@vpn backup_full
+scp -P 2202 'autoadmin@vpn:/var/opt/backups/full/vpn-full-*.tar.zst' /root/backups/
 ```
 
 - Restore one file, e.g. the Headscale DB
