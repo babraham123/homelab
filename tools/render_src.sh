@@ -106,5 +106,5 @@ for node in secsvcs homesvcs; do
     fail "src/nodes.yml ${node} subdomains don't match the Host() rules in src/${node}/traefik/routes.yml"
 done
 
-rm -f "${project_dir}"/**/.DS_Store
+find . -name .DS_Store -delete
 echo "Rendered the repo into ${project_dir}"
