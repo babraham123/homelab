@@ -28,5 +28,8 @@ misleading message. Not intentional in the sense of correct; harmless in effect.
   `homesite/tools/deploy_src.sh` is in the homesite repo, so it is out of scope here.
   Each `upload_src.sh` call in `deploy_src.sh` still ends in `|| echo "<host> upload failed"`,
   so the deploy carries on past an unreachable host and exits 0, which is what 04 (wontfix) wants.
+- shellcheck 0.11.0 passes on both scripts, but it did not flag the old top-level `return`
+  either. It can't tell whether a script is meant to be sourced, so enabling shellcheck
+  (ci-and-docs/02) won't catch this class of bug.
 
 ## Comments

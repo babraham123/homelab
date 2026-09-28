@@ -29,6 +29,7 @@ fail if `SECRET_NAME` is `null`. Same `--arg`/quoting review for `get_secret.sh`
 - `list_secrets.sh` interpolates nothing and is unchanged.
 - Checked against fixture files with yq v4.53.6 and jq 1.7.1. Single-line and multi-line
   values come out byte-for-byte the same as before. A missing name or ID gives `null`, and
-  `SECRET_ID` unset exits 1. shellcheck is not installed locally, so it was not run.
+  `SECRET_ID` unset exits 1. shellcheck 0.11.0 passes on all three scripts; on the old
+  `get_secret_by_id.sh` it reported SC2086 for the unquoted `$SECRET_ID`.
 
 ## Comments
