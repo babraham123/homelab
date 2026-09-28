@@ -19,7 +19,7 @@ fi
 
 rm -rf "$project_dir"
 mkdir -p "$project_dir"
-cp *.md "$project_dir"
+cp ./*.md "$project_dir"
 cp -R guides "$project_dir"
 cp -R adr "$project_dir"
 sed 's/(docs\/\([^)]*\)\.md)/(\1.md)/g' ../README.md > "${project_dir}/index.md"

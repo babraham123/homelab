@@ -52,13 +52,13 @@ case $1 in
     systemctl daemon-reload
     systemctl start hassconfig-volume.service
     volpath=$(podman volume inspect -f '{{ .Mountpoint }}' systemd-hassconfig)
-    if [ ! -e $volpath/configuration.yaml ]; then
-      cp home_assistant/*.yaml $volpath
+    if [ ! -e "$volpath"/configuration.yaml ]; then
+      cp home_assistant/*.yaml "$volpath"
     else
-      echo $volpath
-      ls $volpath
+      echo "$volpath"
+      ls "$volpath"
       echo -n "Have you manually updated the config files? Y or N: "
-      read reply
+      read -r reply
       if [[ ! $reply =~ ^[Yy]$ ]]; then
         exit 1
       fi
