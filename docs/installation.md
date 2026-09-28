@@ -3,9 +3,10 @@
 ## Guide order of execution
 
 Most of the config files are templatized to remove personal details. So first, render
-the source locally and then start following the guides.
+the source locally and then start following the guides. Without an argument the
+render goes to a private temp dir, whose path it prints.
 ```bash
-tools/render_src.sh /tmp/homelab-rendered
+tools/render_src.sh
 ```
 
 Note: the guides ending in `.j2` are templates; render them with

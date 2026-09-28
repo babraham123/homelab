@@ -258,8 +258,9 @@ Create a mechanism to programmatic execute commands remotely
 - Install the homelab source code
 ```bash
 # From your local machine
-tools/render_src.sh /tmp/homelab-rendered
-tools/upload_src.sh router /tmp/homelab-rendered
+out=$(mktemp -d)/homelab-rendered
+tools/render_src.sh "$out"
+tools/upload_src.sh router "$out"
 ```
 - Create autoadmin user
   - Go to System >> User Manager >> Add

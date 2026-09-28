@@ -103,8 +103,9 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```bash
 exit
 # From your local machine
-tools/render_src.sh /tmp/homelab-rendered
-tools/upload_src.sh SUBDOMAIN /tmp/homelab-rendered
+out=$(mktemp -d)/homelab-rendered
+tools/render_src.sh "$out"
+tools/upload_src.sh SUBDOMAIN "$out"
 ```
 
 ## Automation
