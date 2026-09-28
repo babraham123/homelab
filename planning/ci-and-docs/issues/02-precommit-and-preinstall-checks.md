@@ -49,5 +49,8 @@ rollback for service configs too.
   to the secsvcs/homesvcs `Host()` rules. The hook only needs to run the render.
 - 2026-09-27: 01 and 08 resolved, so every blocker is resolved. The hook
   (`.githooks/pre-commit`) runs `render_src.sh`, so the nodes.yml checks already run in
-  it. The authelia validate command (secrets passed from the quadlet) is in
-  `docs/maintenance.md` "Upgrade Authelia to a new minor version".
+  it. Untested authelia validate that passes the quadlet's secrets and env so the
+  template filter can run, from `src/authelia` in the rendered tree:
+  `podman run --rm $(sed -nE 's/^Secret=/--secret=/p; s/^Environment=/--env=/p' authelia.container)
+  -v "$PWD":/config:ro -v /etc/opt/authelia/certificates:/certificates:ro
+  "$(sed -n 's/^Image=//p' authelia.container)" authelia config validate --config /config/configuration.yml`
