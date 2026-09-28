@@ -1,0 +1,16 @@
+# /etc/systemd/system/backup_orchestrator.service
+
+[Unit]
+Description="Homelab: Wakes pve2 and backs up every VM to PBS"
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+
+Environment=TZ={{ personal.timezone }}
+
+ExecStart=/usr/local/bin/backup_orchestrator.sh
+
+# Bounds a hung ssh or vzdump; a full run is well under this.
+TimeoutStartSec=6h

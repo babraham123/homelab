@@ -11,7 +11,7 @@ storage:
   type: postgres
   path: "postgres://gatus@pgdb.{{ site.url }}:5432/gatus"
 
-# PBS VM backups
+# PBS VM backups: src/pve1/backup_orchestrator.timer
 maintenance:
   start: 01:00
   duration: 2h

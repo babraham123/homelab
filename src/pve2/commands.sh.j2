@@ -31,6 +31,20 @@ case $1 in
     vm_id=$(/usr/local/bin/get_vm_id.sh devtop)
     qm start "$vm_id" --timeout 30
     ;;
+  run_backups)
+    # devtop and gaming share the GPU. Backing up a stopped one starts it, and the
+    # hookscript then stops the other, so only back up whichever is running.
+    vm_ids=("$(/usr/local/bin/get_vm_id.sh websvcs)")
+    for vm in devtop gaming; do
+      vm_id=$(/usr/local/bin/get_vm_id.sh "$vm")
+      if qm status "$vm_id" | grep -qw running; then
+        vm_ids+=("$vm_id")
+      else
+        echo "Skipping $vm, not running"
+      fi
+    done
+    vzdump "${vm_ids[@]}" --storage pbs2 --mode snapshot
+    ;;
   install_certs_and_keys)
     # Moves the certificates into their respective locations and restarts the services.
     # Also configures the PBS cert fingerprint.
