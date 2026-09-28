@@ -1,6 +1,6 @@
 # 02. Pin mkdocs and its plugins
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homesite
 Source: review findings 35, 40

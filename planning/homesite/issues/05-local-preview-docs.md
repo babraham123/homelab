@@ -1,6 +1,6 @@
 # 05. Fix the local preview instructions
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homesite
 Source: review finding 43
