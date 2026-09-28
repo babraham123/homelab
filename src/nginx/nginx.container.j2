@@ -20,7 +20,8 @@ HostName=static.{{ site.url }}
 IP={{ websvcs.container_subnet }}.8
 
 Environment=TZ={{ personal.timezone }}
-Volume=/var/opt/nginx/www:/www:ro
+# The whole dir, so the www symlink and the releases/ it points into both resolve.
+Volume=/var/opt/nginx:/srv:ro
 Volume=/etc/opt/nginx/conf:/etc/nginx:ro
 
 [Service]

@@ -52,6 +52,9 @@ grep -r "IP=" src/*/*.container.j2
 
 `nginx` serves static content out of `/var/opt/nginx/www`, mapped by subdomain
 (`www/`, `wifi/`, and shared `error/` pages; see `src/nginx/nginx.conf.j2`).
+`www` is a symlink to one of `/var/opt/nginx/releases/<UTC timestamp>/`, so a deploy or
+rollback is an atomic symlink swap; the container mounts all of `/var/opt/nginx` at
+`/srv` so the link resolves inside it.
 That content is **not** in this repo: one example is the separate
 [homesite](https://github.com/babraham123/homesite) repo, which builds and deploys via
 its own `tools/deploy_src.sh`. This repo owns only the nginx config and quadlet.
