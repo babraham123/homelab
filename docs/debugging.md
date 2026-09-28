@@ -160,7 +160,7 @@ Building an image inside a quadlet: see
 ### Known issues
 
 - Renaming a user breaks rootless Podman storage for that user. Fix:
-  [podman#24938](https://github.com/containers/podman/issues/24938#issuecomment-2851080972).
+  [podman#24938](https://github.com/podman-container-tools/podman/issues/24938#issuecomment-2851080972).
 - Permission denied inside a container is usually SELinux labels, user namespaces, or
   missing capabilities. See this
   [Red Hat guide](https://www.redhat.com/sysadmin/container-permission-denied-errors)
