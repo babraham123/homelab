@@ -252,9 +252,9 @@ policy:
   # where the ACL policies are stored and read from.
   mode: file
   # If the mode is set to "file", the path to a
-  # HuJSON file containing ACL policies.
-  # Not currently in use, doesn't integrate with OIDC groups and FreeBSD issues.
-  # path: "/etc/headscale/acl.hujson"
+  # HuJSON file containing ACL policies. Rendered from headscale_acl.hujson.j2 and
+  # installed by src/vpn/install_svcs.sh; membership comes from vars.yml.
+  path: "/etc/headscale/acl.hujson"
 
 ## DNS
 #

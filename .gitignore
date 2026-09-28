@@ -12,5 +12,6 @@ notes
 
 # AI artifacts
 .scratch
+.claude/settings.local.json
 .claude/worktrees
 
