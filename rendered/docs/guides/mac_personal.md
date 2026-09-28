@@ -52,9 +52,9 @@ cd homelab
 git config core.hooksPath .githooks
 # Fill in personal details based on vars.template.yml
 vim vars.yml
-tools/render_src.sh ../homelab-rendered
+tools/render_src.sh /tmp/homelab-rendered
 
-cd ../homelab-rendered/src
+cd /tmp/homelab-rendered/src
 cp debian/aliases.zsh ~/.oh-my-zsh/custom
 cp debian/functions.zsh ~/.oh-my-zsh/custom
 cp macos/ssh.config ~/.ssh/config

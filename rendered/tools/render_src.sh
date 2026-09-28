@@ -117,6 +117,7 @@ dups=$(yq "$subdomains" src/nodes.yml | sort | uniq -d)
 # The subdomain lists drive DNS and SNI routing, so they must match what Traefik serves.
 # websvcs is the default route and needs no entries.
 for node in secsvcs homesvcs; do
+  # shellcheck disable=SC2016 # the backticks are literal regex text
   routed=$(yq --yaml-fix-merge-anchor-to-spec=true '.http.routers[].rule' "src/${node}/traefik/routes.yml" | \
     grep -oE 'Host\(`[^.`]+\.' | sed -E 's/^Host\(`//; s/\.$//' | sort -u)
   listed=$(inventory "$node" '.nodes[strenv(node)].services[] | select(has("subdomain")) | .subdomain' | sort -u)
