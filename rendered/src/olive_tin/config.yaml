@@ -665,6 +665,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: pve1 Install Backup Orchestrator
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 install_backup_orchestrator
+              id: pve1_install_backup_orchestrator
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: pve1 Install Ssh Ca
               icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
               shell: ssh autoadmin@pve1 install_ssh_ca
@@ -721,6 +729,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
               shell: ssh autoadmin@pve2 stop_gaming_vm
               id: pve2_stop_gaming_vm
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Run Backups
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 run_backups
+              id: pve2_run_backups
               maxConcurrent: 1
               timeout: 60
 
