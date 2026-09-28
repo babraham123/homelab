@@ -42,6 +42,9 @@ case $1 in
     mv homeproxy.{{ site.url }}.key.pem /etc/opt/traefik/certificates/proxy.key
 
     mv mqtt.{{ site.url }}.key.pem /etc/opt/mosquitto/certificates/key.pem
+    # mosquitto drops root and runs as uid 1883 before loading the key.
+    # https://github.com/eclipse-mosquitto/mosquitto/blob/master/docker/2.0-openssl/Dockerfile
+    chown 1883:1883 /etc/opt/mosquitto/certificates/key.pem
 
     mv zigbee.{{ site.url }}.key.pem /etc/opt/zigbee2mqtt/certificates/client.key
 

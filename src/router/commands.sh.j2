@@ -13,7 +13,9 @@ case "$1" in
   install_dispatcher)
     cp /root/router-src/sshd_extra /etc
     cp /root/router-src/sudoers /usr/local/etc/sudoers.d/dispatcher
-    cp /root/router-src/dispatcher.sh /usr/local/bin
+    # Rename, not overwrite: see install_dispatcher in src/debian/commands.sh.j2
+    cp /root/router-src/dispatcher.sh /usr/local/bin/dispatcher.sh.new
+    mv /usr/local/bin/dispatcher.sh.new /usr/local/bin/dispatcher.sh
 
     php /etc/sshd
     service sshd onerestart

@@ -57,7 +57,8 @@ All four NICs belong to the router VM, so until it's back there is no LAN, DHCP,
 
 ### 1. Install Proxmox with a temporary link to pve2
 - Install Proxmox as in the [router guide](./router.md#install-proxmox); the user and desktop steps can wait.
-- At the installer's network screen, pick the NIC in the port cabled to pve2 (pfSense's `igc2`) and give it a free static address on pve2's subnet, e.g. `{{ pve2.subnet }}.250/24`, gateway `{{ pve2.subnet }}.1`. The router's ports are assigned in PCI order: WAN, LAN (WiFi AP), pve2, LAN2 (switch). So pve2's port is the third Ethernet controller in `lspci -nn | grep -i ethernet`; for PCI address `BB:00.0` Linux names it `enpBBs0` (bus number without the leading zero). Confirm with `ip -br link`: only the cabled ports show `UP`.
+- At the installer's network screen, set the hostname to `pve1.{{ site.url }}`. The node name must be `pve1`: restored VM configs land under `/etc/pve/nodes/pve1/`, and `acme_transfer.sh` and `install_dispatcher` look the host up by that name. Renaming a node after step 4 orphans the restored VMs.
+- On the same screen, pick the NIC in the port cabled to pve2 (pfSense's `igc2`) and give it a free static address on pve2's subnet, e.g. `{{ pve2.subnet }}.250/24`, gateway `{{ pve2.subnet }}.1`. The router's ports are assigned in PCI order: WAN, LAN (WiFi AP), pve2, LAN2 (switch). So pve2's port is the third Ethernet controller in `lspci -nn | grep -i ethernet`. For PCI address `BB:00.0` Linux names it `enp<N>s0`, where `N` is the bus number `BB` converted from hex to decimal (`03` → `enp3s0`, `0a` → `enp10s0`). Confirm with `ip -br link`: only the cabled ports show `UP`.
 - Enable IOMMU and the vfio modules now (router guide, [Install pfSense](./router.md#install-pfsense), "Enable IOMMU / NIC passthrough"). The restored router VM can't start without them.
 
 ### 2. Power on pve2 by hand
@@ -112,10 +113,13 @@ The VMs keep their MACs, so pfSense's static DHCP leases hand back the same IPs.
 
 ### 8. Re-render and upload
 ```bash
-# From the workstation, repo root
+# From the workstation. The old pve1 entries in known_hosts (from the original
+# install, before the host CA) would otherwise make ssh refuse the new host key.
+ssh-keygen -R pve1; ssh-keygen -R pve1.{{ site.url }}; ssh-keygen -R {{ pve1.ip }}
+# Repo root
 tools/deploy_src.sh
 ```
-pve1's new host key isn't CA-signed until step 10, so expect a first-connection prompt. Then on pve1:
+pve1's new host key isn't CA-signed until step 10, so expect a first-connection prompt. `deploy_src.sh` doesn't stop on a failed host; check its output for `pve1 upload failed`. Then on pve1:
 - [Debian setup, Automation](./debian.md#automation): `autoadmin` user and `install_dispatcher`.
 - [pve1 guide, Configs](./pve1.md#configs): jinjanator, yq.
 - [pve1 guide, Secrets](./pve1.md#secrets): the first block only (age, sops, the shell exports). Skip `age-keygen`.
@@ -162,7 +166,7 @@ ssh autoadmin@pve1 install_ca
 Refills `/root/acme`, installs pve1's `pveproxy` cert, pushes certs to pve2, pbs2 and the router, and re-pins the `pbs2` fingerprint on pve1. Self-signed service certs don't need re-issuing; they live on the VMs.
 
 ### 13. Backups and verification
-- Recreate the backup job ([Proxmox guide, Backups](./proxmox.md#backups), "PVE setup"), until the orchestrator replaces it (*planned*, `backup-and-dr/01`, `02`). Run it once now.
+- If step 3 restored `jobs.cfg`, the backup job is already back. Otherwise recreate it ([Proxmox guide, Backups](./proxmox.md#backups), "PVE setup"), until the orchestrator replaces it (*planned*, `backup-and-dr/01`, `02`). Either way, run it once now.
 - Check:
   - Login at `https://auth.{{ site.url }}` (Authelia, LLDAP, Postgres).
   - `ssh manualadmin@pve1` from the workstation, with no host-key prompt.
@@ -206,13 +210,13 @@ chmod 600 "/root/secrets/${host}.yaml"
 # Re-encrypts to the new key + host key and redistributes; save and quit the editor
 /root/homelab-rendered/src/pve1/secret_update.sh "$host"
 ```
-- The sudo passwords were in `pve1.yaml`. Without them, decrypt as root through the guest agent on the Proxmox host that runs the VM (pve1: secsvcs, homesvcs; pve2: websvcs), copy the file to pve1's `/dev/shm`, and continue from `sops -e`:
+- The host sudo passwords are required: `secret_update.sh` installs the re-encrypted file over `ssh` with `sudo`. They're not in SOPS; they're in the maintainer's offline copy (`auth/08`). If only the *decrypt* half is a problem (e.g. the host's SSH is broken), pull the plaintext as root through the guest agent on the Proxmox host that runs the VM (pve1: secsvcs, homesvcs; pve2: websvcs), copy it to pve1's `/dev/shm`, and continue from `sops -e`:
 ```bash
 umask 077
 qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age \
   | jq -r '."out-data"' > /dev/shm/HOST.yaml
 ```
-- `pve1.yaml` has no host copy. Recreate it with `sops /root/secrets/pve1.yaml` from `src/pve1/secrets_template.yaml`: a new Gmail app password ([Notifications](./pve1.md#notifications)), a new `api_ro` password on PBS ([Proxmox guide, Monitoring](./proxmox.md#monitoring)), and MaxMind keys from the MaxMind account. Host sudo passwords aren't in SOPS; they're in the maintainer's offline copy (`auth/08`).
+- `pve1.yaml` has no host copy. Recreate it with `sops /root/secrets/pve1.yaml` from `src/pve1/secrets_template.yaml`: a new Gmail app password ([Notifications](./pve1.md#notifications)), a new `api_ro` password on PBS ([Proxmox guide, Monitoring](./proxmox.md#monitoring)), and MaxMind keys from the MaxMind account.
 - `rm -rf /root/secrets/lost` once every host is done.
 
 ### Only the private CA is lost
@@ -256,7 +260,10 @@ diff -r /tmp/homelab-template /tmp/homelab-real/homelab-rendered
 
 ### Nothing escrowed
 Today's situation for a dead SSD. Do the bare-metal steps 1–8, then, in place of step 9:
-1. SSH CA: [CA certs](./pve1.md#ca-certs), then step 10 and [Only the SSH CA is lost](#only-the-ssh-ca-is-lost). With a new CA, `ssh_cert_gen.sh` asks for each host's password on its first run, as on the original install.
+1. SSH CA. Run `ssh_cert_gen.sh` once, not once per section:
+   - New `ca_ssh_key` and `ca_ssh_host_key` only: the first two `ssh-keygen` blocks of [CA certs](./pve1.md#ca-certs). Skip that section's root key and `ssh_cert_gen.sh`.
+   - Step 10 as written. With a new CA, `ssh_cert_gen.sh` asks for each host's password on its first run, as on the original install.
+   - The gaming VM's host cert is from the old CA, so also run the `start_pve2` / `start_gaming_vm` / `ssh_cert_gen_windows.sh` block from [Only the SSH CA is lost](#only-the-ssh-ca-is-lost), and replace the `@cert-authority` line on the workstation and other clients.
 2. AGE key: [Only the AGE key is lost](#only-the-age-key-is-lost), including `pve1.yaml`. Collect each `<host>_id_ed25519.pub` again first ([pve1 guide, Secrets](./pve1.md#secrets)).
 3. Private CA: [Only the private CA is lost](#only-the-private-ca-is-lost).
 4. Continue with steps 11–13.
