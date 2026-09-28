@@ -4,7 +4,7 @@ here = pathlib.Path(".")
 inv = yaml.safe_load((here/"services.yml").read_text())
 env = Environment(loader=FileSystemLoader("templates"), keep_trailing_newline=True)
 out = env.get_template("dispatcher_cases.j2").render(services=inv["services"], node=inv["node"])
-pathlib.Path("rendered-dispatcher-cases.sh").write_text(out)
+pathlib.Path("rendered-dispatcher-cases.sh.part").write_text(out)
 
 gen = set(re.findall(r"^  install_([a-z0-9_-]+)\)$", out, re.M)) - {"all_svcs"}
 cur = set(re.findall(r"^  install_([a-z0-9_-]+)\)$",
