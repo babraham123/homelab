@@ -16,7 +16,7 @@ case $1 in
     qm start "$vm_id" --timeout 30
     # Poll until the guest is reachable so callers that chain an SSH command into
     # it don't race the OS boot (sshd/scheduled tasks aren't up yet).
-    for i in $(seq 1 60); do
+    for _ in $(seq 1 60); do
       ping -c1 -W1 {{ gaming.ip }} &>/dev/null && break
       sleep 5
     done
