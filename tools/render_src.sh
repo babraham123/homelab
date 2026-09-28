@@ -53,19 +53,7 @@ cd "$project_dir"
 $fdfind . --extension sh --exec chmod +x "{}"
 $fdfind . --extension pl --exec chmod +x "{}"
 
-# Validate yaml files
-if ! yamllint -c lint.yaml .; then
-  echo "error: yaml linting failed" >&2
-  exit 1
-fi
-
-# Validate json files
-$fdfind . --extension json | xargs -I% \
-  sh -c 'jq -e . % > /dev/null || { echo "error: json validation failed: %" >&2; exit 1; }'
-
-# Validate unique IPs
-$fdfind . --extension container | xargs grep -h "IP=" | \
-  sort | uniq -d | grep . && { echo "error: duplicate IPs found" >&2; exit 1; }
+tools/validate_rendered.sh .
 
 fail() { echo "error: $*" >&2; exit 1; }
 

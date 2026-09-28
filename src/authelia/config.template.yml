@@ -1,11 +1,10 @@
-{% import 'src/nodes.jinja' as inv with context -%}
-# /etc/opt/authelia/config/configuration.yml
----
-# v4.39.28
+# yamllint disable rule:comments-indentation
+
 # SPDX-FileCopyrightText: 2026 Authelia
 #
 # SPDX-License-Identifier: Apache-2.0
 
+---
 ###############################################################################
 ##                           Authelia Configuration                          ##
 ###############################################################################
@@ -24,20 +23,20 @@
 ## Certificates directory specifies where Authelia will load trusted certificates (public portion) from in addition to
 ## the system certificates store.
 ## They should be in base64 format, and have one of the following extensions: *.cer, *.crt, *.pem.
-certificates_directory: '/certificates/'
+# certificates_directory: '/config/certificates/'
 
 ## The theme to display: light, dark, grey, auto.
-theme: 'auto'
+# theme: 'light'
 
 ## Set the default 2FA method for new users and for when a user has a preferred method configured that has been
 ## disabled. This setting must be a method that is enabled.
 ## Options are totp, webauthn, mobile_push.
-default_2fa_method: 'totp'
+# default_2fa_method: ''
 
 ##
 ## Server Configuration
 ##
-server:
+# server:
   ## The address for the Main server to listen on in the address common syntax.
   ## Formats:
   ##  - [<scheme>://]<hostname>[:<port>][/<path>]
@@ -45,7 +44,7 @@ server:
   ## Square brackets indicate optional portions of the format. Scheme must be 'tcp', 'tcp4', 'tcp6', 'unix', or 'fd'.
   ## The default scheme is 'unix' if the address is an absolute path otherwise it's 'tcp'. The default port is '9091'.
   ## If the path is specified this configures the router to handle both the `/` path and the configured path.
-  address: 'tcp://:9091/'
+  # address: 'tcp://:9091/'
 
   ## Set the path on disk to Authelia assets.
   ## Useful to allow overriding of specific static assets.
@@ -56,16 +55,15 @@ server:
   # disable_healthcheck: false
 
   ## Authelia by default doesn't accept TLS communication on the server port. This section overrides this behavior.
-  tls:
+  # tls:
     ## The path to the DER base64/PEM format private key.
-    key: "/certificates/auth.key"
+    # key: ''
 
     ## The path to the DER base64/PEM format public certificate.
-    certificate: "/certificates/auth.cert.pem"
+    # certificate: ''
 
     ## The list of certificates for client authentication.
-    # TODO: debug issue and re-enable mutual TLS
-    # client_certificates: ["/certificates/secproxy.client.pem", "/certificates/webproxy.client.pem", "/certificates/homeproxy.client.pem"]
+    # client_certificates: []
 
   ## Server headers configuration/customization.
   # headers:
@@ -101,7 +99,7 @@ server:
 
   ## Server Endpoints configuration.
   ## This section is considered advanced and it SHOULD NOT be configured unless you've read the relevant documentation.
-  endpoints:
+  # endpoints:
     ## Enables the pprof endpoint.
     # enable_pprof: false
 
@@ -109,51 +107,29 @@ server:
     # enable_expvars: false
 
     ## Configure the authz endpoints.
-    # Ref:
-    # https://www.authelia.com/configuration/miscellaneous/server-endpoints-authz/
-    # https://www.authelia.com/reference/guides/proxy-authorization
-    # Needed for https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage/#general-protections
-    authz:
-      # Used by Traefik proxy
-      forward-auth:
-        implementation: 'ForwardAuth'
-        authn_strategies:
-          - name: 'HeaderAuthorization'
-            schemes:
-              - 'Basic'
-              - 'Bearer'
-          - name: 'CookieSession'
+    # authz:
+      # forward-auth:
+        # implementation: 'ForwardAuth'
+        # authn_strategies: []
       # ext-authz:
         # implementation: 'ExtAuthz'
-        # authn_strategies:
-          # - name: 'HeaderAuthorization'
-            # schemes:
-              # - 'Basic'
-              # - 'Bearer'
-          # - name: 'CookieSession'
+        # authn_strategies: []
       # auth-request:
         # implementation: 'AuthRequest'
-        # authn_strategies:
-          # - name: 'HeaderAuthRequestProxyAuthorization'
-            # schemes:
-              # - 'Basic'
-              # - 'Bearer'
-          # - name: 'CookieSession'
-      legacy:
-        implementation: 'Legacy'
-        authn_strategies:
-          - name: 'HeaderLegacy'
-          - name: 'CookieSession'
+        # authn_strategies: []
+      # legacy:
+        # implementation: 'Legacy'
+        # authn_strategies: []
 
 ##
 ## Log Configuration
 ##
-log:
+# log:
   ## Level of verbosity for logs: info, debug, trace.
-  level: 'info'
+  # level: 'debug'
 
   ## Format the logs are written as: json, text.
-  format: 'text'
+  # format: 'json'
 
   ## File path where the logs will be written. If not set logs are written to stdout.
   # file_path: '/config/authelia.log'
@@ -164,14 +140,14 @@ log:
 ##
 ## Telemetry Configuration
 ##
-telemetry:
+# telemetry:
 
   ##
   ## Metrics Configuration
   ##
-  metrics:
+  # metrics:
     ## Enable Metrics.
-    enabled: true
+    # enabled: false
 
     ## The address for the Metrics server to listen on in the address common syntax.
     ## Formats:
@@ -180,7 +156,7 @@ telemetry:
     ## Square brackets indicate optional portions of the format. Scheme must be 'tcp', 'tcp4', 'tcp6', 'unix', or 'fd'.
     ## The default scheme is 'unix' if the address is an absolute path otherwise it's 'tcp'. The default port is '9959'.
     ## If the path is not specified it defaults to `/metrics`.
-    address: 'tcp://:9959/metrics'
+    # address: 'tcp://:9959/metrics'
 
     ## Metrics Server Buffers configuration.
     # buffers:
@@ -207,72 +183,72 @@ telemetry:
 ## TOTP Configuration
 ##
 ## Parameters used for TOTP generation.
-totp:
+# totp:
   ## Disable TOTP.
-  disable: false
+  # disable: false
 
   ## The issuer name displayed in the Authenticator application of your choice.
-  issuer: {{ site.url }}
+  # issuer: 'authelia.com'
 
   ## The TOTP algorithm to use.
   ## It is CRITICAL you read the documentation before changing this option:
   ## https://www.authelia.com/c/totp#algorithm
-  algorithm: 'SHA1'
+  # algorithm: 'SHA1'
 
   ## The number of digits a user has to input. Must either be 6 or 8.
   ## Changing this option only affects newly generated TOTP configurations.
   ## It is CRITICAL you read the documentation before changing this option:
   ## https://www.authelia.com/c/totp#digits
-  digits: 6
+  # digits: 6
 
   ## The period in seconds a Time-based One-Time Password is valid for.
   ## Changing this option only affects newly generated TOTP configurations.
-  period: 30
+  # period: 30
 
   ## The skew controls number of Time-based One-Time Passwords either side of the current one that are valid.
   ## Warning: before changing skew read the docs link below.
-  skew: 1
+  # skew: 1
   ## See: https://www.authelia.com/c/totp#input-validation to read
   ## the documentation.
 
   ## The size of the generated shared secrets. Default is 32 and is sufficient in most use cases, minimum is 20.
-  secret_size: 32
+  # secret_size: 32
 
   ## The allowed algorithms for a user to pick from.
-  allowed_algorithms:
-    - 'SHA1'
+  # allowed_algorithms:
+  # - 'SHA1'
 
   ## The allowed digits for a user to pick from.
-  allowed_digits:
-    - 6
+  # allowed_digits:
+  # - 6
 
   ## The allowed periods for a user to pick from.
-  allowed_periods:
-    - 30
+  # allowed_periods:
+  # - 30
 
   ## Disable the reuse security policy which prevents replays of one-time password code values.
-  disable_reuse_security_policy: false
+  # disable_reuse_security_policy: false
 
 ##
 ## WebAuthn Configuration
 ##
 ## Parameters used for WebAuthn.
-webauthn:
+# webauthn:
   ## Disable WebAuthn.
-  disable: false
+  # disable: false
 
   ## Enables logins via a Passkey.
-  enable_passkey_login: true
+  # enable_passkey_login: false
 
   ## The display name the browser should show the user for when using WebAuthn to login/register.
-  display_name: {{ site.name | tojson }}
+  # display_name: 'Authelia'
 
   ## Conveyance preference controls if we collect the attestation statement including the AAGUID from the device.
   ## Options are none, indirect, direct.
-  attestation_conveyance_preference: 'indirect'
+  # attestation_conveyance_preference: 'indirect'
 
   ## The interaction timeout for WebAuthn dialogues in the duration common syntax.
-  timeout: '60 seconds'
+  # timeout: '60 seconds'
 
   ## Authenticator Filtering.
   # filtering:
@@ -286,17 +262,17 @@ webauthn:
     # prohibited_aaguids: []
 
   ## Selection Criteria controls the preferences for registration.
-  selection_criteria:
+  # selection_criteria:
     ## The attachment preference. Either 'cross-platform' for dedicated authenticators, or 'platform' for embedded
-    ## authenticators. '' means the user can choose.
-    attachment: ''
+    ## authenticators.
+    # attachment: 'cross-platform'
 
     ## The discoverability preference. Options are 'discouraged', 'preferred', and 'required'.
-    discoverability: 'preferred'
+    # discoverability: 'discouraged'
 
     ## User verification controls if the user must make a gesture or action to confirm they are present.
     ## Options are required, preferred, discouraged.
-    user_verification: 'preferred'
+    # user_verification: 'preferred'
 
   ## Metadata Service validation via MDS3.
   # metadata:
@@ -356,59 +332,59 @@ identity_validation:
   ## Reset Password flow. Adjusts how the reset password flow operates.
   reset_password:
     ## Maximum allowed time before the JWT is generated and when the user uses it in the duration common syntax.
-    jwt_lifespan: '5 minutes'
+    # jwt_lifespan: '5 minutes'
 
     ## The algorithm used for the Reset Password JWT.
-    jwt_algorithm: 'HS256'
+    # jwt_algorithm: 'HS256'
 
     ## The secret key used to sign and verify the JWT.
-    # jwt_secret: 'a_very_important_secret'
+    jwt_secret: 'a_very_important_secret'
 
   ## Elevated Session flows. Adjusts the flow which require elevated sessions for example managing credentials, adding,
   ## removing, etc.
-  elevated_session:
+  # elevated_session:
     ## Maximum allowed lifetime after the One-Time Code is generated that it is considered valid.
-    code_lifespan: '5 minutes'
+    # code_lifespan: '5 minutes'
 
     ## Maximum allowed lifetime after the user uses the One-Time Code and the user must perform the validation again in
     ## the duration common syntax.
-    elevation_lifespan: '10 minutes'
+    # elevation_lifespan: '10 minutes'
 
     ## Number of characters the one-time password contains.
-    characters: 8
+    # characters: 8
 
     ## In addition to the One-Time Code requires the user performs a second factor authentication.
-    require_second_factor: false
+    # require_second_factor: false
 
     ## Skips the elevation requirement and entry of the One-Time Code if the user has performed second factor
     ## authentication.
-    skip_second_factor: false
+    # skip_second_factor: false
 
 ##
 ## NTP Configuration
 ##
 ## This is used to validate the servers time is accurate enough to validate TOTP.
-ntp:
+# ntp:
   ## The address of the NTP server to connect to in the address common syntax.
   ## Format: [<scheme>://]<hostname>[:<port>].
   ## Square brackets indicate optional portions of the format. Scheme must be 'udp', 'udp4', or 'udp6'.
   ## The default scheme is 'udp'. The default port is '123'.
-  address: 'udp://debian.pool.ntp.org:123'
+  # address: 'udp://time.cloudflare.com:123'
 
   ## NTP version.
-  version: 4
+  # version: 4
 
   ## Maximum allowed time offset between the host and the NTP server in the duration common syntax.
-  max_desync: '3 seconds'
+  # max_desync: '3 seconds'
 
   ## Disables the NTP check on startup entirely. This means Authelia will not contact a remote service at all if you
   ## set this to true, and can operate in a truly offline mode.
-  disable_startup_check: true
+  # disable_startup_check: false
 
   ## The default of false will prevent startup only if we can contact the NTP server and the time is out of sync with
   ## the NTP server more than the configured max_desync. If you set this to true, an error will be logged but startup
   ## will continue regardless of results.
-  disable_failure: false
+  # disable_failure: false
 
 ##
 ## Definitions
@@ -422,9 +398,6 @@ ntp:
     # definition_name:
       ## The common expression language expression for this definition.
       # expression: ''
-    ## Gives Authelia access to a user attribute named 'attribute_name'.
-    # attribute_name:
-      # expression: '"attibute_name_users" in groups'
 
   ## The network definitions.
   # network:
@@ -442,15 +415,15 @@ ntp:
 ## Used for verifying user passwords and retrieve information such as email address and groups users belong to.
 ##
 ## The available providers are: `file`, `ldap`. You must use only one of these providers.
-authentication_backend:
+# authentication_backend:
   ## Password Change Options.
-  password_change:
+  # password_change:
     ## Disable both the HTML element and the API for password change functionality.
-    disable: false
+    # disable: false
   ## Password Reset Options.
-  password_reset:
+  # password_reset:
     ## Disable both the HTML element and the API for reset password functionality.
-    disable: false
+    # disable: false
 
     ## External reset password url that redirects the user to an external reset portal. This disables the internal reset
     ## functionality.
@@ -462,7 +435,7 @@ authentication_backend:
   ## To force update on every request you can set this to '0' or 'always', this will increase processor demand.
   ## See the below documentation for more information.
   ## Refresh Interval docs: https://www.authelia.com/c/1fa#refresh-interval
-  refresh_interval: '5 minutes'
+  # refresh_interval: '5 minutes'
 
   ##
   ## LDAP (Authentication Provider)
@@ -470,13 +443,13 @@ authentication_backend:
   ## This is the recommended Authentication Provider in production
   ## because it allows Authelia to offload the stateful operations
   ## onto the LDAP service.
-  ldap:
+  # ldap:
     ## The address of the directory server to connect to in the address common syntax.
     ## Format: [<scheme>://]<hostname>[:<port>].
     ## Square brackets indicate optional portions of the format. Scheme must be 'ldap', 'ldaps', or 'ldapi`.
     ## The default scheme is 'ldapi' if the address is an absolute path otherwise it's 'ldaps'.
     ## The default port is '636', unless the scheme is 'ldap' in which case it's '389'.
-    address: 'ldaps://ldap.{{ site.url }}:6360'
+    # address: 'ldaps://127.0.0.1:636'
 
     ## The LDAP implementation, this affects elements like the attribute utilized for resetting a password.
     ## Acceptable options are as follows:
@@ -489,19 +462,19 @@ authentication_backend:
     ## Depending on the option here certain other values in this section have a default value, notably all of the
     ## attribute mappings have a default value that this config overrides, you can read more about these default values
     ## at https://www.authelia.com/c/ldap#defaults
-    implementation: 'lldap'
+    # implementation: 'custom'
 
     ## The dial timeout for LDAP in the duration common syntax.
-    timeout: '5 seconds'
+    # timeout: '20 seconds'
 
     ## Use StartTLS with the LDAP connection.
-    start_tls: false
+    # start_tls: false
 
     ## TLS configuration.
-    tls:
+    # tls:
       ## The server subject name to check the servers certificate against during the validation process.
       ## This option is not required if the certificate has a SAN which matches the address options hostname.
-      server_name: 'ldap.{{ site.url }}'
+      # server_name: 'ldap.example.com'
 
       ## Skip verifying the server certificate entirely. In preference to setting this we strongly recommend you add the
       ## certificate or the certificate of the authority signing the certificate to the certificates directory which is
@@ -509,10 +482,10 @@ authentication_backend:
       ## It's important to note the public key should be added to the directory, not the private key.
       ## This option is strongly discouraged but may be useful in some self-signed situations where validation is not
       ## important to the administrator.
-      skip_verify: false
+      # skip_verify: false
 
       ## Minimum TLS version for the connection.
-      minimum_version: 'TLS1.2'
+      # minimum_version: 'TLS1.2'
 
       ## Maximum TLS version for the connection.
       # maximum_version: 'TLS1.3'
@@ -535,26 +508,26 @@ authentication_backend:
         # -----END PRIVATE KEY-----
 
     ## Connection Pooling configuration.
-    pooling:
+    # pooling:
       ## Enable Pooling.
-      enable: true
+      # enable: false
 
       ## Pool count.
-      count: 5
+      # count: 5
 
       ## Retries to obtain a connection during the timeout.
-      retries: 2
+      # retries: 2
 
       ## Timeout before the attempt to obtain a connection fails.
-      timeout: '10 seconds'
+      # timeout: '10 seconds'
 
     ## The distinguished name of the container searched for objects in the directory information tree.
     ## See also: additional_users_dn, additional_groups_dn.
-    base_dn: 'dc={{ site.url.replace('.', ',dc=') }}'
+    # base_dn: 'dc=example,dc=com'
 
     ## The additional_users_dn is prefixed to base_dn and delimited by a comma when searching for users.
     ## i.e. with this set to OU=Users and base_dn set to DC=a,DC=com; OU=Users,DC=a,DC=com is searched for users.
-    additional_users_dn: 'ou=people'
+    # additional_users_dn: 'ou=users'
 
     ## The users filter used in search queries to find the user profile based on input filled in login form.
     ## Various placeholders are available in the user filter which you can read about in the documentation which can
@@ -568,11 +541,11 @@ authentication_backend:
     ##
     ## To allow sign in both with username and email, one can use a filter like
     ## (&(|({username_attribute}={input})({mail_attribute}={input}))(objectClass=person))
-    users_filter: '(&({username_attribute}={input})(objectClass=person))'
+    # users_filter: '(&({username_attribute}={input})(objectClass=person))'
 
     ## The additional_groups_dn is prefixed to base_dn and delimited by a comma when searching for groups.
     ## i.e. with this set to OU=Groups and base_dn set to DC=a,DC=com; OU=Groups,DC=a,DC=com is searched for groups.
-    additional_groups_dn: 'ou=groups'
+    # additional_groups_dn: 'ou=groups'
 
     ## The groups filter used in search queries to find the groups based on relevant authenticated user.
     ## Various placeholders are available in the groups filter which you can read about in the documentation which can
@@ -581,25 +554,23 @@ authentication_backend:
     ## If your groups use the `groupOfUniqueNames` structure use this instead:
     ##    (&(uniqueMember={dn})(objectClass=groupOfUniqueNames))
     # groups_filter: '(&(member={dn})(objectClass=groupOfNames))'
-    ## In LLDAP, only this filter is supported right now
-    groups_filter: '(member={dn})'
 
     ## The group search mode to use. Options are 'filter' or 'memberof'. It's essential to read the docs if you wish to
     ## use 'memberof'. Also 'filter' is the best choice for most use cases.
-    group_search_mode: 'filter'
+    # group_search_mode: 'filter'
 
     ## Follow referrals returned by the server.
     ## This is especially useful for environments where read-only servers exist. Only implemented for write operations.
-    permit_referrals: false
+    # permit_referrals: false
 
     ## The username and password of the admin user.
-    user: 'cn=admin,ou=people,dc={{ site.url.replace('.', ',dc=') }}'
-
+    # user: 'cn=admin,dc=example,dc=com'
     ## Password can also be set using a secret: https://www.authelia.com/c/secrets
     # password: 'password'
 
     ## The attributes for users and objects from the directory server.
-    attributes:
+    # attributes:
+
       ## The distinguished name attribute if your directory server supports it. Users should read the docs before
       ## configuring. Only used for the 'memberof' group search mode.
       # distinguished_name: ''
@@ -612,27 +583,21 @@ authentication_backend:
       ## Technically non-unique attributes like 'mail' can also be used but we don't recommend using them, we instead
       ## advise to use a filter to perform alternative lookups and the attributes mentioned above
       ## (sAMAccountName and uid) to follow https://datatracker.ietf.org/doc/html/rfc2307.
-      username: 'uid'
+      # username: 'uid'
 
       ## The attribute holding the display name of the user. This will be used to greet an authenticated user.
-      display_name: 'displayName'
+      # display_name: 'displayName'
 
       ## The attribute holding the mail address of the user. If multiple email addresses are defined for a user, only
       ## the first one returned by the directory server is used.
-      mail: 'mail'
+      # mail: 'mail'
 
       ## The attribute which provides distinguished names of groups an object is a member of.
       ## Only used for the 'memberof' group search mode.
       # member_of: 'memberOf'
 
       ## The attribute holding the name of the group.
-      group_name: 'cn'
-
-      # extra:
-        ## Gives Authelia access to a user attribute named 'extra_example'.
-        # extra_example:
-          # multi_valued: false
-          # value_type: 'string'
+      # group_name: 'cn'
 
   ##
   ## File (Authentication Provider)
@@ -683,53 +648,53 @@ authentication_backend:
 ##
 ## Password Policy Configuration.
 ##
-password_policy:
+# password_policy:
 
   ## The standard policy allows you to tune individual settings manually.
-  standard:
-    enabled: false
+  # standard:
+    # enabled: false
 
     ## Require a minimum length for passwords.
-    min_length: 8
+    # min_length: 8
 
     ## Require a maximum length for passwords.
-    max_length: 0
+    # max_length: 0
 
     ## Require uppercase characters.
-    require_uppercase: true
+    # require_uppercase: true
 
     ## Require lowercase characters.
-    require_lowercase: true
+    # require_lowercase: true
 
     ## Require numeric characters.
-    require_number: true
+    # require_number: true
 
     ## Require special characters.
-    require_special: true
+    # require_special: true
 
   ## zxcvbn is a well known and used password strength algorithm. It does not have tunable settings.
-  zxcvbn:
-    enabled: true
+  # zxcvbn:
+    # enabled: false
 
     ## Configures the minimum score allowed.
-    min_score: 3
+    # min_score: 3
 
 ##
 ## Privacy Policy Configuration
 ##
 ## Parameters used for displaying the privacy policy link and drawer.
-privacy_policy:
+# privacy_policy:
 
   ## Enables the display of the privacy policy using the policy_url.
-  enabled: false
+  # enabled: false
 
   ## Enables the display of the privacy policy drawer which requires users accept the privacy policy
   ## on a per-browser basis.
-  require_user_acceptance: false
+  # require_user_acceptance: false
 
   ## The URL of the privacy policy document. Must be an absolute URL and must have the 'https://' scheme.
   ## If the privacy policy enabled option is true, this MUST be provided.
-  policy_url: ''
+  # policy_url: ''
 
 ##
 ## Access Control Configuration
@@ -758,47 +723,15 @@ privacy_policy:
 ##   is optional and matches any resource if not provided.
 ##
 ## Note: the order of the rules is important. The first policy matching (domain, resource, subject) applies.
-access_control:
+# access_control:
   ## Default policy can either be 'bypass', 'one_factor', 'two_factor' or 'deny'. It is the policy applied to any
   ## resource if there is no policy to be applied to the user.
-  default_policy: 'deny'
+  # default_policy: 'deny'
 
-  networks:
-    - name: 'internal'
-      networks:
-        - '{{ lan.mask }}'
-        - '{{ pve1.mask }}'
-        - '{{ pve2.mask }}'
-        - '{{ lan2.mask }}'
-        - '{{ wifi.trusted.mask }}'
-        - '{{ wired.trusted.mask }}'
-    - name: 'vpn'
-      networks: '100.64.0.0/16'
-
-  ## Rules applied to everyone
-  rules:
-    - domain:
-        - '{{ site.url }}'
-        - 'auth.{{ site.url }}'
-        - 'www.{{ site.url }}'
-      policy: 'bypass'
-
-    - domain: '*.{{ site.url }}'
-      subject: 'oauth2:client:{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
-      policy: 'one_factor'
-
-    - domain: '*.{{ site.url }}'
-      networks:
-        - 'internal'
-        - 'vpn'
-      subject:
-        - 'group:authelia_gen_access'
-      policy: 'one_factor'
-
-    - domain: '*.{{ site.url }}'
-      subject:
-        - 'group:authelia_gen_access'
-      policy: 'two_factor'
+  # rules:
+    ## Rules applied to everyone
+    # - domain: 'public.example.com'
+    #   policy: 'bypass'
 
     ## Domain Regex examples. Generally we recommend just using a standard domain.
     # - domain_regex: '^(?P<User>\w+)\.example\.com$'
@@ -879,18 +812,18 @@ access_control:
 session:
   ## The secret to encrypt the session data. This is only used with Redis / Redis Sentinel.
   ## Secret can also be set using a secret: https://www.authelia.com/c/secrets
-  # secret: 'insecure_session_secret'
+  secret: 'insecure_session_secret'
 
   ## Cookies configures the list of allowed cookie domains for sessions to be created on.
   ## Undefined values will default to the values below.
-  cookies:
-    -
+  # cookies:
+  #   -
       ## The name of the session cookie.
       # name: 'authelia_session'
 
       ## The domain to protect.
       ## Note: the Authelia portal must also be in that domain.
-      domain: '{{ site.url }}'
+      # domain: 'example.com'
 
       ## Required. The fully qualified URI of the portal to redirect users to on proxies that support redirections.
       ## Rules:
@@ -898,7 +831,7 @@ session:
       ##   - The above 'domain' option MUST either:
       ##      - Match the host portion of this URI.
       ##      - Match the suffix of the host portion when prefixed with '.'.
-      authelia_url: 'https://auth.{{ site.url }}'
+      # authelia_url: 'https://auth.example.com'
 
       ## Optional. The fully qualified URI used as the redirection location if the portal is accessed directly. Not
       ## configuring this option disables the automatic redirection behavior.
@@ -912,7 +845,7 @@ session:
       ##   - The above 'domain' option MUST either:
       ##      - Match the host portion of this URI.
       ##      - Match the suffix of the host portion when prefixed with '.'.
-      default_redirection_url: 'https://dash.{{ site.url }}'
+      # default_redirection_url: 'https://www.example.com'
 
       ## Sets the Cookie SameSite value. Possible options are none, lax, or strict.
       ## Please read https://www.authelia.com/c/session#same_site
@@ -937,19 +870,19 @@ session:
       # remember_me: '1 month'
 
   ## Cookie Session Domain default 'name' value.
-  name: 'authelia_session'
+  # name: 'authelia_session'
 
   ## Cookie Session Domain default 'same_site' value.
-  same_site: 'lax'
+  # same_site: 'lax'
 
   ## Cookie Session Domain default 'inactivity' value.
-  inactivity: '5m'
+  # inactivity: '5m'
 
   ## Cookie Session Domain default 'expiration' value.
-  expiration: '1h'
+  # expiration: '1h'
 
   ## Cookie Session Domain default 'remember_me' value.
-  remember_me: '1M'
+  # remember_me: '1M'
 
   ##
   ## Redis Provider
@@ -1052,26 +985,26 @@ session:
 ##
 ## This mechanism prevents attackers from brute-forcing the first factor. It bans the user if too many attempts are made
 ## in a short period of time.
-regulation:
+# regulation:
   ## Regulation Mode.
-  modes:
-    - 'user'
+  # modes:
+    # - 'user'
 
   ## The number of failed login attempts before user is banned. Set it to 0 to disable regulation.
-  max_retries: 3
+  # max_retries: 3
 
   ## The time range during which the user can attempt login before being banned in the duration common syntax. The user
   ## is banned if the authentication failed 'max_retries' times in a 'find_time' seconds window.
-  find_time: '2 minutes'
+  # find_time: '2 minutes'
 
   ## The length of time before a banned user can login again in the duration common syntax.
-  ban_time: '5 minutes'
+  # ban_time: '5 minutes'
 
 ##
 ## Storage Provider Configuration
 ##
 ## The available providers are: `local`, `mysql`, `postgres`. You must use one and only one of these providers.
-storage:
+# storage:
   ## The encryption key that is used to encrypt sensitive information in the database. Must be a string with a minimum
   ## length of 20. Please see the docs if you configure this with an undesirable key and need to change it, you MUST use
   ## the CLI to change this in the database if you want to change it from a previously configured value.
@@ -1152,12 +1085,12 @@ storage:
   ##
   ## PostgreSQL (Storage Provider)
   ##
-  postgres:
+  # postgres:
     ## The address of the PostgreSQL server to connect to in the address common syntax.
     ## Format: [<scheme>://]<hostname>[:<port>].
     ## Square brackets indicate optional portions of the format. Scheme must be 'tcp', 'tcp4', 'tcp6', or 'unix`.
     ## The default scheme is 'unix' if the address is an absolute path otherwise it's 'tcp'. The default port is '5432'.
-    address: 'tcp://pgdb.{{ site.url }}:5432'
+    # address: 'tcp://127.0.0.1:5432'
 
     ## List of additional server instance configurations to fallback to when the primary instance is not available.
     # servers:
@@ -1184,23 +1117,23 @@ storage:
             # -----END PRIVATE KEY-----
 
     ## The database name to use.
-    database: 'authelia'
+    # database: 'authelia'
 
     ## The schema name to use.
-    schema: 'public'
+    # schema: 'public'
 
     ## The username used for SQL authentication.
-    username: 'authelia'
+    # username: 'authelia'
 
     ## The password used for SQL authentication.
     ## Can also be set using a secret: https://www.authelia.com/c/secrets
     # password: 'mypassword'
 
     ## The connection timeout in the duration common syntax.
-    timeout: '5 seconds'
+    # timeout: '5 seconds'
 
     ## PostgreSQL TLS settings. Configuring this requires TLS.
-    tls:
+    # tls:
       ## The server subject name to check the servers certificate against during the validation process.
       ## This option is not required if the certificate has a SAN which matches the address options hostname.
       # server_name: 'postgres.example.com'
@@ -1211,10 +1144,10 @@ storage:
       ## It's important to note the public key should be added to the directory, not the private key.
       ## This option is strongly discouraged but may be useful in some self-signed situations where validation is not
       ## important to the administrator.
-      skip_verify: false
+      # skip_verify: false
 
       ## Minimum TLS version for the connection.
-      minimum_version: 'TLS1.2'
+      # minimum_version: 'TLS1.2'
 
       ## Maximum TLS version for the connection.
       # maximum_version: 'TLS1.3'
@@ -1241,9 +1174,9 @@ storage:
 ##
 ## Notifications are sent to users when they require a password reset, a WebAuthn registration or a TOTP registration.
 ## The available providers are: filesystem, smtp. You must use only one of these providers.
-notifier:
+# notifier:
   ## You can disable the notifier startup check by setting this to true.
-  disable_startup_check: false
+  # disable_startup_check: false
 
   ##
   ## File System (Notification Provider)
@@ -1263,15 +1196,15 @@ notifier:
   ##        (only works for unauthenticated connections)
   ##   - validate the SMTP server x509 certificate during the TLS handshake against the hosts trusted certificates
   ##     (configure in tls section)
-  smtp:
+  # smtp:
     ## The address of the SMTP server to connect to in the address common syntax.
-    address: 'smtp://smtp.gmail.com:587'
+    # address: 'smtp://127.0.0.1:25'
 
     ## The connection timeout in the duration common syntax.
-    timeout: '5 seconds'
+    # timeout: '5 seconds'
 
     ## The username used for SMTP authentication.
-    username: '{{ site.email }}'
+    # username: 'test'
 
     ## The password used for SMTP authentication.
     ## Can also be set using a secret: https://www.authelia.com/c/secrets
@@ -1280,25 +1213,25 @@ notifier:
     ## The sender is used to is used for the MAIL FROM command and the FROM header.
     ## If this is not defined and the username is an email, we use the username as this value. This can either be just
     ## an email address or the RFC5322 'Name <email address>' format.
-    sender: 'Authelia <admin@{{ site.url }}>'
+    # sender: 'Authelia <admin@example.com>'
 
     ## HELO/EHLO Identifier. Some SMTP Servers may reject the default of localhost.
-    identifier: '{{ site.url }}'
+    # identifier: 'localhost'
 
     ## Subject configuration of the emails sent. {title} is replaced by the text from the notifier.
-    subject: '[Authelia] {title}'
+    # subject: '[Authelia] {title}'
 
     ## This address is used during the startup check to verify the email configuration is correct.
     ## It's not important what it is except if your email server only allows local delivery.
-    startup_check_address: 'test@{{ site.url }}'
+    # startup_check_address: 'test@authelia.com'
 
     ## By default we require some form of TLS. This disables this check though is not advised.
-    disable_require_tls: false
+    # disable_require_tls: false
 
     ## Disables sending HTML formatted emails.
-    disable_html_emails: false
+    # disable_html_emails: false
 
-    tls:
+    # tls:
       ## The server subject name to check the servers certificate against during the validation process.
       ## This option is not required if the certificate has a SAN which matches the address options hostname.
       # server_name: 'smtp.example.com'
@@ -1309,10 +1242,10 @@ notifier:
       ## It's important to note the public key should be added to the directory, not the private key.
       ## This option is strongly discouraged but may be useful in some self-signed situations where validation is not
       ## important to the administrator.
-      skip_verify: false
+      # skip_verify: false
 
       ## Minimum TLS version for the connection.
-      minimum_version: 'TLS1.2'
+      # minimum_version: 'TLS1.2'
 
       ## Maximum TLS version for the connection.
       # maximum_version: 'TLS1.3'
@@ -1337,39 +1270,48 @@ notifier:
 ##
 ## Identity Providers
 ##
-identity_providers:
+# identity_providers:
+
   ##
   ## OpenID Connect (Identity Provider)
   ##
   ## It's recommended you read the documentation before configuration of this section.
   ## See: https://www.authelia.com/c/oidc/provider
-  oidc:
+  # oidc:
     ## The hmac_secret is used to sign OAuth2 tokens (authorization code, access tokens and refresh tokens).
     ## HMAC Secret can also be set using a secret: https://www.authelia.com/c/secrets
     # hmac_secret: 'this_is_a_secret_abc123abc123abc'
 
     ## The JWK's issuer option configures multiple JSON Web Keys. It's required that at least one of the JWK's
     ## configured has the RS256 algorithm. For RSA keys (RS or PS) the minimum is a 2048 bit key.
-    jwks:
-      -
-        ## Key ID embedded into the JWT header for key matching. Must be an alphanumeric string with 7 or less characters.
-        ## This value is automatically generated if not provided. It's recommended to not configure this.
-        # key_id: 'example'
+    # jwks:
+    # -
+      ## Key ID embedded into the JWT header for key matching. Must be an alphanumeric string with 7 or less characters.
+      ## This value is automatically generated if not provided. It's recommended to not configure this.
+      # key_id: 'example'
 
-        ## The key algorithm used with this key.
-        algorithm: 'RS256'
+      ## The key algorithm used with this key.
+      # algorithm: 'RS256'
 
-        ## The key use expected with this key. Currently only 'sig' is supported.
-        use: 'sig'
+      ## The key use expected with this key. Currently only 'sig' is supported.
+      # use: 'sig'
 
-        ## Required Private Key in PEM DER form.
-        # yamllint disable-line rule:braces
-        key: {% raw %}{{ secret "/certificates/auth.key" | mindent 10 "|" | msquote }}{% endraw %}
+      ## Required Private Key in PEM DER form.
+      # key: |
+        # -----BEGIN PRIVATE KEY-----
+        # ...
+        # -----END PRIVATE KEY-----
 
-        ## Optional matching certificate chain in PEM DER form that matches the key. All certificates within the chain
-        ## must be valid and current, and from top to bottom each certificate must be signed by the subsequent one.
-        # yamllint disable-line rule:braces
-        certificate_chain: {% raw %}{{ secret "/certificates/auth.cert.pem" | mindent 10 "|" | msquote }}{% endraw %}
+
+      ## Optional matching certificate chain in PEM DER form that matches the key. All certificates within the chain
+      ## must be valid and current, and from top to bottom each certificate must be signed by the subsequent one.
+      # certificate_chain: |
+        # -----BEGIN CERTIFICATE-----
+        # ...
+        # -----END CERTIFICATE-----
+        # -----BEGIN CERTIFICATE-----
+        # ...
+        # -----END CERTIFICATE-----
 
     ## Enables additional debug messages.
     # enable_client_debug_messages: false
@@ -1395,81 +1337,61 @@ identity_providers:
 
     ## Authorization Policies which can be utilized by clients. The 'policy_name' is an arbitrary value that you pick
     ## which is utilized as the value for the 'authorization_policy' on the client.
-    # Ref: https://www.authelia.com/configuration/identity-providers/openid-connect/provider/#authorization_policies
-    authorization_policies:
-      gen_access:
-        default_policy: 'two_factor'
-        rules:
-          - policy: 'one_factor'
-            subject: 'group:authelia_gen_access'
+    # authorization_policies:
+      # policy_name:
+        # default_policy: 'two_factor'
+        # rules:
+          # - policy: 'one_factor'
+          #   subject: 'group:services'
+          #   networks:
+              #  - '192.168.1.0/24'
 
     ## The lifespans configure the expiration for these token types in the duration common syntax. In addition to this
     ## syntax the lifespans can be customized per-client.
-    lifespans:
+    # lifespans:
       ## Configures the default/fallback lifespan for given token types. This behavior applies to all clients and all
       ## grant types but you can override this behavior using the custom lifespans.
-      access_token: '1 hour'
-      authorize_code: '1 minute'
-      id_token: '1 hour'
-      refresh_token: '90 minutes'
+      # access_token: '1 hour'
+      # authorize_code: '1 minute'
+      # id_token: '1 hour'
+      # refresh_token: '90 minutes'
 
     ## Cross-Origin Resource Sharing (CORS) settings.
-    cors:
+    # cors:
       ## List of endpoints in addition to the metadata endpoints to permit cross-origin requests on.
-      endpoints:
-        - 'authorization'
-        - 'pushed-authorization-request'
-        - 'token'
-        - 'revocation'
-        - 'introspection'
-        - 'userinfo'
+      # endpoints:
+        #  - 'authorization'
+        #  - 'pushed-authorization-request'
+        #  - 'token'
+        #  - 'revocation'
+        #  - 'introspection'
+        #  - 'userinfo'
 
       ## List of allowed origins.
       ## Any origin with https is permitted unless this option is configured or the
       ## allowed_origins_from_client_redirect_uris option is enabled.
-      # Add to list if using Authelia for an external service
-      allowed_origins:
-        - 'https://{{ site.url }}'
+      # allowed_origins:
+        # - 'https://example.com'
 
       ## Automatically adds the origin portion of all redirect URI's on all clients to the list of allowed_origins,
       ## provided they have the scheme http or https and do not have the hostname of localhost.
       # allowed_origins_from_client_redirect_uris: false
 
-    claims_policies:
-      # custom_claims_policy:
-        # custom_claims:
-          ## Gives the 'custom_claims_policy' claim policy access to the 'claim_name' and 'extra_claim_name' claims.
-          # claim_name:
-            # attribute: 'attribute_name'
-          # extra_claim_name:
-            # attribute: 'extra_example'
-      headscale:
-        id_token: ['email', 'groups']
-
-      grafana:
-        id_token: ['email', 'name', 'groups', 'preferred_username']
-
-    # scopes:
-      ## Gives the arbitrary scope 'scope_name` access to the 'claim_name' and 'extra_claim_name' claims.
-      # scope_name:
-        # claims:
-          # - 'claim_name'
-          # - 'extra_claim_name'
-
     ## Clients is a list of registered clients and their configuration.
     ## It's recommended you read the documentation before configuration of a registered client.
     ## See: https://www.authelia.com/c/oidc/registered-clients
-    clients:
+    # clients:
       # -
         ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
         ## configuration.
-        # client_id: 'example_client_id'
+        # client_id: 'myapp'
 
         ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
-        # client_name: 'example_name'
+        # client_name: 'My Application'
 
         ## The client secret is a shared secret between Authelia and the consumer of this client.
-        # client_secret: 'secret_hash'
+        # yamllint disable-line rule:line-length
+        # client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
 
         ## Sector Identifiers are occasionally used to generate pairwise subject identifiers. In most cases this is not
         ## necessary. It is critical to read the documentation for more information.
@@ -1480,7 +1402,7 @@ identity_providers:
 
         ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
         # redirect_uris:
-          # - 'https://example.{{ site.url }}/oidc_callback'
+          # - 'https://oidc.example.com:8080/oauth2/callback'
 
         ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
         ## URIs to fetch Request Objects.
@@ -1490,12 +1412,10 @@ identity_providers:
         ## Audience this client is allowed to request.
         # audience: []
 
-        ## Assigns the 'custom_claims_policy' claims policy to this client.
-        # claims_policy: 'custom_claims_policy'
-
         ## Scopes this client is allowed to request.
         # scopes:
           # - 'openid'
+          # - 'groups'
           # - 'email'
           # - 'profile'
 
@@ -1748,358 +1668,4 @@ identity_providers:
               # -----BEGIN CERTIFICATE-----
               # ...
               # -----END CERTIFICATE-----
-      -
-        # Ref:
-        # https://headscale.net/stable/ref/oidc
-        # https://www.authelia.com/integration/openid-connect/clients/headscale/
-        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
-        ## configuration.
-        client_id: '{% raw %}{{ mustEnv "HEADSCALE_OIDC_ID" }}{% endraw %}'
-
-        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
-        client_name: 'Headscale VPN'
-
-        ## The client secret is a shared secret between Authelia and the consumer of this client.
-        client_secret: '{% raw %}{{ mustEnv "HEADSCALE_OIDC_HASH" }}{% endraw %}'
-
-        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
-        redirect_uris:
-          - 'https://vpn.{{ site.url }}/oidc/callback'
-          - 'https://vpn.{{ site.url }}:443/oidc/callback'
-
-        ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
-        ## URIs to fetch Request Objects.
-        # request_uris:
-          # - 'https://oidc.example.com:8080/oidc/request-object.jwk'
-
-        ## Audience this client is allowed to request.
-        # audience: []
-
-        ## Assigns the 'custom_claims_policy' claims policy to this client.
-        claims_policy: 'headscale'
-
-        ## Scopes this client is allowed to request.
-        scopes:
-          - 'openid'
-          - 'groups'
-          - 'email'
-          - 'profile'
-
-        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
-        ## authorization policies section.
-        authorization_policy: 'two_factor'
-
-        ## Enforces the use of PKCE for this client when set to true.
-        require_pkce: true
-
-        ## Enforces the use of PKCE for this client when configured, and enforces the specified challenge method.
-        ## Options are 'plain' and 'S256'.
-        pkce_challenge_method: 'S256'
-
-        ## The permitted client authentication method for the Token Endpoint for this client.
-        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
-        ## defaults to 'none' per the specifications.
-        token_endpoint_auth_method: 'client_secret_basic'
-
-        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
-        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
-        # token_endpoint_auth_signing_alg: 'RS256'
-
-        ## The signing algorithm used for signing the Access Tokens in Access Request responses.
-        ## Please read the documentation before adjusting this option.
-        ## See: https://www.authelia.com/c/oidc/registered-clients#access_token_signed_response_alg
-        # access_token_signed_response_alg: 'none'
-
-        ## The signing algorithm used for ID Tokens. An issuer JWK with a matching algorithm must be available when
-        ## configured. Has no effect if id_token_signed_response_key_id is configured.
-        # id_token_signed_response_alg: 'RS256'
-
-        ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
-        ## available. Has no effect if userinfo_signing_key_id is configured.
-        # userinfo_signed_response_alg: 'none'
-
-      -
-        # Ref: https://www.authelia.com/integration/openid-connect/grafana/
-        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
-        ## configuration.
-        client_id: '{% raw %}{{ mustEnv "GRAFANA_OIDC_ID" }}{% endraw %}'
-
-        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
-        client_name: 'Grafana'
-
-        ## The client secret is a shared secret between Authelia and the consumer of this client.
-        client_secret: '{% raw %}{{ mustEnv "GRAFANA_OIDC_HASH" }}{% endraw %}'
-
-        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
-        redirect_uris:
-          - 'https://graph.{{ site.url }}/login/generic_oauth'
-
-        ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
-        ## URIs to fetch Request Objects.
-        # request_uris:
-          # - 'https://oidc.example.com:8080/oidc/request-object.jwk'
-
-        ## Audience this client is allowed to request.
-        # audience: []
-
-        ## Assigns the 'custom_claims_policy' claims policy to this client.
-        claims_policy: 'grafana'
-
-        ## Scopes this client is allowed to request.
-        scopes:
-          - 'openid'
-          - 'groups'
-          - 'email'
-          - 'profile'
-
-        ## Grant Types configures which grants this client can obtain.
-        ## It's not recommended to define this unless you know what you're doing.
-        grant_types:
-          - 'authorization_code'
-
-        ## Response Types configures which responses this client can be sent.
-        ## It's not recommended to define this unless you know what you're doing.
-        response_types:
-          - 'code'
-
-        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
-        ## authorization policies section.
-        authorization_policy: 'gen_access'
-
-        ## The consent mode controls how consent is obtained.
-        consent_mode: 'implicit'
-
-        ## Enforces the use of PKCE for this client when set to true.
-        require_pkce: true
-
-        ## Enforces the use of PKCE for this client when configured, and enforces the specified challenge method.
-        ## Options are 'plain' and 'S256'.
-        pkce_challenge_method: 'S256'
-
-        ## The permitted client authentication method for the Token Endpoint for this client.
-        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
-        ## defaults to 'none' per the specifications.
-        token_endpoint_auth_method: 'client_secret_post'
-
-        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
-        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
-        # token_endpoint_auth_signing_alg: 'RS256'
-
-        ## The signing algorithm used for signing the Access Tokens in Access Request responses.
-        ## Please read the documentation before adjusting this option.
-        ## See: https://www.authelia.com/c/oidc/registered-clients#access_token_signed_response_alg
-        access_token_signed_response_alg: 'none'
-
-        ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
-        ## available. Has no effect if userinfo_signing_key_id is configured.
-        userinfo_signed_response_alg: 'none'
-
-      -
-        # Ref:
-        # https://github.com/christiaangoossens/hass-oidc-auth
-        # https://github.com/christiaangoossens/hass-oidc-auth/blob/main/docs/provider-configurations/authelia.md
-        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
-        ## configuration.
-        client_id: '{% raw %}{{ mustEnv "HASS_OIDC_ID" }}{% endraw %}'
-
-        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
-        client_name: 'Home Assistant'
-
-        ## The client secret is a shared secret between Authelia and the consumer of this client.
-        client_secret: '{% raw %}{{ mustEnv "HASS_OIDC_HASH" }}{% endraw %}'
-
-        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
-        redirect_uris:
-          - 'https://home.{{ site.url }}/auth/oidc/callback'
-
-        ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
-        ## URIs to fetch Request Objects.
-        # request_uris:
-          # - 'https://oidc.example.com:8080/oidc/request-object.jwk'
-
-        ## Audience this client is allowed to request.
-        # audience: []
-
-        ## Scopes this client is allowed to request.
-        scopes:
-          - 'openid'
-          - 'groups'
-          - 'email'
-          - 'profile'
-
-        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
-        ## authorization policies section.
-        authorization_policy: 'gen_access'
-
-        ## Enforces the use of PKCE for this client when set to true.
-        require_pkce: true
-
-        ## Enforces the use of PKCE for this client when configured, and enforces the specified challenge method.
-        ## Options are 'plain' and 'S256'.
-        pkce_challenge_method: 'S256'
-
-        ## The permitted client authentication method for the Token Endpoint for this client.
-        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
-        ## defaults to 'none' per the specifications.
-        token_endpoint_auth_method: 'client_secret_post'
-
-        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
-        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
-        # token_endpoint_auth_signing_alg: 'RS256'
-
-        ## The signing algorithm used for ID Tokens. An issuer JWK with a matching algorithm must be available when
-        ## configured. Has no effect if id_token_signed_response_key_id is configured.
-        id_token_signed_response_alg: 'RS256'
-
-        ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
-        ## available. Has no effect if userinfo_signing_key_id is configured.
-        userinfo_signed_response_alg: 'none'
-
-      -
-        # Ref:
-        # https://www.authelia.com/integration/openid-connect/clients/apache-guacamole/
-        # https://guacamole.apache.org/doc/gug/openid-auth.html
-        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
-        ## configuration.
-        client_id: '{% raw %}{{ mustEnv "GUAC_OIDC_ID" }}{% endraw %}'
-
-        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
-        client_name: 'Guacamole'
-
-        ## Sets the client to public. This should typically not be set, please see the documentation for usage.
-        # TODO: migrate to a private client once apache/guacamole-client#1219 ships (planning/auth/issues/07)
-        public: true
-
-        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
-        redirect_uris:
-          - 'https://remote.{{ site.url }}'
-
-        ## Scopes this client is allowed to request.
-        scopes:
-          - 'openid'
-          - 'groups'
-          - 'email'
-          - 'profile'
-
-        ## Grant Types configures which grants this client can obtain.
-        ## It's not recommended to define this unless you know what you're doing.
-        grant_types:
-          - 'implicit'
-
-        ## Response Types configures which responses this client can be sent.
-        ## It's not recommended to define this unless you know what you're doing.
-        response_types:
-          - 'id_token'
-
-        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
-        ## authorization policies section.
-        authorization_policy: 'gen_access'
-
-        ## Enforces the use of PKCE for this client when set to true.
-        require_pkce: false
-
-        ## Enforces the use of PKCE for this client when configured, and enforces the specified challenge method.
-        ## Options are 'plain' and 'S256'.
-        pkce_challenge_method: ''
-
-        ## The permitted client authentication method for the Token Endpoint for this client.
-        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
-        ## defaults to 'none' per the specifications.
-        token_endpoint_auth_method: 'none'
-
-        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
-        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
-        # token_endpoint_auth_signing_alg: 'RS256'
-
-        ## The signing algorithm used for signing the Access Tokens in Access Request responses.
-        ## Please read the documentation before adjusting this option.
-        ## See: https://www.authelia.com/c/oidc/registered-clients#access_token_signed_response_alg
-        access_token_signed_response_alg: 'none'
-
-        ## The signing algorithm used for ID Tokens. An issuer JWK with a matching algorithm must be available when
-        ## configured. Has no effect if id_token_signed_response_key_id is configured.
-        # id_token_signed_response_alg: 'RS256'
-
-        ## The signing algorithm used for User Info responses. An issuer JWK with a matching algorithm must be
-        ## available. Has no effect if userinfo_signing_key_id is configured.
-        userinfo_signed_response_alg: 'none'
-
-      -
-        # Ref:
-        # https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage
-        # https://www.authelia.com/integration/openid-connect/uptime-kuma/
-        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
-        ## configuration.
-        client_id: '{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
-
-        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
-        client_name: 'Gatus'
-
-        ## The client secret is a shared secret between Authelia and the consumer of this client.
-        client_secret: '{% raw %}{{ mustEnv "GATUS_OIDC_HASH" }}{% endraw %}'
-
-        ## Sets the client to public. This should typically not be set, please see the documentation for usage.
-        public: false
-
-        ## Audience this client is allowed to request.
-        audience:{% for host in inv.uptime | map(attribute='host') | sort %}
-          - 'https://{{ host }}'{% endfor %}
-
-        requested_audience_mode: 'implicit'
-
-        ## Scopes this client is allowed to request.
-        scopes:
-          - 'authelia.bearer.authz'
-
-        ## Grant Types configures which grants this client can obtain.
-        ## It's not recommended to define this unless you know what you're doing.
-        grant_types:
-          - 'client_credentials'
-
-        ## The permitted client authentication method for the Token Endpoint for this client.
-        ## For confidential client types this value defaults to 'client_secret_basic' and for the public client types it
-        ## defaults to 'none' per the specifications.
-        token_endpoint_auth_method: 'client_secret_basic'
-
-        ## The permitted client authentication signing algorithm for the Token Endpoint for this client when using
-        ## the 'client_secret_jwt' or 'private_key_jwt' token_endpoint_auth_method.
-        # token_endpoint_auth_signing_alg: 'RS256'
-
-      -
-        # Ref: https://docs.olivetin.app/security/oauth2_authelia.html
-        ## The Client ID is the OAuth 2.0 and OpenID Connect 1.0 Client ID which is used to link an application to a
-        ## configuration.
-        client_id: '{% raw %}{{ mustEnv "OLIVE_TIN_OIDC_ID" }}{% endraw %}'
-
-        ## The description to show to users when they end up on the consent screen. Defaults to the ID above.
-        client_name: 'Olive Tin'
-
-        ## The client secret is a shared secret between Authelia and the consumer of this client.
-        client_secret: '{% raw %}{{ mustEnv "OLIVE_TIN_OIDC_HASH" }}{% endraw %}'
-
-        ## Redirect URI's specifies a list of valid case-sensitive callbacks for this client.
-        redirect_uris:
-          - 'https://command.{{ site.url }}/oauth/callback'
-
-        ## Request URI's specifies a list of valid case-sensitive TLS-secured URIs for this client for use as
-        ## URIs to fetch Request Objects.
-        # request_uris:
-          # - 'https://oidc.example.com:8080/oidc/request-object.jwk'
-
-        ## Audience this client is allowed to request.
-        # audience: []
-
-        ## Scopes this client is allowed to request.
-        scopes:
-          - 'openid'
-          - 'groups'
-          - 'profile'
-
-        ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
-        ## authorization policies section.
-        authorization_policy: 'gen_access'
-
-        ## The consent mode controls how consent is obtained.
-        # consent_mode: implicit
-
 ...

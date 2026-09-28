@@ -47,3 +47,7 @@ rollback for service configs too.
   (this supersedes the script-fixes/01 dispatcher check, since dispatchers are generated
   from that list), commands must be cases in their scripts, subdomains unique and equal
   to the secsvcs/homesvcs `Host()` rules. The hook only needs to run the render.
+- 2026-09-27: 01 and 08 resolved, so every blocker is resolved. The hook
+  (`.githooks/pre-commit`) runs `render_src.sh`, so the nodes.yml checks already run in
+  it. The authelia validate command (secrets passed from the quadlet) is in
+  `docs/maintenance.md` "Upgrade Authelia to a new minor version".

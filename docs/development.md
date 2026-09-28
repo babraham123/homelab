@@ -104,13 +104,25 @@ The output holds real values, so keep it out of shared paths such as a fixed
 into it. The directory must be named `homelab-rendered`, since `upload_src.sh` moves
 it into place by that name.
 
-Rendering also validates YAML, JSON, checks for duplicate container IPs, and checks
+Rendering also validates YAML, JSON, checks for duplicate container IPs
+(`tools/validate_rendered.sh`), and checks
 `src/nodes.yml` against the scripts and routes it describes: each node's `services`
 must be exactly its `install_svcs.sh` cases, every command must be a case in its
 script, subdomains must be unique, the secsvcs/homesvcs subdomains must match the
 `Host()` rules in their `traefik/routes.yml`, and each image's quadlet (copied by the
 service's case) must have `Image=localhost/` + its `upstream` ref without the registry
 host, or `Image=localhost/<build>:latest`.
+
+### Pre-commit hook
+
+`.githooks/pre-commit` renders the staged tree against `vars.template.yml` in a temp
+dir, which runs every check above, then runs `shellcheck -x --severity=warning` over
+the rendered `*.sh` files (so `*.sh.j2` scripts are checked with their Jinja filled
+in). It takes about 6 s. Activate it once per clone:
+```bash
+git config core.hooksPath .githooks
+```
+Skip it for one commit with `git commit --no-verify`.
 
 Upload rendered files to a specific server:
 ```bash
