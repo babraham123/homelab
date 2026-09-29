@@ -180,7 +180,7 @@ doesn't warn "unable to resolve host".
 
 - **secsvcs:** `ssh autoadmin@secsvcs install_olive_tin`. **Check:** the OliveTin
   "vpnsvcs Install Dispatcher" button succeeds.
-- **Mac:** re-copy `macos/ssh.config` per `mac_personal.md.j2`. If
+- **Mac:** re-copy `debian/ssh_config` per `mac_personal.md.j2`. If
   `ssh-keygen -F '[vpn.SITE]:2202'` finds a TOFU entry, remove it with `ssh-keygen -R`;
   the CA line covers both names.
 - **pve1:** rename any `/root/secrets/vpn.yaml`, `vpn.yaml.age` and
