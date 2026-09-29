@@ -122,3 +122,5 @@ reachable over the tailnet, so it watches from outside.
 - The suspected defects are either fixed or confirmed harmless, with the reason.
 
 ## Comments
+
+2026-09-28 (restructure/08): the vpn node is now `vpnsvcs`: `src/vpnsvcs/`, `vpnsvcs.ip`, host `vpnsvcs.SITE`, guide `docs/guides/vpnsvcs.md.j2`, archives `vpnsvcs-full-*`. `vpn.SITE` stays the Headscale endpoint. Use the new names where this ticket says vpn; see phase 8 of `planning/restructure/vpn-rename-runbook.md`.
