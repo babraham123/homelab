@@ -1,7 +1,7 @@
 #!/bin/bash
 # Installs VPN specific systemd services.
 # Usage:
-#   src/vpn/install_svcs.sh SERVICE_NAME
+#   src/vpnsvcs/install_svcs.sh SERVICE_NAME
 
 set -euo pipefail
 

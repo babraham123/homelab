@@ -17,7 +17,7 @@ if ! ping -c3 -W3 "${host}.${url}" > /dev/null; then
 fi
 
 port="22"
-if [[ "$host" == "vpn" ]]; then
+if [[ "$host" == "vpnsvcs" ]]; then
   port="2202"
 fi
 

@@ -157,15 +157,15 @@ dashboards:
               maxConcurrent: 1
               timeout: 60
 {% endfor %}
-      - title: vpn
+      - title: vpnsvcs
         type: fieldset
         contents:
-{% for cmd in inv.commands.vpn %}
+{% for cmd in inv.commands.vpnsvcs %}
           - inlineAction:
-              title: vpn {{ cmd | replace("_", " ") | title }}
+              title: vpnsvcs {{ cmd | replace("_", " ") | title }}
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn {{ cmd }}
-              id: vpn_{{ cmd }}
+              shell: ssh autoadmin@vpnsvcs {{ cmd }}
+              id: vpnsvcs_{{ cmd }}
               maxConcurrent: 1
               timeout: 60
 {% endfor %}

@@ -143,7 +143,7 @@ ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N ""
 ssh-keygen -s /root/ssh/ca_ssh_key -I pve1 -n manualadmin,autoadmin -V +395d /root/.ssh/id_ed25519.pub
 # Trust the host CA before contacting other hosts; same line ssh_cert_gen.sh writes
 echo "@cert-authority *.{{ site.url }} $(cat /root/ssh/ca_ssh_host_key.pub)" > /etc/ssh/ssh_known_hosts
-# Signs pve1's new host key and refreshes the rest; needs pve2, vpn, websvcs, devtop and router up
+# Signs pve1's new host key and refreshes the rest; needs pve2, vpnsvcs, websvcs, devtop and router up
 /root/homelab-rendered/src/certificates/ssh_cert_gen.sh
 ```
 The key has no passphrase because pve1's scripts use it without a prompt ([pve1 guide](./pve1.md#ca-certs)). `ssh_cert_gen_windows.sh` isn't needed: the gaming VM's host cert and the CA are unchanged.
@@ -221,7 +221,7 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
 
 ### Only the private CA is lost
 Not an emergency: every service cert and the CA chain live on the VMs and keep working until they expire (395 days). Only issuing is blocked. Rebuild before the next [yearly renewal](../maintenance.md#refresh-certificates), in one sitting, because services reject each other until all of them have the new chain.
-- Follow [CA infra](./pve1.md#ca-infra) in full: new root and intermediate, new passphrases, `openssl.cnf` from the rendered `src/certificates/openssl.root.cnf` and `openssl.intermediate.cnf`. Its `upload` loop installs the new chain on pve1, pve2, vpn, secsvcs, homesvcs, websvcs and devtop.
+- Follow [CA infra](./pve1.md#ca-infra) in full: new root and intermediate, new passphrases, `openssl.cnf` from the rendered `src/certificates/openssl.root.cnf` and `openssl.intermediate.cnf`. Its `upload` loop installs the new chain on pve1, pve2, vpnsvcs, secsvcs, homesvcs, websvcs and devtop.
 - Re-issue and redistribute every service key and cert, including the chain in each service's cert directory:
 ```bash
 /root/homelab-rendered/src/certificates/self_signed_key_gen.sh

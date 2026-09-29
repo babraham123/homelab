@@ -1,8 +1,8 @@
 #!/bin/bash
 # Full backup of the VPS. It isn't a Proxmox VM, so no vzdump covers it; this archive
-# of the whole root filesystem is its backup. Restore steps are in docs/guides/vpn.md.
+# of the whole root filesystem is its backup. Restore steps are in docs/guides/vpnsvcs.md.
 # Usage:
-#   src/vpn/backup_full.sh
+#   src/vpnsvcs/backup_full.sh
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
@@ -20,7 +20,7 @@ install -d -m 700 -o autoadmin -g autoadmin "$backup_dir"
 umask 077
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
-archive="${backup_dir}/vpn-full-$(date +%Y-%m-%dT%H%M%S).tar.zst"
+archive="${backup_dir}/vpnsvcs-full-$(date +%Y-%m-%dT%H%M%S).tar.zst"
 
 # Headscale's DB is in WAL mode, so copying its files mid-write can capture a torn
 # state. .backup snapshots it consistently while headscale keeps serving.
@@ -63,5 +63,5 @@ chown autoadmin:autoadmin "$archive"
 chmod 400 "$archive"
 # Keep the newest 2; the disk is small and pve1 keeps the history. The ISO timestamp
 # makes name order chronological.
-find "$backup_dir" -maxdepth 1 -name 'vpn-full-*.tar.zst' | sort | head -n -2 | xargs -r rm -f
+find "$backup_dir" -maxdepth 1 -name 'vpnsvcs-full-*.tar.zst' | sort | head -n -2 | xargs -r rm -f
 ls -lh "$archive"

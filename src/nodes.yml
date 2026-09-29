@@ -56,14 +56,14 @@ nodes:
       - {name: install_dispatcher, script: router/commands.sh}
       - {name: start_pve2, script: router/commands.sh}
 
-  vpn:
+  vpnsvcs:
     services:
       headscale: {}
       tailscaled: {}
       haproxy: {}
       geoip_generator: {}
     commands:
-      - {name: backup_full, run: [sudo /root/homelab-rendered/src/vpn/backup_full.sh]}
+      - {name: backup_full, run: [sudo /root/homelab-rendered/src/vpnsvcs/backup_full.sh]}
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
       - {name: install_ca, script: debian/commands.sh}

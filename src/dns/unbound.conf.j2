@@ -7,6 +7,7 @@
 # https://serverfault.com/questions/659990/unbound-exceptions-to-local-zone-rules-for-specific-subdomains-and-main-domain
 server:
     local-zone: "vpn.{{ site.url }}." transparent
+    local-zone: "vpnsvcs.{{ site.url }}." transparent
     # Redirect other subdomains to a machine on the LAN
 
     # Hosts

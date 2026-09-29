@@ -3,7 +3,7 @@
 # This script is triggered by the SSH daemon when the specific automation key is used.
 # It parses $SSH_ORIGINAL_COMMAND to determine which action to take.
 # Usage:
-#   ssh autoadmin@vpn CMD
+#   ssh autoadmin@vpnsvcs CMD
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
@@ -16,19 +16,19 @@ echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 
 case "${SSH_ORIGINAL_COMMAND:-}" in
   install_headscale)
-    sudo /root/homelab-rendered/src/vpn/install_svcs.sh headscale
+    sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh headscale
     ;;
   install_tailscaled)
-    sudo /root/homelab-rendered/src/vpn/install_svcs.sh tailscaled
+    sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh tailscaled
     ;;
   install_haproxy)
-    sudo /root/homelab-rendered/src/vpn/install_svcs.sh haproxy
+    sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh haproxy
     ;;
   install_geoip_generator)
-    sudo /root/homelab-rendered/src/vpn/install_svcs.sh geoip_generator
+    sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh geoip_generator
     ;;
   backup_full)
-    sudo /root/homelab-rendered/src/vpn/backup_full.sh
+    sudo /root/homelab-rendered/src/vpnsvcs/backup_full.sh
     ;;
   install_ssh_ca)
     sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca

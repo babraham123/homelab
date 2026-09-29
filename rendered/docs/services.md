@@ -79,9 +79,9 @@ its own `tools/deploy_src.sh`. This repo owns only the nginx config and quadlet.
 | container VMs | node_exporter | Host metrics |
 | pve1, pve2 | vm_watchdog | VM health watchdog |
 | pve1 | cert_notifier (timer) | Email warnings before cert expiry (msmtp) |
-| vpn | haproxy | Public ingress ([Networking](networking.md#ingress-the-three-tier-chain)) |
-| vpn | headscale, tailscaled | Mesh VPN coordinator + client |
-| vpn | geoip_generator (timer) | Daily GeoIP map refresh for HAProxy |
+| vpnsvcs | haproxy | Public ingress ([Networking](networking.md#ingress-the-three-tier-chain)) |
+| vpnsvcs | headscale, tailscaled | Mesh VPN coordinator + client |
+| vpnsvcs | geoip_generator (timer) | Daily GeoIP map refresh for HAProxy |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
 Proxmox web UIs are exposed internally as pve1/pve2/pbs2/router.janedoe.com through
@@ -184,7 +184,7 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
   and copies the `.tar` to `/var/opt/backups/hass/` (last 8 kept), so it rides in
   the VM backup. Restore from Settings >> System >> Backups; recorder history
   (`hassdb`) is not in the archive.
-- VPS: no vzdump covers it, so `ssh autoadmin@vpn backup_full` tars its whole root
+- VPS: no vzdump covers it, so `ssh -p 2202 autoadmin@vpnsvcs backup_full` tars its whole root
   filesystem, with a consistent Headscale DB snapshot, to `/var/opt/backups/full/` on
-  vpn (last 2 kept) for pve1 to pull. Restore steps in
-  [the VPN guide](guides/vpn.md#backup-and-restore).
+  vpnsvcs (last 2 kept) for pve1 to pull. Restore steps in
+  [the VPN guide](guides/vpnsvcs.md#backup-and-restore).

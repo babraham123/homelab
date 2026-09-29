@@ -18,7 +18,7 @@ tools/upload_src.sh secsvcs "$project_dir" || echo "secsvcs upload failed"
 tools/upload_src.sh homesvcs "$project_dir" || echo "homesvcs upload failed"
 tools/upload_src.sh pve2 "$project_dir" || echo "pve2 upload failed"
 tools/upload_src.sh websvcs "$project_dir" || echo "websvcs upload failed"
-tools/upload_src.sh vpn "$project_dir" || echo "vpn upload failed"
+tools/upload_src.sh vpnsvcs "$project_dir" || echo "vpnsvcs upload failed"
 tools/upload_src.sh router "$project_dir" || echo "router upload failed"
 tools/upload_src.sh devtop "$project_dir" || echo "devtop upload failed"
 
