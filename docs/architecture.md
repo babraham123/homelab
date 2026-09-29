@@ -22,7 +22,7 @@ flowchart TB
     inet(("Internet"))
 
     subgraph cloud["Linode VPS (cloud)"]
-        haproxy["HAProxy on vpn<br/>12.34.56.78 :80, :443<br/>SNI routing, rate limiting"]
+        haproxy["HAProxy on vpnsvcs<br/>12.34.56.78 :80, :443<br/>SNI routing, rate limiting"]
         headscale["Headscale + DERP<br/>mesh coordinator"]
     end
 
@@ -141,7 +141,7 @@ pve2 runs `websvcs`, `devtop`, the Windows `gaming` VM, and Proxmox Backup Serve
 (`pbs2`). GPU/PCI passthrough setup is covered in [the GPU guide](guides/gpu.md) and
 [the Proxmox guide](guides/proxmox.md).
 
-### vpn: cloud VPS
+### vpnsvcs: cloud VPS
 
 Smallest Linode shared-CPU instance. The only machine with a public IP. Runs HAProxy,
 Headscale, Tailscale, and the GeoIP map generator directly on the host (no containers).
@@ -163,7 +163,7 @@ Headscale, Tailscale, and the GeoIP map generator directly on the host (no conta
 |----------|---------|--------------|
 | pve1 | Proxmox hypervisor (mini PC), always on | self |
 | pve2 | Proxmox hypervisor (tower), intermittent, has accelerators | self |
-| vpn | VPN coordinator and public endpoint (Headscale, HAProxy) | Linode |
+| vpnsvcs | VPN coordinator and public endpoint (Headscale, HAProxy) | Linode |
 | router | Routing, firewall and VLAN management (pfSense) | pve1 |
 | secsvcs | Core services: auth, user management, monitoring | pve1 |
 | homesvcs | Home automation (Home Assistant, MQTT, ESPHome) | pve1 |

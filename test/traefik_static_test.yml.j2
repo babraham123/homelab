@@ -20,18 +20,18 @@ entryPoints:
       aliasHeadersStrategy: delete
     proxyProtocol:
       insecure: false
-      trustedIPs: [{{ vpn.ip }}]
+      trustedIPs: [{{ vpnsvcs.ip }}]
     forwardedHeaders:
       insecure: false
-      trustedIPs: [{{ vpn.ip }}]
+      trustedIPs: [{{ vpnsvcs.ip }}]
   websecure:
     address: ":443/tcp"
     http:
       aliasHeadersStrategy: delete
     proxyProtocol:
       insecure: false
-      trustedIPs: [{{ vpn.ip }}]
+      trustedIPs: [{{ vpnsvcs.ip }}]
     forwardedHeaders:
       insecure: false
-      trustedIPs: [{{ vpn.ip }}]
+      trustedIPs: [{{ vpnsvcs.ip }}]
 ...

@@ -376,7 +376,7 @@ Known issues:
   [reddit thread](https://www.reddit.com/r/selfhosted/comments/17uu41b/headscale_cant_load_derp_map/)
 - macOS clients can't reach advertised subnets:
   [tailscale#4766](https://github.com/tailscale/tailscale/issues/4766)
-- More in the [VPN guide](guides/vpn.md) and Tailscale's
+- More in the [VPN guide](guides/vpnsvcs.md) and Tailscale's
   [troubleshooting docs](https://tailscale.com/kb/1023/troubleshooting/).
 
 ## Ingress: HAProxy and Traefik
@@ -406,7 +406,7 @@ tcpdump -i eth0 -s 1500 \
   '(tcp[((tcp[12:1] & 0xf0) >> 2)+5:1] = 0x01) and (tcp[((tcp[12:1] & 0xf0) >> 2):1] = 0x16)' \
   -nnXSs0 -ttt -w sni.pcap
 # locally
-scp manualadmin@vpn:sni.pcap .
+scp -P 2202 manualadmin@vpnsvcs:sni.pcap .
 ```
 
 ### Traefik (container VMs)

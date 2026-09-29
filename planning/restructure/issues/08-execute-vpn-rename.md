@@ -1,6 +1,6 @@
 # 08. Rename the vpn node to vpnsvcs
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26 (user item 48)
@@ -51,3 +51,10 @@ It changes the Host steps above:
 - The first host cert is signed by hand from pve1, connecting by the old name.
 - Reinstall only the dispatcher, not the services: the headscale case upgrades
   Headscale.
+
+2026-09-28: runbook phase 1 (repo) is done. None of observability/08, observability/10,
+backup-and-dr/10 or restructure/02 had landed, so phase 8 has nothing to rename yet.
+The old/new render diff matches the runbook's expected set; `haproxy.cfg` and
+`traefik/static.yml` are identical. Beyond the runbook table: `pve1_recovery.md.j2:224`'s
+node list, and `pve1.md.j2`'s "services in VPN" lines. No homesite redirect for
+`guides/vpn.md`: the maintainer dropped it. Phases 2–7 (human) remain.

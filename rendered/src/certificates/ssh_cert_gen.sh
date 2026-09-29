@@ -6,7 +6,7 @@ set -euo pipefail
 
 /root/homelab-rendered/src/debian/is_root.sh
 /root/homelab-rendered/src/debian/is_reachable.sh pve2
-/root/homelab-rendered/src/debian/is_reachable.sh vpn
+/root/homelab-rendered/src/debian/is_reachable.sh vpnsvcs
 /root/homelab-rendered/src/debian/is_reachable.sh secsvcs
 /root/homelab-rendered/src/debian/is_reachable.sh websvcs
 /root/homelab-rendered/src/debian/is_reachable.sh homesvcs
@@ -21,15 +21,18 @@ chmod 644 known_hosts
 function configure_server() {
   host=$1
   port="22"
-  if [[ "$host" == "vpn" ]]; then
+  principals="${host}.janedoe.com"
+  if [[ "$host" == "vpnsvcs" ]]; then
     port="2202"
+    # vpn.janedoe.com is the Headscale endpoint on the same box; callers still use it
+    principals+=",vpn.janedoe.com"
   fi
   echo "Configuring SSH CA for ${host}"
   scp -P "$port" ca_ssh_key.pub "autoadmin@${host}:/home/autoadmin"
 
   scp -P "$port" "autoadmin@${host}:/etc/ssh/ssh_host_ed25519_key.pub" "public/${host}.ssh_host_key.pub"
   addr=$(dig "${host}.janedoe.com" +short)
-  ssh-keygen -s ca_ssh_host_key -I "$host" -h -n "${host}.janedoe.com,${addr}" -V +395d "public/${host}.ssh_host_key.pub"
+  ssh-keygen -s ca_ssh_host_key -I "$host" -h -n "${principals},${addr}" -V +395d "public/${host}.ssh_host_key.pub"
   chmod 444 "public/${host}.ssh_host_key-cert.pub"
   scp -P "$port" "public/${host}.ssh_host_key-cert.pub" "autoadmin@${host}:/home/autoadmin/ssh_host_key_cert.pub"
   scp -P "$port" known_hosts "autoadmin@${host}:/home/autoadmin"
@@ -42,7 +45,7 @@ configure_server secsvcs
 configure_server homesvcs
 configure_server pve2
 configure_server websvcs
-configure_server vpn
+configure_server vpnsvcs
 configure_server devtop
 
 # router

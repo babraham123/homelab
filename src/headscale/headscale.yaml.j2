@@ -111,7 +111,7 @@ derp:
 
     # For better connection stability (especially when using an Exit-Node and DNS is not working),
     # it is possible to optionally add the public IPv4 and IPv6 address to the Derp-Map using:
-    ipv4: {{ vpn.ip }}
+    ipv4: {{ vpnsvcs.ip }}
     # ipv6: 2001:db8::1
 
   # List of externally available DERP maps encoded in JSON
@@ -253,7 +253,7 @@ policy:
   mode: file
   # If the mode is set to "file", the path to a
   # HuJSON file containing ACL policies. Rendered from headscale_acl.hujson.j2 and
-  # installed by src/vpn/install_svcs.sh; membership comes from vars.yml.
+  # installed by src/vpnsvcs/install_svcs.sh; membership comes from vars.yml.
   path: "/etc/headscale/acl.hujson"
 
 ## DNS

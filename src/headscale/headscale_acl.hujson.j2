@@ -9,7 +9,7 @@
 // Users: `name@` refers to a Headscale user. OIDC logins (Authelia) get their username
 // from `preferred_username`, so an LLDAP user `jane` is `jane@`. Headscale strips one trailing
 // `@` and matches the stored name, so a user created as `jane@` never matches: store names
-// without `@`. Guests are the `guest1` user (vpn.md.j2 "Guest users"); one-off rules come from
+// without `@`. Guests are the `guest1` user (vpnsvcs.md.j2 "Guest users"); one-off rules come from
 // `tailscale_extra_acls` in vars.yml. OIDC groups can't be used in policy rules (juanfont/headscale#2366, see
 // planning/auth/issues/09-headscale-oidc-groups.md); membership is defined in `groups` below.
 {
@@ -18,7 +18,7 @@
   "groups": {
     "group:admin": ["{{ tailscale_admin }}@"],
     "group:family": ["{{ users | join('@", "') }}@"], // note for future: add_more_users
-    // guests: visitors' devices, created per docs/guides/vpn.md.j2 "Guest users"
+    // guests: visitors' devices, created per docs/guides/vpnsvcs.md.j2 "Guest users"
     "group:guests": ["guest1@"],
   },
   // hosts should be defined using its IP addresses and a subnet mask.
@@ -86,7 +86,7 @@
       ]
     },
     // public endpoint (HAProxy on the VPS, user `public`): only the web front doors.
-    // Mirrors the ufw egress rules in docs/guides/vpn.md.j2.
+    // Mirrors the ufw egress rules in docs/guides/vpnsvcs.md.j2.
     {
       "action": "accept",
       "src": ["public@"],

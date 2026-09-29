@@ -8,7 +8,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 - **node** — a machine with a directory under `src/` holding its `install_svcs.sh`,
   `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config, and an entry in
   `src/nodes.yml`. The nodes:
-  `pve1`, `pve2`, `router`, `vpn`, `secsvcs`, `homesvcs`, `websvcs`, `devtop`,
+  `pve1`, `pve2`, `router`, `vpnsvcs`, `secsvcs`, `homesvcs`, `websvcs`, `devtop`,
   `gaming`. `src/debian/` and `src/macos/` are shared base setups, not nodes.
 - **service** — any other directory under `src/`; one containerized (or host-level)
   application: its quadlet `*.container` file, volumes, and config templates.

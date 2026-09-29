@@ -38,7 +38,7 @@ site:
 tail_domain: "janedoe.ts.net"
 
 # Hosts
-vpn:
+vpnsvcs:
   ip: 12.34.56.78
 router:
   ip: 192.168.1.1

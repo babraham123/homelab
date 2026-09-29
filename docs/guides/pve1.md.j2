@@ -160,10 +160,11 @@ openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pe
 cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
 chmod 444 intermediate/certs/ca-chain.cert.pem
 
-function upload() { scp intermediate/certs/ca-chain.cert.pem "autoadmin@${1}:/home/autoadmin"; ssh "autoadmin@${1}" "install_ca"; }
+# Optional second argument: the SSH port (vpnsvcs listens on 2202)
+function upload() { scp -P "${2:-22}" intermediate/certs/ca-chain.cert.pem "autoadmin@${1}:/home/autoadmin"; ssh -p "${2:-22}" "autoadmin@${1}" "install_ca"; }
 upload pve1
 upload pve2
-upload vpn
+upload vpnsvcs 2202
 upload secsvcs
 upload homesvcs
 upload websvcs
@@ -189,7 +190,7 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/w
 ### Manage certs
 - Create domain specific keys and certs
 ```bash
-# Wait until the services in VPN, secsvcs, websvcs and homesvcs are setup but not yet started
+# Wait until the services in vpnsvcs, secsvcs, websvcs and homesvcs are setup but not yet started
 /root/homelab-rendered/src/certificates/self_signed_key_gen.sh
 /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 ```
@@ -204,7 +205,7 @@ cd /root/acme
 TCD_VERSION=$(curl -s "https://api.github.com/repos/ldez/traefik-certs-dumper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
 wget "https://github.com/ldez/traefik-certs-dumper/releases/download/v${TCD_VERSION}/traefik-certs-dumper_v${TCD_VERSION}_linux_amd64.tar.gz" -O - | tar xz
 mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
-# Wait until the services in VPN, secsvcs, websvcs and homesvcs are started
+# Wait until the services in vpnsvcs, secsvcs, websvcs and homesvcs are started
 /root/homelab-rendered/src/certificates/acme_transfer.sh
 ```
 

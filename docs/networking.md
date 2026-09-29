@@ -137,7 +137,7 @@ types are visible from a given VLAN.
 
 External requests cross three layers, each with a distinct job:
 
-1. **HAProxy on vpn** is the only public listener (:80, :443). It runs in TCP mode for
+1. **HAProxy on vpnsvcs** is the only public listener (:80, :443). It runs in TCP mode for
    HTTPS: it inspects the TLS ClientHello's SNI and routes to a backend VM *without
    terminating TLS*. Rate limiting, geo-blocking, and attack-path filtering happen
    here (see [Security](security.md#the-edge-haproxy)).
@@ -153,7 +153,7 @@ External requests cross three layers, each with a distinct job:
 sequenceDiagram
     autonumber
     participant C as External client
-    participant H as HAProxy on vpn
+    participant H as HAProxy on vpnsvcs
     participant T as Traefik on homesvcs
     participant A as Authelia on secsvcs
     participant S as Home Assistant (10.12.0.11)

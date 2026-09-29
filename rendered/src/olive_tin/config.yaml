@@ -772,71 +772,71 @@ dashboards:
               maxConcurrent: 1
               timeout: 60
 
-      - title: vpn
+      - title: vpnsvcs
         type: fieldset
         contents:
 
           - inlineAction:
-              title: vpn Install Headscale
+              title: vpnsvcs Install Headscale
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn install_headscale
-              id: vpn_install_headscale
+              shell: ssh autoadmin@vpnsvcs install_headscale
+              id: vpnsvcs_install_headscale
               maxConcurrent: 1
               timeout: 60
 
           - inlineAction:
-              title: vpn Install Tailscaled
+              title: vpnsvcs Install Tailscaled
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn install_tailscaled
-              id: vpn_install_tailscaled
+              shell: ssh autoadmin@vpnsvcs install_tailscaled
+              id: vpnsvcs_install_tailscaled
               maxConcurrent: 1
               timeout: 60
 
           - inlineAction:
-              title: vpn Install Haproxy
+              title: vpnsvcs Install Haproxy
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn install_haproxy
-              id: vpn_install_haproxy
+              shell: ssh autoadmin@vpnsvcs install_haproxy
+              id: vpnsvcs_install_haproxy
               maxConcurrent: 1
               timeout: 60
 
           - inlineAction:
-              title: vpn Install Geoip Generator
+              title: vpnsvcs Install Geoip Generator
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn install_geoip_generator
-              id: vpn_install_geoip_generator
+              shell: ssh autoadmin@vpnsvcs install_geoip_generator
+              id: vpnsvcs_install_geoip_generator
               maxConcurrent: 1
               timeout: 60
 
           - inlineAction:
-              title: vpn Backup Full
+              title: vpnsvcs Backup Full
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn backup_full
-              id: vpn_backup_full
+              shell: ssh autoadmin@vpnsvcs backup_full
+              id: vpnsvcs_backup_full
               maxConcurrent: 1
               timeout: 60
 
           - inlineAction:
-              title: vpn Install Ssh Ca
+              title: vpnsvcs Install Ssh Ca
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn install_ssh_ca
-              id: vpn_install_ssh_ca
+              shell: ssh autoadmin@vpnsvcs install_ssh_ca
+              id: vpnsvcs_install_ssh_ca
               maxConcurrent: 1
               timeout: 60
 
           - inlineAction:
-              title: vpn Install Dispatcher
+              title: vpnsvcs Install Dispatcher
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn install_dispatcher
-              id: vpn_install_dispatcher
+              shell: ssh autoadmin@vpnsvcs install_dispatcher
+              id: vpnsvcs_install_dispatcher
               maxConcurrent: 1
               timeout: 60
 
           - inlineAction:
-              title: vpn Install Ca
+              title: vpnsvcs Install Ca
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpn install_ca
-              id: vpn_install_ca
+              shell: ssh autoadmin@vpnsvcs install_ca
+              id: vpnsvcs_install_ca
               maxConcurrent: 1
               timeout: 60
 

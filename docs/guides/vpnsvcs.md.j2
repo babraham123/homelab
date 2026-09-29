@@ -8,12 +8,12 @@
 ### Basic setup
 - Setup smallest, CPU shared VM in [Linode](https://www.linode.com/)
 - Basic [Debian Linux setup](./debian.md)
-  - `ssh root@{{ vpn.ip }}`
+  - `ssh root@{{ vpnsvcs.ip }}`
 
 ### Security hardening
 - Move the ssh port
 ```bash
-ssh manualadmin@vpn.{{ vpn.ip }}
+ssh manualadmin@{{ vpnsvcs.ip }}
 sudo su
 # write "Port 2202"
 vim /etc/ssh/sshd_config
@@ -24,7 +24,7 @@ exit
 ```
 - Firewall rules
 ```bash
-ssh -p 2202 manualadmin@vpn.{{ vpn.ip }}
+ssh -p 2202 manualadmin@{{ vpnsvcs.ip }}
 sudo su
 ufw deny 22/tcp
 ufw allow http
@@ -52,7 +52,7 @@ fail2ban-client -d | grep sshd
 ```bash
 mkdir -p /etc/opt/secrets
 chmod 711 /etc/opt/secrets
-src/vpn/install_svcs.sh headscale
+src/vpnsvcs/install_svcs.sh headscale
 cp src/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
 ```
@@ -103,7 +103,7 @@ exit
 
 - Store the secrets
 ```bash
-ssh -p 2202 manualadmin@{{ vpn.ip }}
+ssh -p 2202 manualadmin@{{ vpnsvcs.ip }}
 sudo su
 # Grab the oidc client id and the raw version of the client secret from the steps above
 vim /etc/opt/secrets/hs_oidc_id
@@ -116,10 +116,10 @@ chmod 600 /etc/opt/secrets/*
 ```bash
 sudo su
 cd /root/homelab-rendered
-src/vpn/install_svcs.sh haproxy
+src/vpnsvcs/install_svcs.sh haproxy
 ```
 - Update Headscale
-  - `src/vpn/install_svcs.sh headscale`
+  - `src/vpnsvcs/install_svcs.sh headscale`
 - Update your DNS A record
   - Change the host from `vpn` to all subdomains `*`
   - Add another A record for the bare domain, host = `@`
@@ -140,7 +140,7 @@ src/vpn/install_svcs.sh haproxy
 headscale users create public
 headscale --user USER_ID preauthkeys create --expiration 100y
 # Setup client
-src/vpn/install_svcs.sh tailscaled
+src/vpnsvcs/install_svcs.sh tailscaled
 tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --snat-subnet-routes=false --authkey AUTH_KEY
 # Clamp MTU
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
@@ -204,16 +204,16 @@ getent hosts metrics.{{ site.url }}   # should print {{ secsvcs.ip }}
 ```bash
 ssh manualadmin@pve1
 ssh autoadmin@secsvcs build_haproxy_mapper
-scp -3 autoadmin@secsvcs:/home/autoadmin/email.txt scp://autoadmin@vpn:2202//home/autoadmin
+scp -3 autoadmin@secsvcs:/home/autoadmin/email.txt scp://autoadmin@vpnsvcs:2202//home/autoadmin
 # copy the license key on pve1
 sudo SOPS_AGE_KEY_FILE="/root/secrets/age.txt" sops /root/secrets/pve1.yaml | yq ".maxmind_license_key"
 exit
 
-# back on vpn, paste in the license key
+# back on vpnsvcs, paste in the license key
 vim /etc/opt/secrets/maxmind_license_key
 chmod 600 /etc/opt/secrets/maxmind_license_key
 # install and run geoip service
-/root/homelab-rendered/src/vpn/install_svcs.sh geoip_generator
+/root/homelab-rendered/src/vpnsvcs/install_svcs.sh geoip_generator
 systemctl start geoip_generator.service
 ```
 
@@ -238,7 +238,7 @@ tailscale ping --tsmp other_node
 
 - For Debian ([src](https://tailscale.com/kb/1626/install-debian-trixie))
 ```bash
-src/vpn/install_svcs.sh tailscaled
+src/vpnsvcs/install_svcs.sh tailscaled
 sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes --authkey AUTH_KEY
 # --exit-node=router
 ```
@@ -247,12 +247,12 @@ sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes 
 
 ## ACL policy
 `src/headscale/headscale_acl.hujson.j2` is installed as `/etc/headscale/acl.hujson` by
-`src/vpn/install_svcs.sh headscale`. Membership comes from `vars.yml` (`users`,
+`src/vpnsvcs/install_svcs.sh headscale`. Membership comes from `vars.yml` (`users`,
 `tailscale_admin`, `tailscale_extra_acls`). Every user referenced must exist in
 `headscale users list` with that exact name (no trailing `@`; the `@` is only in the
 policy).
 ```bash
-# after tools/upload_src.sh vpn ...
+# after tools/upload_src.sh vpnsvcs ...
 cd /root/homelab-rendered/src
 cp headscale/headscale_acl.hujson /etc/headscale/acl.hujson
 headscale policy check --file /etc/headscale/acl.hujson --bypass-grpc-and-access-database-directly
@@ -291,19 +291,19 @@ EOF
 
 ## Backup and restore
 Archive the whole root filesystem, with a consistent snapshot of the Headscale DB, to
-`/var/opt/backups/full/vpn-full-TIMESTAMP.tar.zst` (newest 2 kept). Only the copy
+`/var/opt/backups/full/vpnsvcs-full-TIMESTAMP.tar.zst` (newest 2 kept). Only the copy
 pulled off the box survives losing the VPS.
 ```bash
 # From pve1
-ssh -p 2202 autoadmin@vpn backup_full
-scp -P 2202 'autoadmin@vpn:/var/opt/backups/full/vpn-full-*.tar.zst' /root/backups/
+ssh -p 2202 autoadmin@vpnsvcs backup_full
+scp -P 2202 'autoadmin@vpnsvcs:/var/opt/backups/full/vpnsvcs-full-*.tar.zst' /root/backups/
 ```
 
 - Restore one file, e.g. the Headscale DB
 ```bash
 mkdir /tmp/restore
-zstd -dc vpn-full-TIMESTAMP.tar.zst | tar -x -C /tmp/restore ./var/lib/headscale/db.sqlite
-# on vpn: systemctl stop headscale, replace db.sqlite, delete db.sqlite-wal/-shm, start
+zstd -dc vpnsvcs-full-TIMESTAMP.tar.zst | tar -x -C /tmp/restore ./var/lib/headscale/db.sqlite
+# on vpnsvcs: systemctl stop headscale, replace db.sqlite, delete db.sqlite-wal/-shm, start
 ```
 
 - Restore the whole VPS onto a new Linode
@@ -316,16 +316,16 @@ zstd -dc vpn-full-TIMESTAMP.tar.zst | tar -x -C /tmp/restore ./var/lib/headscale
     pve1 because the rescue system runs from RAM.
 ```bash
 ssh root@NEW_IP 'mkdir -p /media/sda && mount /dev/sda /media/sda && rm -rf /media/sda/*'
-zstd -dc vpn-full-TIMESTAMP.tar.zst | \
+zstd -dc vpnsvcs-full-TIMESTAMP.tar.zst | \
   ssh root@NEW_IP 'tar -x --numeric-owner --acls --xattrs -C /media/sda'
 # The new disk has a new filesystem UUID; regenerate the boot config for it
 ssh root@NEW_IP 'cd /media/sda && for d in dev proc sys; do mount --bind /$d $d; done && chroot . update-grub'
 ```
-  - Reboot out of Rescue Mode. If the public IP changed, update `vpn.ip` in
-    `vars.yml`, the `vpn` A record, and redeploy. Tailnet nodes reconnect on their own:
+  - Reboot out of Rescue Mode. If the public IP changed, update `vpnsvcs.ip` in
+    `vars.yml`, the `*` A record, and redeploy. Tailnet nodes reconnect on their own:
     the Headscale DB, noise key and SSH host keys are the originals.
 
 ## Upgrade
 [Headscale docs](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)
 
-- Back up first: `ssh -p 2202 autoadmin@vpn.{{ site.url }} backup_full`
+- Back up first: `ssh -p 2202 autoadmin@vpnsvcs.{{ site.url }} backup_full`
