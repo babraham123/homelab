@@ -25,7 +25,7 @@ PR 3216 makes headscale persist the OIDC `groups` claim per user and resolve
 
 1. Wait for a headscale release whose changelog includes PR 3216 (check with
    `gh pr view 3216 -R juanfont/headscale --json state,mergedAt` and the release notes).
-2. Upgrade headscale (see `docs/guides/vpn.md.j2` "Upgrade").
+2. Upgrade headscale (see `docs/guides/vpnsvcs.md.j2` "Upgrade").
 3. In LLDAP create the groups the policy uses: `tailscale_admin`, `tailscale_family`,
    `tailscale_guests`. Add them to Authelia's `headscale` claims policy (`groups` is
    already in the id_token) so they appear in the `groups` claim.

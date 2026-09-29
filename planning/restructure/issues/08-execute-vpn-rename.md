@@ -63,5 +63,5 @@ node list, and `pve1.md.j2`'s "services in VPN" lines. No homesite redirect for
 finds nothing. Follow-up in the repo: short names from pve1 fell back to trust-on-first-use,
 because `@cert-authority *.SITE` only matches full names. `install_ssh_ca` now installs
 `src/debian/ssh_config` (canonicalize short names, port 2202 for the VPS) as
-`/etc/ssh/ssh_config.d/homelab.conf`. Phase 8 applies to observability/08,
-observability/10 and backup-and-dr/10 when they land; each has a comment.
+`/etc/ssh/ssh_config.d/homelab.conf`. Phase 8 is moot: observability/08, observability/10,
+observability/12, backup-and-dr/10 and restructure/02 now use `vpnsvcs` directly.

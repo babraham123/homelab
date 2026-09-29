@@ -25,8 +25,8 @@ this ticket is its HAProxy half. The VPS vmagent that scrapes it is observabilit
    ```
    First confirm the build has it: `haproxy -vv | grep -i prometheus` (Debian trixie's
    3.0.x is built with `USE_PROMEX=1`).
-2. **Scrape job.** Add `haproxy` to `src/vpn/prometheus.yml.j2` (created by 08):
-   target `127.0.0.1:8405`, with `instance` relabelled to `vpn.SITE:8405`.
+2. **Scrape job.** Add `haproxy` to `src/vpnsvcs/prometheus.yml.j2` (created by 08):
+   target `127.0.0.1:8405`, with `instance` relabelled to `vpnsvcs.SITE:8405`.
 3. **No `check` on the backend servers.** Maintainer decision: each backend has one
    server, so a health check buys no failover, and a false DOWN would cut traffic.
    Detect an unreachable VM from connection errors instead.
@@ -52,7 +52,7 @@ this ticket is its HAProxy half. The VPS vmagent that scrapes it is observabilit
 
 - `curl -s 127.0.0.1:8405/metrics | head` works on the VPS, and `ss -ltnp` shows 8405
   bound to `127.0.0.1` only.
-- `up{job="haproxy",host="vpn.SITE"} == 1` in VictoriaMetrics.
+- `up{job="haproxy",host="vpnsvcs.SITE"} == 1` in VictoriaMetrics.
 - Stopping Traefik on websvcs for 5 minutes fires `HaproxyBackendConnectErrors` for the
   websvcs backends, once a request hits them.
 - The dashboard shows non-zero drop rates from normal scanner traffic.

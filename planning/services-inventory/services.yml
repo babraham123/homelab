@@ -97,9 +97,9 @@ secrets:
   olive_tin_oidc_secret:      {owner: olive_tin,  gen: *oidc_hash}
   olive_tin_oidc_secret_hash: {owner: olive_tin,  gen: *oidc_hash}
   # Secrets owned elsewhere but minted on secsvcs because Authelia is the issuer.
-  hs_oidc_id:               {owner: headscale,    gen: *oidc_id,  remote: vpn}
-  hs_oidc_secret:           {owner: headscale,    gen: *oidc_hash, remote: vpn}
-  hs_oidc_secret_hash:      {owner: headscale,    gen: *oidc_hash, remote: vpn}
+  hs_oidc_id:               {owner: headscale,    gen: *oidc_id,  remote: vpnsvcs}
+  hs_oidc_secret:           {owner: headscale,    gen: *oidc_hash, remote: vpnsvcs}
+  hs_oidc_secret_hash:      {owner: headscale,    gen: *oidc_hash, remote: vpnsvcs}
   hass_pg_password:         {owner: home_assistant, gen: *alnum20, remote: homesvcs}
   hass_oidc_id:             {owner: home_assistant, gen: *oidc_id, remote: homesvcs}
   hass_oidc_secret:         {owner: home_assistant, gen: *oidc_hash, remote: homesvcs}

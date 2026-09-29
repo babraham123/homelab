@@ -16,7 +16,7 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
   nothing copies them anywhere except the planned escrow (04).
 - **pve2 host and PBS:** `/etc/pve`, `/etc/proxmox-backup` (datastore config, users,
   `encryption-key`), network config.
-- **vpn (VPS):** Headscale's database and noise private key, `/etc/ssh` host keys and
+- **vpnsvcs (VPS):** Headscale's database and noise private key, `/etc/ssh` host keys and
   cert, ufw rules. Losing the Headscale DB re-registers every tailnet node.
 - **router:** pfSense `config.xml`. ACB covers it only if the device key is recoverable
   (09's TODO); a local copy removes that dependency.
@@ -57,7 +57,7 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
 
 ## Comments
 
-2026-09-27: vpn is covered by 12's `backup_full` (whole root, consistent Headscale DB). For vpn, step 3 pulls `/var/opt/backups/full/vpn-full-*.tar.zst` after running it, instead of a `backup_files` built from `backup_paths`.
+2026-09-27: vpnsvcs is covered by 12's `backup_full` (whole root, consistent Headscale DB). For vpnsvcs, step 3 pulls `/var/opt/backups/full/vpnsvcs-full-*.tar.zst` after running it, instead of a `backup_files` built from `backup_paths`.
 
 - 2026-09-27: 01 landed. Steps are `step_<name>` functions listed in `STEPS` in
   `src/pve1/backup_orchestrator.sh.j2`. A failing step is recorded and the run continues
@@ -65,5 +65,3 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
   the pulls before `vzdump_pve1` so pve1's collection lands before the PBS upload, and
   give each host its own step (e.g. `files_<node>`) so each gets its own
   `homelab_backup_last_success_timestamp_seconds{job=...}` series.
-
-2026-09-28 (restructure/08): the vpn node is now `vpnsvcs`: `src/vpnsvcs/`, `vpnsvcs.ip`, host `vpnsvcs.SITE`, guide `docs/guides/vpnsvcs.md.j2`, archives `vpnsvcs-full-*`. `vpn.SITE` stays the Headscale endpoint. Use the new names where this ticket says vpn; see phase 8 of `planning/restructure/vpn-rename-runbook.md`.
