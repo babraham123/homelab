@@ -9,6 +9,9 @@ cd /home/autoadmin
 case $1 in
   install_ssh_ca)
     # Moves SSH public keys into their respective locations and restarts sshd.
+    # First, so a stale upload without it fails before anything is moved
+    install -m 644 /root/homelab-rendered/src/debian/ssh_config /etc/ssh/ssh_config.d/homelab.conf
+
     chown root:root ca_ssh_key.pub
     mv ca_ssh_key.pub /etc/ssh
 

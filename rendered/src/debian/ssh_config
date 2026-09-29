@@ -1,0 +1,15 @@
+# SSH client config, installed as:
+#   - /etc/ssh/ssh_config.d/homelab.conf on Debian nodes, by `install_ssh_ca`
+#   - ~/.ssh/config on the Mac (docs/guides/mac_personal.md)
+#   - /home/olivetin/.ssh/config in the OliveTin container
+
+# Short names like `vpnsvcs` become `vpnsvcs.janedoe.com`, so they match the host
+# cert principals and the `@cert-authority *.janedoe.com` known_hosts line
+CanonicalizeHostname yes
+CanonicalDomains janedoe.com
+# Optional: controls how many dots before considering a hostname fully qualified
+CanonicalizeMaxDots 0
+
+# ufw only opens 2202 for SSH on the VPS
+Host vpnsvcs.janedoe.com vpn.janedoe.com
+  Port 2202

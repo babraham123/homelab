@@ -57,7 +57,7 @@ tools/render_src.sh /tmp/homelab-rendered
 cd /tmp/homelab-rendered/src
 cp debian/aliases.zsh ~/.oh-my-zsh/custom
 cp debian/functions.zsh ~/.oh-my-zsh/custom
-cp macos/ssh.config ~/.ssh/config
+cp debian/ssh_config ~/.ssh/config
 chmod 600 ~/.ssh/config
 ```
 
