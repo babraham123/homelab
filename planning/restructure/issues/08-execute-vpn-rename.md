@@ -1,6 +1,6 @@
 # 08. Rename the vpn node to vpnsvcs
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26 (user item 48)
@@ -58,3 +58,10 @@ The old/new render diff matches the runbook's expected set; `haproxy.cfg` and
 `traefik/static.yml` are identical. Beyond the runbook table: `pve1_recovery.md.j2:224`'s
 node list, and `pve1.md.j2`'s "services in VPN" lines. No homesite redirect for
 `guides/vpn.md`: the maintainer dropped it. Phases 2–7 (human) remain.
+
+2026-09-28: phases 2–7 done by the maintainer; resolved. `git grep -n '{{ vpn\.' src docs`
+finds nothing. Follow-up in the repo: short names from pve1 fell back to trust-on-first-use,
+because `@cert-authority *.SITE` only matches full names. `install_ssh_ca` now installs
+`src/debian/ssh_config` (canonicalize short names, port 2202 for the VPS) as
+`/etc/ssh/ssh_config.d/homelab.conf`. Phase 8 applies to observability/08,
+observability/10 and backup-and-dr/10 when they land; each has a comment.

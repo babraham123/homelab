@@ -92,3 +92,5 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   `tmpDataPath=/vmagentdata` and `maxDiskUsagePerURL=1GiB`, so the VPS branch inherits
   them. Both blockers (04, 11) are resolved, so this ticket is unblocked. observability/12
   follows it.
+
+2026-09-28 (restructure/08): the vpn node is now `vpnsvcs`: `src/vpnsvcs/`, `vpnsvcs.ip`, host `vpnsvcs.SITE`, guide `docs/guides/vpnsvcs.md.j2`, archives `vpnsvcs-full-*`. `vpn.SITE` stays the Headscale endpoint. Use the new names where this ticket says vpn; see phase 8 of `planning/restructure/vpn-rename-runbook.md`.
