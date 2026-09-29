@@ -23,7 +23,7 @@ inventory or a node.
   is a runtime check; for static validation use `traefik validate` if available in your
   version, otherwise start-and-ping in a throwaway network.
 - authelia: `authelia config validate`.
-- haproxy (vpn): `haproxy -c -f /root/homelab-rendered/src/haproxy/haproxy.cfg`.
+- haproxy (vpnsvcs): `haproxy -c -f /root/homelab-rendered/src/haproxy/haproxy.cfg`.
 - vmalert: `vmalert -rule=/path/*.yml -dryRun`.
 - alertmanager: `amtool check-config`; ntfy-alertmanager: dry start (observability/10).
 - Gatus: no validator; start and check `/health`.

@@ -34,17 +34,17 @@ with no resource argument, only uniformity.
 Design from observability/04's Answer: every container uses `Network=host` and binds to
 loopback, and vmagent pushes to secsvcs. Nothing new listens off `127.0.0.1`.
 
-Quadlets under `src/vpn/`:
+Quadlets under `src/vpnsvcs/`:
 
 - `node_exporter` (reuse `src/node_exporter/`, textfile collector directory as on the
   other nodes): `--web.listen-address=127.0.0.1:9100`, `--pid=host`, `/` mounted at
   `/host:ro,rslave` with `--path.rootfs=/host`;
 - `fluentbit` (journald → VictoriaLogs at `logs.SITE`; reuse `src/fluentbit/` with the
   VPS's unit list): `http_listen: 127.0.0.1`;
-- `vmagent` (the shared template, with a `Network=host` branch and a `vpn)` case in
+- `vmagent` (the shared template, with a `Network=host` branch and a `vpnsvcs)` case in
   `render_host.sh`): scrapes node_exporter, Headscale (`127.0.0.1:9090`), tailscaled
   (`100.100.100.100/metrics`) and fluent-bit, and remote-writes to `metrics.SITE` with
-  `--remoteWrite.label=host=vpn.SITE`. The disk buffer from observability/11 covers
+  `--remoteWrite.label=host=vpnsvcs.SITE`. The disk buffer from observability/11 covers
   tailnet and secsvcs outages.
 
 Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `tailscaled`,
@@ -52,24 +52,24 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
 
 ## Prerequisites
 
-- `src/vpn/install_svcs.sh.j2` grows a `podman` case that installs Podman and copies
+- `src/vpnsvcs/install_svcs.sh.j2` grows a `podman` case that installs Podman and copies
   `src/podman/*.sh` and `containers.conf`. No `net.network`: with host networking,
   netavark adds no nftables rules. Still compare `nft list ruleset` before and after.
 - The telemetry names resolve to secsvcs through `/etc/hosts`, a manual step in
-  `docs/guides/vpn.md.j2`.
+  `docs/guides/vpnsvcs.md.j2`.
 - Secrets pipeline on the VPS (`/etc/opt/secrets/secrets.yaml.age`): check that
-  `secret_update.sh vpn` already works there; add `victoriametrics_admin_password` for
+  `secret_update.sh vpnsvcs` already works there; add `victoriametrics_admin_password` for
   vmagent, the same credential the other vmagents use (maintainer decision 2026-09-27).
 - The VPS joins the image-updater rollout (image-updater/05) so its images are scanned
   like the others.
 - Alerts: `src/vmalert/configs/vps.yml` with `VpsMetricsAbsent`
-  (`absent_over_time(up{job="node_exporter",host="vpn.SITE"}[5m])`). A pushing host can't raise `up == 0`,
+  (`absent_over_time(up{job="node_exporter",host="vpnsvcs.SITE"}[5m])`). A pushing host can't raise `up == 0`,
   so exclude the VPS from observability/01's `NodeDown`.
 
 ## Acceptance
 
 - `systemctl list-units '*.service' | grep Homelab` on the VPS shows the three services.
-- `up{host="vpn.SITE"} == 1` for every scrape job; VPS journal lines appear in
+- `up{host="vpnsvcs.SITE"} == 1` for every scrape job; VPS journal lines appear in
   VictoriaLogs.
 - `ss -ltnp` on the VPS shows no new listeners off loopback; an external port scan shows
   only 80, 443 and the Headscale/SSH ports it showed before.
@@ -92,5 +92,3 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   `tmpDataPath=/vmagentdata` and `maxDiskUsagePerURL=1GiB`, so the VPS branch inherits
   them. Both blockers (04, 11) are resolved, so this ticket is unblocked. observability/12
   follows it.
-
-2026-09-28 (restructure/08): the vpn node is now `vpnsvcs`: `src/vpnsvcs/`, `vpnsvcs.ip`, host `vpnsvcs.SITE`, guide `docs/guides/vpnsvcs.md.j2`, archives `vpnsvcs-full-*`. `vpn.SITE` stays the Headscale endpoint. Use the new names where this ticket says vpn; see phase 8 of `planning/restructure/vpn-rename-runbook.md`.

@@ -88,8 +88,8 @@ reachable over the tailnet, so it watches from outside.
 - **Watchdog rule:** `src/vmalert/configs/pipeline.yml`: `alert: Watchdog`, `expr: vector(1)`,
   `labels: {severity: none}`. Route it in Alertmanager to a `null` receiver so it never
   notifies. It only needs to be *present* in Alertmanager.
-- **VPS checker (pull, not push):** `src/vpn/deadman.sh` + `deadman.{service,timer}`
-  (every 5 min), a new `deadman` case in `src/vpn/install_svcs.sh.j2`.
+- **VPS checker (pull, not push):** `src/vpnsvcs/deadman.sh` + `deadman.{service,timer}`
+  (every 5 min), a new `deadman` case in `src/vpnsvcs/install_svcs.sh.j2`.
   - Over the tailnet:
     - `GET https://alert.{{ site.url }}/api/v2/alerts?filter=alertname="Watchdog"`
       (basic auth). This proves vmalert → Alertmanager is alive and evaluating.
@@ -122,5 +122,3 @@ reachable over the tailnet, so it watches from outside.
 - The suspected defects are either fixed or confirmed harmless, with the reason.
 
 ## Comments
-
-2026-09-28 (restructure/08): the vpn node is now `vpnsvcs`: `src/vpnsvcs/`, `vpnsvcs.ip`, host `vpnsvcs.SITE`, guide `docs/guides/vpnsvcs.md.j2`, archives `vpnsvcs-full-*`. `vpn.SITE` stays the Headscale endpoint. Use the new names where this ticket says vpn; see phase 8 of `planning/restructure/vpn-rename-runbook.md`.

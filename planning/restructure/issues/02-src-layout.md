@@ -11,7 +11,7 @@ Blocked by: 01
 ```
 src/
   base/        debian/ podman/ macos/ certificates/ node_exporter/
-  nodes/       pve1/ pve2/ router/ vpn/ secsvcs/ homesvcs/ websvcs/ devtop/ gaming/
+  nodes/       pve1/ pve2/ router/ vpnsvcs/ secsvcs/ homesvcs/ websvcs/ devtop/ gaming/
   services/    everything else (authelia/ grafana/ traefik/ ...)
   nodes.yml
 ```
@@ -53,5 +53,3 @@ prefixes. Grep the rendered tree for `homelab-rendered/src/[a-z]` paths that don
   `node ~ '/install_svcs.sh'`, `debian/install_svcs.sh` and `router/` prefixes in
   `nodes.jinja`, the `{% import 'src/nodes.jinja' ... %}` lines, and the
   `src/${node}/...` paths in `render_src.sh`'s inventory checks.
-
-2026-09-28 (restructure/08): the vpn node is now `vpnsvcs`: `src/vpnsvcs/`, `vpnsvcs.ip`, host `vpnsvcs.SITE`, guide `docs/guides/vpnsvcs.md.j2`, archives `vpnsvcs-full-*`. `vpn.SITE` stays the Headscale endpoint. Use the new names where this ticket says vpn; see phase 8 of `planning/restructure/vpn-rename-runbook.md`.

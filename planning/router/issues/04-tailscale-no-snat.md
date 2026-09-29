@@ -46,7 +46,7 @@ rules and Traefik (auth/06) see pfSense instead of the tailnet client.
      is fine;
    - optionally add narrower rules or aliases per tailnet IP for defence in depth or
      logging.
-4. **Exit node:** pfSense advertises one (`docs/guides/vpn.md.j2`). Internet-bound
+4. **Exit node:** pfSense advertises one (`docs/guides/vpnsvcs.md.j2`). Internet-bound
    tailnet traffic now leaves WAN with a 100.x source. Switch Outbound NAT to Hybrid
    and add WAN rules translating `100.64.0.0/10` (and the ULA /48, if IPv6 exit is used)
    to the WAN address.

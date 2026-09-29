@@ -23,7 +23,7 @@ IPs and every guide. The whole network map on the least-trusted VM.
   Exclude `docs/`, `probes/`, `LICENSE`, `README.md`, and all other nodes.
 - `install_svcs.sh` paths are unchanged (`/root/homelab-rendered/src/...`) because the
   subset preserves the tree shape.
-- pve1 additionally gets `src/certificates/` and `src/pve1/`; the vpn node gets
+- pve1 additionally gets `src/certificates/` and `src/pve1/`; vpnsvcs gets
   `haproxy/`, `headscale/`.
 
 ## Acceptance

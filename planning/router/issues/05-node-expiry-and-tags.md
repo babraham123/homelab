@@ -24,34 +24,34 @@ only. Tags need `tagOwners` in the policy, which needs the policy loaded (03).
 ## Change
 
 1. Policy (`src/headscale/headscale_acl.hujson.j2`):
-   - add `"tagOwners": { "tag:router": ["group:admin"], "tag:vpn": ["group:admin"] }`;
+   - add `"tagOwners": { "tag:router": ["group:admin"], "tag:vpnsvcs": ["group:admin"] }`;
    - replace the `admin@` and `public@` sources/destinations with `tag:router` and
-     `tag:vpn` (the public-endpoint rule becomes `src: ["tag:vpn"]`; the self rules for
+     `tag:vpnsvcs` (the public-endpoint rule becomes `src: ["tag:vpnsvcs"]`; the self rules for
      those two users go away);
    - `autoApprovers`: `routes` for the router's subnets and `exitNode` for `tag:router`,
      so re-registration doesn't leave routes unapproved;
-   - update `tests` (`src` for a tagged node is `tag:vpn`, not a user).
+   - update `tests` (`src` for a tagged node is `tag:vpnsvcs`, not a user).
    Keep `cousin` user-owned unless it becomes infrastructure too.
 2. Create tagged, reusable pre-auth keys:
    ```bash
    headscale preauthkeys create --reusable --expiration 100y --tags tag:router
-   headscale preauthkeys create --reusable --expiration 100y --tags tag:vpn
+   headscale preauthkeys create --reusable --expiration 100y --tags tag:vpnsvcs
    ```
 3. Re-register: pfSense Tailscale package page, replace the auth key, restart
    Tailscale; on the VPS, `tailscale up --login-server ... --auth-key ... --force-reauth`
-   with the same flags as `docs/guides/vpn.md.j2`. Confirm `headscale nodes list` shows
+   with the same flags as `docs/guides/vpnsvcs.md.j2`. Confirm `headscale nodes list` shows
    the tags and `Expiration` stays `0001-01-01`. Delete the old `admin` and `public`
    users once no node is left under them (`headscale users destroy -i ID`).
 4. Set `node.expiry: 30d` in both config templates, deploy, restart headscale. Existing
    personal nodes keep their stored expiry until they next register; force one with
    `tailscale logout && tailscale login ...` to confirm the 30-day value lands.
-5. Docs: `docs/guides/vpn.md.j2` "Create pre-auth key" and "Add public endpoint" use the
+5. Docs: `docs/guides/vpnsvcs.md.j2` "Create pre-auth key" and "Add public endpoint" use the
    tagged keys; `docs/security.md` VPN boundary notes tagged infra vs. expiring user
    devices.
 
 ## Acceptance
 
-- `headscale nodes list`: router and vpn show `tag:router` / `tag:vpn`, no expiry;
+- `headscale nodes list`: router and vpnsvcs show `tag:router` / `tag:vpnsvcs`, no expiry;
   every user-owned node registered after step 4 shows an expiry ~30 days out.
 - A Tailscale restart on pfSense keeps the routes and exit node approved without a
   manual step.
