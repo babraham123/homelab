@@ -165,26 +165,43 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
 ## Storage and backups
 
 - Container state lives in named Podman volumes (`postgresdb`, `grafanadata`,
-  `vmdata`, `vldata`, `ntfydb`, `hassdb`, `hassconfig`, `mqttdata`, `z2mdb`, …).
-  VM disks are LVM-thin on each host's NVMe; guests use ext4. No ZFS or RAID;
-  backups over redundancy.
-- **Proxmox Backup Server** (`pbs2`, on pve2) backs up VM disks with prune/GC
-  schedules.
-- `ssh autoadmin@secsvcs pg_dumpall` writes a logical Postgres dump to
-  `/var/opt/backups/postgres/` on secsvcs (last 14 kept), so the next VM backup carries
-  an application-consistent copy. Restore into a fresh container with
-  `zstd -dc FILE | podman exec -i CONTAINER psql -U postgres`.
-- pfSense uses the Auto Config Backup package; PVE/PBS `/etc` is tarballed
-  separately.
-- Podman volume backup is a documented manual procedure (stop services in reverse
-  order, archive volumes; see [the Podman guide](guides/podman.md));
-  VictoriaMetrics has its own backup procedure in
-  [the secure services guide](guides/secure_services.md).
-- Home Assistant: `ssh autoadmin@homesvcs backup_hass` calls HA's `backup.create`
-  and copies the `.tar` to `/var/opt/backups/hass/` (last 8 kept), so it rides in
-  the VM backup. Restore from Settings >> System >> Backups; recorder history
-  (`hassdb`) is not in the archive.
-- VPS: no vzdump covers it, so `ssh -p 2202 autoadmin@vpnsvcs backup_full` tars its whole root
-  filesystem, with a consistent Headscale DB snapshot, to `/var/opt/backups/full/` on
-  vpnsvcs (last 2 kept) for pve1 to pull. Restore steps in
-  [the VPN guide](guides/vpnsvcs.md#backup-and-restore).
+  `vmdata`, `vldata`, `ntfydb`, `hassdb`, `hassconfig`, `mqttdata`, `z2mdb`, …) and
+  under `/etc/opt` and `/var/opt`. VM disks are LVM-thin on each host's NVMe; guests
+  use ext4. No ZFS or RAID for the VMs; backups over redundancy.
+- The media array on pve2 (four HDDs on a passed-through SATA card, snapraid parity,
+  mergerfs union, owned by websvcs) is the exception: media is not backed up, parity
+  is its protection. [pve2 storage guide](guides/pve2_storage.md).
+- **One weekly run**, Saturday 02:00, by `backup_orchestrator.service` on pve1. It
+  wakes pve2 (PBS lives there) and runs, in order:
+  1. `backup.sh` on every node (secsvcs, homesvcs, websvcs, vpnsvcs, then pve1 and
+     pve2), through the SSH dispatcher as `backup`. Each node's script stages what is
+     worth keeping under `/var/opt/backups/`: application dumps under `dumps/`
+     (`pg_dumpall`, Home Assistant's native backup, a consistent Headscale SQLite
+     snapshot) and plain copies of its config trees and small volumes under `files/`,
+     paths as on the live system. Large or rebuildable data is left out by name in each
+     script. pve1 mirrors `files/` into `/root/backups/<node>/` and moves the dumps
+     there; the node keeps nothing but its newest dump.
+  2. On pve1 and pve2 the same `backup.sh` continues with the VM images, to PBS through
+     the API (`pvesh create /nodes/<n>/vzdump`), snapshot mode. On pve2 devtop and gaming
+     share the GPU, so the running one is backed up, shut down, the other backed up,
+     and the first started again.
+  3. `proxmox-backup-client backup` from pve1, encrypted with the client key
+     `/root/secrets/pbs_client.key`: `/root/backups/vpnsvcs` as `host/vpnsvcs` in
+     namespace `pve1` (it stands in for the VPS's image), the rest of `/root/backups`
+     as `host/pve1` in namespace `files`. Once both succeed the dumps are deleted from
+     pve1: from then on they exist only in PBS. `/root/backups/repo/` holds the repo and
+     `vars.yml`, written by every `tools/deploy_src.sh`.
+  4. `prune.sh` on pve2 (dispatcher command `prune`): the PBS prune jobs, then garbage
+     collection. Last, so the snapshots just made count, and inside the run because PBS
+     is only up during it.
+  5. A `homelab_backup_last_success_timestamp_seconds{job}` metric per step,
+     `BackupStale` after 8 days (`src/vmalert/configs/backups.yml`), an ntfy summary,
+     and pve2 off again if it was off.
+- Retention, applied by pve2's `prune.sh` as PBS prune jobs, one per namespace:
+  images (`pve1`, `pve2`, including `host/vpnsvcs`) keep last 1, weekly 2, monthly 2;
+  `files` keep last 1, weekly 3, monthly 6.
+- pfSense also uses the Auto Config Backup package. PVE and PBS configs (`/etc/pve`,
+  `/etc/proxmox-backup`) are in the hosts' stages, so PBS's own config is kept
+  outside PBS.
+- Restores, from the node's stage, pve1's collection or PBS, for a file, a VM or a
+  host: [the restore guide](guides/restore.md).

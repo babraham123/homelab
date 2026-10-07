@@ -143,6 +143,24 @@ case $1 in
     mv fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd
     ;;
+  snapraid)
+    # Media array: snapraid parity over the passed-through HDDs, mergerfs union, SMART
+    # on the guest side since the SATA controller is passed through whole. Disk layout
+    # (partitions, mkfs, fstab, first sync) is manual: docs/guides/pve2_storage.md.
+    apt-get install -y snapraid mergerfs smartmontools
+    mkdir -p /var/snapraid
+    cp snapraid/snapraid.conf /etc/snapraid.conf
+    cp snapraid/snapraid_run.sh /usr/local/bin
+    cp snapraid/snapraid-*.service snapraid/snapraid-*.timer /etc/systemd/system
+    systemctl daemon-reload
+    systemctl enable --now smartmontools
+    if grep -q '^/dev/disk' snapraid/media.fstab; then
+      systemctl enable --now snapraid-sync.timer snapraid-scrub.timer
+    else
+      # No disks declared in vars.yml yet: the timers would only fail
+      systemctl disable --now snapraid-sync.timer snapraid-scrub.timer 2> /dev/null || true
+    fi
+    ;;
   *)
     echo "error: unknown service: $1" >&2
     exit 1

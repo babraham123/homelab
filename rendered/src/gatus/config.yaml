@@ -10,12 +10,12 @@ storage:
   type: postgres
   path: "postgres://gatus@pgdb.janedoe.com:5432/gatus"
 
-# PBS VM backups: src/pve1/backup_orchestrator.timer
+# The weekly backup run: src/pve1/backup_orchestrator.timer
 maintenance:
-  start: 01:00
-  duration: 2h
+  start: "02:00"
+  duration: 3h
   timezone: "America/Los_Angeles"
-  every: [Sunday]
+  every: [Saturday]
 
 public-endpoint: &public
   group: public

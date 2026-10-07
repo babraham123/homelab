@@ -2,7 +2,7 @@
 
 Tracked in git since 2026-09-26 (moved from the gitignored `.scratch/`). One directory per feature; see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
 
-- [Backups and disaster recovery](backup-and-dr/spec.md) — 11 issues
+- [Backups and disaster recovery](backup-and-dr/spec.md) — 14 issues
 - [Supply chain and upgrade safety](supply-chain/spec.md) — 2 issues
 - [Authorization model](auth/spec.md) — 9 issues
 - [Container hardening](container-hardening/spec.md) — 2 issues

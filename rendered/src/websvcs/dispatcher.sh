@@ -63,6 +63,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_fluentbit)
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh fluentbit
     ;;
+  install_snapraid)
+    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh snapraid
+    ;;
   install_all_svcs)
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh traefik
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh vmagent
@@ -78,12 +81,16 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh whisper
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh openwakeword
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh fluentbit
+    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh snapraid
     ;;
   install_keys)
     sudo /root/homelab-rendered/src/websvcs/commands.sh install_keys
     ;;
   install_certs)
     sudo /root/homelab-rendered/src/websvcs/commands.sh install_certs
+    ;;
+  backup)
+    sudo /root/homelab-rendered/src/websvcs/backup.sh
     ;;
   install_ssh_ca)
     sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca

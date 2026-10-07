@@ -1,6 +1,6 @@
 # 10. Back up the important files on every host, not only the VM images
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Blocked by: 01
 Repo: homelab
@@ -65,3 +65,28 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
   the pulls before `vzdump_pve1` so pve1's collection lands before the PBS upload, and
   give each host its own step (e.g. `files_<node>`) so each gets its own
   `homelab_backup_last_success_timestamp_seconds{job=...}` series.
+
+## Answer
+
+Done with the backup restructure (2026-10-04), in a different shape from the ticket:
+
+- No `backup_paths` in `nodes.yml`: each node has a hand-written `src/<node>/backup.sh`
+  (pve1, pve2, secsvcs, homesvcs, websvcs, vpnsvcs) that runs its application hooks
+  (`pg_dumpall`, HA native backup, Headscale `sqlite3 .backup`) into `dumps/<name>/` and
+  mirrors explicit config paths and small volumes into `files/` under
+  `/var/opt/backups/` with `rsync --relative` (`src/debian/backup_lib.sh`). Each script
+  names what it skips and why. On pve1 and pve2 the same script goes on to the VM images.
+  The old `pg_dumpall`, `backup_hass`, `backup_full` and `run_backups` commands are gone;
+  `backup` is the one dispatcher command per node, no arguments.
+- No tarballs and no `age`: plain trees dedup in PBS, and the upload is encrypted with
+  pve1's client key (11).
+- The orchestrator (`src/pve1/backup_orchestrator.sh.j2`) runs `backup_<node>` steps
+  (ssh `backup`, rsync `files/` into `/root/backups/<node>/files/`, move `dumps/` there,
+  keep only the newest dump of each kind), then `upload`: `host/vpnsvcs` into namespace
+  `pve1` and `host/pve1` (the rest of `/root/backups`) into namespace `files`. After a
+  successful upload the dumps are deleted from pve1; the node keeps only its newest one
+  in case a pull never came, so a failed upload leaves exactly one behind.
+- Router: not pulled; its `config.xml` is inside the router VM image and in ACB.
+  devtop/gaming: images only.
+- Docs: `docs/services.md#storage-and-backups`, `docs/guides/restore.md`, and the
+  `pve1_recovery.md` table.

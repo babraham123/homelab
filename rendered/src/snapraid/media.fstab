@@ -1,0 +1,11 @@
+# Appended to /etc/fstab on websvcs by hand (docs/guides/pve2_storage.md). Disks by
+# stable id, so a changed SATA port order changes nothing; nofail so the VM boots with
+# a disk missing, and snapraid's sync refuses to run until it is back.
+/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AA-part1  /mnt/disk1  ext4  defaults,nofail,noatime  0  2
+/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AB-part1  /mnt/disk2  ext4  defaults,nofail,noatime  0  2
+/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AC-part1  /mnt/disk3  ext4  defaults,nofail,noatime  0  2
+/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AD-part1  /mnt/parity  ext4  defaults,nofail,noatime  0  2
+# mergerfs union of the data disks. Options per the mergerfs quickstart for kernels
+# >= 6.6; minfreespace keeps every disk from filling to the last byte, and moveonenospc
+# moves a file to another disk when a write runs out of space on the one it landed on.
+/mnt/disk1:/mnt/disk2:/mnt/disk3  /srv/media  fuse.mergerfs  cache.files=off,category.create=pfrd,func.getattr=newest,minfreespace=50G,moveonenospc=true,fsname=media,nofail  0  0

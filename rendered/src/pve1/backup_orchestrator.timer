@@ -8,7 +8,7 @@ RefuseManualStop=no
 [Timer]
 # Run if machine was off. Keep src/gatus/config.yaml.j2's maintenance window aligned.
 Persistent=true
-OnCalendar=Sun *-*-* 01:00:00
+OnCalendar=Sat *-*-* 02:00:00
 Unit=backup_orchestrator.service
 
 [Install]

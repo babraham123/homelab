@@ -67,29 +67,6 @@ case $1 in
     mv ./known_hosts /etc/opt/olive_tin/ssh
     chmod 644 /etc/opt/olive_tin/ssh/known_hosts
     ;;
-  pg_dumpall)
-    # Lands inside the VM disk, so the PBS snapshot of secsvcs carries it offsite.
-    backup_dir=/var/opt/backups/postgres
-    mkdir -p "$backup_dir"
-    chmod 700 "$backup_dir"
-    umask 077
-    dump_file="${backup_dir}/pg_dumpall-$(date +%Y-%m-%dT%H%M%S).sql.zst"
-    PGPASSWORD="$(/usr/local/bin/get_secret.sh postgres_password)"
-    export PGPASSWORD
-    # Connect via the container hostname, not the socket or loopback, so pg_hba's
-    # scram-sha-256 rule applies instead of the image's trust rules.
-    if ! podman exec -e PGPASSWORD postgres \
-        pg_dumpall -h pgdb.{{ site.url }} -U postgres | zstd -q -o "${dump_file}.tmp"; then
-      rm -f "${dump_file}.tmp"
-      echo "error: pg_dumpall failed" >&2
-      exit 1
-    fi
-    mv "${dump_file}.tmp" "$dump_file"
-    chmod 600 "$dump_file"
-    # Keep the newest 14; the ISO timestamp makes name order chronological
-    find "$backup_dir" -maxdepth 1 -name 'pg_dumpall-*.sql.zst' | sort | head -n -14 | xargs -r rm -f
-    ls -l "$dump_file"
-    ;;
   build_haproxy_mapper)
     # Doesn't need to run as root
     git clone https://github.com/babraham123/haproxy-mapper.git mapper

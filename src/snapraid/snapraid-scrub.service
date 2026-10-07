@@ -1,0 +1,12 @@
+# /etc/systemd/system/snapraid-scrub.service
+
+[Unit]
+Description="Homelab: snapraid scrub of the media array"
+# Both jobs lock the content files; let the other finish first.
+Conflicts=snapraid-sync.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/snapraid_run.sh scrub
+Nice=10
+IOSchedulingClass=idle

@@ -13,6 +13,11 @@ trap 'rm -rf "$render_dir"' EXIT
 project_dir="${render_dir}/homelab-rendered"
 tools/render_src.sh "$project_dir"
 
+# The repo plus vars.yml, the one render input that isn't in git, to pve1's
+# /root/backups/repo. ssh encrypts it in flight; pve1 already holds every secret.
+{ git ls-files -z; printf 'vars.yml\0'; } | tar --null -T - -czf - | \
+  ssh autoadmin@pve1 archive_repo || echo "pve1 repo archive failed"
+
 tools/upload_src.sh pve1 "$project_dir" || echo "pve1 upload failed"
 tools/upload_src.sh secsvcs "$project_dir" || echo "secsvcs upload failed"
 tools/upload_src.sh homesvcs "$project_dir" || echo "homesvcs upload failed"

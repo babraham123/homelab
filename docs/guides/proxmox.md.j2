@@ -211,22 +211,47 @@ ufw allow in from any to any port 8007 proto tcp
   - Datastore >> backup1
     - Content tab >> Add Namespace
       - Add namespaces for pve1, pve2 under Root
-    - Prune & GC tab, [options](https://pbs.proxmox.com/docs/maintenance.html)
-      - Prune Jobs >> Add >> Last weekly: 3, daily
-      - Garbage Collection >> Edit >> daily
+    - Prune & GC tab: leave empty, both come from `prune.sh` (below)
 
-- PVE setup
-  - Datacenter >> Storage >> Add >> Proxmox Backup Server
-  - VM >> Backup >> Backup now
-  - Datacenter >> Backup >> Add
-    - Exclude fingerprint for Let's Encrypt derived PBS certs
-    - For the schedule I picked Sunday at 1am (pve1), 2am (pve2)
-
-- PVE / PBS backups
-  - TODO: flesh this out
+- Namespaces under Root: `pve1` and `pve2` for the VM images (and `host/vpnsvcs`),
+  `files` for the host backups. Content tab >> Add Namespace. Retention is per
+  namespace, set by pve2's `prune.sh`.
+- Backup identity for pve1: a user and a token that can write and read backups in the
+  `pve1` and `files` namespaces but never delete them. The secret is shown once; it
+  goes into `/root/secrets/pve1.yaml` as `pbs2_backup_token` on pve1.
 ```bash
-tar -czf "etc-backup-$(date -I).tar.gz" /etc
+proxmox-backup-manager user create pve1@pbs
+proxmox-backup-manager user generate-token pve1@pbs backup
+proxmox-backup-manager acl update /datastore/backup1/pve1 DatastoreBackup --auth-id 'pve1@pbs!backup'
+proxmox-backup-manager acl update /datastore/backup1/files DatastoreBackup --auth-id 'pve1@pbs!backup'
 ```
+- Client encryption key, on pve1. Everything pve1 sends is encrypted with it; the key
+  file is in the escrow set and nothing restores without it.
+```bash
+proxmox-backup-client key create --kdf none /root/secrets/pbs_client.key
+chmod 400 /root/secrets/pbs_client.key
+```
+- PVE storage on both hosts, [ref](https://pbs.proxmox.com/docs/pve-integration.html).
+  No fingerprint: the PBS cert is Let's Encrypt derived (`acme_transfer.sh`).
+```bash
+# pve1: the token, the key, namespace pve1
+pvesm add pbs pbs2 --server pbs2.{{ site.url }} --datastore backup1 --namespace pve1 \
+  --username 'pve1@pbs!backup' --password "$(sops -d /root/secrets/pve1.yaml | yq .pbs2_backup_token)" \
+  --encryption-key /root/secrets/pbs_client.key --content backup
+# pve2: PBS is local; root@pam, namespace pve2. Same key (copied from pve1) so every
+# image in the datastore is ciphertext.
+pvesm add pbs pbs2 --server pbs2.{{ site.url }} --datastore backup1 --namespace pve2 \
+  --username root@pam --password ROOT_PASSWORD --encryption-key /root/pbs_client.key --content backup
+pvesm status
+```
+- No backup jobs in the PVE UI (Datacenter >> Backup must be empty on both hosts) and
+  no prune or GC job made in the PBS UI: the schedule is `src/pve1/backup_orchestrator.timer`
+  (Saturday 02:00), and its last step runs pve2's `prune.sh`, which creates or updates
+  the prune jobs `images-pve1`, `images-pve2` (keep last 1, weekly 2, monthly 2) and
+  `files` (last 1, weekly 3, monthly 6), runs them, then garbage collection.
+- The host configs (`/etc/pve`, `/etc/proxmox-backup`) are staged by each host's
+  `backup.sh` and end up in pve1's `/root/backups/`, so PBS's own config is kept
+  outside PBS. Restores: [the restore guide](./restore.md).
 
 ## Monitoring
 - Install Node Exporter

@@ -27,8 +27,11 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   stop_gaming_vm)
     sudo /root/homelab-rendered/src/pve2/commands.sh stop_gaming_vm
     ;;
-  run_backups)
-    sudo /root/homelab-rendered/src/pve2/commands.sh run_backups
+  backup)
+    sudo /root/homelab-rendered/src/pve2/backup.sh
+    ;;
+  prune)
+    sudo /root/homelab-rendered/src/pve2/prune.sh
     ;;
   shutdown)
     sudo /usr/sbin/shutdown -h now

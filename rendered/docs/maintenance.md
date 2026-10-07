@@ -49,5 +49,11 @@ ssh autoadmin@pve2 start_gaming_vm
 sudo /root/homelab-rendered/src/certificates/ssh_cert_gen_windows.sh
 ```
 
+## Backups
+- Runs itself every Saturday 02:00 from pve1; the ntfy `alert` topic gets a summary and `BackupStale` fires after 8 quiet days. Run it by hand with `sudo systemctl start backup_orchestrator` on pve1 (blocks for the run; `journalctl -u backup_orchestrator -f`).
+- Once a quarter: the [restore test](guides/restore.md#quarterly-restore-test). Last done: never.
+- Media array on pve2: `snapraid status` on websvcs; a failed disk follows [pve2 storage](guides/pve2_storage.md#day-to-day).
+
 ## Disaster recovery
+- Restore a file, a VM or a host: [restore guide](guides/restore.md)
 - pve1's SSD died, or its AGE key, private CA, SSH CA or `vars.yml` is gone: [pve1 disaster recovery](guides/pve1_recovery.md)

@@ -290,40 +290,18 @@ EOF
 ```
 
 ## Backup and restore
-Archive the whole root filesystem, with a consistent snapshot of the Headscale DB, to
-`/var/opt/backups/full/vpnsvcs-full-TIMESTAMP.tar.zst` (newest 2 kept). Only the copy
-pulled off the box survives losing the VPS.
-```bash
-# From pve1
-ssh -p 2202 autoadmin@vpnsvcs backup_full
-scp -P 2202 'autoadmin@vpnsvcs:/var/opt/backups/full/vpnsvcs-full-*.tar.zst' /root/backups/
-```
+`ssh autoadmin@vpnsvcs backup` (pve1's orchestrator runs it weekly) snapshots the Headscale DB consistently with `sqlite3 .backup` and copies `/var/lib/headscale` (noise and DERP keys), `/etc/headscale`, `/var/lib/tailscale`, `/etc/haproxy`, `/etc/ssh`, `/etc/ufw`, `/etc/opt` and `/root/.ssh` into `/var/opt/backups/`. pve1 mirrors that into `/root/backups/vpnsvcs/` and on to PBS as `host/vpnsvcs`, kept like a VM image (last 1, weekly 2, monthly 2); the DB snapshot moves with it and lives in PBS only. The OS itself isn't archived: a new VPS is rebuilt from this guide, then the files go back.
 
-- Restore one file, e.g. the Headscale DB
+- Restore one file, e.g. the Headscale DB: [restore guide](./restore.md#application-restores).
+- Restore the whole VPS onto a new Linode:
+  1. Create a Linode with the same Debian release and follow this guide up to, not including, "Headscale" (users, SSH, ufw, the dispatcher).
+  2. From pve1, copy the stage back and put the files in place:
 ```bash
-mkdir /tmp/restore
-zstd -dc vpnsvcs-full-TIMESTAMP.tar.zst | tar -x -C /tmp/restore ./var/lib/headscale/db.sqlite
-# on vpnsvcs: systemctl stop headscale, replace db.sqlite, delete db.sqlite-wal/-shm, start
+scp -r /root/backups/vpnsvcs manualadmin@NEW_IP:
+ssh -t manualadmin@NEW_IP 'sudo rsync -a vpnsvcs/files/ / && sudo rm -rf vpnsvcs'
 ```
-
-- Restore the whole VPS onto a new Linode
-  - Create a Linode with the same Debian release, power it off, and boot it into
-    [Rescue Mode](https://techdocs.akamai.com/cloud-computing/docs/rescue-and-rebuild)
-    with its disk as `/dev/sda`. Keep Network Helper on: it rewrites the restored
-    network config for the new IP at boot.
-  - In the Lish console: `passwd && systemctl start ssh`
-  - From pve1, wipe the fresh image and stream the archive in. It's decompressed on
-    pve1 because the rescue system runs from RAM.
-```bash
-ssh root@NEW_IP 'mkdir -p /media/sda && mount /dev/sda /media/sda && rm -rf /media/sda/*'
-zstd -dc vpnsvcs-full-TIMESTAMP.tar.zst | \
-  ssh root@NEW_IP 'tar -x --numeric-owner --acls --xattrs -C /media/sda'
-# The new disk has a new filesystem UUID; regenerate the boot config for it
-ssh root@NEW_IP 'cd /media/sda && for d in dev proc sys; do mount --bind /$d $d; done && chroot . update-grub'
-```
-  - Reboot out of Rescue Mode. If the public IP changed, update `vpnsvcs.ip` in
-    `vars.yml`, the `*` A record, and redeploy. Tailnet nodes reconnect on their own:
-    the Headscale DB, noise key and SSH host keys are the originals.
+  3. Continue the guide: install Headscale, HAProxy and tailscaled with `install_*`; `install_headscale` keeps the restored `/var/lib/headscale`. Then restore the DB snapshot from PBS (`host/vpnsvcs`, `dumps/headscale/db-*.sqlite`) as in the restore guide, and `systemctl restart headscale haproxy tailscaled`.
+  4. Point the public DNS at the new IP, and `headscale nodes list` should show every node.
 
 ## Upgrade
 [Headscale docs](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)

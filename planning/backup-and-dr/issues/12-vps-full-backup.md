@@ -35,3 +35,10 @@ is 10's orchestrator step; 10's vpn `backup_paths` can be just this archive.
 Human: redeploy vpn (`install_headscale` for sqlite3, `apt install zstd`,
 `install_dispatcher`), run `backup_full`, and check Acceptance.
 Open: the archive is plaintext and readable with the autoadmin key; encrypting it to pve1's age key waits on 04 (TODO in `backup_full.sh`).
+
+- 2026-10-04: Superseded by the backup restructure: `backup_full.sh` is replaced by
+`src/vpnsvcs/backup.sh.j2` (`backup`), which stages the Headscale DB snapshot and
+the state and config a fresh Debian can't regenerate instead of the whole root
+filesystem; the OS is rebuilt from the guide. The plaintext-archive TODO is moot: the
+stage is pulled by pve1 and encrypted on upload, as its own PBS group `host/vpnsvcs` with the image retention. `docs/guides/vpnsvcs.md#backup-and-restore`
+has the new restore path.

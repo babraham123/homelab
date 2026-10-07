@@ -1,21 +1,31 @@
 #!/bin/bash
-# Weekly backup run: wakes pve2 (PBS lives there), dumps application data inside the VMs,
-# snapshots every VM on both hosts to PBS, records per-step success metrics, then powers
-# pve2 back off if it was off to begin with. Posts a one-line ntfy summary at the end.
+# Weekly backup run. Wakes pve2 (PBS lives there), runs backup.sh on every node, pulls
+# each node's stage into /root/backups/<node>/, sends /root/backups to PBS as host
+# backups, has pve2 prune and garbage-collect PBS, records per-step success metrics,
+# then powers pve2 back off if it was off to begin with. Posts a one-line ntfy summary
+# at the end.
 # Usage:
 #   /usr/local/bin/backup_orchestrator.sh
-# Adding a backup: write a step_<name> function and list it in STEPS.
+# Adding a node: give it a backup.sh and a `backup` dispatcher command, then list it in
+# NODES. Adding another step: write a step_<name> function and list it in STEPS.
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
 
 storage=pbs2
+backups=/root/backups
 metrics=/var/lib/node_exporter/textfile_collector/homelab_backup.prom
 ssh=(ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
 is_reachable=/root/homelab-rendered/src/debian/is_reachable.sh
+keyfile=/root/secrets/pbs_client.key
 
-# wake_pve2 and sleep_pve2 bracket these. Application dumps come first so they land on the VM disks before vzdump reads them.
-STEPS=(pg_dumpall backup_hass vzdump_pve1 vzdump_pve2)
+# In step order. The VMs first, so their dumps are on the VM disks before the hosts'
+# backup.sh images them. prune comes after upload so this week's snapshots count.
+NODES=(secsvcs homesvcs websvcs vpnsvcs pve1 pve2)
+# wake_pve2 and sleep_pve2 bracket these.
+STEPS=()
+for node in "${NODES[@]}"; do STEPS+=("backup_${node}"); done
+STEPS+=(upload prune)
 
 step_wake_pve2() {
   "${ssh[@]}" autoadmin@router start_pve2
@@ -23,20 +33,56 @@ step_wake_pve2() {
   wait_for 300 "PBS storage $storage inactive" storage_active
 }
 
-step_pg_dumpall() {
-  "${ssh[@]}" autoadmin@secsvcs pg_dumpall
+# Usage: pull NODE. Runs the node's backup.sh and brings its stage here: files/ is
+# mirrored, dumps/ is moved (the node keeps nothing once they are here). Only the
+# newest dump of each kind is kept, so a failed upload leaves one behind, not a pile.
+# The stage is owned by autoadmin, the user the dispatcher key logs in as, so rsync
+# reads all of it over the same sftp channel scp uses.
+pull() {
+  local node=$1 src="/var/opt/backups" dir dest
+  dest="${backups}/${node}"
+  install -d -m 700 "$dest" "${dest}/dumps"
+  if [[ $node == pve1 ]]; then
+    /root/homelab-rendered/src/pve1/backup.sh
+    rsync -a --delete "${src}/files/" "${dest}/files/"
+    rsync -a --remove-source-files "${src}/dumps/" "${dest}/dumps/"
+  else
+    "${ssh[@]}" "autoadmin@${node}" backup
+    src="autoadmin@${node}:/var/opt/backups"
+    rsync -a --delete -e "${ssh[*]}" "${src}/files/" "${dest}/files/"
+    rsync -a --remove-source-files -e "${ssh[*]}" "${src}/dumps/" "${dest}/dumps/"
+  fi
+  for dir in "${dest}"/dumps/*/; do
+    if [[ -d $dir ]]; then
+      find "$dir" -maxdepth 1 -type f | sort | head -n -1 | xargs -r rm -f --
+    fi
+  done
+}
+for node in "${NODES[@]}"; do
+  eval "step_backup_${node}() { pull ${node}; }"
+done
+
+# Host backups of the collection, encrypted on this side with the client key, so PBS,
+# its disk and any offsite copy only ever hold ciphertext; losing the key loses the
+# backups, so it is in the escrow set (docs/guides/pve1_recovery.md). The vpnsvcs
+# stage is its own group next to pve1's VM images, since it stands in for the VPS's
+# image and takes that retention; everything else goes to the `files` namespace.
+# Dumps are deleted once both uploads succeed: PBS holds them from here on.
+step_upload() {
+  [[ -f $keyfile ]] || { echo "error: ${keyfile} missing" >&2; return 1; }
+  export PBS_REPOSITORY='pve1@pbs!backup@pbs2.janedoe.com:backup1'
+  PBS_PASSWORD=$(secret pbs2_backup_token)
+  export PBS_PASSWORD
+  proxmox-backup-client backup "vpnsvcs.pxar:${backups}/vpnsvcs" --ns pve1 --backup-id vpnsvcs \
+    --keyfile "$keyfile"
+  proxmox-backup-client backup "backups.pxar:${backups}" --ns files --backup-id pve1 \
+    --keyfile "$keyfile" --exclude /vpnsvcs --skip-lost-and-found true
+  find "$backups" -path '*/dumps/*' -type f -delete
 }
 
-step_backup_hass() {
-  "${ssh[@]}" autoadmin@homesvcs backup_hass
-}
-
-step_vzdump_pve1() {
-  vzdump --all --storage "$storage" --mode snapshot
-}
-
-step_vzdump_pve2() {
-  "${ssh[@]}" autoadmin@pve2 run_backups
+# Retention and GC run on pve2, where proxmox-backup-manager is.
+step_prune() {
+  "${ssh[@]}" autoadmin@pve2 prune
 }
 
 step_sleep_pve2() {
@@ -62,6 +108,11 @@ wait_for() {
   done
 }
 
+# Usage: secret NAME. Reads pve1's own secrets file; pve1 holds every host's SOPS file.
+secret() {
+  SOPS_AGE_KEY_FILE=/root/secrets/age.txt sops -d /root/secrets/pve1.yaml | yq ".$1"
+}
+
 ok=()
 failed=()
 declare -A done_at=()
@@ -83,16 +134,18 @@ run() {
   fi
 }
 
-# Keeps the previous timestamp of failed jobs, so staleness alerts fire per job.
+# Keeps the previous timestamp of failed jobs, so staleness alerts fire per job. Jobs
+# no longer in STEPS are dropped, or a renamed step would alert as stale forever.
 write_metrics() {
   local name='homelab_backup_last_success_timestamp_seconds' job value
-  declare -A last=()
+  declare -A previous=() last=()
   if [[ -f $metrics ]]; then
     while read -r job value; do
-      [[ $job =~ job=\"([^\"]+)\" ]] && last[${BASH_REMATCH[1]}]=$value
+      [[ $job =~ job=\"([^\"]+)\" ]] && previous[${BASH_REMATCH[1]}]=$value
     done < <(grep "^${name}{" "$metrics")
   fi
   for job in "${STEPS[@]}"; do
+    [[ -v previous[$job] ]] && last[$job]=${previous[$job]}
     [[ -v done_at[$job] ]] && last[$job]=${done_at[$job]}
   done
 

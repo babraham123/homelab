@@ -1,0 +1,27 @@
+# /etc/snapraid.conf, from websvcs.media in vars.yml. The disk mounted under
+# /mnt/parity is parity, the rest are data.
+# Ref: https://www.snapraid.it/manual
+{%- set ns = namespace(data=[], parity=none) %}
+{%- for d in websvcs.media.disks %}
+{%-   if d.mount.startswith('/mnt/parity') %}{% set ns.parity = d %}
+{%-   else %}{% set ns.data = ns.data + [d] %}{% endif %}
+{%- endfor %}
+{%- set data = ns.data %}
+parity {{ ns.parity.mount }}/snapraid.parity
+
+# One content file per data disk plus one on the OS disk: any one copy is enough.
+content /var/snapraid/snapraid.content
+{% for d in data -%}
+content {{ d.mount }}/snapraid.content
+{% endfor -%}
+
+{% for d in data -%}
+data d{{ loop.index }} {{ d.mount }}/
+{% endfor -%}
+
+exclude *.unrecoverable
+exclude /tmp/
+exclude /lost+found/
+exclude .Trash-*/
+exclude *.partial
+exclude .snapraid.content.lock

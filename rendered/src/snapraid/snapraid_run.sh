@@ -1,0 +1,75 @@
+#!/bin/bash
+# Runs a snapraid sync or scrub, then records the result for node_exporter and checks
+# every array disk's SMART health. Driven by snapraid-sync.timer (daily) and
+# snapraid-scrub.timer (weekly). The array is media only; parity is its only
+# protection, so a failed sync is worth an alert (src/vmalert/configs/backups.yml).
+# Usage:
+#   /usr/local/bin/snapraid_run.sh sync|scrub
+
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+set -euo pipefail
+
+job=${1:-}
+textfile=/var/lib/node_exporter/textfile_collector
+disks=(/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AA /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AB /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AC /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AD)
+mounts=(/mnt/disk1 /mnt/disk2 /mnt/disk3 /mnt/parity)
+(( ${#disks[@]} )) || { echo "error: no disks in websvcs.media.disks (vars.yml)" >&2; exit 1; }
+
+# Usage: write_prom FILE LINES...; atomic, node_exporter only reads *.prom
+write_prom() {
+  local file="${textfile}/$1"
+  shift
+  mkdir -p "$textfile"
+  printf '%s\n' "$@" > "${file}.tmp"
+  chmod 644 "${file}.tmp"
+  mv "${file}.tmp" "$file"
+}
+
+smart_health() {
+  local lines=('# HELP homelab_smart_healthy 1 when smartctl -H reports the disk as PASSED.'
+               '# TYPE homelab_smart_healthy gauge') dev healthy
+  for dev in "${disks[@]}"; do
+    healthy=0
+    smartctl -H "$dev" | grep -q 'PASSED' && healthy=1
+    lines+=("homelab_smart_healthy{device=\"$(basename "$dev")\"} ${healthy}")
+  done
+  write_prom homelab_smart.prom "${lines[@]}"
+}
+
+case $job in
+  sync)
+    # Every mount must be present, or snapraid would sync a missing disk as deleted.
+    for mount in "${mounts[@]}"; do
+      mountpoint -q "$mount" || { echo "error: ${mount} is not mounted" >&2; exit 1; }
+    done
+    # diff exits 2 when there are changes, 0 when there are none, 1 on error.
+    set +e
+    diff=$(snapraid diff 2>&1)
+    rc=$?
+    set -e
+    (( rc == 0 || rc == 2 )) || { echo "$diff" >&2; exit 1; }
+    # A bad rm or ransomware would otherwise be written into parity.
+    threshold=200
+    removed=$(awk '/removed$/ {print $1}' <<< "$diff")
+    if (( removed > threshold )); then
+      echo "error: ${removed} files removed since the last sync, over the threshold of ${threshold}." >&2
+      echo "If that is intended: snapraid sync --force-empty, or run this with the threshold raised." >&2
+      exit 1
+    fi
+    snapraid sync
+    ;;
+  scrub)
+    # 8% of the oldest blocks each week checks every block about once a quarter.
+    snapraid scrub -p 8 -o 10
+    ;;
+  *)
+    echo "usage: $0 sync|scrub" >&2
+    exit 1
+    ;;
+esac
+
+smart_health
+write_prom "homelab_snapraid_${job}.prom" \
+  '# HELP homelab_snapraid_last_success_timestamp_seconds Unix time of the last successful snapraid job.' \
+  '# TYPE homelab_snapraid_last_success_timestamp_seconds gauge' \
+  "homelab_snapraid_last_success_timestamp_seconds{job=\"${job}\"} $(date +%s)"

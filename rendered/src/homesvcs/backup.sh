@@ -1,0 +1,52 @@
+#!/bin/bash
+# homesvcs backup: Home Assistant's native backup plus the config and small state of
+# every service, staged under /var/opt/backups for pve1's backup_orchestrator to pull.
+# Usage:
+#   src/homesvcs/backup.sh
+# Not staged, on purpose: hassdb (the recorder history, large, HA rebuilds the schema)
+# and /var/opt/home_assistant/media (camera recordings).
+
+set -euo pipefail
+# shellcheck source=src/debian/backup_lib.sh
+source /root/homelab-rendered/src/debian/backup_lib.sh
+
+stage_init
+
+# Home Assistant: a native backup restores across HA versions, unlike a copy of
+# /config. Ref: https://www.home-assistant.io/integrations/backup/
+token=$(/usr/local/bin/get_secret.sh hass_backup_token)
+if [[ -z "$token" || "$token" == "null" ]]; then
+  echo "error: hass_backup_token secret is not set" >&2
+  exit 1
+fi
+volpath=$(podman volume inspect -f '{{ .Mountpoint }}' systemd-hassconfig)
+dir=$(dump_dir hass)
+marker=$(mktemp)
+trap 'rm -f "$marker"' EXIT
+# The REST call blocks until the backup is written; the token goes via stdin so it
+# stays out of the process list. Needs an admin user's token.
+printf 'header = "Authorization: Bearer %s"\n' "$token" | \
+  curl -sS --fail-with-body --max-time 1800 -K - -X POST \
+  http://10.12.0.11:8123/api/services/backup/create
+echo
+archive=$(find "$volpath/backups" -maxdepth 1 -name 'Custom_backup_*.tar' \
+  -newer "$marker" -printf '%T@ %p\n' | sort -n | tail -n 1 | cut -d' ' -f2-)
+if [[ -z "$archive" ]]; then
+  echo "error: no new backup archive in $volpath/backups" >&2
+  exit 1
+fi
+cp "$archive" "${dir}/hass-$(date +%Y-%m-%dT%H%M%S).tar"
+# backup.create has no retention of its own: keep only this one inside HA so the
+# volume, and every image backup of it, stays small.
+find "$volpath/backups" -maxdepth 1 -name 'Custom_backup_*.tar' ! -path "$archive" -delete
+keep_newest "$dir" 'hass-*.tar' 1
+
+# Config trees: Zigbee2MQTT and ESPHome configs, Mosquitto, Traefik's acme.json, this
+# host's secrets key and bundle.
+stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd
+# Zigbee2MQTT's device database and Mosquitto's retained messages. Both are small and
+# tolerate a live copy.
+stage_volume z2mdb
+stage_volume mqttdata
+
+stage_finish
