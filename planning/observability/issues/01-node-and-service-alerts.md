@@ -58,3 +58,9 @@ firing state. Document the list in `docs/services.md#observability`.
   as `pve1.<site>:9100`). A failed step keeps its old timestamp, so `BackupStale` fires
   per job; the run is weekly, so 8 days is right. `backup_orchestrator.service` is a
   "Homelab:" unit, so `SystemdUnitFailed` also catches a failed run.
+
+- 2026-10-04: the backup rules landed with the backup restructure as
+  `src/vmalert/configs/backups.yml` (`BackupStale`, `BackupNeverRan`, plus
+  `SnapraidStale` and `DiskUnhealthy` for the media array). The orchestrator's job
+  labels are now `backup_<node>` and `upload`. Leave backups
+  out of `homelab.yml`.

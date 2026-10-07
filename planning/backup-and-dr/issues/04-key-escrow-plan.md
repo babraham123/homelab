@@ -4,7 +4,6 @@ Status: ready-for-human
 Type: task
 Repo: homelab
 Source: review finding 3
-Blocked by: 09
 
 ## Problem
 
@@ -38,3 +37,10 @@ Write `docs/guides/escrow.md` and implement it:
 - A dry run: decrypt one `secrets.yaml.age` using only the escrow key on a laptop.
 
 ## Comments
+
+- 2026-10-04: Now a hard prerequisite for the backup restructure, not a nice-to-have: every image
+and host backup pve1 sends to PBS is encrypted with `/root/secrets/pbs_client.key`, and
+the copy of that key inside PBS is encrypted with itself. The escrow set gains
+`pbs_client.key` and the `pbs2_backup_token` value from `pve1.yaml` (the identity that
+can read the backups). `docs/guides/pve1_recovery.md` and `docs/guides/restore.md`
+describe the restore that depends on them. Unblocked: 09 is resolved.

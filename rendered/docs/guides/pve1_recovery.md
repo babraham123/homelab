@@ -1,54 +1,56 @@
 # pve1 disaster recovery
 What to keep off pve1, and the order of operations when its SSD dies or one of its trust roots (AGE key, private CA, SSH CA, `vars.yml`) is lost. pve1 is the one host that restoring VMs can't bring back: the private CA, SSH CA, AGE key, ACME distribution and secret provisioning all live on the Proxmox host itself, outside every VM backup.
 
-> **Current state:** nothing on the pve1 *host* is backed up. PBS (`pbs2` on pve2) holds the pve1 *VMs* (router, secsvcs, homesvcs), and only from runs where pve2 happened to be on. Until the escrow bundle exists, a dead SSD means doing the [AGE key](#only-the-age-key-is-lost), [CA](#only-the-private-ca-is-lost) and [SSH CA](#only-the-ssh-ca-is-lost) scenarios together; see [Nothing escrowed](#nothing-escrowed).
+> **Current state:** the weekly run ([Services](../services.md#storage-and-backups)) sends the pve1 *host's* files (`/root/secrets`, `/root/ca`, `/root/ssh`, `/etc/pve`, …) to PBS inside the `pve1` host backup, and the pve1 *VMs* as images. Both are encrypted with `/root/secrets/pbs_client.key`, so the key and the PBS token are what the escrow bundle must hold; until it exists (`backup-and-dr/04`), a dead SSD means doing the [AGE key](#only-the-age-key-is-lost), [CA](#only-the-private-ca-is-lost) and [SSH CA](#only-the-ssh-ca-is-lost) scenarios together; see [Nothing escrowed](#nothing-escrowed).
 >
 > Tickets referenced as `backup-and-dr/NN` are in `planning/backup-and-dr/issues/`. Anything marked *planned* depends on one of them and does not exist yet.
 
 ## What must exist off-box
-This is the canonical list: `backup-and-dr/04` escrows it and `backup-and-dr/01`/`05` back it up. "Covered by":
-- **PBS VM backup**: inside a VM disk that PBS backs up today.
+This is the canonical list: `backup-and-dr/04` escrows it and the weekly run backs it up. "Covered by":
+- **PBS VM backup**: inside a VM disk that PBS backs up.
+- **PBS host backup**: staged by pve1's `backup.sh files` into `/root/backups/pve1/` and uploaded with the rest of `/root/backups`. Restoring it needs the client key and the token, so those two can only come from escrow.
 - **Escrow**: the escrow bundle, *planned* (`backup-and-dr/04`).
-- **Repo backup**: encrypted repo tarball on pve1, *planned* (`backup-and-dr/05`).
+- **Repo backup**: `/root/backups/repo/`, written by every `tools/deploy_src.sh`, in the PBS host backup.
 - **Regenerate**: derived; rebuild it with the script or guide section listed.
 
 ### On pve1
 
 | Path on pve1 | What | Covered by | If lost |
 |---|---|---|---|
-| `/root/secrets/age.txt`, `age.pub` | AGE identity; every SOPS file and every host's `secrets.yaml.age` is encrypted to it | Escrow | [Only the AGE key is lost](#only-the-age-key-is-lost) |
-| `/root/secrets/pve1.yaml` | pve1's own secrets: `msmtp_password`, `pbs2_api_password`, MaxMind keys | Escrow | No other copy; re-enter by hand from `src/pve1/secrets_template.yaml` |
-| `/root/secrets/{secsvcs,homesvcs,websvcs}.yaml` | SOPS source of each host's secrets | Escrow | Rebuild from the host's own copy ([AGE scenario](#only-the-age-key-is-lost)) |
+| `/root/secrets/age.txt`, `age.pub` | AGE identity; every SOPS file and every host's `secrets.yaml.age` is encrypted to it | Escrow, PBS host backup | [Only the AGE key is lost](#only-the-age-key-is-lost) |
+| `/root/secrets/pbs_client.key` | PBS client encryption key; every image and host backup pve1 sends is ciphertext under it | **Escrow only**: the copy in PBS is encrypted with itself | Nothing in PBS restores. Rebuild everything from the guides |
+| `/root/secrets/pve1.yaml` | pve1's own secrets: `msmtp_password`, `pbs2_api_password`, `pbs2_backup_token` (the PBS identity; needed to read the backups), MaxMind keys | Escrow, PBS host backup | Re-enter by hand from `src/pve1/secrets_template.yaml`; a new PBS token per the [Proxmox guide](./proxmox.md#backups) |
+| `/root/secrets/{secsvcs,homesvcs,websvcs}.yaml` | SOPS source of each host's secrets | Escrow, PBS host backup | Rebuild from the host's own copy ([AGE scenario](#only-the-age-key-is-lost)) |
 | `/root/secrets/<host>.yaml.age` | per-host `age` copy pushed to `/etc/opt/secrets/secrets.yaml.age` | Regenerate | `secret_update.sh <host>` |
 | `/root/secrets/<host>_id_ed25519.pub` | host recipient key | Regenerate | re-`scp` from the host ([pve1 guide](./pve1.md#secrets)) |
-| `/root/ca/private/ca.key.pem`, `certs/ca.cert.pem`, `index.txt`, `serial`, `crlnumber` | root CA | Escrow | [Only the private CA is lost](#only-the-private-ca-is-lost) |
-| `/root/ca/intermediate/private/intermediate.key.pem`, `certs/intermediate.cert.pem`, `certs/ca-chain.cert.pem`, `index.txt`, `serial`, `crlnumber`, `crl/` | intermediate CA | Escrow | same |
+| `/root/ca/private/ca.key.pem`, `certs/ca.cert.pem`, `index.txt`, `serial`, `crlnumber` | root CA | Escrow, PBS host backup | [Only the private CA is lost](#only-the-private-ca-is-lost) |
+| `/root/ca/intermediate/private/intermediate.key.pem`, `certs/intermediate.cert.pem`, `certs/ca-chain.cert.pem`, `index.txt`, `serial`, `crlnumber`, `crl/` | intermediate CA | Escrow, PBS host backup | same |
 | `/root/ca/intermediate/private/*.janedoe.com.key.pem`, `certs/`, `csr/` | per-service keys, certs and CSRs | Escrow (part of `/root/ca`) | `self_signed_key_gen.sh` + `self_signed_cert_gen.sh` |
 | `/root/ca/openssl.cnf`, `/root/ca/intermediate/openssl.cnf` | CA config | Regenerate | rendered `src/certificates/openssl.{root,intermediate}.cnf` |
-| `/root/ssh/ca_ssh_key`, `ca_ssh_key.pub` | SSH user CA: signs client keys for `manualadmin`/`autoadmin` | Escrow | [Only the SSH CA is lost](#only-the-ssh-ca-is-lost) |
-| `/root/ssh/ca_ssh_host_key`, `ca_ssh_host_key.pub` | SSH host CA: behind every `@cert-authority` line | Escrow | same |
+| `/root/ssh/ca_ssh_key`, `ca_ssh_key.pub` | SSH user CA: signs client keys for `manualadmin`/`autoadmin` | Escrow, PBS host backup | [Only the SSH CA is lost](#only-the-ssh-ca-is-lost) |
+| `/root/ssh/ca_ssh_host_key`, `ca_ssh_host_key.pub` | SSH host CA: behind every `@cert-authority` line | Escrow, PBS host backup | same |
 | `/root/ssh/known_hosts`, `public/`, `date_ssh_certs*.txt` | host pubkeys and certs, `@cert-authority` line, renewal timestamps | Regenerate | `ssh_cert_gen.sh`, `ssh_cert_gen_windows.sh` |
 | Passphrases of `ca.key.pem`, `intermediate.key.pem`, `ca_ssh_key` | not files; asked for at signing time | Offline copy held by the maintainer; a better home is `auth/08` | the escrowed keys are useless without them |
 | `/root/acme/` | copies of each Traefik's `acme.json`, dumped certs, `pbs2_cert_info.txt`, `date_acme_certs.txt` | Regenerate | `acme_transfer.sh` |
 | `/root/.ssh/id_ed25519`, `id_ed25519-cert.pub` | root's client key, signed as `manualadmin,autoadmin`; every pve1 script SSHes with it | Regenerate | new key + re-sign ([step 10](#10-ssh-root-key-and-host-certs)) |
-| `/etc/pve/storage.cfg`, `/etc/pve/priv/storage/pbs2.*` | `pbs2` storage entry and its credentials | Escrow (`/etc/pve` tarball) | re-add the storage ([step 3](#3-reconnect-the-pbs-storage)) |
-| `/etc/pve/jobs.cfg`, `user.cfg`, `qemu-server/*.conf` | backup jobs, `api_ro` user, VM configs | Escrow (`/etc/pve` tarball); VM configs are also inside each PBS VM backup | VM configs return with `qmrestore`; recreate jobs and users ([Proxmox guide](./proxmox.md#backups)) |
+| `/etc/pve/storage.cfg`, `/etc/pve/priv/storage/pbs2.*` | `pbs2` storage entry, its token and the encryption key | PBS host backup | re-add the storage ([step 3](#3-reconnect-the-pbs-storage)) |
+| `/etc/pve/user.cfg`, `qemu-server/*.conf` | `api_ro` user, VM configs | PBS host backup; VM configs are also inside each PBS VM backup | VM configs return with `qmrestore`; recreate users ([Proxmox guide](./proxmox.md#backups)) |
 | `/etc/network/interfaces`, `/etc/resolv.conf` | host network | Regenerate | from `src/pve1/interfaces.j2`, `src/pve1/resolv.conf.j2` |
 | `/root/homelab-rendered/` | rendered repo | Regenerate | `tools/deploy_src.sh` from the workstation |
 | `/etc/msmtprc`, `/usr/local/bin/{msmtp_password,cert_notifier,vm_watchdog}.sh`, their systemd units, the msmtp AppArmor edit, node_exporter | host services | Regenerate | [pve1 guide](./pve1.md#notifications), [Proxmox guide](./proxmox.md#vm-management) |
-| `/root/backups/repo/` (*planned*) | encrypted repo tarballs | Escrow | `backup-and-dr/05` |
+| `/root/backups/` | every node's staged files and dumps as of the last run, and `repo/` with the repo and `vars.yml` | PBS host backup | the nodes' own `/var/opt/backups/` stages still hold their last copy |
 
 ### Elsewhere
 
 | Where | What | Covered by | If lost |
 |---|---|---|---|
-| `vars.yml` on the workstation | every personal value the render needs | nothing today (`tools/backup_src.sh` is manual and unencrypted); *planned*: Repo backup, Escrow | [Only vars.yml is lost](#only-varsyml-is-lost) |
+| `vars.yml` on the workstation | every personal value the render needs | Repo backup (on every deploy), Escrow | [Only vars.yml is lost](#only-varsyml-is-lost) |
 | `/etc/opt/traefik/certificates/acme.json` on secsvcs, homesvcs, websvcs | Let's Encrypt account key + certs | PBS VM backup | Traefik re-issues on start (rate limits apply) |
 | `/etc/opt/olive_tin/ssh/` on secsvcs | OliveTin's `autoadmin` key + cert | PBS VM backup | `ssh_cert_gen.sh` |
 | `/etc/opt/secrets/id_ed25519`, `secrets.yaml.age` on each host | host decryption key + that host's secrets | PBS VM backup | new key, re-collect pubkey, `secret_update.sh <host>` |
 | pfSense `config.xml` | firewall, VLANs, DHCP leases, DNS | PBS VM backup (router VM), Auto Config Backup; *planned*: Escrow | [Router without a VM backup](#router-without-a-vm-backup) |
 | ACB device key + encryption password | needed to pull an ACB backup onto a fresh pfSense | Offline copy held by the maintainer; see `auth/08` | ACB backups unusable |
-| PBS datastore `backup1` on pve2 | every VM backup | nothing (single copy); *planned*: offsite (`backup-and-dr/03`) | rebuild VMs from the guides |
+| PBS datastore `backup1` on pve2 | every VM and host backup | nothing (single copy); *planned*: offsite (`backup-and-dr/03`) | rebuild VMs from the guides; the nodes' stages and pve1's `/root/backups` still hold the last files |
 
 ## Rebuild pve1 from bare metal
 Assumes the SSD is replaced, pve2 and its PBS datastore are intact, and you have the escrow bundle and `vars.yml`. VM restore details beyond what's here are *planned* in `backup-and-dr/06`.
@@ -65,18 +67,20 @@ All four NICs belong to the router VM, so until it's back there is no LAN, DHCP,
 `start_pve2` sends Wake-on-LAN from the router, which is down: press pve2's power button. Proxmox configures a static address at install, so pve2 comes up on `192.168.2.10` without DHCP, and PBS listens on `:8007`.
 
 ### 3. Reconnect the PBS storage
-- With the escrow `/etc/pve` tarball: copy back only `storage.cfg`, `priv/storage/pbs2.*` and `jobs.cfg`. Leave `nodes/`, `local/` and the certs; they belong to the new install.
-- Without it:
+- From the escrow bundle you need `pbs_client.key` and the `pbs2_backup_token` value (in `pve1.yaml`); the `/etc/pve` copy in PBS is only reachable once the storage is back.
+- Then:
 ```bash
 # On pve2's console: the PBS cert fingerprint
 proxmox-backup-manager cert info | grep Fingerprint
 
 # On pve1
 pvesm add pbs pbs2 --server 192.168.2.10 --datastore backup1 --namespace pve1 \
-  --username 'USER@REALM' --password 'PASSWORD' --fingerprint 'FINGERPRINT'
+  --username 'pve1@pbs!backup' --password 'TOKEN_SECRET' --fingerprint 'FINGERPRINT' \
+  --encryption-key /path/to/escrowed/pbs_client.key
 pvesm list pbs2
 ```
-- The storage authenticates as `root@pam` today; `backup-and-dr/11` replaces it with a backup-only user. If the storage has an encryption key (`ls /etc/pve/priv/storage/pbs2.enc` on the old pve1), that file is required to restore anything and must be escrowed; `backup-and-dr/11` decides whether to use one.
+- The fingerprint is needed here because the new install doesn't trust the Let's Encrypt chain until step 7. The token can only write and read backups, never delete them, so a compromised pve1 can't take the backups with it (`backup-and-dr/11`).
+- Once the VMs are back (step 4) and the host has `proxmox-backup-client` (step 9's `install_backup_orchestrator`), the whole `/root` tree returns from the host backup: `proxmox-backup-client restore host/pve1/TIMESTAMP backups.pxar /tmp/restore --ns files --keyfile pbs_client.key --pattern 'pve1/*'`, then copy `pve1/files/root/{secrets,ca,ssh,acme,.ssh}` into place ([restore guide](./restore.md#from-pbs)). That makes the AGE, CA and SSH CA scenarios below unnecessary when PBS survived.
 
 ### 4. Restore the VMs
 Restore the router, secsvcs and homesvcs while the temporary link is up. Don't start them yet.

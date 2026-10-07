@@ -30,3 +30,7 @@ Blocked by: auth/01, auth/02, backup-and-dr/01, backup-and-dr/09, image-updater/
   so nobody "fixes" it (leftover from observability/05).
 
 ## Comments
+
+- 2026-10-04: the podman guide "Backups — TODO" and the proxmox guide "PVE / PBS
+  backups — TODO" are done by the backup restructure (`backup.sh` per node, host configs
+  staged, `docs/guides/restore.md`). The "Add a new user" item remains.

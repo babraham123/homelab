@@ -1,0 +1,56 @@
+#!/bin/bash
+# pve2 backup: stages the host's and PBS's config under /var/opt/backups for pve1's
+# backup_orchestrator to pull, then backs up every VM on this host to PBS through the
+# API. Retention is prune.sh, which the orchestrator runs after its own upload.
+# Usage:
+#   src/pve2/backup.sh
+
+set -euo pipefail
+# shellcheck source=src/debian/backup_lib.sh
+source /root/homelab-rendered/src/debian/backup_lib.sh
+
+node=$(hostname)
+
+vm_running() { qm status "$1" | grep -qw running; }
+
+backup_vm() {
+  local upid
+  upid=$(pvesh create "/nodes/${node}/vzdump" --vmid "$1" --storage pbs2 --mode snapshot \
+    --notes-template '{% raw %}{{guestname}}{% endraw %}')
+  pve_task "$upid"
+}
+
+stage_init
+# /etc/proxmox-backup is PBS itself: datastore and namespace definitions, users,
+# tokens and ACLs, prune/GC jobs. It is the one thing PBS can't restore from PBS.
+stage_paths /etc/pve /etc/proxmox-backup /etc/network/interfaces /etc/resolv.conf \
+  /etc/hosts /etc/hostname /etc/ssh /etc/opt /etc/systemd/system /etc/fstab \
+  /root/.ssh /var/lib/vz/snippets /usr/local/bin
+stage_finish
+
+websvcs=$(/usr/local/bin/get_vm_id.sh websvcs)
+devtop=$(/usr/local/bin/get_vm_id.sh devtop)
+gaming=$(/usr/local/bin/get_vm_id.sh gaming)
+
+# devtop and gaming share the GPU. vzdump launches a paused QEMU, GPU attached, to read
+# a stopped VM's disks whatever the mode, and the hookscript then stops the other VM.
+# So: back up whichever is running, shut it down, back up the other, then put things
+# back as they were.
+was_running=""
+for vm in "$devtop" "$gaming"; do
+  vm_running "$vm" && was_running=$vm
+done
+
+backup_vm "$websvcs"
+if [[ -n $was_running ]]; then
+  backup_vm "$was_running"
+  # The gaming VM can ignore ACPI mid-session; forceStop makes the timeout a hard stop.
+  qm shutdown "$was_running" --timeout 180 --forceStop 1
+fi
+for vm in "$devtop" "$gaming"; do
+  [[ $vm == "$was_running" ]] || backup_vm "$vm"
+done
+if [[ -n $was_running ]]; then
+  qm start "$was_running"
+fi
+

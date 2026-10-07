@@ -1,0 +1,42 @@
+# Backup and media-array alerts, from the textfile metrics written by pve1's
+# backup_orchestrator.sh and websvcs' snapraid_run.sh. The backup run is weekly, so
+# eight days of silence is one missed run.
+---
+groups:
+  - name: backups
+    rules:
+      - alert: BackupStale
+        expr: time() - homelab_backup_last_success_timestamp_seconds > 8 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backup step {{ $labels.job }} hasn't succeeded in over 8 days"
+          description: "Last success {{ $value | humanizeDuration }} ago. See journalctl -u backup_orchestrator on pve1."
+      - alert: BackupNeverRan
+        expr: absent(homelab_backup_last_success_timestamp_seconds)
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No backup metrics from pve1"
+          description: "homelab_backup.prom is missing from pve1's textfile collector; the orchestrator has never completed, or node_exporter isn't scraped."
+      - alert: SnapraidStale
+        # websvcs is only up with pve2, and Persistent timers catch up at boot, so the
+        # threshold is a week, not a day.
+        expr: time() - homelab_snapraid_last_success_timestamp_seconds > 8 * 86400
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "snapraid {{ $labels.job }} hasn't succeeded in over 8 days"
+          description: "Parity is stale; media changed since then is unprotected. See journalctl -u snapraid-{{ $labels.job }} on websvcs."
+      - alert: DiskUnhealthy
+        expr: homelab_smart_healthy == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SMART health check failed for {{ $labels.device }}"
+          description: "smartctl -H on websvcs no longer reports PASSED. Replace the disk, then snapraid fix."
+...

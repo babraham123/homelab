@@ -1,0 +1,96 @@
+# Restore
+How to get a file, a VM or a whole Proxmox host back from the weekly backup. What the backup holds and how it is made is in [Services: storage and backups](../services.md#storage-and-backups); the full list of what pve1 must keep off-box is in [pve1 disaster recovery](./pve1_recovery.md).
+
+Everything in PBS is encrypted with the client key `/root/secrets/pbs_client.key` on pve1. Without that key nothing restores, from PBS or from any offsite copy of it. It is in the escrow set (`backup-and-dr/04`).
+
+Three tiers, cheapest first:
+1. **The node's own stage**, `/var/opt/backups/files/` on the node: the newest copy of its config trees and small volumes, paths as on the live system. No other machine needed. Application dumps are not kept here: pve1 moves them out at every run.
+2. **pve1's collection**, `/root/backups/<node>/files/` on pve1: a mirror of every node's stage as of the last run, plus `repo/` (the repo and `vars.yml`, written by every `tools/deploy_src.sh`). pve1 is always on. A `dumps/` directory still holding files means the last upload failed and PBS doesn't have them yet.
+3. **PBS** (`pbs2`, on pve2): every weekly run. Application dumps live only here. Namespace `files` holds `host/pve1` (the collection: last 1, weekly 3, monthly 6 kept); namespaces `pve1` and `pve2` hold the VM images and `host/vpnsvcs` (last 1, weekly 2, monthly 2). Needs pve2 awake: `ssh autoadmin@router start_pve2`.
+
+## A file or an application's data
+### From the stage or pve1's collection
+```bash
+# On the node: the last copy of a config tree, paths as on the live system
+ls /var/opt/backups/files/etc/opt/
+# On pve1: the same, for any node, as of the last Saturday run
+ls /root/backups/secsvcs/files/etc/opt/
+```
+Copy the file back into place with `cp -a`, then restart the service that reads it.
+
+### From PBS
+Any application dump, anything older than the last run, or pve1 is gone too. List the host backups and pull one directory out without restoring the whole archive:
+```bash
+# On pve1 (or any machine with proxmox-backup-client, the token and the key)
+export PBS_REPOSITORY='pve1@pbs!backup@pbs2.janedoe.com:backup1'
+export PBS_PASSWORD=$(sops -d /root/secrets/pve1.yaml | yq .pbs2_backup_token)
+proxmox-backup-client snapshot list --ns files
+proxmox-backup-client catalog dump host/pve1/2026-10-04T02:00:00Z backups.pxar --ns files \
+  --keyfile /root/secrets/pbs_client.key | grep secsvcs/dumps
+proxmox-backup-client restore host/pve1/2026-10-04T02:00:00Z backups.pxar /tmp/restore --ns files \
+  --keyfile /root/secrets/pbs_client.key --pattern 'secsvcs/dumps/postgres/*'
+# vpnsvcs is its own group, next to pve1's images
+proxmox-backup-client snapshot list --ns pve1
+proxmox-backup-client restore host/vpnsvcs/2026-10-04T02:00:00Z vpnsvcs.pxar /tmp/restore --ns pve1 \
+  --keyfile /root/secrets/pbs_client.key --pattern 'dumps/headscale/*'
+```
+`catalog shell` does the same interactively (`ls`, `select`, `restore-selected`).
+
+### Application restores
+Each dump restores into a fresh or stopped service; the file copies above cover the rest of `/etc/opt`.
+
+- **Postgres** (Authelia, LLDAP, Gatus, Guacamole, Isso), from `secsvcs/dumps/postgres/pg_dumpall-*.sql.zst`:
+```bash
+# On secsvcs, with every other service stopped so nothing writes during the load
+zstd -dc pg_dumpall-TIMESTAMP.sql.zst | podman exec -i postgres psql -U postgres
+```
+- **Home Assistant**, from `homesvcs/dumps/hass/hass-*.tar`: Settings >> System >> Backups >> upload, or copy the file into the `hassconfig` volume's `backups/` directory and restore from there. Recorder history (`hassdb`) is not backed up; HA creates an empty one.
+- **Headscale**, from `host/vpnsvcs`, `dumps/headscale/db-*.sqlite`:
+```bash
+systemctl stop headscale
+cp db-TIMESTAMP.sqlite /var/lib/headscale/db.sqlite
+rm -f /var/lib/headscale/db.sqlite-wal /var/lib/headscale/db.sqlite-shm
+chown headscale:headscale /var/lib/headscale/db.sqlite
+systemctl start headscale
+```
+- **A Podman volume copy** (`files/volumes/<name>/`, e.g. `grafanadata`, `z2mdb`): stop the service, `rsync -a` the directory into `podman volume inspect -f '{{ .Mountpoint }}' systemd-<name>`, start it.
+- **The repo and `vars.yml`**, from `/root/backups/repo/homelab-*.tar.gz` on pve1: `tar -xzf` into an empty directory. `vars.yml` is in the root of the archive.
+
+## A VM
+From PBS, with pve2 awake. Each backup carries the VM config (disks, NICs, MAC, passthrough), so the restored VM keeps its DHCP lease and its place in the startup order.
+
+- **In place**, replacing a broken VM:
+```bash
+# On the host that owns the VM
+pvesm list pbs2 | grep VMID      # newest first; check the dates
+qm stop VMID
+qmrestore pbs2:backup/vm/VMID/TIMESTAMP VMID --storage local-lvm --force
+qm start VMID
+```
+- **To a scratch VMID**, to test or to pick files out of a disk without touching production:
+```bash
+qmrestore pbs2:backup/vm/VMID/TIMESTAMP 999 --storage local-lvm --unique
+qm set 999 --net0 virtio,bridge=vmbr0,link_down=1   # no network: same IP as the original
+qm start 999
+# Console in through the PVE UI, or mount its disk from the host:
+# guestmount -a /dev/pve/vm-999-disk-0 -i --ro /mnt/scratch
+qm destroy 999 --purge
+```
+- **UI**: the PBS storage >> Backups >> select >> Restore, or PBS's own File Restore for single files out of a VM disk (needs the key loaded on the PVE storage, which `pvesm set pbs2 --encryption-key` does).
+- **devtop and gaming on pve2**: their data disks are not part of the image once `backup=0` is set on them; a restored VM comes back with the system disk only. Re-attach the data disk with `qm set VMID --scsi1 local-games:vm-VMID-disk-1,backup=0`.
+- **The router**: pfSense's config is also in Auto Config Backup. The VM restore is faster and keeps the NIC passthrough config.
+
+## A Proxmox host
+- **pve1**: [pve1 disaster recovery](./pve1_recovery.md). The escrow bundle supplies the AGE key, the PBS token and the client key; everything else comes back from PBS and `/root/backups`.
+- **pve2** (and PBS with it), assuming pve1 is intact:
+  1. Install Proxmox as in [the router guide](./router.md#install-proxmox), hostname `pve2`, static IP `192.168.2.10`; then PBS as in [the Proxmox guide](./proxmox.md#backups). IOMMU and the GPU/SATA passthrough per [the GPU guide](./gpu.md) and [pve2 storage](./pve2_storage.md).
+  2. **The datastore is intact** (the SATA SSD survived): mount it where it was and recreate the datastore entry pointing at it; PBS picks up the existing chunks and snapshots. Then restore `/etc/proxmox-backup` from pve1's `/root/backups/pve2/files/etc/proxmox-backup/` for the users, tokens, ACLs and jobs, and `systemctl restart proxmox-backup proxmox-backup-proxy`.
+  3. **The datastore is lost**: create a new `backup1` with namespaces `pve1`, `pve2` and `files`, recreate the `pve1@pbs!backup` token and ACLs ([Proxmox guide](./proxmox.md#backups)), and run the pve1 steps of the apply guide to re-point `pbs2`. Everything that was only in PBS is gone until the offsite copy exists (`backup-and-dr/03`); the VMs on pve2 are rebuilt from their guides and pve1's `/root/backups/websvcs`.
+  4. Restore `/etc/pve/storage.cfg` and the `priv/storage/pbs2.*` files from `/root/backups/pve2/files/etc/pve/` so the `pbs2` storage and its key come back, then `qmrestore` websvcs, devtop and gaming as above.
+  5. `tools/deploy_src.sh`, `install_dispatcher`, `install_vm_watchdog`, `install_certs_and_keys` on pve2, and `install_all_svcs` on websvcs.
+
+## Quarterly restore test
+Record the date in `docs/maintenance.md` when done.
+1. Wake pve2. Restore secsvcs to VMID 999 with `--unique` and the NIC down, as above. Boot it and log in on the console; `systemctl list-units 'Homelab*'` should show every service running and `podman exec postgres psql -U postgres -c '\l'` should list the databases. Destroy it.
+2. Pull one file out of the newest host backup with `proxmox-backup-client restore ... --pattern`, e.g. the Headscale DB, and open it: `sqlite3 db-*.sqlite 'PRAGMA integrity_check'`.
+3. Decrypt a copy of the client key from the escrow bundle, not from pve1, to prove the escrow is current.

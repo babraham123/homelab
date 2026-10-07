@@ -97,7 +97,7 @@ ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
 ```
 
 ## Backups
-TODO: turn into a script
+The scheduled backup is each node's `backup.sh` (see [Services](../services.md#storage-and-backups)); what follows is the manual fallback for a volume it doesn't cover.
 
 - Backup container volumes
 ```bash

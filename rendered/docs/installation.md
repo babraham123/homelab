@@ -34,3 +34,4 @@ Now follow the guides in this specific order:
 1. homesvcs services (home automation): [home_services](guides/home_services.md)
 1. gaming (Windows VM, GPU passthrough, Sunshine): [vm_windows](guides/vm_windows.md), [gaming](guides/gaming.md)
 1. devtop (Linux desktop VM): [dev_desktop](guides/dev_desktop.md)
+1. pve2 media array (HDDs, snapraid, mergerfs in websvcs): [pve2_storage](guides/pve2_storage.md)

@@ -1,0 +1,14 @@
+# /etc/systemd/system/snapraid-scrub.timer
+
+[Unit]
+Description="Homelab: Scrubs a slice of the snapraid array weekly"
+
+[Timer]
+# pve2 is off most of the time; Persistent runs a missed job at the next boot.
+Persistent=true
+OnCalendar=Sat *-*-* 05:00:00
+RandomizedDelaySec=10m
+Unit=snapraid-scrub.service
+
+[Install]
+WantedBy=timers.target

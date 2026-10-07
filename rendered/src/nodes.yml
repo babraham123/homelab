@@ -34,6 +34,7 @@ nodes:
       cert_notifier: {}
       backup_orchestrator: {}
     commands:
+      - {name: archive_repo, script: pve1/commands.sh}
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
       - {name: install_ca, script: debian/commands.sh}
@@ -44,7 +45,8 @@ nodes:
       - {name: install_certs_and_keys, script: pve2/commands.sh}
       - {name: start_gaming_vm, script: pve2/commands.sh}
       - {name: stop_gaming_vm, script: pve2/commands.sh}
-      - {name: run_backups, script: pve2/commands.sh}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/pve2/backup.sh]}
+      - {name: prune, run: [sudo /root/homelab-rendered/src/pve2/prune.sh]}
       - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
@@ -63,7 +65,7 @@ nodes:
       haproxy: {}
       geoip_generator: {}
     commands:
-      - {name: backup_full, run: [sudo /root/homelab-rendered/src/vpnsvcs/backup_full.sh]}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/vpnsvcs/backup.sh]}
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
       - {name: install_ca, script: debian/commands.sh}
@@ -95,7 +97,7 @@ nodes:
       - {name: install_olive_tin_cert, script: secsvcs/commands.sh}
       - {name: install_ca, script: debian/commands.sh}
       - {name: copy_acme_certs, script: debian/commands.sh}
-      - {name: pg_dumpall, script: secsvcs/commands.sh}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/secsvcs/backup.sh]}
       - {name: build_haproxy_mapper, script: secsvcs/commands.sh, sudo: false}
 
   homesvcs:
@@ -112,7 +114,7 @@ nodes:
     commands:
       - {name: install_keys, script: homesvcs/commands.sh}
       - {name: install_certs, script: homesvcs/commands.sh}
-      - {name: backup_hass, run: [sudo /root/homelab-rendered/src/homesvcs/backup_hass.sh]}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/homesvcs/backup.sh]}
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
       - {name: install_ca, script: debian/commands.sh}
@@ -137,10 +139,12 @@ nodes:
       whisper: {}
       openwakeword: {}
       fluentbit: {}
+      snapraid: {}
     install_all_svcs: true
     commands:
       - {name: install_keys, script: websvcs/commands.sh}
       - {name: install_certs, script: websvcs/commands.sh}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/websvcs/backup.sh]}
       - {name: install_ssh_ca, script: debian/commands.sh}
       - {name: install_dispatcher, script: debian/commands.sh}
       - {name: install_ca, script: debian/commands.sh}

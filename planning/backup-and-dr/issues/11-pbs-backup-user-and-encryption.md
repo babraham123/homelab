@@ -1,6 +1,6 @@
 # 11. Back up to PBS as a backup-only user, and decide on client-side encryption
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer answer to backup-and-dr/09 open question 1 (2026-09-27)
@@ -61,3 +61,29 @@ Answer under `## Answer` before changing anything:
   it.
 
 ## Comments
+
+## Answer
+
+**Encryption: yes, one client key, held on pve1.** Decided in the backup restructure
+(2026-10-04): `/root/secrets/pbs_client.key` (`proxmox-backup-client key create --kdf
+none`) is used by the `pbs2` PVE storage on pve1 (`--encryption-key`) and by the host
+backup upload, so images and files share one key and dedup across them; pve2's storage
+gets a copy so its images are ciphertext too. Verify jobs work on encrypted chunks
+(digests are of the ciphertext). The key joins the escrow set (04), and the copy of it
+inside PBS is useless without itself, so escrow is a hard prerequisite. Old unencrypted
+snapshots stay restorable and prune out over time. Encrypting only an offsite copy was
+rejected: the datastore sits on the same box as most of the VMs.
+
+**Identity:** user `pve1@pbs`, token `pve1@pbs!backup`, `DatastoreBackup` on
+`/datastore/backup1/pve1` and `/datastore/backup1/files` (the new namespace for the
+host backups; retention is per namespace). The secret is `pbs2_backup_token` in
+`/root/secrets/pve1.yaml` (`src/pve1/secrets_template.yaml`); the orchestrator reads
+it with sops for `PBS_PASSWORD`. pve2's storage stays `root@pam`: PBS is local to it.
+
+Code side done: `secrets_template.yaml`, the orchestrator's `step_upload`,
+`docs/guides/proxmox.md#backups` and `pve1_recovery.md` step 3. Human side (the apply
+guide, `notes/apply-since-5a50097.md`): create the `files` namespace, the user, token
+and ACLs on PBS, the key
+on pve1, enter the token in `pve1.yaml`, `pvesm set pbs2` on both hosts, then the
+acceptance checks: `pvesm status`, a scratch restore, and `proxmox-backup-client
+snapshot forget` refused as the token.

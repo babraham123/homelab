@@ -24,6 +24,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_backup_orchestrator)
     sudo /root/homelab-rendered/src/pve1/install_svcs.sh backup_orchestrator
     ;;
+  archive_repo)
+    sudo /root/homelab-rendered/src/pve1/commands.sh archive_repo
+    ;;
   install_ssh_ca)
     sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca
     ;;

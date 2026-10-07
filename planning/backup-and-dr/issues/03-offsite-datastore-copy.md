@@ -45,3 +45,10 @@ finish this.
   `homelab_backup_last_success_timestamp_seconds{job="offsite_copy"}` series and a
   place in the ntfy summary with no further wiring. pve2 is powered off after the last
   step, so the copy must finish inside the step (or keep pve2 up until it does).
+
+- 2026-10-04: Decision from the backup restructure: PBS-native. Use a PBS 4 S3-compatible datastore
+as a push sync target (B2 or similar); restic is out, since every chunk in `backup1` is
+already encrypted with pve1's client key, so the remote holds ciphertext without a second
+tool. The sync job runs as a step at the end of pve2's `backup.sh images`, before the
+orchestrator powers pve2 off, and gets a `homelab_backup_last_success_timestamp_seconds`
+series through the `images_pve2` step. Still ready-for-human: provider, bucket, budget.

@@ -48,6 +48,18 @@ secsvcs:
 websvcs:
   ip: 192.168.2.20
   container_subnet: 10.11.0
+  # HDD array on pve2's PCIe SATA card, passed through to websvcs. snapraid protects
+  # the disks, mergerfs unions the data disks at /srv/media. The disk mounted under
+  # /mnt/parity is parity, the rest are data.
+  # Only the stable /dev/disk/by-id name and the mount point are declared; partitioning,
+  # mkfs and the first sync are manual (docs/guides/pve2_storage.md). Leave `disks`
+  # empty until the disks are in: the snapraid timers are only installed when it's set.
+  media:
+    disks:
+      - {id: ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AA, mount: /mnt/disk1}
+      - {id: ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AB, mount: /mnt/disk2}
+      - {id: ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AC, mount: /mnt/disk3}
+      - {id: ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AD, mount: /mnt/parity}
 homesvcs:
   ip: 192.168.4.21
   container_subnet: 10.12.0
@@ -113,6 +125,7 @@ retention:
   log_days: 14
   metric_days: 14
   hass_days: 14
+
 
 # tools/render_src.sh appends src/nodes.yml (the `nodes:` key) here at render time.
 ...

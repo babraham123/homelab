@@ -301,10 +301,10 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: secsvcs Pg Dumpall
+              title: secsvcs Backup
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
-              shell: ssh autoadmin@secsvcs pg_dumpall
-              id: secsvcs_pg_dumpall
+              shell: ssh autoadmin@secsvcs backup
+              id: secsvcs_backup
               maxConcurrent: 1
               timeout: 60
 
@@ -417,10 +417,10 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: homesvcs Backup Hass
+              title: homesvcs Backup
               icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
-              shell: ssh autoadmin@homesvcs backup_hass
-              id: homesvcs_backup_hass
+              shell: ssh autoadmin@homesvcs backup
+              id: homesvcs_backup
               maxConcurrent: 1
               timeout: 60
 
@@ -589,6 +589,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: websvcs Install Snapraid
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_snapraid
+              id: websvcs_install_snapraid
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: websvcs Install All Svcs
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_all_svcs
@@ -609,6 +617,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_certs
               id: websvcs_install_certs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Backup
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs backup
+              id: websvcs_backup
               maxConcurrent: 1
               timeout: 60
 
@@ -673,6 +689,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: pve1 Archive Repo
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 archive_repo
+              id: pve1_archive_repo
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: pve1 Install Ssh Ca
               icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
               shell: ssh autoadmin@pve1 install_ssh_ca
@@ -733,10 +757,18 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: pve2 Run Backups
+              title: pve2 Backup
               icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
-              shell: ssh autoadmin@pve2 run_backups
-              id: pve2_run_backups
+              shell: ssh autoadmin@pve2 backup
+              id: pve2_backup
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Prune
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 prune
+              id: pve2_prune
               maxConcurrent: 1
               timeout: 60
 
@@ -809,10 +841,10 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: vpnsvcs Backup Full
+              title: vpnsvcs Backup
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpnsvcs backup_full
-              id: vpnsvcs_backup_full
+              shell: ssh autoadmin@vpnsvcs backup
+              id: vpnsvcs_backup
               maxConcurrent: 1
               timeout: 60
 

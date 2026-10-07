@@ -1,10 +1,10 @@
 # 06. Restore instructions for VMs on pve1 and pve2, and a quarterly test
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: review finding 5
-Blocked by: 01, 03, 07, 08
+Blocked by: 04
 
 ## Problem
 
@@ -32,3 +32,9 @@ Add `docs/guides/restore.md`:
   the guide.
 
 ## Comments
+
+- 2026-10-04: `docs/guides/restore.md` written with the backup restructure: file / application
+restores from the node's stage, pve1's `/root/backups` or PBS (`proxmox-backup-client
+restore --pattern`), VM restore in place and to a scratch VMID, pve1 and pve2 host
+restores, and the quarterly test. Open: the acceptance test itself (one scratch-VMID
+restore, date recorded in `docs/maintenance.md`), and the offsite section waits on 03.

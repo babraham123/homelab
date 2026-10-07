@@ -27,8 +27,8 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_geoip_generator)
     sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh geoip_generator
     ;;
-  backup_full)
-    sudo /root/homelab-rendered/src/vpnsvcs/backup_full.sh
+  backup)
+    sudo /root/homelab-rendered/src/vpnsvcs/backup.sh
     ;;
   install_ssh_ca)
     sudo /root/homelab-rendered/src/debian/commands.sh install_ssh_ca

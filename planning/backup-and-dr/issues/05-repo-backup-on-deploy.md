@@ -1,6 +1,6 @@
 # 05. Back up the repo (incl. vars.yml) to pve1 on every deploy
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 4
@@ -30,3 +30,14 @@ entire render pipeline.
 - No plaintext copy of `vars.yml` is produced anywhere in the process.
 
 ## Comments
+
+## Answer
+
+Done with the backup restructure (2026-10-04), with one change from the ticket: no
+`age` on the archive. `tools/deploy_src.sh` tars `git ls-files` plus `vars.yml` and
+pipes it over ssh to the new `archive_repo` dispatcher command on pve1
+(`src/pve1/commands.sh.j2`), which writes `/root/backups/repo/homelab-<ts>.tar.gz`
+(root, 0600, newest 3 kept). ssh encrypts it in flight, pve1 already
+holds every secret, and the weekly host backup carries `/root/backups` to PBS encrypted
+with the client key, so an `age` layer would only have hurt dedup. `tools/backup_src.sh`
+is deleted.
