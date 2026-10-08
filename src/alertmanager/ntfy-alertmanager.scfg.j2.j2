@@ -1,5 +1,7 @@
 # /etc/opt/ntfy-alertmanager/config.scfg.j2
 # Ref: https://git.xenrox.net/~xenrox/ntfy-alertmanager
+# Container-to-container URLs are always <hostname>.SITE:<container port>, never through
+# Traefik (see src/alertmanager/config.yml.j2.j2).
 
 # Public facing base URL of the service (e.g. https://ntfy-alertmanager.xenrox.net)
 # This setting is required for the "Silence" feature.
@@ -19,7 +21,7 @@ password {% raw %}{{ env('ntfy_alertmanager_admin_password') }}{% endraw %}
 
 labels {
   # https://docs.ntfy.sh/publish/#message-priority
-  order "severity"
+  order "severity,host"
 
   severity "critical" {
     priority 5
@@ -42,18 +44,13 @@ labels {
     priority 1
   }
 
-  instance "sevsvcs.{{ site.url }}" {
-    tags "computer,secsvcs"
+  # Label values match exactly, so `host` (the node, no port; src/<node>/prometheus.yml.j2)
+  # rather than `instance`, which carries a port.
+{% for node in ['pve1', 'pve2', 'secsvcs', 'homesvcs', 'websvcs', 'vpnsvcs'] %}
+  host "{{ node }}.{{ site.url }}" {
+    tags "computer,{{ node }}"
   }
-  instance "websvcs.{{ site.url }}" {
-    tags "computer,websvcs"
-  }
-  instance "pve1.{{ site.url }}" {
-    tags "computer,pve1"
-  }
-  instance "pve2.{{ site.url }}" {
-    tags "computer,pve2"
-  }
+{% endfor %}
 }
 
 # Settings for resolved alerts
@@ -65,7 +62,7 @@ resolved {
 
 ntfy {
   # URL of the ntfy topic - required
-  topic http://push.{{ site.url }}/alert
+  topic http://push.{{ site.url }}:2586/alert
   # ntfy authentication via Basic Auth (https://docs.ntfy.sh/publish/#username-password)
   user alert
   password {% raw %}{{ env('ntfy_alert_password') }}{% endraw %}

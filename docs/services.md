@@ -165,6 +165,18 @@ flowchart LR
   - `health.yml`, `vmagent.yml`, `vmalert.yml`, `vmsingle.yml`, `fluentbit.yml`: the
     pipeline's own components, upstream rule sets.
   The "Homelab alerts" Grafana dashboard shows what is firing and the signals behind it.
+- Delivery: Alertmanager (grouped by alert and instance, 30 s wait, 24 h repeat) emails
+  `+alert@` and posts to ntfy-alertmanager, which maps severity to an ntfy priority,
+  tags the node from the `host` label, pushes to ntfy's `alert` topic (the phone app,
+  iOS via ntfy.sh) and emails `+alert2@`. Container-to-container URLs in those configs
+  are `<name>.SITE:<port>`, never through Traefik.
+- The path above lives entirely on secsvcs, so it can't report its own death. vmalert
+  evaluates a `Watchdog` rule that always fires and Alertmanager routes to a null
+  receiver; `deadman.timer` on the VPS (`src/vpnsvcs/deadman.sh`, every 5 minutes, over
+  the tailnet) checks that the alert is present in Alertmanager's API and that ntfy is
+  healthy. Three failures in a row send an email and a push to a private ntfy.sh topic,
+  neither touching secsvcs. `VpsMetricsAbsent` is the mirror image (observability/08).
+  The quarterly check is in [Maintenance](maintenance.md#alerting-pipeline-test).
 
 ## Key data flows
 

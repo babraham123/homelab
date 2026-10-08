@@ -57,6 +57,23 @@ case $1 in
     systemctl restart geoip_generator.timer
     exit 0
     ;;
+  deadman)
+    # The checker's credentials are hand-placed, like hs_oidc_*; fail here, not at 02:00.
+    for f in alertmanager_admin_password alert_smtp_password deadman_ntfy_topic; do
+      [[ -s /etc/opt/secrets/$f ]] || { echo "error: missing /etc/opt/secrets/$f" >&2; exit 1; }
+    done
+    apt install -y jq curl
+    install -d -m 700 /var/lib/deadman
+    cp vpnsvcs/deadman.service /etc/systemd/system
+    cp vpnsvcs/deadman.timer /etc/systemd/system
+
+    systemctl daemon-reload
+    systemctl enable deadman.timer
+    systemctl restart deadman.timer
+    systemctl start deadman.service
+    systemctl status deadman.timer --no-pager
+    exit 0
+    ;;
   *)
     echo "error: unknown service: $1" >&2
     exit 1

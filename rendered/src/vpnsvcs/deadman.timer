@@ -1,0 +1,12 @@
+# /etc/systemd/system/deadman.timer
+
+[Unit]
+Description="Homelab: Runs deadman.service every 5 minutes"
+
+[Timer]
+OnCalendar=*:0/5
+RandomizedDelaySec=30
+Unit=deadman.service
+
+[Install]
+WantedBy=timers.target

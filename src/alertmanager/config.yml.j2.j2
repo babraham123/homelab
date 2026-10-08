@@ -1,4 +1,7 @@
 # /etc/opt/alertmanager/config.yml.j2
+# Container-to-container URLs are always <hostname>.SITE:<container port>, never through
+# Traefik: Podman's DNS resolves the name to the container, where only that port
+# listens, and the site DNS would hand the request to Traefik's redirect and ForwardAuth.
 ---
 global:
   # The smarthost and SMTP sender used for mail notifications.
@@ -44,6 +47,12 @@ route:
 
   # All the above attributes are inherited by all child routes and can
   # overwritten on each.
+  routes:
+    # Watchdog always fires (src/vmalert/configs/pipeline.yml); the VPS's deadman.sh
+    # looks for it in the API, so it must be present here and never delivered.
+    - matchers:
+        - alertname="Watchdog"
+      receiver: "null"
 
   # # The child route trees.
   # routes:
@@ -75,12 +84,13 @@ inhibit_rules:
     equal: [alertname, instance]
 
 receivers:
+  - name: "null"
   - name: "ntfy"
     email_configs:
       - to: '{{ site.email.replace('@', '+alert@') }}'
         send_resolved: true
     webhook_configs:
-      - url: "http://ntfy-alertmanager.{{ site.url }}"
+      - url: "http://ntfy-alertmanager.{{ site.url }}:2588/"
         http_config:
           basic_auth:
             username: "admin"

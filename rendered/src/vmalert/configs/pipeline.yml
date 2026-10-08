@@ -1,0 +1,16 @@
+# Watchdog always fires. Alertmanager routes it to its null receiver, so nobody is
+# notified; its presence in Alertmanager's API is what the VPS's deadman.sh checks
+# (src/vpnsvcs/deadman.sh) to prove vmalert -> Alertmanager is alive from outside
+# secsvcs. Severity "none" keeps it out of ntfy-alertmanager's priority map should it
+# ever leak.
+---
+groups:
+  - name: pipeline
+    rules:
+      - alert: Watchdog
+        expr: vector(1)
+        labels:
+          severity: none
+        annotations:
+          summary: "Alerting pipeline heartbeat; always firing, never delivered"
+...

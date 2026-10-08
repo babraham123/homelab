@@ -849,6 +849,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: vpnsvcs Install Deadman
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_deadman
+              id: vpnsvcs_install_deadman
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: vpnsvcs Backup
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs backup

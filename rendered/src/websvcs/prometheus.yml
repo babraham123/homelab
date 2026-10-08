@@ -1,5 +1,7 @@
 # /etc/opt/vmagent/prometheus.yml
 # Ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration
+# Every target carries a `host` label (the node, no port): ntfy-alertmanager tags pushes
+# by it, and it stays the same for every job on a node.
 ---
 global:
   scrape_interval: 10s
@@ -9,14 +11,19 @@ scrape_configs:
     static_configs:
       - targets: ['metric-collector.janedoe.com:8429']
     metrics_path: /metrics
+    relabel_configs: &host
+      - target_label: host
+        replacement: websvcs.janedoe.com
   - job_name: 'fluentbit'
     static_configs:
       - targets: ['log-collector.janedoe.com:2020']
     metrics_path: /api/v1/metrics/prometheus
+    relabel_configs: *host
 #   - job_name: 'finance_exporter'
 #     static_configs:
 #       - targets: ['finance-exporter.janedoe.com:8002']
 #     metrics_path: /
+#     relabel_configs: *host
   - job_name: 'node_exporter'
     static_configs:
       - targets:
@@ -25,8 +32,13 @@ scrape_configs:
     relabel_configs:
       - target_label: instance
         replacement: websvcs.janedoe.com:9100
+      - target_label: host
+        replacement: websvcs.janedoe.com
   - job_name: 'node_exporter_pve'
     static_configs:
       - targets: ['pve2.janedoe.com:9100']
     metrics_path: /metrics
+    relabel_configs:
+      - target_label: host
+        replacement: pve2.janedoe.com
 ...

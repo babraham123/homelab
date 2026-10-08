@@ -16,6 +16,6 @@ no Traefik or HAProxy metrics, an empty PVE dashboard, and 10-minute uptime inte
 | [07](issues/07-gatus-tier1-interval.md) | Check tier-1 services every 2 minutes in Gatus | `ready-for-agent` | task |
 | [08](issues/08-vpnsvcs-node-containers.md) | Install Podman on the VPS and containerise node_exporter, fluent-bit and vmagent (loopback, push) | `ready-for-agent` | task |
 | [09](issues/09-long-term-retention-allowlist.md) | Explore long-term retention for an allowlist of series | `ready-for-agent` | research |
-| [10](issues/10-alerting-pipeline-e2e.md) | Validate the alerting pipeline end to end | `ready-for-agent` | task |
+| [10](issues/10-alerting-pipeline-e2e.md) | Validate the alerting pipeline end to end | `ready-for-human` (code in; run the test plan) | task |
 | [11](issues/11-vmagent-persistent-queue.md) | Keep vmagent's remote-write buffer on its volume, and cap it | `resolved` | task |
 | [12](issues/12-haproxy-metrics.md) | Expose HAProxy's metrics on loopback, scrape them, alert and graph | `ready-for-agent` | task |

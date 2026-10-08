@@ -1,6 +1,6 @@
 # 10. Validate the alerting pipeline end to end
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26
@@ -122,3 +122,16 @@ reachable over the tailnet, so it watches from outside.
 - The suspected defects are either fixed or confirmed harmless, with the reason.
 
 ## Comments
+
+- 2026-10-07: the code half is in. Defects 1–3 fixed: ports on the webhook and the
+  topic, the typo, and a `host` label on every target in the three
+  `prometheus.yml.j2` files that ntfy-alertmanager now tags on (one block per node,
+  vpnsvcs included for 08). `Watchdog` is `src/vmalert/configs/pipeline.yml`, routed
+  to a `null` receiver. The VPS checker is `src/vpnsvcs/deadman.sh.j2` with
+  `deadman.{service,timer}` and an `install_deadman` case; it uses curl for both SMTP
+  (no msmtp, no AppArmor edit) and the ntfy.sh push, with three hand-placed files in
+  `/etc/opt/secrets/` (`docs/guides/vpnsvcs.md#dead-man-switch`). The test plan is
+  `docs/maintenance.md#alerting-pipeline-test`. Remaining for the maintainer: run tests
+  1–11 at the next deploy (`notes/apply-since-5a50097.md` steps 8 and 9) and record
+  them under `## Answer`. The install-time `amtool check-config` goes with
+  ci-and-docs/02's pre-install checks.

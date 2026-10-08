@@ -27,6 +27,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_geoip_generator)
     sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh geoip_generator
     ;;
+  install_deadman)
+    sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh deadman
+    ;;
   backup)
     sudo /root/homelab-rendered/src/vpnsvcs/backup.sh
     ;;

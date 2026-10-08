@@ -54,3 +54,8 @@ rollback for service configs too.
   `podman run --rm $(sed -nE 's/^Secret=/--secret=/p; s/^Environment=/--env=/p' authelia.container)
   -v "$PWD":/config:ro -v /etc/opt/authelia/certificates:/certificates:ro
   "$(sed -n 's/^Image=//p' authelia.container)" authelia config validate --config /config/configuration.yml`
+- 2026-10-07 (observability/10): Alertmanager's config is rendered with secrets by the
+  unit's `ExecStartPre`, so `amtool check-config` has to run after that render, e.g.
+  as a second `ExecStartPre` in `alertmanager.container` on the rendered file. Same
+  for ntfy-alertmanager (no `--check` flag: a dry start). The two URL regressions this
+  would have caught were the missing container ports on the webhook and the topic.

@@ -65,6 +65,7 @@ nodes:
       tailscaled: {}
       haproxy: {}
       geoip_generator: {}
+      deadman: {}
     commands:
       - {name: backup, run: [sudo /root/homelab-rendered/src/vpnsvcs/backup.sh]}
       - {name: install_ssh_ca, script: debian/commands.sh}

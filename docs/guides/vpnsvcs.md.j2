@@ -289,6 +289,26 @@ tee -a /etc/hosts <<'EOF'
 EOF
 ```
 
+## Dead-man switch
+`deadman.timer` checks every 5 minutes, over the tailnet, that Alertmanager on secsvcs
+still holds vmalert's always-firing `Watchdog` alert and that ntfy is healthy; three
+failures in a row mean the alerting path is down and it says so by email and through
+public ntfy.sh, so a dead secsvcs is still reported. Details in
+[Services](../services.md#observability). It needs the `/etc/hosts` telemetry block
+above and three root-only files:
+```bash
+sudo su
+# From pve1: sops -d /root/secrets/secsvcs.yaml | yq '.alertmanager_admin_password, .alert_smtp_password'
+vim /etc/opt/secrets/alertmanager_admin_password
+vim /etc/opt/secrets/alert_smtp_password
+# A long random topic name; subscribe to https://ntfy.sh/<topic> in the phone's ntfy app
+LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32 | tee /etc/opt/secrets/deadman_ntfy_topic; echo
+chmod 600 /etc/opt/secrets/*
+/root/homelab-rendered/src/vpnsvcs/install_svcs.sh deadman
+journalctl -u deadman --no-pager | tail       # silent when the path is healthy
+```
+State lives in `/var/lib/deadman/` (`failures` counter, `firing` flag).
+
 ## Backup and restore
 `ssh autoadmin@vpnsvcs backup` (pve1's orchestrator runs it weekly) snapshots the Headscale DB consistently with `sqlite3 .backup` and copies `/var/lib/headscale` (noise and DERP keys), `/etc/headscale`, `/var/lib/tailscale`, `/etc/haproxy`, `/etc/ssh`, `/etc/ufw`, `/etc/opt` and `/root/.ssh` into `/var/opt/backups/`. pve1 mirrors that into `/root/backups/vpnsvcs/` and on to PBS as `host/vpnsvcs`, kept like a VM image (last 1, weekly 2, monthly 2); the DB snapshot moves with it and lives in PBS only. The OS itself isn't archived: a new VPS is rebuilt from this guide, then the files go back.
 
