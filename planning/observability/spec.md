@@ -13,7 +13,7 @@ no Traefik or HAProxy metrics, an empty PVE dashboard, and 10-minute uptime inte
 | [04](issues/04-haproxy-metrics-design.md) | Design: get HAProxy metrics from the VPS into VictoriaMetrics | `resolved` (loopback exporter + VPS vmagent push, folded into 08) | research |
 | [05](issues/05-pve-dashboard-cleanup.md) | Remove or feed the empty pve.json dashboard | `resolved` (shipped in `9cdf062`) | task |
 | [06](issues/06-cert-expiry-alerts.md) | Add the cert-expiry vmalert rules the docs already claim exist | `resolved` (in `homelab.yml`) | task |
-| [07](issues/07-gatus-tier1-interval.md) | Check tier-1 services every 2 minutes in Gatus | `ready-for-agent` | task |
+| [07](issues/07-gatus-tier1-interval.md) | Check tier-1 services every 2 minutes in Gatus | `resolved` (`uptime_tier`) | task |
 | [08](issues/08-vpnsvcs-node-containers.md) | Install Podman on the VPS and containerise node_exporter, fluent-bit and vmagent (loopback, push) | `ready-for-agent` | task |
 | [09](issues/09-long-term-retention-allowlist.md) | Explore long-term retention for an allowlist of series | `ready-for-agent` | research |
 | [10](issues/10-alerting-pipeline-e2e.md) | Validate the alerting pipeline end to end | `ready-for-human` (code in; run the test plan) | task |

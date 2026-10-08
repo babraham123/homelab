@@ -74,6 +74,10 @@ route:
 # We use this to mute any warning-level notifications if the same alert is
 # already critical.
 inhibit_rules:
+  # Every Gatus check goes through Authelia's ForwardAuth, so with the login portal
+  # down every endpoint fails; report the cause, not the symptoms.
+  - source_matchers: [alertname="EndpointDown", name="authelia"]
+    target_matchers: [alertname="EndpointDown"]
   - source_matchers: [severity="critical"]
     target_matchers: [severity="warning"]
     # Apply inhibition if the alertname is the same.

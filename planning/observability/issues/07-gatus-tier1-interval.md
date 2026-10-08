@@ -1,6 +1,6 @@
 # 07. Check tier-1 services every 2 minutes in Gatus
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 24
@@ -46,3 +46,10 @@ so DNS generation is unaffected.
   gone. Add a per-service attribute (e.g. `uptime_tier: 1`) and pick the anchor in the
   `src/gatus/config.yaml.j2` loop. `auth` needs `uptime` + `uptime_path: /api/health` on
   secsvcs `authelia`, which also adds it to the Gatus OIDC client's audience.
+- 2026-10-07: done through the inventory: `uptime_tier: 1` on the three Traefik
+  dashboards, `authelia` (`/api/health`, `uptime_conditions: ['[BODY].status == OK']`),
+  home, push, dash and graph; `src/nodes.jinja` carries `tier` and `conditions`, and
+  `src/gatus/config.yaml.j2` picks the `*tier1` anchor (2 m). The inhibition rule
+  (authelia `EndpointDown` silences the other `EndpointDown`s) is in Alertmanager.
+  No per-endpoint `alerting` block: Gatus has no notifier here, `EndpointDown` in
+  vmalert is the alert (observability/01). `vault.SITE/alive` waits for vaultwarden/01.

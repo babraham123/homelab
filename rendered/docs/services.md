@@ -150,7 +150,8 @@ flowchart LR
   gets an uptime check from one key.
 - Retention for metrics, logs, and Home Assistant history is set in `vars.yml`.
 - Gatus is a second, independent path: HTTPS checks that don't depend on the metrics
-  pipeline. Every HTTPS check also fails when the cert has under 14 days left, and a
+  pipeline, every 10 minutes, or 2 for the proxies, the login portal and the pages
+  opened first (`uptime_tier: 1`). Every HTTPS check also fails when the cert has under 14 days left, and a
   `tls://` check watches the LDAPS cert; the cert_notifier email timer covers Postgres
   and Mosquitto. Gatus has no notifier of its own: its results are scraped, and
   `EndpointDown` and the cert rules below fire through vmalert.

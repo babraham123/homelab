@@ -53,15 +53,34 @@ internal-endpoint: &internal
     # ACME renews at 30 days out, so this only fires once renewal has been failing.
     - "[CERTIFICATE_EXPIRATION] > 336h"
 
+# Tier 1: the proxies, the login portal and the pages opened first. 2 minutes on
+# these ~8 endpoints is ~4 requests a minute at HAProxy, nothing against its
+# stick-table limits (conn_rate(3s) > 50). Every check passes through Authelia's
+# ForwardAuth, so when auth is down every endpoint fails; Alertmanager inhibits the
+# rest behind the authelia EndpointDown (src/alertmanager/config.yml.j2.j2).
+tier1-endpoint: &tier1
+  <<: *internal
+  interval: 2m
+
 endpoints:
   # - name: personal site
     # <<: *public
     # url: "https://janedoe.com"
 
-  # Internal endpoints come from the uptime entries in src/nodes.yml
+  # Internal endpoints come from the uptime entries in src/nodes.yml. A merge key
+  # replaces lists, so extra conditions repeat the anchor's.
+
+  - name: authelia
+    <<: *tier1
+    url: "https://auth.janedoe.com/api/health"
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+      - "[BODY].status == OK"
 
   - name: traefik secsvcs
-    <<: *internal
+    <<: *tier1
     url: "https://secproxy.janedoe.com"
 
   - name: victoriametrics
@@ -81,11 +100,11 @@ endpoints:
     url: "https://alert.janedoe.com"
 
   - name: ntfy health check
-    <<: *internal
+    <<: *tier1
     url: "https://push.janedoe.com/v1/health"
 
   - name: grafana
-    <<: *internal
+    <<: *tier1
     url: "https://graph.janedoe.com"
 
   - name: olive_tin
@@ -93,7 +112,7 @@ endpoints:
     url: "https://command.janedoe.com"
 
   - name: traefik homesvcs
-    <<: *internal
+    <<: *tier1
     url: "https://homeproxy.janedoe.com"
 
   - name: zigbee2mqtt
@@ -105,15 +124,15 @@ endpoints:
     url: "https://iot.janedoe.com"
 
   - name: home assistant
-    <<: *internal
+    <<: *tier1
     url: "https://home.janedoe.com"
 
   - name: traefik websvcs
-    <<: *internal
+    <<: *tier1
     url: "https://webproxy.janedoe.com"
 
   - name: homepage
-    <<: *internal
+    <<: *tier1
     url: "https://dash.janedoe.com"
 
   - name: guacamole

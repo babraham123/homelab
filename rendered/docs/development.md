@@ -150,9 +150,10 @@ sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh SERVICE
 1. If cross-VM TLS is needed, add cert/key gen to `src/certificates/` and update `commands.sh`
 1. Add service to `install_svcs.sh`
 1. Add it under the node's `services` in `src/nodes.yml`, in install order, with its
-   `subdomain` and, to monitor it in Gatus, `uptime` (and `uptime_path` if the health
-   check isn't `/`). This adds the dispatcher case, sudoers grant, OliveTin button,
-   DNS/SNI routing and uptime check
+   `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health
+   check isn't `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for
+   extra Gatus conditions). This adds the dispatcher case, sudoers grant, OliveTin
+   button, DNS/SNI routing and uptime check
 1. Update Authelia config if OIDC auth is available (`src/authelia/`)
 1. Add Homepage dashboard entry (`src/homepage/`)
 1. Update the relevant guide in `docs/guides/`

@@ -2044,6 +2044,7 @@ identity_providers:
         audience:
           - 'https://alert.janedoe.com'
           - 'https://archive.janedoe.com'
+          - 'https://auth.janedoe.com'
           - 'https://command.janedoe.com'
           - 'https://dash.janedoe.com'
           - 'https://graph.janedoe.com'

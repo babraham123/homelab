@@ -20,8 +20,8 @@ judged too complex.
 
 - `debian_services`, `services` and `commands`: the dispatcher entries.
   `services` is a mapping whose key order is the install order, so a service can carry
-  attributes; today those are `subdomain`, `uptime` (the Gatus endpoint name) and
-  `uptime_path`.
+  attributes; today those are `subdomain`, `uptime` (the Gatus endpoint name),
+  `uptime_path`, `uptime_tier` and `uptime_conditions`.
 - `install_all_svcs: true` on the container VMs only.
 - `triggers` for the gaming VM's PowerShell whitelist.
 

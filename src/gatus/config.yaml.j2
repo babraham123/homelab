@@ -54,16 +54,35 @@ internal-endpoint: &internal
     # ACME renews at 30 days out, so this only fires once renewal has been failing.
     - "[CERTIFICATE_EXPIRATION] > 336h"
 
+# Tier 1: the proxies, the login portal and the pages opened first. 2 minutes on
+# these ~8 endpoints is ~4 requests a minute at HAProxy, nothing against its
+# stick-table limits (conn_rate(3s) > 50). Every check passes through Authelia's
+# ForwardAuth, so when auth is down every endpoint fails; Alertmanager inhibits the
+# rest behind the authelia EndpointDown (src/alertmanager/config.yml.j2.j2).
+tier1-endpoint: &tier1
+  <<: *internal
+  interval: 2m
+
 endpoints:
   # - name: personal site
     # <<: *public
     # url: "https://{{ site.url }}"
 
-  # Internal endpoints come from the uptime entries in src/nodes.yml
+  # Internal endpoints come from the uptime entries in src/nodes.yml. A merge key
+  # replaces lists, so extra conditions repeat the anchor's.
 {% for endpoint in inv.uptime %}
   - name: {{ endpoint.name }}
-    <<: *internal
+    <<: *{{ 'tier1' if endpoint.tier == 1 else 'internal' }}
     url: "{{ endpoint.url }}"
+{%- if endpoint.conditions %}
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+{%- for condition in endpoint.conditions %}
+      - "{{ condition }}"
+{%- endfor %}
+{%- endif %}
 {% endfor %}
 
   # Internal CA, year-long certs (src/certificates/self_signed_cert_gen.sh). LDAPS is

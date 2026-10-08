@@ -11,6 +11,10 @@
 #                      uptime:      Gatus endpoint name (keys its history); monitors
 #                                   https://<subdomain>.<site.url><uptime_path>
 #                      uptime_path: default ""
+#                      uptime_tier: 1 checks every 2 minutes instead of 10 (the
+#                                   proxies, login, and what you'd open first)
+#                      uptime_conditions: extra Gatus conditions, appended to the
+#                                   anchor's (status, latency, cert expiry)
 #                      upstream:    pulled image, full ref with registry host and
 #                                   namespace (docker.io/library/nginx:stable); the
 #                                   quadlet's Image= must be localhost/ + the ref
@@ -77,16 +81,17 @@ nodes:
     services:
       postgres: {}
       lldap: {subdomain: ldap}
-      authelia: {subdomain: auth}
-      traefik: {subdomain: secproxy, uptime: traefik secsvcs}
+      authelia: {subdomain: auth, uptime: authelia, uptime_path: /api/health, uptime_tier: 1,
+                 uptime_conditions: ['[BODY].status == OK']}
+      traefik: {subdomain: secproxy, uptime: traefik secsvcs, uptime_tier: 1}
       victoriametrics: {subdomain: metrics, uptime: victoriametrics}
       victorialogs: {subdomain: logs, uptime: victorialogs}
       gatus: {subdomain: uptime}
       vmalert: {subdomain: vmalert, uptime: vmalert}
       alertmanager: {subdomain: alert, uptime: alertmanager}
       ntfy-alertmanager: {subdomain: ntfy-alertmanager}
-      ntfy: {subdomain: push, uptime: ntfy health check, uptime_path: /v1/health}
-      grafana: {subdomain: graph, uptime: grafana}
+      ntfy: {subdomain: push, uptime: ntfy health check, uptime_path: /v1/health, uptime_tier: 1}
+      grafana: {subdomain: graph, uptime: grafana, uptime_tier: 1}
       vault: {}
       olive_tin: {subdomain: command, uptime: olive_tin}
       fluentbit: {}
@@ -105,12 +110,12 @@ nodes:
   homesvcs:
     debian_services: [mdns_repeater, node_exporter]
     services:
-      traefik: {subdomain: homeproxy, uptime: traefik homesvcs}
+      traefik: {subdomain: homeproxy, uptime: traefik homesvcs, uptime_tier: 1}
       vmagent: {}
       mosquitto: {}
       zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt}
       esphome: {subdomain: iot, uptime: esphome}
-      home_assistant: {subdomain: home, uptime: home assistant}
+      home_assistant: {subdomain: home, uptime: home assistant, uptime_tier: 1}
       fluentbit: {}
     install_all_svcs: true
     commands:
@@ -127,10 +132,10 @@ nodes:
   websvcs:
     debian_services: [mdns_repeater, node_exporter]
     services:
-      traefik: {subdomain: webproxy, uptime: traefik websvcs}
+      traefik: {subdomain: webproxy, uptime: traefik websvcs, uptime_tier: 1}
       vmagent: {}
       nginx: {subdomain: www}
-      homepage: {subdomain: dash, uptime: homepage}
+      homepage: {subdomain: dash, uptime: homepage, uptime_tier: 1}
       isso: {subdomain: comment}
       guacamole: {subdomain: remote, uptime: guacamole}
       guacd: {}
