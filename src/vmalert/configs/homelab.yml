@@ -86,6 +86,26 @@ groups:
         annotations:
           summary: "Scrape target {{ $labels.job }} on {{ $labels.instance }} is down"
 
+  - name: traefik
+    rules:
+      - alert: Traefik5xxRate
+        expr: sum by (host, service) (rate(traefik_service_requests_total{code=~"5.."}[5m])) > 1
+        for: 5m
+        labels:
+          severity: error
+        annotations:
+          summary: "{{ $labels.service }} on {{ $labels.host }} returns {{ $value | printf \"%.1f\" }} 5xx/s"
+          description: "The access log on the Traefik dashboard has the paths; a 502/504 means the container behind it."
+      - alert: TraefikCertExpiry
+        # Every cert Traefik holds, including subdomains Gatus doesn't check.
+        expr: traefik_tls_certs_not_after - time() < 14 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Traefik on {{ $labels.host }} holds a cert for {{ $labels.cn }} expiring in {{ $value | humanizeDuration }}"
+          description: "ACME renews at 30 days; check podman logs traefik for the challenge failure."
+
   - name: auth
     rules:
       - alert: AuthFailureBurst

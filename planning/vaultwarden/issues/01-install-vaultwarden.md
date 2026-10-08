@@ -141,3 +141,5 @@ in front of `/admin`, it adds friction for little gain.
   Postgres-backed Vaultwarden is covered with no extra step. Data kept outside Postgres
   (attachments, `rsa_key*`) is in the secsvcs VM snapshot only; backup-and-dr/10 is where
   it gets a file-level copy.
+- 2026-10-07 (observability/02): `access_token=` in `RequestPath` is redacted by
+  `src/fluentbit/journald.lua.j2` before the line leaves the node.

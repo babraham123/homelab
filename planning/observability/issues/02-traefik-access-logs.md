@@ -1,6 +1,6 @@
 # 02. Enable Traefik access logs and ship them to VictoriaLogs
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 19
@@ -59,3 +59,11 @@ logs. **Approved.**
   Vaultwarden's websocket (`/notifications/hub?access_token=<JWT>`) puts a live session
   token in the URL; see vaultwarden/01. If Traefik can't redact a single parameter, drop
   the query string for `vault.SITE` in the fluent-bit pipeline.
+
+- 2026-10-07: done. `accessLog` JSON with the three headers kept, a `parser`
+  processor (`json`, declared under `parsers:` since the image's parsers.conf is
+  shadowed by the config mount) ahead of `journald.lua`, which copies the request
+  fields, redacts `access_token=` and rewrites `message` as one line. journald is
+  capped by `src/debian/journald.conf` from every `install_fluentbit`. Logs panels are
+  on the Traefik dashboard (observability/03) rather than per node in victorialogs.json.
+  Unfiltered, per the estimate; `filters.statusCodes` stays an option.

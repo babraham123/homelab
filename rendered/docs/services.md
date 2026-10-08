@@ -145,6 +145,13 @@ flowchart LR
     class vm,vl,graf data
 ```
 
+- Traefik on each VM exposes Prometheus metrics on a `metrics` entrypoint (`:8082`,
+  podman network only, scraped by the node's collector as `instance` secproxy,
+  homeproxy or webproxy) and writes a JSON access log to stdout: Fluent Bit splits it
+  into fields, keeps only the User-Agent, Referer and Remote-User headers, redacts
+  `access_token` query strings and ships it with the journal. The "Traefik" dashboard
+  has both; `Traefik5xxRate` and `TraefikCertExpiry` alert on the metrics. journald
+  itself is capped at 1 GB per node (`src/debian/journald.conf`).
 - Scrape targets are listed by hand in each VM's `src/<node>/prometheus.yml.j2`. Gatus
   checks are generated from the `uptime` keys in `src/nodes.yml`, so a new service
   gets an uptime check from one key.

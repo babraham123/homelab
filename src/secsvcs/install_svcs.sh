@@ -109,6 +109,8 @@ case $1 in
     mkdir -p /etc/opt/fluentbit
     cp secsvcs/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
     cp fluentbit/journald.lua /etc/opt/fluentbit
+    install -D -m 644 debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
+    systemctl restart systemd-journald
     /root/homelab-rendered/src/podman/render_host.sh secsvcs fluentbit/fluentbit.container
     mv fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd

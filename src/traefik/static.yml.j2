@@ -10,17 +10,28 @@ api:
 log:
   level: WARN
   format: common
-# accessLog:
-#   format: common
-#   filters:
-#     statusCodes:
-#       - "400-499"
-#   fields:
-#     defaultMode: keep
-#     headers:
-#       defaultMode: keep
-#       names:
-#         Authorization: redact
+# One JSON line per request to stdout, so Fluent Bit's journald tailer ships it to
+# VictoriaLogs with the fields split out (src/fluentbit/). Traefik is the only hop
+# that sees decrypted HTTP, and the only record of LAN-side requests, which never
+# touch HAProxy. Headers are dropped except the three worth having; the Lua filter
+# redacts access_token query strings (Vaultwarden's websocket carries one).
+accessLog:
+  format: json
+  bufferingSize: 100
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: drop
+      names:
+        User-Agent: keep
+        Referer: keep
+        Remote-User: keep
+metrics:
+  prometheus:
+    entryPoint: metrics
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
 providers:
   file:
     watch: false
@@ -31,6 +42,9 @@ experimental:
       modulename: "github.com/bitrvmpd/traefik-plugin-rewrite-headers"
       version: "v0.0.1"
 entryPoints:
+  # Scraped by the node's collector over the podman network; never published.
+  metrics:
+    address: ":8082/tcp"
   web:
     address: ":80/tcp"
     http:

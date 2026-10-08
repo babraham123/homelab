@@ -51,6 +51,15 @@ scrape_configs:
       - targets: ['push.{{ site.url }}:2587']
     metrics_path: /metrics
     relabel_configs: *host
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['{{ secsvcs.container_subnet }}.6:8082']
+    metrics_path: /metrics
+    relabel_configs:
+      - target_label: instance
+        replacement: secproxy.{{ site.url }}
+      - target_label: host
+        replacement: secsvcs.{{ site.url }}
   - job_name: 'node_exporter'
     static_configs:
       - targets:

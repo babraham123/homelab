@@ -29,5 +29,21 @@ function process_msg(tag, timestamp, record)
   new_record["tid"] = record["tid"] or ""
   new_record["invocation_id"] = record["systemd_invocation_id"] or ""
   new_record["boot_id"] = record["boot_id"] or ""
+
+  -- Traefik access log (src/traefik/static.yml.j2), already split by the json parser:
+  -- keep its CamelCase and request_/downstream_ header fields, redact the one query
+  -- parameter that carries a session token, and replace the JSON blob with one line.
+  if record["RequestMethod"] then
+    for key, value in pairs(record) do
+      if key:match("^[A-Z]") or key:match("^request_") or key:match("^downstream_") or key == "entryPointName" then
+        new_record[key] = value
+      end
+    end
+    local path = (record["RequestPath"] or ""):gsub("access_token=[^&]*", "access_token=REDACTED")
+    new_record["RequestPath"] = path
+    new_record["message"] = string.format("%s %s%s %s %dms %s", record["RequestMethod"] or "",
+      record["RequestHost"] or "", path, record["DownstreamStatus"] or "",
+      math.floor((record["Duration"] or 0) / 1e6), record["ClientHost"] or "")
+  end
   return 1, new_timestamp, new_record
 end

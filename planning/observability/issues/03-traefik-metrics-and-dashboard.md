@@ -1,6 +1,6 @@
 # 03. Expose Traefik Prometheus metrics, scrape them, add a dashboard
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 20
@@ -37,3 +37,9 @@ Source: review finding 20
   dashboard renders per-router request rate and latency.
 
 ## Comments
+
+- 2026-10-07: done. `metrics` entrypoint `:8082`, `traefik` job in the three
+  `prometheus.yml.j2` (`instance` = secproxy/homeproxy/webproxy, `host` = node),
+  Grafana.com 17346 rev 9 as `traefik.json` with the datasource swapped to
+  VictoriaMetrics, a `host` variable scoping every query, and two access-log panels.
+  `Traefik5xxRate` and `TraefikCertExpiry` are in `homelab.yml`.

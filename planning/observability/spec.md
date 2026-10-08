@@ -8,8 +8,8 @@ no Traefik or HAProxy metrics, an empty PVE dashboard, and 10-minute uptime inte
 | # | Title | Status | Type |
 |---|---|---|---|
 | [01](issues/01-node-and-service-alerts.md) | Add vmalert rules for hosts, disks, systemd units, backups and auth | `resolved` (`homelab.yml`, alerts dashboard) | task |
-| [02](issues/02-traefik-access-logs.md) | Enable Traefik access logs and ship them to VictoriaLogs | `ready-for-agent` | task |
-| [03](issues/03-traefik-metrics-and-dashboard.md) | Expose Traefik Prometheus metrics, scrape them, add a dashboard | `ready-for-agent` | task |
+| [02](issues/02-traefik-access-logs.md) | Enable Traefik access logs and ship them to VictoriaLogs | `resolved` | task |
+| [03](issues/03-traefik-metrics-and-dashboard.md) | Expose Traefik Prometheus metrics, scrape them, add a dashboard | `resolved` | task |
 | [04](issues/04-haproxy-metrics-design.md) | Design: get HAProxy metrics from the VPS into VictoriaMetrics | `resolved` (loopback exporter + VPS vmagent push, folded into 08) | research |
 | [05](issues/05-pve-dashboard-cleanup.md) | Remove or feed the empty pve.json dashboard | `resolved` (shipped in `9cdf062`) | task |
 | [06](issues/06-cert-expiry-alerts.md) | Add the cert-expiry vmalert rules the docs already claim exist | `resolved` (in `homelab.yml`) | task |

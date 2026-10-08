@@ -19,6 +19,15 @@ scrape_configs:
       - targets: ['log-collector.{{ site.url }}:2020']
     metrics_path: /api/v1/metrics/prometheus
     relabel_configs: *host
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['{{ homesvcs.container_subnet }}.6:8082']
+    metrics_path: /metrics
+    relabel_configs:
+      - target_label: instance
+        replacement: homeproxy.{{ site.url }}
+      - target_label: host
+        replacement: homesvcs.{{ site.url }}
   - job_name: 'node_exporter'
     static_configs:
       - targets:
