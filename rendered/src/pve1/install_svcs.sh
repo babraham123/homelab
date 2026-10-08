@@ -20,7 +20,7 @@ case $1 in
     exit 0
     ;;
   backup_orchestrator)
-    # The client uploads /root/backups to PBS as a host backup; rsync pulls the stages.
+    # The client uploads /root/backups to PBS as a host backup; rsync builds the local stage.
     apt-get install -y proxmox-backup-client rsync
     cp pve1/backup_orchestrator.sh /usr/local/bin
     cp pve1/backup_orchestrator.service /etc/systemd/system
