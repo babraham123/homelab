@@ -1,6 +1,6 @@
 # 12. Expose HAProxy's metrics on loopback, scrape them, alert and graph
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Blocked by: 08
 Repo: homelab
@@ -58,3 +58,11 @@ this ticket is its HAProxy half. The VPS vmagent that scrapes it is observabilit
 - The dashboard shows non-zero drop rates from normal scanner traffic.
 
 ## Comments
+
+- 2026-10-07: done. `frontend prometheus` on `127.0.0.1:8405` in `haproxy.cfg.j2`, the
+  `haproxy` job in `src/vpnsvcs/prometheus.yml.j2`, `HaproxyDown` and
+  `HaproxyBackendConnectErrors` in `vps.yml`, Grafana.com 12693 as `haproxy.json` with
+  a "Dropped at the edge" row (frontend denied requests, `silent_drop_*` backends,
+  backend connection errors) on top; it never used `haproxy_backend_up`. ADR 0007
+  covers both tickets. Confirm the metric names and `haproxy -vv | grep -i prometheus`
+  at apply (step 9).
