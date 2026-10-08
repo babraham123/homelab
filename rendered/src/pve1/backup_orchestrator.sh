@@ -15,7 +15,8 @@ set -euo pipefail
 storage=pbs2
 backups=/root/backups
 metrics=/var/lib/node_exporter/textfile_collector/homelab_backup.prom
-ssh=(ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
+ssh_opts=(-o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
+ssh=(ssh "${ssh_opts[@]}")
 is_reachable=/root/homelab-rendered/src/debian/is_reachable.sh
 keyfile=/root/secrets/pbs_client.key
 
@@ -34,23 +35,28 @@ step_wake_pve2() {
 }
 
 # Usage: pull NODE. Runs the node's backup.sh and brings its stage here: files/ is
-# mirrored, dumps/ is moved (the node keeps nothing once they are here). Only the
+# replaced, dumps/ is moved (the node keeps nothing once they are here). Only the
 # newest dump of each kind is kept, so a failed upload leaves one behind, not a pile.
-# The stage is owned by autoadmin, the user the dispatcher key logs in as, so rsync
-# reads all of it over the same sftp channel scp uses.
+# Remote stages come over sftp, the one transfer the dispatcher passes through (rsync
+# would need its own server command); the stage is owned by autoadmin so sftp reads
+# all of it. Symlinks are not copied: sftp skips them with a warning.
 pull() {
   local node=$1 src="/var/opt/backups" dir dest
   dest="${backups}/${node}"
+  rm -rf "${dest}/files"
   install -d -m 700 "$dest" "${dest}/dumps"
   if [[ $node == pve1 ]]; then
     /root/homelab-rendered/src/pve1/backup.sh
-    rsync -a --delete "${src}/files/" "${dest}/files/"
-    rsync -a --remove-source-files "${src}/dumps/" "${dest}/dumps/"
+    cp -a "${src}/files" "${dest}/files"
+    cp -a "${src}/dumps/." "${dest}/dumps/"
+    find "${src}/dumps" -type f -delete
   else
     "${ssh[@]}" "autoadmin@${node}" backup
-    src="autoadmin@${node}:/var/opt/backups"
-    rsync -a --delete -e "${ssh[*]}" "${src}/files/" "${dest}/files/"
-    rsync -a --remove-source-files -e "${ssh[*]}" "${src}/dumps/" "${dest}/dumps/"
+    sftp -q -b - "${ssh_opts[@]}" "autoadmin@${node}" <<EOF
+get -pr ${src}/files ${dest}
+get -pr ${src}/dumps ${dest}
+-rm ${src}/dumps/*/*
+EOF
   fi
   for dir in "${dest}"/dumps/*/; do
     if [[ -d $dir ]]; then

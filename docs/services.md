@@ -179,8 +179,9 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
      (`pg_dumpall`, Home Assistant's native backup, a consistent Headscale SQLite
      snapshot) and plain copies of its config trees and small volumes under `files/`,
      paths as on the live system. Large or rebuildable data is left out by name in each
-     script. pve1 mirrors `files/` into `/root/backups/<node>/` and moves the dumps
-     there; the node keeps nothing but its newest dump.
+     script. pve1 copies `files/` into `/root/backups/<node>/` over sftp (the one
+     transfer the dispatcher passes through) and moves the dumps there; the node
+     keeps nothing but its newest dump.
   2. On pve1 and pve2 the same `backup.sh` continues with the VM images, to PBS through
      the API (`pvesh create /nodes/<n>/vzdump`), snapshot mode. On pve2 devtop and gaming
      share the GPU, so the running one is backed up, shut down, the other backed up,
