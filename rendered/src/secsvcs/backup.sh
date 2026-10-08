@@ -17,7 +17,7 @@ stage_init
 # of the image's trust rules.
 dir=$(dump_dir postgres)
 dump="${dir}/pg_dumpall-$(date +%Y-%m-%dT%H%M%S).sql.zst"
-PGPASSWORD="$(/usr/local/bin/get_secret.sh postgres_password)"
+PGPASSWORD="$(/root/homelab-rendered/src/podman/get_secret.sh postgres_password)"
 export PGPASSWORD
 if ! podman exec -e PGPASSWORD postgres \
     pg_dumpall -h pgdb.janedoe.com -U postgres | zstd -q -o "${dump}.tmp"; then

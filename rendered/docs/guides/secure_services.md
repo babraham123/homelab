@@ -52,7 +52,7 @@ journalctl -eu authelia
     `vim /etc/opt/traefik/config/dynamic/traefik.yml`
   - Navigate to `ldap.janedoe.com` and login
     User = admin, get the password below
-    `/usr/local/bin/get_secret.sh lldap_admin_password`
+    `/root/homelab-rendered/src/podman/get_secret.sh lldap_admin_password`
   - Add regular users, add them to the `lldap_password_manager` group, (note for future: add_more_users)
     - jane
     - jane, jayden, jasper, 

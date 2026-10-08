@@ -31,6 +31,6 @@ sudo chown root:root /etc/opt/secrets/secrets.yaml.age
 
 echo "placeholder" > /tmp/placeholder.txt
 sudo podman secret rm --all
-sudo /usr/local/bin/list_secrets.sh | xargs -I% sudo podman secret create "%" /tmp/placeholder.txt
+sudo /root/homelab-rendered/src/podman/list_secrets.sh | xargs -I% sudo podman secret create "%" /tmp/placeholder.txt
 sudo podman secret ls
 '

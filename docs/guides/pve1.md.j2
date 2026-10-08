@@ -222,12 +222,11 @@ sops /root/secrets/pve1.yaml
 ```bash
 # Enable AppArmor
 apt install -y msmtp msmtp-mta
-# Update AppArmor profile, add "/usr/local/bin/msmtp_password.sh PUx,"
+# Update AppArmor profile, add "/root/homelab-rendered/src/pve1/msmtp_password.sh PUx,"
 vim /etc/apparmor.d/usr.bin.msmtp +82
 apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
 
 cd /root/homelab-rendered
-cp src/pve1/msmtp_password.sh /usr/local/bin
 cp src/certificates/msmtprc /etc
 src/pve1/install_svcs.sh cert_notifier
 ```

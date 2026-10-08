@@ -7,15 +7,11 @@ Initial setup for the secondary VM host, PVE2. Handles VM management services.
 ## VM management
 [Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
 
-- Ensure mutual exclusion between VMs that use the GPU
-  - Install hook script
+- Ensure mutual exclusion between VMs that use the GPU: the hook script, copied to
+  `local:snippets` and attached to devtop and gaming. Rerun after any deploy that
+  changes `src/pve2/hookscript.pl`.
 ```bash
-mkdir -p /var/lib/vz/snippets
-cp src/pve2/hookscript.pl /var/lib/vz/snippets
-# get IDs of GPU VMs, devtop and gaming
-qm list
-qm set 100 --hookscript local:snippets/hookscript.pl
-qm set 102 --hookscript local:snippets/hookscript.pl
+ssh autoadmin@pve2 install_hookscript
 ```
 
 ## Automation

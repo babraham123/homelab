@@ -161,11 +161,6 @@ sudo su
 src/debian/install_svcs.sh vm_watchdog
 ```
 
-- Other tools
-```bash
-cp src/pve2/get_vm_id.sh /usr/local/bin
-```
-
 ## Networking
 - Remove unnecessary services (not using HA mode), [src](https://free-pmx.org/guides/ha-disable/)
 ```bash
@@ -283,7 +278,7 @@ Perform these steps after pve1, secsvcs and victoriametrics is configured (do th
 - Get the metrics admin password and hash credentials
 ```bash
 ssh manualadmin@secsvcs
-password=$(sudo /usr/local/bin/get_secret.sh victoriametrics_admin_password)
+password=$(sudo /root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_password)
 echo -n "admin:$password" | base64
 ```
 - Go to Datacenter >> Metric Server >> Add >> InfluxDB

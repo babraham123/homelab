@@ -14,7 +14,7 @@ stage_init
 
 # Home Assistant: a native backup restores across HA versions, unlike a copy of
 # /config. Ref: https://www.home-assistant.io/integrations/backup/
-token=$(/usr/local/bin/get_secret.sh hass_backup_token)
+token=$(/root/homelab-rendered/src/podman/get_secret.sh hass_backup_token)
 if [[ -z "$token" || "$token" == "null" ]]; then
   echo "error: hass_backup_token secret is not set" >&2
   exit 1

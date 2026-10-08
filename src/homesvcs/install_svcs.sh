@@ -7,7 +7,6 @@ set -euo pipefail
 
 cd /root/homelab-rendered/src
 mkdir -p /etc/containers/systemd
-cp podman/*.sh /usr/local/bin
 
 case $1 in
   traefik)
@@ -23,7 +22,7 @@ case $1 in
   vmagent)
     mkdir -p /etc/opt/vmagent
     cp homesvcs/prometheus.yml /etc/opt/vmagent
-    /usr/local/bin/render_host.sh homesvcs victoriametrics/vmagent.container
+    /root/homelab-rendered/src/podman/render_host.sh homesvcs victoriametrics/vmagent.container
     mv victoriametrics/vmagent.container /etc/containers/systemd
     cp victoriametrics/vmagentdata.volume /etc/containers/systemd
     ;;
@@ -70,7 +69,7 @@ case $1 in
     mkdir -p /etc/opt/fluentbit
     cp fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
     cp fluentbit/journald.lua /etc/opt/fluentbit
-    /usr/local/bin/render_host.sh homesvcs fluentbit/fluentbit.container
+    /root/homelab-rendered/src/podman/render_host.sh homesvcs fluentbit/fluentbit.container
     mv fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd
     ;;

@@ -37,7 +37,7 @@ This is the canonical list: `backup-and-dr/04` escrows it and the weekly run bac
 | `/etc/pve/user.cfg`, `qemu-server/*.conf` | `api_ro` user, VM configs | PBS host backup; VM configs are also inside each PBS VM backup | VM configs return with `qmrestore`; recreate users ([Proxmox guide](./proxmox.md#backups)) |
 | `/etc/network/interfaces`, `/etc/resolv.conf` | host network | Regenerate | from `src/pve1/interfaces.j2`, `src/pve1/resolv.conf.j2` |
 | `/root/homelab-rendered/` | rendered repo | Regenerate | `tools/deploy_src.sh` from the workstation |
-| `/etc/msmtprc`, `/usr/local/bin/{msmtp_password,cert_notifier,vm_watchdog}.sh`, their systemd units, the msmtp AppArmor edit, node_exporter | host services | Regenerate | [pve1 guide](./pve1.md#notifications), [Proxmox guide](./proxmox.md#vm-management) |
+| `/etc/msmtprc`, `/usr/local/bin/{cert_notifier,vm_watchdog}.sh`, their systemd units, the msmtp AppArmor edit, node_exporter | host services | Regenerate | [pve1 guide](./pve1.md#notifications), [Proxmox guide](./proxmox.md#vm-management) |
 | `/root/backups/` | every node's staged files and dumps as of the last run, and `repo/` with the repo and `vars.yml` | PBS host backup | the nodes' own `/var/opt/backups/` stages still hold their last copy |
 
 ### Elsewhere

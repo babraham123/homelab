@@ -14,7 +14,7 @@ scp initdb.sql manualadmin@secsvcs:/home/manualadmin
 ssh manualadmin@secsvcs
 sudo su
 container=$(podman container ls | grep postgres | awk '{print $1}')
-cat initdb.sql | podman exec -i -e PGPASSWORD="$(/usr/local/bin/get_secret.sh guacamole_pg_password)" --user 70 "$container" psql -U guacamole -d guacamole
+cat initdb.sql | podman exec -i -e PGPASSWORD="$(/root/homelab-rendered/src/podman/get_secret.sh guacamole_pg_password)" --user 70 "$container" psql -U guacamole -d guacamole
 rm initdb.sql
 exit
 exit

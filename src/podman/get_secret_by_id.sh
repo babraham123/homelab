@@ -1,7 +1,7 @@
 #!/bin/bash
 # Prints out the value of a custom secret by ID (for podman).
 # Usage:
-#   SECRET_ID=XX /usr/local/bin/get_secret_by_id.sh
+#   SECRET_ID=XX src/podman/get_secret_by_id.sh
 
 set -euo pipefail
 
@@ -13,4 +13,4 @@ if [[ "$SECRET_NAME" == "null" ]]; then
   exit 1
 fi
 
-/usr/bin/age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age | NAME="$SECRET_NAME" /usr/bin/yq '.[strenv(NAME)]' | head -c -1
+"$(dirname "$0")/get_secret.sh" "$SECRET_NAME" | head -c -1

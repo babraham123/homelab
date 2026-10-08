@@ -281,7 +281,7 @@ Upload to Victoria Metrics:
 - Get the metrics admin password from secsvcs
 ```bash
 ssh manualadmin@secsvcs
-sudo /usr/local/bin/get_secret.sh victoriametrics_admin_password
+sudo /root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_password
 exit
 ```
 - Install the plugins

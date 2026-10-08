@@ -25,8 +25,8 @@ sub unbind_gpu {
 if ($phase eq 'pre-start') {
     # First phase 'pre-start' will be executed before the guest
     # is started. Exiting with a code != 0 will abort the start
-    my $devtop = `/usr/local/bin/get_vm_id.sh devtop`;
-    my $gaming = `/usr/local/bin/get_vm_id.sh gaming`;
+    my $devtop = `/root/homelab-rendered/src/pve2/get_vm_id.sh devtop`;
+    my $gaming = `/root/homelab-rendered/src/pve2/get_vm_id.sh gaming`;
 
     print "$vmid is starting, shutdown competing VMs.\n";
     if ($vmid == $devtop) {

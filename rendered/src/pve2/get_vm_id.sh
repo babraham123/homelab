@@ -1,7 +1,8 @@
 #!/bin/bash
 # Prints out the proxmox VM ID if given it's name.
 # Usage:
-#   /usr/local/bin/get_vm_id.sh VM_NAME
+#   src/pve2/get_vm_id.sh VM_NAME
+# Called in place from /root/homelab-rendered, so a deploy updates it.
 
 set -euo pipefail
 

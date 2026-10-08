@@ -69,9 +69,11 @@ mkdir -p /etc/opt/secrets
 chmod 700 /etc/opt/secrets
 cp /home/manualadmin/.ssh/id_ed25519* /etc/opt/secrets
 chmod 600 /etc/opt/secrets/*
-cd /root/homelab-rendered
-cp src/podman/*.sh /usr/local/bin
-cp src/podman/containers.conf /etc/containers
+cp /root/homelab-rendered/src/podman/containers.conf /etc/containers
+```
+The secret helpers (`src/podman/*.sh`) run in place from `/root/homelab-rendered`;
+nothing is copied, so a deploy updates them.
+```bash
 ```
 
 ## mDNS

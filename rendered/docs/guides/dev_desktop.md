@@ -42,7 +42,7 @@ ssh manualadmin@pve2
 - Update VM config
 ```bash
 sudo su
-vmid=`/usr/local/bin/get_vm_id.sh devtop`
+vmid=`/root/homelab-rendered/src/pve2/get_vm_id.sh devtop`
 qm set $vmid -vga std,clipboard=vnc
 echo "args: -vnc 0.0.0.0:22" >> /etc/pve/local/qemu-server/$vmid.conf
 exit
