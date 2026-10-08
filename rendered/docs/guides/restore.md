@@ -53,7 +53,7 @@ rm -f /var/lib/headscale/db.sqlite-wal /var/lib/headscale/db.sqlite-shm
 chown headscale:headscale /var/lib/headscale/db.sqlite
 systemctl start headscale
 ```
-- **A Podman volume copy** (`files/volumes/<name>/`, e.g. `grafanadata`, `z2mdb`): stop the service, `rsync -a` the directory into `podman volume inspect -f '{{ .Mountpoint }}' systemd-<name>`, start it.
+- **A Podman volume copy** (`files/volumes/<name>/`, e.g. `grafanadata`, `z2mdb`): stop the service, `cp -a` the directory's contents into `podman volume inspect -f '{{ .Mountpoint }}' systemd-<name>`, start it.
 - **The repo and `vars.yml`**, from `/root/backups/repo/homelab-*.tar.gz` on pve1: `tar -xzf` into an empty directory. `vars.yml` is in the root of the archive.
 
 ## A VM

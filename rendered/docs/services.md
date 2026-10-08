@@ -24,7 +24,7 @@ grep -r "IP=" src/*/*.container.j2
 | .6 | traefik | traefik | Node ingress, TLS termination | secproxy.janedoe.com |
 | .7 | victoriametrics | victoriametrics | Metrics TSDB | metrics.janedoe.com |
 | .8 | victorialogs | victorialogs | Log storage/query | logs.janedoe.com |
-| .9 | gatus | gatus | Uptime + cert-expiry checks | uptime.janedoe.com |
+| .9 | gatus | gatus | Uptime checks | uptime.janedoe.com |
 | .10 | alertmanager | alertmanager | Alert routing | alert.janedoe.com |
 | .11 | vmalert | vmalert | Alert rule evaluation | vmalert.janedoe.com |
 | .12 | grafana | grafana-oss | Dashboards | graph.janedoe.com |
@@ -81,7 +81,7 @@ its own `tools/deploy_src.sh`. This repo owns only the nginx config and quadlet.
 | pve1 | cert_notifier (timer) | Email warnings before cert expiry (msmtp) |
 | vpnsvcs | haproxy | Public ingress ([Networking](networking.md#ingress-the-three-tier-chain)) |
 | vpnsvcs | headscale, tailscaled | Mesh VPN coordinator + client |
-| vpnsvcs | geoip_generator (timer) | Daily GeoIP map refresh for HAProxy |
+| vpnsvcs | geoip_generator (timer) | Weekly GeoIP map refresh for HAProxy |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
 Proxmox web UIs are exposed internally as pve1/pve2/pbs2/router.janedoe.com through
@@ -145,12 +145,14 @@ flowchart LR
     class vm,vl,graf data
 ```
 
-- Scrape targets are auto-generated at render time from the service configs, so new
-  services join monitoring without manual scrape config.
+- Scrape targets are listed by hand in each VM's `src/<node>/prometheus.yml.j2`. Gatus
+  checks are generated from the `uptime` keys in `src/nodes.yml`, so a new service
+  gets an uptime check from one key.
 - Retention for metrics, logs, and Home Assistant history is set in `vars.yml`.
-- Gatus is a second, independent path: HTTP checks with their own alerting, so a
-  broken metrics pipeline doesn't mean silent outages. Cert expiry is watched by
-  Gatus, vmalert, *and* the cert_notifier email timer.
+- Gatus is a second, independent path: HTTPS checks that don't depend on the metrics
+  pipeline. It has no alerting of its own yet (observability/10). Cert expiry is
+  watched only by the cert_notifier email timer; Gatus and vmalert checks are planned
+  (observability/06).
 
 ## Key data flows
 
@@ -178,10 +180,10 @@ reinstalling a service. See [Security](security.md#host-access-the-ssh-dispatche
      worth keeping under `/var/opt/backups/`: application dumps under `dumps/`
      (`pg_dumpall`, Home Assistant's native backup, a consistent Headscale SQLite
      snapshot) and plain copies of its config trees and small volumes under `files/`,
-     paths as on the live system. Large or rebuildable data is left out by name in each
-     script. pve1 copies `files/` into `/root/backups/<node>/` over sftp (the one
-     transfer the dispatcher passes through) and moves the dumps there; the node
-     keeps nothing but its newest dump.
+     paths as on the live system, rebuilt from scratch every run. Large or rebuildable
+     data is left out by name in each script. pve1 copies `files/` into
+     `/root/backups/<node>/` over sftp (the one transfer the dispatcher passes through)
+     and moves the dumps there.
   2. On pve1 and pve2 the same `backup.sh` continues with the VM images, to PBS through
      the API (`pvesh create /nodes/<n>/vzdump`), snapshot mode. On pve2 devtop and gaming
      share the GPU, so the running one is backed up, shut down, the other backed up,

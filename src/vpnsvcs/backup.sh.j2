@@ -24,11 +24,10 @@ sqlite3 "$snapshot" 'PRAGMA integrity_check' | grep -qx ok || {
   echo "error: Headscale DB snapshot failed its integrity check" >&2
   exit 1
 }
-keep_newest "$dir" 'db-*.sqlite' 1
 
 # The live DB files are excluded in favour of the snapshot. /var/lib/headscale also
 # holds the noise and DERP private keys: losing them re-registers every tailnet node.
-rsync_excludes+=(--exclude='/var/lib/headscale/db.sqlite*' --exclude='/var/lib/headscale/cache')
+excludes+=(--exclude='var/lib/headscale/db.sqlite*' --exclude=var/lib/headscale/cache)
 stage_paths /var/lib/headscale /etc/headscale /var/lib/tailscale /etc/haproxy \
   /etc/ssh /etc/ufw /etc/opt /etc/systemd/system /etc/letsencrypt /root/.ssh
 

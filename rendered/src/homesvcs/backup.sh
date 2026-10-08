@@ -39,7 +39,6 @@ cp "$archive" "${dir}/hass-$(date +%Y-%m-%dT%H%M%S).tar"
 # backup.create has no retention of its own: keep only this one inside HA so the
 # volume, and every image backup of it, stays small.
 find "$volpath/backups" -maxdepth 1 -name 'Custom_backup_*.tar' ! -path "$archive" -delete
-keep_newest "$dir" 'hass-*.tar' 1
 
 # Config trees: Zigbee2MQTT and ESPHome configs, Mosquitto, Traefik's acme.json, this
 # host's secrets key and bundle.

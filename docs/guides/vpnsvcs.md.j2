@@ -298,7 +298,7 @@ EOF
   2. From pve1, copy the stage back and put the files in place:
 ```bash
 scp -r /root/backups/vpnsvcs manualadmin@NEW_IP:
-ssh -t manualadmin@NEW_IP 'sudo rsync -a vpnsvcs/files/ / && sudo rm -rf vpnsvcs'
+ssh -t manualadmin@NEW_IP 'sudo cp -a vpnsvcs/files/. / && sudo rm -rf vpnsvcs'
 ```
   3. Continue the guide: install Headscale, HAProxy and tailscaled with `install_*`; `install_headscale` keeps the restored `/var/lib/headscale`. Then restore the DB snapshot from PBS (`host/vpnsvcs`, `dumps/headscale/db-*.sqlite`) as in the restore guide, and `systemctl restart headscale haproxy tailscaled`.
   4. Point the public DNS at the new IP, and `headscale nodes list` should show every node.

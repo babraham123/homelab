@@ -37,9 +37,9 @@ step_wake_pve2() {
 # Usage: pull NODE. Runs the node's backup.sh and brings its stage here: files/ is
 # replaced, dumps/ is moved (the node keeps nothing once they are here). Only the
 # newest dump of each kind is kept, so a failed upload leaves one behind, not a pile.
-# Remote stages come over sftp, the one transfer the dispatcher passes through (rsync
-# would need its own server command); the stage is owned by autoadmin so sftp reads
-# all of it. Symlinks are not copied: sftp skips them with a warning.
+# Remote stages come over sftp, the one transfer the dispatcher passes through; the
+# stage is owned by autoadmin so sftp reads all of it. Symlinks are not copied: sftp
+# skips them with a warning.
 pull() {
   local node=$1 src="/var/opt/backups" dir dest
   dest="${backups}/${node}"

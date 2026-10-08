@@ -31,7 +31,7 @@ HAProxy on the VPS filters before routing (config:
   per 10s flags the source IP (`gpc0`), and flagged sources are dropped regardless of
   their subsequent rate until the table entry expires.
 - **Geo-blocking.** Countries listed in `vars.yml` are blocked via per-country map
-  files generated daily from the MaxMind GeoIP database by the `geoip_generator`
+  files generated weekly from the MaxMind GeoIP database by the `geoip_generator`
   systemd timer.
 - **Attack-path filtering.** HTTP requests for `.env`, `.git`, `.aws`, `wp-admin`,
   `phpmyadmin`, and similar scanner bait are silently dropped.
@@ -162,8 +162,8 @@ flowchart TB
 - **Public TLS**: Traefik on each service VM (secsvcs, homesvcs, websvcs) answers ACME
   challenges; `acme_transfer.sh` on pve1 pulls their `acme.json` files, dumps the certs
   and installs them on pve1, pve2, pbs2 and pfSense.
-- **Expiry monitoring**: the `cert_notifier` timer on pve1 emails weeks in advance;
-  Gatus and vmalert also alert on approaching expiry. Rotation cadence lives in
+- **Expiry monitoring**: the `cert_notifier` timer on pve1 emails weeks in advance.
+  Gatus and vmalert expiry alerts are planned (observability/06). Rotation cadence lives in
   [Maintenance](maintenance.md#refresh-certificates).
 
 ## Host access: the SSH dispatcher
@@ -215,14 +215,15 @@ SOPS + AGE, kept out of git and written to disk encrypted (see
 ## VPS hardening
 
 The one public machine gets extra care: SSH moved to port 2202 with `ufw deny 22`,
-fail2ban with a custom jail, and only 80, 443, 3478 (STUN), and 41641 (WireGuard)
-open. Headscale admin operations happen over localhost, not the public interface.
+fail2ban with a custom jail, and only 2202 (SSH), 80, 443, 3478 (STUN), and 41641
+(WireGuard) open. Headscale admin operations happen over localhost, not the public interface.
 
 ## Known gaps
 
 - Headscale ACLs disabled (above): network-layer zero trust is not real today.
-- LLDAP↔Authelia mutual TLS is disabled pending a certificate CN fix; the connection
-  is still LDAPS.
+- Traefik→Authelia mutual TLS is disabled pending a certificate fix: Traefik presents
+  client certs, but Authelia's `client_certificates` check is commented out. LLDAP
+  doesn't verify Authelia's client cert either; that connection is still LDAPS.
 - ESP32-class IoT devices talk plaintext on their VLAN; TLS costs too much CPU/RAM
   there; containment relies on VLAN firewall rules.
 - Wired VLAN enforcement waits on a managed switch.
