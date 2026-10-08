@@ -38,3 +38,8 @@ Update `docs/security.md` to describe the actual three paths (Gatus condition,
 vmalert-on-Gatus-metric, `cert_notifier` email) accurately.
 
 ## Comments
+
+2026-10-07: the Gatus half is in place: `[CERTIFICATE_EXPIRATION] > 336h` on both
+anchors and a `tls://ldap.SITE:6360` endpoint at 720h. Postgres (STARTTLS-style) and
+Mosquitto (`require_certificate`) can't be `tls://` checks; `cert_notifier` keeps them.
+Remaining: the vmalert rules above, once observability/01 lands.

@@ -163,7 +163,10 @@ flowchart TB
   challenges; `acme_transfer.sh` on pve1 pulls their `acme.json` files, dumps the certs
   and installs them on pve1, pve2, pbs2 and pfSense.
 - **Expiry monitoring**: the `cert_notifier` timer on pve1 emails weeks in advance.
-  Gatus and vmalert expiry alerts are planned (observability/06). Rotation cadence lives in
+  Gatus fails an endpoint whose ACME cert has under 14 days left (every HTTPS check)
+  and checks the LDAPS cert at 30 days; Postgres and Mosquitto are not reachable as
+  plain TLS endpoints and stay with `cert_notifier`. vmalert rules on Gatus's expiry
+  metric are planned (observability/06). Rotation cadence lives in
   [Maintenance](maintenance.md#refresh-certificates).
 
 ## Host access: the SSH dispatcher

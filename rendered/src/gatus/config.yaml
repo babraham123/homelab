@@ -28,6 +28,8 @@ public-endpoint: &public
   conditions:
     - "[STATUS] == 200"
     - "[RESPONSE_TIME] < 1000"
+    # ACME renews at 30 days out, so this only fires once renewal has been failing.
+    - "[CERTIFICATE_EXPIRATION] > 336h"
 
 internal-endpoint: &internal
   group: internal
@@ -48,6 +50,8 @@ internal-endpoint: &internal
   conditions:
     - "[STATUS] == 200"
     - "[RESPONSE_TIME] < 1000"
+    # ACME renews at 30 days out, so this only fires once renewal has been failing.
+    - "[CERTIFICATE_EXPIRATION] > 336h"
 
 endpoints:
   # - name: personal site
@@ -120,6 +124,20 @@ endpoints:
     <<: *internal
     url: "https://archive.janedoe.com"
 
+
+  # Internal CA, year-long certs (src/certificates/self_signed_cert_gen.sh). LDAPS is
+  # the one TLS-on-connect service without client-certificate auth: Postgres negotiates
+  # TLS after connecting and Mosquitto requires a client certificate, so cert_notifier
+  # covers those. No dns-resolver here: the container's resolver is the internal DNS.
+  - name: lldap tls
+    group: internal
+    interval: 1h
+    url: "tls://ldap.janedoe.com:6360"
+    client:
+      timeout: 10s
+    conditions:
+      - "[CONNECTED] == true"
+      - "[CERTIFICATE_EXPIRATION] > 720h"
 
   # - name: jellyfin
     # <<: *internal
