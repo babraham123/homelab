@@ -1,0 +1,35 @@
+# The VPS pushes its metrics from a local vmagent (docs/adr/0007-vps-metrics-pushed.md),
+# so when the VPS, its tailnet link or that vmagent is down nothing arrives and
+# `up == 0` can't fire: absence is the signal. NodeDown (homelab.yml) still covers the
+# node_exporter container dying while vmagent lives.
+---
+groups:
+  - name: vps
+    rules:
+      - alert: VpsMetricsAbsent
+        expr: absent_over_time(up{job="node_exporter",host=~"vpnsvcs\\..*"}[5m])
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No metrics from the VPS for 10 minutes"
+          description: "The VPS, its tailnet link, or its vmagent is down; public ingress is likely off. deadman.timer there can't report this either."
+      - alert: HaproxyDown
+        expr: up{job="haproxy"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HAProxy on the VPS is not answering its exporter"
+          description: "Public ingress is down. systemctl status haproxy on vpnsvcs."
+      - alert: HaproxyBackendConnectErrors
+        # The backend servers have no health check (one server each, a false DOWN would
+        # cut traffic), so an unreachable VM shows as connection errors once traffic hits it.
+        expr: sum by (proxy) (rate(haproxy_backend_connection_errors_total{proxy=~".*svcs_https?_proxy"}[5m])) > 0
+        for: 5m
+        labels:
+          severity: error
+        annotations:
+          summary: "HAProxy can't connect to {{ $labels.proxy }}"
+          description: "The VM or its Traefik is down, or the tailnet path from the VPS is broken."
+...

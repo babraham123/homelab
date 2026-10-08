@@ -59,6 +59,57 @@ case $1 in
     systemctl restart geoip_generator.timer
     exit 0
     ;;
+  podman)
+    # Podman for the telemetry quadlets, set up as on the VMs (docs/guides/podman.md):
+    # Debian's package, the secret helpers' tools, jinjanator for the ExecStartPre
+    # renders. No podman network is created: every quadlet here uses Network=host.
+    apt install -y podman age jq python3-pip
+    pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible
+    if ! yq --version 2>/dev/null | grep -q mikefarah; then
+      YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+      wget -qO- "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" | tar xz -C /tmp yq_linux_amd64
+      mv /tmp/yq_linux_amd64 /usr/bin/yq
+    fi
+    install -d -m 700 /etc/opt/secrets
+    install -d /etc/containers/systemd
+    cp podman/containers.conf /etc/containers/containers.conf
+    systemctl enable --now podman-auto-update.timer
+    echo "Now run secret_update.sh vpnsvcs from pve1 (docs/guides/vpnsvcs.md#telemetry-agents)"
+    exit 0
+    ;;
+  node_exporter)
+    install -d -m 755 /var/lib/node_exporter/textfile_collector
+    cp vpnsvcs/node_exporter.container /etc/containers/systemd
+    systemctl daemon-reload
+    systemctl restart node_exporter
+    systemctl status node_exporter --no-pager
+    exit 0
+    ;;
+  fluentbit)
+    mkdir -p /etc/opt/fluentbit
+    cp vpnsvcs/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
+    cp fluentbit/journald.lua /etc/opt/fluentbit
+    install -D -m 644 debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
+    systemctl restart systemd-journald
+    /root/homelab-rendered/src/podman/render_host.sh vpnsvcs fluentbit/fluentbit.container
+    mv fluentbit/fluentbit.container /etc/containers/systemd
+    cp fluentbit/fbdata.volume /etc/containers/systemd
+    systemctl daemon-reload
+    systemctl restart fluentbit
+    systemctl status fluentbit --no-pager
+    exit 0
+    ;;
+  vmagent)
+    mkdir -p /etc/opt/vmagent
+    cp vpnsvcs/prometheus.yml /etc/opt/vmagent
+    /root/homelab-rendered/src/podman/render_host.sh vpnsvcs victoriametrics/vmagent.container
+    mv victoriametrics/vmagent.container /etc/containers/systemd
+    cp victoriametrics/vmagentdata.volume /etc/containers/systemd
+    systemctl daemon-reload
+    systemctl restart vmagent
+    systemctl status vmagent --no-pager
+    exit 0
+    ;;
   deadman)
     # The checker's credentials are hand-placed, like hs_oidc_*; fail here, not at 02:00.
     for f in alertmanager_admin_password alert_smtp_password deadman_ntfy_topic; do

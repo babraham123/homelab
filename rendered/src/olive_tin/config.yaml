@@ -857,6 +857,38 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: vpnsvcs Install Podman
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_podman
+              id: vpnsvcs_install_podman
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpnsvcs Install Node Exporter
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_node_exporter
+              id: vpnsvcs_install_node_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpnsvcs Install Fluentbit
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_fluentbit
+              id: vpnsvcs_install_fluentbit
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpnsvcs Install Vmagent
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_vmagent
+              id: vpnsvcs_install_vmagent
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: vpnsvcs Backup
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs backup

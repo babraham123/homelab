@@ -82,6 +82,8 @@ its own `tools/deploy_src.sh`. This repo owns only the nginx config and quadlet.
 | vpnsvcs | haproxy | Public ingress ([Networking](networking.md#ingress-the-three-tier-chain)) |
 | vpnsvcs | headscale, tailscaled | Mesh VPN coordinator + client |
 | vpnsvcs | geoip_generator (timer) | Weekly GeoIP map refresh for HAProxy |
+| vpnsvcs | deadman (timer) | Watches the alerting path on secsvcs from outside ([Observability](#observability)) |
+| vpnsvcs | node_exporter, fluentbit, vmagent (quadlets) | Host metrics, journal and HAProxy metrics, pushed to secsvcs over the tailnet ([ADR 0007](adr/0007-vps-metrics-pushed.md)) |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
 Proxmox web UIs are exposed internally as pve1/pve2/pbs2/router.janedoe.com through
@@ -101,7 +103,7 @@ flowchart LR
 
     tg["Telegraf on pfSense"]
 
-    subgraph agents["Per container VM"]
+    subgraph agents["Per container VM, and the VPS"]
         vmagent["vmagent"]
         fb["Fluent Bit"]
     end
@@ -152,6 +154,14 @@ flowchart LR
   `access_token` query strings and ships it with the journal. The "Traefik" dashboard
   has both; `Traefik5xxRate` and `TraefikCertExpiry` alert on the metrics. journald
   itself is capped at 1 GB per node (`src/debian/journald.conf`).
+- The VPS runs the same vmagent and Fluent Bit as quadlets on the host network, every
+  listener on loopback, and pushes to secsvcs over the tailnet (`metrics.SITE` and
+  `logs.SITE` pinned to secsvcs in its `/etc/hosts`); a 1 GiB disk queue rides out a
+  tailnet outage. It scrapes HAProxy's built-in exporter (`127.0.0.1:8405`), Headscale,
+  tailscaled and node_exporter. Since a pushing host can't raise `up == 0`,
+  `VpsMetricsAbsent` fires on silence; `HaproxyDown` and `HaproxyBackendConnectErrors`
+  cover the edge (`src/vmalert/configs/vps.yml`), and the "HAProxy" dashboard graphs
+  what it drops.
 - Scrape targets are listed by hand in each VM's `src/<node>/prometheus.yml.j2`. Gatus
   checks are generated from the `uptime` keys in `src/nodes.yml`, so a new service
   gets an uptime check from one key.

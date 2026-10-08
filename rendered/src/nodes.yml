@@ -70,6 +70,11 @@ nodes:
       haproxy: {}
       geoip_generator: {}
       deadman: {}
+      # Telemetry quadlets on the host network (docs/adr/0007-vps-metrics-pushed.md)
+      podman: {}
+      node_exporter: {}
+      fluentbit: {}
+      vmagent: {}
     commands:
       - {name: backup, run: [sudo /root/homelab-rendered/src/vpnsvcs/backup.sh]}
       - {name: install_ssh_ca, script: debian/commands.sh}

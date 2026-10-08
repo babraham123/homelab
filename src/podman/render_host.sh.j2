@@ -26,6 +26,10 @@ case $1 in
   homesvcs)
     subnet="{{ homesvcs.container_subnet }}"
     ;;
+  vpnsvcs)
+    # No podman network on the VPS: the templates take host networking when empty.
+    subnet=""
+    ;;
   *)
     echo "error: unknown service: $1" >&2
     exit 1

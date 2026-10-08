@@ -289,6 +289,36 @@ tee -a /etc/hosts <<'EOF'
 EOF
 ```
 
+## Telemetry agents
+node_exporter, Fluent Bit and vmagent run as Podman quadlets on the host network
+([ADR 0007](../adr/0007-vps-metrics-pushed.md)), each listening on loopback; vmagent
+pushes to secsvcs over the tailnet, so the `/etc/hosts` block under Telemetry must be
+in place first. HAProxy, Headscale and tailscaled stay on the host.
+```bash
+sudo su
+cd /root/homelab-rendered
+nft list ruleset > /root/nft.before
+src/vpnsvcs/install_svcs.sh podman
+# The podman secrets are read from an age file, as on the VMs: the VPS's ssh host key
+# is the identity, and pve1 holds /root/secrets/vpnsvcs.yaml (src/vpnsvcs/secrets_template.yaml)
+cp /home/manualadmin/.ssh/id_ed25519* /etc/opt/secrets
+chmod 600 /etc/opt/secrets/*
+```
+On pve1: `sudo /root/homelab-rendered/src/pve1/secret_update.sh vpnsvcs` (fill in the two
+passwords from secsvcs.yaml). Back on the VPS:
+```bash
+src/vpnsvcs/install_svcs.sh node_exporter
+src/vpnsvcs/install_svcs.sh fluentbit
+src/vpnsvcs/install_svcs.sh vmagent
+ss -ltnp | grep -v 127.0.0.1          # only sshd, haproxy, headscale: nothing new off loopback
+nft list ruleset | diff /root/nft.before -   # host networking adds no rules
+curl -s 127.0.0.1:9100/metrics | grep node_systemd_unit_state | head -3
+curl -s 127.0.0.1:8405/metrics | head -3     # HAProxy's exporter
+```
+In VictoriaMetrics `up{host="vpnsvcs.{{ site.url }}"}` is 1 for haproxy, headscale,
+tailscaled, vmagent, fluentbit and node_exporter, and `logs.{{ site.url }}` shows the
+VPS's journal. The images are pulled by `podman-auto-update.timer` like the VMs'.
+
 ## Dead-man switch
 `deadman.timer` checks every 5 minutes, over the tailnet, that Alertmanager on secsvcs
 still holds vmalert's always-firing `Watchdog` alert and that ntfy is healthy; three

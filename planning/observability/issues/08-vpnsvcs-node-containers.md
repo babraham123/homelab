@@ -1,6 +1,6 @@
 # 08. Install Podman on the VPS and containerise node_exporter, fluent-bit and vmagent
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: user item 50
@@ -92,3 +92,14 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   `tmpDataPath=/vmagentdata` and `maxDiskUsagePerURL=1GiB`, so the VPS branch inherits
   them. Both blockers (04, 11) are resolved, so this ticket is unblocked. observability/12
   follows it.
+
+- 2026-10-07: done. `install_podman` (Debian's podman, age/jq/yq/jinjanator, the shell
+  secret driver, auto-update timer), then `node_exporter` (`src/vpnsvcs/node_exporter.container.j2`:
+  host net + pid, `/` at `/host`, systemd collector over the mounted sockets, unit
+  filter from the inventory), `fluentbit` and `vmagent` from the shared templates,
+  which now branch on an empty `subnet` from `render_host.sh vpnsvcs` to
+  `Network=host` and loopback listeners. `src/vpnsvcs/prometheus.yml.j2` scrapes the six
+  jobs; `src/vpnsvcs/secrets_template.yaml` holds the two passwords for
+  `secret_update.sh vpnsvcs`. `vps.yml` has `VpsMetricsAbsent`; `NodeDown` keeps the VPS
+  (it fires if the node_exporter container dies under a live vmagent). ADR 0007.
+  `geoip_generator` stays a host unit. Acceptance checks are in the apply note, step 9.

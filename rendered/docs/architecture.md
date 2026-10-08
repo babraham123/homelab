@@ -144,7 +144,9 @@ pve2 runs `websvcs`, `devtop`, the Windows `gaming` VM, and Proxmox Backup Serve
 ### vpnsvcs: cloud VPS
 
 Smallest Linode shared-CPU instance. The only machine with a public IP. Runs HAProxy,
-Headscale, Tailscale, and the GeoIP map generator directly on the host (no containers).
+Headscale, Tailscale, the GeoIP map generator and the dead-man checker directly on
+the host; node_exporter, Fluent Bit and vmagent are Podman quadlets on the host
+network, listening on loopback only.
 
 ### Network gear and peripherals
 
@@ -185,6 +187,7 @@ Recorded as ADRs in `docs/adr/`:
 - [SOPS + AGE for secrets instead of a secrets manager](adr/0004-sops-age-secrets.md)
 - [SSH forced-command dispatcher instead of a config-management agent](adr/0005-ssh-forced-command-dispatcher.md)
 - [Declared node inventory instead of parsing configs at render time](adr/0006-node-inventory.md)
+- [VPS metrics pushed by a local vmagent, every listener on loopback](adr/0007-vps-metrics-pushed.md)
 
 ## Secrets
 
