@@ -73,19 +73,20 @@ Done with the backup restructure (2026-10-04), in a different shape from the tic
 - No `backup_paths` in `nodes.yml`: each node has a hand-written `src/<node>/backup.sh`
   (pve1, pve2, secsvcs, homesvcs, websvcs, vpnsvcs) that runs its application hooks
   (`pg_dumpall`, HA native backup, Headscale `sqlite3 .backup`) into `dumps/<name>/` and
-  mirrors explicit config paths and small volumes into `files/` under
-  `/var/opt/backups/` with `rsync --relative` (`src/debian/backup_lib.sh`). Each script
+  copies explicit config paths and small volumes into `files/` under
+  `/var/opt/backups/` with a `tar` pipe (`src/debian/backup_lib.sh`), the stage
+  emptied first. Each script
   names what it skips and why. On pve1 and pve2 the same script goes on to the VM images.
   The old `pg_dumpall`, `backup_hass`, `backup_full` and `run_backups` commands are gone;
   `backup` is the one dispatcher command per node, no arguments.
 - No tarballs and no `age`: plain trees dedup in PBS, and the upload is encrypted with
   pve1's client key (11).
 - The orchestrator (`src/pve1/backup_orchestrator.sh.j2`) runs `backup_<node>` steps
-  (ssh `backup`, rsync `files/` into `/root/backups/<node>/files/`, move `dumps/` there,
+  (ssh `backup`, sftp `files/` into `/root/backups/<node>/files/`, move `dumps/` there,
   keep only the newest dump of each kind), then `upload`: `host/vpnsvcs` into namespace
   `pve1` and `host/pve1` (the rest of `/root/backups`) into namespace `files`. After a
-  successful upload the dumps are deleted from pve1; the node keeps only its newest one
-  in case a pull never came, so a failed upload leaves exactly one behind.
+  successful upload the dumps are deleted from pve1; the node empties its stage at the
+  start of every run.
 - Router: not pulled; its `config.xml` is inside the router VM image and in ACB.
   devtop/gaming: images only.
 - Docs: `docs/services.md#storage-and-backups`, `docs/guides/restore.md`, and the

@@ -16,8 +16,8 @@ source /root/homelab-rendered/src/debian/backup_lib.sh
 
 stage_init
 
-rsync_excludes+=(--exclude='/etc/opt/wyoming/src' --exclude='/etc/opt/novnc/src'
-  --exclude='/etc/opt/finance_exporter/src')
+excludes+=(--exclude=etc/opt/wyoming/src --exclude=etc/opt/novnc/src
+  --exclude=etc/opt/finance_exporter/src)
 stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd \
   /etc/snapraid.conf /etc/fstab "$(realpath /var/opt/nginx/www)"
 # Isso comments, SQLite under a running process; a live copy is acceptable.

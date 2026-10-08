@@ -1,19 +1,19 @@
 #!/bin/bash
-# Shared by every node's backup.sh. Each node stages what is worth keeping under
-# /var/opt/backups: config trees and volume copies under files/, application dumps
-# under dumps/<name>/. pve1's backup_orchestrator mirrors files/ into
-# /root/backups/<node>/, moves the dumps there, and sends the collection to PBS; the
-# dumps are deleted once that upload succeeds. Nothing here needs to be an archive:
-# plain trees dedup better in PBS than tarballs do.
+# Shared by every node's backup.sh. Each run rebuilds /var/opt/backups from scratch:
+# config trees and volume copies under files/, application dumps under dumps/<name>/.
+# pve1's backup_orchestrator copies files/ into /root/backups/<node>/, moves the dumps
+# there, and sends the collection to PBS. Nothing here needs to be an archive: plain
+# trees dedup better in PBS than tarballs do.
 # Usage, from a backup.sh running as root:
 #   source /root/homelab-rendered/src/debian/backup_lib.sh
-#   stage_init [OWNER]           # OWNER defaults to autoadmin, the user pve1 pulls as
-#   dump_dir NAME                # prints dumps/NAME, created; only the newest dump is
-#                                # kept there, in case the last pull never came
-#   stage_paths PATH...          # mirrors each path into files/ (--relative, --delete)
-#   stage_volume VOLUME [NAME]   # mirrors a Podman volume into files/volumes/NAME
-#   keep_newest DIR GLOB N       # deletes all but the newest N matches; ISO timestamps
-#                                # in the names make sort order chronological
+#   stage_init [OWNER]           # empties the stage; OWNER defaults to autoadmin, the
+#                                # user pve1 pulls as
+#   dump_dir NAME                # prints dumps/NAME, created
+#   excludes+=(--exclude=PAT)    # tar patterns, relative to / (or the volume root),
+#                                # applied to every stage_* call after
+#   stage_paths PATH...          # copies each path into files/, paths as on the live
+#                                # system, so files/etc/opt/... restores to /
+#   stage_volume VOLUME [NAME]   # copies a Podman volume into files/volumes/NAME
 #   stage_finish                 # ownership and permissions of the whole stage
 #   pve_task UPID                # waits for a PVE task (pvesh create returns its UPID),
 #                                # prints its log, fails unless it ended OK
@@ -24,12 +24,12 @@ stage=/var/opt/backups
 files="${stage}/files"
 dumps="${stage}/dumps"
 stage_owner=autoadmin
+excludes=(--exclude='*.tmp' --exclude=lost+found)
 
 stage_init() {
   stage_owner=${1:-autoadmin}
-  command -v rsync > /dev/null || { echo "error: rsync is not installed (apt install rsync)" >&2; exit 1; }
-  install -d -m 700 -o "$stage_owner" -g "$stage_owner" "$stage"
-  install -d -m 700 "$files" "$dumps"
+  rm -rf "$stage"
+  install -d -m 700 "$stage" "$files" "$dumps"
 }
 
 dump_dir() {
@@ -37,37 +37,32 @@ dump_dir() {
   echo "${dumps}/$1"
 }
 
-stage_paths() {
-  local path present=() missing=()
-  for path in "$@"; do
-    if [[ -e $path ]]; then present+=("$path"); else missing+=("$path"); fi
-  done
-  if (( ${#missing[@]} )); then
-    echo "warning: not staged, missing: ${missing[*]}" >&2
-  fi
-  # --relative keeps the source path under files/, so files/etc/opt/... restores to /
-  # by inspection. --delete drops files that vanished at the source.
-  rsync -a --relative --delete --delete-excluded "${rsync_excludes[@]}" "${present[@]}" "${files}/"
+# Usage: copy SRC DEST MEMBER... (MEMBERs relative to SRC). tar exits 1 for "file
+# changed as we read it", expected for SQLite under a live process; 2 is a real error.
+copy() {
+  local src=$1 dest=$2
+  shift 2
+  install -d -m 700 "$dest"
+  tar -C "$src" -c "${excludes[@]}" "$@" | tar -C "$dest" -x ||
+    (( PIPESTATUS[0] < 2 && PIPESTATUS[1] == 0 ))
 }
 
-# Excludes applied to every stage_paths call; nodes append to it before staging.
-rsync_excludes=(--exclude='*.tmp' --exclude='lost+found')
+stage_paths() {
+  local path present=()
+  for path in "$@"; do
+    if [[ -e $path ]]; then present+=("${path#/}"); else echo "warning: not staged, missing: $path" >&2; fi
+  done
+  copy / "$files" "${present[@]}"
+}
 
 stage_volume() {
-  local volume=$1 name=${2:-$1} mountpoint
-  mountpoint=$(podman volume inspect -f '{{ .Mountpoint }}' "systemd-${volume}")
-  install -d -m 700 "${files}/volumes"
-  rsync -a --delete "${rsync_excludes[@]}" "${mountpoint}/" "${files}/volumes/${name}/"
-}
-
-keep_newest() {
-  local dir=$1 glob=$2 n=$3
-  find "$dir" -maxdepth 1 -name "$glob" | sort | head -n "-${n}" | xargs -r rm -rf --
+  local volume=$1 name=${2:-$1}
+  copy "$(podman volume inspect -f '{{ .Mountpoint }}' "systemd-${volume}")" "${files}/volumes/${name}" .
 }
 
 stage_finish() {
-  # One owner for the whole tree so a single rsync as that user reads all of it. Group
-  # and others get nothing: the stage holds secrets files and private keys.
+  # One owner for the whole tree so sftp as that user reads all of it. Group and
+  # others get nothing: the stage holds secrets files and private keys.
   chown -R "${stage_owner}:${stage_owner}" "$stage"
   chmod -R u=rwX,go= "$stage"
   echo "Staged $(du -sh "$stage" | cut -f1) in ${stage}"
