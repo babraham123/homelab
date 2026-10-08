@@ -28,8 +28,8 @@ update-initramfs -u -k all && reboot
 ```
 After the reboot `lspci -k -s ADDRESS` shows `Kernel driver in use: vfio-pci` and the four HDDs are gone from `lsblk`. Attach the card to websvcs:
 ```bash
-qm set $(/usr/local/bin/get_vm_id.sh websvcs) --hostpci1 ADDRESS,pcie=1
-qm stop $(/usr/local/bin/get_vm_id.sh websvcs) && qm start $(/usr/local/bin/get_vm_id.sh websvcs)
+qm set $(/root/homelab-rendered/src/pve2/get_vm_id.sh websvcs) --hostpci1 ADDRESS,pcie=1
+qm stop $(/root/homelab-rendered/src/pve2/get_vm_id.sh websvcs) && qm start $(/root/homelab-rendered/src/pve2/get_vm_id.sh websvcs)
 ```
 A passthrough device pins the VM's memory and blocks live migration and `qm snapshot`; vzdump snapshot-mode backups are unaffected.
 

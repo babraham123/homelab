@@ -2,7 +2,7 @@
 # Renders the given file in the same directory as it's template (FILENAME.j2).
 # Includes basic networking details about the host.
 # Usage:
-#   /usr/local/bin/render_host.sh SUBDOMAIN FILENAME
+#   src/podman/render_host.sh SUBDOMAIN FILENAME
 # Ref:
 # https://github.com/kpfleming/jinjanator
 

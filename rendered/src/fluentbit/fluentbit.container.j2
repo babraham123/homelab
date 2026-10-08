@@ -36,7 +36,7 @@ Volume=fbdata.volume:/data
 Restart=on-failure
 TimeoutStartSec=300
 
-ExecStartPre=/usr/local/bin/render_services.sh /etc/opt/fluentbit/config.yaml
+ExecStartPre=/root/homelab-rendered/src/podman/render_services.sh /etc/opt/fluentbit/config.yaml
 
 [Install]
 WantedBy=multi-user.target

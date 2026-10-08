@@ -11,7 +11,7 @@ host smtp.gmail.com
 from admin@{{ site.url }}
 auth on
 user {{ site.email }}
-password "/usr/local/bin/msmtp_password.sh"
+password "/root/homelab-rendered/src/pve1/msmtp_password.sh"
 
 # Set a default account
 account default : gmail

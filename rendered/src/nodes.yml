@@ -45,6 +45,7 @@ nodes:
       - {name: install_certs_and_keys, script: pve2/commands.sh}
       - {name: start_gaming_vm, script: pve2/commands.sh}
       - {name: stop_gaming_vm, script: pve2/commands.sh}
+      - {name: install_hookscript, script: pve2/commands.sh}
       - {name: backup, run: [sudo /root/homelab-rendered/src/pve2/backup.sh]}
       - {name: prune, run: [sudo /root/homelab-rendered/src/pve2/prune.sh]}
       - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}

@@ -28,9 +28,9 @@ stage_paths /etc/pve /etc/proxmox-backup /etc/network/interfaces /etc/resolv.con
   /root/.ssh /var/lib/vz/snippets /usr/local/bin
 stage_finish
 
-websvcs=$(/usr/local/bin/get_vm_id.sh websvcs)
-devtop=$(/usr/local/bin/get_vm_id.sh devtop)
-gaming=$(/usr/local/bin/get_vm_id.sh gaming)
+websvcs=$(/root/homelab-rendered/src/pve2/get_vm_id.sh websvcs)
+devtop=$(/root/homelab-rendered/src/pve2/get_vm_id.sh devtop)
+gaming=$(/root/homelab-rendered/src/pve2/get_vm_id.sh gaming)
 
 # devtop and gaming share the GPU. vzdump launches a paused QEMU, GPU attached, to read
 # a stopped VM's disks whatever the mode, and the hookscript then stops the other VM.

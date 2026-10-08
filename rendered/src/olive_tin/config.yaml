@@ -757,6 +757,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: pve2 Install Hookscript
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 install_hookscript
+              id: pve2_install_hookscript
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: pve2 Backup
               icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
               shell: ssh autoadmin@pve2 backup

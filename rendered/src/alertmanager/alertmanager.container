@@ -29,8 +29,8 @@ Volume=/etc/opt/alertmanager:/config:ro
 Restart=on-failure
 TimeoutStartSec=300
 
-ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/alertmanager/config.yml alert_smtp_password,ntfy_alertmanager_admin_password
-ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/alertmanager/web_config.yml alertmanager_admin_password,bcrypt_salt
+ExecStartPre=/root/homelab-rendered/src/podman/render_secrets.sh /etc/opt/alertmanager/config.yml alert_smtp_password,ntfy_alertmanager_admin_password
+ExecStartPre=/root/homelab-rendered/src/podman/render_secrets.sh /etc/opt/alertmanager/web_config.yml alertmanager_admin_password,bcrypt_salt
 # User defined in the AM dockerfile
 ExecStartPre=chown nobody:nogroup /etc/opt/alertmanager/config.yml /etc/opt/alertmanager/web_config.yml
 

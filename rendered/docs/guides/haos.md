@@ -14,7 +14,7 @@ HA_VERSION=$(curl -s "https://api.github.com/repos/home-assistant/operating-syst
 wget "https://github.com/home-assistant/operating-system/releases/download/${HA_VERSION}/haos_ova-${HA_VERSION}.qcow2.xz"
 unxz "haos_ova-${HA_VERSION}.qcow2.xz"
 
-vm_id=$(sudo /usr/local/bin/get_vm_id.sh homesvcs)
+vm_id=$(sudo /root/homelab-rendered/src/pve2/get_vm_id.sh homesvcs)
 sudo qm importdisk "$vm_id" haos_ova-${HA_VERSION}.qcow2 local-lvm
 rm haos_ova*
 ```

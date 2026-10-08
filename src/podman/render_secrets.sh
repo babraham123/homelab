@@ -3,7 +3,7 @@
 # Includes the given secrets as env vars while rendering.
 # The rendered file will be owned by root.
 # Usage:
-#   /usr/local/bin/render_secrets.sh FILENAME SECRET1,SECRET2
+#   src/podman/render_secrets.sh FILENAME SECRET1,SECRET2
 # Ref:
 # https://github.com/kpfleming/jinjanator
 # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_filters.html
@@ -19,7 +19,7 @@ fi
 IFS=, read -ra secrets <<< "$2"
 for secret in "${secrets[@]}"; do
   echo "$secret"
-  secret_value=$(/usr/local/bin/get_secret.sh "$secret")
+  secret_value=$("$(dirname "$0")/get_secret.sh" "$secret")
   printf -v "$secret" "%s" "$secret_value"
   export "${secret?}"
 done

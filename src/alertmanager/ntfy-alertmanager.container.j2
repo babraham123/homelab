@@ -28,7 +28,7 @@ Volume=/etc/opt/ntfy-alertmanager/config.scfg:/etc/ntfy-alertmanager/config.scfg
 Restart=on-failure
 TimeoutStartSec=300
 
-ExecStartPre=/usr/local/bin/render_secrets.sh /etc/opt/ntfy-alertmanager/config.scfg ntfy_alertmanager_admin_password,ntfy_alert_password,alertmanager_admin_password
+ExecStartPre=/root/homelab-rendered/src/podman/render_secrets.sh /etc/opt/ntfy-alertmanager/config.scfg ntfy_alertmanager_admin_password,ntfy_alert_password,alertmanager_admin_password
 
 [Install]
 WantedBy=multi-user.target

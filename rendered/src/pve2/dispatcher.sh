@@ -27,6 +27,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   stop_gaming_vm)
     sudo /root/homelab-rendered/src/pve2/commands.sh stop_gaming_vm
     ;;
+  install_hookscript)
+    sudo /root/homelab-rendered/src/pve2/commands.sh install_hookscript
+    ;;
   backup)
     sudo /root/homelab-rendered/src/pve2/backup.sh
     ;;

@@ -7,7 +7,6 @@ set -euo pipefail
 
 cd /root/homelab-rendered/src
 mkdir -p /etc/containers/systemd
-cp podman/*.sh /usr/local/bin
 
 case $1 in
   postgres)
@@ -110,7 +109,7 @@ case $1 in
     mkdir -p /etc/opt/fluentbit
     cp secsvcs/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
     cp fluentbit/journald.lua /etc/opt/fluentbit
-    /usr/local/bin/render_host.sh secsvcs fluentbit/fluentbit.container
+    /root/homelab-rendered/src/podman/render_host.sh secsvcs fluentbit/fluentbit.container
     mv fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd
     ;;

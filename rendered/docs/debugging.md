@@ -169,12 +169,13 @@ Building an image inside a quadlet: see
 ## Secrets
 
 Node secrets are an AGE-encrypted YAML file, decrypted on demand by helper scripts
-(source: `src/podman/`).
+in `/root/homelab-rendered/src/podman/` (as root).
 
 ```bash
-list_secrets.sh                         # all secret names
-get_secret.sh lldap_admin_password      # one value
-SECRET_ID=ID get_secret_by_id.sh        # resolve a podman secret ID
+cd /root/homelab-rendered/src/podman
+./list_secrets.sh                       # all secret names
+./get_secret.sh lldap_admin_password    # one value
+SECRET_ID=ID ./get_secret_by_id.sh      # resolve a podman secret ID
 podman secret ls
 
 # Equivalent raw command
@@ -222,7 +223,7 @@ curl -H "Host: www.janedoe.com" http://nginx:8100/  # skip Traefik
 curl -vk --resolve www.janedoe.com:443:127.0.0.1 https://www.janedoe.com
 
 # Basic auth
-curl -u "admin:$(get_secret.sh victoriametrics_admin_password)" \
+curl -u "admin:$(/root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_password)" \
   https://metrics.janedoe.com/api/v1/query?query=up
 
 # Throwaway web server to test a route or firewall rule
@@ -544,8 +545,8 @@ When an app's SSO login fails, check both the app's logs and Authelia's, then:
 
 - `redirect_uris` for the client in `src/authelia/configuration.yml.j2` exactly match
   what the app sends.
-- Client ID and secret match on both sides (`get_secret.sh APP_oidc_id`,
-  `get_secret.sh APP_oidc_secret`).
+- Client ID and secret match on both sides (`/root/homelab-rendered/src/podman/get_secret.sh APP_oidc_id`,
+  `/root/homelab-rendered/src/podman/get_secret.sh APP_oidc_secret`).
 - The app trusts the cert served at `auth.janedoe.com` (see
   [Certificates and TLS](#certificates-and-tls)).
 - Authelia's [OIDC FAQ](https://www.authelia.com/integration/openid-connect/frequently-asked-questions/)
@@ -569,7 +570,7 @@ does this.
 go mod init oauth && go get golang.org/x/oauth2 golang.org/x/oauth2/clientcredentials
 go build -o oauth
 tcpdump -i vmbr0 host 12.34.56.78 -w capture.pcap &
-CLIENT_ID="$(get_secret.sh gatus_oidc_id)" CLIENT_SECRET="$(get_secret.sh gatus_oidc_secret)" ./oauth
+CLIENT_ID="$(/root/homelab-rendered/src/podman/get_secret.sh gatus_oidc_id)" CLIENT_SECRET="$(/root/homelab-rendered/src/podman/get_secret.sh gatus_oidc_secret)" ./oauth
 kill %1
 
 # Decrypt with the exported keys
@@ -587,7 +588,7 @@ Useful to iterate on `configuration.yml` quickly. Download a release binary, wri
 each secret to a file, and point the `*_FILE` env vars at them:
 
 ```bash
-get_secret.sh authelia_jwt_secret | head -c -1 > authelia_jwt_secret
+/root/homelab-rendered/src/podman/get_secret.sh authelia_jwt_secret | head -c -1 > authelia_jwt_secret
 # ...one file per secret below; edit certificates_directory in configuration.yml
 AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE=authelia_jwt_secret \
 AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE=lldap_admin_password \
@@ -639,8 +640,8 @@ Metrics and logs require basic auth (`admin` + `victoriametrics_admin_password` 
 `victorialogs_admin_password`).
 
 ```bash
-VM_AUTH="admin:$(get_secret.sh victoriametrics_admin_password)"
-VL_AUTH="admin:$(get_secret.sh victorialogs_admin_password)"
+VM_AUTH="admin:$(/root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_password)"
+VL_AUTH="admin:$(/root/homelab-rendered/src/podman/get_secret.sh victorialogs_admin_password)"
 
 # Instant query
 curl -u "$VM_AUTH" 'https://metrics.janedoe.com/api/v1/query' --data-urlencode 'query=up == 0'
