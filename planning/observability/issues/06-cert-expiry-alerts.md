@@ -1,6 +1,6 @@
 # 06. Add the cert-expiry vmalert rules the docs already claim exist
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 23
@@ -43,3 +43,6 @@ vmalert-on-Gatus-metric, `cert_notifier` email) accurately.
 anchors and a `tls://ldap.SITE:6360` endpoint at 720h. Postgres (STARTTLS-style) and
 Mosquitto (`require_certificate`) can't be `tls://` checks; `cert_notifier` keeps them.
 Remaining: the vmalert rules above, once observability/01 lands.
+
+2026-10-07: `CertExpiringSoon` (14 d, warning) and `CertExpiringCritical` (3 d, critical)
+are in `src/vmalert/configs/homelab.yml`; `docs/security.md` describes the three paths.

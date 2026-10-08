@@ -1,0 +1,126 @@
+# Host, scrape, auth, uptime and cert-expiry alerts. Every VM and host runs
+# node_exporter (src/node_exporter/node_runner.sh), scraped by its node's collector as
+# job node_exporter (VMs) or node_exporter_pve (pve1, pve2). Backups are in
+# backups.yml; the VictoriaMetrics components have their own upstream files.
+# Severity is what ntfy-alertmanager maps to a push priority: critical (5), error (4),
+# warning (3), info (1).
+---
+groups:
+  - name: hosts
+    rules:
+      - alert: NodeDown
+        expr: up{job=~"node_exporter.*"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.instance }} is not answering node_exporter scrapes"
+          description: "The host is down, node_exporter stopped, or its collector can't reach it (ufw, pve host up?)."
+      - alert: DiskAlmostFull
+        expr: node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|ramfs"} / node_filesystem_size_bytes < 0.10
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.mountpoint }} on {{ $labels.instance }} has {{ $value | humanizePercentage }} free"
+          description: "Podman images and journald are the usual growth on the VMs: podman image prune, journalctl --vacuum-size."
+      - alert: DiskFillingIn24h
+        # Only once under 30% so a fresh VM's first image pulls don't extrapolate to full.
+        expr: |
+          predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|ramfs"}[6h], 24 * 3600) < 0
+            and node_filesystem_avail_bytes / node_filesystem_size_bytes < 0.30
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.mountpoint }} on {{ $labels.instance }} fills up within a day at the current rate"
+      - alert: MemoryPressure
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.10
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.instance }} has {{ $value | humanizePercentage }} of memory available"
+      - alert: HighLoad
+        expr: node_load15 / count without (cpu, mode) (node_cpu_seconds_total{mode="idle"}) > 2
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.instance }} load15 is {{ $value | printf \"%.1f\" }} per core"
+      - alert: HighCpuTemp
+        # Only the hosts have sensors; pve1 is fanless.
+        expr: node_hwmon_temp_celsius > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.instance }} {{ $labels.chip }} {{ $labels.sensor }} is at {{ $value }}°C"
+      - alert: SystemdUnitFailed
+        # node_runner.sh exports only the "Homelab:" units, so this is every quadlet,
+        # the host services and the backup orchestrator; a restart loop ends up here.
+        expr: node_systemd_unit_state{state="failed"} == 1
+        for: 5m
+        labels:
+          severity: error
+        annotations:
+          summary: "{{ $labels.name }} failed on {{ $labels.instance }}"
+          description: "journalctl -u {{ $labels.name }} on the node."
+      - alert: ClockSkew
+        expr: abs(node_timex_offset_seconds) > 0.5 or node_timex_sync_status == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.instance }} clock is off or unsynced"
+          description: "TOTP, TLS and the SSH certs all need the clocks within seconds. timedatectl on the node."
+
+  - name: scrapes
+    rules:
+      - alert: TargetDown
+        # Hosts have NodeDown, VictoriaMetrics components ServiceDown (health.yml).
+        expr: up{job!~"node_exporter.*|victoriametrics|vmagent|vmalert"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Scrape target {{ $labels.job }} on {{ $labels.instance }} is down"
+
+  - name: auth
+    rules:
+      - alert: AuthFailureBurst
+        # authelia_authn counts first-factor attempts, labelled success and banned.
+        expr: sum(increase(authelia_authn{success="false"}[10m])) > 20
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value | printf \"%.0f\" }} failed logins in 10 minutes"
+          description: "Authelia's regulation bans after a few failures per user; a burst across users is a scan. Check the authelia log for the source IPs."
+
+  - name: uptime
+    # Gatus is the second path: HTTPS checks that don't depend on the scrape pipeline.
+    rules:
+      - alert: EndpointDown
+        expr: gatus_results_endpoint_success == 0
+        for: 15m
+        labels:
+          severity: error
+        annotations:
+          summary: "{{ $labels.name }} has been failing its uptime check for 15 minutes"
+          description: "Group {{ $labels.group }}; the history is on the Gatus page (uptime subdomain)."
+      - alert: CertExpiringSoon
+        # Gatus reports this for every TLS endpoint it checks. ACME renews at 30 days
+        # out, so 14 days means renewal has been failing for over two weeks.
+        expr: gatus_results_certificate_expiration_seconds < 14 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.name }} certificate expires in {{ $value | humanizeDuration }}"
+      - alert: CertExpiringCritical
+        expr: gatus_results_certificate_expiration_seconds < 3 * 86400
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.name }} certificate expires in {{ $value | humanizeDuration }}"
+...

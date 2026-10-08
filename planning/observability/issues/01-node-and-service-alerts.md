@@ -1,6 +1,6 @@
 # 01. Add vmalert rules for hosts, disks, systemd units, backups and auth
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 18
@@ -64,3 +64,9 @@ firing state. Document the list in `docs/services.md#observability`.
   `SnapraidStale` and `DiskUnhealthy` for the media array). The orchestrator's job
   labels are now `backup_<node>` and `upload`. Leave backups
   out of `homelab.yml`.
+
+- 2026-10-07: landed as `src/vmalert/configs/homelab.yml` (groups hosts, scrapes, auth,
+  uptime) plus `src/grafana/dashboards/alerts.json`. `AuthFailureBurst` uses
+  `authelia_authn{success="false"}`, the counter the Authelia dashboard already graphs.
+  The cert rules from 06 are in the same file. Acceptance (vmalert load, a broken
+  quadlet, `fallocate`) is in the apply note for the next deploy.

@@ -165,8 +165,9 @@ flowchart TB
 - **Expiry monitoring**: the `cert_notifier` timer on pve1 emails weeks in advance.
   Gatus fails an endpoint whose ACME cert has under 14 days left (every HTTPS check)
   and checks the LDAPS cert at 30 days; Postgres and Mosquitto are not reachable as
-  plain TLS endpoints and stay with `cert_notifier`. vmalert rules on Gatus's expiry
-  metric are planned (observability/06). Rotation cadence lives in
+  plain TLS endpoints and stay with `cert_notifier`. vmalert turns Gatus's expiry
+  metric into `CertExpiringSoon` (14 days) and `CertExpiringCritical` (3 days) pushes.
+  Rotation cadence lives in
   [Maintenance](maintenance.md#refresh-certificates).
 
 ## Host access: the SSH dispatcher

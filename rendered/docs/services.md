@@ -150,10 +150,21 @@ flowchart LR
   gets an uptime check from one key.
 - Retention for metrics, logs, and Home Assistant history is set in `vars.yml`.
 - Gatus is a second, independent path: HTTPS checks that don't depend on the metrics
-  pipeline. It has no alerting of its own yet (observability/10). Every HTTPS check
-  also fails when the cert has under 14 days left, and a `tls://` check watches the
-  LDAPS cert; the cert_notifier email timer covers the rest, vmalert rules are planned
-  (observability/06).
+  pipeline. Every HTTPS check also fails when the cert has under 14 days left, and a
+  `tls://` check watches the LDAPS cert; the cert_notifier email timer covers Postgres
+  and Mosquitto. Gatus has no notifier of its own: its results are scraped, and
+  `EndpointDown` and the cert rules below fire through vmalert.
+- Alert rules live in `src/vmalert/configs/`, one file per concern, all routed by
+  severity (`critical` > `error` > `warning` > `info` as ntfy priorities):
+  - `homelab.yml`: hosts (`NodeDown`, `DiskAlmostFull`, `DiskFillingIn24h`,
+    `MemoryPressure`, `HighLoad`, `HighCpuTemp`, `SystemdUnitFailed` for any
+    "Homelab:" unit, `ClockSkew`), `TargetDown` for every other scrape, `AuthFailureBurst`
+    on Authelia's first-factor counter, and the Gatus-fed `EndpointDown`,
+    `CertExpiringSoon` (14 days) and `CertExpiringCritical` (3 days).
+  - `backups.yml`: `BackupStale`, `BackupNeverRan`, `SnapraidStale`, `DiskUnhealthy`.
+  - `health.yml`, `vmagent.yml`, `vmalert.yml`, `vmsingle.yml`, `fluentbit.yml`: the
+    pipeline's own components, upstream rule sets.
+  The "Homelab alerts" Grafana dashboard shows what is firing and the signals behind it.
 
 ## Key data flows
 
