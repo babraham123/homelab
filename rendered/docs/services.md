@@ -221,7 +221,7 @@ flowchart LR
   by websvcs. Not backed up; parity is its protection ([pve2 storage guide](guides/pve2_storage.md))
 - **pfSense**: the Auto Config Backup package
 - **Weekly run**, Saturday 02:00, `backup_orchestrator.service` on pve1. It wakes pve2 (PBS), then:
-  1. `backup.sh` on every node (secsvcs, homesvcs, websvcs, vpnsvcs, then pve1 and pve2) through the
+  1. `backup.sh` on every node (homesvcs, secsvcs, vpnsvcs, websvcs, then pve1 and pve2) through the
      SSH dispatcher as `backup` (pve1's runs directly), rebuilding `/var/opt/backups/`:
      - `dumps/`: `pg_dumpall`, Home Assistant's native backup, a Headscale SQLite snapshot
      - `files/`: config trees and small volumes, paths as on the live system; large or rebuildable
