@@ -14,14 +14,14 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 source "${rendered}/base/debian/backup_lib.sh"
 
 # Root owned: the pull is local, so nothing here needs to be readable by autoadmin.
-stage_init root
+stage_init
 # /etc/pve is the pmxcfs mount: storage.cfg and the PBS credentials under priv/,
 # VM configs, users. Reading it is fine; it just doesn't take chmod.
 stage_paths /etc/pve /etc/network/interfaces /etc/resolv.conf /etc/hosts /etc/hostname \
   /etc/ssh /etc/msmtprc /etc/aliases /etc/opt /etc/systemd/system \
   /root/secrets /root/ca /root/ssh /root/acme /root/.ssh \
   /var/lib/vz/snippets /usr/local/bin
-stage_finish
+stage_send
 
 # router, secsvcs, homesvcs.
 vzdump_to pbs2 --all 1

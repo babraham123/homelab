@@ -36,4 +36,4 @@ stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd
 stage_volume grafanadata
 stage_volume ntfydb
 
-stage_finish
+stage_send

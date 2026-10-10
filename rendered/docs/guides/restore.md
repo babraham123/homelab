@@ -6,26 +6,22 @@ How to get a file, a VM or a whole Proxmox host back from the weekly backup.
 - Everything in PBS is encrypted with `/root/secrets/pbs_client.key` on pve1; nothing restores
   without it. The escrow bundle that will hold it is *planned* (`backup-and-dr/04`)
 
-Three tiers, cheapest first:
-1. **The node's stage**, `/var/opt/backups/files/` on the node
-   - The newest copy of its config trees and small volumes, paths as on the live system
-   - No other machine needed; no application dumps (pve1 moves them out every run)
-2. **pve1's collection**, `/root/backups/<node>/files/` on pve1
-   - Every node's stage as of the last run, plus `repo/` (the repo and `vars.yml`, from every
-     `tools/deploy_src.sh`)
+Two tiers, cheapest first (the nodes keep no stage: `backup` streams it to pve1 and deletes it):
+1. **pve1's collection**, `/root/backups/<node>/files/` on pve1
+   - Every node's config trees and small volumes as of the last run, paths as on the live system,
+     plus `repo/` (the repo and `vars.yml`, from every `tools/deploy_src.sh`)
    - A non-empty `dumps/` means the last upload failed and PBS doesn't have them
-3. **PBS** (`pbs2`, on pve2), every weekly run; needs pve2 awake: `ssh autoadmin@router start_pve2`
+   - A fresh copy of one node: `/root/homelab-rendered/src/nodes/pve1/collect_stage.sh NODE`
+2. **PBS** (`pbs2`, on pve2), every weekly run; needs pve2 awake: `ssh autoadmin@router start_pve2`
    - The only home of application dumps
    - Namespace `files`: `host/pve1`, the collection
    - Namespaces `pve1`, `pve2`: the VM images and `host/vpnsvcs`
    - Retention per namespace: [Storage and backups](../services.md#storage-and-backups)
 
 ## A file or an application's data
-### From the stage or pve1's collection
+### From pve1's collection
 ```bash
-# On the node: the last copy, paths as on the live system
-ls /var/opt/backups/files/etc/opt/
-# On pve1: the same, for any node, as of the last Saturday run
+# On pve1: paths as on the live system, for any node, as of the last Saturday run
 ls /root/backups/secsvcs/files/etc/opt/
 ```
 - `cp -a` the file back, then restart the service that reads it

@@ -32,4 +32,4 @@ excludes+=(--exclude='var/lib/headscale/db.sqlite*' --exclude=var/lib/headscale/
 stage_paths /var/lib/headscale /etc/headscale /var/lib/tailscale /etc/haproxy \
   /etc/ssh /etc/ufw /etc/opt /etc/systemd/system /etc/letsencrypt /root/.ssh
 
-stage_finish
+stage_send

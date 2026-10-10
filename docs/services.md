@@ -228,10 +228,11 @@ flowchart LR
      - `dumps/`: `pg_dumpall`, Home Assistant's native backup, a Headscale SQLite snapshot
      - `files/`: config trees and small volumes, paths as on the live system; large or rebuildable
        data is excluded by name
-     - pve1 copies `files/` into `/root/backups/<node>/` over sftp (the one transfer the dispatcher
-       passes through) and moves the dumps there
+     - the node streams the stage as a tar on `backup`'s stdout, with a `SHA256SUMS` manifest, and
+       deletes it; pve1 checks the manifest, then replaces `/root/backups/<node>/files/` and adds
+       the dumps. Nothing stays on the node between runs
      - `src/base/debian/backup_lib.sh` owns both ends of the stage: the node scripts and the
-       orchestrator source it
+       orchestrator source it; `src/nodes/pve1/collect_stage.sh NODE` pulls one node by hand
   2. pve1 and pve2: VM images to PBS through the API (`pvesh create /nodes/<n>/vzdump`, snapshot
      mode). devtop and gaming share pve2's GPU: back up the running one, shut it down, back up the
      other, start the first again

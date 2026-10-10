@@ -47,7 +47,7 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
 | `/etc/network/interfaces`, `/etc/resolv.conf` | host network | Regenerate | from `src/nodes/pve1/interfaces.j2`, `src/nodes/pve1/resolv.conf.j2` |
 | `/root/homelab-rendered/` | rendered repo | Regenerate | `tools/deploy_src.sh` from the workstation |
 | `/etc/msmtprc`, `/usr/local/bin/{cert_notifier,vm_watchdog,backup_orchestrator}.sh`, their systemd units, the msmtp AppArmor edit, node_exporter | host services | Regenerate | [step 11](#11-host-services) |
-| `/root/backups/` | every node's staged files and dumps as of the last run, and `repo/` | PBS host backup | the nodes' own `/var/opt/backups/` stages still hold their last files |
+| `/root/backups/` | every node's staged files and dumps as of the last run, and `repo/` | PBS host backup | nothing: the nodes keep no stage |
 
 ### Elsewhere
 
@@ -59,7 +59,7 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
 | `/etc/opt/secrets/id_ed25519`, `secrets.yaml.age` on each host | host decryption key + that host's secrets | PBS VM backup; vpnsvcs: PBS `host/vpnsvcs` | new key, re-collect pubkey, `secret_update.sh <host>` |
 | pfSense `config.xml` | firewall, VLANs, DHCP leases, DNS | PBS VM backup (router VM), Auto Config Backup; *planned*: Escrow | [Router without a VM backup](#router-without-a-vm-backup) |
 | ACB device key + encryption password | needed to pull an ACB backup onto a fresh pfSense | Offline copy held by the maintainer; see `auth/08` | ACB backups unusable |
-| PBS datastore `backup1` on pve2 | every VM and host backup | nothing (single copy); *planned*: offsite (`backup-and-dr/03`) | rebuild VMs from the guides; the nodes' stages and pve1's `/root/backups` hold the last files |
+| PBS datastore `backup1` on pve2 | every VM and host backup | nothing (single copy); *planned*: offsite (`backup-and-dr/03`) | rebuild VMs from the guides; pve1's `/root/backups` holds the last files |
 
 ## Rebuild pve1 from bare metal
 - Assumes a new SSD, pve2 and its datastore intact, and `vars.yml`

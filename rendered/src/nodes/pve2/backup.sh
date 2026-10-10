@@ -20,7 +20,7 @@ stage_init
 stage_paths /etc/pve /etc/proxmox-backup /etc/network/interfaces /etc/resolv.conf \
   /etc/hosts /etc/hostname /etc/ssh /etc/opt /etc/systemd/system /etc/fstab \
   /root/.ssh /var/lib/vz/snippets /usr/local/bin
-stage_finish
+stage_send
 
 websvcs=$("${rendered}/nodes/pve2/get_vm_id.sh" websvcs)
 devtop=$("${rendered}/nodes/pve2/get_vm_id.sh" devtop)

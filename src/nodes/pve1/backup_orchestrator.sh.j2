@@ -1,11 +1,11 @@
 {% import 'src/nodes.jinja' as inv with context -%}
 #!/bin/bash
 # Weekly backup run. Dumps the router VM to pve1's own disk, wakes pve2 (PBS lives
-# there), runs backup.sh on every node, collects each node's stage into
-# /root/backups/<node>/ (backup_lib's stage_collect), sends /root/backups to PBS as host
-# backups, has pve2 prune and garbage-collect PBS, records per-step success metrics,
-# then powers pve2 back off if it was off to begin with. Posts a one-line ntfy summary
-# at the end.
+# there), runs backup.sh on every node and receives the stage each streams back into
+# /root/backups/<node>/ (backup_lib's stage_collect; src/nodes/pve1/collect_stage.sh
+# does one node outside the weekly run), sends /root/backups to PBS as host backups,
+# has pve2 prune and garbage-collect PBS, records per-step success metrics, then powers
+# pve2 back off if it was off to begin with. Posts a one-line ntfy summary at the end.
 # Usage:
 #   src/nodes/pve1/backup_orchestrator.sh
 # Adding a node: give it a backup.sh and a `backup` dispatcher command, which puts it

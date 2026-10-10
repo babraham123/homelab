@@ -25,4 +25,4 @@ stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd \
 # Isso comments, SQLite under a running process; a live copy is acceptable.
 stage_volume issodb
 
-stage_finish
+stage_send

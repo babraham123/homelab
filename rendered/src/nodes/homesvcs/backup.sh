@@ -48,4 +48,4 @@ stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd
 stage_volume z2mdb
 stage_volume mqttdata
 
-stage_finish
+stage_send

@@ -368,13 +368,13 @@ journalctl -u deadman --no-pager | tail       # silent when the path is healthy
 - State: `/var/lib/deadman/` (`failures` counter, `firing` flag)
 
 ## Backup and restore
-- `ssh autoadmin@vpnsvcs backup`, run weekly by pve1's orchestrator, stages into
-  `/var/opt/backups/`:
+- `backup`, run weekly by pve1's orchestrator through the dispatcher (pve1's certificate only),
+  stages into `/var/opt/backups/`, streams it to pve1 and deletes it:
   - `dumps/`: the Headscale DB, snapshotted with `sqlite3 .backup`
   - `files/`: `/var/lib/headscale` (noise and DERP keys), `/etc/headscale`, `/var/lib/tailscale`,
     `/etc/haproxy`, `/etc/ssh`, `/etc/ufw`, `/etc/opt`, `/etc/systemd/system`, `/etc/letsencrypt`,
     `/root/.ssh`
-- pve1 mirrors it into `/root/backups/vpnsvcs/`, then to PBS as `host/vpnsvcs` with the image
+- pve1 keeps it in `/root/backups/vpnsvcs/`, then to PBS as `host/vpnsvcs` with the image
   retention; the DB snapshot lives in PBS only
 - No OS archive: rebuild from this guide, then put the files back
 - One file, e.g. the Headscale DB: [restore guide](./restore.md#application-restores)
@@ -392,4 +392,4 @@ ssh -t manualadmin@NEW_IP 'sudo cp -a vpnsvcs/files/. / && sudo rm -rf vpnsvcs'
 
 ## Upgrade
 - [Headscale docs](https://github.com/juanfont/headscale/blob/main/docs/setup/upgrade.md)
-- Back up first: `ssh autoadmin@vpnsvcs.{{ site.url }} backup`
+- Back up first, on pve1: `/root/homelab-rendered/src/nodes/pve1/collect_stage.sh vpnsvcs`
