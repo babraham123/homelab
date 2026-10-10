@@ -7,8 +7,8 @@ Source: review finding 26 (maintainer: mv is intentional, add a comment)
 
 ## Change
 
-At each `mv` of a rendered file — `src/secsvcs/install_svcs.sh:114`,
-`src/homesvcs/install_svcs.sh:27,74`, `src/websvcs/install_svcs.sh:33,142` — add:
+At each `mv` of a rendered file — `src/nodes/secsvcs/install_svcs.sh:114`,
+`src/nodes/homesvcs/install_svcs.sh:27,74`, `src/nodes/websvcs/install_svcs.sh:33,142` — add:
 
 ```bash
 # mv, not cp: render_host.sh rendered this file in place inside /root/homelab-rendered,

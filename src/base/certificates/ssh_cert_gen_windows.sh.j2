@@ -1,11 +1,11 @@
 #!/bin/bash
 # Generate SSH certificates and distribute them to all servers.
 # Usage:
-#   /root/homelab-rendered/src/certificates/ssh_cert_gen_windows.sh
+#   /root/homelab-rendered/src/base/certificates/ssh_cert_gen_windows.sh
 set -euo pipefail
 
-/root/homelab-rendered/src/debian/is_root.sh
-/root/homelab-rendered/src/debian/is_reachable.sh gaming
+/root/homelab-rendered/src/base/debian/is_root.sh
+/root/homelab-rendered/src/base/debian/is_reachable.sh gaming
 
 cd /root/ssh
 

@@ -46,7 +46,7 @@ ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N ""
 
 # Wait until all of the VMs have been created. On the first run it will
 # ask you for the root password of various hosts.
-/root/homelab-rendered/src/certificates/ssh_cert_gen.sh
+/root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
 # The cert for the gaming VM will be generated later
 ```
 
@@ -76,7 +76,7 @@ chmod 400 age.*
 
 - Generate the SOPS pve1 secrets file
 ```bash
-# Fill in all of the secrets you can based on `src/pve1/secrets_template.yaml`
+# Fill in all of the secrets you can based on `src/nodes/pve1/secrets_template.yaml`
 sops /root/secrets/pve1.yaml
 ```
 
@@ -84,24 +84,24 @@ sops /root/secrets/pve1.yaml
 ```bash
 scp manualadmin@secsvcs:/home/manualadmin/.ssh/id_ed25519.pub secsvcs_id_ed25519.pub
 chmod 400 secsvcs_id_ed25519.pub
-# Fill in all of the secrets you can based on `src/secsvcs/secrets_template.yaml`
-/root/homelab-rendered/src/pve1/secret_update.sh secsvcs
+# Fill in all of the secrets you can based on `src/nodes/secsvcs/secrets_template.yaml`
+/root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs
 ```
 
 - Generate the SOPS/AGE websvcs secrets file
 ```bash
 scp manualadmin@websvcs:/home/manualadmin/.ssh/id_ed25519.pub websvcs_id_ed25519.pub
 chmod 400 websvcs_id_ed25519.pub
-# Fill in all of the secrets you can based on `src/websvcs/secrets_template.yaml`
-/root/homelab-rendered/src/pve1/secret_update.sh websvcs
+# Fill in all of the secrets you can based on `src/nodes/websvcs/secrets_template.yaml`
+/root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs
 ```
 
 - Generate the SOPS/AGE homesvcs secrets file
 ```bash
 scp manualadmin@homesvcs:/home/manualadmin/.ssh/id_ed25519.pub homesvcs_id_ed25519.pub
 chmod 400 homesvcs_id_ed25519.pub
-# Fill in all of the secrets you can based on `src/homesvcs/secrets_template.yaml`
-/root/homelab-rendered/src/pve1/secret_update.sh homesvcs
+# Fill in all of the secrets you can based on `src/nodes/homesvcs/secrets_template.yaml`
+/root/homelab-rendered/src/nodes/pve1/secret_update.sh homesvcs
 ```
 
 ## Self-Signed Certificates
@@ -191,8 +191,8 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/w
 - Create domain specific keys and certs
 ```bash
 # Wait until the services in secsvcs, websvcs and homesvcs are setup but not yet started
-/root/homelab-rendered/src/certificates/self_signed_key_gen.sh
-/root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
+/root/homelab-rendered/src/base/certificates/self_signed_key_gen.sh
+/root/homelab-rendered/src/base/certificates/self_signed_cert_gen.sh
 ```
 
 ## ACME Certificates
@@ -206,7 +206,7 @@ TCD_VERSION=$(curl -s "https://api.github.com/repos/ldez/traefik-certs-dumper/re
 wget "https://github.com/ldez/traefik-certs-dumper/releases/download/v${TCD_VERSION}/traefik-certs-dumper_v${TCD_VERSION}_linux_amd64.tar.gz" -O - | tar xz
 mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
 # Wait until the services in secsvcs, websvcs and homesvcs are started
-/root/homelab-rendered/src/certificates/acme_transfer.sh
+/root/homelab-rendered/src/base/certificates/acme_transfer.sh
 ```
 
 ## Notifications
@@ -215,7 +215,7 @@ mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
 - Generate app passwords for lldap, authelia and msmtp, [Ref](https://support.google.com/accounts/answer/185833?hl=en)
 ```bash
 # Update sops files
-/root/homelab-rendered/src/pve1/secret_update.sh secsvcs
+/root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs
 sops /root/secrets/pve1.yaml
 ```
 - Setup notifications
@@ -226,14 +226,14 @@ vim /etc/apparmor.d/usr.bin.msmtp +82
 ```
 ```
 /usr/bin/hostname PUx,
-/root/homelab-rendered/src/pve1/msmtp_password.sh PUx,
+/root/homelab-rendered/src/nodes/pve1/msmtp_password.sh PUx,
 ```
 - Install the notifier
 ```bash
 apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
 cd /root/homelab-rendered
-cp src/certificates/msmtprc /etc
-src/pve1/install_svcs.sh cert_notifier
+cp src/base/certificates/msmtprc /etc
+src/nodes/pve1/install_svcs.sh cert_notifier
 ```
 
 ## Backups
@@ -241,5 +241,5 @@ src/pve1/install_svcs.sh cert_notifier
   [Proxmox guide](./proxmox.md#backups).
 ```bash
 cd /root/homelab-rendered
-src/pve1/install_svcs.sh backup_orchestrator
+src/nodes/pve1/install_svcs.sh backup_orchestrator
 ```

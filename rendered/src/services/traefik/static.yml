@@ -1,0 +1,106 @@
+# /etc/opt/traefik/config/static/traefik.yml
+# Ref: https://doc.traefik.io/traefik/reference/static-configuration/file/
+---
+global:
+  sendAnonymousUsage: false
+  checkNewVersion: true
+api:
+  dashboard: true
+  insecure: false
+log:
+  level: WARN
+  format: common
+# One JSON line per request to stdout, so Fluent Bit's journald tailer ships it to
+# VictoriaLogs with the fields split out (src/services/fluentbit/). Traefik is the only hop
+# that sees decrypted HTTP, and the only record of LAN-side requests, which never
+# touch HAProxy. Headers are dropped except the three worth having. The Lua filter
+# redacts access_token query strings (Vaultwarden's websocket carries one) only in
+# what reaches VictoriaLogs: the node's own journal keeps the raw line.
+accessLog:
+  format: json
+  bufferingSize: 100
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: drop
+      names:
+        User-Agent: keep
+        Referer: keep
+        Remote-User: keep
+metrics:
+  prometheus:
+    entryPoint: metrics
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+providers:
+  file:
+    watch: false
+    directory: /config/dynamic
+experimental:
+  plugins:
+    rewriteHeaders:
+      modulename: "github.com/bitrvmpd/traefik-plugin-rewrite-headers"
+      version: "v0.0.1"
+entryPoints:
+  # Scraped by the node's collector over the podman network; never published.
+  metrics:
+    address: ":8082/tcp"
+  web:
+    address: ":80/tcp"
+    http:
+      aliasHeadersStrategy: delete
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+    proxyProtocol:
+      insecure: false
+      # Tailscale subnet IP needed due to https://github.com/tailscale/tailscale/issues/5573
+      trustedIPs: [12.34.56.78, 192.168.4.1, 192.168.2.1]
+    forwardedHeaders:
+      insecure: false
+      trustedIPs: [12.34.56.78, 192.168.4.1, 192.168.2.1]
+  websecure:
+    address: ":443/tcp"
+    http:
+      aliasHeadersStrategy: delete
+    proxyProtocol:
+      insecure: false
+      trustedIPs: [12.34.56.78, 192.168.4.1, 192.168.2.1]
+    forwardedHeaders:
+      insecure: false
+      trustedIPs: [12.34.56.78, 192.168.4.1, 192.168.2.1]
+  smtp:
+    address: ":465/tcp"
+    http:
+      aliasHeadersStrategy: delete
+certificatesResolvers:
+  # Consider changing cert duration from 90 days to 1 year
+  le-http-staging:
+    acme:
+      email: jdoe@gmail.com
+      storage: /certificates/acme.staging.json
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      httpChallenge:
+        entryPoint: web
+  le-http-production:
+    acme:
+      email: jdoe@gmail.com
+      storage: /certificates/acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      httpChallenge:
+        entryPoint: web
+  le-tls-staging:
+    acme:
+      email: jdoe@gmail.com
+      storage: /certificates/acme.staging.json
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      tlsChallenge: {}
+  le-tls-production:
+    acme:
+      email: jdoe@gmail.com
+      storage: /certificates/acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      tlsChallenge: {}
+...

@@ -25,7 +25,7 @@ Blocked by: auth/01, auth/02, backup-and-dr/01, backup-and-dr/09, image-updater/
 - `docs/guides/proxmox.md.j2` "PVE / PBS backups — TODO: flesh this out": `/etc/pve`
   and `/etc/proxmox-backup` tarballs, where they go (backup-and-dr/09 table), and that
   PBS's own config must be backed up *outside* PBS.
-- `src/victoriametrics/victoriametrics.container.j2`: one-line comment next to the commented
+- `src/services/victoriametrics/victoriametrics.container.j2`: one-line comment next to the commented
   `--influxListenAddr` saying PVE pushes InfluxDB line protocol to HTTP `/write` instead,
   so nobody "fixes" it (leftover from observability/05).
 

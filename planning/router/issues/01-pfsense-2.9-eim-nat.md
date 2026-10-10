@@ -35,7 +35,7 @@ of the workarounds should be needed (#18035).
    - the REST API package. Change `docs/guides/router.md.j2:187` from
      `pfSense-2.8.0-pkg-RESTAPI.pkg` to `pfSense-2.9.0-pkg-RESTAPI.pkg`, which the latest
      pfsense-api release ships.
-   Check that the `src/router/plugins/` telegraf scripts still report.
+   Check that the `src/nodes/router/plugins/` telegraf scripts still report.
 3. **NAT:**
    - Firewall → NAT → Outbound: switch to Hybrid if on Automatic. Add a rule for UDP
      from the LAN/VLAN subnets that run Tailscale, with **Endpoint-independent (Port
@@ -43,11 +43,11 @@ of the workarounds should be needed (#18035).
    - Delete the static-port outbound NAT rule for Tailscale, if present.
    - Services → UPnP IGD & PMP: **disable** the service and remove its ACLs.
 4. **Randomized client port:** the repo already has `randomize_client_port: false` in
-   `src/headscale/headscale.yaml.j2` and `headscale_private.yaml.j2`, and
+   `src/services/headscale/headscale.yaml.j2` and `headscale_private.yaml.j2`, and
    `randomizeClientPort` is not in `headscale_acl.hujson.j2`.
    - Confirm the running Headscale config matches: `grep randomize
      /etc/headscale/config.yaml` on the VPS. Also check any per-client `--port` /
-     `TS_PORT` overrides on LAN nodes (e.g. `src/headscale/tailscale.service.j2`, the
+     `TS_PORT` overrides on LAN nodes (e.g. `src/services/headscale/tailscale.service.j2`, the
      pfSense Tailscale package's listen port).
    - Remove any override that exists only to dodge the symmetric NAT.
 5. **Verify** with the same commands as step 1:

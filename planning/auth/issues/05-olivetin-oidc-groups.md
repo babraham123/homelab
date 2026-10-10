@@ -8,7 +8,7 @@ Source: upstream OliveTin/OliveTin#1103 (https://github.com/OliveTin/OliveTin/is
 ## Problem
 
 OliveTin's OAuth2 path dropped array-valued `groups` claims, so every Authelia user got
-an empty usergroup and matched no ACL. The workaround in `src/olive_tin/config.yaml.j2`
+an empty usergroup and matched no ACL. The workaround in `src/services/olive_tin/config.yaml.j2`
 (`# TODO: revert with oauth groups are fixed`) sets `defaultPermissions` to
 `view/exec/logs: true`, so **anyone who clears Authelia's `gen_access` policy can run
 every OliveTin action**, including the root-level dispatcher commands. The
@@ -22,7 +22,7 @@ until the reporter confirms it works in a release.
 1. Confirm the running image is ≥ 3000.20.0 (`Image=docker.io/jamesread/olivetin:latest-3k`
    with `AutoUpdate=registry`): `podman exec olive_tin OliveTin --version`, or check the
    footer. Update with `install_olive_tin` if older.
-2. In `src/olive_tin/config.yaml.j2`:
+2. In `src/services/olive_tin/config.yaml.j2`:
    - `defaultPermissions`: `view: false`, `exec: false`, `logs: false`; remove the TODO.
    - `admins` ACL: uncomment `addToEveryAction: true`.
    - Gaming buttons: uncomment `acls: [general]` so `command_general` users see only

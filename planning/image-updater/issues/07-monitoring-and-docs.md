@@ -9,7 +9,7 @@ Blocked by: 05, observability/01
 
 ## Change
 
-- vmalert rule in `src/vmalert/configs/homelab.yml` (created by observability/01): last
+- vmalert rule in `src/services/vmalert/configs/homelab.yml` (created by observability/01): last
   success age over 36 h. Use age, not `absent()`, so a powered-off websvcs doesn't alert.
 - Gatus external endpoints for the secsvcs and homesvcs heartbeats.
 - `docs/guides/podman.md.j2`: remove `systemctl enable --now podman-auto-update.timer`

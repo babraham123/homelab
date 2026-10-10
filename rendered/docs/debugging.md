@@ -107,12 +107,12 @@ QUADLET_UNIT_DIRS=/root/podtest \
 
 ### Test env vars and secrets with a throwaway service
 
-`test/test.container` and `test/test_service.sh` print how Podman passes environment
+`probes/test.container` and `probes/test_service.sh` print how Podman passes environment
 variables and secrets into a container.
 
 ```bash
-cp test/test_service.sh /usr/local/bin/ && chmod +x /usr/local/bin/test_service.sh
-cp test/test.container /etc/containers/systemd/
+cp probes/test_service.sh /usr/local/bin/ && chmod +x /usr/local/bin/test_service.sh
+cp probes/test.container /etc/containers/systemd/
 systemctl daemon-reload
 systemctl start test.service
 journalctl -eu test
@@ -124,7 +124,7 @@ podman run --rm -v /usr/local/bin:/test_bin \
   docker.io/library/debian:trixie-slim /test_bin/test_service.sh
 ```
 
-`test/counter.sh` loops until it receives SIGTERM/SIGINT; use it to check that a
+`probes/counter.sh` loops until it receives SIGTERM/SIGINT; use it to check that a
 container entrypoint forwards signals and shuts down cleanly.
 
 ```bash
@@ -148,7 +148,7 @@ du -sh "$(podman volume inspect --format '{{ .Mountpoint }}' systemd-vmdata)"
 
 ```bash
 # Find every tag that points at the same digest as TAG (run on pve1)
-/root/homelab-rendered/src/pve1/lookup_docker_tag.sh homeassistant/home-assistant stable
+/root/homelab-rendered/src/nodes/pve1/lookup_docker_tag.sh homeassistant/home-assistant stable
 
 # Preview what AutoUpdate=registry would pull
 podman auto-update --dry-run
@@ -169,10 +169,10 @@ Building an image inside a quadlet: see
 ## Secrets
 
 Node secrets are an AGE-encrypted YAML file, decrypted on demand by helper scripts
-in `/root/homelab-rendered/src/podman/` (as root).
+in `/root/homelab-rendered/src/base/podman/` (as root).
 
 ```bash
-cd /root/homelab-rendered/src/podman
+cd /root/homelab-rendered/src/base/podman
 ./list_secrets.sh                       # all secret names
 ./get_secret.sh lldap_admin_password    # one value
 SECRET_ID=ID ./get_secret_by_id.sh      # resolve a podman secret ID
@@ -223,7 +223,7 @@ curl -H "Host: www.janedoe.com" http://nginx:8100/  # skip Traefik
 curl -vk --resolve www.janedoe.com:443:127.0.0.1 https://www.janedoe.com
 
 # Basic auth
-curl -u "admin:$(/root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_password)" \
+curl -u "admin:$(/root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_password)" \
   https://metrics.janedoe.com/api/v1/query?query=up
 
 # Throwaway web server to test a route or firewall rule
@@ -326,13 +326,13 @@ podman rm -f systemd-test
 ```
 
 Test the same thing from an application library's point of view (Node, matching
-Zigbee2MQTT) with `test/mdns.js`:
+Zigbee2MQTT) with `probes/mdns.js`:
 
 ```bash
 podman run --replace --rm -it --name=node-test --network=systemd-net \
   docker.io/library/node:lts-trixie-slim /bin/bash
 npm install -g multicast-dns bonjour-service
-NODE_PATH=$(npm root -g) node   # paste in test/mdns.js
+NODE_PATH=$(npm root -g) node   # paste in probes/mdns.js
 ```
 
 Don't leave `avahi-daemon` running on the container network: it answers and consumes
@@ -470,7 +470,7 @@ openssl verify -CAfile /root/ca/intermediate/certs/ca-chain.cert.pem CERT.pem
 
 ### Signing a cert manually with the internal CA
 
-Normally `src/certificates/self_signed_cert_gen.sh` does this. To sign one CSR by
+Normally `src/base/certificates/self_signed_cert_gen.sh` does this. To sign one CSR by
 hand (on pve1; the CA passphrase is stored nowhere, so type it):
 
 ```bash
@@ -530,10 +530,10 @@ LLDAP web UI login issues: [lldap#373](https://github.com/lldap/lldap/issues/373
 
 When an app's SSO login fails, check both the app's logs and Authelia's, then:
 
-- `redirect_uris` for the client in `src/authelia/configuration.yml.j2` exactly match
+- `redirect_uris` for the client in `src/services/authelia/configuration.yml.j2` exactly match
   what the app sends.
-- Client ID and secret match on both sides (`/root/homelab-rendered/src/podman/get_secret.sh APP_oidc_id`,
-  `/root/homelab-rendered/src/podman/get_secret.sh APP_oidc_secret`).
+- Client ID and secret match on both sides (`/root/homelab-rendered/src/base/podman/get_secret.sh APP_oidc_id`,
+  `/root/homelab-rendered/src/base/podman/get_secret.sh APP_oidc_secret`).
 - The app trusts the cert served at `auth.janedoe.com` (see
   [Certificates and TLS](#certificates-and-tls)).
 - Authelia's [OIDC FAQ](https://www.authelia.com/integration/openid-connect/frequently-asked-questions/)
@@ -549,7 +549,7 @@ then plain ForwardAuth. LLDAP has
 When a client (e.g. Gatus using client-credentials) fails against Authelia's token
 endpoint and logs aren't enough, capture and decrypt the traffic. Modern TLS uses
 forward secrecy, so the server key alone can't decrypt it; the client must export
-session keys via `SSLKEYLOGFILE`. `test/oauth.go.j2` is a minimal Go client that
+session keys via `SSLKEYLOGFILE`. `probes/oauth.go.j2` is a minimal Go client that
 does this.
 
 ```bash
@@ -557,7 +557,7 @@ does this.
 go mod init oauth && go get golang.org/x/oauth2 golang.org/x/oauth2/clientcredentials
 go build -o oauth
 tcpdump -i vmbr0 host 12.34.56.78 -w capture.pcap &
-CLIENT_ID="$(/root/homelab-rendered/src/podman/get_secret.sh gatus_oidc_id)" CLIENT_SECRET="$(/root/homelab-rendered/src/podman/get_secret.sh gatus_oidc_secret)" ./oauth
+CLIENT_ID="$(/root/homelab-rendered/src/base/podman/get_secret.sh gatus_oidc_id)" CLIENT_SECRET="$(/root/homelab-rendered/src/base/podman/get_secret.sh gatus_oidc_secret)" ./oauth
 kill %1
 
 # Decrypt with the exported keys
@@ -575,7 +575,7 @@ Useful to iterate on `configuration.yml` quickly. Download a release binary, wri
 each secret to a file, and point the `*_FILE` env vars at them:
 
 ```bash
-/root/homelab-rendered/src/podman/get_secret.sh authelia_jwt_secret | head -c -1 > authelia_jwt_secret
+/root/homelab-rendered/src/base/podman/get_secret.sh authelia_jwt_secret | head -c -1 > authelia_jwt_secret
 # ...one file per secret below; edit certificates_directory in configuration.yml
 AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE=authelia_jwt_secret \
 AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE=lldap_admin_password \
@@ -587,7 +587,7 @@ AUTHELIA_SERVER_DISABLE_HEALTHCHECK=true \
   ./authelia-linux-amd64 --config configuration.yml
 ```
 
-Match the env var list to the `Secret=` lines in `src/authelia/authelia.container.j2`.
+Match the env var list to the `Secret=` lines in `src/services/authelia/authelia.container.j2`.
 
 ## Databases
 
@@ -628,8 +628,8 @@ Metrics and logs require basic auth (`admin` + `victoriametrics_admin_password` 
 `victorialogs_admin_password`).
 
 ```bash
-VM_AUTH="admin:$(/root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_password)"
-VL_AUTH="admin:$(/root/homelab-rendered/src/podman/get_secret.sh victorialogs_admin_password)"
+VM_AUTH="admin:$(/root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_password)"
+VL_AUTH="admin:$(/root/homelab-rendered/src/base/podman/get_secret.sh victorialogs_admin_password)"
 
 # Instant query
 curl -u "$VM_AUTH" 'https://metrics.janedoe.com/api/v1/query' --data-urlencode 'query=up == 0'
@@ -663,15 +663,15 @@ curl -s -u ":TOKEN" https://push.janedoe.com/TOPIC/json
 curl -u ":TOKEN" -d "hello" https://push.janedoe.com/TOPIC
 ```
 
-ntfy also accepts email-to-topic over SMTP. `test/email.txt.j2` is a raw SMTP
+ntfy also accepts email-to-topic over SMTP. `probes/email.txt.j2` is a raw SMTP
 session. Traefik exposes it only as SMTPS on 465; plain SMTP on port 25 is reachable
 only from `systemd-net` on secsvcs:
 
 ```bash
-openssl s_client -connect push.janedoe.com:465 -quiet < test/email.txt
+openssl s_client -connect push.janedoe.com:465 -quiet < probes/email.txt
 # Plain SMTP, from secsvcs
 podman run -i --rm --net systemd-net docker.io/nicolaka/netshoot:latest \
-  nc ntfy 25 < test/email.txt
+  nc ntfy 25 < probes/email.txt
 ```
 
 Test outbound mail (used by cert_notifier and other alerts). msmtp is configured

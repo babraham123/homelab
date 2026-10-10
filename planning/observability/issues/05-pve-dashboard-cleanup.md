@@ -11,7 +11,7 @@ The maintainer is right about `proxmox.json`: it queries `cpustat_cpus`,
 `memory_memtotal`, `system_used` etc., which come from PVE's built-in **Metric Server →
 InfluxDB** push (`docs/guides/proxmox.md.j2:264`). VictoriaMetrics accepts InfluxDB line
 protocol on its main HTTP port at `/write`, which is why it works even though
-`--influxListenAddr` is commented out in `src/victoriametrics/victoriametrics.container.j2`.
+`--influxListenAddr` is commented out in `src/services/victoriametrics/victoriametrics.container.j2`.
 
 `pve.json` was a different dashboard: it queried `pve_guest_info`, `pve_up`,
 `pve_cpu_usage_limit`, `pve_memory_*` — the metric family of `prometheus-pve-exporter`,

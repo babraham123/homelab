@@ -18,7 +18,7 @@ Consequences:
 
 - Recovery (09's guide) depends on a physical copy being current and at hand.
 - `docs/debugging.md#remote-sudo-non-interactively` pipes `<host>_root_pswd` from
-  `/root/secrets/pve1.yaml`, but those keys aren't in `src/pve1/secrets_template.yaml`
+  `/root/secrets/pve1.yaml`, but those keys aren't in `src/nodes/pve1/secrets_template.yaml`
   and, per the maintainer, the passwords aren't in SOPS at all. The documented recipe
   doesn't work.
 

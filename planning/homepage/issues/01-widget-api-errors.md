@@ -11,11 +11,11 @@ Three widgets on the homepage dashboard show API errors:
 
 | Widget | Config | Secrets it uses |
 |---|---|---|
-| Proxmox | `src/homepage/proxmox.yaml.j2` (the per-service `proxmox` widgets in `services.yaml.j2` are commented out) | `DASH_PVE1_TOKEN` ← `dash_pve1_api_token` |
+| Proxmox | `src/services/homepage/proxmox.yaml.j2` (the per-service `proxmox` widgets in `services.yaml.j2` are commented out) | `DASH_PVE1_TOKEN` ← `dash_pve1_api_token` |
 | Google Calendar (iCal) | `services.yaml.j2` → `Calendar` → `Home events` | `HOME_ICAL_URL` ← `home_ical_url` |
-| Weather (Open-Meteo) | `src/homepage/widgets.yaml.j2` → `openmeteo` | `HOME_LATITUDE`, `HOME_LONGITUDE` ← `home_latitude`, `home_longitude` |
+| Weather (Open-Meteo) | `src/services/homepage/widgets.yaml.j2` → `openmeteo` | `HOME_LATITUDE`, `HOME_LONGITUDE` ← `home_latitude`, `home_longitude` |
 
-Podman secrets are mapped to env vars in `src/homepage/homepage.container.j2`.
+Podman secrets are mapped to env vars in `src/services/homepage/homepage.container.j2`.
 
 ## Leading hypothesis
 
@@ -28,7 +28,7 @@ three failing together. Confirm this before looking at other causes.
 ## Other causes to rule out
 
 - Secret values: empty or stale on websvcs (`podman secret inspect --showsecret`; the
-  template in `src/websvcs/secrets_template.yaml` defaults to `""`).
+  template in `src/nodes/websvcs/secrets_template.yaml` defaults to `""`).
 - Proxmox: `api_ro@pam!homepage` token missing, expired, or missing `PVEAuditor`; TLS
   verification of `pve1.<site>:8006` from inside the container; `proxmox.yaml` only has
   pve1 (no pve2).
@@ -53,7 +53,7 @@ not a one-liner.)_
 
 ## Comments
 
-- 2026-09-27: step 3 implemented, not yet deployed or validated. In `src/homepage/`, every
+- 2026-09-27: step 3 implemented, not yet deployed or validated. In `src/services/homepage/`, every
   env target and placeholder is now `HOMEPAGE_VAR_<old name>` (for example
   `HOMEPAGE_VAR_HOME_LATITUDE`, `HOMEPAGE_VAR_DASH_PVE1_TOKEN`). The podman secret names
   are unchanged, so no secrets need recreating. Home Assistant's own `HOME_LATITUDE` /

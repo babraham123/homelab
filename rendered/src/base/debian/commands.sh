@@ -1,0 +1,52 @@
+#!/bin/bash
+# Usage:
+#   src/base/debian/commands.sh CMD
+
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+set -euo pipefail
+cd /home/autoadmin
+
+case $1 in
+  install_ssh_ca)
+    # Moves SSH public keys into their respective locations and restarts sshd.
+    # First, so a stale upload without it fails before anything is moved
+    install -m 644 /root/homelab-rendered/src/base/debian/ssh_config /etc/ssh/ssh_config.d/homelab.conf
+
+    chown root:root ca_ssh_key.pub
+    mv ca_ssh_key.pub /etc/ssh
+
+    chown root:root ssh_host_key_cert.pub
+    mv ssh_host_key_cert.pub /etc/ssh
+
+    chown root:root known_hosts
+    mv known_hosts /etc/ssh/ssh_known_hosts
+
+    systemctl restart sshd
+    systemctl status sshd --no-pager
+    ;;
+  install_dispatcher)
+    # This runs inside dispatcher.sh, which bash reads incrementally. Overwriting
+    # it in place makes bash resume at the old byte offset in the new file; a
+    # rename gives the new script its own inode and leaves the running one intact.
+    cp "/root/homelab-rendered/src/nodes/$(hostname)/dispatcher.sh" /usr/local/bin/dispatcher.sh.new
+    mv /usr/local/bin/dispatcher.sh.new /usr/local/bin/dispatcher.sh
+    cp /root/homelab-rendered/src/base/debian/autoadmin_sshd.conf /etc/ssh/sshd_config.d
+    cp "/root/homelab-rendered/src/nodes/$(hostname)/sudoers" /etc/sudoers.d/dispatcher
+
+    systemctl restart sshd
+    systemctl status sshd --no-pager
+    ;;
+  install_ca)
+    chown root:root ca-chain.cert.pem
+    mv ca-chain.cert.pem /etc/ssl/certs/janedoe.com.ca_chain.cert.pem
+    ;;
+  copy_acme_certs)
+    # Only for hosts running traefik
+    cp /etc/opt/traefik/certificates/acme.json /home/autoadmin/acme.json
+    chown autoadmin:autoadmin /home/autoadmin/acme.json
+    ;;
+  *)
+    echo "error: unknown file type: $1" >&2
+    exit 1
+    ;;
+esac

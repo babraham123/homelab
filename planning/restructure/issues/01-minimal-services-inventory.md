@@ -50,9 +50,9 @@ pve1: ...
 `jinjanate` accepts more than one data file: `jinjanate -o out tmpl vars.yml src/nodes.yml`.
 So `render_src.sh` drops the `{ head vars.yml; parse_*.sh ...; } > all_vars.yml`
 assembly entirely and templates loop over `nodes.secsvcs.subdomains` etc. Templates to
-convert: `src/dns/unbound.conf.j2`, `src/haproxy/haproxy.cfg.j2`,
-`src/<node>/sudoers.j2`, `src/gatus/config.yaml.j2` (endpoints loop), and
-`src/<node>/dispatcher.sh` becomes `dispatcher.sh.j2` with the case block generated.
+convert: `src/services/dns/unbound.conf.j2`, `src/services/haproxy/haproxy.cfg.j2`,
+`src/nodes/<node>/sudoers.j2`, `src/services/gatus/config.yaml.j2` (endpoints loop), and
+`src/nodes/<node>/dispatcher.sh` becomes `dispatcher.sh.j2` with the case block generated.
 `routes.yml`, quadlets, `install_svcs.sh` stay hand-written.
 
 ## Validation (in `render_src.sh` / pre-commit)

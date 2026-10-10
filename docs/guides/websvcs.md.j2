@@ -14,7 +14,7 @@ scp initdb.sql manualadmin@secsvcs:/home/manualadmin
 ssh manualadmin@secsvcs
 sudo su
 container=$(podman container ls | grep postgres | awk '{print $1}')
-cat initdb.sql | podman exec -i -e PGPASSWORD="$(/root/homelab-rendered/src/podman/get_secret.sh guacamole_pg_password)" --user 70 "$container" psql -U guacamole -d guacamole
+cat initdb.sql | podman exec -i -e PGPASSWORD="$(/root/homelab-rendered/src/base/podman/get_secret.sh guacamole_pg_password)" --user 70 "$container" psql -U guacamole -d guacamole
 rm initdb.sql
 exit
 exit
@@ -25,22 +25,22 @@ exit
 - Install and start containers
 ```bash
 cd /root/homelab-rendered
-src/websvcs/install_svcs.sh traefik
-src/websvcs/install_svcs.sh vmagent
-src/websvcs/install_svcs.sh nginx
-src/websvcs/install_svcs.sh homepage
-src/websvcs/install_svcs.sh isso
-src/websvcs/install_svcs.sh guacd
-src/websvcs/install_svcs.sh guacamole
-# src/websvcs/install_svcs.sh archivebox
+src/nodes/websvcs/install_svcs.sh traefik
+src/nodes/websvcs/install_svcs.sh vmagent
+src/nodes/websvcs/install_svcs.sh nginx
+src/nodes/websvcs/install_svcs.sh homepage
+src/nodes/websvcs/install_svcs.sh isso
+src/nodes/websvcs/install_svcs.sh guacd
+src/nodes/websvcs/install_svcs.sh guacamole
+# src/nodes/websvcs/install_svcs.sh archivebox
 
-# src/websvcs/install_svcs.sh go2rtc
-# src/websvcs/install_svcs.sh piper
-# src/websvcs/install_svcs.sh whisper
-# src/websvcs/install_svcs.sh openwakeword
+# src/nodes/websvcs/install_svcs.sh go2rtc
+# src/nodes/websvcs/install_svcs.sh piper
+# src/nodes/websvcs/install_svcs.sh whisper
+# src/nodes/websvcs/install_svcs.sh openwakeword
 
-# src/websvcs/install_svcs.sh finance_exporter
-src/websvcs/install_svcs.sh fluentbit
+# src/nodes/websvcs/install_svcs.sh finance_exporter
+src/nodes/websvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
 systemctl restart mdns_repeater
@@ -69,7 +69,7 @@ systemctl restart guacamole
 - Restore SSO-only login from the rendered quadlet
 ```bash
 cd /root/homelab-rendered
-src/websvcs/install_svcs.sh guacamole
+src/nodes/websvcs/install_svcs.sh guacamole
 exit
 ```
 - Log in through Authelia and confirm that Settings >> Connections >> New Connection appears
@@ -83,7 +83,7 @@ exit
   - Record the secret
 ```bash
 ssh manualadmin@pve1
-sudo /root/homelab-rendered/src/pve1/secret_update.sh websvcs
+sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs
 ```
   - Go to Permissions >> Add >> API Token Permission
   - path = /, token = api_ro@..., role = PVEAuditor, propagate = check

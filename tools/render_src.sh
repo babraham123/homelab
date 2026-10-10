@@ -10,7 +10,7 @@
 # https://github.com/kpfleming/jinjanator
 # Note:
 # The *.j2.j2 extension indicates that the file will go thru a second pass of jinjanate,
-# usually during service startup. See src/podman/render_secrets.sh for an example.
+# usually during service startup. See src/base/podman/render_secrets.sh for an example.
 
 set -euo pipefail
 
@@ -74,10 +74,10 @@ cat > "${vars_dir}/images.j2" <<'EOF'
 EOF
 jinjanate --quiet "${vars_dir}/images.j2" "$all_vars" | \
   while read -r node svc container image; do
-    quadlet=$(awk -v c="${svc})" '$1 == c {f=1; next} f && /;;/ {exit} f' "src/${node}/install_svcs.sh" | \
+    quadlet=$(awk -v c="${svc})" '$1 == c {f=1; next} f && /;;/ {exit} f' "src/nodes/${node}/install_svcs.sh" | \
       grep -oE "[a-zA-Z0-9_./-]+/${container}\.container" | head -n 1 || true)
     [ -n "$quadlet" ] || \
-      fail "the ${svc} case in src/${node}/install_svcs.sh copies no ${container}.container (src/nodes.yml)"
+      fail "the ${svc} case in src/nodes/${node}/install_svcs.sh copies no ${container}.container (src/nodes.yml)"
     # A *.container.j2.j2 source is still *.container.j2 until install time
     file="src/${quadlet}"
     [ -f "$file" ] || file+=".j2"
@@ -91,7 +91,7 @@ cases() { sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$1" | sort -u; }
 inventory() { node="$1" yq "$2" src/nodes.yml; }
 
 for node in $(yq '.nodes | keys | .[]' src/nodes.yml); do
-  install_file="src/${node}/install_svcs.sh"
+  install_file="src/nodes/${node}/install_svcs.sh"
   actual=""
   [ -f "$install_file" ] && actual=$(cases "$install_file")
   listed=$(inventory "$node" '.nodes[strenv(node)].services // {} | keys | .[]' | sort -u)
@@ -99,8 +99,8 @@ for node in $(yq '.nodes | keys | .[]' src/nodes.yml); do
     fail "src/nodes.yml ${node}.services doesn't match the cases in ${install_file}"
 
   for svc in $(inventory "$node" '.nodes[strenv(node)].debian_services // [] | .[]'); do
-    cases src/debian/install_svcs.sh | grep -qx "$svc" || \
-      fail "src/debian/install_svcs.sh has no ${svc} case (src/nodes.yml ${node}.debian_services)"
+    cases src/base/debian/install_svcs.sh | grep -qx "$svc" || \
+      fail "src/base/debian/install_svcs.sh has no ${svc} case (src/nodes.yml ${node}.debian_services)"
   done
 
   inventory "$node" '.nodes[strenv(node)].commands // [] | .[] | select(has("script")) | .name + " " + .script' | \
@@ -118,11 +118,11 @@ dups=$(yq "$subdomains" src/nodes.yml | sort | uniq -d)
 # websvcs is the default route and needs no entries.
 for node in secsvcs homesvcs; do
   # shellcheck disable=SC2016 # the backticks are literal regex text
-  routed=$(yq --yaml-fix-merge-anchor-to-spec=true '.http.routers[].rule' "src/${node}/traefik/routes.yml" | \
+  routed=$(yq --yaml-fix-merge-anchor-to-spec=true '.http.routers[].rule' "src/nodes/${node}/traefik/routes.yml" | \
     grep -oE 'Host\(`[^.`]+\.' | sed -E 's/^Host\(`//; s/\.$//' | sort -u)
   listed=$(inventory "$node" '.nodes[strenv(node)].services[] | select(has("subdomain")) | .subdomain' | sort -u)
   [[ "$routed" == "$listed" ]] || \
-    fail "src/nodes.yml ${node} subdomains don't match the Host() rules in src/${node}/traefik/routes.yml"
+    fail "src/nodes.yml ${node} subdomains don't match the Host() rules in src/nodes/${node}/traefik/routes.yml"
 done
 
 find . -name .DS_Store -delete

@@ -2,7 +2,7 @@
 # websvcs backup: the config and small state of every service, staged under
 # /var/opt/backups for pve1's backup_orchestrator to pull.
 # Usage:
-#   src/websvcs/backup.sh
+#   src/nodes/websvcs/backup.sh
 # Not staged, on purpose: /var/opt/archivebox (large, re-archivable), the chromium
 # volume (browser profile), the whisper/piper/openwakeword model caches (downloaded on
 # start), and the media array under /srv/media and its member disks:
@@ -11,8 +11,8 @@
 # kept here.
 
 set -euo pipefail
-# shellcheck source=src/debian/backup_lib.sh
-source /root/homelab-rendered/src/debian/backup_lib.sh
+# shellcheck source=src/base/debian/backup_lib.sh
+source /root/homelab-rendered/src/base/debian/backup_lib.sh
 
 stage_init
 

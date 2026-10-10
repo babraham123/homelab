@@ -4,11 +4,11 @@
 # for pve1's backup_orchestrator to pull. The OS itself is rebuilt from
 # docs/guides/vpnsvcs.md; Linode's own backups cover the rest.
 # Usage:
-#   src/vpnsvcs/backup.sh
+#   src/nodes/vpnsvcs/backup.sh
 
 set -euo pipefail
-# shellcheck source=src/debian/backup_lib.sh
-source /root/homelab-rendered/src/debian/backup_lib.sh
+# shellcheck source=src/base/debian/backup_lib.sh
+source /root/homelab-rendered/src/base/debian/backup_lib.sh
 
 command -v sqlite3 > /dev/null || { echo "error: sqlite3 is not installed" >&2; exit 1; }
 stage_init

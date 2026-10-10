@@ -5,7 +5,7 @@
 # there, and sends the collection to PBS. Nothing here needs to be an archive: plain
 # trees dedup better in PBS than tarballs do.
 # Usage, from a backup.sh running as root:
-#   source /root/homelab-rendered/src/debian/backup_lib.sh
+#   source /root/homelab-rendered/src/base/debian/backup_lib.sh
 #   stage_init [OWNER]           # empties the stage; OWNER defaults to autoadmin, the
 #                                # user pve1 pulls as
 #   dump_dir NAME                # prints dumps/NAME, created

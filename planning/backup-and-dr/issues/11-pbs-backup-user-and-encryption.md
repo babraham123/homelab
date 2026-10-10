@@ -27,7 +27,7 @@ It's also unknown whether the storage uses a client-side encryption key.
      need, and grant nothing more.
 2. **Switch the storage** on pve1 to the new identity
    (`pvesm set pbs2 --username ... --password ...`), and store the secret in
-   `/root/secrets/pve1.yaml` (`src/pve1/secrets_template.yaml`).
+   `/root/secrets/pve1.yaml` (`src/nodes/pve1/secrets_template.yaml`).
 3. **Document** the setup in `docs/guides/proxmox.md.j2` and step 3 of
    `docs/guides/pve1_recovery.md.j2`, replacing `USER@REALM`.
 
@@ -77,7 +77,7 @@ rejected: the datastore sits on the same box as most of the VMs.
 **Identity:** user `pve1@pbs`, token `pve1@pbs!backup`, `DatastoreBackup` on
 `/datastore/backup1/pve1` and `/datastore/backup1/files` (the new namespace for the
 host backups; retention is per namespace). The secret is `pbs2_backup_token` in
-`/root/secrets/pve1.yaml` (`src/pve1/secrets_template.yaml`); the orchestrator reads
+`/root/secrets/pve1.yaml` (`src/nodes/pve1/secrets_template.yaml`); the orchestrator reads
 it with sops for `PBS_PASSWORD`. pve2's storage stays `root@pam`: PBS is local to it.
 
 Code side done: `secrets_template.yaml`, the orchestrator's `step_upload`,

@@ -3,13 +3,13 @@
 # orchestrator copies it into /root/backups/pve1 like any other node's stage), then
 # backs up every VM on this host to PBS through the API.
 # Usage:
-#   src/pve1/backup.sh
+#   src/nodes/pve1/backup.sh
 # pve1 is the one host nothing else can restore: the AGE key, private CA, SSH CA and
 # every secrets file live here, outside any VM. docs/guides/pve1_recovery.md lists them.
 
 set -euo pipefail
-# shellcheck source=src/debian/backup_lib.sh
-source /root/homelab-rendered/src/debian/backup_lib.sh
+# shellcheck source=src/base/debian/backup_lib.sh
+source /root/homelab-rendered/src/base/debian/backup_lib.sh
 
 # Root owned: the pull is local, so nothing here needs to be readable by autoadmin.
 stage_init root

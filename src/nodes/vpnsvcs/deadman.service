@@ -7,4 +7,4 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/root/homelab-rendered/src/vpnsvcs/deadman.sh
+ExecStart=/root/homelab-rendered/src/nodes/vpnsvcs/deadman.sh

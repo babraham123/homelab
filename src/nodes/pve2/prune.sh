@@ -5,7 +5,7 @@
 # Retention lives here, not in the PBS UI. One job per namespace because prune jobs
 # can't tell images from host backups otherwise.
 # Usage:
-#   src/pve2/prune.sh
+#   src/nodes/pve2/prune.sh
 
 set -euo pipefail
 

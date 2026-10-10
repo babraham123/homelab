@@ -17,7 +17,7 @@ backups=/root/backups
 metrics=/var/lib/node_exporter/textfile_collector/homelab_backup.prom
 ssh_opts=(-o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
 ssh=(ssh "${ssh_opts[@]}")
-is_reachable=/root/homelab-rendered/src/debian/is_reachable.sh
+is_reachable=/root/homelab-rendered/src/base/debian/is_reachable.sh
 keyfile=/root/secrets/pbs_client.key
 
 # In step order. The VMs first, so their dumps are on the VM disks before the hosts'
@@ -46,7 +46,7 @@ pull() {
   rm -rf "${dest}/files"
   install -d -m 700 "$dest" "${dest}/dumps"
   if [[ $node == pve1 ]]; then
-    /root/homelab-rendered/src/pve1/backup.sh
+    /root/homelab-rendered/src/nodes/pve1/backup.sh
     cp -a "${src}/files" "${dest}/files"
     cp -a "${src}/dumps/." "${dest}/dumps/"
     find "${src}/dumps" -type f -delete

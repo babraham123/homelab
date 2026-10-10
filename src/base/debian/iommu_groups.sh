@@ -1,7 +1,7 @@
 #!/bin/bash
 # Display the IOMMU Groups the PCI devices are assigned to.
 # Usage:
-#   src/debian/iommu_groups.sh
+#   src/base/debian/iommu_groups.sh
 set -euo pipefail
 shopt -s nullglob
 

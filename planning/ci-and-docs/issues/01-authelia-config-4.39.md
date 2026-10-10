@@ -9,7 +9,7 @@ Source: review finding 32 (maintainer wants the full annotated template kept)
 
 - Fetch the 4.39.x `config.template.yml` from the Authelia repo at the tag matching
   `Image=docker.io/authelia/authelia:4.39`.
-- Diff the current `src/authelia/configuration.yml.j2` against the *4.38.10* template
+- Diff the current `src/services/authelia/configuration.yml.j2` against the *4.38.10* template
   to extract exactly your customisations (uncommented keys, the `{% raw %}` blocks,
   `access_control`, OIDC clients, `{{ site.url }}` substitutions).
 - Apply those customisations onto the 4.39 template; resolve renamed/deprecated keys
@@ -24,7 +24,7 @@ Source: review finding 32 (maintainer wants the full annotated template kept)
 - Confirmed 2026-09-26: `Image=docker.io/authelia/authelia:4.39` vs `# v4.38.10` header.
   Add a render-time check (next to the duplicate-IP check, or in ci-and-docs/08) that the
   header version's major.minor equals the `Image=` tag, so the two can't drift again.
-- Keep the upstream template as a pristine copy (`src/authelia/config.template.yml`,
+- Keep the upstream template as a pristine copy (`src/services/authelia/config.template.yml`,
   untracked by the render via `.fdignore`) so the next bump is a three-way merge
   (`git merge-file`) instead of a hand diff.
 - Pin `Image=` to the full patch tag (`4.39.x`) so "matching template" is unambiguous;
@@ -48,7 +48,7 @@ Done 2026-09-27, merged onto the v4.39.28 template.
   `site.name` (as in `vars.template.yml`) broke the YAML.
 - `Image=` stays on the `4.39` minor tag (maintainer decision): patch releases don't change
   the template, and `AutoUpdate=registry` keeps picking them up.
-- Pristine upstream copy at `src/authelia/config.template.yml`. It isn't in `.fdignore`:
+- Pristine upstream copy at `src/services/authelia/config.template.yml`. It isn't in `.fdignore`:
   that only affects `*.j2` rendering, and a non-`.j2` file is copied unrendered anyway.
 - Dropped (maintainer decision): the header-vs-image render check and the
   `docs/maintenance.md` procedure. For the next bump: comment out every uncommented key

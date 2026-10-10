@@ -48,7 +48,7 @@ route:
   # All the above attributes are inherited by all child routes and can
   # overwritten on each.
   routes:
-    # Watchdog always fires (src/vmalert/configs/pipeline.yml); the VPS's deadman.sh
+    # Watchdog always fires (src/services/vmalert/configs/pipeline.yml); the VPS's deadman.sh
     # looks for it in the API, so it must be present here and never delivered.
     - matchers:
         - alertname="Watchdog"

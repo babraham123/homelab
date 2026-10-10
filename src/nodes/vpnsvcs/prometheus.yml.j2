@@ -21,7 +21,7 @@ scrape_configs:
     metrics_path: /api/v1/metrics/prometheus
     relabel_configs: *host
   - job_name: 'haproxy'
-    # The built-in exporter (src/haproxy/haproxy.cfg.j2)
+    # The built-in exporter (src/services/haproxy/haproxy.cfg.j2)
     static_configs:
       - targets: ['{{ vpnsvcs.container_subnet }}.1:8405']
     metrics_path: /metrics
@@ -31,7 +31,7 @@ scrape_configs:
       - target_label: host
         replacement: vpnsvcs
   - job_name: 'headscale'
-    # metrics_listen_addr in src/headscale/headscale.yaml.j2
+    # metrics_listen_addr in src/services/headscale/headscale.yaml.j2
     static_configs:
       - targets: ['{{ vpnsvcs.container_subnet }}.1:9090']
     metrics_path: /metrics

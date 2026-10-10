@@ -3,9 +3,9 @@
 How traffic moves: physical topology, VLANs, DNS, and the three-tier ingress chain.
 All addresses below are the placeholder values from `vars.template.yml`.
 
-The ground-truth configs are `src/dns/unbound.conf.j2`,
-`src/haproxy/haproxy.cfg.j2`, the per-node
-`src/<node>/traefik/` directories, and [the router guide](guides/router.md).
+The ground-truth configs are `src/services/dns/unbound.conf.j2`,
+`src/services/haproxy/haproxy.cfg.j2`, the per-node
+`src/nodes/<node>/traefik/` directories, and [the router guide](guides/router.md).
 
 ## Physical and logical topology
 
@@ -132,7 +132,7 @@ router boundaries, which VLAN segmentation otherwise breaks. Three pieces bridge
 - A firewall rule allows UDP/5353 to the multicast range across the bridged VLANs.
 
 Gotcha: `avahi-daemon` must be disabled where `mdns_repeater` runs; it silently
-intercepts queries first. `test/mdns.js` is a probe script for verifying which service
+intercepts queries first. `probes/mdns.js` is a probe script for verifying which service
 types are visible from a given VLAN.
 
 ## Ingress: the three-tier chain

@@ -7,7 +7,7 @@ Source: review finding 24
 
 ## Change
 
-In `src/gatus/config.yaml.j2` add a third anchor:
+In `src/services/gatus/config.yaml.j2` add a third anchor:
 
 ```yaml
 tier1-endpoint: &tier1
@@ -29,7 +29,7 @@ so DNS generation is unaffected.
 
 ## Improvements
 
-- Confirmed 2026-09-26: `src/gatus/config.yaml.j2` has no `auth.SITE` endpoint at all.
+- Confirmed 2026-09-26: `src/services/gatus/config.yaml.j2` has no `auth.SITE` endpoint at all.
   Since every other endpoint's check passes through Authelia's ForwardAuth, an Authelia
   outage shows up as *every* endpoint failing; add a `[BODY].status == ok` condition on
   `/api/health` and route its failure at `severity: critical` with an inhibition rule in
@@ -44,12 +44,12 @@ so DNS generation is unaffected.
 - 2026-09-27: restructure/01 generates the internal endpoints from
   `src/nodes.yml` (`uptime`/`uptime_path` on each service); `parse_uptime_urls.sh` is
   gone. Add a per-service attribute (e.g. `uptime_tier: 1`) and pick the anchor in the
-  `src/gatus/config.yaml.j2` loop. `auth` needs `uptime` + `uptime_path: /api/health` on
+  `src/services/gatus/config.yaml.j2` loop. `auth` needs `uptime` + `uptime_path: /api/health` on
   secsvcs `authelia`, which also adds it to the Gatus OIDC client's audience.
 - 2026-10-07: done through the inventory: `uptime_tier: 1` on the three Traefik
   dashboards, `authelia` (`/api/health`, `uptime_conditions: ['[BODY].status == OK']`),
   home, push, dash and graph; `src/nodes.jinja` carries `tier` and `conditions`, and
-  `src/gatus/config.yaml.j2` picks the `*tier1` anchor (2 m). The inhibition rule
+  `src/services/gatus/config.yaml.j2` picks the `*tier1` anchor (2 m). The inhibition rule
   (authelia `EndpointDown` silences the other `EndpointDown`s) is in Alertmanager.
   No per-endpoint `alerting` block: Gatus has no notifier here, `EndpointDown` in
   vmalert is the alert (observability/01). `vault.SITE/alive` waits for vaultwarden/01.

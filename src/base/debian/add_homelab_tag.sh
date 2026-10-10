@@ -1,7 +1,7 @@
 #!/bin/bash
 # Prefixes the service's description with "Homelab: "
 # Usage:
-#   src/debian/add_homelab_tag.sh SYSTEMD_FILE.service
+#   src/base/debian/add_homelab_tag.sh SYSTEMD_FILE.service
 set -euo pipefail
 
 if grep -q "Description=\"Homelab: " "$1"; then

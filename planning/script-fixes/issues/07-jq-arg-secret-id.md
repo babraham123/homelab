@@ -7,7 +7,7 @@ Source: review finding 31
 
 ## Change
 
-`src/podman/get_secret_by_id.sh:8`:
+`src/base/podman/get_secret_by_id.sh:8`:
 
 ```bash
 SECRET_NAME=$(jq -r --arg id "$SECRET_ID" '.idToName[$id]' /var/lib/containers/storage/secrets/secrets.json)
@@ -20,7 +20,7 @@ fail if `SECRET_NAME` is `null`. Same `--arg`/quoting review for `get_secret.sh`
 
 ## Answer
 
-- `src/podman/get_secret_by_id.sh`: exits 1 if `SECRET_ID` is unset or empty, looks up the
+- `src/base/podman/get_secret_by_id.sh`: exits 1 if `SECRET_ID` is unset or empty, looks up the
   name with `jq --arg id "$SECRET_ID" '.idToName[$id]'`, and exits 1 with
   `no secret with ID <id>` when the lookup returns `null`.
 - `get_secret_by_id.sh` and `get_secret.sh` now pass the secret name to yq as

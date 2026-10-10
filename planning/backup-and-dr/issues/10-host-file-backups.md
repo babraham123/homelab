@@ -26,7 +26,7 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
 ## Change
 
 1. **Inventory.** For each node in `src/nodes.yml`, list the paths worth keeping, with a
-   one-line why per path. Derive them from `src/<node>/install_svcs.sh`, the guides, and
+   one-line why per path. Derive them from `src/nodes/<node>/install_svcs.sh`, the guides, and
    09's tables. Declare them in `nodes.yml` (e.g. `backup_paths:`), so the list lives
    next to the rest of the node's facts.
 2. **Per-host command.** A `backup_files` dispatcher command, generated from
@@ -60,7 +60,7 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
 2026-09-27: vpnsvcs is covered by 12's `backup_full` (whole root, consistent Headscale DB). For vpnsvcs, step 3 pulls `/var/opt/backups/full/vpnsvcs-full-*.tar.zst` after running it, instead of a `backup_files` built from `backup_paths`.
 
 - 2026-09-27: 01 landed. Steps are `step_<name>` functions listed in `STEPS` in
-  `src/pve1/backup_orchestrator.sh.j2`. A failing step is recorded and the run continues
+  `src/nodes/pve1/backup_orchestrator.sh.j2`. A failing step is recorded and the run continues
   (only `wake_pve2` aborts), which already covers "unreachable host doesn't abort". Put
   the pulls before `vzdump_pve1` so pve1's collection lands before the PBS upload, and
   give each host its own step (e.g. `files_<node>`) so each gets its own
@@ -70,18 +70,18 @@ not the hosts that aren't VMs on pve1, or the files outside a VM image:
 
 Done with the backup restructure (2026-10-04), in a different shape from the ticket:
 
-- No `backup_paths` in `nodes.yml`: each node has a hand-written `src/<node>/backup.sh`
+- No `backup_paths` in `nodes.yml`: each node has a hand-written `src/nodes/<node>/backup.sh`
   (pve1, pve2, secsvcs, homesvcs, websvcs, vpnsvcs) that runs its application hooks
   (`pg_dumpall`, HA native backup, Headscale `sqlite3 .backup`) into `dumps/<name>/` and
   copies explicit config paths and small volumes into `files/` under
-  `/var/opt/backups/` with a `tar` pipe (`src/debian/backup_lib.sh`), the stage
+  `/var/opt/backups/` with a `tar` pipe (`src/base/debian/backup_lib.sh`), the stage
   emptied first. Each script
   names what it skips and why. On pve1 and pve2 the same script goes on to the VM images.
   The old `pg_dumpall`, `backup_hass`, `backup_full` and `run_backups` commands are gone;
   `backup` is the one dispatcher command per node, no arguments.
 - No tarballs and no `age`: plain trees dedup in PBS, and the upload is encrypted with
   pve1's client key (11).
-- The orchestrator (`src/pve1/backup_orchestrator.sh.j2`) runs `backup_<node>` steps
+- The orchestrator (`src/nodes/pve1/backup_orchestrator.sh.j2`) runs `backup_<node>` steps
   (ssh `backup`, sftp `files/` into `/root/backups/<node>/files/`, move `dumps/` there,
   keep only the newest dump of each kind), then `upload`: `host/vpnsvcs` into namespace
   `pve1` and `host/pve1` (the rest of `/root/backups`) into namespace `files`. After a

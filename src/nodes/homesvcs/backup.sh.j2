@@ -2,19 +2,19 @@
 # homesvcs backup: Home Assistant's native backup plus the config and small state of
 # every service, staged under /var/opt/backups for pve1's backup_orchestrator to pull.
 # Usage:
-#   src/homesvcs/backup.sh
+#   src/nodes/homesvcs/backup.sh
 # Not staged, on purpose: hassdb (the recorder history, large, HA rebuilds the schema)
 # and /var/opt/home_assistant/media (camera recordings).
 
 set -euo pipefail
-# shellcheck source=src/debian/backup_lib.sh
-source /root/homelab-rendered/src/debian/backup_lib.sh
+# shellcheck source=src/base/debian/backup_lib.sh
+source /root/homelab-rendered/src/base/debian/backup_lib.sh
 
 stage_init
 
 # Home Assistant: a native backup restores across HA versions, unlike a copy of
 # /config. Ref: https://www.home-assistant.io/integrations/backup/
-token=$(/root/homelab-rendered/src/podman/get_secret.sh hass_backup_token)
+token=$(/root/homelab-rendered/src/base/podman/get_secret.sh hass_backup_token)
 if [[ -z "$token" || "$token" == "null" ]]; then
   echo "error: hass_backup_token secret is not set" >&2
   exit 1

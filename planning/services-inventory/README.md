@@ -33,7 +33,7 @@ uv run --with pyyaml python compare.py
   chains (including the UI/API splits and header-regex matchers), TLS options, and
   backend URLs all match.
 - **The generated dispatcher includes `ntfy-alertmanager`**, which is missing from
-  `src/secsvcs/dispatcher.sh` today because `gen_dispatch_cmds.sh` matches
+  `src/nodes/secsvcs/dispatcher.sh` today because `gen_dispatch_cmds.sh` matches
   `[a-zA-Z0-9_]+` and the name contains a hyphen. Reading data instead of regexing code
   removes the bug class, not just this instance.
 

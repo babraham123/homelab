@@ -5,17 +5,15 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 
 ## Nodes and naming
 
-- **node** — a machine with a directory under `src/` holding, as applicable, its
+- **node** — a machine with a directory under `src/nodes/` holding, as applicable, its
   `install_svcs.sh`, `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config,
   and an entry in `src/nodes.yml`. The nodes:
   `pve1`, `pve2`, `router`, `vpnsvcs`, `secsvcs`, `homesvcs`, `websvcs`, `devtop`,
-  `gaming`. `src/debian/` and `src/macos/` are shared base setups, not nodes.
-- **service** — any other directory under `src/`; one containerized (or host-level)
+  `gaming`. `src/base/` holds the setups they share (`debian/`, `podman/`, `macos/`, ...).
+- **service** — a directory under `src/services/`; one containerized (or host-level)
   application: its quadlet `*.container` file, volumes, and config templates.
 - **container VM** — one of `secsvcs`, `homesvcs`, `websvcs`: a Debian VM running
   Podman quadlets with its own Traefik and its own container subnet.
-- Guide names differ from node names: `secure_services` ↔ `secsvcs`,
-  `home_services` ↔ `homesvcs`, `web_services` ↔ `websvcs`, `dev_desktop` ↔ `devtop`.
 - **secproxy / homeproxy / webproxy** — the Traefik instance on secsvcs / homesvcs /
   websvcs respectively (also their dashboard subdomains).
 - **pbs2** — the Proxmox Backup Server instance on pve2.
@@ -45,7 +43,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 - **manualadmin** — the interactive human SSH account on each node (file uploads,
   full sudo with password).
 - **autoadmin** — the automation SSH account. Its key is bound to a ForceCommand.
-- **dispatcher** — `src/<node>/dispatcher.sh`, the ForceCommand script that
+- **dispatcher** — `src/nodes/<node>/dispatcher.sh`, the ForceCommand script that
   whitelists exact `$SSH_ORIGINAL_COMMAND` strings and maps them to `install_svcs.sh`
   / `commands.sh` invocations. It and the node's sudoers file are rendered from the
   same node inventory entries, so the whitelist and the sudo grants can't diverge.
@@ -59,7 +57,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   [docs/networking.md](docs/networking.md).
 - **site domain** — the public domain (`janedoe.com` in templates); **tail domain** —
   the Tailscale/Headscale mesh domain (`janedoe.ts.net` in templates).
-- **internal CA** — the two-tier private X.509 hierarchy in `src/certificates/`
+- **internal CA** — the two-tier private X.509 hierarchy in `src/base/certificates/`
   (root + intermediate) for service-to-service TLS. Distinct from the **SSH CA**
   (host certificates) and from **ACME** (public Let's Encrypt certs via Traefik).
 - **VLAN-ID-as-third-octet** — each VLAN's subnet embeds its ID: VLAN 10 →

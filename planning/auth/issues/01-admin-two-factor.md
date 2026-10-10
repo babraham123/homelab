@@ -7,7 +7,7 @@ Source: review findings 11, 12
 
 ## Problem
 
-`src/authelia/configuration.yml.j2:769-791`: one subject (`group:authelia_gen_access`)
+`src/services/authelia/configuration.yml.j2:769-791`: one subject (`group:authelia_gen_access`)
 matches `*.SITE`, and the `internal`/`vpn` network rule drops everything to
 `one_factor`. Membership in the general group therefore grants password-only access from
 the LAN to OliveTin (root command execution), the Traefik dashboards, Proxmox and PBS.

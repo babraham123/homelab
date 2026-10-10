@@ -1,6 +1,6 @@
 # Homepage dashboard
 
-The homepage dashboard (`dash.<site>`, websvcs, `src/homepage/`). Maintainer request
+The homepage dashboard (`dash.<site>`, websvcs, `src/services/homepage/`). Maintainer request
 2026-09-27: the Proxmox, Google Calendar and weather widgets show API errors.
 
 ## Issues

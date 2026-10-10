@@ -1,6 +1,6 @@
 # 02. Restructure src/ into nodes/, services/, base/ and update every path
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: user item 53
@@ -53,3 +53,27 @@ prefixes. Grep the rendered tree for `homelab-rendered/src/[a-z]` paths that don
   `node ~ '/install_svcs.sh'`, `debian/install_svcs.sh` and `router/` prefixes in
   `nodes.jinja`, the `{% import 'src/nodes.jinja' ... %}` lines, and the
   `src/${node}/...` paths in `render_src.sh`'s inventory checks.
+- 2026-10-10: Moved and every path updated. `nodes.yml` `script:` values are now
+  `nodes/<node>/...` or `base/debian/...`; `nodes.jinja` builds
+  `nodes/<node>/install_svcs.sh` and maps `nodes/router/` to `/root/router-src/`.
+  Rendered against `vars.template.yml`, the before and after trees are identical once the
+  `base/`, `nodes/` and `services/` prefixes are stripped. No `homelab-rendered/src/...`
+  path in the render, and no `src/...` path in the repo, points at a missing file.
+  Left for a human: the cutover below. Do it in one sitting: after the upload, every
+  installed copy that embeds an old `/root/homelab-rendered/src/<dir>` path breaks:
+  dispatcher and sudoers, `/etc/containers/containers.conf` (the podman secret driver,
+  so every container with secrets fails to start), quadlet and unit `ExecStart*` lines,
+  `/etc/msmtprc`, pve1's orchestrator, pve2's hookscript.
+  1. `tools/deploy_src.sh`
+  2. On every Debian/PVE node (pve1, pve2, secsvcs, homesvcs, websvcs, vpnsvcs on port 2202,
+     devtop), as manualadmin, since the old dispatcher's `install_dispatcher` points at
+     the removed path: `sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher`
+  3. secsvcs, homesvcs, websvcs, vpnsvcs:
+     `sudo cp /root/homelab-rendered/src/base/podman/containers.conf /etc/containers`
+  4. `ssh autoadmin@NODE install_all_svcs` on secsvcs, homesvcs, websvcs
+  5. vpnsvcs: `install_deadman`, `install_fluentbit`; `cp .../src/base/certificates/msmtprc /etc`
+  6. pve1: `install_cert_notifier`, `install_backup_orchestrator`; the same `msmtprc` copy
+  7. pve2: `install_hookscript`
+  8. Router and gaming: nothing; their trees land at `/root/router-src` and
+     `C:/Homelab/gaming-src` as before
+  9. On each node, `grep -rE "homelab-rendered/src/" /etc /usr/local/bin /var/lib/vz/snippets 2>/dev/null | grep -vE "src/(base|nodes|services)/"` prints nothing

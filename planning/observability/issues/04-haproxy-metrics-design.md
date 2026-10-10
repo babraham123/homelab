@@ -9,7 +9,7 @@ Source: review finding 21
 
 **A. HAProxy built-in exporter, scraped over the tailnet (recommended now).**
 HAProxy ≥ 2.0 ships a Prometheus exporter; no extra process. In
-`src/haproxy/haproxy.cfg.j2`:
+`src/services/haproxy/haproxy.cfg.j2`:
 
 ```
 frontend prometheus
@@ -21,7 +21,7 @@ frontend prometheus
 
 Bind only on the Tailscale interface (so it is unreachable from the internet) and add
 `tcp-request connection reject if !{ src 100.64.0.0/10 }` as belt-and-braces. Then
-`src/secsvcs/prometheus.yml.j2` gets a `haproxy` job targeting
+`src/nodes/secsvcs/prometheus.yml.j2` gets a `haproxy` job targeting
 `{{ vpn.tailscale_ip }}:8405` — secsvcs's VictoriaMetrics is already a mesh peer (the
 VMs are HAProxy's backends over Tailscale). Five lines of config, zero new software on
 the VPS. Also scrape the VPS's node_exporter the same way (the VPS has none today —
@@ -37,7 +37,7 @@ observability/08 (containerising the VPS services). Do this *after* A, when 08 l
 ## Deliverable
 
 - Implement A. Import Grafana.com dashboard **12693** ("HAProxy 2 Full") as
-  `src/grafana/dashboards/haproxy.json`, fix datasource.
+  `src/services/grafana/dashboards/haproxy.json`, fix datasource.
 - Alerts: `HaproxyDown` (`up{job="haproxy"}==0`), `HaproxyBackendDown`
   (`haproxy_backend_up == 0`), and a panel for `haproxy_frontend_denied_connections_total`
   so you can finally see how much the edge is dropping.
@@ -86,7 +86,7 @@ Why not A first:
 - **It needs new parts.** A `vpn.tailscale_ip` var: Headscale assigns the address, and it
   changes on re-registration. A `ufw allow in on tailscale0` rule. And an ACL that doesn't
   exist yet: Headscale runs with no policy file (`policy.path` is commented out in
-  `src/headscale/headscale.yaml.j2`), so the tailnet is allow-all.
+  `src/services/headscale/headscale.yaml.j2`), so the tailnet is allow-all.
 - **It's throwaway.** 08 would replace it, and 08 is approved and blocked only by this
   ticket.
 
@@ -121,7 +121,7 @@ Why not A first:
   samples arrive, so observability/01's `NodeDown` (`up{job=~"node_exporter.*"} == 0`)
   can't fire for the VPS. It needs an absence rule, and observability/10 relies on that
   rule for "VPS down".
-- **Existing bug on every node.** `src/victoriametrics/vmagent.container.j2.j2` mounts
+- **Existing bug on every node.** `src/services/victoriametrics/vmagent.container.j2.j2` mounts
   `/vmagentdata` but never sets `-remoteWrite.tmpDataPath`. The default is the relative
   path `vmagent-remotewrite-data` in the container rootfs, so the buffer is lost whenever
   the container is recreated.
@@ -131,7 +131,7 @@ Why not A first:
 
 ### Config sketch
 
-`src/haproxy/haproxy.cfg.j2`:
+`src/services/haproxy/haproxy.cfg.j2`:
 
 ```
 frontend prometheus
@@ -174,7 +174,7 @@ scrape_configs:
     relabel_configs: [{target_label: instance, replacement: 'vpn.{{ site.url }}:2020'}]
 ```
 
-**vmagent quadlet.** Keep the one shared template `src/victoriametrics/vmagent.container.j2.j2`.
+**vmagent quadlet.** Keep the one shared template `src/services/victoriametrics/vmagent.container.j2.j2`.
 Add a `vpn)` case to `render_host.sh` that sets `subnet=""`, and branch on `subnet` in
 the template. Second-pass tags need `{% raw %}` wrapping, as the `IP=` line has now.
 
@@ -218,7 +218,7 @@ Nothing else changes: ufw already allows `out on tailscale0 to {{ secsvcs.ip }} 
 80,443`, and Traefik accepts connections from trusted IPs with or without a PROXY
 header.
 
-`src/vmalert/configs/vps.yml` (new):
+`src/services/vmalert/configs/vps.yml` (new):
 
 ```yaml
 groups:
@@ -236,7 +236,7 @@ groups:
 ```
 
 Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
-`src/vmalert/configs/vmagent.yml`.
+`src/services/vmalert/configs/vmagent.yml`.
 
 ### Failure modes (B)
 
@@ -264,9 +264,9 @@ Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
    This drops 08's `net.network` prerequisite: with no netavark bridge, nftables stays
    untouched. Keep 08's `nft list ruleset` before/after check to confirm.
 5. **Remote-write credential.** The admin password, as on the other nodes (maintainer).
-6. **Alerts.** Add `src/vmalert/configs/vps.yml`. Exclude the VPS from `NodeDown` in
+6. **Alerts.** Add `src/services/vmalert/configs/vps.yml`. Exclude the VPS from `NodeDown` in
    observability/01; `VpsMetricsAbsent` replaces it there.
-7. **Dashboard.** Import Grafana.com 12693 as `src/grafana/dashboards/haproxy.json` and
+7. **Dashboard.** Import Grafana.com 12693 as `src/services/grafana/dashboards/haproxy.json` and
    fix the datasource. Replace the denied-connections panel with
    `sum by (proxy) (rate(haproxy_frontend_requests_denied_total[5m]))`.
 8. **Docs.**
@@ -320,7 +320,7 @@ Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
   metric names: https://github.com/haproxy/haproxy/blob/v3.0.0/addons/promex/service-prometheus.c ;
   silent-drop counters: https://github.com/haproxy/haproxy/blob/v3.0.0/src/tcp_act.c ;
   `check`: https://docs.haproxy.org/3.0/configuration.html#5.2-check
-- Debian HAProxy 3.0.11 in trixie with `USE_PROMEX=1`: https://sources.debian.org/src/haproxy/ ,
+- Debian HAProxy 3.0.11 in trixie with `USE_PROMEX=1`: https://sources.debian.org/src/services/haproxy/ ,
   https://salsa.debian.org/haproxy-team/haproxy/-/blob/master/debian/rules
 - vmagent buffering, `tmpDataPath`, `maxDiskUsagePerURL`, `remoteWrite.label`:
   https://docs.victoriametrics.com/victoriametrics/vmagent/ ; default path:

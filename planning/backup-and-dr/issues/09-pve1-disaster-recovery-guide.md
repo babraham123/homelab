@@ -26,7 +26,7 @@ Add `docs/guides/pve1_recovery.md`:
    | `/root/acme/`, `/etc/opt/traefik/certificates/acme.json` | Let's Encrypt account + certs | re-issue (rate limits apply) |
    | `/root/.ssh/` | autoadmin key/cert used by OliveTin + scripts | regenerate, redistribute |
    | `/etc/pve/` | PVE cluster/VM config | rebuild VMs by hand |
-   | `/etc/network/interfaces`, `/etc/resolv.conf` | rendered from `src/pve1/` | re-render |
+   | `/etc/network/interfaces`, `/etc/resolv.conf` | rendered from `src/nodes/pve1/` | re-render |
    | `/root/homelab-rendered/` | rendered tree | re-render from repo + `vars.yml` |
    | `vars.yml` (workstation) | all personal values | reconstruct from memory |
    | pfSense config XML (router VM) | firewall/VLAN/DNS | Auto Config Backup package, also escrow |
@@ -48,4 +48,4 @@ Add `docs/guides/pve1_recovery.md`:
 ## Comments
 
 - 2026-09-27: Added `docs/guides/pve1_recovery.md.j2` (renders to `pve1_recovery.md`), linked from `security.md#secrets` and `maintenance.md`; its inventory is now the canonical list for 04. Corrected vs. the table above: `acme.json` and the OliveTin key live on the VMs (PBS-covered), `/root/acme` and `/root/.ssh` are regenerable.
-  TODOs for the maintainer: PBS user + encryption key of pve1's `pbs2` storage; where the CA/SSH CA passphrases and ACB device key/password are kept; how root's `/root/.ssh/id_ed25519` was created; Linux name of the NIC cabled to pve2; `<host>_root_pswd` keys missing from `src/pve1/secrets_template.yaml`.
+  TODOs for the maintainer: PBS user + encryption key of pve1's `pbs2` storage; where the CA/SSH CA passphrases and ACB device key/password are kept; how root's `/root/.ssh/id_ed25519` was created; Linux name of the NIC cabled to pve2; `<host>_root_pswd` keys missing from `src/nodes/pve1/secrets_template.yaml`.

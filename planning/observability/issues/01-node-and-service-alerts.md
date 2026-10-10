@@ -8,11 +8,11 @@ Blocked by: backup-and-dr/01
 
 ## Problem
 
-All 35 rules in `src/vmalert/configs/` are VictoriaMetrics self-monitoring.
+All 35 rules in `src/services/vmalert/configs/` are VictoriaMetrics self-monitoring.
 
 ## Change
 
-New file `src/vmalert/configs/homelab.yml` (`install_svcs.sh vmalert` already copies
+New file `src/services/vmalert/configs/homelab.yml` (`install_svcs.sh vmalert` already copies
 `configs/*.yml`). Rules, all with `severity` labels that Alertmanager already routes:
 
 **Hosts (node_exporter, all VMs + pve1/pve2):**
@@ -23,7 +23,7 @@ New file `src/vmalert/configs/homelab.yml` (`install_svcs.sh vmalert` already co
 - `HighLoad`: `node_load15 / count(node_cpu_seconds_total{mode="idle"}) without(cpu,mode) > 2` for 15m
 - `HighCpuTemp`: `node_hwmon_temp_celsius > 85` for 5m (pve1 is fanless)
 - `SystemdUnitFailed`: `node_systemd_unit_state{state="failed"} == 1` for 5m —
-  `src/node_exporter/node_runner.sh:17` already passes `--collector.systemd`, filtered by
+  `src/base/node_exporter/node_runner.sh:17` already passes `--collector.systemd`, filtered by
   `--collector.systemd.unit-include="($SVC_LIST)\.service"`, so only the units in
   `SVC_LIST` are visible; check that list covers every quadlet on each node (and the
   orchestrator/updater timers once they exist). This is also the cheapest "container
@@ -60,13 +60,13 @@ firing state. Document the list in `docs/services.md#observability`.
   "Homelab:" unit, so `SystemdUnitFailed` also catches a failed run.
 
 - 2026-10-04: the backup rules landed with the backup restructure as
-  `src/vmalert/configs/backups.yml` (`BackupStale`, `BackupNeverRan`, plus
+  `src/services/vmalert/configs/backups.yml` (`BackupStale`, `BackupNeverRan`, plus
   `SnapraidStale` and `DiskUnhealthy` for the media array). The orchestrator's job
   labels are now `backup_<node>` and `upload`. Leave backups
   out of `homelab.yml`.
 
-- 2026-10-07: landed as `src/vmalert/configs/homelab.yml` (groups hosts, scrapes, auth,
-  uptime) plus `src/grafana/dashboards/alerts.json`. `AuthFailureBurst` uses
+- 2026-10-07: landed as `src/services/vmalert/configs/homelab.yml` (groups hosts, scrapes, auth,
+  uptime) plus `src/services/grafana/dashboards/alerts.json`. `AuthFailureBurst` uses
   `authelia_authn{success="false"}`, the counter the Authelia dashboard already graphs.
   The cert rules from 06 are in the same file. Acceptance (vmalert load, a broken
   quadlet, `fallocate`) is in the apply note for the next deploy.

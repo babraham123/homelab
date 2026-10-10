@@ -29,14 +29,14 @@ disks on the NVMe, which the weekly image backup then carries to PBS.
   10 days), both via `snapraid_run.sh`, which refuses a sync when more than
   200 files vanished (`threshold` in `snapraid_run.sh`). Metrics
   `homelab_snapraid_last_success_timestamp_seconds{job}` and `homelab_smart_healthy{device}`
-  through node_exporter's textfile dir; alerts in `src/vmalert/configs/backups.yml`.
+  through node_exporter's textfile dir; alerts in `src/services/vmalert/configs/backups.yml`.
 - Remove the old unused HDD first. Hardware: SATA card, mounting for four drives, six
   SATA power leads; the RM550x is enough with the GPU power-capped.
 
 ## Code (done)
 
-`src/snapraid/` (`snapraid.conf.j2`, `media.fstab.j2`, `snapraid_run.sh.j2`, the four
-units), `install_snapraid` in `src/websvcs/install_svcs.sh` (listed under websvcs
+`src/services/snapraid/` (`snapraid.conf.j2`, `media.fstab.j2`, `snapraid_run.sh.j2`, the four
+units), `install_snapraid` in `src/nodes/websvcs/install_svcs.sh` (listed under websvcs
 `services` in `nodes.yml`; timers are only enabled once `websvcs.media.disks` is set),
 `websvcs.media.disks` in `vars.template.yml`, `docs/guides/pve2_storage.md`.
 

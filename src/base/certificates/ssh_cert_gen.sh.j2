@@ -1,17 +1,17 @@
 #!/bin/bash
 # Generate SSH certificates and distribute them to all servers.
 # Usage:
-#   /root/homelab-rendered/src/certificates/ssh_cert_gen.sh
+#   /root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
 set -euo pipefail
 
-/root/homelab-rendered/src/debian/is_root.sh
-/root/homelab-rendered/src/debian/is_reachable.sh pve2
-/root/homelab-rendered/src/debian/is_reachable.sh vpnsvcs
-/root/homelab-rendered/src/debian/is_reachable.sh secsvcs
-/root/homelab-rendered/src/debian/is_reachable.sh websvcs
-/root/homelab-rendered/src/debian/is_reachable.sh homesvcs
-/root/homelab-rendered/src/debian/is_reachable.sh devtop
-/root/homelab-rendered/src/debian/is_reachable.sh router
+/root/homelab-rendered/src/base/debian/is_root.sh
+/root/homelab-rendered/src/base/debian/is_reachable.sh pve2
+/root/homelab-rendered/src/base/debian/is_reachable.sh vpnsvcs
+/root/homelab-rendered/src/base/debian/is_reachable.sh secsvcs
+/root/homelab-rendered/src/base/debian/is_reachable.sh websvcs
+/root/homelab-rendered/src/base/debian/is_reachable.sh homesvcs
+/root/homelab-rendered/src/base/debian/is_reachable.sh devtop
+/root/homelab-rendered/src/base/debian/is_reachable.sh router
 
 cd /root/ssh
 

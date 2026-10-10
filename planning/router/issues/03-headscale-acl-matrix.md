@@ -8,7 +8,7 @@ Source: maintainer request 2026-09-26; tailscale/tailscale#5573 (Brad Fitzpatric
 
 ## Problem
 
-The group matrix in `src/headscale/headscale_acl.hujson.j2` (family / guests / public →
+The group matrix in `src/services/headscale/headscale_acl.hujson.j2` (family / guests / public →
 subnets) is commented out, and the policy grants every user `*:*`. It was disabled on
 the belief that ACLs don't work for pfSense subnet routes.
 

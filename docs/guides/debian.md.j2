@@ -90,7 +90,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 ...
 plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```
-- Copy files from source repo, under `src/debian`
+- Copy files from source repo, under `src/base/debian`
   - `vim ~/.oh-my-zsh/custom/aliases.zsh`
   - `vim ~/.oh-my-zsh/custom/functions.zsh`
   - `sudo vim /root/.zshrc`
@@ -123,7 +123,7 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 exit
 # Install configs
-/root/homelab-rendered/src/debian/commands.sh install_dispatcher
+/root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
 ```
 
 ## Backups

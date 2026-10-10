@@ -7,7 +7,7 @@ Source: review finding 14 (user chose a HAProxy TODO over tightening Authelia re
 
 ## Change
 
-Add a commented `# TODO` block at the top of `src/haproxy/haproxy.cfg.j2` listing:
+Add a commented `# TODO` block at the top of `src/services/haproxy/haproxy.cfg.j2` listing:
 
 - Per-SNI stricter limits for `auth.SITE` (the only brute-forceable surface): a
   dedicated stick table keyed on `src` for connections where `req.ssl_sni -i auth.SITE`,

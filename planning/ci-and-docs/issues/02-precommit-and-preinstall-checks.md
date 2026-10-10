@@ -23,7 +23,7 @@ inventory or a node.
   is a runtime check; for static validation use `traefik validate` if available in your
   version, otherwise start-and-ping in a throwaway network.
 - authelia: `authelia config validate`.
-- haproxy (vpnsvcs): `haproxy -c -f /root/homelab-rendered/src/haproxy/haproxy.cfg`.
+- haproxy (vpnsvcs): `haproxy -c -f /root/homelab-rendered/src/services/haproxy/haproxy.cfg`.
 - vmalert: `vmalert -rule=/path/*.yml -dryRun`.
 - alertmanager: `amtool check-config`; ntfy-alertmanager: dry start (observability/10).
 - Gatus: no validator; start and check `/health`.
@@ -50,7 +50,7 @@ rollback for service configs too.
 - 2026-09-27: 01 and 08 resolved, so every blocker is resolved. The hook
   (`.githooks/pre-commit`) runs `render_src.sh`, so the nodes.yml checks already run in
   it. Untested authelia validate that passes the quadlet's secrets and env so the
-  template filter can run, from `src/authelia` in the rendered tree:
+  template filter can run, from `src/services/authelia` in the rendered tree:
   `podman run --rm $(sed -nE 's/^Secret=/--secret=/p; s/^Environment=/--env=/p' authelia.container)
   -v "$PWD":/config:ro -v /etc/opt/authelia/certificates:/certificates:ro
   "$(sed -n 's/^Image=//p' authelia.container)" authelia config validate --config /config/configuration.yml`

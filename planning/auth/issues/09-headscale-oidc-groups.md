@@ -13,7 +13,7 @@ Blocked by: upstream PR 3216 shipping in a headscale release
 Headscale can't use OIDC groups in policy rules
 ([docs: Limitations](https://headscale.net/stable/ref/oidc/#limitations)). The `groups`
 claim from Authelia is only used for the `allowed_groups` login filter
-(`headscale_access`). So `src/headscale/headscale_acl.hujson.j2` keeps its own copy of
+(`headscale_access`). So `src/services/headscale/headscale_acl.hujson.j2` keeps its own copy of
 group membership: `group:admin` from `tailscale_admin` and `group:family` from `users` in
 `vars.yml`. That duplicates LLDAP, and any user missing from `vars.yml` (e.g. `cousin`)
 silently gets no access once the policy loads (router/03).

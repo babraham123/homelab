@@ -15,8 +15,8 @@ offsite, power down".
 
 ## Change
 
-Add `src/pve1/backup_orchestrator.sh` + `backup_orchestrator.{service,timer}`, installed
-via `src/pve1/install_svcs.sh backup_orchestrator` (new case + dispatcher entry).
+Add `src/nodes/pve1/backup_orchestrator.sh` + `backup_orchestrator.{service,timer}`, installed
+via `src/nodes/pve1/install_svcs.sh backup_orchestrator` (new case + dispatcher entry).
 
 Sequence:
 
@@ -38,7 +38,7 @@ Sequence:
    started.
 
 Every step logs to the journal and posts a one-line ntfy summary at the end (success or
-the step that failed). Keep the Gatus maintenance window in `src/gatus/config.yaml.j2`
+the step that failed). Keep the Gatus maintenance window in `src/services/gatus/config.yaml.j2`
 aligned with the timer.
 
 ## Acceptance
@@ -60,7 +60,7 @@ aligned with the timer.
 
 ## Answer
 
-2026-09-27: `src/pve1/backup_orchestrator.sh.j2` + `.service.j2` (oneshot, 6h timeout) +
+2026-09-27: `src/nodes/pve1/backup_orchestrator.sh.j2` + `.service.j2` (oneshot, 6h timeout) +
 `.timer` (Sun 01:00, `Persistent=true`), installed by
 `ssh autoadmin@pve1 install_backup_orchestrator` (`backup_orchestrator: {}` under pve1
 `services` in `src/nodes.yml`; only the timer is enabled).
@@ -75,7 +75,7 @@ aligned with the timer.
   running PBS. `src/base/lib.sh` doesn't exist yet (restructure/03 is still open), so the
   script carries its own `wait_for`; restructure/03 should swap it for `wait_reachable`.
 - **vzdump.** pve1: `vzdump --all --storage pbs2 --mode snapshot` (router, secsvcs,
-  homesvcs). pve2: new `run_backups` dispatcher command in `src/pve2/commands.sh.j2` backs
+  homesvcs). pve2: new `run_backups` dispatcher command in `src/nodes/pve2/commands.sh.j2` backs
   up websvcs plus whichever of devtop/gaming is running. Backing up the stopped one
   starts it, and the hookscript would then stop the running one (shared GPU), so this
   applies to devtop too, not only gaming.

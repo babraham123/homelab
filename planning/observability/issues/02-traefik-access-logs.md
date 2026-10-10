@@ -37,13 +37,13 @@ logs. **Approved.**
 
 ## Change
 
-- `src/traefik/static.yml.j2`: uncomment `accessLog`, use `format: json`, keep the
+- `src/services/traefik/static.yml.j2`: uncomment `accessLog`, use `format: json`, keep the
   `Authorization: redact` field rule already written, set `headers.defaultMode: drop`
   with `names: {User-Agent: keep, Referer: keep, Remote-User: keep}` and
   `Cookie: drop`, `bufferingSize: 100`. Start unfiltered; add
   `filters.statusCodes: ["400-599"]` later only if the estimate above proves low.
 - Check `SystemMaxUse=` in `/etc/systemd/journald.conf` on each container VM and pin it
-  (e.g. `1G`) in `src/debian/` so on-node retention is explicit.
+  (e.g. `1G`) in `src/base/debian/` so on-node retention is explicit.
 - Log to stdout (default) so Fluent Bit's journald tailer picks it up with no extra
   volume. Add a `journald.lua`/parser rule so JSON fields become VictoriaLogs fields.
 - Grafana: a VictoriaLogs panel per node filtering `_stream: {unit="traefik.service"}`.
@@ -64,6 +64,6 @@ logs. **Approved.**
   processor (`json`, declared under `parsers:` since the image's parsers.conf is
   shadowed by the config mount) ahead of `journald.lua`, which copies the request
   fields, redacts `access_token=` and rewrites `message` as one line. journald is
-  capped by `src/debian/journald.conf` from every `install_fluentbit`. Logs panels are
+  capped by `src/base/debian/journald.conf` from every `install_fluentbit`. Logs panels are
   on the Traefik dashboard (observability/03) rather than per node in victorialogs.json.
   Unfiltered, per the estimate; `filters.statusCodes` stays an option.

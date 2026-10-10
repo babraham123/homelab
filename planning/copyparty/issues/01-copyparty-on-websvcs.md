@@ -13,7 +13,7 @@ a landing directory the sync (03) can read.
 
 ## Change
 
-- `src/copyparty/copyparty.container.j2`, following `src/archivebox/archivebox.container.j2`:
+- `src/services/copyparty/copyparty.container.j2`, following `src/services/archivebox/archivebox.container.j2`:
   `Image=docker.io/copyparty/ac:latest`, `ContainerName=copyparty`,
   `HostName=files.{{ site.url }}`, `IP={{ websvcs.container_subnet }}.19` (next free;
   `.18` is taken), port 3923, `NoNewPrivileges=true`.
@@ -21,7 +21,7 @@ a landing directory the sync (03) can read.
     path rather than a named volume so 02 can read uploads from the host.
   - `AutoUpdate=registry` for now to match the other quadlets. image-updater/05 converts
     it with the rest.
-- `src/copyparty/copyparty.conf.j2`:
+- `src/services/copyparty/copyparty.conf.j2`:
   - Trust Authelia's identity header: `idp-h-usr: Remote-User`,
     `idp-h-grp: Remote-Groups`, `xff-src: {{ websvcs.container_subnet }}.6` (Traefik
     only), `rproxy: 1`.
@@ -29,7 +29,7 @@ a landing directory the sync (03) can read.
     `/drop` volume that is upload-only (`w` without `r`) for general use.
   - Before writing these keys, check the exact names against the copyparty README
     (IdP section, `--idp-h-usr`, volume flags).
-- `src/websvcs/traefik/routes.yml.j2`: router `files` (`Host(files.SITE)`, the `*service`
+- `src/nodes/websvcs/traefik/routes.yml.j2`: router `files` (`Host(files.SITE)`, the `*service`
   anchor with `authelia@file`) and service `http://files.{{ site.url }}:3923/`.
   - **Public, authenticated (maintainer decision).** websvcs is HAProxy's catch-all
     backend (`use_backend websvcs_https_proxy if tld || any_subdomain`), so `files.SITE`
@@ -37,7 +37,7 @@ a landing directory the sync (03) can read.
     the router and no path bypasses it. Don't add an Authelia `bypass` rule for
     `files.SITE`, and don't add a Traefik router for it without the middleware.
   - **Client IP check:** auth/06. Set `xff-src` to Traefik's IP only.
-- `src/websvcs/install_svcs.sh copyparty` case: create `/var/opt/copyparty/data/car`
+- `src/nodes/websvcs/install_svcs.sh copyparty` case: create `/var/opt/copyparty/data/car`
   (owned by the container UID), copy config and quadlet, restart. Add it to
   `install_all_svcs` and regenerate the websvcs dispatcher.
 - `docs/services.md` websvcs table row (`.19 | copyparty | copyparty | File drop (behind Authelia) |

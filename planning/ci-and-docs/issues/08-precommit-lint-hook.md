@@ -50,7 +50,7 @@ Done 2026-09-27.
 - The hook's first run found, now fixed: `self_signed_cert_gen.sh.j2` put
   `{{ site.name }}` inside single-quoted `-subj` strings, which broke on an apostrophe
   (now shell-quoted once with `| quote`); `mkdir -p -m 700` in `backup_hass` (SC2174,
-  now `install -d`, with `backup_hass` moved to `src/homesvcs/backup_hass.sh.j2`); the
+  now `install -d`, with `backup_hass` moved to `src/nodes/homesvcs/backup_hass.sh.j2`); the
   unused loop variables were fixed on main in 0d8f9e8. The hook passes on the branch.
 - The hook also writes `rendered/` (ci-and-docs/07).
 

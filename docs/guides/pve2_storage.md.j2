@@ -5,7 +5,7 @@ Four HDDs on a PCIe SATA card passed through whole to websvcs, snapraid for pari
 - PBS stays on the SATA SSD on the onboard controller; games stay on the gaming VM's NVMe until a second SSD arrives (`backup-and-dr/14`)
 - Everything here is run by hand once. The repo carries only what must match the disks afterwards:
   - `websvcs.media.disks` in `vars.yml`
-  - from it `src/snapraid/snapraid.conf.j2`, `media.fstab.j2` and the snapraid timers, installed by `install_snapraid`
+  - from it `src/services/snapraid/snapraid.conf.j2`, `media.fstab.j2` and the snapraid timers, installed by `install_snapraid`
 - The pool is always `/srv/media`
 
 ## Hardware prerequisites
@@ -27,7 +27,7 @@ ls -l /dev/disk/by-id/ | grep -v part
 ## 2. Pass the controller through
 - The card's PCI address and IOMMU group; the group must hold only the card
 ```bash
-/root/homelab-rendered/src/debian/iommu_groups.sh | grep -i -B1 -A1 sata
+/root/homelab-rendered/src/base/debian/iommu_groups.sh | grep -i -B1 -A1 sata
 ```
 - IOMMU and vfio are already on for the GPU ([Proxmox guide, GPU](./proxmox.md#gpu)). Bind the card to vfio at boot so the host never claims the disks
 ```bash
@@ -38,8 +38,8 @@ update-initramfs -u -k all && reboot
 - After the reboot, `lspci -k -s ADDRESS` shows `Kernel driver in use: vfio-pci` and the HDDs are gone from `lsblk`
 - Attach the card to websvcs
 ```bash
-qm set $(/root/homelab-rendered/src/pve2/get_vm_id.sh websvcs) --hostpci1 ADDRESS,pcie=1
-qm stop $(/root/homelab-rendered/src/pve2/get_vm_id.sh websvcs) && qm start $(/root/homelab-rendered/src/pve2/get_vm_id.sh websvcs)
+qm set $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs) --hostpci1 ADDRESS,pcie=1
+qm stop $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs) && qm start $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs)
 ```
 - Passthrough pins the VM's memory and blocks live migration and `qm snapshot`; vzdump snapshot-mode backups are unaffected
 
@@ -64,7 +64,7 @@ ssh autoadmin@websvcs install_snapraid
 - On websvcs, append the rendered fstab fragment and mount
 ```bash
 mkdir -p /mnt/disk1 /mnt/disk2 /mnt/disk3 /mnt/parity /srv/media
-cat /root/homelab-rendered/src/snapraid/media.fstab >> /etc/fstab
+cat /root/homelab-rendered/src/services/snapraid/media.fstab >> /etc/fstab
 systemctl daemon-reload && mount -a
 df -h /mnt/disk* /mnt/parity /srv/media
 ```
@@ -77,14 +77,14 @@ systemctl list-timers 'snapraid-*'
 ```
 - `snapraid-sync.timer` syncs daily, `snapraid-scrub.timer` scrubs weekly, both through `snapraid_run.sh`
 - A sync is refused when more than 200 files disappeared since the last one (`threshold` in `snapraid_run.sh`)
-- `homelab_snapraid_last_success_timestamp_seconds` and `homelab_smart_healthy` reach VictoriaMetrics via node_exporter; `src/vmalert/configs/backups.yml` alerts on both
+- `homelab_snapraid_last_success_timestamp_seconds` and `homelab_smart_healthy` reach VictoriaMetrics via node_exporter; `src/services/vmalert/configs/backups.yml` alerts on both
 
 ## Day to day
 - Media goes under `/srv/media`; mergerfs puts new files on the disk with the most free space. Services read the pool, never `/mnt/disk*`
 - **A disk failed** ([manual](https://www.snapraid.it/manual#recover)):
   1. Replace it and format as in step 3, same label and mount point
   2. Update its id in `vars.yml`, `tools/deploy_src.sh`, then `ssh autoadmin@websvcs install_snapraid` to reinstall `/etc/snapraid.conf`
-  3. On websvcs, replace the disk's line in `/etc/fstab` with the new one from `/root/homelab-rendered/src/snapraid/media.fstab`, then `systemctl daemon-reload && mount -a`
+  3. On websvcs, replace the disk's line in `/etc/fstab` with the new one from `/root/homelab-rendered/src/services/snapraid/media.fstab`, then `systemctl daemon-reload && mount -a`
   4. On websvcs: `snapraid fix -d dN` for a data disk; `snapraid sync -F` then `snapraid fix` for the parity disk
 - **Mass delete on purpose** (over the threshold): `snapraid sync --force-empty`, or raise the threshold and run `snapraid_run.sh sync`
 - SMART details: `smartctl -a /dev/disk/by-id/ata-...` on websvcs; `smartd` logs to the journal

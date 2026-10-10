@@ -52,7 +52,7 @@ ufw allow in from any to any port 5353 proto udp
 ```bash
 cd /root/homelab-rendered
 mkdir -p /etc/containers/systemd
-cp src/$(hostname -s)/net.network /etc/containers/systemd
+cp src/nodes/$(hostname -s)/net.network /etc/containers/systemd
 systemctl daemon-reload
 systemctl start net-network
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
@@ -74,15 +74,15 @@ mkdir -p /etc/opt/secrets
 chmod 700 /etc/opt/secrets
 cp /home/manualadmin/.ssh/id_ed25519* /etc/opt/secrets
 chmod 600 /etc/opt/secrets/*
-cp /root/homelab-rendered/src/podman/containers.conf /etc/containers
+cp /root/homelab-rendered/src/base/podman/containers.conf /etc/containers
 ```
-The secret helpers (`src/podman/*.sh`) run in place from `/root/homelab-rendered`;
+The secret helpers (`src/base/podman/*.sh`) run in place from `/root/homelab-rendered`;
 nothing is copied, so a deploy updates them.
 
 ## mDNS
 - Install dependencies and service
 ```bash
-/root/homelab-rendered/src/debian/install_svcs.sh mdns_repeater
+/root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
 ```
 
 ## Monitoring
@@ -92,7 +92,7 @@ adduser node_exporter --system
 groupadd node_exporter
 usermod -a -G node_exporter node_exporter
 cd /root/homelab-rendered
-src/debian/install_svcs.sh node_exporter
+src/base/debian/install_svcs.sh node_exporter
 ```
 
 - Allow access from metrics container to host in order to scrape node_exporter

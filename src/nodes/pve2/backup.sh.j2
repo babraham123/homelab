@@ -3,11 +3,11 @@
 # backup_orchestrator to pull, then backs up every VM on this host to PBS through the
 # API. Retention is prune.sh, which the orchestrator runs after its own upload.
 # Usage:
-#   src/pve2/backup.sh
+#   src/nodes/pve2/backup.sh
 
 set -euo pipefail
-# shellcheck source=src/debian/backup_lib.sh
-source /root/homelab-rendered/src/debian/backup_lib.sh
+# shellcheck source=src/base/debian/backup_lib.sh
+source /root/homelab-rendered/src/base/debian/backup_lib.sh
 
 node=$(hostname)
 
@@ -28,9 +28,9 @@ stage_paths /etc/pve /etc/proxmox-backup /etc/network/interfaces /etc/resolv.con
   /root/.ssh /var/lib/vz/snippets /usr/local/bin
 stage_finish
 
-websvcs=$(/root/homelab-rendered/src/pve2/get_vm_id.sh websvcs)
-devtop=$(/root/homelab-rendered/src/pve2/get_vm_id.sh devtop)
-gaming=$(/root/homelab-rendered/src/pve2/get_vm_id.sh gaming)
+websvcs=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs)
+devtop=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop)
+gaming=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh gaming)
 
 # devtop and gaming share the GPU. vzdump launches a paused QEMU, GPU attached, to read
 # a stopped VM's disks whatever the mode, and the hookscript then stops the other VM.

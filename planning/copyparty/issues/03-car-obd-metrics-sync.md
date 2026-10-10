@@ -13,8 +13,8 @@ metrics stack.
 
 ## Change
 
-- `src/websvcs/car_ingest.sh` + `car_ingest.{service,timer}` (every 15 min while
-  websvcs is up), installed by a `car_ingest` case in `src/websvcs/install_svcs.sh`:
+- `src/nodes/websvcs/car_ingest.sh` + `car_ingest.{service,timer}` (every 15 min while
+  websvcs is up), installed by a `car_ingest` case in `src/nodes/websvcs/install_svcs.sh`:
   - scan `/var/opt/copyparty/data/car/` for files not recorded in
     `/var/lib/car_ingest/state` (keyed by sha256, so re-uploads are skipped);
   - convert each file to VictoriaMetrics import format with the original sample
@@ -28,7 +28,7 @@ metrics stack.
   - record file hash, sample count and outcome; move failed files to `car/failed/`;
   - write `car_ingest_last_success_timestamp_seconds` and
     `car_ingest_files_total{result=...}` to `/var/lib/node_exporter/textfile_collector/`.
-- Grafana dashboard `src/grafana/dashboards/car.json`: trip selector (`trip` label),
+- Grafana dashboard `src/services/grafana/dashboards/car.json`: trip selector (`trip` label),
   speed/RPM/coolant/fuel-trim/voltage panels, and a Geomap panel if GPS is present.
 - Keep the raw CSVs in copyparty permanently. They are the source of truth and can be
   re-imported.

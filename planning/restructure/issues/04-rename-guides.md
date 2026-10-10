@@ -1,6 +1,6 @@
 # 04. Rename guides to match node names
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: user item 55
@@ -17,3 +17,6 @@ homesite. Optionally add `mkdocs-redirects` entries in homesite for the old URLs
 they're public.
 
 ## Comments
+- 2026-10-10: Renamed. The only links were in `docs/installation.md` and `CONTEXT.md`;
+  no homesite blog post links into these guides. Re-rendered into
+  `homesite/src/www/docs/homelab`. No redirects: homesite has no `mkdocs-redirects`.

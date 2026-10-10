@@ -1,7 +1,7 @@
 #!/bin/bash
 # Checks if the current user is root.
 # Usage:
-#   /root/homelab-rendered/src/debian/is_root.sh
+#   /root/homelab-rendered/src/base/debian/is_root.sh
 set -euo pipefail
 
 if [ "$(id -u)" != "0" ]; then

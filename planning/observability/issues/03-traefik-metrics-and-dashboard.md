@@ -7,7 +7,7 @@ Source: review finding 20
 
 ## Change
 
-- `src/traefik/static.yml.j2`:
+- `src/services/traefik/static.yml.j2`:
   ```yaml
   entryPoints:
     metrics:
@@ -20,11 +20,11 @@ Source: review finding 20
       addServicesLabels: true
   ```
 - Scrape from each node's collector, which is on the same `net.network` as Traefik:
-  `src/secsvcs/prometheus.yml.j2`, `src/homesvcs/prometheus.yml.j2`,
-  `src/websvcs/prometheus.yml.j2` → `targets: ['{{ <node>.container_subnet }}.6:8082']`
+  `src/nodes/secsvcs/prometheus.yml.j2`, `src/nodes/homesvcs/prometheus.yml.j2`,
+  `src/nodes/websvcs/prometheus.yml.j2` → `targets: ['{{ <node>.container_subnet }}.6:8082']`
   with `instance` relabelled to `<proxy>.SITE`. No `PublishPort` needed.
 - Dashboard: import Grafana.com **17346** ("Traefik Official Standalone Dashboard",
-  Traefik v2/v3, Prometheus) into `src/grafana/dashboards/traefik.json`; fix the
+  Traefik v2/v3, Prometheus) into `src/services/grafana/dashboards/traefik.json`; fix the
   datasource UID to the VictoriaMetrics one used by the other dashboards. Verify the
   ID before importing; 4475 is the older community one.
 - Once router labels exist, add alerts: `Traefik5xxRate`

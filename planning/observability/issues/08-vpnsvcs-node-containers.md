@@ -34,12 +34,12 @@ with no resource argument, only uniformity.
 Design from observability/04's Answer: every container uses `Network=host` and binds to
 loopback, and vmagent pushes to secsvcs. Nothing new listens off `127.0.0.1`.
 
-Quadlets under `src/vpnsvcs/`:
+Quadlets under `src/nodes/vpnsvcs/`:
 
-- `node_exporter` (reuse `src/node_exporter/`, textfile collector directory as on the
+- `node_exporter` (reuse `src/base/node_exporter/`, textfile collector directory as on the
   other nodes): `--web.listen-address=127.0.0.1:9100`, `--pid=host`, `/` mounted at
   `/host:ro,rslave` with `--path.rootfs=/host`;
-- `fluentbit` (journald → VictoriaLogs at `logs.SITE`; reuse `src/fluentbit/` with the
+- `fluentbit` (journald → VictoriaLogs at `logs.SITE`; reuse `src/services/fluentbit/` with the
   VPS's unit list): `http_listen: 127.0.0.1`;
 - `vmagent` (the shared template, with a `Network=host` branch and a `vpnsvcs)` case in
   `render_host.sh`): scrapes node_exporter, Headscale (`127.0.0.1:9090`), tailscaled
@@ -52,8 +52,8 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
 
 ## Prerequisites
 
-- `src/vpnsvcs/install_svcs.sh.j2` grows a `podman` case that installs Podman and copies
-  `src/podman/*.sh` and `containers.conf`. No `net.network`: with host networking,
+- `src/nodes/vpnsvcs/install_svcs.sh.j2` grows a `podman` case that installs Podman and copies
+  `src/base/podman/*.sh` and `containers.conf`. No `net.network`: with host networking,
   netavark adds no nftables rules. Still compare `nft list ruleset` before and after.
 - The telemetry names resolve to secsvcs through `/etc/hosts`, a manual step in
   `docs/guides/vpnsvcs.md.j2`.
@@ -62,7 +62,7 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   vmagent, the same credential the other vmagents use (maintainer decision 2026-09-27).
 - The VPS joins the image-updater rollout (image-updater/05) so its images are scanned
   like the others.
-- Alerts: `src/vmalert/configs/vps.yml` with `VpsMetricsAbsent`
+- Alerts: `src/services/vmalert/configs/vps.yml` with `VpsMetricsAbsent`
   (`absent_over_time(up{job="node_exporter",host="vpnsvcs.SITE"}[5m])`). A pushing host can't raise `up == 0`,
   so exclude the VPS from observability/01's `NodeDown`.
 
@@ -94,12 +94,12 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   follows it.
 
 - 2026-10-07: done. `install_podman` (Debian's podman, age/jq/yq/jinjanator, the shell
-  secret driver, auto-update timer), then `node_exporter` (`src/vpnsvcs/node_exporter.container.j2`:
+  secret driver, auto-update timer), then `node_exporter` (`src/nodes/vpnsvcs/node_exporter.container.j2`:
   host net + pid, `/` at `/host`, systemd collector over the mounted sockets, unit
   filter from the inventory), `fluentbit` and `vmagent` from the shared templates,
   which now branch on an empty `subnet` from `render_host.sh vpnsvcs` to
-  `Network=host` and loopback listeners. `src/vpnsvcs/prometheus.yml.j2` scrapes the six
-  jobs; `src/vpnsvcs/secrets_template.yaml` holds the two passwords for
+  `Network=host` and loopback listeners. `src/nodes/vpnsvcs/prometheus.yml.j2` scrapes the six
+  jobs; `src/nodes/vpnsvcs/secrets_template.yaml` holds the two passwords for
   `secret_update.sh vpnsvcs`. `vps.yml` has `VpsMetricsAbsent`; `NodeDown` keeps the VPS
   (it fires if the node_exporter container dies under a live vmagent). ADR 0007.
   `geoip_generator` stays a host unit. Acceptance checks are in the apply note, step 9.
@@ -112,7 +112,7 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   `ip_nonlocal_bind`; ufw admits only `<subnet>.7`. The "nothing off loopback"
   acceptance becomes "nothing new reachable from outside" (an `nmap` from off the VPS).
   ADR 0007 updated.
-- 2026-10-10: follow-up done. `geoip_generator` is a quadlet: `src/haproxy/geoip_generator.Containerfile`
+- 2026-10-10: follow-up done. `geoip_generator` is a quadlet: `src/services/haproxy/geoip_generator.Containerfile`
   builds haproxy-mapper from source and adds the script, built on the VPS by
   `install_geoip_generator` (secsvcs's `build_haproxy_mapper` and the binary copy are
   gone). The license key is a podman secret from `vpnsvcs.yaml`; the container runs

@@ -23,12 +23,12 @@ Keep secrets out of git and write them to disk encrypted with SOPS and AGE.
 - pve1 holds the source of truth: one SOPS file per host at
   `/root/secrets/<host>.yaml`, encrypted to pve1's AGE key. SOPS encrypts YAML values
   but not keys, so the file is human-readable.
-- `src/pve1/secret_update.sh <host>` edits that file, re-encrypts it with plain `age`
+- `src/nodes/pve1/secret_update.sh <host>` edits that file, re-encrypts it with plain `age`
   to two recipients (pve1's key and the host's ed25519 SSH key; SOPS doesn't support
   SSH keys), and installs it on the host at `/etc/opt/secrets/secrets.yaml.age`.
-- Git holds only `src/<node>/secrets_template.yaml`: secret names with empty values
+- Git holds only `src/nodes/<node>/secrets_template.yaml`: secret names with empty values
   and the command used to generate each one.
-- Podman uses the `shell` secrets driver (`src/podman/containers.conf`). Podman stores
+- Podman uses the `shell` secrets driver (`src/base/podman/containers.conf`). Podman stores
   only placeholder values; at container startup `get_secret_by_id.sh` decrypts the
   host file and returns the requested value.
 - Apps that only read secrets from a config file use `*.j2.j2` second-pass templates:

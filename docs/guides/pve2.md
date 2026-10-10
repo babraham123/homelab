@@ -9,7 +9,7 @@ Initial setup for the secondary VM host, PVE2. Handles VM management services.
 
 - Ensure mutual exclusion between VMs that use the GPU: the hook script, copied to
   `local:snippets` and attached to devtop and gaming. Rerun after any deploy that
-  changes `src/pve2/hookscript.pl`.
+  changes `src/nodes/pve2/hookscript.pl`.
 ```bash
 ssh autoadmin@pve2 install_hookscript
 ```

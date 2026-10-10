@@ -46,7 +46,7 @@ Every request must pass Authelia (maintainer decision in `copyparty/spec.md`), b
 
 - Recommendation between options 1 and 2 (depends on Car Scanner's auto-save support,
   see copyparty/02).
-- The Termux script, committed under `src/copyparty/termux/` with setup steps in
+- The Termux script, committed under `src/services/copyparty/termux/` with setup steps in
   `docs/guides/`.
 - The Authelia and copyparty config for the upload identity, if option A above is
   chosen.

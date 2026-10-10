@@ -7,7 +7,7 @@ Source: found in observability/04 (2026-09-27)
 
 ## Problem
 
-`src/victoriametrics/vmagent.container.j2.j2` mounts `vmagentdata.volume` at
+`src/services/victoriametrics/vmagent.container.j2.j2` mounts `vmagentdata.volume` at
 `/vmagentdata`, but never sets `-remoteWrite.tmpDataPath`. vmagent's default is the
 relative path `vmagent-remotewrite-data`, so the on-disk queue is written to the
 container's own writable layer. Nothing uses the volume.
@@ -38,7 +38,7 @@ About 1 GiB:
   day of outage, so 1 GiB is weeks. The number is an estimate; confirm it with
   `vmagent_remotewrite_pending_data_bytes` during the acceptance test and adjust.
 - **Past the cap:** vmagent drops the oldest data, and the existing
-  `PersistentQueueIsDroppingData` rule in `src/vmalert/configs/vmagent.yml` fires.
+  `PersistentQueueIsDroppingData` rule in `src/services/vmalert/configs/vmagent.yml` fires.
 
 Update observability/04's Answer (follow-up step 2) and observability/08 to point here,
 since this fix no longer rides with 08.
@@ -52,12 +52,12 @@ since this fix no longer rides with 08.
 
 ## Answer
 
-Done in `src/victoriametrics/vmagent.container.j2.j2`: the shared `Exec=` now carries
+Done in `src/services/victoriametrics/vmagent.container.j2.j2`: the shared `Exec=` now carries
 `--remoteWrite.tmpDataPath="/vmagentdata"` and `--remoteWrite.maxDiskUsagePerURL="1GiB"`.
 homesvcs and websvcs both render from this template, and observability/08's VPS branch
 inherits the flags. `tools/render_src.sh` renders cleanly with both flags in the quadlet.
 
-- **No alert change.** `PersistentQueueIsDroppingData` in `src/vmalert/configs/vmagent.yml`
+- **No alert change.** `PersistentQueueIsDroppingData` in `src/services/vmalert/configs/vmagent.yml`
   already watches `vm_persistentqueue_bytes_dropped_total`, which vmagent increments when
   the 1 GiB cap forces it to drop the oldest blocks.
 - **Cutover.** The first restart after deploy still loses whatever sits in the old rootfs

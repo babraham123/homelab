@@ -1,15 +1,15 @@
 #!/bin/bash
 # Updates and installs custom secrets.
 # Usage:
-#   /root/homelab-rendered/src/pve1/secret_update.sh SUBDOMAIN
+#   /root/homelab-rendered/src/nodes/pve1/secret_update.sh SUBDOMAIN
 
 set -euo pipefail
 
 host="$1"
 addr="manualadmin@${host}"
 
-/root/homelab-rendered/src/debian/is_root.sh
-/root/homelab-rendered/src/debian/is_reachable.sh "$host"
+/root/homelab-rendered/src/base/debian/is_root.sh
+/root/homelab-rendered/src/base/debian/is_reachable.sh "$host"
 
 SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)
 export SOPS_AGE_RECIPIENTS
@@ -31,6 +31,6 @@ sudo chown root:root /etc/opt/secrets/secrets.yaml.age
 
 echo "placeholder" > /tmp/placeholder.txt
 sudo podman secret rm --all
-sudo /root/homelab-rendered/src/podman/list_secrets.sh | xargs -I% sudo podman secret create "%" /tmp/placeholder.txt
+sudo /root/homelab-rendered/src/base/podman/list_secrets.sh | xargs -I% sudo podman secret create "%" /tmp/placeholder.txt
 sudo podman secret ls
 '

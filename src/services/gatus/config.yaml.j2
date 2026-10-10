@@ -11,7 +11,7 @@ storage:
   type: postgres
   path: "postgres://gatus@pgdb.{{ site.url }}:5432/gatus"
 
-# The weekly backup run: src/pve1/backup_orchestrator.timer
+# The weekly backup run: src/nodes/pve1/backup_orchestrator.timer
 maintenance:
   start: "02:00"
   duration: 3h
@@ -58,7 +58,7 @@ internal-endpoint: &internal
 # these ~8 endpoints is ~4 requests a minute at HAProxy, nothing against its
 # stick-table limits (conn_rate(3s) > 50). Every check passes through Authelia's
 # ForwardAuth, so when auth is down every endpoint fails; Alertmanager inhibits the
-# rest behind the authelia EndpointDown (src/alertmanager/config.yml.j2.j2).
+# rest behind the authelia EndpointDown (src/services/alertmanager/config.yml.j2.j2).
 tier1-endpoint: &tier1
   <<: *internal
   interval: 2m
@@ -85,7 +85,7 @@ endpoints:
 {%- endif %}
 {% endfor %}
 
-  # Internal CA, year-long certs (src/certificates/self_signed_cert_gen.sh). LDAPS is
+  # Internal CA, year-long certs (src/base/certificates/self_signed_cert_gen.sh). LDAPS is
   # the one TLS-on-connect service without client-certificate auth: Postgres negotiates
   # TLS after connecting and Mosquitto requires a client certificate, so cert_notifier
   # covers those. No dns-resolver here: the container's resolver is the internal DNS.

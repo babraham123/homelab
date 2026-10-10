@@ -7,7 +7,7 @@ Source: review finding 10
 
 ## Problem
 
-`src/traefik/static.yml.j2` loads `github.com/bitrvmpd/traefik-plugin-rewrite-headers`
+`src/services/traefik/static.yml.j2` loads `github.com/bitrvmpd/traefik-plugin-rewrite-headers`
 v0.0.1 from GitHub at startup via Yaegi: a single-maintainer, unpinned-by-digest
 dependency inside the TLS terminator, plus a hard startup dependency on GitHub.
 
@@ -29,15 +29,15 @@ dependency inside the TLS terminator, plus a hard startup dependency on GitHub.
    Take that block only; drop its `os.Stdout.WriteString` debug line and leave
    `.traefik.yml` `import:` pointing at your fork. Add a test case for `Host` next to the
    existing ones.
-2. Vendor the source into this repo at `src/traefik/plugins-local/src/github.com/<you>/traefik-plugin-rewrite-headers/`
+2. Vendor the source into this repo at `src/services/traefik/plugins-local/src/github.com/<you>/traefik-plugin-rewrite-headers/`
    (Traefik's local-plugin layout requires this exact path shape and a `.traefik.yml`
    manifest at the plugin root).
 3. In `static.yml.j2` replace `experimental.plugins.rewriteHeaders` with
    `experimental.localPlugins.rewriteHeaders.moduleName: github.com/<you>/traefik-plugin-rewrite-headers`.
-4. Mount it in every Traefik quadlet (`src/{secsvcs,homesvcs,websvcs}/traefik/traefik.container.j2`):
+4. Mount it in every Traefik quadlet (`src/nodes/{secsvcs,homesvcs,websvcs}/traefik/traefik.container.j2`):
    `Volume=/etc/opt/traefik/plugins-local:/plugins-local:ro`, and copy the directory in
    each node's `install_svcs.sh traefik` case.
-5. Middleware reference in `src/secsvcs/traefik/basic_auth.yml` stays `vm-auth-token`;
+5. Middleware reference in `src/nodes/secsvcs/traefik/basic_auth.yml` stays `vm-auth-token`;
    the plugin key name is unchanged.
 
 ## Acceptance

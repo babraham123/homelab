@@ -10,7 +10,7 @@ Blocked by: script-fixes/01
 
 - `tools/parse_images.sh <node>`, called from `tools/render_src.sh` for secsvcs,
   homesvcs and websvcs:
-  - read `case` entries of `src/<node>/install_svcs.sh` in file order (same order
+  - read `case` entries of `src/nodes/<node>/install_svcs.sh` in file order (same order
     `gen_dispatch_cmds.sh` uses for `install_all_svcs`);
   - map each case to the `.container` files it copies;
   - read `homelab.upstream`, `homelab.build` and `homelab.update_last` labels;

@@ -2,19 +2,19 @@
 # Copy the acme.json files from secsvcs, websvcs and homesvcs to pve1. Parse and distribute the
 # ACME certificates to pve1, pve2, pbs2 and pfsense.
 # Usage:
-#   /root/homelab-rendered/src/certificates/acme_transfer.sh
+#   /root/homelab-rendered/src/base/certificates/acme_transfer.sh
 set -euo pipefail
 
-/root/homelab-rendered/src/debian/is_root.sh
-/root/homelab-rendered/src/debian/is_reachable.sh pve1
-/root/homelab-rendered/src/debian/is_reachable.sh pve2
-/root/homelab-rendered/src/debian/is_reachable.sh router
+/root/homelab-rendered/src/base/debian/is_root.sh
+/root/homelab-rendered/src/base/debian/is_reachable.sh pve1
+/root/homelab-rendered/src/base/debian/is_reachable.sh pve2
+/root/homelab-rendered/src/base/debian/is_reachable.sh router
 
 cd /root/acme
 
 function download() {
   host="$1"
-  /root/homelab-rendered/src/debian/is_reachable.sh "$host"
+  /root/homelab-rendered/src/base/debian/is_reachable.sh "$host"
 
   ssh "autoadmin@${host}" copy_acme_certs
   scp "autoadmin@${host}:/home/autoadmin/acme.json" "/root/acme/${host}.acme.json"

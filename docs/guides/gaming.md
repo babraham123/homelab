@@ -55,12 +55,12 @@ sudo apt install -y moonlight-qt vim less iproute2 git netcat
 sudo apt update
 sudo apt upgrade
 ```
-- Install the service, rendered from `src/moonlight/moonlight.service.j2`
+- Install the service, rendered from `src/services/moonlight/moonlight.service.j2`
 ```bash
 # From your local machine
 out=$(mktemp -d)/homelab-rendered
 tools/render_src.sh "$out"
-scp "$out/src/moonlight/moonlight.service" manualadmin@SUBDOMAIN:
+scp "$out/src/services/moonlight/moonlight.service" manualadmin@SUBDOMAIN:
 # On the Pi
 sudo install -m 644 moonlight.service /etc/systemd/system/
 sudo systemctl daemon-reload

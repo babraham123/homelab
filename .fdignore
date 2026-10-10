@@ -18,8 +18,8 @@ vars.template.yml
 all_vars.yml
 docs/diagrams
 tools
-src/grafana/dashboards/*.json
-src/vmalert/configs/*.yml
+src/services/grafana/dashboards/*.json
+src/services/vmalert/configs/*.yml
 
 # Invalid file types
 *.png

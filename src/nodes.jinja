@@ -16,8 +16,8 @@
 {%- set images = {} -%}
 
 {%- macro path(node, script) -%}
-{#- upload_src.sh ships only src/router to the router, as /root/router-src -#}
-{{- script | replace('router/', '/root/router-src/', 1) if node == 'router'
+{#- upload_src.sh ships only src/nodes/router to the router, as /root/router-src -#}
+{{- script | replace('nodes/router/', '/root/router-src/', 1) if node == 'router'
     else '/root/homelab-rendered/src/' ~ script -}}
 {%- endmacro -%}
 
@@ -26,11 +26,11 @@
   {%- set entries = [] -%}
   {%- for svc in spec.get('debian_services', []) -%}
     {%- do entries.append({'name': 'install_' ~ svc,
-        'run': ['sudo ' ~ path(node, 'debian/install_svcs.sh') ~ ' ' ~ svc]}) -%}
+        'run': ['sudo ' ~ path(node, 'base/debian/install_svcs.sh') ~ ' ' ~ svc]}) -%}
   {%- endfor -%}
   {%- set install_all = [] -%}
   {%- for svc in services -%}
-    {%- do install_all.append('sudo ' ~ path(node, node ~ '/install_svcs.sh') ~ ' ' ~ svc) -%}
+    {%- do install_all.append('sudo ' ~ path(node, 'nodes/' ~ node ~ '/install_svcs.sh') ~ ' ' ~ svc) -%}
     {%- do entries.append({'name': 'install_' ~ svc, 'run': [install_all[-1]]}) -%}
   {%- endfor -%}
   {%- if spec.get('install_all_svcs', false) -%}

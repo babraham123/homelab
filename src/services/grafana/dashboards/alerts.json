@@ -464,5 +464,5 @@
   "title": "Homelab alerts",
   "uid": "homelab-alerts",
   "version": 1,
-  "description": "Firing vmalert rules (src/vmalert/configs/homelab.yml, backups.yml) and the signals they watch."
+  "description": "Firing vmalert rules (src/services/vmalert/configs/homelab.yml, backups.yml) and the signals they watch."
 }

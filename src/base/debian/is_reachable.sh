@@ -1,7 +1,7 @@
 #!/bin/bash
 # Checks if the given server is reachable.
 # Usage:
-#   /root/homelab-rendered/src/debian/is_reachable.sh SUBDOMAIN
+#   /root/homelab-rendered/src/base/debian/is_reachable.sh SUBDOMAIN
 set -euo pipefail
 
 subdomain=$1

@@ -15,7 +15,7 @@ down and there is no record of last week's working tag.
 
 ## Proposed change
 
-- Pin every `Image=` to `name:tag@sha256:...` (`src/pve1/lookup_docker_tag.sh` already
+- Pin every `Image=` to `name:tag@sha256:...` (`src/nodes/pve1/lookup_docker_tag.sh` already
   exists to help find tags).
 - Remove `AutoUpdate=registry` (or keep it only on images you genuinely don't care
   about) and document the manual upgrade procedure in `docs/maintenance.md` (fills one of

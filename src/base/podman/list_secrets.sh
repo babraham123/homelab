@@ -1,7 +1,7 @@
 #!/bin/bash
 # Prints out all custom secret names (for podman).
 # Usage:
-#   src/podman/list_secrets.sh
+#   src/base/podman/list_secrets.sh
 
 set -euo pipefail
 

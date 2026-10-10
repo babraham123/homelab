@@ -1,7 +1,7 @@
 #!/bin/bash
 # Find all tags associated with a given docker image tag.
 # Usage:
-#   /root/homelab-rendered/src/pve1/lookup_docker_tag.sh REPO TAG
+#   /root/homelab-rendered/src/nodes/pve1/lookup_docker_tag.sh REPO TAG
 
 set -euo pipefail
 

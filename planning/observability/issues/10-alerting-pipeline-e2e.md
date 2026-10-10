@@ -25,9 +25,9 @@ staleness alerts depend on this path.
 ## Defects (confirmed in the tree 2026-09-26; fix before the test plan)
 
 1. **Missing ports.**
-   - `src/alertmanager/config.yml.j2.j2:83` webhook is `http://ntfy-alertmanager.{{ site.url }}`,
+   - `src/services/alertmanager/config.yml.j2.j2:83` webhook is `http://ntfy-alertmanager.{{ site.url }}`,
      but ntfy-alertmanager listens on `:2588` (`ntfy-alertmanager.scfg.j2.j2:8`).
-   - `src/alertmanager/ntfy-alertmanager.scfg.j2.j2:68` topic is
+   - `src/services/alertmanager/ntfy-alertmanager.scfg.j2.j2:68` topic is
      `http://push.{{ site.url }}/alert`, but ntfy listens on `:2586` (`ntfy/config.yml.j2.j2:24`).
 
    vmalert's URLs all carry explicit container ports (`:8428`, `:9093`). Whichever way
@@ -41,7 +41,7 @@ staleness alerts depend on this path.
 2. **Typo.** `ntfy-alertmanager.scfg.j2.j2:45` `instance "sevsvcs.{{ site.url }}"` should be
    `secsvcs`.
 3. **Instance tags never match.** Instance labels carry a port (the relabel in
-   `src/secsvcs/prometheus.yml.j2:50` sets `secsvcs.{{ site.url }}:9100`), while the scfg
+   `src/nodes/secsvcs/prometheus.yml.j2:50` sets `secsvcs.{{ site.url }}:9100`), while the scfg
    matches bare hostnames. ntfy-alertmanager matches label values exactly. Preferred fix:
    in every `prometheus.yml.j2` relabel a separate `host` label (`secsvcs.SITE`, no
    port) and match on that in the scfg, so the same tag block works for node_exporter,
@@ -65,7 +65,7 @@ Run each step and record the result under `## Answer`.
 | # | Test | How | Expect |
 |---|---|---|---|
 | 1 | Alertmanager → ntfy, isolated | `amtool alert add PipelineTest severity=warning instance=test --alertmanager.url=https://alert.SITE` (basic auth), or POST `/api/v2/alerts` | ntfy notification priority 3, tag `warning`; email to `+alert@` and `+alert2@` |
-| 2 | Full path from vmalert | temporary `src/vmalert/configs/pipeline_test.yml`: `alert: PipelineTest, expr: vector(1), labels: {severity: critical}` | ntfy priority 5, `rotating_light`, within `group_wait` (30 s) + eval interval |
+| 2 | Full path from vmalert | temporary `src/services/vmalert/configs/pipeline_test.yml`: `alert: PipelineTest, expr: vector(1), labels: {severity: critical}` | ntfy priority 5, `rotating_light`, within `group_wait` (30 s) + eval interval |
 | 3 | Severity map | repeat 1 for `error`, `info` | priorities 4 and 1 |
 | 4 | Inhibition | fire `critical` and `warning` with the same `alertname` and `instance` | only the critical one is delivered |
 | 5 | Resolve | delete the test rule / let the amtool alert expire | ntfy `resolved,tada` priority 1; resolved email |
@@ -85,11 +85,11 @@ The whole path runs on secsvcs, so it cannot report its own death: secsvcs down,
 Alertmanager down, or email and ntfy both broken. The VPS is off-site, always on and
 reachable over the tailnet, so it watches from outside.
 
-- **Watchdog rule:** `src/vmalert/configs/pipeline.yml`: `alert: Watchdog`, `expr: vector(1)`,
+- **Watchdog rule:** `src/services/vmalert/configs/pipeline.yml`: `alert: Watchdog`, `expr: vector(1)`,
   `labels: {severity: none}`. Route it in Alertmanager to a `null` receiver so it never
   notifies. It only needs to be *present* in Alertmanager.
-- **VPS checker (pull, not push):** `src/vpnsvcs/deadman.sh` + `deadman.{service,timer}`
-  (every 5 min), a new `deadman` case in `src/vpnsvcs/install_svcs.sh.j2`.
+- **VPS checker (pull, not push):** `src/nodes/vpnsvcs/deadman.sh` + `deadman.{service,timer}`
+  (every 5 min), a new `deadman` case in `src/nodes/vpnsvcs/install_svcs.sh.j2`.
   - Over the tailnet:
     - `GET https://alert.{{ site.url }}/api/v2/alerts?filter=alertname="Watchdog"`
       (basic auth). This proves vmalert → Alertmanager is alive and evaluating.
@@ -125,8 +125,8 @@ reachable over the tailnet, so it watches from outside.
 - 2026-10-07: the code half is in. Defects 1–3 fixed: ports on the webhook and the
   topic, the typo, and a `host` label on every target in the three
   `prometheus.yml.j2` files that ntfy-alertmanager now tags on (one block per node,
-  vpnsvcs included for 08). `Watchdog` is `src/vmalert/configs/pipeline.yml`, routed
-  to a `null` receiver. The VPS checker is `src/vpnsvcs/deadman.sh.j2` with
+  vpnsvcs included for 08). `Watchdog` is `src/services/vmalert/configs/pipeline.yml`, routed
+  to a `null` receiver. The VPS checker is `src/nodes/vpnsvcs/deadman.sh.j2` with
   `deadman.{service,timer}` and an `install_deadman` case; it mails through msmtp with
   pve1's account (AppArmor override in `install_deadman`), pushes to ntfy.sh with curl,
   and reads three hand-placed files in

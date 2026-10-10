@@ -146,9 +146,9 @@ Improve latency when under heavy load
 
 ### Share connectivity with the PVE host and other VMs
 - Configure `vmbr0` to be static, use the LAN network and have no physical interface. 
-  - Paste in `src/pve1/interfaces`
+  - Paste in `src/nodes/pve1/interfaces`
     - `sudo nano /etc/network/interfaces`
-  - Paste in `src/pve1/resolv.conf`
+  - Paste in `src/nodes/pve1/resolv.conf`
     - `sudo nano /etc/resolv.conf`
 - In pfSense,
 	- Attach `vmbr0` as a network device
@@ -170,7 +170,7 @@ Improve latency when under heavy load
 For local-only overrides of existing routes
 - Go to Services >> DNS Resolver
 - Set "System Domain Local Zone Type" to "Redirect"
-- Paste `src/dns/unbound.conf` into "Custom options"
+- Paste `src/services/dns/unbound.conf` into "Custom options"
 
 ### Certificate
 - Setup cert import
@@ -282,7 +282,7 @@ Upload to Victoria Metrics:
 - Get the metrics admin password from secsvcs
 ```bash
 ssh manualadmin@secsvcs
-sudo /root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_password
+sudo /root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_password
 exit
 ```
 - Install the plugins

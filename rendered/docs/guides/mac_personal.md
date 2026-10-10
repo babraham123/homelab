@@ -55,9 +55,9 @@ vim vars.yml
 tools/render_src.sh /tmp/homelab-rendered
 
 cd /tmp/homelab-rendered/src
-cp debian/aliases.zsh ~/.oh-my-zsh/custom
-cp debian/functions.zsh ~/.oh-my-zsh/custom
-cp debian/ssh_config ~/.ssh/config
+cp base/debian/aliases.zsh ~/.oh-my-zsh/custom
+cp base/debian/functions.zsh ~/.oh-my-zsh/custom
+cp base/debian/ssh_config ~/.ssh/config
 chmod 600 ~/.ssh/config
 ```
 
@@ -76,9 +76,9 @@ networksetup -switchtolocation Home
 ```bash
 sudo ipconfig setverbose 1
 networksetup -switchtolocation Automatic
-sudo cp macos/vpn.sh /usr/local/bin
-sudo cp macos/detect_wifi_change.sh /usr/local/bin
-cp macos/com.my.detect.wifi.change.plist ~/Library/LaunchAgents
+sudo cp base/macos/vpn.sh /usr/local/bin
+sudo cp base/macos/detect_wifi_change.sh /usr/local/bin
+cp base/macos/com.my.detect.wifi.change.plist ~/Library/LaunchAgents
 launchctl load ~/Library/LaunchAgents/com.my.detect.wifi.change.plist
 ```
 - Test by switching WiFi networks, confirm location changes

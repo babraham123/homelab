@@ -37,7 +37,7 @@ ufw enable
 ```bash
 cd /root/homelab-rendered
 apt install -y fail2ban python3-systemd
-cp src/debian/jail.local /etc/fail2ban
+cp src/base/debian/jail.local /etc/fail2ban
 echo "port = 2202" >> /etc/fail2ban/jail.local
 systemctl enable fail2ban
 systemctl restart fail2ban
@@ -52,8 +52,8 @@ fail2ban-client -d | grep sshd
 ```bash
 mkdir -p /etc/opt/secrets
 chmod 711 /etc/opt/secrets
-src/vpnsvcs/install_svcs.sh headscale
-cp src/headscale/headscale_private.yaml /etc/headscale/config.yaml
+src/nodes/vpnsvcs/install_svcs.sh headscale
+cp src/services/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
 ```
 
@@ -95,7 +95,7 @@ ssh manualadmin@secsvcs
 sudo podman run --rmi docker.io/authelia/authelia:latest authelia crypto rand --length 72 --charset rfc3986
 sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986
 # Store hashed and raw version of secret under hs_oidc_secret(_hash). id under hs_oidc_id
-ssh -t manualadmin@pve1 'sudo /root/homelab-rendered/src/pve1/secret_update.sh secsvcs'
+ssh -t manualadmin@pve1 'sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs'
 # Restart authelia to pick up hashed secret version
 sudo systemctl restart authelia
 exit
@@ -116,10 +116,10 @@ chmod 600 /etc/opt/secrets/*
 ```bash
 sudo su
 cd /root/homelab-rendered
-src/vpnsvcs/install_svcs.sh haproxy
+src/nodes/vpnsvcs/install_svcs.sh haproxy
 ```
 - Update Headscale
-  - `src/vpnsvcs/install_svcs.sh headscale`
+  - `src/nodes/vpnsvcs/install_svcs.sh headscale`
 - Update your DNS A record
   - Change the host from `vpn` to all subdomains `*`
   - Add another A record for the bare domain, host = `@`
@@ -140,7 +140,7 @@ src/vpnsvcs/install_svcs.sh haproxy
 headscale users create public
 headscale --user USER_ID preauthkeys create --expiration 100y
 # Setup client
-src/vpnsvcs/install_svcs.sh tailscaled
+src/nodes/vpnsvcs/install_svcs.sh tailscaled
 tailscale up --login-server https://vpn.janedoe.com:443 --accept-routes --snat-subnet-routes=false --authkey AUTH_KEY
 # Clamp MTU
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
@@ -219,7 +219,7 @@ tailscale ping --tsmp other_node
 
 - For Debian ([src](https://tailscale.com/kb/1626/install-debian-trixie))
 ```bash
-src/vpnsvcs/install_svcs.sh tailscaled
+src/nodes/vpnsvcs/install_svcs.sh tailscaled
 sudo tailscale up --login-server https://vpn.janedoe.com:443 --accept-routes --authkey AUTH_KEY
 # --exit-node=router
 ```
@@ -227,14 +227,14 @@ sudo tailscale up --login-server https://vpn.janedoe.com:443 --accept-routes --a
 - In cloud VM, check connected nodes: `sudo headscale nodes list`
 
 ## ACL policy
-- `src/headscale/headscale_acl.hujson.j2` → `/etc/headscale/acl.hujson`, installed by `install_svcs.sh headscale`
+- `src/services/headscale/headscale_acl.hujson.j2` → `/etc/headscale/acl.hujson`, installed by `install_svcs.sh headscale`
 - Membership comes from `vars.yml` (`users`, `tailscale_admin`, `tailscale_extra_acls`)
 - Every user must exist in `headscale users list` under that exact name (the `@` is only in the policy)
 - Reload after a change
 ```bash
 # after tools/upload_src.sh vpnsvcs ...
 cd /root/homelab-rendered/src
-cp headscale/headscale_acl.hujson /etc/headscale/acl.hujson
+cp services/headscale/headscale_acl.hujson /etc/headscale/acl.hujson
 # resolves users against the DB and runs the policy's tests; without the flag it only parses
 headscale policy check --file /etc/headscale/acl.hujson --bypass-grpc-and-access-database-directly
 systemctl reload headscale        # a failing policy is rejected
@@ -269,15 +269,15 @@ ufw allow in on $POD_IFACE from 10.13.0.0/24 to any port 53 proto udp
 ufw route allow in on $POD_IFACE out on tailscale0 to 192.168.4.20 port 443 proto tcp
 ufw route allow in on $POD_IFACE out on tailscale0 to 100.100.100.100 port 80 proto tcp
 # HAProxy and Headscale re-bind on the gateway
-src/vpnsvcs/install_svcs.sh haproxy
-cp src/headscale/headscale_private.yaml /etc/headscale/config.yaml
+src/nodes/vpnsvcs/install_svcs.sh haproxy
+cp src/services/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
 ```
-- On pve1: `sudo /root/homelab-rendered/src/pve1/secret_update.sh vpnsvcs` (fill in the two passwords from secsvcs.yaml)
+- On pve1: `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs` (fill in the two passwords from secsvcs.yaml)
 - Install and check
 ```bash
-src/vpnsvcs/install_svcs.sh fluentbit
-src/vpnsvcs/install_svcs.sh vmagent
+src/nodes/vpnsvcs/install_svcs.sh fluentbit
+src/nodes/vpnsvcs/install_svcs.sh vmagent
 ss -ltnp | grep -E ':(8405|9090|9100) '   # 8405, 9090 on 10.13.0.1 only
 podman exec vmagent wget -qO- 10.13.0.1:8405/metrics | head -3
 podman exec vmagent wget -qO- 100.100.100.100/metrics | head -3   # tailscaled through tailscale0
@@ -285,12 +285,12 @@ podman exec vmagent wget -qO- 100.100.100.100/metrics | head -3   # tailscaled t
 - From outside, `nmap -Pn -p- 12.34.56.78` shows no new ports
 - In VictoriaMetrics, `up{host="vpnsvcs.janedoe.com"}` is 1 for haproxy, headscale, tailscaled, vmagent, fluentbit and node_exporter
 - `logs.janedoe.com` shows the VPS's journal
-- If tailscaled stays down, bind its metrics elsewhere or drop its job from `src/vpnsvcs/prometheus.yml.j2`
+- If tailscaled stays down, bind its metrics elsewhere or drop its job from `src/nodes/vpnsvcs/prometheus.yml.j2`
 
 ## Geoblock by country
 - `geoip_generator`: a quadlet built on the VPS (haproxy-mapper and the script), run weekly by its timer; HAProxy reloads after each run
 - Needs the Podman setup from [Telemetry agents](#telemetry-agents)
-- Add `maxmind_license_key` to `/root/secrets/vpnsvcs.yaml` on pve1 (copy it from `pve1.yaml`), then `sudo /root/homelab-rendered/src/pve1/secret_update.sh vpnsvcs`
+- Add `maxmind_license_key` to `/root/secrets/vpnsvcs.yaml` on pve1 (copy it from `pve1.yaml`), then `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`
 ```bash
 sudo su
 cd /root/homelab-rendered
@@ -298,7 +298,7 @@ POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
 # Only the generator reaches the internet, for download.maxmind.com
 ufw route allow in on $POD_IFACE out on $NET_IFACE from 10.13.0.30 to any port 443 proto tcp
-src/vpnsvcs/install_svcs.sh geoip_generator
+src/nodes/vpnsvcs/install_svcs.sh geoip_generator
 systemctl start geoip_generator    # one run now
 ls /etc/haproxy/countries | wc -l  # about 250 maps
 ```
@@ -325,16 +325,16 @@ vim /etc/apparmor.d/usr.bin.msmtp +82
 ```
 ```
 /usr/bin/hostname PUx,
-/root/homelab-rendered/src/vpnsvcs/msmtp_password.sh PUx,
+/root/homelab-rendered/src/nodes/vpnsvcs/msmtp_password.sh PUx,
 ```
 ```bash
 apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
-cp /root/homelab-rendered/src/certificates/msmtprc /etc
+cp /root/homelab-rendered/src/base/certificates/msmtprc /etc
 echo test | msmtp -a default jdoe@gmail.com
 ```
 - Install the checker
 ```bash
-/root/homelab-rendered/src/vpnsvcs/install_svcs.sh deadman
+/root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh deadman
 journalctl -u deadman --no-pager | tail       # silent when the path is healthy
 ```
 - State: `/var/lib/deadman/` (`failures` counter, `firing` flag)

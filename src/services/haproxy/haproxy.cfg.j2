@@ -130,7 +130,7 @@ frontend http_all
     default_backend silent_drop_http
 
 # The built-in Prometheus exporter, on the podman bridge gateway for the local vmagent
-# only (src/vpnsvcs/prometheus.yml.j2, ufw); never bound to a public or tailnet address.
+# only (src/nodes/vpnsvcs/prometheus.yml.j2, ufw); never bound to a public or tailnet address.
 # The bridge appears when the first container starts, hence ip_nonlocal_bind.
 frontend prometheus
     mode http

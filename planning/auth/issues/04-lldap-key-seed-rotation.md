@@ -7,7 +7,7 @@ Source: review finding 17
 
 ## Problem
 
-`src/lldap/lldap.container.j2` binds `lldap_admin_password` to both
+`src/services/lldap/lldap.container.j2` binds `lldap_admin_password` to both
 `LLDAP_LDAP_USER_PASS` and `LLDAP_KEY_SEED`.
 
 ## Consequences of changing the key material (answer to the maintainer's question)
@@ -22,7 +22,7 @@ LLDAP docs for the exact behaviour of `LLDAP_KEY_SEED` / `key_file` before execu
 
 ## Change
 
-1. Add `lldap_key_seed` to `src/secsvcs/secrets_template.yaml` (gen: 64 alnum chars).
+1. Add `lldap_key_seed` to `src/nodes/secsvcs/secrets_template.yaml` (gen: 64 alnum chars).
 2. **Migration without a password reset:** set `lldap_key_seed`'s value to the *current*
    admin password string, so the derived key is unchanged. `secret_update.sh secsvcs`,
    restart lldap, confirm login. This step is a no-op cryptographically.

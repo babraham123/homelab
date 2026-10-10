@@ -12,11 +12,11 @@ captured crash-consistently inside the VM disk image.
 
 ## Change
 
-- `src/secsvcs/commands.sh pg_dumpall`: `podman exec postgres pg_dumpall -U postgres`
+- `src/nodes/secsvcs/commands.sh pg_dumpall`: `podman exec postgres pg_dumpall -U postgres`
   → `/var/opt/backups/postgres/pg_dumpall-<date>.sql.zst`, keep last 14, `chmod 600`.
   Use the `postgres_password` secret via `get_secret.sh` rather than trusting local
   auth.
-- Add `pg_dumpall)` to `src/secsvcs/dispatcher.sh` (regenerate sudoers via the normal
+- Add `pg_dumpall)` to `src/nodes/secsvcs/dispatcher.sh` (regenerate sudoers via the normal
   render).
 - Orchestrator (issue 01) calls `ssh autoadmin@secsvcs pg_dumpall` before `vzdump`, so
   the dump lands inside the VM image that PBS captures; PBS then carries it to pbs2 and

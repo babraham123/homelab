@@ -1,5 +1,5 @@
 # Host, scrape, auth, uptime and cert-expiry alerts. Every VM and host runs
-# node_exporter (src/node_exporter/node_runner.sh), scraped by its node's collector as
+# node_exporter (src/base/node_exporter/node_runner.sh), scraped by its node's collector as
 # job node_exporter (VMs) or node_exporter_pve (pve1, pve2). Backups are in
 # backups.yml; the VictoriaMetrics components have their own upstream files.
 # Severity is what ntfy-alertmanager maps to a push priority: critical (5), error (4),

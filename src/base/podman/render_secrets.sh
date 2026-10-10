@@ -3,7 +3,7 @@
 # Includes the given secrets as env vars while rendering.
 # The rendered file will be owned by root.
 # Usage:
-#   src/podman/render_secrets.sh FILENAME SECRET1,SECRET2
+#   src/base/podman/render_secrets.sh FILENAME SECRET1,SECRET2
 # Ref:
 # https://github.com/kpfleming/jinjanator
 # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_filters.html

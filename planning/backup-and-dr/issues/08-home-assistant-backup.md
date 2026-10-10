@@ -13,14 +13,14 @@ across versions.
 
 ## Change
 
-- Enable the HA backup integration in `src/home_assistant/configuration.yaml.j2`
+- Enable the HA backup integration in `src/services/home_assistant/configuration.yaml.j2`
   (`backup:`), and create a long-lived access token stored as `hass_backup_token` in the
   homesvcs secrets.
-- `src/homesvcs/commands.sh backup_hass`: call `POST /api/services/backup/create`
+- `src/nodes/homesvcs/commands.sh backup_hass`: call `POST /api/services/backup/create`
   (or `ha backups new` is Supervisor-only; container installs use the API), wait for
   completion, copy the resulting archive out of the `hassconfig` volume to
   `/var/opt/backups/hass/`, keep last 8.
-- Add `backup_hass)` to `src/homesvcs/dispatcher.sh`.
+- Add `backup_hass)` to `src/nodes/homesvcs/dispatcher.sh`.
 - Orchestrator (issue 01) calls it before `vzdump homesvcs`; the archive then rides
   inside the VM backup to pbs2 and offsite.
 

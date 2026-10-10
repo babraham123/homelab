@@ -10,7 +10,7 @@ Source: maintainer request 2026-09-27; upstream GUACAMOLE-2258
 ## Problem
 
 Guacamole's OpenID extension (≤ 1.6.0) only supports the implicit flow as a public client.
-The Authelia client in `src/authelia/configuration.yml.j2` therefore sets `public: true`,
+The Authelia client in `src/services/authelia/configuration.yml.j2` therefore sets `public: true`,
 `grant_types: [implicit]`, `response_types: [id_token]`, `token_endpoint_auth_method: none`
 and `require_pkce: false`. Implicit flow puts the ID token in the browser URL and is
 deprecated in OAuth 2.1.
@@ -33,12 +33,12 @@ PR and may change before merge.
 
 1. **Secrets:** add `guacamole_oidc_secret` (plaintext, websvcs) and
    `guacamole_oidc_secret_hash` (secsvcs). Follow the grafana/olive_tin pattern:
-   - `src/websvcs/secrets_template.yaml`: `guacamole_oidc_secret`
-   - `src/secsvcs/secrets_template.yaml`: `guacamole_oidc_secret` + `guacamole_oidc_secret_hash`,
+   - `src/nodes/websvcs/secrets_template.yaml`: `guacamole_oidc_secret`
+   - `src/nodes/secsvcs/secrets_template.yaml`: `guacamole_oidc_secret` + `guacamole_oidc_secret_hash`,
      with the `authelia crypto hash generate pbkdf2` comment
    - `planning/services-inventory/services.yml`: matching entries (`gen: *oidc_hash`,
      `remote: websvcs` for the plaintext)
-2. **Authelia** (`src/authelia/authelia.container.j2`, `configuration.yml.j2`, Guacamole client):
+2. **Authelia** (`src/services/authelia/authelia.container.j2`, `configuration.yml.j2`, Guacamole client):
    - `Secret=guacamole_oidc_secret_hash,type=env,target=GUAC_OIDC_HASH`
    - `client_secret: '{{ mustEnv "GUAC_OIDC_HASH" }}'` (in `{% raw %}` like the others)
    - remove `public: true` and its TODO
@@ -55,7 +55,7 @@ PR and may change before merge.
      claims there, but with code flow Authelia moves them to userinfo by default. Without
      this policy, `preferred_username` and `groups` drop out of the ID token and group
      permissions stop mapping.
-3. **Guacamole** (`src/guacamole/guacamole.container.j2`):
+3. **Guacamole** (`src/services/guacamole/guacamole.container.j2`):
    - bump `Image=` to the release that includes the PR
    - `Secret=guacamole_oidc_secret,type=env,target=OPENID_CLIENT_SECRET`
    - `OPENID_RESPONSE_TYPE=code`, `OPENID_PKCE_REQUIRED=true`

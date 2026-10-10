@@ -20,10 +20,10 @@ three things fail:
 ## Current state (from the repo)
 
 The plumbing exists:
-- HAProxy sends `send-proxy-v2` on every node backend (`src/haproxy/haproxy.cfg.j2:144-164`);
+- HAProxy sends `send-proxy-v2` on every node backend (`src/services/haproxy/haproxy.cfg.j2:144-164`);
 - Traefik's `web` and `websecure` entrypoints accept PROXY protocol and
   `X-Forwarded-*` from `[vpnsvcs.ip, pve1.subnet.1, pve2.subnet.1]`
-  (`src/traefik/static.yml.j2:41-55`). The gateway addresses are there because Tailscale
+  (`src/services/traefik/static.yml.j2:41-55`). The gateway addresses are there because Tailscale
   subnet routing SNATs (tailscale/tailscale#5573).
 
 Nobody has verified it end to end, and trusting the subnet gateways means anything

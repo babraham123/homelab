@@ -33,10 +33,10 @@ pve2 is up.
 ## Comments
 
 - 2026-09-27: 01 landed. The schedule is `OnCalendar=Sun *-*-* 01:00:00` in
-  `src/pve1/backup_orchestrator.timer` (not a .j2 yet), and the Gatus maintenance window
-  in `src/gatus/config.yaml.j2` mirrors it, so template both from `backup.schedule`. The
+  `src/nodes/pve1/backup_orchestrator.timer` (not a .j2 yet), and the Gatus maintenance window
+  in `src/services/gatus/config.yaml.j2` mirrors it, so template both from `backup.schedule`. The
   vzdump flags are `--storage pbs2 --mode snapshot` in `step_vzdump_pve1` and in
-  `run_backups` (`src/pve2/commands.sh.j2`). 01 asked the human to delete the UI jobs
+  `run_backups` (`src/nodes/pve2/commands.sh.j2`). 01 asked the human to delete the UI jobs
   already. PBS prune/GC schedules only fire while pve2 is up, and pve2 is now up only
   during the run, so drive prune/GC from `run_backups` or schedule them inside the window.
 
@@ -44,7 +44,7 @@ pve2 is up.
 
 Done with the backup restructure (2026-10-04), hardcoded rather than in `vars.yml` by
 maintainer decision: the schedule is `OnCalendar=Sat *-*-* 02:00:00` in
-`src/pve1/backup_orchestrator.timer` with the Gatus maintenance window to match;
+`src/nodes/pve1/backup_orchestrator.timer` with the Gatus maintenance window to match;
 retention is three PBS prune jobs that pve2's `prune.sh` creates or updates and runs as
 the orchestrator's last step (after the upload), then garbage collection, so prune/GC
 happen while pve2 is awake and count the run's own snapshots:

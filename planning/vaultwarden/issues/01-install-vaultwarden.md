@@ -47,7 +47,7 @@ and alerting on logs.
   - the secsvcs guide (`secure_services.md.j2`, or `secsvcs.md.j2` if restructure/04
     has landed);
   - `docs/services.md`.
-- **Quadlet** `src/vaultwarden/vaultwarden.container.j2`:
+- **Quadlet** `src/services/vaultwarden/vaultwarden.container.j2`:
   - `Image=docker.io/vaultwarden/server:latest` (converted by image-updater/05),
     `ContainerName=vaultwarden`, `HostName=vault.{{ site.url }}`,
     `IP={{ secsvcs.container_subnet }}.16` (next free);
@@ -90,12 +90,12 @@ and alerting on logs.
   - second router `Host(vault.SITE) && PathPrefix(/admin)` with `authelia@file`, gated
     at `two_factor` (auth/01) and, for now, the current admin group
     until auth/01 lands.
-- **Postgres:** add a `vaultwarden` user and DB block to `src/postgres/pg_init.sql`.
+- **Postgres:** add a `vaultwarden` user and DB block to `src/services/postgres/pg_init.sql`.
   `initdb.d` only runs on an empty cluster, so for the existing one, also run it once by
   hand with `podman exec postgres psql …`, and document that in the case.
 - **Logs:** the websocket URL carries `access_token=<JWT>`, and Traefik can't redact a
   query parameter. Uncomment the `vault-notifications` router in
-  `src/secsvcs/traefik/routes.yml.j2` alongside `vault`: it has access logs off, so
+  `src/nodes/secsvcs/traefik/routes.yml.j2` alongside `vault`: it has access logs off, so
   `/notifications/` requests never reach the journal or VictoriaLogs.
 - **Brute-force alerting instead of fail2ban:** fail2ban on secsvcs can't block at the
   edge, which is HAProxy on the VPS, and `SSO_ONLY` moves login to Authelia anyway. Add a
@@ -144,6 +144,6 @@ in front of `/admin`, it adds friction for little gain.
   (attachments, `rsa_key*`) is in the secsvcs VM snapshot only; backup-and-dr/10 is where
   it gets a file-level copy.
 - 2026-10-07 (observability/02): `access_token=` in `RequestPath` is redacted by
-  `src/fluentbit/journald.lua.j2` before the line leaves the node.
+  `src/services/fluentbit/journald.lua.j2` before the line leaves the node.
 - 2026-10-10: the Lua redaction only covers VictoriaLogs; the node's journal keeps the
   raw line. The websocket now gets its own router with access logs off (see **Logs**).

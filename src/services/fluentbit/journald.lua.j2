@@ -30,7 +30,7 @@ function process_msg(tag, timestamp, record)
   new_record["invocation_id"] = record["systemd_invocation_id"] or ""
   new_record["boot_id"] = record["boot_id"] or ""
 
-  -- Traefik access log (src/traefik/static.yml.j2), already split by the json parser:
+  -- Traefik access log (src/services/traefik/static.yml.j2), already split by the json parser:
   -- keep its CamelCase and request_/downstream_ header fields, redact the one query
   -- parameter that carries a session token, and replace the JSON blob with one line.
   if record["RequestMethod"] then

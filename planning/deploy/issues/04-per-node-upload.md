@@ -19,11 +19,11 @@ IPs and every guide. The whole network map on the least-trusted VM.
 - `upload_src.sh <node>` assembles a per-node subset before `scp`:
   `src/nodes/<node>/`, `src/base/` (debian, podman, macos as relevant), and the service
   directories that node installs — read from the minimal inventory (restructure/01), or
-  until then by parsing `cp <svc>/` lines in `src/<node>/install_svcs.sh`.
+  until then by parsing `cp <svc>/` lines in `src/nodes/<node>/install_svcs.sh`.
   Exclude `docs/`, `probes/`, `LICENSE`, `README.md`, and all other nodes.
 - `install_svcs.sh` paths are unchanged (`/root/homelab-rendered/src/...`) because the
   subset preserves the tree shape.
-- pve1 additionally gets `src/certificates/` and `src/pve1/`; vpnsvcs gets
+- pve1 additionally gets `src/base/certificates/` and `src/nodes/pve1/`; vpnsvcs gets
   `haproxy/`, `headscale/`.
 
 ## Acceptance

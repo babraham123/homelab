@@ -7,7 +7,7 @@ Source: review finding 13
 
 ## Problem
 
-`src/secsvcs/traefik/basic_auth.yml` injects `admin:$X_ADMIN_PASSWORD` for anyone who
+`src/nodes/secsvcs/traefik/basic_auth.yml` injects `admin:$X_ADMIN_PASSWORD` for anyone who
 clears Authelia, so every authenticated user is admin on those four tools.
 
 ## Mechanism: Traefik multi-layer routing (confirmed)
@@ -18,7 +18,7 @@ does exactly this. A **parent** router matches `Host()`, runs its middlewares
 (`authelia@file` ForwardAuth), and Traefik then evaluates **child** routers — declared
 with `parentRefs: [parent]` — against the request *as modified by the parent's
 middlewares*. ForwardAuth copies `authResponseHeaders` (already includes `Remote-Groups`
-in `src/traefik/dynamic/authelia.yml.j2`) onto the request, so a child rule
+in `src/services/traefik/dynamic/authelia.yml.j2`) onto the request, so a child rule
 `HeaderRegexp(\`Remote-Groups\`, ...)` sees Authelia's verdict. Documented order:
 parent rule → parent middlewares → one child matches. Constraints: file provider only
 (fine), parents must have no `service`, `entryPoints`, `tls` or `observability`; those
@@ -32,7 +32,7 @@ request before setting them from Authelia's response, so a client-supplied
 ## Change
 
 - LLDAP group `telemetry` (human step); add yourself.
-- `src/secsvcs/traefik/routes.yml.j2`, for each of `metrics`, `logs`, `alert`, `push`
+- `src/nodes/secsvcs/traefik/routes.yml.j2`, for each of `metrics`, `logs`, `alert`, `push`
   (replacing today's `-ui` router; keep the `-api`/`-hass-api` routers untouched):
 
   ```yaml

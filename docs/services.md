@@ -3,7 +3,7 @@
 Container catalog, host services, observability and backups. Hostnames use the
 placeholder `janedoe.com`; subnets are the `vars.template.yml` placeholders.
 
-- Every container is a Podman quadlet (`src/<service>/*.container`) with a static IP on
+- Every container is a Podman quadlet (`src/services/<service>/*.container`) with a static IP on
   its node's bridge network ([ADR 0001](adr/0001-podman-quadlets-over-kubernetes.md))
 - The catalog is what the repo defines; what runs is whatever `install_svcs.sh`
   installed (`systemctl list-units "*.service"` on the node)
@@ -48,7 +48,7 @@ placeholder `janedoe.com`; subnets are the `vars.template.yml` placeholders.
 | .20 | fluentbit | fluent-bit | journald → VictoriaLogs forwarder | n/a |
 
 - `nginx` serves `/var/opt/nginx/www` by subdomain (`www/`, `wifi/` (redirects to the AP's admin page), shared `error/`;
-  `src/nginx/nginx.conf.j2`)
+  `src/services/nginx/nginx.conf.j2`)
 - `www` links to `/var/opt/nginx/releases/<UTC timestamp>/`, so a deploy or rollback is
   an atomic symlink swap; the container mounts all of `/var/opt/nginx` at `/srv`
 - The content isn't in this repo, e.g. [homesite](https://github.com/babraham123/homesite)
@@ -71,7 +71,7 @@ placeholder `janedoe.com`; subnets are the `vars.template.yml` placeholders.
 |-----|---------|-------|---------|-----|
 | .7 | vmagent | vmagent | Local metrics scraper | n/a |
 | .20 | fluentbit | fluent-bit | Journal → VictoriaLogs forwarder | n/a |
-| .30 | geoip_generator | built from `src/haproxy/geoip_generator.Containerfile` | Weekly GeoIP maps for HAProxy (timer) | n/a |
+| .30 | geoip_generator | built from `src/services/haproxy/geoip_generator.Containerfile` | Weekly GeoIP maps for HAProxy (timer) | n/a |
 
 ## Host-level services (not containerized)
 
@@ -89,9 +89,9 @@ placeholder `janedoe.com`; subnets are the `vars.template.yml` placeholders.
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
 pve1, pve2, pbs2 and the router serve their own web UIs as pve1/pve2/pbs2/router.janedoe.com:
-- websvcs Traefik's ACME routes (`src/websvcs/traefik/acme_routes.yml.j2`) only obtain
+- websvcs Traefik's ACME routes (`src/nodes/websvcs/traefik/acme_routes.yml.j2`) only obtain
   the certs; requests to them get a 403
-- `acme_transfer.sh` (`src/certificates/`) installs the certs on each host
+- `acme_transfer.sh` (`src/base/certificates/`) installs the certs on each host
 
 ## Observability
 
@@ -158,7 +158,7 @@ flowchart LR
   - JSON access log to stdout; Fluent Bit splits it into fields, keeps only the
     User-Agent, Referer and Remote-User headers, and redacts `access_token`
   - "Traefik" dashboard; `Traefik5xxRate` and `TraefikCertExpiry`
-- **journald**: capped at 1 GB per node (`src/debian/journald.conf`)
+- **journald**: capped at 1 GB per node (`src/base/debian/journald.conf`)
 - **VPS** ([ADR 0007](adr/0007-vps-metrics-pushed.md)):
   - The same node_exporter, vmagent and Fluent Bit as the VMs, on its own Podman network
     with nothing published
@@ -168,7 +168,7 @@ flowchart LR
     (ufw lets only vmagent in), tailscaled and node_exporter
   - `VpsMetricsAbsent` fires on silence, since a pushing host can't raise `up == 0`;
     `HaproxyDown` and `HaproxyBackendConnectErrors` cover the edge; "HAProxy" dashboard
-- **Scrape targets**: by hand in each node's `src/<node>/prometheus.yml.j2`, each
+- **Scrape targets**: by hand in each node's `src/nodes/<node>/prometheus.yml.j2`, each
   relabelled with `host` = the bare node name (`secsvcs`), the same value as the
   journal's `hostname` field in VictoriaLogs, so one dashboard variable filters both
 - **Retention** for metrics, logs and Home Assistant history: `vars.yml`
@@ -179,7 +179,7 @@ flowchart LR
     LDAPS; cert_notifier emails cover Postgres and Mosquitto
   - No notifier of its own: results are scraped, and `EndpointDown` and the cert rules
     fire through vmalert
-- **Alert rules**, `src/vmalert/configs/`, one file per concern; severity `critical` >
+- **Alert rules**, `src/services/vmalert/configs/`, one file per concern; severity `critical` >
   `error` > `warning` > `info` maps to ntfy priority:
   - `homelab.yml`: hosts (`NodeDown`, `DiskAlmostFull`, `DiskFillingIn24h`,
     `MemoryPressure`, `HighLoad`, `HighCpuTemp`, `SystemdUnitFailed` for any
@@ -199,7 +199,7 @@ flowchart LR
   - Container-to-container URLs are `<name>.SITE:<port>`, never through Traefik
 - **Dead-man switch**, since the path above lives entirely on secsvcs:
   - vmalert's `Watchdog` always fires; Alertmanager routes it to a null receiver
-  - `deadman.timer` on the VPS (`src/vpnsvcs/deadman.sh`, every 5 minutes, over the
+  - `deadman.timer` on the VPS (`src/nodes/vpnsvcs/deadman.sh`, every 5 minutes, over the
     tailnet) checks the alert is in Alertmanager and ntfy is healthy
   - Three failures in a row: an email and a push to a private ntfy.sh topic, neither
     touching secsvcs
@@ -245,7 +245,7 @@ flowchart LR
   4. `prune.sh` on pve2 (dispatcher `prune`): the PBS prune jobs, then garbage
      collection. Last, so this run's snapshots count, and while PBS is up
   5. A `homelab_backup_last_success_timestamp_seconds{job}` metric per step,
-     `BackupStale` after 8 days (`src/vmalert/configs/backups.yml`), an ntfy summary,
+     `BackupStale` after 8 days (`src/services/vmalert/configs/backups.yml`), an ntfy summary,
      and pve2 off again if it was off
 - **Retention**, PBS prune jobs per namespace:
   - images (`pve1`, `pve2`, including `host/vpnsvcs`): last 1, weekly 2, monthly 2

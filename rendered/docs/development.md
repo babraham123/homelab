@@ -11,7 +11,7 @@
 
 - `vars.yml` contains specific/personal values for rendering (gitignored), `vars.template.yml` is an example
 - All `*.j2` files are processed through Jinja2 via `jinjanate` at render time
-- `*.j2.j2` files undergo a *second* render pass on the node, by one of the `src/podman/render_*.sh` scripts:
+- `*.j2.j2` files undergo a *second* render pass on the node, by one of the `src/base/podman/render_*.sh` scripts:
   - `render_host.sh`, at install time from `install_svcs.sh`: per-node values in the vmagent and Fluent Bit quadlets
   - `render_secrets.sh`, at container start (`ExecStartPre`): secrets injection
   - `render_services.sh`, at container start: Fluent Bit's config, with the node's "Homelab:" units
@@ -19,16 +19,17 @@
 
 ### Service Structure
 
-Some directories under `src/` map to a node. They may contain:
-- `install_svcs.sh`: installs configs to `/etc/opt/<service>/` and container files to `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not executable, since `install` defaults to 755), then reloads systemd
-- `commands.sh` - Other tasks that run as root and are triggered remotely
-- `traefik/`: reverse proxy routing rules (HTTP routers, middlewares)
-- `secrets_template.yaml`: template for SOPS-encrypted secrets
-
-The remaining directories under `src/` typically map to a service. They may contain:
-- `*.container`: Podman quadlet systemd unit files
-- `*.volume`: Podman volume definitions
-- Service configuration files
+`src/` has three groups, plus `nodes.yml` and `nodes.jinja`:
+- `src/nodes/<node>/`, one per node. May contain:
+  - `install_svcs.sh`: installs configs to `/etc/opt/<service>/` and container files to `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not executable, since `install` defaults to 755), then reloads systemd. Runs from `/root/homelab-rendered/src`, so its paths start with `base/`, `nodes/` or `services/`
+  - `commands.sh` - Other tasks that run as root and are triggered remotely
+  - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config shared by every node is `src/services/traefik/`
+  - `secrets_template.yaml`: template for SOPS-encrypted secrets
+- `src/services/<service>/`, one per service. May contain:
+  - `*.container`: Podman quadlet systemd unit files
+  - `*.volume`: Podman volume definitions
+  - Service configuration files
+- `src/base/`: setup shared across nodes: `debian/`, `podman/`, `macos/`, `certificates/`, `node_exporter/`
 
 ### Diagrams
 
@@ -144,20 +145,20 @@ the next commit that runs the hook.
 - Install / update the relevant service:
 ```bash
 ssh manualadmin@secsvcs
-sudo /root/homelab-rendered/src/secsvcs/install_svcs.sh SERVICE
+sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
 ```
 
 ### Add a new service
 
 1. Add Traefik route config for the VM
-1. Create service container and config files in `src/<service>/`
-1. If cross-VM TLS is needed, add cert/key gen to `src/certificates/` and update `commands.sh`
+1. Create service container and config files in `src/services/<service>/`
+1. If cross-VM TLS is needed, add cert/key gen to `src/base/certificates/` and update `commands.sh`
 1. Add service to `install_svcs.sh`
 1. Add it under the node's `services` in `src/nodes.yml`, in install order, with its
    `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health
    check isn't `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for
    extra Gatus conditions). This adds the dispatcher case, sudoers grant, OliveTin
    button, DNS/SNI routing and uptime check
-1. Update Authelia config if OIDC auth is available (`src/authelia/`)
-1. Add Homepage dashboard entry (`src/homepage/`)
+1. Update Authelia config if OIDC auth is available (`src/services/authelia/`)
+1. Add Homepage dashboard entry (`src/services/homepage/`)
 1. Update the relevant guide in `docs/guides/`

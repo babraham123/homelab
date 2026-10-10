@@ -6,7 +6,7 @@ Repo: homelab
 Source: review finding 37
 
 Maintainer decision: ignore for now. `install_vault` remains wired through
-`src/secsvcs/{install_svcs.sh,dispatcher.sh}` as a no-op stub.
+`src/nodes/secsvcs/{install_svcs.sh,dispatcher.sh}` as a no-op stub.
 
 ## Comments
 

@@ -1,0 +1,10 @@
+# /etc/systemd/system/deadman.service
+
+[Unit]
+Description="Homelab: Checks the alerting path on secsvcs from outside it"
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/root/homelab-rendered/src/nodes/vpnsvcs/deadman.sh

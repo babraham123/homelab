@@ -20,7 +20,7 @@ Principles:
 ## The edge: HAProxy
 
 HAProxy on the VPS filters before routing (config:
-`src/haproxy/haproxy.cfg.j2`):
+`src/services/haproxy/haproxy.cfg.j2`):
 
 - **TLS hardening.** Mozilla intermediate profile: TLS 1.2/1.3 only, custom dhparam,
   session tickets disabled.
@@ -50,7 +50,7 @@ An embedded DERP relay covers peers that can't hole-punch.
 
 **Current state:** the network layer is not yet zero-trust. The intended
 group-based Headscale ACL matrix exists in
-`src/headscale/headscale_acl.hujson.j2`
+`src/services/headscale/headscale_acl.hujson.j2`
 but is marked "not currently in use" and the active policy is permissive (each
 enrolled user gets broad access). SNAT does not block the matrix: Tailscale enforces
 ACLs in its OS-independent packet filter (`net/tstun`) on the tailnet address, before
@@ -114,7 +114,7 @@ flowchart TB
 
     subgraph x509["Private X.509 CA (internal service TLS)"]
         direction TB
-        root["Root CA<br/>src/certificates/openssl.root.cnf"]
+        root["Root CA<br/>src/base/certificates/openssl.root.cnf"]
         inter["Intermediate CA<br/>pathlen:0, 30-day CRLs"]
         svc["Server certs: authelia, lldap, postgres,<br/>mosquitto, each Traefik<br/>Client certs: each Traefik,<br/>zigbee2mqtt, Home Assistant"]
         root -- "signs" --> inter -- "issues" --> svc
@@ -179,7 +179,7 @@ accounts with sharply different powers:
 - **`manualadmin`** is interactive SSH for a human: file uploads, exploratory work,
   full sudo with password.
 - **`autoadmin`** is the automation account. Its SSH key is bound to a `ForceCommand`
-  script, `src/<node>/dispatcher.sh`, which whitelists a fixed
+  script, `src/nodes/<node>/dispatcher.sh`, which whitelists a fixed
   set of `$SSH_ORIGINAL_COMMAND` strings (`install_traefik`, `install_all_svcs`,
   `copy_acme_certs`, …) and rejects everything else. The dispatcher and its sudoers
   entry are both rendered from the node's entries in `src/nodes.yml`, so sudo grants
@@ -201,7 +201,7 @@ SOPS + AGE, kept out of git and written to disk encrypted (see
 - Each host gets `/etc/opt/secrets/secrets.yaml.age`, encrypted with plain `age` to
   pve1's key and the host's ed25519 SSH key. The host's private key sits beside it in
   the root-only `/etc/opt/secrets/`.
-- Git holds only `src/<node>/secrets_template.yaml` (names, no values).
+- Git holds only `src/nodes/<node>/secrets_template.yaml` (names, no values).
 - Podman uses the `shell` secrets driver: Podman stores placeholders, and at container
   startup `get_secret_by_id.sh` decrypts the requested value from the host file.
   Quadlets consume them as env vars (`type=env`) or files under `/run/secrets/`.
@@ -212,7 +212,7 @@ SOPS + AGE, kept out of git and written to disk encrypted (see
 - pve1's AGE key is the single point of failure; a lost VM key can be replaced by
   rerunning `secret_update.sh`. What must be kept off pve1, and how to recover each
   trust root, is in [pve1 disaster recovery](guides/pve1_recovery.md).
-- Rotation: `src/pve1/secret_update.sh <host>` edits the SOPS file, re-encrypts and
+- Rotation: `src/nodes/pve1/secret_update.sh <host>` edits the SOPS file, re-encrypts and
   redistributes it, and recreates the Podman placeholders; then restart affected
   services.
 

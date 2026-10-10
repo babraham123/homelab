@@ -112,7 +112,7 @@ sudo reboot
 lspci -nnv | grep VGA
 ```
 - Confirm that the iGPU has a dedicated IOMMU group
-  - `/root/homelab-rendered/src/debian/iommu_groups.sh`
+  - `/root/homelab-rendered/src/base/debian/iommu_groups.sh`
 - Change the Display type for all VMs
   - In the PVE UI, Go to VM >> Hardware >> Display
   - Set the display to `VirtIO-GPU` or `none`. For the target VM use `none`
@@ -158,7 +158,7 @@ lsusb -t
 - Watchdog to prevent stuck VM
 ```bash
 sudo su
-/root/homelab-rendered/src/debian/install_svcs.sh vm_watchdog
+/root/homelab-rendered/src/base/debian/install_svcs.sh vm_watchdog
 ```
 
 ## Networking
@@ -242,7 +242,7 @@ pvesm add pbs pbs2 --server pbs2.janedoe.com --datastore backup1 --namespace pve
 pvesm status
 ```
 - No backup jobs in the PVE UI (Datacenter >> Backup must be empty on both hosts) and
-  no prune or GC job made in the PBS UI: the schedule is `src/pve1/backup_orchestrator.timer`
+  no prune or GC job made in the PBS UI: the schedule is `src/nodes/pve1/backup_orchestrator.timer`
   (Saturday 02:00), and its last step runs pve2's `prune.sh`, which creates or updates
   the prune jobs `images-pve1`, `images-pve2` (keep last 1, weekly 2, monthly 2) and
   `files` (last 1, weekly 3, monthly 6), runs them, then garbage collection.
@@ -257,7 +257,7 @@ adduser node_exporter --system
 groupadd node_exporter
 usermod -a -G node_exporter node_exporter
 cd /root/homelab-rendered
-src/debian/install_svcs.sh node_exporter
+src/base/debian/install_svcs.sh node_exporter
 ```
 
 - Allow access from metrics container in order to scrape node_exporter
@@ -282,7 +282,7 @@ Perform these steps after pve1, secsvcs and victoriametrics is configured (do th
 - Get the metrics admin password and hash credentials
 ```bash
 ssh manualadmin@secsvcs
-password=$(sudo /root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_password)
+password=$(sudo /root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_password)
 echo -n "admin:$password" | base64
 ```
 - Go to Datacenter >> Metric Server >> Add >> InfluxDB

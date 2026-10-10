@@ -9,7 +9,7 @@ Blocked by: 03
 
 ## Problem
 
-`node.expiry` in `src/headscale/headscale.yaml.j2` is `0` (never). A positive value
+`node.expiry` in `src/services/headscale/headscale.yaml.j2` is `0` (never). A positive value
 applies to every registration, and the pfSense package re-runs
 `tailscale up --auth-key` on each Tailscale restart, so the router would get a fresh
 30-day key every restart and drop off the tailnet a month later. The VPS node was
@@ -23,7 +23,7 @@ only. Tags need `tagOwners` in the policy, which needs the policy loaded (03).
 
 ## Change
 
-1. Policy (`src/headscale/headscale_acl.hujson.j2`):
+1. Policy (`src/services/headscale/headscale_acl.hujson.j2`):
    - add `"tagOwners": { "tag:router": ["group:admin"], "tag:vpnsvcs": ["group:admin"] }`;
    - replace the `admin@` and `public@` sources/destinations with `tag:router` and
      `tag:vpnsvcs` (the public-endpoint rule becomes `src: ["tag:vpnsvcs"]`; the self rules for

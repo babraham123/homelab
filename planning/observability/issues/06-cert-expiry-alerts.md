@@ -14,7 +14,7 @@ approaching expiry." vmalert has no such rule.
 ## Change
 
 No new exporter needed: Gatus already exports certificate expiry for every endpoint it
-checks. In `src/vmalert/configs/homelab.yml` (observability/01):
+checks. In `src/services/vmalert/configs/homelab.yml` (observability/01):
 
 ```yaml
 - alert: CertExpiringSoon
@@ -45,4 +45,4 @@ Mosquitto (`require_certificate`) can't be `tls://` checks; `cert_notifier` keep
 Remaining: the vmalert rules above, once observability/01 lands.
 
 2026-10-07: `CertExpiringSoon` (14 d, warning) and `CertExpiringCritical` (3 d, critical)
-are in `src/vmalert/configs/homelab.yml`; `docs/security.md` describes the three paths.
+are in `src/services/vmalert/configs/homelab.yml`; `docs/security.md` describes the three paths.

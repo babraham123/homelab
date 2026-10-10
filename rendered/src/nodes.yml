@@ -4,8 +4,8 @@
 # and Gatus endpoints from it. See docs/adr/0006-node-inventory.md.
 #
 # Per node, all keys optional:
-#   debian_services: src/debian/install_svcs.sh cases, dispatched as install_<name>
-#   services:        src/<node>/install_svcs.sh cases, dispatched as install_<name>.
+#   debian_services: src/base/debian/install_svcs.sh cases, dispatched as install_<name>
+#   services:        src/nodes/<node>/install_svcs.sh cases, dispatched as install_<name>.
 #                    Key order is install order. Per service, all optional:
 #                      subdomain:   host its Traefik router answers on
 #                      uptime:      Gatus endpoint name (keys its history); monitors
@@ -38,30 +38,30 @@ nodes:
       cert_notifier: {}
       backup_orchestrator: {}
     commands:
-      - {name: archive_repo, script: pve1/commands.sh}
-      - {name: install_ssh_ca, script: debian/commands.sh}
-      - {name: install_dispatcher, script: debian/commands.sh}
-      - {name: install_ca, script: debian/commands.sh}
+      - {name: archive_repo, script: nodes/pve1/commands.sh}
+      - {name: install_ssh_ca, script: base/debian/commands.sh}
+      - {name: install_dispatcher, script: base/debian/commands.sh}
+      - {name: install_ca, script: base/debian/commands.sh}
 
   pve2:
     debian_services: [vm_watchdog]
     commands:
-      - {name: install_certs_and_keys, script: pve2/commands.sh}
-      - {name: start_gaming_vm, script: pve2/commands.sh}
-      - {name: stop_gaming_vm, script: pve2/commands.sh}
-      - {name: install_hookscript, script: pve2/commands.sh}
-      - {name: backup, run: [sudo /root/homelab-rendered/src/pve2/backup.sh]}
-      - {name: prune, run: [sudo /root/homelab-rendered/src/pve2/prune.sh]}
+      - {name: install_certs_and_keys, script: nodes/pve2/commands.sh}
+      - {name: start_gaming_vm, script: nodes/pve2/commands.sh}
+      - {name: stop_gaming_vm, script: nodes/pve2/commands.sh}
+      - {name: install_hookscript, script: nodes/pve2/commands.sh}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/pve2/backup.sh]}
+      - {name: prune, run: [sudo /root/homelab-rendered/src/nodes/pve2/prune.sh]}
       - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}
-      - {name: install_ssh_ca, script: debian/commands.sh}
-      - {name: install_dispatcher, script: debian/commands.sh}
-      - {name: install_ca, script: debian/commands.sh}
+      - {name: install_ssh_ca, script: base/debian/commands.sh}
+      - {name: install_dispatcher, script: base/debian/commands.sh}
+      - {name: install_ca, script: base/debian/commands.sh}
 
   router:
     commands:
-      - {name: install_certs, script: router/commands.sh}
-      - {name: install_dispatcher, script: router/commands.sh}
-      - {name: start_pve2, script: router/commands.sh}
+      - {name: install_certs, script: nodes/router/commands.sh}
+      - {name: install_dispatcher, script: nodes/router/commands.sh}
+      - {name: start_pve2, script: nodes/router/commands.sh}
 
   vpnsvcs:
     debian_services: [node_exporter]
@@ -75,10 +75,10 @@ nodes:
       vmagent: {}
       geoip_generator: {build: geoip_generator}
     commands:
-      - {name: backup, run: [sudo /root/homelab-rendered/src/vpnsvcs/backup.sh]}
-      - {name: install_ssh_ca, script: debian/commands.sh}
-      - {name: install_dispatcher, script: debian/commands.sh}
-      - {name: install_ca, script: debian/commands.sh}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/vpnsvcs/backup.sh]}
+      - {name: install_ssh_ca, script: base/debian/commands.sh}
+      - {name: install_dispatcher, script: base/debian/commands.sh}
+      - {name: install_ca, script: base/debian/commands.sh}
 
   secsvcs:
     debian_services: [mdns_repeater, node_exporter]
@@ -101,14 +101,14 @@ nodes:
       fluentbit: {}
     install_all_svcs: true
     commands:
-      - {name: install_keys, script: secsvcs/commands.sh}
-      - {name: install_certs, script: secsvcs/commands.sh}
-      - {name: install_ssh_ca, script: debian/commands.sh}
-      - {name: install_dispatcher, script: debian/commands.sh}
-      - {name: install_olive_tin_cert, script: secsvcs/commands.sh}
-      - {name: install_ca, script: debian/commands.sh}
-      - {name: copy_acme_certs, script: debian/commands.sh}
-      - {name: backup, run: [sudo /root/homelab-rendered/src/secsvcs/backup.sh]}
+      - {name: install_keys, script: nodes/secsvcs/commands.sh}
+      - {name: install_certs, script: nodes/secsvcs/commands.sh}
+      - {name: install_ssh_ca, script: base/debian/commands.sh}
+      - {name: install_dispatcher, script: base/debian/commands.sh}
+      - {name: install_olive_tin_cert, script: nodes/secsvcs/commands.sh}
+      - {name: install_ca, script: base/debian/commands.sh}
+      - {name: copy_acme_certs, script: base/debian/commands.sh}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh]}
 
   homesvcs:
     debian_services: [mdns_repeater, node_exporter]
@@ -121,13 +121,13 @@ nodes:
       fluentbit: {}
     install_all_svcs: true
     commands:
-      - {name: install_keys, script: homesvcs/commands.sh}
-      - {name: install_certs, script: homesvcs/commands.sh}
-      - {name: backup, run: [sudo /root/homelab-rendered/src/homesvcs/backup.sh]}
-      - {name: install_ssh_ca, script: debian/commands.sh}
-      - {name: install_dispatcher, script: debian/commands.sh}
-      - {name: install_ca, script: debian/commands.sh}
-      - {name: copy_acme_certs, script: debian/commands.sh}
+      - {name: install_keys, script: nodes/homesvcs/commands.sh}
+      - {name: install_certs, script: nodes/homesvcs/commands.sh}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh]}
+      - {name: install_ssh_ca, script: base/debian/commands.sh}
+      - {name: install_dispatcher, script: base/debian/commands.sh}
+      - {name: install_ca, script: base/debian/commands.sh}
+      - {name: copy_acme_certs, script: base/debian/commands.sh}
 
   # websvcs is the default route, so its subdomains need no DNS or SNI entries; they
   # only name the uptime URLs.
@@ -145,13 +145,13 @@ nodes:
       snapraid: {}
     install_all_svcs: true
     commands:
-      - {name: install_keys, script: websvcs/commands.sh}
-      - {name: install_certs, script: websvcs/commands.sh}
-      - {name: backup, run: [sudo /root/homelab-rendered/src/websvcs/backup.sh]}
-      - {name: install_ssh_ca, script: debian/commands.sh}
-      - {name: install_dispatcher, script: debian/commands.sh}
-      - {name: install_ca, script: debian/commands.sh}
-      - {name: copy_acme_certs, script: debian/commands.sh}
+      - {name: install_keys, script: nodes/websvcs/commands.sh}
+      - {name: install_certs, script: nodes/websvcs/commands.sh}
+      - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/websvcs/backup.sh]}
+      - {name: install_ssh_ca, script: base/debian/commands.sh}
+      - {name: install_dispatcher, script: base/debian/commands.sh}
+      - {name: install_ca, script: base/debian/commands.sh}
+      - {name: copy_acme_certs, script: base/debian/commands.sh}
 
   devtop:
     commands:
@@ -159,9 +159,9 @@ nodes:
         run:
           - sudo /usr/bin/systemctl status nvidia-persistenced --no-pager
           - nvidia-smi
-      - {name: install_ssh_ca, script: debian/commands.sh}
-      - {name: install_dispatcher, script: debian/commands.sh}
-      - {name: install_ca, script: debian/commands.sh}
+      - {name: install_ssh_ca, script: base/debian/commands.sh}
+      - {name: install_dispatcher, script: base/debian/commands.sh}
+      - {name: install_ca, script: base/debian/commands.sh}
 
   gaming:
     triggers: [StartSunshine, StopSunshine, InstallAutomation]
