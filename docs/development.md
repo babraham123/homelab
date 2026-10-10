@@ -155,8 +155,8 @@ it, against the files it describes:
   routed host is listed, except on websvcs, the default route;
 - `upstream` refs name a registry host and namespace, and the quadlet each service's case copies has
   `Image=localhost/` + the ref without its host, or `Image=localhost/<build>:latest`;
-- the OliveTin config has a button for every dispatcher case, and every `ssh autoadmin@NODE CASE` it
-  runs names a real case.
+- the OliveTin config has a button for every dispatcher case without `key_ids`, none for a gated
+  one, and every `ssh autoadmin@NODE CASE` it runs names a real case.
 
 Each check is one function in the script; add an invariant as a new function plus a fixture test
 (see [Tests](#tests)).

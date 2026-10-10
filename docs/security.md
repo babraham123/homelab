@@ -176,11 +176,27 @@ sharply different powers:
   in the host field (`autoadmin secsvcs=(root) NOPASSWD: …`), so a node still grants only its own
   commands. `install_dispatcher` checks the sudoers file with `visudo -c` before installing it. The
   router (`/bin/sh` on pfSense) and the gaming VM (PowerShell) keep their own dispatchers.
+- There is no file transfer outside the whitelist: no sftp or scp as `autoadmin`. Commands that
+  need data carry it on stdin or stdout, still without arguments. `backup` streams the node's stage
+  as a tar with a `SHA256SUMS` manifest; `copy_acme_certs` and `host_key` print a file; the
+  `install_*` commands take their files on stdin, bundled by `src/base/debian/send_files.sh` with a
+  manifest and unpacked by `receive_files` (`src/base/lib.sh`) into a private temp dir that must
+  hold exactly the named regular files.
+- Commands that move secrets or trust anchors (`backup`, `copy_acme_certs`, `install_ssh_ca`,
+  `install_ca`, `install_certs`, `install_keys`, …) have `key_ids: [pve1]` in the inventory. sshd
+  exposes the certificate a session logged in with (`ExposeAuthInfo`, `autoadmin_sshd.conf`), and
+  the dispatcher's `require_key_id` rejects every key ID but those listed. OliveTin's key (ID
+  `olive_tin`) can only run the open, parameterless commands, and OliveTin gets no button for the
+  gated ones.
+- `/home/autoadmin` is root-owned and sshd has `PermitUserRC no`, so nothing can plant a `.bashrc`
+  or `.ssh/rc` that bash or sshd would run around the forced command. autoadmin is not in the `sudo`
+  group: the dispatcher's sudoers file is its only sudo.
 
 So automation (OliveTin buttons, deploy scripts, cert distribution) can trigger predefined actions
-remotely, but a stolen `autoadmin` key cannot run arbitrary commands. The render fails if a node's
-`services` in its `inventory.yml` differ from its `install_svcs.sh` cases, so the whitelist stays in
-sync with the services that exist (see [ADR 0006](adr/0006-node-inventory.md)).
+remotely, but a stolen `autoadmin` key cannot run arbitrary commands or read or write files, and only
+pve1's key reaches the secrets. The render fails if a node's `services` in its `inventory.yml` differ
+from its `install_svcs.sh` cases, so the whitelist stays in sync with the services that exist (see
+[ADR 0006](adr/0006-node-inventory.md)).
 
 ## Secrets
 

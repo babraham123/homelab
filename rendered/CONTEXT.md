@@ -43,13 +43,19 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 
 - **manualadmin** — the interactive human SSH account on each node (file uploads, full sudo with
   password).
-- **autoadmin** — the automation SSH account. Its key is bound to a ForceCommand.
+- **autoadmin** — the automation SSH account. Its key is bound to a ForceCommand; it has no file
+  access (no sftp), and its home is root-owned.
 - **dispatcher** — the ForceCommand script that whitelists exact `$SSH_ORIGINAL_COMMAND` strings
   and maps them to `install_svcs.sh` / `commands.sh` invocations. The Debian nodes share
   `src/base/debian/dispatcher.sh` and `sudoers`, which hold every Debian node's cases and grants
   and pick the node by hostname; the router and gaming have their own under `src/nodes/<node>/`.
   Dispatcher and sudoers are rendered from the same node inventory entries, so the whitelist and
-  the sudo grants can't diverge.
+  the sudo grants can't diverge. Commands carry data on stdin (`install_*`, via `send_files.sh`
+  and `receive_files`) or stdout (`backup`, `copy_acme_certs`, `host_key`); the dispatcher's own
+  output goes to stderr.
+- **key_ids** — an inventory command's list of SSH certificate key IDs allowed to run it (`pve1`
+  for anything that moves secrets or trust anchors). The dispatcher checks the login certificate
+  through sshd's `ExposeAuthInfo`; OliveTin's key (`olive_tin`) gets no button for gated commands.
 - **commands.sh** — a node's grab-bag of root actions triggered remotely via the dispatcher (cert
   installs, waking pve2, gaming VM start/stop, the repo archive).
 

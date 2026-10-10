@@ -178,3 +178,18 @@ file in `/home/autoadmin` is no longer possible once the directory is root-owned
 Follow-up: split into tasks (dispatcher and sshd changes; backup pipe; cert scripts; docs), in that
 order, each deployable with `install_dispatcher` first so a node never has the new client against
 the old server.
+
+## Comments
+
+2026-10-10: implemented on `worktree-sftp` in four commits (dispatchers and gating; backup pipe;
+cert distribution; docs). Departures from the Answer: the host public key is read with a `host_key`
+dispatcher command over the authenticated session, not `ssh-keyscan`, since a key read off the wire
+could be anyone's and this one gets signed; the stage's `SHA256SUMS` is checked on receipt and not
+kept (it would go stale as dumps are trimmed and deleted); the manifest check on the router is a
+POSIX loop over `sha256 -q`, since FreeBSD's `sha256sum -c` differs; the Mac's cert request in
+`ssh_cert_gen.sh` goes through `manualadmin`'s home; the root-owned home is a one-time manual step in
+`docs/guides/debian.md` (maintainer decision), gaming untouched beyond deleting its sftp branch.
+Tested off-box: the key-ID check against a locally signed certificate, the stage pipe (intact,
+truncated, tampered, dump trimming) and `send_files.sh`/`receive_files` (rename, wrong set, extra,
+tampered, symlink). Human: deploy with `install_dispatcher` on every node first, then the one-time
+home step, then run a `collect_stage.sh` and `acme_transfer.sh` to confirm on the live nodes.
