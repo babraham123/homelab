@@ -89,7 +89,7 @@ qm destroy 999 --purge
   4. Restore `/etc/pve/storage.cfg` and the `priv/storage/pbs2.*` files from `/root/backups/pve2/files/etc/pve/` so the `pbs2` storage and its key come back, then `qmrestore` websvcs, devtop and gaming as above.
   5. `tools/deploy_src.sh`, `install_dispatcher`, `install_vm_watchdog`, `install_certs_and_keys` on pve2, and `install_all_svcs` on websvcs.
 
-## Quarterly restore test
+## Annual restore test
 Record the date in `docs/maintenance.md` when done.
 1. Wake pve2. Restore secsvcs to VMID 999 with `--unique` and the NIC down, as above. Boot it and log in on the console; `systemctl list-units 'Homelab*'` should show every service running and `podman exec postgres psql -U postgres -c '\l'` should list the databases. Destroy it.
 2. Pull one file out of the newest host backup with `proxmox-backup-client restore ... --pattern`, e.g. the Headscale DB, and open it: `sqlite3 db-*.sqlite 'PRAGMA integrity_check'`.

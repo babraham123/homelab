@@ -195,7 +195,7 @@ flowchart LR
   the tailnet) checks that the alert is present in Alertmanager's API and that ntfy is
   healthy. Three failures in a row send an email and a push to a private ntfy.sh topic,
   neither touching secsvcs. `VpsMetricsAbsent` is the mirror image (observability/08).
-  The quarterly check is in [Maintenance](maintenance.md#alerting-pipeline-test).
+  The annual check is in [Maintenance](maintenance.md#alerting-pipeline-test).
 
 ## Key data flows
 

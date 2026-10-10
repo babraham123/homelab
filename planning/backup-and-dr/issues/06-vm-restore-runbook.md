@@ -1,4 +1,4 @@
-# 06. Restore instructions for VMs on pve1 and pve2, and a quarterly test
+# 06. Restore instructions for VMs on pve1 and pve2, and an annual test
 
 Status: ready-for-human
 Type: task
@@ -23,7 +23,7 @@ Add `docs/guides/restore.md`:
 - **Restore application data** independent of the VM: `podman volume import` (already
   in `docs/guides/podman.md.j2`), Postgres from the `pg_dumpall` output (issue 07),
   Home Assistant from its native backup (issue 08).
-- A **quarterly restore test** entry in `docs/maintenance.md`: restore secsvcs to a
+- An **annual restore test** entry in `docs/maintenance.md`: restore secsvcs to a
   scratch VMID, boot it, confirm Authelia login works, destroy it.
 
 ## Acceptance
@@ -36,5 +36,5 @@ Add `docs/guides/restore.md`:
 - 2026-10-04: `docs/guides/restore.md` written with the backup restructure: file / application
 restores from the node's stage, pve1's `/root/backups` or PBS (`proxmox-backup-client
 restore --pattern`), VM restore in place and to a scratch VMID, pve1 and pve2 host
-restores, and the quarterly test. Open: the acceptance test itself (one scratch-VMID
+restores, and the annual test. Open: the acceptance test itself (one scratch-VMID
 restore, date recorded in `docs/maintenance.md`), and the offsite section waits on 03.

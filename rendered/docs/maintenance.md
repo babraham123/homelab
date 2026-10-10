@@ -51,7 +51,7 @@ sudo /root/homelab-rendered/src/certificates/ssh_cert_gen_windows.sh
 
 ## Backups
 - Runs itself every Saturday 02:00 from pve1; the ntfy `alert` topic gets a summary and `BackupStale` fires after 8 quiet days. Run it by hand with `sudo systemctl start backup_orchestrator` on pve1 (blocks for the run; `journalctl -u backup_orchestrator -f`).
-- Once a year: the [restore test](guides/restore.md#quarterly-restore-test). Last done: never.
+- Once a year: the [restore test](guides/restore.md#annual-restore-test). Last done: never.
 - Media array on pve2: `snapraid status` on websvcs; a failed disk follows [pve2 storage](guides/pve2_storage.md#day-to-day).
 
 ## Alerting pipeline test
@@ -59,24 +59,12 @@ Once a year, with the backup restore test. Last done: never. Every alert goes
 vmalert → Alertmanager → ntfy-alertmanager → ntfy → phone, plus two emails
 (`+alert@` from Alertmanager, `+alert2@` from ntfy-alertmanager); the VPS's `deadman`
 timer watches that path from outside and reports to `+alert@` and a private ntfy.sh
-topic. `AM='https://alert.SITE'`, with the Alertmanager admin password
-(`sops -d /root/secrets/secsvcs.yaml | yq .alertmanager_admin_password` on pve1).
+topic.
 
 | # | Test | How | Expect |
 |---|---|---|---|
-| 1 | Alertmanager → ntfy | `amtool alert add PipelineTest severity=warning host=secsvcs.SITE --alertmanager.url=$AM` (`podman exec alertmanager amtool ...` on secsvcs, or `curl -u admin: -XPOST $AM/api/v2/alerts -d '[{"labels":{"alertname":"PipelineTest","severity":"warning"}}]'`) | ntfy priority 3, tag `warning`, `secsvcs` tag; email to `+alert@` and `+alert2@` |
-| 2 | Full path from vmalert | On secsvcs, `/etc/opt/vmalert/pipeline_test.yml` with `alert: PipelineTest, expr: vector(1), labels: {severity: critical}`; `systemctl restart vmalert` | ntfy priority 5, `rotating_light`, within `group_wait` (30 s) plus one evaluation |
-| 3 | Severity map | repeat 1 with `severity=error`, then `info` | priorities 4 and 1 |
-| 4 | Inhibition | fire `critical` and `warning` with the same `alertname` and `instance` | only the critical one is delivered |
-| 5 | Resolve | delete `pipeline_test.yml`, restart vmalert; let the amtool alerts expire (`--end=now`) | ntfy `resolved,tada` priority 1; resolved email |
-| 6 | Silence button | tap the ntfy action | Alertmanager shows a 24 h silence; no repeat |
-| 7 | Phone off-LAN | repeat 1 with the phone on mobile data | notification arrives |
-| 8 | ntfy down | `systemctl stop ntfy` on secsvcs, repeat 1 | both emails still arrive; `podman logs ntfy-alertmanager` shows the failure; `deadman` fires after 15 min |
-| 9 | ntfy-alertmanager down | stop it, repeat 1 | `+alert@` email still arrives |
-| 10 | Alertmanager down | `systemctl stop alertmanager` | `deadman`: email + ntfy.sh push within 15 min; recovery notice after `systemctl start alertmanager` |
-| 11 | secsvcs down | shut down the secsvcs VM | `deadman` fires the same way |
-
-Remove `pipeline_test.yml` afterwards (`install_vmalert` also clears it).
+| 1 | Full path from vmalert | With the phone on mobile data: on secsvcs, `/etc/opt/vmalert/pipeline_test.yml` with `alert: PipelineTest, expr: vector(1), labels: {severity: critical}`; `systemctl restart vmalert`. Then delete it and restart vmalert again (`install_vmalert` also clears it) | ntfy priority 5, `rotating_light`, `secsvcs` tag within `group_wait` (30 s) plus one evaluation; email to `+alert@` and `+alert2@`. After the delete: ntfy `resolved,tada` priority 1 and a resolved email |
+| 2 | Dead-man switch | `systemctl stop alertmanager` on secsvcs, then `systemctl start alertmanager` | `deadman`: email + ntfy.sh push within 15 min; a recovery notice after the start |
 
 ## Disaster recovery
 - Restore a file, a VM or a host: [restore guide](guides/restore.md)

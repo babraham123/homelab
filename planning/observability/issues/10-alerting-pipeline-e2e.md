@@ -56,7 +56,7 @@ staleness alerts depend on this path.
   container, always `<hostname>.SITE:<container port>`, never through Traefik".
 - Keep test 2's `pipeline_test.yml` rule permanently as `Watchdog` (see the dead-man
   section), so the end-to-end path is exercised every evaluation interval rather than
-  once a quarter.
+  once a year.
 
 ## Test plan
 
@@ -111,7 +111,7 @@ reachable over the tailnet, so it watches from outside.
 
 ## Also
 
-- Write the test plan into `docs/maintenance.md` as a quarterly check, next to the
+- Write the test plan into `docs/maintenance.md` as an annual check, next to the
   restore test (backup-and-dr/06).
 - `docs/services.md` / `docs/security.md`: describe the actual notification paths.
 
@@ -135,3 +135,7 @@ reachable over the tailnet, so it watches from outside.
   1–11 at the next deploy (`notes/apply-since-5a50097.md` steps 8 and 9) and record
   them under `## Answer`. The install-time `amtool check-config` goes with
   ci-and-docs/02's pre-install checks.
+- 2026-10-10: the maintenance test plan is cut to two tests: the full path from
+  vmalert (fire, phone off-LAN, both emails, resolve) and the dead-man switch
+  (Alertmanager stopped). The severity map, inhibition, silence button and
+  single-component outages are no longer tested. Record those two under `## Answer`.
