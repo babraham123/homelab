@@ -47,15 +47,18 @@ POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
 # MQTT broker
 ufw allow in from any to any port 8883 proto tcp
-ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 8883
-# ESPHome OTA updates
+ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 8883 proto tcp
+# ESPHome OTA updates. Published ports are DNATed to the containers, so the route rules are
+# what admit the traffic
 ufw allow in from 192.168.11.0/24 to any port 3232,8266,2040,8892 proto tcp
 ufw allow in from 192.168.21.0/24 to any port 3232,8266,2040,8892 proto tcp
-ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 3232,8266,2040,8892 proto tcp
+ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.11.0/24 to any port 3232,8266,2040,8892 proto tcp
+ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.21.0/24 to any port 3232,8266,2040,8892 proto tcp
 # HA, Shelly devices
 # ufw allow in from 192.168.11.0/24 to any port 5683 proto udp
 # ufw allow in from 192.168.21.0/24 to any port 5683 proto udp
-# ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 5683
+# ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.11.0/24 to any port 5683 proto udp
+# ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.21.0/24 to any port 5683 proto udp
 ```
 
 ## Onboarding

@@ -37,7 +37,9 @@ NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
 
 ufw allow in from 192.168.4.21 to any port 5432,6360,9091,465 proto tcp
 ufw allow in from 192.168.2.20 to any port 5432,6360,9091,465 proto tcp
-ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 5432,6360,9091,465 proto tcp
+# Published ports are DNATed to the containers, so these route rules are what admit the traffic
+ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.4.21 to any port 5432,6360,9091,465 proto tcp
+ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.2.20 to any port 5432,6360,9091,465 proto tcp
 ```
 
 - Confirm that the logs for traefik, authelia and lldap look good
