@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copy the acme.json files from secsvcs, websvcs and homesvcs to pve1. Parse and distribute the
-# ACME certificates to pve1, pve2, pbs2 and pfsense.
+# Copy the acme.json files from the Traefik nodes (those with copy_acme_certs) to pve1. Parse
+# and distribute the ACME certificates to pve1, pve2, pbs2 and pfsense.
 # Usage:
 #   /root/homelab-rendered/src/base/certificates/acme_transfer.sh
 
@@ -25,9 +25,9 @@ function download() {
     --source "${host}.acme.json" --dest /root/acme --version v2
 }
 
-download "secsvcs"
-download "homesvcs"
-download "websvcs"
+for node in homesvcs secsvcs websvcs; do
+  download "$node"
+done
 
 # Ref: https://pve.proxmox.com/wiki/Certificate_Management
 cp pve1.janedoe.com/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem

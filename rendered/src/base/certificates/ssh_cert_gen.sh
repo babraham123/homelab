@@ -7,7 +7,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 require_root
-require_reachable pve2 vpnsvcs secsvcs websvcs homesvcs devtop router
+require_reachable devtop homesvcs pve2 secsvcs vpnsvcs websvcs router
 
 cd /root/ssh
 
@@ -37,12 +37,9 @@ function configure_server() {
 # First: its install_ssh_ca puts src/base/debian/ssh_config on pve1, which is where this
 # script's ssh and scp find vpnsvcs's port
 configure_server pve1
-configure_server secsvcs
-configure_server homesvcs
-configure_server pve2
-configure_server websvcs
-configure_server vpnsvcs
-configure_server devtop
+for node in devtop homesvcs pve2 secsvcs vpnsvcs websvcs; do
+  configure_server "$node"
+done
 
 # router
 ssh -M -S ~/.ssh/ssh-socket-%r-%h-%p -f -N admin@router

@@ -6,8 +6,8 @@
 # with. Posts a one-line ntfy summary at the end.
 # Usage:
 #   src/nodes/pve1/backup_orchestrator.sh
-# Adding a node: give it a backup.sh and a `backup` dispatcher command, then list it in
-# NODES. Adding another step: write a step_<name> function and list it in STEPS.
+# Adding a node: give it a backup.sh and a `backup` dispatcher command, which puts it
+# in NODES. Adding another step: write a step_<name> function and list it in STEPS.
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
@@ -24,8 +24,9 @@ ssh=(ssh "${ssh_opts[@]}")
 keyfile=/root/secrets/pbs_client.key
 
 # In step order. The VMs first, so their dumps are on the VM disks before the hosts'
-# backup.sh images them. prune comes after upload so this week's snapshots count.
-NODES=(secsvcs homesvcs websvcs vpnsvcs pve1 pve2)
+# backup.sh images them; pve1 runs its own backup.sh, so it has no `backup` command.
+# prune comes after upload so this week's snapshots count.
+NODES=(homesvcs secsvcs vpnsvcs websvcs pve1 pve2)
 # wake_pve2 and sleep_pve2 bracket these.
 STEPS=()
 for node in "${NODES[@]}"; do STEPS+=("backup_${node}"); done

@@ -35,6 +35,8 @@
     dispatch[node]:   dispatcher cases, [{name, run: [line, ...]}], in case order
     cases(node):      those cases as dispatcher.sh `case` text
     commands[node]:   case names (OliveTin buttons)
+    nodes_with[case]: nodes whose dispatcher has that case, in node-name order; how
+                      scripts find e.g. the backup, install_ssh_ca or copy_acme_certs nodes
     sudo_cmds[node]:  sorted commands the dispatcher runs with sudo (sudoers)
     subdomains[node]: sorted subdomains its Traefik serves (Unbound, HAProxy)
     uptime:           Gatus internal endpoints, [{name, host, url, tier, conditions}]
@@ -42,6 +44,7 @@
                       entries last), [{service, container, image, upstream | build}] -#}
 {%- set dispatch = {} -%}
 {%- set commands = {} -%}
+{%- set nodes_with = {} -%}
 {%- set sudo_cmds = {} -%}
 {%- set subdomains = {} -%}
 {%- set uptime = [] -%}
@@ -81,6 +84,9 @@
   {%- endfor -%}
   {%- do dispatch.update({node: entries}) -%}
   {%- do commands.update({node: entries | map(attribute='name') | list}) -%}
+  {%- for entry in entries -%}
+    {%- do nodes_with.update({entry.name: nodes_with.get(entry.name, []) + [node]}) -%}
+  {%- endfor -%}
 
   {%- set sudo = [] -%}
   {%- for entry in entries -%}

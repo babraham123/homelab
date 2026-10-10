@@ -97,112 +97,21 @@ dashboards:
 
   - title: All Commands
     contents:
-      - title: secsvcs
+{%- set icons = {'secsvcs': 'security', 'homesvcs': 'home', 'websvcs': 'cloud',
+    'pve1': 'host-rounded', 'pve2': 'host-sharp', 'vpnsvcs': 'vpn-key', 'router': 'router',
+    'gaming': 'videogame-asset', 'devtop': 'desktop-windows-outline'} %}
+{%- for node, cmds in inv.commands.items() if cmds %}
+      - title: {{ node }}
         type: fieldset
         contents:
-{% for cmd in inv.commands.secsvcs %}
+{% for cmd in cmds %}
           - inlineAction:
-              title: secsvcs {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
-              shell: ssh autoadmin@secsvcs {{ cmd }}
-              id: secsvcs_{{ cmd }}
+              title: {{ node }} {{ cmd | replace("_", " ") | title }}
+              icon: <iconify-icon icon="material-symbols:{{ icons.get(node, 'dns') }}"></iconify-icon>
+              shell: ssh autoadmin@{{ node }} {{ cmd }}
+              id: {{ node }}_{{ cmd }}
               maxConcurrent: 1
               timeout: 60
 {% endfor %}
-      - title: homesvcs
-        type: fieldset
-        contents:
-{% for cmd in inv.commands.homesvcs %}
-          - inlineAction:
-              title: homesvcs {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
-              shell: ssh autoadmin@homesvcs {{ cmd }}
-              id: homesvcs_{{ cmd }}
-              maxConcurrent: 1
-              timeout: 60
-{% endfor %}
-      - title: websvcs
-        type: fieldset
-        contents:
-{% for cmd in inv.commands.websvcs %}
-          - inlineAction:
-              title: websvcs {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs {{ cmd }}
-              id: websvcs_{{ cmd }}
-              maxConcurrent: 1
-              timeout: 60
-{% endfor %}
-      - title: pve1
-        type: fieldset
-        contents:
-{% for cmd in inv.commands.pve1 %}
-          - inlineAction:
-              title: pve1 {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
-              shell: ssh autoadmin@pve1 {{ cmd }}
-              id: pve1_{{ cmd }}
-              maxConcurrent: 1
-              timeout: 60
-{% endfor %}
-      - title: pve2
-        type: fieldset
-        contents:
-{% for cmd in inv.commands.pve2 %}
-          - inlineAction:
-              title: pve2 {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
-              shell: ssh autoadmin@pve2 {{ cmd }}
-              id: pve2_{{ cmd }}
-              maxConcurrent: 1
-              timeout: 60
-{% endfor %}
-      - title: vpnsvcs
-        type: fieldset
-        contents:
-{% for cmd in inv.commands.vpnsvcs %}
-          - inlineAction:
-              title: vpnsvcs {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpnsvcs {{ cmd }}
-              id: vpnsvcs_{{ cmd }}
-              maxConcurrent: 1
-              timeout: 60
-{% endfor %}
-      - title: router
-        type: fieldset
-        contents:
-{% for cmd in inv.commands.router %}
-          - inlineAction:
-              title: router {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:router"></iconify-icon>
-              shell: ssh autoadmin@router {{ cmd }}
-              id: router_{{ cmd }}
-              maxConcurrent: 1
-              timeout: 60
-{% endfor %}
-      - title: gaming
-        type: fieldset
-        contents:
-{% for cmd in inv.commands.gaming %}
-          - inlineAction:
-              title: gaming {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:videogame-asset"></iconify-icon>
-              shell: ssh autoadmin@gaming {{ cmd }}
-              id: gaming_{{ cmd }}
-              maxConcurrent: 1
-              timeout: 60
-{% endfor %}
-      - title: devtop
-        type: fieldset
-        contents:
-{% for cmd in inv.commands.devtop %}
-          - inlineAction:
-              title: devtop {{ cmd | replace("_", " ") | title }}
-              icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
-              shell: ssh autoadmin@devtop {{ cmd }}
-              id: devtop_{{ cmd }}
-              maxConcurrent: 1
-              timeout: 60
-{% endfor %}
+{%- endfor %}
 ...

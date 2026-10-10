@@ -19,14 +19,12 @@ tools/render_src.sh "$project_dir"
 { git ls-files -z; printf 'vars.yml\0'; } | tar --null -T - -czf - | \
   ssh autoadmin@pve1 archive_repo || echo "pve1 repo archive failed"
 
-tools/upload_src.sh pve1 "$project_dir" || echo "pve1 upload failed"
-tools/upload_src.sh secsvcs "$project_dir" || echo "secsvcs upload failed"
-tools/upload_src.sh homesvcs "$project_dir" || echo "homesvcs upload failed"
-tools/upload_src.sh pve2 "$project_dir" || echo "pve2 upload failed"
-tools/upload_src.sh websvcs "$project_dir" || echo "websvcs upload failed"
-tools/upload_src.sh vpnsvcs "$project_dir" || echo "vpnsvcs upload failed"
-tools/upload_src.sh router "$project_dir" || echo "router upload failed"
-tools/upload_src.sh devtop "$project_dir" || echo "devtop upload failed"
+for dir in src/nodes/*/; do
+  node=$(basename "$dir")
+  # The gaming VM is usually off, so its upload is left to the user, below
+  [[ $node == gaming ]] && continue
+  tools/upload_src.sh "$node" "$project_dir" || echo "${node} upload failed"
+done
 
 echo -e "\nStart the gaming VM and run the following cmd:"
 echo "tools/upload_src.sh gaming \"$project_dir\""
