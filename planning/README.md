@@ -20,3 +20,4 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
 - [Vaultwarden](vaultwarden/spec.md) — 1 issue (maintainer request, added 2026-09-26)
 - [Router and network](router/spec.md) — 6 issues (maintainer request, added 2026-09-26)
 - [Homepage dashboard](homepage/spec.md) — 2 issues (maintainer request, added 2026-09-27)
+- [autoadmin file access](autoadmin-sftp/spec.md) — 1 issue (architecture review, added 2026-10-10)
