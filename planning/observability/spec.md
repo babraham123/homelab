@@ -1,9 +1,8 @@
 # Observability gaps
 
-The pipeline exists but monitored mostly itself: no useful alerts, no HTTP access logs,
-no Traefik or HAProxy metrics, an empty PVE dashboard, and 10-minute uptime intervals.
-As of 2026-10-07 everything but 09 (long-term retention) is in the tree; 10's test
-plan waits for the next deploy.
+The pipeline exists but monitored mostly itself: no useful alerts, no HTTP access logs, no Traefik
+or HAProxy metrics, an empty PVE dashboard, and 10-minute uptime intervals. As of 2026-10-07
+everything but 09 (long-term retention) is in the tree; 10's test plan waits for the next deploy.
 
 ## Issues
 

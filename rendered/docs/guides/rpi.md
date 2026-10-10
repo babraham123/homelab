@@ -2,13 +2,18 @@
 Guide to setup a Raspberry PI device.
 
 ## Prepare the SD card
-- Flash a SD card with RPi OS: [src](https://www.cyberciti.biz/faq/how-to-create-disk-image-on-mac-os-x-with-dd-command/)
+- Flash a SD card with RPi OS:
+  [src](https://www.cyberciti.biz/faq/how-to-create-disk-image-on-mac-os-x-with-dd-command/)
 ```bash
 diskutil
 ```
 - Install [macports](https://www.macports.org/install.php)
 - Add the credentials to the boot image, [src](https://raspberrypi.stackexchange.com/a/145010/22576)
-- old: [src](https://www.raspberrypi.com/documentation/computers/configuration.html), [notes](https://web.archive.org/web/20240504152152/https://desertbot.io/blog/headless-raspberry-pi-4-ssh-wifi-setup), [WPA](https://android.googlesource.com/platform/external/wpa_supplicant_8/+/master-soong/wpa_supplicant/wpa_supplicant.conf#662), [wifi pass](https://android.googlesource.com/platform/external/wpa_supplicant_8/+/master/wpa_supplicant/wpa_supplicant.conf#1243)
+- old: [src](https://www.raspberrypi.com/documentation/computers/configuration.html),
+  [notes](https://web.archive.org/web/20240504152152/https://desertbot.io/blog/headless-raspberry-pi-4-ssh-wifi-setup),
+  [WPA](https://android.googlesource.com/platform/external/wpa_supplicant_8/+/master-soong/wpa_supplicant/wpa_supplicant.conf#662),
+  [wifi
+  pass](https://android.googlesource.com/platform/external/wpa_supplicant_8/+/master/wpa_supplicant/wpa_supplicant.conf#1243)
 ```bash
 touch /Volumes/bootfs/ssh
 # Setup username and password (just openssl on Linux)

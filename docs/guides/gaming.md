@@ -1,6 +1,6 @@
 # Gaming setup
-Guide to stream games from the windows VM to my living room TV.
-First stand up the [Windows VM](./vm_windows.md)
+Guide to stream games from the windows VM to my living room TV. First stand up the [Windows
+VM](./vm_windows.md)
 
 ## Streaming
 
@@ -8,8 +8,10 @@ First stand up the [Windows VM](./vm_windows.md)
 - Install [ViGEmBus](https://github.com/ViGEm/ViGEmBus)
 - Install [Playnite](https://playnite.link/)
 - Install [ChangeScreenResolution.exe](https://tools.taubenkorb.at/change-screen-resolution/)
-- Install [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/latest/md_docs_2getting__started.html)
-  - Add Playnite as a cmd: `"C:\Users\admin\AppData\Local\Playnite\Playnite.FullscreenApp.exe" --hidesplashscreen`
+- Install
+  [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/latest/md_docs_2getting__started.html)
+  - Add Playnite as a cmd:
+    `"C:\Users\admin\AppData\Local\Playnite\Playnite.FullscreenApp.exe" --hidesplashscreen`
   - Run PowerShell cmds:
 ```PowerShell
 cd "C:\Program Files\Sunshine\scripts"
@@ -18,20 +20,23 @@ cd "C:\Program Files\Sunshine\scripts"
 # Don't start on boot
 Set-Service -Name SunshineService -StartupType Manual
 ```
-- Install [Moonlight](https://github.com/moonlight-stream/moonlight-qt/releases) on Mac, Raspberry Pi
+- Install [Moonlight](https://github.com/moonlight-stream/moonlight-qt/releases) on Mac, Raspberry
+  Pi
 - Install Oculus App
   - Run as admin: `C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe`
   - Start the App
   - [Enable mDNS reflection](./router.md#mdns)
   - On Quest 2, Settings > System > Link, enable Air link, pair with computer
 - Install Yuzu, Ryujinx
-  - Download [keys](https://theprodkeys.com/yuzu-encryption-keys-are-missing/) and copy to correct folder location
+  - Download [keys](https://theprodkeys.com/yuzu-encryption-keys-are-missing/) and copy to correct
+    folder location
   - Import into Playnite
 - Install Dolphin, import into Playnite
 
 ### Apple TV client
 - Install Moonlight from the App Store
-- Tweak the [settings](https://www.reddit.com/r/appletv/comments/nklgcl/any_apple_tv_4k_2021_owners_that_have_tried/)
+- Tweak the
+  [settings](https://www.reddit.com/r/appletv/comments/nklgcl/any_apple_tv_4k_2021_owners_that_have_tried/)
 - Attempt to connect to the gaming VM. Open the Sunshine web UI and enter in the pairing code.
 - Pair xbox controller via bluetooth
 
@@ -68,7 +73,9 @@ sudo systemctl enable moonlight.service
 ```
 - In the Moonlight GUI, set resolution to 1080p, refresh rate to 60Hz
 
-- Buy Xbox S/X controllers (model [1914](https://boilingsteam.com/xbox-one-controller-a-perfected-xbox-360-gamepad/)) and [dongle](https://www.microsoft.com/en-us/d/xbox-wireless-adapter-for-windows/91dqrb97l130)
+- Buy Xbox S/X controllers (model
+  [1914](https://boilingsteam.com/xbox-one-controller-a-perfected-xbox-360-gamepad/)) and
+  [dongle](https://www.microsoft.com/en-us/d/xbox-wireless-adapter-for-windows/91dqrb97l130)
 - Install [xone](https://github.com/dlundqvist/xone) driver
 ```bash
 # Plugin in dongle
@@ -77,7 +84,8 @@ cd xone
 sudo ./install.sh --release
 sudo xow-get-firmware.sh --skip-disclaimer
 ```
-- Power on controllers, [pair](https://support.xbox.com/en-US/help/hardware-network/controller/connect-xbox-wireless-controller-to-pc)
+- Power on controllers,
+  [pair](https://support.xbox.com/en-US/help/hardware-network/controller/connect-xbox-wireless-controller-to-pc)
   - Put dongle into pairing mode
 ```bash
 echo 1 | sudo tee /sys/bus/usb/drivers/xone-dongle/*/pairing

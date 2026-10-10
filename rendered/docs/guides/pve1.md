@@ -1,5 +1,6 @@
 # PVE1 setup specific for hosting secsvcs
-Initial setup for the primary VM host, PVE1. Handles the self signed CA and other certificates, secrets management, notifications and VM management services.
+Initial setup for the primary VM host, PVE1. Handles the self signed CA and other certificates,
+secrets management, notifications and VM management services.
 
 - Make sure that [Proxmox setup](./proxmox.md) has been completed.
 - Create the secsvcs and homesvcs VMs (websvcs is on [PVE2](./pve2.md)). Configure podman on them.
@@ -109,7 +110,8 @@ Use self-signed certs for server to server traffic. Use Let's Encrypt certs for 
 
 ### CA infra
 [Ref](https://jamielinux.com/docs/openssl-certificate-authority/index.html)
-- Setup CA infrastructure for self signed certs. The root CA key should be kept as secure as possible. 
+- Setup CA infrastructure for self signed certs. The root CA key should be kept as secure as
+  possible.
 ```bash
 # root CA
 mkdir /root/ca
@@ -212,7 +214,8 @@ mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
 ## Notifications
 - Create a custom Gmail account
 - Enable 2 Step verification
-- Generate app passwords for lldap, authelia and msmtp, [Ref](https://support.google.com/accounts/answer/185833?hl=en)
+- Generate app passwords for lldap, authelia and msmtp,
+  [Ref](https://support.google.com/accounts/answer/185833?hl=en)
 ```bash
 # Update sops files
 /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs
@@ -237,8 +240,8 @@ src/nodes/pve1/install_svcs.sh cert_notifier
 ```
 
 ## Backups
-- Install the weekly backup. First add the `pbs2` storage and the client key from the
-  [Proxmox guide](./proxmox.md#backups).
+- Install the weekly backup. First add the `pbs2` storage and the client key from the [Proxmox
+  guide](./proxmox.md#backups).
 ```bash
 cd /root/homelab-rendered
 src/nodes/pve1/install_svcs.sh backup_orchestrator

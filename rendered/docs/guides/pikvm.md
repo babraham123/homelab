@@ -1,6 +1,5 @@
 # Pi-KVM DIY setup
-Guide to create a KVM device to control PVE2.
-TODO: finish this guide
+Guide to create a KVM device to control PVE2. TODO: finish this guide
 
 ### Wiring
 - [ATX controller](https://perdeas.com/wp/?p=36)

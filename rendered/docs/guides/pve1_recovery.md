@@ -1,17 +1,25 @@
 # pve1 disaster recovery
-What pve1 must keep off-box, and how to recover when its SSD dies or a trust root (AGE key, private CA, SSH CA, `vars.yml`) is lost.
+What pve1 must keep off-box, and how to recover when its SSD dies or a trust root (AGE key, private
+CA, SSH CA, `vars.yml`) is lost.
 
-- pve1 is the one host a VM restore can't bring back: the private CA, SSH CA, AGE key, ACME distribution and secret provisioning live on the Proxmox host, outside every VM backup
-- The weekly run ([Services](../services.md#storage-and-backups)) sends pve1's host files (`/root/secrets`, `/root/ca`, `/root/ssh`, `/etc/pve`, …) to PBS as `host/pve1`, and its VMs as images, all encrypted with `/root/secrets/pbs_client.key`
-- The escrow bundle (*planned*, `backup-and-dr/04`) must hold that key and the PBS token. Until then, see [Nothing escrowed](#nothing-escrowed)
-- `backup-and-dr/NN` tickets are in `planning/backup-and-dr/issues/`; anything *planned* doesn't exist yet
+- pve1 is the one host a VM restore can't bring back: the private CA, SSH CA, AGE key, ACME
+  distribution and secret provisioning live on the Proxmox host, outside every VM backup
+- The weekly run ([Services](../services.md#storage-and-backups)) sends pve1's host files
+  (`/root/secrets`, `/root/ca`, `/root/ssh`, `/etc/pve`, …) to PBS as `host/pve1`, and its VMs as
+  images, all encrypted with `/root/secrets/pbs_client.key`
+- The escrow bundle (*planned*, `backup-and-dr/04`) must hold that key and the PBS token. Until
+  then, see [Nothing escrowed](#nothing-escrowed)
+- `backup-and-dr/NN` tickets are in `planning/backup-and-dr/issues/`; anything *planned* doesn't
+  exist yet
 
 ## What must exist off-box
 The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "Covered by":
 - **PBS VM backup**: inside a VM disk that PBS backs up
-- **PBS host backup**: staged by pve1's `backup.sh` into `/root/backups/pve1/` and uploaded with the rest of `/root/backups`; needs the client key and a token to restore
+- **PBS host backup**: staged by pve1's `backup.sh` into `/root/backups/pve1/` and uploaded with the
+  rest of `/root/backups`; needs the client key and a token to restore
 - **Escrow**: the escrow bundle, *planned* (`backup-and-dr/04`)
-- **Repo backup**: `/root/backups/repo/`, written by every `tools/deploy_src.sh`, in the PBS host backup
+- **Repo backup**: `/root/backups/repo/`, written by every `tools/deploy_src.sh`, in the PBS host
+  backup
 - **Regenerate**: derived; rebuild with the script or guide listed
 
 ### On pve1
@@ -55,17 +63,24 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
 
 ## Rebuild pve1 from bare metal
 - Assumes a new SSD, pve2 and its datastore intact, and `vars.yml`
-- All four NICs belong to the router VM: no LAN, DHCP, DNS or Wake-on-LAN until it's back. Work from pve1's console until step 5
+- All four NICs belong to the router VM: no LAN, DHCP, DNS or Wake-on-LAN until it's back. Work from
+  pve1's console until step 5
 - More on VM restores: [restore guide](./restore.md#a-vm)
 
 ### 1. Install Proxmox with a temporary link to pve2
-- Install Proxmox as in the [router guide](./router.md#install-proxmox); the user and desktop steps can wait
-- Hostname `pve1.janedoe.com`. The node name must be `pve1`: restored VM configs land under `/etc/pve/nodes/pve1/`, and the scripts look the host up by name. Renaming after step 4 orphans the restored VMs
-- Network: the NIC cabled to pve2 (pfSense's `igc2`), a free static address on pve2's subnet, e.g. `192.168.2.250/24`, gateway `192.168.2.1`
-  - Ports are in PCI order: WAN, LAN (WiFi AP), pve2, LAN2 (switch). pve2's is the third controller in `lspci -nn | grep -i ethernet`
+- Install Proxmox as in the [router guide](./router.md#install-proxmox); the user and desktop steps
+  can wait
+- Hostname `pve1.janedoe.com`. The node name must be `pve1`: restored VM configs land under
+  `/etc/pve/nodes/pve1/`, and the scripts look the host up by name. Renaming after step 4 orphans
+  the restored VMs
+- Network: the NIC cabled to pve2 (pfSense's `igc2`), a free static address on pve2's subnet, e.g.
+  `192.168.2.250/24`, gateway `192.168.2.1`
+  - Ports are in PCI order: WAN, LAN (WiFi AP), pve2, LAN2 (switch). pve2's is the third controller
+    in `lspci -nn | grep -i ethernet`
   - PCI address `BB:00.0` → `enp<N>s0`, `N` = `BB` in decimal (`03` → `enp3s0`, `0a` → `enp10s0`)
   - `ip -br link`: only the cabled ports are `UP`
-- Enable IOMMU and the vfio modules now ([router guide](./router.md#install-pfsense), "Enable IOMMU / NIC passthrough"); the router VM can't start without them
+- Enable IOMMU and the vfio modules now ([router guide](./router.md#install-pfsense), "Enable IOMMU
+  / NIC passthrough"); the router VM can't start without them
 
 ### 2. Power on pve2 by hand
 - Press pve2's power button (`start_pve2` needs the router)
@@ -73,8 +88,10 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
 
 ### 3. Reconnect the PBS storage
 - Needs the client key and a PBS token:
-  - Key: `pbs_client.key` from escrow, or pve2's copy, `/etc/pve/priv/storage/pbs2.enc`; put it at `/root/secrets/pbs_client.key` (`install -D -m 400`)
-  - Token: `pbs2_backup_token` from escrow (in `pve1.yaml`), or a new one made on pve2 ([Proxmox guide](./proxmox.md#backups))
+  - Key: `pbs_client.key` from escrow, or pve2's copy, `/etc/pve/priv/storage/pbs2.enc`; put it at
+    `/root/secrets/pbs_client.key` (`install -D -m 400`)
+  - Token: `pbs2_backup_token` from escrow (in `pve1.yaml`), or a new one made on pve2 ([Proxmox
+    guide](./proxmox.md#backups))
 - The fingerprint is needed until step 12 installs the Let's Encrypt cert
 ```bash
 # On pve2's console
@@ -98,7 +115,8 @@ qmrestore pbs2:backup/vm/VMID/TIMESTAMP VMID --storage local-lvm
 
 ### 5. Switch pve1 to its normal network and start the router
 - `vmbr0` has no bridge ports; pfSense is the gateway
-- The rendered tree isn't on pve1 yet: write `/etc/network/interfaces` and `/etc/resolv.conf` by hand from `src/nodes/pve1/interfaces.j2` and `src/nodes/pve1/resolv.conf.j2`
+- The rendered tree isn't on pve1 yet: write `/etc/network/interfaces` and `/etc/resolv.conf` by
+  hand from `src/nodes/pve1/interfaces.j2` and `src/nodes/pve1/resolv.conf.j2`
   - `vmbr0` static `192.168.4.10/24`, gateway `192.168.4.1`, `bridge-ports none`
   - `search janedoe.com`, `nameserver 192.168.4.1`
 ```bash
@@ -136,17 +154,20 @@ tools/deploy_src.sh
 - Then on pve1:
   - [Debian setup, Automation](./debian.md#automation): `autoadmin` user and `install_dispatcher`
   - [pve1 guide, Configs](./pve1.md#configs): jinjanator, yq
-  - [pve1 guide, Secrets](./pve1.md#secrets): the first block only (age, sops, the shell exports); skip `age-keygen`
+  - [pve1 guide, Secrets](./pve1.md#secrets): the first block only (age, sops, the shell exports);
+    skip `age-keygen`
 
 ### 9. Restore the trust roots
-- From PBS: install the client and pull `/root` out of the newest host backup ([restore guide](./restore.md#from-pbs))
+- From PBS: install the client and pull `/root` out of the newest host backup ([restore
+  guide](./restore.md#from-pbs))
 ```bash
 /root/homelab-rendered/src/nodes/pve1/install_svcs.sh backup_orchestrator
 proxmox-backup-client restore host/pve1/TIMESTAMP backups.pxar /tmp/restore --ns files \
   --keyfile /root/secrets/pbs_client.key --pattern 'pve1/*'
 ```
   Then copy `pve1/files/root/{secrets,ca,ssh,acme,.ssh}` into place.
-- Or from escrow (format *planned* in `backup-and-dr/04`, `docs/guides/escrow.md`), at the paths in [On pve1](#on-pve1)
+- Or from escrow (format *planned* in `backup-and-dr/04`, `docs/guides/escrow.md`), at the paths in
+  [On pve1](#on-pve1)
 - Neither: [Nothing escrowed](#nothing-escrowed)
 - Permissions, as in the [pve1 guide](./pve1.md):
 ```bash
@@ -177,19 +198,24 @@ cd /root/ca
 scp intermediate/certs/ca-chain.cert.pem autoadmin@pve1:/home/autoadmin
 ssh autoadmin@pve1 install_ca
 ```
-- [pve1 guide, ACME Certificates](./pve1.md#acme-certificates): `traefik-certs-dumper`, `mkdir -p /root/acme`
-- [pve1 guide, Notifications](./pve1.md#notifications): msmtp, the AppArmor edit, `cert_notifier`; skip creating the Gmail account
-- [Proxmox guide](./proxmox.md): VM management (`vm_watchdog`), Networking (HA services, ufw), Monitoring (node_exporter and its ufw rule, `api_ro` user, metric server)
+- [pve1 guide, ACME Certificates](./pve1.md#acme-certificates): `traefik-certs-dumper`,
+  `mkdir -p /root/acme`
+- [pve1 guide, Notifications](./pve1.md#notifications): msmtp, the AppArmor edit, `cert_notifier`;
+  skip creating the Gmail account
+- [Proxmox guide](./proxmox.md): VM management (`vm_watchdog`), Networking (HA services, ufw),
+  Monitoring (node_exporter and its ufw rule, `api_ro` user, metric server)
 
 ### 12. Certificates
 ```bash
 /root/homelab-rendered/src/base/certificates/acme_transfer.sh
 ```
-- Refills `/root/acme`, installs pve1's `pveproxy` cert, pushes certs to pve2, pbs2 and the router, re-pins the `pbs2` fingerprint
+- Refills `/root/acme`, installs pve1's `pveproxy` cert, pushes certs to pve2, pbs2 and the router,
+  re-pins the `pbs2` fingerprint
 - Self-signed service certs live on the VMs; no re-issue
 
 ### 13. Backups and verification
-- `/root/homelab-rendered/src/nodes/pve1/install_svcs.sh backup_orchestrator` if step 9 didn't, then one run: `systemctl start backup_orchestrator`
+- `/root/homelab-rendered/src/nodes/pve1/install_svcs.sh backup_orchestrator` if step 9 didn't, then
+  one run: `systemctl start backup_orchestrator`
 - Check:
   - Login at `https://auth.janedoe.com` (Authelia, LLDAP, Postgres)
   - `ssh manualadmin@pve1` from the workstation, no host-key prompt
@@ -198,8 +224,11 @@ ssh autoadmin@pve1 install_ca
 - Power pve2 back down: `ssh autoadmin@pve2 shutdown`
 
 ### Router without a VM backup
-- Recreate the VM ([debugging, Recreate the VM](../debugging.md#recreate-the-vm)) and install pfSense ([router guide](./router.md#install-pfsense))
-- Restore `config.xml` under Diagnostics >> Backup & Restore, from Auto Config Backup (needs the ACB device key and encryption password) or escrow; offline decryption: [Decrypt a config backup](../debugging.md#decrypt-a-config-backup)
+- Recreate the VM ([debugging, Recreate the VM](../debugging.md#recreate-the-vm)) and install
+  pfSense ([router guide](./router.md#install-pfsense))
+- Restore `config.xml` under Diagnostics >> Backup & Restore, from Auto Config Backup (needs the ACB
+  device key and encryption password) or escrow; offline decryption: [Decrypt a config
+  backup](../debugging.md#decrypt-a-config-backup)
 - Not in `config.xml`, restore by hand:
   - `/root/router-src` and the dispatcher ([router guide, Automation](./router.md#automation))
   - `/root/pve2_mac_address.txt` ([pve2 guide, Automation](./pve2.md#automation))
@@ -209,7 +238,8 @@ ssh autoadmin@pve1 install_ca
 
 ### Only the AGE key is lost
 - From escrow or the PBS host backup: restore `age.txt`/`age.pub` and stop
-- Otherwise the SOPS files on pve1 are unreadable, but each host's `secrets.yaml.age` is also encrypted to the host's key. Rebuild from those
+- Otherwise the SOPS files on pve1 are unreadable, but each host's `secrets.yaml.age` is also
+  encrypted to the host's key. Rebuild from those
 - New key:
 ```bash
 ssh manualadmin@pve1
@@ -235,14 +265,17 @@ chmod 600 "/root/secrets/${host}.yaml"
 # Re-encrypts to the new key + host key and redistributes; save and quit the editor
 /root/homelab-rendered/src/nodes/pve1/secret_update.sh "$host"
 ```
-- `secret_update.sh` needs each host's sudo password; they're in the maintainer's offline copy (`auth/08`), not SOPS
-- If the host's SSH is broken, decrypt through the guest agent on its Proxmox host (pve1: secsvcs, homesvcs; pve2: websvcs), copy to pve1's `/dev/shm`, and continue from `sops -e`:
+- `secret_update.sh` needs each host's sudo password; they're in the maintainer's offline copy
+  (`auth/08`), not SOPS
+- If the host's SSH is broken, decrypt through the guest agent on its Proxmox host (pve1: secsvcs,
+  homesvcs; pve2: websvcs), copy to pve1's `/dev/shm`, and continue from `sops -e`:
 ```bash
 umask 077
 qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age \
   | jq -r '."out-data"' > /dev/shm/HOST.yaml
 ```
-- `pve1.yaml` has no host copy. Recreate it with `sops /root/secrets/pve1.yaml` from `src/nodes/pve1/secrets_template.yaml`:
+- `pve1.yaml` has no host copy. Recreate it with `sops /root/secrets/pve1.yaml` from
+  `src/nodes/pve1/secrets_template.yaml`:
   - a new Gmail app password ([Notifications](./pve1.md#notifications))
   - a new `api_ro` password on PBS ([Proxmox guide, Monitoring](./proxmox.md#monitoring))
   - a new PBS token ([Proxmox guide, Backups](./proxmox.md#backups))
@@ -250,21 +283,28 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
 - `rm -rf /root/secrets/lost` once every host is done
 
 ### Only the private CA is lost
-- Not urgent: service certs and the chain live on the VMs and work until they expire (395 days); only issuing is blocked
-- Rebuild before the next [yearly renewal](../maintenance.md#refresh-certificates), in one sitting: services reject each other until all have the new chain
-- Follow [CA infra](./pve1.md#ca-infra) in full: new root and intermediate, new passphrases, `openssl.cnf` from the rendered `src/base/certificates/openssl.{root,intermediate}.cnf`. Its `upload` loop installs the chain on every host
+- Not urgent: service certs and the chain live on the VMs and work until they expire (395 days);
+  only issuing is blocked
+- Rebuild before the next [yearly renewal](../maintenance.md#refresh-certificates), in one sitting:
+  services reject each other until all have the new chain
+- Follow [CA infra](./pve1.md#ca-infra) in full: new root and intermediate, new passphrases,
+  `openssl.cnf` from the rendered `src/base/certificates/openssl.{root,intermediate}.cnf`. Its
+  `upload` loop installs the chain on every host
 - Re-issue and redistribute every service key and cert:
 ```bash
 /root/homelab-rendered/src/base/certificates/self_signed_key_gen.sh
 /root/homelab-rendered/src/base/certificates/self_signed_cert_gen.sh
 ```
 - Restart the secure services on secsvcs, homesvcs and websvcs, as the script asks
-- Browser TLS is Let's Encrypt; if you added the private CA to a device's trust store by hand, replace it there too
+- Browser TLS is Let's Encrypt; if you added the private CA to a device's trust store by hand,
+  replace it there too
 
 ### Only the SSH CA is lost
-- Not urgent: hosts and clients trust the old CA, so existing certs work until they expire (395 days); only signing is blocked
+- Not urgent: hosts and clients trust the old CA, so existing certs work until they expire (395
+  days); only signing is blocked
 - New CA keys ([CA certs](./pve1.md#ca-certs)), with a new passphrase for `ca_ssh_key`
-- Re-sign and redistribute everything, then the gaming VM ([Maintenance](../maintenance.md#refresh-certificates)):
+- Re-sign and redistribute everything, then the gaming VM
+  ([Maintenance](../maintenance.md#refresh-certificates)):
 ```bash
 /root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
 ssh autoadmin@router start_pve2
@@ -272,11 +312,14 @@ ssh autoadmin@pve2 start_gaming_vm
 /root/homelab-rendered/src/base/certificates/ssh_cert_gen_windows.sh
 ```
 - Expect host-key prompts: pve1 trusts the new host CA before the script reaches every host
-- Replace the `@cert-authority` line in `~/.ssh/known_hosts` on the workstation and other clients with the one the script prints
+- Replace the `@cert-authority` line in `~/.ssh/known_hosts` on the workstation and other clients
+  with the one the script prints
 
 ### Only vars.yml is lost
-- Take it from the newest `/root/backups/repo/homelab-*.tar.gz` on pve1 (`vars.yml` is in the archive root), the PBS host backup, or escrow
-- None of those: reconstruct it by diffing a render of the template against a host's `/root/homelab-rendered`, rendered with the real values at the last deploy
+- Take it from the newest `/root/backups/repo/homelab-*.tar.gz` on pve1 (`vars.yml` is in the
+  archive root), the PBS host backup, or escrow
+- None of those: reconstruct it by diffing a render of the template against a host's
+  `/root/homelab-rendered`, rendered with the real values at the last deploy
 ```bash
 # On the workstation, repo root, ideally at the last deployed commit
 cp vars.template.yml vars.yml
@@ -288,14 +331,21 @@ ssh manualadmin@pve1 'rm /tmp/homelab-rendered.tgz'
 tar -C "$work" -xzf "$work/homelab-rendered.tgz"
 diff -r "$work/homelab-template" "$work/homelab-rendered"
 ```
-- Edit `vars.yml` and repeat until the `diff` is empty, then `rm -rf "$work"`. A value no template uses can't be recovered, but nothing needs it
+- Edit `vars.yml` and repeat until the `diff` is empty, then `rm -rf "$work"`. A value no template
+  uses can't be recovered, but nothing needs it
 
 ### Nothing escrowed
-Neither escrow nor the PBS host backup can supply the trust roots. Do steps 1–8, then in place of step 9:
+Neither escrow nor the PBS host backup can supply the trust roots. Do steps 1–8, then in place of
+step 9:
 1. SSH CA (run `ssh_cert_gen.sh` once, not once per section):
-   - New `ca_ssh_key` and `ca_ssh_host_key`: the first two `ssh-keygen` blocks of [CA certs](./pve1.md#ca-certs); skip its root key and `ssh_cert_gen.sh`
-   - Step 10 as written; with a new CA, `ssh_cert_gen.sh` asks for each host's password, as on the original install
-   - The gaming VM's cert is from the old CA: also run the `start_pve2` / `start_gaming_vm` / `ssh_cert_gen_windows.sh` block from [Only the SSH CA is lost](#only-the-ssh-ca-is-lost), and replace the `@cert-authority` line on clients
-2. AGE key: [Only the AGE key is lost](#only-the-age-key-is-lost), including `pve1.yaml`; collect each `<host>_id_ed25519.pub` again first ([pve1 guide, Secrets](./pve1.md#secrets))
+   - New `ca_ssh_key` and `ca_ssh_host_key`: the first two `ssh-keygen` blocks of [CA
+     certs](./pve1.md#ca-certs); skip its root key and `ssh_cert_gen.sh`
+   - Step 10 as written; with a new CA, `ssh_cert_gen.sh` asks for each host's password, as on the
+     original install
+   - The gaming VM's cert is from the old CA: also run the `start_pve2` / `start_gaming_vm` /
+     `ssh_cert_gen_windows.sh` block from [Only the SSH CA is lost](#only-the-ssh-ca-is-lost), and
+     replace the `@cert-authority` line on clients
+2. AGE key: [Only the AGE key is lost](#only-the-age-key-is-lost), including `pve1.yaml`; collect
+   each `<host>_id_ed25519.pub` again first ([pve1 guide, Secrets](./pve1.md#secrets))
 3. Private CA: [Only the private CA is lost](#only-the-private-ca-is-lost)
 4. Continue with steps 11–13

@@ -1,5 +1,6 @@
 # Mac Setup
-Setup a MacOS based computer to access homelab services, both remotely and locally. Also optimizes the Terminal app to access VM hosts and work on homelab code.
+Setup a MacOS based computer to access homelab services, both remotely and locally. Also optimizes
+the Terminal app to access VM hosts and work on homelab code.
 
 ## Dependencies
 - Install xcode, homebrew, pipx, git and other dependencies
@@ -12,7 +13,8 @@ git --version
 ```
 
 ## Terminal
-- Install Iterm2, zsh, oh-my-zsh, powerlevel10k ([src](https://medium.com/seokjunhong/customize-the-terminal-zsh-iterm2-powerlevel10k-complete-guide-for-beginners-35c4ba439055))
+- Install Iterm2, zsh, oh-my-zsh, powerlevel10k
+  ([src](https://medium.com/seokjunhong/customize-the-terminal-zsh-iterm2-powerlevel10k-complete-guide-for-beginners-35c4ba439055))
 ```bash
 brew install zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
@@ -33,7 +35,8 @@ brew install --cask font-meslo-lg-nerd-font
 
 wget -O .vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
 ```
-- In iTerm, configure [natural key bindings](https://apple.stackexchange.com/questions/136928/using-alt-cmd-right-left-arrow-in-iterm)
+- In iTerm, configure [natural key
+  bindings](https://apple.stackexchange.com/questions/136928/using-alt-cmd-right-left-arrow-in-iterm)
 
 ## Source code
 - Install tools

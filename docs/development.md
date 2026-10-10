@@ -9,47 +9,65 @@
 
 ### Templating System
 
-- `vars.yml` contains specific/personal values for rendering (gitignored), `vars.template.yml` is an example
+- `vars.yml` contains specific/personal values for rendering (gitignored), `vars.template.yml` is an
+  example
 - All `*.j2` files are processed through Jinja2 via `jinjanate` at render time
-- `*.j2.j2` files undergo a *second* render pass on the node, by one of the `src/base/podman/render_*.sh` scripts:
-  - `render_host.sh`, at install time from `install_svcs.sh`: per-node values in the vmagent and Fluent Bit quadlets
+- `*.j2.j2` files undergo a *second* render pass on the node, by one of the
+  `src/base/podman/render_*.sh` scripts:
+  - `render_host.sh`, at install time from `install_svcs.sh`: per-node values in the vmagent and
+    Fluent Bit quadlets
   - `render_secrets.sh`, at container start (`ExecStartPre`): secrets injection
   - `render_services.sh`, at container start: Fluent Bit's config, with the node's "Homelab:" units
-- `src/nodes.yml` is the node inventory: each node's dispatcher entries (services in install order, other commands) and each service's subdomain, Gatus endpoint and container image facts (`upstream`/`build`, `update_last`, `containers`). `render_src.sh` appends it to `vars.yml` as `nodes:` in a private temp `all_vars.yml`, and templates import `src/nodes.jinja` for the lists derived from it (dispatcher cases, sudoers grants, OliveTin buttons, DNS/SNI subdomains, uptime endpoints, image update order). See [ADR 0006](adr/0006-node-inventory.md)
+- `src/nodes.yml` is the node inventory: each node's dispatcher entries (services in install order,
+  other commands) and each service's subdomain, Gatus endpoint and container image facts
+  (`upstream`/`build`, `update_last`, `containers`). `render_src.sh` appends it to `vars.yml` as
+  `nodes:` in a private temp `all_vars.yml`, and templates import `src/nodes.jinja` for the lists
+  derived from it (dispatcher cases, sudoers grants, OliveTin buttons, DNS/SNI subdomains, uptime
+  endpoints, image update order). See [ADR 0006](adr/0006-node-inventory.md)
 
 ### Service Structure
 
 `src/` has three groups, plus `nodes.yml` and `nodes.jinja`:
 - `src/nodes/<node>/`, one per node. May contain:
-  - `install_svcs.sh`: installs configs to `/etc/opt/<service>/` and container files to `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not executable, since `install` defaults to 755), then reloads systemd. Runs from `/root/homelab-rendered/src`, so its paths start with `base/`, `nodes/` or `services/`
+  - `install_svcs.sh`: installs configs to `/etc/opt/<service>/` and container files to
+    `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not executable, since
+    `install` defaults to 755), then reloads systemd. Runs from `/root/homelab-rendered/src`, so its
+    paths start with `base/`, `nodes/` or `services/`
   - `commands.sh` - Other tasks that run as root and are triggered remotely
-  - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config shared by every node is `src/services/traefik/`
+  - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config
+    shared by every node is `src/services/traefik/`
   - `secrets_template.yaml`: template for SOPS-encrypted secrets
 - `src/services/<service>/`, one per service. May contain:
   - `*.container`: Podman quadlet systemd unit files
   - `*.volume`: Podman volume definitions
   - Service configuration files
-- `src/base/`: setup shared across nodes: `debian/`, `podman/`, `macos/`, `certificates/`, `node_exporter/`
+- `src/base/`: setup shared across nodes: `debian/`, `podman/`, `macos/`, `certificates/`,
+  `node_exporter/`
 
 ### Shell scripts
 
-- Every script that runs on a Debian or PVE node sources `src/base/lib.sh` first: `set -euo pipefail`, `log`/`warn`/`die`, `require_root`, `require_reachable`/`wait_reachable`, `install_quadlet`, `reload_restart`. Scripts run in place source it relative to themselves; copies installed to `/usr/local/bin` with `install_bin` (and the dispatcher) source `/usr/local/lib/homelab/lib.sh`, which `install_lib` puts there
+- Every script that runs on a Debian or PVE node sources `src/base/lib.sh` first:
+  `set -euo pipefail`, `log`/`warn`/`die`, `require_root`, `require_reachable`/`wait_reachable`,
+  `install_quadlet`, `reload_restart`. Scripts run in place source it relative to themselves; copies
+  installed to `/usr/local/bin` with `install_bin` (and the dispatcher) source
+  `/usr/local/lib/homelab/lib.sh`, which `install_lib` puts there
 - `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die`
-- Router (`/bin/sh` on pfSense), gaming and macOS scripts get a copy of their own directory only, so they stand alone; `msmtp_password.sh` runs under msmtp with no options set, so it stands alone too
+- Router (`/bin/sh` on pfSense), gaming and macOS scripts get a copy of their own directory only, so
+  they stand alone; `msmtp_password.sh` runs under msmtp with no options set, so it stands alone too
 
 ### Diagrams
 
-Docs diagrams are Mermaid, rendered inline by GitHub. Conventions kept across all of
-them so they read as one set:
+Docs diagrams are Mermaid, rendered inline by GitHub. Conventions kept across all of them so they
+read as one set:
 
-- Box color groups related roles within a diagram; fills are transparent and only the
-  stroke is colored, so diagrams stay legible in both the light and dark GitHub themes.
+- Box color groups related roles within a diagram; fills are transparent and only the stroke is
+  colored, so diagrams stay legible in both the light and dark GitHub themes.
 - Grey dashed boxes are hardware that is planned but not in service.
 - Most edges carry the link, protocol, or script name as a label.
-- In the two network topology diagrams only, solid edges are physical paths and dotted
-  edges are logical ones (tunnels, tagged VLANs, virtual NICs).
-- Sequence diagrams use `autonumber` and activation bars so the request and its
-  return path are both visible.
+- In the two network topology diagrams only, solid edges are physical paths and dotted edges are
+  logical ones (tunnels, tagged VLANs, virtual NICs).
+- Sequence diagrams use `autonumber` and activation bars so the request and its return path are both
+  visible.
 
 ## Deployment pipeline
 
@@ -91,11 +109,11 @@ flowchart TB
     class second secret
 ```
 
-Only validated output ever ships, and secrets only materialize inside the node at
-container start; the rendered tree on disk still has secret placeholders in its
-`*.j2` files. `deploy_src.sh` runs render + upload for every node in one command,
-and archives the repo plus `vars.yml` to pve1 (`archive_repo`). It always skips the gaming
-VM and prints the upload command to run once it's started.
+Only validated output ever ships, and secrets only materialize inside the node at container start;
+the rendered tree on disk still has secret placeholders in its `*.j2` files. `deploy_src.sh` runs
+render + upload for every node in one command, and archives the repo plus `vars.yml` to pve1
+(`archive_repo`). It always skips the gaming VM and prints the upload command to run once it's
+started.
 
 ## Deploy changes
 
@@ -109,20 +127,18 @@ Render templates locally:
 out=$(mktemp -d)/homelab-rendered
 tools/render_src.sh "$out"
 ```
-Without an argument `render_src.sh` picks a private temp dir itself and prints it.
-The output holds real values, so keep it out of shared paths such as a fixed
-`/tmp/homelab-rendered`; `vars.yml`, `.git`, `planning` and `notes` are never copied
-into it. The directory must be named `homelab-rendered`, since `upload_src.sh` moves
-it into place by that name.
+Without an argument `render_src.sh` picks a private temp dir itself and prints it. The output holds
+real values, so keep it out of shared paths such as a fixed `/tmp/homelab-rendered`; `vars.yml`,
+`.git`, `planning` and `notes` are never copied into it. The directory must be named
+`homelab-rendered`, since `upload_src.sh` moves it into place by that name.
 
 Rendering also validates YAML, JSON, checks for duplicate container IPs
-(`tools/validate_rendered.sh`), and checks
-`src/nodes.yml` against the scripts and routes it describes: each node's `services`
-must be exactly its `install_svcs.sh` cases, every command must be a case in its
-script, subdomains must be unique, the secsvcs/homesvcs subdomains must match the
-`Host()` rules in their `traefik/routes.yml`, and each image's quadlet (copied by the
-service's case) must have `Image=localhost/` + its `upstream` ref without the registry
-host, or `Image=localhost/<build>:latest`.
+(`tools/validate_rendered.sh`), and checks `src/nodes.yml` against the scripts and routes it
+describes: each node's `services` must be exactly its `install_svcs.sh` cases, every command must be
+a case in its script, subdomains must be unique, the secsvcs/homesvcs subdomains must match the
+`Host()` rules in their `traefik/routes.yml`, and each image's quadlet (copied by the service's
+case) must have `Image=localhost/` + its `upstream` ref without the registry host, or
+`Image=localhost/<build>:latest`.
 
 Upload rendered files to a specific server:
 ```bash
@@ -131,19 +147,18 @@ tools/upload_src.sh <hostname> "$out"
 
 ### Pre-commit hook and `rendered/`
 
-`.githooks/pre-commit` renders the staged tree against `vars.template.yml` in a temp
-dir, which runs every check above, then runs `shellcheck -x --severity=warning` over
-the rendered `*.sh` files (so `*.sh.j2` scripts are checked with their Jinja filled
-in). If everything passes it replaces `rendered/` with that render and stages it, so
-every commit carries a readable copy of what the nodes get, with example values.
-`rendered/` is generated: edit the templates, never the copy. It is left out of the
-deploy render and marked `linguist-generated` so GitHub collapses it in diffs. The
+`.githooks/pre-commit` renders the staged tree against `vars.template.yml` in a temp dir, which runs
+every check above, then runs `shellcheck -x --severity=warning` over the rendered `*.sh` files (so
+`*.sh.j2` scripts are checked with their Jinja filled in). If everything passes it replaces
+`rendered/` with that render and stages it, so every commit carries a readable copy of what the
+nodes get, with example values. `rendered/` is generated: edit the templates, never the copy. It is
+left out of the deploy render and marked `linguist-generated` so GitHub collapses it in diffs. The
 hook takes about 7 s. Activate it once per clone:
 ```bash
 git config core.hooksPath .githooks
 ```
-Skip it for one commit with `git commit --no-verify`; `rendered/` is then stale until
-the next commit that runs the hook.
+Skip it for one commit with `git commit --no-verify`; `rendered/` is then stale until the next
+commit that runs the hook.
 
 ### Update a web service
 
@@ -160,11 +175,10 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
 1. Create service container and config files in `src/services/<service>/`
 1. If cross-VM TLS is needed, add cert/key gen to `src/base/certificates/` and update `commands.sh`
 1. Add service to `install_svcs.sh`
-1. Add it under the node's `services` in `src/nodes.yml`, in install order, with its
-   `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health
-   check isn't `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for
-   extra Gatus conditions). This adds the dispatcher case, sudoers grant, OliveTin
-   button, DNS/SNI routing and uptime check
+1. Add it under the node's `services` in `src/nodes.yml`, in install order, with its `subdomain`
+   and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health check isn't `/`,
+   `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions). This adds
+   the dispatcher case, sudoers grant, OliveTin button, DNS/SNI routing and uptime check
 1. Update Authelia config if OIDC auth is available (`src/services/authelia/`)
 1. Add Homepage dashboard entry (`src/services/homepage/`)
 1. Update the relevant guide in `docs/guides/`

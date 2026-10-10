@@ -1,15 +1,18 @@
 # Windows VM setup
-Guide to create a Windows VM. 
+Guide to create a Windows VM.
 
 - First do the basic [VM setup](./vm.md)
 
 ## Images
 - Download the Windows [ISO](https://www.microsoft.com/software-download/windows11)
-- Download the Windows VirtIO [drivers](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso)
+- Download the Windows VirtIO
+  [drivers](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso)
 - Upload ISOs to Proxmox on "local"
 
 ## Configure VM
-[src](https://www.wundertech.net/how-to-install-windows-11-on-proxmox/), [tips](https://pve.proxmox.com/wiki/Windows_11_guest_best_practices), [vid](https://www.youtube.com/watch?v=fupuTkkKPDU)
+[src](https://www.wundertech.net/how-to-install-windows-11-on-proxmox/),
+[tips](https://pve.proxmox.com/wiki/Windows_11_guest_best_practices),
+[vid](https://www.youtube.com/watch?v=fupuTkkKPDU)
 - Turn on
   - For driver ISO, if IDE1 doesn't work use SATA0
   - If boot fails
@@ -24,7 +27,8 @@ Guide to create a Windows VM.
   - On mac, verify connection
     - install `Windows App`, click Add PC
     - username = `gaming\admin`, login password
-  - Disable login, [ref](https://web.archive.org/web/20250307115119/https://answers.microsoft.com/en-us/windows/forum/all/how-to-login-automatically-to-windows-11/c0e9301e-392e-445a-a5cb-f44d00289715)
+  - Disable login,
+    [ref](https://web.archive.org/web/20250307115119/https://answers.microsoft.com/en-us/windows/forum/all/how-to-login-automatically-to-windows-11/c0e9301e-392e-445a-a5cb-f44d00289715)
 - Install apps
   - Enable copy-paste: win R, `rdpclip.exe`, enter
   - Launch shell: win R, `PowerShell`, ctrl shift enter
@@ -41,7 +45,8 @@ winget install -e -h --accept-source-agreements --accept-package-agreements --id
 ```
 
 ## SSH
-- Install SSH, [src](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell)
+- Install SSH,
+  [src](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell)
 ```powershell
 Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
@@ -64,14 +69,16 @@ icacls "C:\Homelab" /grant "admin:(OI)(CI)(F)"
 - Shutdown VM
 
 ## GPU Passthrough
-[src](https://3os.org/infrastructure/proxmox/gpu-passthrough/gpu-passthrough-to-vm/#proxmox-configuration-for-gpu-passthrough), [vid](https://www.youtube.com/watch?v=fgx3NMk6F54)
+[src](https://3os.org/infrastructure/proxmox/gpu-passthrough/gpu-passthrough-to-vm/#proxmox-configuration-for-gpu-passthrough),
+[vid](https://www.youtube.com/watch?v=fgx3NMk6F54)
 - Follow the steps in [Proxmox > PCI passthrough](./proxmox.md#pci-passthrough)
 - Create VM, add PCI Device
 - Install Geforce Experience
   - Open NVIDIA Control Panel, test 3D acceleration
 
 ## Automation
-Create a mechanism to programmatic execute commands remotely. These commands are specific to the gaming VM but they can be generalized.
+Create a mechanism to programmatic execute commands remotely. These commands are specific to the
+gaming VM but they can be generalized.
 - Start the gaming VM
 - Install the homelab source code
 ```bash

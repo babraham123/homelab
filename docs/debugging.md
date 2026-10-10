@@ -1,15 +1,15 @@
 # Debugging
 
-Commands and procedures for diagnosing problems across the homelab, grouped by layer.
-Placeholder values from `vars.template.yml` throughout (`janedoe.com`, VPS at
-`12.34.56.78`). Unless noted, commands run as root on the affected node.
+Commands and procedures for diagnosing problems across the homelab, grouped by layer. Placeholder
+values from `vars.template.yml` throughout (`janedoe.com`, VPS at `12.34.56.78`). Unless noted,
+commands run as root on the affected node.
 
 Start with [General triage](#general-triage), then jump to the layer that looks broken.
 
 ## General triage
 
-Every homelab unit's description is prefixed with `Homelab: `, so it's easy to filter
-the managed services from the rest of systemd.
+Every homelab unit's description is prefixed with `Homelab: `, so it's easy to filter the managed
+services from the rest of systemd.
 
 ```bash
 # List managed services and their state
@@ -62,8 +62,8 @@ qm guest exec VMID -- bash -c \
 
 ### VM fails to start
 
-Usually memory exhaustion on the host (especially VMs with PCI passthrough, whose RAM
-is fully pinned) or a stale lock.
+Usually memory exhaustion on the host (especially VMs with PCI passthrough, whose RAM is fully
+pinned) or a stale lock.
 
 ```bash
 top -o %MEM
@@ -91,9 +91,9 @@ podman exec -it CONTAINER /bin/sh
 
 ### Debug a quadlet
 
-Quadlet files in `/etc/containers/systemd/` are converted to systemd units by a
-generator. If a service is missing after `systemctl daemon-reload`, the conversion
-failed; the dry run prints the generated unit or the error.
+Quadlet files in `/etc/containers/systemd/` are converted to systemd units by a generator. If a
+service is missing after `systemctl daemon-reload`, the conversion failed; the dry run prints the
+generated unit or the error.
 
 ```bash
 /usr/lib/systemd/system-generators/podman-system-generator --dryrun
@@ -107,8 +107,8 @@ QUADLET_UNIT_DIRS=/root/podtest \
 
 ### Test env vars and secrets with a throwaway service
 
-`probes/test.container` and `probes/test_service.sh` print how Podman passes environment
-variables and secrets into a container.
+`probes/test.container` and `probes/test_service.sh` print how Podman passes environment variables
+and secrets into a container.
 
 ```bash
 cp probes/test_service.sh /usr/local/bin/ && chmod +x /usr/local/bin/test_service.sh
@@ -124,8 +124,8 @@ podman run --rm -v /usr/local/bin:/test_bin \
   docker.io/library/debian:trixie-slim /test_bin/test_service.sh
 ```
 
-`probes/counter.sh` loops until it receives SIGTERM/SIGINT; use it to check that a
-container entrypoint forwards signals and shuts down cleanly.
+`probes/counter.sh` loops until it receives SIGTERM/SIGINT; use it to check that a container
+entrypoint forwards signals and shuts down cleanly.
 
 ```bash
 ./counter.sh & ./counter.sh & wait < <(jobs -p)
@@ -161,15 +161,15 @@ Building an image inside a quadlet: see
 
 - Renaming a user breaks rootless Podman storage for that user. Fix:
   [podman#24938](https://github.com/podman-container-tools/podman/issues/24938#issuecomment-2851080972).
-- Permission denied inside a container is usually SELinux labels, user namespaces, or
-  missing capabilities. See this
-  [Red Hat guide](https://www.redhat.com/sysadmin/container-permission-denied-errors)
-  and the [capabilities man page](https://man7.org/linux/man-pages/man7/capabilities.7.html).
+- Permission denied inside a container is usually SELinux labels, user namespaces, or missing
+  capabilities. See this [Red Hat
+  guide](https://www.redhat.com/sysadmin/container-permission-denied-errors) and the [capabilities
+  man page](https://man7.org/linux/man-pages/man7/capabilities.7.html).
 
 ## Secrets
 
-Node secrets are an AGE-encrypted YAML file, decrypted on demand by helper scripts
-in `/root/homelab-rendered/src/base/podman/` (as root).
+Node secrets are an AGE-encrypted YAML file, decrypted on demand by helper scripts in
+`/root/homelab-rendered/src/base/podman/` (as root).
 
 ```bash
 cd /root/homelab-rendered/src/base/podman
@@ -188,14 +188,14 @@ On pve1 the source files are SOPS-encrypted:
 sops -d /root/secrets/HOST.yaml | yq ".SECRET_NAME"
 ```
 
-Use `head -c -1` to strip the trailing newline when piping a secret into a file or
-another command. After editing secrets, push them with `secret_update.sh` (see
+Use `head -c -1` to strip the trailing newline when piping a secret into a file or another command.
+After editing secrets, push them with `secret_update.sh` (see
 [Maintenance](maintenance.md#update-secrets)).
 
 ## Container networking
 
-Each container VM and the VPS run a single bridge network, `systemd-net`, where containers
-resolve each other by name.
+Each container VM and the VPS run a single bridge network, `systemd-net`, where containers resolve
+each other by name.
 
 ### Debug shell on the container network
 
@@ -238,12 +238,11 @@ tcpdump -i eth0 port 8428 -w capture.pcap
 tcpdump -A -r capture.pcap | less
 ```
 
-Capturing from inside a container only sees that container's traffic; the bridge
-isn't in promiscuous mode. Capture on the host's bridge interface instead
-(`ip a` to find it). References:
-[tcpdump filters](https://www.redhat.com/sysadmin/filtering-tcpdump),
-[Linux observability tools](https://www.brendangregg.com/Perf/linux_observability_tools.png),
-[port lookup](https://www.speedguide.net/port.php).
+Capturing from inside a container only sees that container's traffic; the bridge isn't in
+promiscuous mode. Capture on the host's bridge interface instead (`ip a` to find it). References:
+[tcpdump filters](https://www.redhat.com/sysadmin/filtering-tcpdump), [Linux observability
+tools](https://www.brendangregg.com/Perf/linux_observability_tools.png), [port
+lookup](https://www.speedguide.net/port.php).
 
 ### Host firewall (ufw)
 
@@ -266,8 +265,8 @@ Check what's exposed to the internet on the VPS with [Shodan](https://www.shodan
 
 ### Reset the network stack
 
-Last resort when the Podman network is wedged. `podman system reset` deletes **all**
-containers, images, and volumes, so back up volume data first.
+Last resort when the Podman network is wedged. `podman system reset` deletes **all** containers,
+images, and volumes, so back up volume data first.
 
 ```bash
 podman network reload systemd-net   # try this first
@@ -305,8 +304,7 @@ avahi-resolve -n DEVICE.local
 dns-sd -G v4v6 DEVICE.local
 ```
 
-Test mDNS from the container network with a full systemd container (Avahi needs
-systemd):
+Test mDNS from the container network with a full systemd container (Avahi needs systemd):
 
 ```bash
 podman run -d --replace --rm --name=systemd-test --network=systemd-net \
@@ -325,8 +323,8 @@ exit
 podman rm -f systemd-test
 ```
 
-Test the same thing from an application library's point of view (Node, matching
-Zigbee2MQTT) with `probes/mdns.js`:
+Test the same thing from an application library's point of view (Node, matching Zigbee2MQTT) with
+`probes/mdns.js`:
 
 ```bash
 podman run --replace --rm -it --name=node-test --network=systemd-net \
@@ -335,17 +333,16 @@ npm install -g multicast-dns bonjour-service
 NODE_PATH=$(npm root -g) node   # paste in probes/mdns.js
 ```
 
-Don't leave `avahi-daemon` running on the container network: it answers and consumes
-query responses meant for Zigbee2MQTT and other clients. mDNS crosses VLANs via the
-router's mDNS bridge. On secsvcs, homesvcs, and websvcs the `mdns_repeater` service
-repeats mDNS between the VM's NIC and `systemd-net` (interfaces in
-`/etc/default/mdns-repeater`); flags are documented in
-[its source](https://github.com/babraham123/mdns-repeater).
+Don't leave `avahi-daemon` running on the container network: it answers and consumes query responses
+meant for Zigbee2MQTT and other clients. mDNS crosses VLANs via the router's mDNS bridge. On
+secsvcs, homesvcs, and websvcs the `mdns_repeater` service repeats mDNS between the VM's NIC and
+`systemd-net` (interfaces in `/etc/default/mdns-repeater`); flags are documented in [its
+source](https://github.com/babraham123/mdns-repeater).
 
 ## VPN: Headscale and Tailscale
 
-Work outward: is the node registered, is the route advertised and approved, does a
-tunnel ping work, does a real packet get through?
+Work outward: is the node registered, is the route advertised and approved, does a tunnel ping work,
+does a real packet get through?
 
 ```bash
 # On the VPS
@@ -376,20 +373,21 @@ Known issues:
 
 - "can't load DERP map":
   [headscale#1542](https://github.com/juanfont/headscale/issues/1542#issuecomment-1712835636),
-  [reddit thread](https://www.reddit.com/r/selfhosted/comments/17uu41b/headscale_cant_load_derp_map/)
+  [reddit
+  thread](https://www.reddit.com/r/selfhosted/comments/17uu41b/headscale_cant_load_derp_map/)
 - macOS clients can't reach advertised subnets:
   [tailscale#4766](https://github.com/tailscale/tailscale/issues/4766)
-- More in the [VPN guide](guides/vpnsvcs.md) and Tailscale's
-  [troubleshooting docs](https://tailscale.com/kb/1023/troubleshooting/).
+- More in the [VPN guide](guides/vpnsvcs.md) and Tailscale's [troubleshooting
+  docs](https://tailscale.com/kb/1023/troubleshooting/).
 
 ## Ingress: HAProxy and Traefik
 
 ### HAProxy (VPS)
 
-The [configuration manual](https://docs.haproxy.org/3.0/configuration.html)
-is the authoritative reference. Headscale's control protocol runs over
-[`/ts2021`](https://github.com/juanfont/headscale/issues/526), which must be passed
-through untouched.
+The [configuration manual](https://docs.haproxy.org/3.0/configuration.html) is the authoritative
+reference. Headscale's control protocol runs over
+[`/ts2021`](https://github.com/juanfont/headscale/issues/526), which must be passed through
+untouched.
 
 ```bash
 haproxy -c -f /etc/haproxy/haproxy.cfg   # validate config
@@ -401,8 +399,8 @@ echo "show stat" | socat stdio /run/haproxy/admin.sock | cut -d, -f1,2,18
 echo "show table" | socat stdio /run/haproxy/admin.sock   # rate-limit / ban tables
 ```
 
-HAProxy routes on SNI without terminating TLS. To see what SNI a client actually
-sends, capture ClientHello packets and open the file in Wireshark:
+HAProxy routes on SNI without terminating TLS. To see what SNI a client actually sends, capture
+ClientHello packets and open the file in Wireshark:
 
 ```bash
 tcpdump -i eth0 -s 1500 \
@@ -414,8 +412,8 @@ scp -P 2202 manualadmin@vpnsvcs:sni.pcap .
 
 ### Traefik (container VMs)
 
-Each container VM's dashboard (secproxy/homeproxy/webproxy.janedoe.com) shows loaded
-routers, services, and middlewares with their errors.
+Each container VM's dashboard (secproxy/homeproxy/webproxy.janedoe.com) shows loaded routers,
+services, and middlewares with their errors.
 
 ```bash
 journalctl -eu traefik
@@ -430,12 +428,12 @@ yq 'explode(.)' /etc/opt/traefik/config/dynamic/FILE.yml
 | `the service "X@docker" does not exist` | Router references a provider that isn't enabled; use `X@file` |
 | `failed to parse CA` | Bad path or PEM in `serversTransport.rootCAs` |
 
-For certificate errors, stop Traefik, delete `acme.json`, and start it again to
-re-request everything (mind Let's Encrypt rate limits).
+For certificate errors, stop Traefik, delete `acme.json`, and start it again to re-request
+everything (mind Let's Encrypt rate limits).
 
 To see requests, enable access logs for one router
-([docs](https://doc.traefik.io/traefik/routing/routers/#accesslogs)), or point a
-middleware or service at a request-logging container:
+([docs](https://doc.traefik.io/traefik/routing/routers/#accesslogs)), or point a middleware or
+service at a request-logging container:
 
 ```bash
 podman run -it --rm --net systemd-net --hostname=logger.janedoe.com \
@@ -457,21 +455,20 @@ echo | openssl s_client -connect HOST:443 -servername HOST 2>/dev/null | openssl
 openssl verify -CAfile /root/ca/intermediate/certs/ca-chain.cert.pem CERT.pem
 ```
 
-- Go programs read extra CA dirs from `SSL_CERT_DIR` (colon separated, replaces the
-  default, so include `/etc/ssl/certs`):
-  `SSL_CERT_DIR=/etc/ssl/certs:/certificates/cacerts`. See
+- Go programs read extra CA dirs from `SSL_CERT_DIR` (colon separated, replaces the default, so
+  include `/etc/ssl/certs`): `SSL_CERT_DIR=/etc/ssl/certs:/certificates/cacerts`. See
   [root_unix.go](https://go.dev/src/crypto/x509/root_unix.go).
-- `x509: certificate signed by unknown authority` from an OIDC client usually means
-  it's validating a public URL (Let's Encrypt cert from Traefik) against the internal
-  CA, or vice versa. Check which cert the URL actually serves with `s_client`.
-- TLS between containers on the same host (e.g. Traefik → Authelia) is rarely worth it;
-  the hostname won't match the cert unless you issue certs for the container names.
-  See [authelia#877](https://github.com/authelia/authelia/issues/877).
+- `x509: certificate signed by unknown authority` from an OIDC client usually means it's validating
+  a public URL (Let's Encrypt cert from Traefik) against the internal CA, or vice versa. Check which
+  cert the URL actually serves with `s_client`.
+- TLS between containers on the same host (e.g. Traefik → Authelia) is rarely worth it; the hostname
+  won't match the cert unless you issue certs for the container names. See
+  [authelia#877](https://github.com/authelia/authelia/issues/877).
 
 ### Signing a cert manually with the internal CA
 
-Normally `src/base/certificates/self_signed_cert_gen.sh` does this. To sign one CSR by
-hand (on pve1; the CA passphrase is stored nowhere, so type it):
+Normally `src/base/certificates/self_signed_cert_gen.sh` does this. To sign one CSR by hand (on
+pve1; the CA passphrase is stored nowhere, so type it):
 
 ```bash
 cd /root/ca
@@ -514,9 +511,9 @@ journalctl -eu authelia
 | `535 5.7.8 Username and Password not accepted` | SMTP password (app password) |
 | ForwardAuth `StatusCode: 404` in Traefik logs | Middleware `address` points at the wrong API path for this Authelia version |
 
-Query LLDAP directly from a debug container on `systemd-net` (see
-[Container networking](#container-networking)); `ldapsearch`
-[cheat sheet](https://bmaupin.github.io/wiki/applications/misc/ldapsearch.html):
+Query LLDAP directly from a debug container on `systemd-net` (see [Container
+networking](#container-networking)); `ldapsearch` [cheat
+sheet](https://bmaupin.github.io/wiki/applications/misc/ldapsearch.html):
 
 ```bash
 LDAPTLS_REQCERT=never ldapsearch -H ldaps://lldap:6360 \
@@ -530,27 +527,27 @@ LLDAP web UI login issues: [lldap#373](https://github.com/lldap/lldap/issues/373
 
 When an app's SSO login fails, check both the app's logs and Authelia's, then:
 
-- `redirect_uris` for the client in `src/services/authelia/configuration.yml.j2` exactly match
-  what the app sends.
-- Client ID and secret match on both sides (`/root/homelab-rendered/src/base/podman/get_secret.sh APP_oidc_id`,
+- `redirect_uris` for the client in `src/services/authelia/configuration.yml.j2` exactly match what
+  the app sends.
+- Client ID and secret match on both sides
+  (`/root/homelab-rendered/src/base/podman/get_secret.sh APP_oidc_id`,
   `/root/homelab-rendered/src/base/podman/get_secret.sh APP_oidc_secret`).
-- The app trusts the cert served at `auth.janedoe.com` (see
-  [Certificates and TLS](#certificates-and-tls)).
-- Authelia's [OIDC FAQ](https://www.authelia.com/integration/openid-connect/frequently-asked-questions/)
-  and the per-app guides in its docs.
+- The app trusts the cert served at `auth.janedoe.com` (see [Certificates and
+  TLS](#certificates-and-tls)).
+- Authelia's [OIDC
+  FAQ](https://www.authelia.com/integration/openid-connect/frequently-asked-questions/) and the
+  per-app guides in its docs.
 
-For an app with no OIDC support, prefer LDAP, then
-[trusted header SSO](https://www.authelia.com/integration/trusted-header-sso/introduction/),
-then plain ForwardAuth. LLDAP has
-[sample client configs](https://github.com/lldap/lldap#sample-client-configurations).
+For an app with no OIDC support, prefer LDAP, then [trusted header
+SSO](https://www.authelia.com/integration/trusted-header-sso/introduction/), then plain ForwardAuth.
+LLDAP has [sample client configs](https://github.com/lldap/lldap#sample-client-configurations).
 
 ### Decrypting an OAuth client's TLS traffic
 
-When a client (e.g. Gatus using client-credentials) fails against Authelia's token
-endpoint and logs aren't enough, capture and decrypt the traffic. Modern TLS uses
-forward secrecy, so the server key alone can't decrypt it; the client must export
-session keys via `SSLKEYLOGFILE`. `probes/oauth.go.j2` is a minimal Go client that
-does this.
+When a client (e.g. Gatus using client-credentials) fails against Authelia's token endpoint and logs
+aren't enough, capture and decrypt the traffic. Modern TLS uses forward secrecy, so the server key
+alone can't decrypt it; the client must export session keys via `SSLKEYLOGFILE`.
+`probes/oauth.go.j2` is a minimal Go client that does this.
 
 ```bash
 # Build and run the test client
@@ -566,13 +563,13 @@ tshark -o tls.keylog_file:ssl_key.log -r capture.pcap -V -R "http.request || htt
 ```
 
 To reproduce with Gatus itself, build it from source and run with
-`GATUS_LOG_LEVEL=DEBUG GATUS_CONFIG_PATH=config.yaml ./gatus` against a minimal
-config with one `oauth2` endpoint.
+`GATUS_LOG_LEVEL=DEBUG GATUS_CONFIG_PATH=config.yaml ./gatus` against a minimal config with one
+`oauth2` endpoint.
 
 ### Run Authelia outside a container
 
-Useful to iterate on `configuration.yml` quickly. Download a release binary, write
-each secret to a file, and point the `*_FILE` env vars at them:
+Useful to iterate on `configuration.yml` quickly. Download a release binary, write each secret to a
+file, and point the `*_FILE` env vars at them:
 
 ```bash
 /root/homelab-rendered/src/base/podman/get_secret.sh authelia_jwt_secret | head -c -1 > authelia_jwt_secret
@@ -603,8 +600,8 @@ podman exec -it --user 70 "$(podman ps --filter name=postgres --format '{{.ID}}'
 \du               -- list roles
 ```
 
-To start a database from scratch, stop every dependent service, then remove its
-volume. This deletes the data.
+To start a database from scratch, stop every dependent service, then remove its volume. This deletes
+the data.
 
 ```bash
 systemctl stop postgres
@@ -650,9 +647,9 @@ curl http://vmalert:8880/api/v1/alerts
 curl http://vmagent:8429/targets
 ```
 
-If logs are missing, check `journalctl -eu fluentbit` on the source VM. If metrics are
-missing, check the target on `metrics.janedoe.com/targets` (secsvcs) or that node's
-`vmagent:8429/targets`, then `journalctl -eu vmagent` there.
+If logs are missing, check `journalctl -eu fluentbit` on the source VM. If metrics are missing,
+check the target on `metrics.janedoe.com/targets` (secsvcs) or that node's `vmagent:8429/targets`,
+then `journalctl -eu vmagent` there.
 
 ## Notifications: ntfy and email
 
@@ -663,9 +660,9 @@ curl -s -u ":TOKEN" https://push.janedoe.com/TOPIC/json
 curl -u ":TOKEN" -d "hello" https://push.janedoe.com/TOPIC
 ```
 
-ntfy also accepts email-to-topic over SMTP. `probes/email.txt.j2` is a raw SMTP
-session. Traefik exposes it only as SMTPS on 465; plain SMTP on port 25 is reachable
-only from `systemd-net` on secsvcs:
+ntfy also accepts email-to-topic over SMTP. `probes/email.txt.j2` is a raw SMTP session. Traefik
+exposes it only as SMTPS on 465; plain SMTP on port 25 is reachable only from `systemd-net` on
+secsvcs:
 
 ```bash
 openssl s_client -connect push.janedoe.com:465 -quiet < probes/email.txt
@@ -674,8 +671,8 @@ podman run -i --rm --net systemd-net docker.io/nicolaka/netshoot:latest \
   nc ntfy 25 < probes/email.txt
 ```
 
-Test outbound mail (used by cert_notifier and other alerts). msmtp is configured
-only on pve1 and vpnsvcs:
+Test outbound mail (used by cert_notifier and other alerts). msmtp is configured only on pve1 and
+vpnsvcs:
 
 ```bash
 echo "test" | msmtp jdoe@gmail.com
@@ -683,11 +680,11 @@ echo "test" | msmtp jdoe@gmail.com
 
 ## Home Assistant and Zigbee
 
-- Config secrets: `!secret name` reads `secrets.yaml`; `!env_var NAME` reads an env
-  var (how container secrets are injected).
+- Config secrets: `!secret name` reads `secrets.yaml`; `!env_var NAME` reads an env var (how
+  container secrets are injected).
 - Broken entity references across configs: run the
-  [Watchman](https://github.com/dummylabs/thewatchman) report from
-  Developer Tools → Actions → `watchman.report`, then read `/config/watchman_report.txt`.
+  [Watchman](https://github.com/dummylabs/thewatchman) report from Developer Tools → Actions →
+  `watchman.report`, then read `/config/watchman_report.txt`.
 - OAuth2/OIDC in Home Assistant:
   [architecture#832](https://github.com/home-assistant/architecture/issues/832).
 - Zigbee2MQTT settings can be overridden by env vars; the name mapping is in
@@ -695,8 +692,7 @@ echo "test" | msmtp jdoe@gmail.com
 - Zigbee coordinator (SLZB-06M) has its own web UI at `http://slzb-06m.local/`.
 - Poor range or dropped devices: change the Zigbee channel away from Wi-Fi
   ([guide](https://www.zigbee2mqtt.io/advanced/zigbee/02_improve_network_range_and_stability.html#reduce-wi-fi-interference-by-changing-the-zigbee-channel)).
-- Coordinator unreachable: see [DNS and mDNS](#dns-and-mdns); it's discovered by
-  mDNS across VLANs.
+- Coordinator unreachable: see [DNS and mDNS](#dns-and-mdns); it's discovered by mDNS across VLANs.
 
 ## pfSense (router)
 
@@ -761,13 +757,12 @@ sudo deluser --remove-home tempadmin
 sudo reboot
 ```
 
-Rootless Podman storage breaks after a rename; see
-[Known issues](#known-issues).
+Rootless Podman storage breaks after a rename; see [Known issues](#known-issues).
 
 ### Remote sudo non-interactively
 
-Type the password once and pipe it into `sudo -S`. `read -s` keeps it off the screen
-and `printf` is a builtin, so it never shows up in `ps`:
+Type the password once and pipe it into `sudo -S`. `read -s` keeps it off the screen and `printf` is
+a builtin, so it never shows up in `ps`:
 
 ```bash
 read -rs -p "sudo password for HOST: " PW; echo

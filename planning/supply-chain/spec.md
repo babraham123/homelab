@@ -1,7 +1,7 @@
 # Supply chain and upgrade safety
 
-Unpinned images with `AutoUpdate=registry` mean unattended major-version upgrades of the
-trust chain, and a third-party Traefik plugin is fetched from GitHub at startup.
+Unpinned images with `AutoUpdate=registry` mean unattended major-version upgrades of the trust
+chain, and a third-party Traefik plugin is fetched from GitHub at startup.
 
 ## Issues
 

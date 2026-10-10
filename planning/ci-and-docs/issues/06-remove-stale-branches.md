@@ -1,9 +1,6 @@
 # 06. Delete the stale ansible/fixes/fixes0/worktree-ntfy branches on origin
 
-Status: ready-for-human
-Type: task
-Repo: homelab
-Source: review finding 38
+Status: ready-for-human Type: task Repo: homelab Source: review finding 38
 
 ## Change
 

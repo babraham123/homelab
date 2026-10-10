@@ -50,8 +50,8 @@ systemctl list-units | grep Homelab
 ## Bootstrap the Guacamole admin
 
 The OpenID extension only proves who a user is. Their permissions come from Postgres, and
-`initdb.sql` grants permissions only to the default `guacadmin` user. Map an LLDAP group to
-an admin group once, then delete `guacadmin`. [Ref](https://guacamole.apache.org/doc/gug/administration.html)
+`initdb.sql` grants permissions only to the default `guacadmin` user. Map an LLDAP group to an admin
+group once, then delete `guacadmin`. [Ref](https://guacamole.apache.org/doc/gug/administration.html)
 
 - In LLDAP, create the `guacamole_admin` group and add yourself to it
 - Temporarily show the password login form next to SSO
@@ -90,7 +90,8 @@ sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs
   - For PBS, Permissions -> Access Control, PVEAuditor -> Audit
 
 ## Hardware acceleration
-This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other models), an Intel iGPU (video transcoding) and a Coral TPU (Frigate object detection).
+This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other models), an Intel iGPU
+(video transcoding) and a Coral TPU (Frigate object detection).
 
 - Disable secure boot, [vid](https://www.youtube.com/watch?v=js_Xoa0f8zM)
 
@@ -98,7 +99,8 @@ This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other mode
 
 - Install Nvidia, Intel and Coral drivers using the [GPU guide](./gpu.md)
 
-- Install the Nvidia container toolkit and CDI, [ref](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+- Install the Nvidia container toolkit and CDI,
+  [ref](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 ```bash
 sudo su
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \

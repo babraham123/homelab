@@ -1,12 +1,13 @@
 # Development desktop setup
-Guide to create the devtop VM. It's intended as an environment for general software development and the execution of AI models.
-TODO: Add vscode, language scripts, remote desktop, model management
+Guide to create the devtop VM. It's intended as an environment for general software development and
+the execution of AI models. TODO: Add vscode, language scripts, remote desktop, model management
 
 - First setup [Debian Linux](./debian.md)
 
 ## Improve the terminal emulator
 - Log on via the Proxmox VNC console
-- Enable the Solarized Dark color theme, [src](https://github.com/aruhier/gnome-terminal-colors-solarized)
+- Enable the Solarized Dark color theme,
+  [src](https://github.com/aruhier/gnome-terminal-colors-solarized)
 ```bash
 # Confirm that you're using gnome
 echo $XDG_CURRENT_DESKTOP
@@ -49,8 +50,10 @@ exit
 exit
 sudo reboot
 ```
-TODO: add a password, [ref](https://forum.proxmox.com/threads/setting-vnc-password-permanently.46655/#post-221726), [ref2](https://pve.proxmox.com/wiki/VNC_Client_Access)
-- add a pve2 secrets file, 
+TODO: add a password,
+[ref](https://forum.proxmox.com/threads/setting-vnc-password-permanently.46655/#post-221726),
+[ref2](https://pve.proxmox.com/wiki/VNC_Client_Access)
+- add a pve2 secrets file,
 ```
 set_password vnc 8_CHAR_PASS -d vnc2
 expire_password vnc +600 -d vnc2

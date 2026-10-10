@@ -2,14 +2,15 @@
 Initial setup for the secondary VM host, PVE2. Handles VM management services.
 
 - Make sure that [Proxmox setup](./proxmox.md) has been completed.
-- Create the websvcs VM with the desired resources and devices attached. websvcs runs the rest of the web apps on a beefier machine. All services are containerized.
+- Create the websvcs VM with the desired resources and devices attached. websvcs runs the rest of
+  the web apps on a beefier machine. All services are containerized.
 
 ## VM management
 [Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
 
-- Ensure mutual exclusion between VMs that use the GPU: the hook script, copied to
-  `local:snippets` and attached to devtop and gaming. Rerun after any deploy that
-  changes `src/nodes/pve2/hookscript.pl`.
+- Ensure mutual exclusion between VMs that use the GPU: the hook script, copied to `local:snippets`
+  and attached to devtop and gaming. Rerun after any deploy that changes
+  `src/nodes/pve2/hookscript.pl`.
 ```bash
 ssh autoadmin@pve2 install_hookscript
 ```

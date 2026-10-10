@@ -1,17 +1,15 @@
 # Backups and disaster recovery
 
-Today PBS runs on pve2, stores backups on pve2's own disk, and its schedule only fires
-when pve2 happens to be powered on. There is no offsite copy, no key escrow, no restore
-test, and no DR runbook. This effort makes pve1 the backup orchestrator, adds
-application-consistent dumps for Postgres and Home Assistant, copies the datastore
-offsite, and documents recovery.
+Today PBS runs on pve2, stores backups on pve2's own disk, and its schedule only fires when pve2
+happens to be powered on. There is no offsite copy, no key escrow, no restore test, and no DR
+runbook. This effort makes pve1 the backup orchestrator, adds application-consistent dumps for
+Postgres and Home Assistant, copies the datastore offsite, and documents recovery.
 
-2026-10-04 restructure (grilling session): one weekly run; a hand-written `backup.sh`
-per node stages files and dumps under `/var/opt/backups/`, pve1 pulls every stage into
-`/root/backups/` and uploads it to PBS encrypted with a client key; VM images go
-through `pvesh` from each host's `backup.sh images`; the HDDs become a snapraid +
-mergerfs media array inside websvcs (13). Shape and reasoning are recorded in the
-tickets' answers and in `docs/services.md#storage-and-backups`.
+2026-10-04 restructure (grilling session): one weekly run; a hand-written `backup.sh` per node
+stages files and dumps under `/var/opt/backups/`, pve1 pulls every stage into `/root/backups/` and
+uploads it to PBS encrypted with a client key; VM images go through `pvesh` from each host's
+`backup.sh images`; the HDDs become a snapraid + mergerfs media array inside websvcs (13). Shape and
+reasoning are recorded in the tickets' answers and in `docs/services.md#storage-and-backups`.
 
 ## Issues
 

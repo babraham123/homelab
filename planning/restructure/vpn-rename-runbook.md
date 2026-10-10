@@ -1,16 +1,14 @@
 # Runbook: rename the vpn node to vpnsvcs
 
-One-off runbook for restructure/08. Produced by restructure/06. `SITE` is `site.url`,
-`VPS_IP` is `vpnsvcs.ip`. Run the phases in order; each ends with a check that must pass
-before the next.
+One-off runbook for restructure/08. Produced by restructure/06. `SITE` is `site.url`, `VPS_IP` is
+`vpnsvcs.ip`. Run the phases in order; each ends with a check that must pass before the next.
 
 ## Decisions
 
-- **`vpn.SITE` stays forever as the Headscale endpoint.** It is a service name, not the
-  node name. Every enrolled client stores it as its login server: the Macs, Apple TV,
-  pfSense, Debian hosts and guests. Changing it would mean re-enrolling every device,
-  new Authelia OIDC redirect URIs and a new Let's Encrypt cert, and it buys nothing.
-  These stay unchanged:
+- **`vpn.SITE` stays forever as the Headscale endpoint.** It is a service name, not the node name.
+  Every enrolled client stores it as its login server: the Macs, Apple TV, pfSense, Debian hosts and
+  guests. Changing it would mean re-enrolling every device, new Authelia OIDC redirect URIs and a
+  new Let's Encrypt cert, and it buys nothing. These stay unchanged:
   - Headscale `server_url`, `tls_letsencrypt_hostname` (`src/headscale/headscale*.yaml.j2`);
   - Authelia's Headscale `redirect_uris` (`src/authelia/configuration.yml.j2:1756-1757`);
   - `--login-server https://vpn.SITE:443` (`src/headscale/tailscale.service.j2`, the guide);
@@ -18,24 +16,22 @@ before the next.
   - Unbound `local-zone: "vpn.SITE." transparent` (`src/dns/unbound.conf.j2:9`);
   - `docs/networking.md:110`.
 - **`vpnsvcs.SITE` is for SSH and ops only.**
-  - **Public DNS:** the `*` wildcard A record already resolves it to the VPS, so the
-    registrar needs no new record.
-  - **LAN DNS: this is the trap.** pfSense's system domain zone is `redirect`, so any
-    `*.SITE` name without its own entry resolves to websvcs. Without an Unbound entry,
-    `ping vpnsvcs.SITE` succeeds against websvcs, so `upload_src.sh`'s reachability
-    check passes. The `scp -P 2202` after it then fails.
-- **SSH host cert principals, permanently:** `vpnsvcs.SITE,vpn.SITE,VPS_IP`. Old
-  callers and rollback keep working. `vpn.SITE` is the same box forever.
-- **Metrics label values move to `vpnsvcs.SITE`.** This starts new series, and the
-  old ones stay queryable. It only applies once observability/08 has landed (see
-  phase 8).
-- **Rename the guide** `docs/guides/vpn.md.j2` → `vpnsvcs.md.j2`, per restructure/04's
-  rule that guide names match node names.
-- **Don't reinstall headscale.** Its `install_svcs.sh` case downloads the latest
-  release, which would be an unplanned upgrade, and overwrites
-  `/etc/headscale/config.yaml`. `vpnsvcs.ip` has the same value as `vpn.ip`, so the
-  rendered Headscale, HAProxy and Traefik configs differ only in comments. Only the
-  dispatcher and sudoers need reinstalling.
+  - **Public DNS:** the `*` wildcard A record already resolves it to the VPS, so the registrar needs
+    no new record.
+  - **LAN DNS: this is the trap.** pfSense's system domain zone is `redirect`, so any `*.SITE` name
+    without its own entry resolves to websvcs. Without an Unbound entry, `ping vpnsvcs.SITE`
+    succeeds against websvcs, so `upload_src.sh`'s reachability check passes. The `scp -P 2202`
+    after it then fails.
+- **SSH host cert principals, permanently:** `vpnsvcs.SITE,vpn.SITE,VPS_IP`. Old callers and
+  rollback keep working. `vpn.SITE` is the same box forever.
+- **Metrics label values move to `vpnsvcs.SITE`.** This starts new series, and the old ones stay
+  queryable. It only applies once observability/08 has landed (see phase 8).
+- **Rename the guide** `docs/guides/vpn.md.j2` → `vpnsvcs.md.j2`, per restructure/04's rule that
+  guide names match node names.
+- **Don't reinstall headscale.** Its `install_svcs.sh` case downloads the latest release, which
+  would be an unplanned upgrade, and overwrites `/etc/headscale/config.yaml`. `vpnsvcs.ip` has the
+  same value as `vpn.ip`, so the rendered Headscale, HAProxy and Traefik configs differ only in
+  comments. Only the dispatcher and sudoers need reinstalling.
 
 ## Phase 0: preflight
 
@@ -46,8 +42,7 @@ before the next.
   - restructure/02 (paths become `src/nodes/vpn…`).
 
   Each one that has landed adds rows to phase 1 or 8.
-- Back up and pull the archive to pve1:
-  `ssh -p 2202 autoadmin@vpn backup_full`, then
+- Back up and pull the archive to pve1: `ssh -p 2202 autoadmin@vpn backup_full`, then
   `scp -P 2202 'autoadmin@vpn:/var/opt/backups/full/vpn-full-*.tar.zst' /root/backups/`.
 - Record a baseline:
   - on the VPS: `headscale nodes list`;
@@ -81,18 +76,17 @@ before the next.
 
 **Leave these alone:**
 
-- `src/macos/vpn.sh.j2` and `docs/guides/mac_personal.md.j2:78`: the Mac's Tailscale
-  toggle, not the node.
+- `src/macos/vpn.sh.j2` and `docs/guides/mac_personal.md.j2:78`: the Mac's Tailscale toggle, not the
+  node.
 - "VPN" as a concept: `docs/security.md`, the `docs/debugging.md:342` heading.
 
-**Existing bug, out of scope:** `src/pve1/secret_update.sh` has no port 2202, so it
-can't reach the VPS today. observability/08 needs it, so fix it there.
+**Existing bug, out of scope:** `src/pve1/secret_update.sh` has no port 2202, so it can't reach the
+VPS today. observability/08 needs it, so fix it there.
 
 **Checks:**
 
-- This grep prints nothing. It is portable ERE, so it avoids `\b`, and it drops
-  Headscale's upstream `*.vpn.example.com` comments. Before the rename it flags 56
-  lines across 19 files.
+- This grep prints nothing. It is portable ERE, so it avoids `\b`, and it drops Headscale's upstream
+  `*.vpn.example.com` comments. Before the rename it flags 56 lines across 19 files.
 
   ```bash
   git grep -nE '\{\{ ?vpn[.]|[.]vpn([^a-z_]|$)|cases[(].vpn.[)]|src/vpn/|autoadmin@vpn([^a-z]|$)|_src[.]sh vpn([^a-z]|$)|vpn-full|vpn[.]md|"vpn"|(server|reachable[.]sh) vpn$' -- ':!planning' | grep -v 'example[.]com'
@@ -100,29 +94,28 @@ can't reach the VPS today. observability/08 needs it, so fix it there.
 
   CONTEXT.md and `docs/architecture.md` prose aren't covered, so check them by eye.
 - `git grep -n 'vpn\.{{ site.url }}'` lists only the keep-list above.
-- Render the old and new commits, each against its own `vars.template.yml`, in
-  throwaway worktrees, and `diff -r` the outputs. The expected diffs are:
+- Render the old and new commits, each against its own `vars.template.yml`, in throwaway worktrees,
+  and `diff -r` the outputs. The expected diffs are:
   - the node directory move;
   - OliveTin and the SSH configs;
   - Unbound, `ssh_cert_gen.sh`, `upload_src.sh` and `deploy_src.sh`;
   - `backup_full.sh`;
   - comments.
 
-  `haproxy.cfg` and `traefik/static.yml` must be identical, and `headscale.yaml` may
-  differ only in the comment at `:256`.
+  `haproxy.cfg` and `traefik/static.yml` must be identical, and `headscale.yaml` may differ only in
+  the comment at `:256`.
 
 ## Phase 2: LAN DNS (human, pfSense)
 
-- Paste the rendered `unbound.conf` into Services → DNS Resolver → Custom options, then
-  save.
-- **Check:** `dig +short vpnsvcs.SITE` from the LAN returns `VPS_IP`, not websvcs's IP.
-  So does `dig +short vpnsvcs.SITE @1.1.1.1`.
+- Paste the rendered `unbound.conf` into Services → DNS Resolver → Custom options, then save.
+- **Check:** `dig +short vpnsvcs.SITE` from the LAN returns `VPS_IP`, not websvcs's IP. So does
+  `dig +short vpnsvcs.SITE @1.1.1.1`.
 
 ## Phase 3: SSH host cert (human, pve1)
 
-This is a one-off manual signing. The rendered `ssh_cert_gen.sh` would SSH to
-`vpnsvcs.SITE` before any cert names it, so this step connects by the old name instead.
-`install_ssh_ca` moves all three uploaded files, so upload all three.
+This is a one-off manual signing. The rendered `ssh_cert_gen.sh` would SSH to `vpnsvcs.SITE` before
+any cert names it, so this step connects by the old name instead. `install_ssh_ca` moves all three
+uploaded files, so upload all three.
 
 ```bash
 cd /root/ssh
@@ -139,15 +132,14 @@ rm public/vpn.ssh_host_key*
 **Check:**
 
 - `ssh-keygen -L -f public/vpnsvcs.ssh_host_key-cert.pub` lists all three principals.
-- `ssh -p 2202 -o BatchMode=yes autoadmin@vpnsvcs.SITE nope` prints
-  `Unauthorized command` with no host-key prompt.
+- `ssh -p 2202 -o BatchMode=yes autoadmin@vpnsvcs.SITE nope` prints `Unauthorized command` with no
+  host-key prompt.
 - The same command against `vpn.SITE` behaves the same way.
 
 ## Phase 4: hostname (human, VPS)
 
-Run phases 4–6 in one sitting. Between the hostname change and phase 6,
-`install_dispatcher` can't find `src/$(hostname)/`, and after phase 5 the old sudoers
-points at paths that are gone.
+Run phases 4–6 in one sitting. Between the hostname change and phase 6, `install_dispatcher` can't
+find `src/$(hostname)/`, and after phase 5 the old sudoers points at paths that are gone.
 
 ```bash
 ssh -p 2202 manualadmin@vpn
@@ -155,8 +147,8 @@ sudo hostnamectl set-hostname vpnsvcs
 sudo vim /etc/hosts   # 127.0.1.1 line: vpnsvcs.SITE vpnsvcs; keep the telemetry block
 ```
 
-**Check:** `hostname` prints `vpnsvcs`, `hostname -f` prints `vpnsvcs.SITE`, and `sudo`
-doesn't warn "unable to resolve host".
+**Check:** `hostname` prints `vpnsvcs`, `hostname -f` prints `vpnsvcs.SITE`, and `sudo` doesn't warn
+"unable to resolve host".
 
 ## Phase 5: deploy (human, Mac)
 
@@ -168,27 +160,26 @@ doesn't warn "unable to resolve host".
 ## Phase 6: dispatcher (human, pve1)
 
 - Run `ssh -p 2202 autoadmin@vpnsvcs install_dispatcher`.
-- Run `ssh -p 2202 autoadmin@vpnsvcs backup_full`. This exercises the new sudoers path
-  and writes the first `vpnsvcs-full-*` archive.
+- Run `ssh -p 2202 autoadmin@vpnsvcs backup_full`. This exercises the new sudoers path and writes
+  the first `vpnsvcs-full-*` archive.
 - Pull the archive to pve1.
-- Delete the old `vpn-full-*` archives on the VPS; the retention glob no longer matches
-  them. Keep pve1's copies as history.
+- Delete the old `vpn-full-*` archives on the VPS; the retention glob no longer matches them. Keep
+  pve1's copies as history.
 - **Check:** both commands succeed, and `sudo cat /etc/sudoers.d/dispatcher` shows only
   `src/vpnsvcs/` paths.
 
 ## Phase 7: other consumers (human)
 
-- **secsvcs:** `ssh autoadmin@secsvcs install_olive_tin`. **Check:** the OliveTin
-  "vpnsvcs Install Dispatcher" button succeeds.
+- **secsvcs:** `ssh autoadmin@secsvcs install_olive_tin`. **Check:** the OliveTin "vpnsvcs Install
+  Dispatcher" button succeeds.
 - **Mac:** re-copy `debian/ssh_config` per `mac_personal.md.j2`. If
-  `ssh-keygen -F '[vpn.SITE]:2202'` finds a TOFU entry, remove it with `ssh-keygen -R`;
-  the CA line covers both names.
-- **pve1:** rename any `/root/secrets/vpn.yaml`, `vpn.yaml.age` and
-  `vpn_id_ed25519.pub` to `vpnsvcs.*`, because `secret_update.sh` keys its files by
-  host name.
-- **Headscale:** tailscaled reports the new OS hostname. If `headscale nodes list`
-  still shows `vpn`, run `headscale nodes rename -i ID vpnsvcs`. No ACL or config
-  references the node's MagicDNS name.
+  `ssh-keygen -F '[vpn.SITE]:2202'` finds a TOFU entry, remove it with `ssh-keygen -R`; the CA line
+  covers both names.
+- **pve1:** rename any `/root/secrets/vpn.yaml`, `vpn.yaml.age` and `vpn_id_ed25519.pub` to
+  `vpnsvcs.*`, because `secret_update.sh` keys its files by host name.
+- **Headscale:** tailscaled reports the new OS hostname. If `headscale nodes list` still shows
+  `vpn`, run `headscale nodes rename -i ID vpnsvcs`. No ACL or config references the node's MagicDNS
+  name.
 - **Linode, optional:** the dashboard label. Leave the rDNS as `vpn.SITE`.
 - **Check:**
   - `tailscale status` on a Mac matches the phase 0 baseline with no re-auth;
@@ -197,9 +188,9 @@ doesn't warn "unable to resolve host".
 
 ## Phase 8: monitoring (only what exists at execution time)
 
-Gatus, Homepage, Grafana and vmalert have no vpn references today: Gatus endpoints come
-from `nodes.yml` `uptime`, and vpn has none. When the tickets below have landed, rename
-their pieces as follows.
+Gatus, Homepage, Grafana and vmalert have no vpn references today: Gatus endpoints come from
+`nodes.yml` `uptime`, and vpn has none. When the tickets below have landed, rename their pieces as
+follows.
 
 - **observability/08:**
   - `src/vpnsvcs/prometheus.yml.j2` instance relabels;
@@ -208,29 +199,27 @@ their pieces as follows.
   - the `VpsMetricsAbsent` expression in `src/vmalert/configs/vps.yml`;
   - the HAProxy dashboard's filters;
   - the fluent-bit host field.
-- **observability/10:** `src/vpnsvcs/deadman.*`, its install case, and any node name
-  in its messages.
+- **observability/10:** `src/vpnsvcs/deadman.*`, its install case, and any node name in its
+  messages.
 - **backup-and-dr/10:** the vpn `backup_paths` entry.
 
 **Order:**
 
 1. Silence `VpsMetricsAbsent` in Alertmanager.
-2. Reinstall the VPS's vmagent, node_exporter and fluent-bit (their install cases are
-   safe to rerun, unlike headscale's).
+2. Reinstall the VPS's vmagent, node_exporter and fluent-bit (their install cases are safe to rerun,
+   unlike headscale's).
 3. Reload vmalert.
 4. Lift the silence.
 
-**Check:** `up{host="vpnsvcs.SITE"} == 1` for every VPS job, with no gap longer than
-the rename window.
+**Check:** `up{host="vpnsvcs.SITE"} == 1` for every VPS job, with no gap longer than the rename
+window.
 
 ## Acceptance (restructure/08)
 
 - `ssh autoadmin@vpnsvcs install_dispatcher` works.
 - `git grep -n '{{ vpn\.' src docs` finds nothing.
-- Every Tailscale client stays connected without re-auth, and `vpn.SITE` answers
-  on 443.
-- The VPS's metrics, Gatus checks and dead-man checker (those that exist) report under
-  `vpnsvcs`.
+- Every Tailscale client stays connected without re-auth, and `vpn.SITE` answers on 443.
+- The VPS's metrics, Gatus checks and dead-man checker (those that exist) report under `vpnsvcs`.
 
 ## Rollback
 

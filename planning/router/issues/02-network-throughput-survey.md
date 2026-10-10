@@ -1,16 +1,12 @@
 # 02. Measure network throughput on every path and find the bottlenecks
 
-Status: ready-for-human
-Type: research
-Repo: homelab
-Source: maintainer request 2026-09-26
-Blocked by: 01
+Status: ready-for-human Type: research Repo: homelab Source: maintainer request 2026-09-26 Blocked
+by: 01
 
 ## Why after 01
 
-The pfSense 2.9 upgrade and the NAT change alter the routing and Tailscale paths, and
-the numbers should describe the router you'll keep. Optionally run test 3 once before 01
-for a before/after.
+The pfSense 2.9 upgrade and the NAT change alter the routing and Tailscale paths, and the numbers
+should describe the router you'll keep. Optionally run test 3 once before 01 for a before/after.
 
 ## Known suspects (from the repo)
 
@@ -25,15 +21,14 @@ for a before/after.
 
 ## Method
 
-Install `iperf3` on the Debian nodes, pve1, pve2, the VPS and a laptop. On pfSense use
-the `iperf` package. For each pair run:
+Install `iperf3` on the Debian nodes, pve1, pve2, the VPS and a laptop. On pfSense use the `iperf`
+package. For each pair run:
 - `iperf3 -c <peer> -t 20` and `-R` (both directions);
 - `-P 4` (parallel);
 - WiFi and tailnet only: `-u -b <rate>` for loss and jitter.
 
 During each run, capture:
-- CPU: pfSense `top -aSH`, PVE host `mpstat -P ALL 1` (watch `vhost-*` and `ksoftirqd`),
-  VPS `top`;
+- CPU: pfSense `top -aSH`, PVE host `mpstat -P ALL 1` (watch `vhost-*` and `ksoftirqd`), VPS `top`;
 - link state: `ifconfig igcN | grep media` on pfSense, `ethtool eno1` on pve2;
 - path MTU: `ping -M do -s <size>` (Linux) / `ping -D -s` (FreeBSD).
 
@@ -52,18 +47,16 @@ During each run, capture:
 
 ## Deliverable
 
-- A "Performance" section in `docs/networking.md`: per path, measured vs expected
-  (2.5 GbE ≈ 2.3 Gbit/s TCP, 1 GbE ≈ 940 Mbit/s, WiFi 6 client typically 500–900
-  Mbit/s, VPS egress per the Linode plan), plus the limiting resource (link, CPU on which
-  box, or MTU).
+- A "Performance" section in `docs/networking.md`: per path, measured vs expected (2.5 GbE ≈ 2.3
+  Gbit/s TCP, 1 GbE ≈ 940 Mbit/s, WiFi 6 client typically 500–900 Mbit/s, VPS egress per the Linode
+  plan), plus the limiting resource (link, CPU on which box, or MTU).
 - A follow-up ticket for each bottleneck worth fixing. Likely candidates:
   - a 2.5 GbE NIC for pve2, and re-testing whether the TSO/GSO workaround is still needed;
   - pfSense tuning or offload settings;
   - pbs2's datastore disk speed if backups are disk-bound rather than network-bound;
   - a bigger VPS if public ingress matters.
-- Record the backup-path throughput and expected run time for a full vzdump in
-  backup-and-dr/01, which sizes the orchestrator's window.
-- Optional: a nightly WAN speed test exporter into VictoriaMetrics, if trends are
-  wanted.
+- Record the backup-path throughput and expected run time for a full vzdump in backup-and-dr/01,
+  which sizes the orchestrator's window.
+- Optional: a nightly WAN speed test exporter into VictoriaMetrics, if trends are wanted.
 
 ## Comments

@@ -1,8 +1,8 @@
 # Router and network
 
-Upgrades and configuration changes to the pfSense router VM on pve1, and network
-performance across the system. Most pfSense configuration is click-configured and
-recorded in `docs/guides/router.md.j2`, not in `src/nodes/router/`.
+Upgrades and configuration changes to the pfSense router VM on pve1, and network performance across
+the system. Most pfSense configuration is click-configured and recorded in
+`docs/guides/router.md.j2`, not in `src/nodes/router/`.
 
 ## Issues
 

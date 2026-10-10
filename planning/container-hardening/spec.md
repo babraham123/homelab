@@ -1,7 +1,7 @@
 # Container hardening
 
-Across 31 quadlets only `NoNewPrivileges=true` is set. Survey what each container
-tolerates before adding `DropCapability`, `ReadOnly`, `Tmpfs` and `HealthCmd`.
+Across 31 quadlets only `NoNewPrivileges=true` is set. Survey what each container tolerates before
+adding `DropCapability`, `ReadOnly`, `Tmpfs` and `HealthCmd`.
 
 ## Issues
 

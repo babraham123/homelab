@@ -1,7 +1,7 @@
 # Code structure
 
-A minimal inventory to kill the parse_*.sh scripts, then a directory reshuffle, a shared
-bash library, and renames.
+A minimal inventory to kill the parse_*.sh scripts, then a directory reshuffle, a shared bash
+library, and renames.
 
 ## Issues
 

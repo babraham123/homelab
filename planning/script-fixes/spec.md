@@ -1,7 +1,7 @@
 # Shell script correctness fixes
 
-Concrete bugs found in `tools/` and `src/`. Each is small and independent; shellcheck in
-CI (ci-and-docs/02) prevents the class from recurring.
+Concrete bugs found in `tools/` and `src/`. Each is small and independent; shellcheck in CI
+(ci-and-docs/02) prevents the class from recurring.
 
 ## Issues
 

@@ -1,21 +1,18 @@
 # 09. pve1 disaster recovery guide with the complete escrow/backup file list
 
-Status: resolved
-Type: task
-Repo: homelab
-Source: review finding 8
+Status: resolved Type: task Repo: homelab Source: review finding 8
 
 ## Problem
 
-pve1 roots the private CA, SSH CA, AGE key, ACME cert distribution and secret
-provisioning. There is no "pve1's SSD died, here is the order of operations" document.
+pve1 roots the private CA, SSH CA, AGE key, ACME cert distribution and secret provisioning. There is
+no "pve1's SSD died, here is the order of operations" document.
 
 ## Change
 
 Add `docs/guides/pve1_recovery.md`:
 
-1. **Inventory of what must exist off-box** (this is the canonical list issue 04
-   escrows and issue 01/05 back up):
+1. **Inventory of what must exist off-box** (this is the canonical list issue 04 escrows and issue
+   01/05 back up):
 
    | Path on pve1 | What | Recovery if lost |
    |---|---|---|
@@ -31,21 +28,24 @@ Add `docs/guides/pve1_recovery.md`:
    | `vars.yml` (workstation) | all personal values | reconstruct from memory |
    | pfSense config XML (router VM) | firewall/VLAN/DNS | Auto Config Backup package, also escrow |
 
-2. **Order of operations** for a bare-metal rebuild: Proxmox install → restore
-   `/etc/pve` → restore router VM first (network) → restore secsvcs/homesvcs from PBS
-   (pve2 must be up: `start_pve2` needs the router, so document the manual power-on) →
-   restore `/root/{secrets,ca,ssh,acme}` from escrow → re-render + upload → verify
-   Authelia login → re-run `acme_transfer.sh`.
-3. **Partial-loss scenarios:** only the AGE key lost; only the CA lost; only `vars.yml`
-   lost.
+2. **Order of operations** for a bare-metal rebuild: Proxmox install → restore `/etc/pve` → restore
+   router VM first (network) → restore secsvcs/homesvcs from PBS (pve2 must be up: `start_pve2`
+   needs the router, so document the manual power-on) → restore `/root/{secrets,ca,ssh,acme}` from
+   escrow → re-render + upload → verify Authelia login → re-run `acme_transfer.sh`.
+3. **Partial-loss scenarios:** only the AGE key lost; only the CA lost; only `vars.yml` lost.
 4. Link from `docs/security.md#secrets` and `docs/maintenance.md`.
 
 ## Acceptance
 
-- Every path in the table is either in the PBS host backup, the escrow bundle (issue 04),
-  or explicitly marked "regenerate".
+- Every path in the table is either in the PBS host backup, the escrow bundle (issue 04), or
+  explicitly marked "regenerate".
 
 ## Comments
 
-- 2026-09-27: Added `docs/guides/pve1_recovery.md.j2` (renders to `pve1_recovery.md`), linked from `security.md#secrets` and `maintenance.md`; its inventory is now the canonical list for 04. Corrected vs. the table above: `acme.json` and the OliveTin key live on the VMs (PBS-covered), `/root/acme` and `/root/.ssh` are regenerable.
-  TODOs for the maintainer: PBS user + encryption key of pve1's `pbs2` storage; where the CA/SSH CA passphrases and ACB device key/password are kept; how root's `/root/.ssh/id_ed25519` was created; Linux name of the NIC cabled to pve2; `<host>_root_pswd` keys missing from `src/nodes/pve1/secrets_template.yaml`.
+- 2026-09-27: Added `docs/guides/pve1_recovery.md.j2` (renders to `pve1_recovery.md`), linked from
+  `security.md#secrets` and `maintenance.md`; its inventory is now the canonical list for 04.
+  Corrected vs. the table above: `acme.json` and the OliveTin key live on the VMs (PBS-covered),
+  `/root/acme` and `/root/.ssh` are regenerable. TODOs for the maintainer: PBS user + encryption key
+  of pve1's `pbs2` storage; where the CA/SSH CA passphrases and ACB device key/password are kept;
+  how root's `/root/.ssh/id_ed25519` was created; Linux name of the NIC cabled to pve2;
+  `<host>_root_pswd` keys missing from `src/nodes/pve1/secrets_template.yaml`.

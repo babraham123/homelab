@@ -24,9 +24,11 @@ vainfo
 
 - In the VM hardware settings, add the PCI device and reboot
 - Find the right [Nvidia version](https://www.nvidia.com/en-in/drivers/)
-- Find the right [CUDA version](https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Debian&target_version=12)
+- Find the right [CUDA
+  version](https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Debian&target_version=12)
   - Drivers: Currently 580 for the 3060Ti and Tesla P4
-- Install drivers, [ref](https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html#debian-installation)
+- Install drivers,
+  [ref](https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html#debian-installation)
 ```bash
 sudo su
 # prep
@@ -69,7 +71,8 @@ apt autoremove --purge
 ## Coral TPU
 
 - In the VM hardware settings, add the PCI device and reboot
-- Install the driver and TPU runtime, [ref](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime)
+- Install the driver and TPU runtime,
+  [ref](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime)
 ```bash
 sudo su
 # Confirm apex driver is not already installed

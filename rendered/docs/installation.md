@@ -2,27 +2,30 @@
 
 ## Guide order of execution
 
-Most of the config files are templatized to remove personal details. So first, render
-the source locally and then start following the guides. Without an argument the
-render goes to a private temp dir, whose path it prints.
+Most of the config files are templatized to remove personal details. So first, render the source
+locally and then start following the guides. Without an argument the render goes to a private temp
+dir, whose path it prints.
 ```bash
 tools/render_src.sh
 ```
 
-Note: the guides ending in `.j2` are templates; render them with
-`tools/render_docs.sh <outdir>` for a readable copy, or read them in place; only
-IPs and domains are templated.
+Note: the guides ending in `.j2` are templates; render them with `tools/render_docs.sh <outdir>` for
+a readable copy, or read them in place; only IPs and domains are templated.
 
 Now follow the guides in this specific order:
 
 1. Macbook setup (the dev machine): [mac_personal](guides/mac_personal.md)
-1. pve1 computer build (the always-on mini PC): [hardware specs](architecture.md#pve1-always-on-mini-pc)
-1. Network build (AP, cabling, and the physical port plan): [architecture](architecture.md#network-gear-and-peripherals), [networking](networking.md#physical-and-logical-topology)
+1. pve1 computer build (the always-on mini PC): [hardware
+   specs](architecture.md#pve1-always-on-mini-pc)
+1. Network build (AP, cabling, and the physical port plan):
+   [architecture](architecture.md#network-gear-and-peripherals),
+   [networking](networking.md#physical-and-logical-topology)
 1. pve1 OS install (Proxmox with NIC passthrough): [proxmox](guides/proxmox.md)
 1. Router VM install (pfSense, VLANs, DNS, mDNS): [router](guides/router.md)
 1. secsvcs VM install, podman setup: [debian](guides/debian.md), [podman](guides/podman.md)
 1. pve2 computer build (the on-demand tower): [hardware specs](architecture.md#pve2-on-demand-tower)
-1. pve2 OS install (Proxmox, GPU passthrough, PBS): [proxmox](guides/proxmox.md), [pve2](guides/pve2.md), [gpu](guides/gpu.md)
+1. pve2 OS install (Proxmox, GPU passthrough, PBS): [proxmox](guides/proxmox.md),
+   [pve2](guides/pve2.md), [gpu](guides/gpu.md)
 1. websvcs VM install, podman setup: [debian](guides/debian.md), [podman](guides/podman.md)
 1. VPS VM setup, domain registrar (Linode, hardening, HAProxy): [vpnsvcs](guides/vpnsvcs.md)
 1. pve1 host, ssh certs, secrets and self-signed certs: [pve1](guides/pve1.md)
@@ -32,6 +35,7 @@ Now follow the guides in this specific order:
 1. VPN setup, user access (enroll personal devices): [vpnsvcs](guides/vpnsvcs.md)
 1. websvcs services (web apps): [websvcs](guides/websvcs.md)
 1. homesvcs services (home automation): [homesvcs](guides/homesvcs.md)
-1. gaming (Windows VM, GPU passthrough, Sunshine): [vm_windows](guides/vm_windows.md), [gaming](guides/gaming.md)
+1. gaming (Windows VM, GPU passthrough, Sunshine): [vm_windows](guides/vm_windows.md),
+   [gaming](guides/gaming.md)
 1. devtop (Linux desktop VM): [devtop](guides/devtop.md)
 1. pve2 media array (HDDs, snapraid, mergerfs in websvcs): [pve2_storage](guides/pve2_storage.md)

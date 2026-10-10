@@ -57,7 +57,8 @@ cp src/services/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
 ```
 
-- Create an A record in your DNS provider that maps the `vpn` subdomain to Linode's public IP ([src](https://www.namecheap.com/support/knowledgebase/article.aspx/9776/2237/how-to-create-a-subdomain-for-my-domain/))
+- Create an A record in your DNS provider that maps the `vpn` subdomain to Linode's public IP
+  ([src](https://www.namecheap.com/support/knowledgebase/article.aspx/9776/2237/how-to-create-a-subdomain-for-my-domain/))
 - Create pre-auth key
 ```bash
 headscale completion bash > /etc/bash_completion.d/headcompletion
@@ -66,10 +67,13 @@ headscale --user USER_ID preauthkeys create --expiration 100y
 ```
 
 ## Remote access
-- For home network, use Tailscale plugin on pfSense ([src](https://www.wundertech.net/how-to-set-up-tailscale-on-pfsense/), [ref](https://davidisaksson.dev/posts/tailscale-on-pfsense/))
+- For home network, use Tailscale plugin on pfSense
+  ([src](https://www.wundertech.net/how-to-set-up-tailscale-on-pfsense/),
+  [ref](https://davidisaksson.dev/posts/tailscale-on-pfsense/))
   - Install the Tailscale package (Go to System >> Package Manager)
   - Go to VPN >> Tailscale
-  - Setup as an [Exit Node](https://headscale.net/stable/ref/routes/#exit-node) for the desired subnet
+  - Setup as an [Exit Node](https://headscale.net/stable/ref/routes/#exit-node) for the desired
+    subnet
   - Restart pfSense ([issue](https://github.com/tailscale/tailscale/issues/7780))
   - On the VPN server, enable pfSense's routes, [ref](https://headscale.net/stable/ref/routes/)
 ```bash
@@ -80,12 +84,19 @@ headscale nodes approve-routes --identifier NODE_ID --routes 192.168.5.0/24
 headscale nodes approve-routes --identifier NODE_ID --routes 192.168.7.0/24
 ```
 
-- At this point you can connect via "machine" users. Skip farther down if you don't want public access.
+- At this point you can connect via "machine" users. Skip farther down if you don't want public
+  access.
 
 ## Add public endpoint
-Summary: Create a public user and a tailscale client on the vpn server. HAProxy forwards the `vpn` subdomain to Headscale on ports 8080, 8443. authelia, lldap, etc traffic is sent to the secsvcs VM, and home assistant traffic to the homesvcs VM. All other traffic is sent to the websvcs VM also via traefik. Similar to Tailscale Funnel, and fulfills a similar role as a DMZ. This also enables OIDC access.
+Summary: Create a public user and a tailscale client on the vpn server. HAProxy forwards the `vpn`
+subdomain to Headscale on ports 8080, 8443. authelia, lldap, etc traffic is sent to the secsvcs VM,
+and home assistant traffic to the homesvcs VM. All other traffic is sent to the websvcs VM also via
+traefik. Similar to Tailscale Funnel, and fulfills a similar role as a DMZ. This also enables OIDC
+access.
 
-Notes: [site-to-site](https://tailscale.com/kb/1214/site-to-site/), [ACLs](https://tailscale.com/kb/1018/acls/#debugging-acls), [troubleshooting](https://tailscale.com/kb/1023/troubleshooting/#unable-to-make-a-tcp-connection-between-two-nodes)
+Notes: [site-to-site](https://tailscale.com/kb/1214/site-to-site/),
+[ACLs](https://tailscale.com/kb/1018/acls/#debugging-acls),
+[troubleshooting](https://tailscale.com/kb/1023/troubleshooting/#unable-to-make-a-tcp-connection-between-two-nodes)
 
 - Create the OIDC credentials
 ```bash
@@ -124,7 +135,8 @@ src/nodes/vpnsvcs/install_svcs.sh haproxy
   - Change the host from `vpn` to all subdomains `*`
   - Add another A record for the bare domain, host = `@`
 
-- Add a DNS CAA record, [ref](https://really-simple-ssl.com/instructions/edit-dns-caa-records-to-allow-lets-encrypt-ssl-certificates/)
+- Add a DNS CAA record,
+  [ref](https://really-simple-ssl.com/instructions/edit-dns-caa-records-to-allow-lets-encrypt-ssl-certificates/)
 ```
 @ issue      letsencrypt.org
 * issue      letsencrypt.org
@@ -134,7 +146,8 @@ src/nodes/vpnsvcs/install_svcs.sh haproxy
 * iodep      mailto:jdoe@gmail.com
 ```
 
-- Create public user and connect, [ref](https://tailscale.com/kb/1080/cli/#up), [snat](https://tailscale.com/kb/1214/site-to-site)
+- Create public user and connect, [ref](https://tailscale.com/kb/1080/cli/#up),
+  [snat](https://tailscale.com/kb/1214/site-to-site)
 ```bash
 # Create user
 headscale users create public
@@ -180,9 +193,9 @@ COMMIT
 ufw enable
 ufw status verbose
 ```
-- Point the telemetry names at secsvcs over the tailnet. Publicly they resolve to the VPS
-  itself, so without this the VPS's metrics and logs would loop through HAProxy's public
-  frontend. The ufw rule above already allows the traffic.
+- Point the telemetry names at secsvcs over the tailnet. Publicly they resolve to the VPS itself, so
+  without this the VPS's metrics and logs would loop through HAProxy's public frontend. The ufw rule
+  above already allows the traffic.
 ```bash
 cat >> /etc/hosts <<'EOF'
 # homelab: telemetry endpoints on secsvcs, reached over the tailnet
@@ -227,9 +240,11 @@ sudo tailscale up --login-server https://vpn.janedoe.com:443 --accept-routes --a
 - In cloud VM, check connected nodes: `sudo headscale nodes list`
 
 ## ACL policy
-- `src/services/headscale/headscale_acl.hujson.j2` → `/etc/headscale/acl.hujson`, installed by `install_svcs.sh headscale`
+- `src/services/headscale/headscale_acl.hujson.j2` → `/etc/headscale/acl.hujson`, installed by
+  `install_svcs.sh headscale`
 - Membership comes from `vars.yml` (`users`, `tailscale_admin`, `tailscale_extra_acls`)
-- Every user must exist in `headscale users list` under that exact name (the `@` is only in the policy)
+- Every user must exist in `headscale users list` under that exact name (the `@` is only in the
+  policy)
 - Reload after a change
 ```bash
 # after tools/upload_src.sh vpnsvcs ...
@@ -240,25 +255,31 @@ headscale policy check --file /etc/headscale/acl.hujson --bypass-grpc-and-access
 systemctl reload headscale        # a failing policy is rejected
 journalctl -eu headscale --no-pager | tail -20
 ```
-- Spot-check from a node: `tailscale debug netmap | jq '.PacketFilter'` shows its rules; `nc -zv HOST PORT` from an allowed and a denied source
+- Spot-check from a node: `tailscale debug netmap | jq '.PacketFilter'` shows its rules;
+  `nc -zv HOST PORT` from an allowed and a denied source
 
 ## Guest users
-- `guest1` (`group:guests`): HTTP/HTTPS to the service VMs and Moonlight from the gaming VM; no exit node, LAN, admin GUIs or Sunshine web UI. Authelia still gates each app.
+- `guest1` (`group:guests`): HTTP/HTTPS to the service VMs and Moonlight from the gaming VM; no exit
+  node, LAN, admin GUIs or Sunshine web UI. Authelia still gates each app.
 - One short-lived key per visit
 ```bash
 headscale users create guest1
 headscale --user USER_ID preauthkeys create --expiration 1h
 ```
-- On the guest's device, log in as under Machine users, **without** `--accept-routes` unless they need a LAN address
-- Moonlight: the guest adds the gaming VM by its LAN IP (needs `--accept-routes`); approve the pairing PIN in the Sunshine web UI
+- On the guest's device, log in as under Machine users, **without** `--accept-routes` unless they
+  need a LAN address
+- Moonlight: the guest adds the gaming VM by its LAN IP (needs `--accept-routes`); approve the
+  pairing PIN in the Sunshine web UI
 - Revoke: `headscale nodes list --user USER_ID`, then `headscale nodes delete -i NODE_ID`
 
 ## Telemetry agents
 - Set up like the VMs ([ADR 0007](../adr/0007-vps-metrics-pushed.md)):
   - Fluent Bit and vmagent on the VPS's own bridge, nothing published
-  - node_exporter, HAProxy, Headscale and tailscaled on the host; HAProxy's and Headscale's metrics on the gateway, `10.13.0.1`
+  - node_exporter, HAProxy, Headscale and tailscaled on the host; HAProxy's and Headscale's metrics
+    on the gateway, `10.13.0.1`
 - Needs the `/etc/hosts` block from [Add public endpoint](#add-public-endpoint)
-- Follow the [Podman guide](./podman.md): Install Podman, Networking (create the network only), Secrets and Monitoring
+- Follow the [Podman guide](./podman.md): Install Podman, Networking (create the network only),
+  Secrets and Monitoring
 - Open the gateway to vmagent and the containers' path to secsvcs
 ```bash
 sudo su
@@ -273,7 +294,8 @@ src/nodes/vpnsvcs/install_svcs.sh haproxy
 cp src/services/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
 ```
-- On pve1: `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs` (fill in the two passwords from secsvcs.yaml)
+- On pve1: `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs` (fill in the two
+  passwords from secsvcs.yaml)
 - Install and check
 ```bash
 src/nodes/vpnsvcs/install_svcs.sh fluentbit
@@ -283,14 +305,18 @@ podman exec vmagent wget -qO- 10.13.0.1:8405/metrics | head -3
 podman exec vmagent wget -qO- 100.100.100.100/metrics | head -3   # tailscaled through tailscale0
 ```
 - From outside, `nmap -Pn -p- 12.34.56.78` shows no new ports
-- In VictoriaMetrics, `up{host="vpnsvcs.janedoe.com"}` is 1 for haproxy, headscale, tailscaled, vmagent, fluentbit and node_exporter
+- In VictoriaMetrics, `up{host="vpnsvcs.janedoe.com"}` is 1 for haproxy, headscale, tailscaled,
+  vmagent, fluentbit and node_exporter
 - `logs.janedoe.com` shows the VPS's journal
-- If tailscaled stays down, bind its metrics elsewhere or drop its job from `src/nodes/vpnsvcs/prometheus.yml.j2`
+- If tailscaled stays down, bind its metrics elsewhere or drop its job from
+  `src/nodes/vpnsvcs/prometheus.yml.j2`
 
 ## Geoblock by country
-- `geoip_generator`: a quadlet built on the VPS (haproxy-mapper and the script), run weekly by its timer; HAProxy reloads after each run
+- `geoip_generator`: a quadlet built on the VPS (haproxy-mapper and the script), run weekly by its
+  timer; HAProxy reloads after each run
 - Needs the Podman setup from [Telemetry agents](#telemetry-agents)
-- Add `maxmind_license_key` to `/root/secrets/vpnsvcs.yaml` on pve1 (copy it from `pve1.yaml`), then `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`
+- Add `maxmind_license_key` to `/root/secrets/vpnsvcs.yaml` on pve1 (copy it from `pve1.yaml`), then
+  `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`
 ```bash
 sudo su
 cd /root/homelab-rendered
@@ -304,8 +330,10 @@ ls /etc/haproxy/countries | wc -l  # about 250 maps
 ```
 
 ## Dead-man switch
-- `deadman.timer` checks every 5 minutes, over the tailnet, that Alertmanager still holds the `Watchdog` alert and that ntfy is healthy ([Services](../services.md#observability))
-- Three failures in a row: an email and a push through public ntfy.sh, so a dead secsvcs is still reported
+- `deadman.timer` checks every 5 minutes, over the tailnet, that Alertmanager still holds the
+  `Watchdog` alert and that ntfy is healthy ([Services](../services.md#observability))
+- Three failures in a row: an email and a push through public ntfy.sh, so a dead secsvcs is still
+  reported
 - Needs the `/etc/hosts` block from [Add public endpoint](#add-public-endpoint)
 - Secrets, root-only
 ```bash
@@ -340,10 +368,14 @@ journalctl -u deadman --no-pager | tail       # silent when the path is healthy
 - State: `/var/lib/deadman/` (`failures` counter, `firing` flag)
 
 ## Backup and restore
-- `ssh autoadmin@vpnsvcs backup`, run weekly by pve1's orchestrator, stages into `/var/opt/backups/`:
+- `ssh autoadmin@vpnsvcs backup`, run weekly by pve1's orchestrator, stages into
+  `/var/opt/backups/`:
   - `dumps/`: the Headscale DB, snapshotted with `sqlite3 .backup`
-  - `files/`: `/var/lib/headscale` (noise and DERP keys), `/etc/headscale`, `/var/lib/tailscale`, `/etc/haproxy`, `/etc/ssh`, `/etc/ufw`, `/etc/opt`, `/etc/systemd/system`, `/etc/letsencrypt`, `/root/.ssh`
-- pve1 mirrors it into `/root/backups/vpnsvcs/`, then to PBS as `host/vpnsvcs` with the image retention; the DB snapshot lives in PBS only
+  - `files/`: `/var/lib/headscale` (noise and DERP keys), `/etc/headscale`, `/var/lib/tailscale`,
+    `/etc/haproxy`, `/etc/ssh`, `/etc/ufw`, `/etc/opt`, `/etc/systemd/system`, `/etc/letsencrypt`,
+    `/root/.ssh`
+- pve1 mirrors it into `/root/backups/vpnsvcs/`, then to PBS as `host/vpnsvcs` with the image
+  retention; the DB snapshot lives in PBS only
 - No OS archive: rebuild from this guide, then put the files back
 - One file, e.g. the Headscale DB: [restore guide](./restore.md#application-restores)
 - The whole VPS onto a new Linode:
@@ -354,7 +386,8 @@ scp -r /root/backups/vpnsvcs manualadmin@NEW_IP:
 ssh -t manualadmin@NEW_IP 'sudo cp -a vpnsvcs/files/. / && sudo rm -rf vpnsvcs'
 ```
   3. Continue the guide; `install_svcs.sh headscale` keeps the restored `/var/lib/headscale`
-  4. Restore the DB snapshot from PBS (`host/vpnsvcs`, `dumps/headscale/db-*.sqlite`) as in the restore guide, then `systemctl restart headscale haproxy tailscaled`
+  4. Restore the DB snapshot from PBS (`host/vpnsvcs`, `dumps/headscale/db-*.sqlite`) as in the
+     restore guide, then `systemctl restart headscale haproxy tailscaled`
   5. Point the public DNS at the new IP; `headscale nodes list` shows every node
 
 ## Upgrade

@@ -25,7 +25,7 @@ usermod -aG sudo manualadmin
 ssh manualadmin@HOSTNAME
 sudo su
 ```
-- Fix deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/) 
+- Fix deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
 	- `nano /etc/apt/sources.list`
 	- add `contrib non-free non-free-firmware` to all Debian sources
 - Install basics
@@ -127,8 +127,8 @@ exit
 ```
 
 ## Backups
-- Setup a destination for manual dumps. The weekly backup stages in `/var/opt/backups`
-  itself, see [Services](../services.md#storage-and-backups).
+- Setup a destination for manual dumps. The weekly backup stages in `/var/opt/backups` itself, see
+  [Services](../services.md#storage-and-backups).
 ```bash
 mkdir /root/backups
 chmod 700 /root/backups

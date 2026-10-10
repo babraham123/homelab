@@ -1,6 +1,5 @@
 # Hackintosh VM setup
-Guide to create a MacOS VM.
-TODO: finish this guide
+Guide to create a MacOS VM. TODO: finish this guide
 
 - First do the basic [VM setup](./vm.md)
 

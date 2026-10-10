@@ -1,15 +1,11 @@
 # 04. Design: get HAProxy metrics from the VPS into VictoriaMetrics
 
-Status: resolved
-Type: research
-Repo: homelab
-Source: review finding 21
+Status: resolved Type: research Repo: homelab Source: review finding 21
 
 ## Options
 
-**A. HAProxy built-in exporter, scraped over the tailnet (recommended now).**
-HAProxy ≥ 2.0 ships a Prometheus exporter; no extra process. In
-`src/services/haproxy/haproxy.cfg.j2`:
+**A. HAProxy built-in exporter, scraped over the tailnet (recommended now).** HAProxy ≥ 2.0 ships a
+Prometheus exporter; no extra process. In `src/services/haproxy/haproxy.cfg.j2`:
 
 ```
 frontend prometheus
@@ -21,74 +17,67 @@ frontend prometheus
 
 Bind only on the Tailscale interface (so it is unreachable from the internet) and add
 `tcp-request connection reject if !{ src 100.64.0.0/10 }` as belt-and-braces. Then
-`src/nodes/secsvcs/prometheus.yml.j2` gets a `haproxy` job targeting
-`{{ vpn.tailscale_ip }}:8405` — secsvcs's VictoriaMetrics is already a mesh peer (the
-VMs are HAProxy's backends over Tailscale). Five lines of config, zero new software on
-the VPS. Also scrape the VPS's node_exporter the same way (the VPS has none today —
-install it via `src/vpn/install_svcs.sh`, bind to the tailnet IP).
+`src/nodes/secsvcs/prometheus.yml.j2` gets a `haproxy` job targeting `{{ vpn.tailscale_ip }}:8405` —
+secsvcs's VictoriaMetrics is already a mesh peer (the VMs are HAProxy's backends over Tailscale).
+Five lines of config, zero new software on the VPS. Also scrape the VPS's node_exporter the same way
+(the VPS has none today — install it via `src/vpn/install_svcs.sh`, bind to the tailnet IP).
 
-**B. Podman + vmagent on the VPS, remote-writing to VictoriaMetrics.** More moving
-parts, but collects node_exporter/fluentbit locally and is the foundation for
-observability/08 (containerising the VPS services). Do this *after* A, when 08 lands.
+**B. Podman + vmagent on the VPS, remote-writing to VictoriaMetrics.** More moving parts, but
+collects node_exporter/fluentbit locally and is the foundation for observability/08 (containerising
+the VPS services). Do this *after* A, when 08 lands.
 
-**Not recommended:** exposing `:8405` publicly behind an ACL, or a separate
-`haproxy_exporter` binary (deprecated in favour of the built-in one).
+**Not recommended:** exposing `:8405` publicly behind an ACL, or a separate `haproxy_exporter`
+binary (deprecated in favour of the built-in one).
 
 ## Deliverable
 
 - Implement A. Import Grafana.com dashboard **12693** ("HAProxy 2 Full") as
   `src/services/grafana/dashboards/haproxy.json`, fix datasource.
-- Alerts: `HaproxyDown` (`up{job="haproxy"}==0`), `HaproxyBackendDown`
-  (`haproxy_backend_up == 0`), and a panel for `haproxy_frontend_denied_connections_total`
-  so you can finally see how much the edge is dropping.
+- Alerts: `HaproxyDown` (`up{job="haproxy"}==0`), `HaproxyBackendDown` (`haproxy_backend_up == 0`),
+  and a panel for `haproxy_frontend_denied_connections_total` so you can finally see how much the
+  edge is dropping.
 - Record the decision as `docs/adr/0006-haproxy-metrics-over-tailnet.md`.
 
 ## Notes
 
-`vpn.tailscale_ip` may need adding to `vars.yml`; Traefik's `trustedIPs` already
-reference the VPS by `vpn.ip`.
+`vpn.tailscale_ip` may need adding to `vars.yml`; Traefik's `trustedIPs` already reference the VPS
+by `vpn.ip`.
 
 ## Comments
 
-- 2026-09-27: researched and resolved; see Answer. It supersedes the Deliverable above:
-  option A is dropped and B is done directly in 08.
-- 2026-09-27: ADR 0006 is now the node inventory (restructure/01); use the
-  next free number.
+- 2026-09-27: researched and resolved; see Answer. It supersedes the Deliverable above: option A is
+  dropped and B is done directly in 08.
+- 2026-09-27: ADR 0006 is now the node inventory (restructure/01); use the next free number.
 - 2026-09-27: the vmagent `tmpDataPath` bug is split out as observability/11.
 - 2026-09-27 maintainer:
   - Q2: pin the names in `/etc/hosts`, as a manual step in `docs/guides/vpn.md.j2` (done).
   - Q3: no `check` on the HAProxy servers; alert on backend connection errors instead.
-  - Q4: split. 08 is the VPS containers, 12 is the HAProxy metrics, 11 is the vmagent
-    buffer.
+  - Q4: split. 08 is the VPS containers, 12 is the HAProxy metrics, 11 is the vmagent buffer.
   - Q1: keep the admin password for the VPS vmagent; no write-only route.
 
 ## Answer
 
-**Recommendation: skip option A. Do option B as part of observability/08, with every VPS
-metrics endpoint on loopback.** HAProxy's built-in exporter binds `127.0.0.1:8405`. A
-vmagent quadlet on the VPS with `Network=host` scrapes it, plus node_exporter, Headscale
-(already on `127.0.0.1:9090`), tailscaled (`100.100.100.100/metrics`) and fluent-bit. It
-remote-writes to `metrics.SITE` on secsvcs over the tailnet. No new listener sits on any
-interface, not even `tailscale0`. The only traffic crossing the tailnet is outbound
-VPS → secsvcs:443, which the VPS's ufw rules already allow
+**Recommendation: skip option A. Do option B as part of observability/08, with every VPS metrics
+endpoint on loopback.** HAProxy's built-in exporter binds `127.0.0.1:8405`. A vmagent quadlet on the
+VPS with `Network=host` scrapes it, plus node_exporter, Headscale (already on `127.0.0.1:9090`),
+tailscaled (`100.100.100.100/metrics`) and fluent-bit. It remote-writes to `metrics.SITE` on secsvcs
+over the tailnet. No new listener sits on any interface, not even `tailscale0`. The only traffic
+crossing the tailnet is outbound VPS → secsvcs:443, which the VPS's ufw rules already allow
 (`docs/guides/vpn.md.j2`). vmagent's disk buffer fills any gap from a tailnet outage.
 
 Why not A first:
 
-- **It likely doesn't route today.** A needs secsvcs to open connections *into* the
-  tailnet through pfSense. The VMs are not tailnet peers; pfSense is the only home
-  node, acting as subnet router. Tailscale documents site-to-site only for Linux subnet
-  routers with `--snat-subnet-routes=false`. pfSense is FreeBSD in netstack/SNAT mode,
-  and router/04 (kernel routing) is `ready-for-human`.
-- **It risks public ingress on boot.** With `bind <tailnet-ip>:8405`, HAProxy fails to
-  start if `tailscale0` isn't up yet, which takes down :80/:443. The fix is
-  `net.ipv4.ip_nonlocal_bind=1`.
-- **It needs new parts.** A `vpn.tailscale_ip` var: Headscale assigns the address, and it
-  changes on re-registration. A `ufw allow in on tailscale0` rule. And an ACL that doesn't
-  exist yet: Headscale runs with no policy file (`policy.path` is commented out in
+- **It likely doesn't route today.** A needs secsvcs to open connections *into* the tailnet through
+  pfSense. The VMs are not tailnet peers; pfSense is the only home node, acting as subnet router.
+  Tailscale documents site-to-site only for Linux subnet routers with `--snat-subnet-routes=false`.
+  pfSense is FreeBSD in netstack/SNAT mode, and router/04 (kernel routing) is `ready-for-human`.
+- **It risks public ingress on boot.** With `bind <tailnet-ip>:8405`, HAProxy fails to start if
+  `tailscale0` isn't up yet, which takes down :80/:443. The fix is `net.ipv4.ip_nonlocal_bind=1`.
+- **It needs new parts.** A `vpn.tailscale_ip` var: Headscale assigns the address, and it changes on
+  re-registration. A `ufw allow in on tailscale0` rule. And an ACL that doesn't exist yet: Headscale
+  runs with no policy file (`policy.path` is commented out in
   `src/services/headscale/headscale.yaml.j2`), so the tailnet is allow-all.
-- **It's throwaway.** 08 would replace it, and 08 is approved and blocked only by this
-  ticket.
+- **It's throwaway.** 08 would replace it, and 08 is approved and blocked only by this ticket.
 
 ### Options
 
@@ -105,26 +94,23 @@ Why not A first:
 
 ### Corrections to the Deliverable
 
-- **`haproxy_backend_up` doesn't exist.** It came from the old `haproxy_exporter`. The
-  built-in exporter has `haproxy_backend_status{state="UP"}`, a 0/1 state-set gauge
+- **`haproxy_backend_up` doesn't exist.** It came from the old `haproxy_exporter`. The built-in
+  exporter has `haproxy_backend_status{state="UP"}`, a 0/1 state-set gauge
   (`addons/promex/service-prometheus.c`).
-- **The backends have no `check`.** HAProxy treats a server without `check` as always
-  UP, so `HaproxyBackendDown` would never fire. Add `check` to the six VM servers.
-  Health checks send PROXY v2 because the servers use `send-proxy-v2`, so Traefik
-  accepts them.
+- **The backends have no `check`.** HAProxy treats a server without `check` as always UP, so
+  `HaproxyBackendDown` would never fire. Add `check` to the six VM servers. Health checks send PROXY
+  v2 because the servers use `send-proxy-v2`, so Traefik accepts them.
 - **`haproxy_frontend_denied_connections_total` stays ~0.** Every drop rule here is
-  `tcp-request content` or `http-request silent-drop`, and silent-drop increments
-  `denied_req` (`src/tcp_act.c`, `tcp_exec_action_silent_drop`). Graph
-  `haproxy_frontend_requests_denied_total` and
-  `haproxy_backend_requests_denied_total{proxy=~"silent_drop_.*"}` instead.
-- **Push breaks `up == 0` as a VPS-down signal.** When the VPS or the tailnet dies, no
-  samples arrive, so observability/01's `NodeDown` (`up{job=~"node_exporter.*"} == 0`)
-  can't fire for the VPS. It needs an absence rule, and observability/10 relies on that
-  rule for "VPS down".
+  `tcp-request content` or `http-request silent-drop`, and silent-drop increments `denied_req`
+  (`src/tcp_act.c`, `tcp_exec_action_silent_drop`). Graph `haproxy_frontend_requests_denied_total`
+  and `haproxy_backend_requests_denied_total{proxy=~"silent_drop_.*"}` instead.
+- **Push breaks `up == 0` as a VPS-down signal.** When the VPS or the tailnet dies, no samples
+  arrive, so observability/01's `NodeDown` (`up{job=~"node_exporter.*"} == 0`) can't fire for the
+  VPS. It needs an absence rule, and observability/10 relies on that rule for "VPS down".
 - **Existing bug on every node.** `src/services/victoriametrics/vmagent.container.j2.j2` mounts
-  `/vmagentdata` but never sets `-remoteWrite.tmpDataPath`. The default is the relative
-  path `vmagent-remotewrite-data` in the container rootfs, so the buffer is lost whenever
-  the container is recreated.
+  `/vmagentdata` but never sets `-remoteWrite.tmpDataPath`. The default is the relative path
+  `vmagent-remotewrite-data` in the container rootfs, so the buffer is lost whenever the container
+  is recreated.
 - **ADR 0006 is taken** by the node inventory (restructure/01). Use the next free number.
 - **The exporter is already installed.** Debian trixie ships HAProxy 3.0.11, built with
   `USE_PROMEX=1`. Confirm on the VPS with `haproxy -vv | grep -i prometheus`.
@@ -194,11 +180,11 @@ Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      ...existing basicAuth / forceVMProto / naming / logger flags...
 ```
 
-`--remoteWrite.label` puts the `host` label that observability/10 asks for on every VPS
-series, in one place.
+`--remoteWrite.label` puts the `host` label that observability/10 asks for on every VPS series, in
+one place.
 
-**Name pinning on the VPS.** Add a new `hosts` case in `src/vpn/install_svcs.sh.j2`. It
-writes a managed `/etc/hosts` block that maps these names to `{{ secsvcs.ip }}`:
+**Name pinning on the VPS.** Add a new `hosts` case in `src/vpn/install_svcs.sh.j2`. It writes a
+managed `/etc/hosts` block that maps these names to `{{ secsvcs.ip }}`:
 
 - `metrics.SITE`
 - `logs.SITE`
@@ -207,16 +193,14 @@ writes a managed `/etc/hosts` block that maps these names to `{{ secsvcs.ip }}`:
 
 Why it's needed:
 
-- **Without it, traffic hairpins through the edge.** The VPS resolves those names
-  publicly to itself and loops through HAProxy's public frontend. HAProxy's own metrics
-  would then travel through HAProxy, subject to the edge rate limits.
+- **Without it, traffic hairpins through the edge.** The VPS resolves those names publicly to itself
+  and loops through HAProxy's public frontend. HAProxy's own metrics would then travel through
+  HAProxy, subject to the edge rate limits.
 - **It covers the containers.** Host-network containers inherit the host's `/etc/hosts`.
-- **observability/10 needs it too.** Its dead-man checker queries the same names over
-  the tailnet.
+- **observability/10 needs it too.** Its dead-man checker queries the same names over the tailnet.
 
-Nothing else changes: ufw already allows `out on tailscale0 to {{ secsvcs.ip }} port
-80,443`, and Traefik accepts connections from trusted IPs with or without a PROXY
-header.
+Nothing else changes: ufw already allows `out on tailscale0 to {{ secsvcs.ip }} port 80,443`, and
+Traefik accepts connections from trusted IPs with or without a PROXY header.
 
 `src/services/vmalert/configs/vps.yml` (new):
 
@@ -249,29 +233,28 @@ Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
 
 ### Follow-up steps (fold into observability/08)
 
-1. **HAProxy.** Add the `prometheus` frontend on `127.0.0.1:8405` and `check` on the six
-   VM servers. Verify with `haproxy -c -f` and `curl -s 127.0.0.1:8405/metrics`.
-2. **Shared vmagent template.** `tmpDataPath` and `maxDiskUsagePerURL` moved to
-   observability/11. Add the `Network=host` branch and the `vpn)` case in `render_host.sh`.
-3. **VPS scrape config and installer.** Write `src/vpn/prometheus.yml.j2`. Add `vmagent`
-   and `hosts` cases to `src/vpn/install_svcs.sh.j2`, alongside 08's `podman`,
-   `node_exporter` and `fluentbit` cases.
+1. **HAProxy.** Add the `prometheus` frontend on `127.0.0.1:8405` and `check` on the six VM servers.
+   Verify with `haproxy -c -f` and `curl -s 127.0.0.1:8405/metrics`.
+2. **Shared vmagent template.** `tmpDataPath` and `maxDiskUsagePerURL` moved to observability/11.
+   Add the `Network=host` branch and the `vpn)` case in `render_host.sh`.
+3. **VPS scrape config and installer.** Write `src/vpn/prometheus.yml.j2`. Add `vmagent` and `hosts`
+   cases to `src/vpn/install_svcs.sh.j2`, alongside 08's `podman`, `node_exporter` and `fluentbit`
+   cases.
 4. **08's other containers** also use `Network=host` with loopback binds:
    - node_exporter: `--web.listen-address=127.0.0.1:9100`; add `--pid=host` and mount
      `/:/host:ro,rslave` with `--path.rootfs=/host`, per the upstream README;
    - fluent-bit: `http_listen: 127.0.0.1`.
 
-   This drops 08's `net.network` prerequisite: with no netavark bridge, nftables stays
-   untouched. Keep 08's `nft list ruleset` before/after check to confirm.
+   This drops 08's `net.network` prerequisite: with no netavark bridge, nftables stays untouched.
+   Keep 08's `nft list ruleset` before/after check to confirm.
 5. **Remote-write credential.** The admin password, as on the other nodes (maintainer).
 6. **Alerts.** Add `src/services/vmalert/configs/vps.yml`. Exclude the VPS from `NodeDown` in
    observability/01; `VpsMetricsAbsent` replaces it there.
-7. **Dashboard.** Import Grafana.com 12693 as `src/services/grafana/dashboards/haproxy.json` and
-   fix the datasource. Replace the denied-connections panel with
+7. **Dashboard.** Import Grafana.com 12693 as `src/services/grafana/dashboards/haproxy.json` and fix
+   the datasource. Replace the denied-connections panel with
    `sum by (proxy) (rate(haproxy_frontend_requests_denied_total[5m]))`.
 8. **Docs.**
-   - `docs/services.md`: the VPS row in the host-level table and the observability
-     diagram.
+   - `docs/services.md`: the VPS row in the host-level table and the observability diagram.
    - `docs/architecture.md`: remove "no containers" for vpn.
    - A new ADR at the next free number: "VPS metrics pushed by a local vmagent".
 9. **Acceptance.** This replaces 08's `up{instance="vpn.SITE"}` check:
@@ -281,52 +264,52 @@ Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
 
 ### For the blocked tickets
 
-- **observability/08:** scope as above. It needs no `vpn.tailscale_ip` and no
-  `net.network`.
-- **restructure/06:** there's no `vpn.tailscale_ip` var and no `node_exporter_vpn` job
-  to rename; job names are generic. The VPS name appears in:
+- **observability/08:** scope as above. It needs no `vpn.tailscale_ip` and no `net.network`.
+- **restructure/06:** there's no `vpn.tailscale_ip` var and no `node_exporter_vpn` job to rename;
+  job names are generic. The VPS name appears in:
   - `src/vpn/prometheus.yml.j2` (instance relabels);
   - the vmagent flag `--remoteWrite.label=host=vpn.SITE`;
   - the `vpn)` case in `render_host.sh`;
   - `VpsMetricsAbsent`'s expression;
   - any dashboard filters.
 
-  A rename changes the `instance` and `host` label values, which starts new series.
-  Either accept that break or keep the label value `vpn`. The `/etc/hosts` pin maps
-  secsvcs names only, so it's unaffected.
+  A rename changes the `instance` and `host` label values, which starts new series. Either accept
+  that break or keep the label value `vpn`. The `/etc/hosts` pin maps secsvcs names only, so it's
+  unaffected.
 
 ### Open questions
 
-1. **Remote-write credential.** Every vmagent uses the VictoriaMetrics admin password
-   today. On the internet-facing VPS, that password also allows reads and
-   `delete_series`. The alternative is a write-only route on secsvcs Traefik:
+1. **Remote-write credential.** Every vmagent uses the VictoriaMetrics admin password today. On the
+   internet-facing VPS, that password also allows reads and `delete_series`. The alternative is a
+   write-only route on secsvcs Traefik:
    - rule `Host(metrics) && Path(/api/v1/write)`;
    - a `basicAuth` middleware with a `vm-writer` user and `removeHeader: true`;
    - then the existing `vm-auth` middleware for the upstream.
 
-   All three vmagents would switch to the writer credential. Recommended; the
-   maintainer decides.
-2. **Where to pin names.** `/etc/hosts` on the VPS host (one place, shared with the
-   observability/10 dead-man) or `AddHost=` per quadlet? Recommended: `/etc/hosts`.
-3. **Health checks change the edge.** With `check`, a backend marked DOWN drops new
-   connections instead of trying them. Acceptable?
-4. **Ticket split.** Keep everything in 08, or move the HAProxy config, alerts and
-   dashboard into a separate observability ticket?
+   All three vmagents would switch to the writer credential. Recommended; the maintainer decides.
+2. **Where to pin names.** `/etc/hosts` on the VPS host (one place, shared with the observability/10
+   dead-man) or `AddHost=` per quadlet? Recommended: `/etc/hosts`.
+3. **Health checks change the edge.** With `check`, a backend marked DOWN drops new connections
+   instead of trying them. Acceptable?
+4. **Ticket split.** Keep everything in 08, or move the HAProxy config, alerts and dashboard into a
+   separate observability ticket?
 
 ### Sources
 
-- HAProxy exporter: https://www.haproxy.com/documentation/haproxy-configuration-tutorials/alerts-and-monitoring/prometheus/ ,
-  https://github.com/haproxy/haproxy/blob/master/addons/promex/README ;
-  metric names: https://github.com/haproxy/haproxy/blob/v3.0.0/addons/promex/service-prometheus.c ;
-  silent-drop counters: https://github.com/haproxy/haproxy/blob/v3.0.0/src/tcp_act.c ;
-  `check`: https://docs.haproxy.org/3.0/configuration.html#5.2-check
-- Debian HAProxy 3.0.11 in trixie with `USE_PROMEX=1`: https://sources.debian.org/src/services/haproxy/ ,
+- HAProxy exporter:
+  https://www.haproxy.com/documentation/haproxy-configuration-tutorials/alerts-and-monitoring/prometheus/
+  , https://github.com/haproxy/haproxy/blob/master/addons/promex/README ; metric names:
+  https://github.com/haproxy/haproxy/blob/v3.0.0/addons/promex/service-prometheus.c ; silent-drop
+  counters: https://github.com/haproxy/haproxy/blob/v3.0.0/src/tcp_act.c ; `check`:
+  https://docs.haproxy.org/3.0/configuration.html#5.2-check
+- Debian HAProxy 3.0.11 in trixie with `USE_PROMEX=1`:
+  https://sources.debian.org/src/services/haproxy/ ,
   https://salsa.debian.org/haproxy-team/haproxy/-/blob/master/debian/rules
 - vmagent buffering, `tmpDataPath`, `maxDiskUsagePerURL`, `remoteWrite.label`:
   https://docs.victoriametrics.com/victoriametrics/vmagent/ ; default path:
   https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/app/vmagent/remotewrite/remotewrite.go
-- Tailscale site-to-site (Linux only, no SNAT): https://tailscale.com/kb/1214/site-to-site ;
-  client metrics: https://tailscale.com/kb/1482/client-metrics ;
-  ufw and `tailscale0`: https://tailscale.com/kb/1077/secure-server-ubuntu
+- Tailscale site-to-site (Linux only, no SNAT): https://tailscale.com/kb/1214/site-to-site ; client
+  metrics: https://tailscale.com/kb/1482/client-metrics ; ufw and `tailscale0`:
+  https://tailscale.com/kb/1077/secure-server-ubuntu
 - Headscale ACLs: https://headscale.net/stable/ref/acls/
 - node_exporter in a container: https://github.com/prometheus/node_exporter#docker

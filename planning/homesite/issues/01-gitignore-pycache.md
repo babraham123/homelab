@@ -1,9 +1,6 @@
 # 01. Stop tracking __pycache__
 
-Status: resolved
-Type: task
-Repo: homesite
-Source: review finding 39
+Status: resolved Type: task Repo: homesite Source: review finding 39
 
 ```bash
 printf '\n# Python\n__pycache__/\n*.pyc\n' >> .gitignore

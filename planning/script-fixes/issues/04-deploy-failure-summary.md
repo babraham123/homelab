@@ -1,9 +1,6 @@
 # 04. deploy_src.sh: collect per-host failures and exit non-zero
 
-Status: wontfix
-Type: task
-Repo: homelab
-Source: review finding 28
+Status: wontfix Type: task Repo: homelab Source: review finding 28
 
 ## Change
 
@@ -26,10 +23,9 @@ Keep `rm -rf "$project_dir"` in a `trap ... EXIT` so a failure still cleans up.
 
 ## Host list from vars.yml (needs a maintainer decision)
 
-`vars.yml` has no `nodes` key today: `vpn`, `router`, `secsvcs`, `websvcs`, `homesvcs`,
-`gaming`, `devtop`, `pve1`, `pve2` are top-level keys next to `site`, `users`, `lan`,
-`wifi`, so `yq keys` can't tell a node from a subnet. Proposed reshape (`vars.template.yml`
-too):
+`vars.yml` has no `nodes` key today: `vpn`, `router`, `secsvcs`, `websvcs`, `homesvcs`, `gaming`,
+`devtop`, `pve1`, `pve2` are top-level keys next to `site`, `users`, `lan`, `wifi`, so `yq keys`
+can't tell a node from a subnet. Proposed reshape (`vars.template.yml` too):
 
 ```yaml
 nodes:               # map order == deploy order (yq preserves it)
@@ -50,24 +46,26 @@ vlans:
   wired: {trusted: ..., iot: ...}
 ```
 
-Then `hosts=($(yq '.nodes | to_entries | map(select(.value.deploy != "manual")) | .[].key' vars.yml))`,
+Then
+`hosts=($(yq '.nodes | to_entries | map(select(.value.deploy != "manual")) | .[].key' vars.yml))`,
 and `render_src.sh`/`upload_src.sh` drop their own lists. Cost: every `{{ <node>.` and
-`{{ lan.`/`{{ wifi.` reference in `src/` and `docs/` becomes `{{ nodes.<node>.` etc.
-(156 occurrences in `src/` and `docs/` on 2026-09-26; one mechanical sed). restructure/01's `src/nodes.yml` should use
-the same node keys, with a render-time check that the two key sets match.
+`{{ lan.`/`{{ wifi.` reference in `src/` and `docs/` becomes `{{ nodes.<node>.` etc. (156
+occurrences in `src/` and `docs/` on 2026-09-26; one mechanical sed). restructure/01's
+`src/nodes.yml` should use the same node keys, with a render-time check that the two key sets match.
 
-Until decided, keep the array in the script; the other hardcoded list
-(`render_src.sh`'s `parse_dispatcher.sh` calls) goes with restructure/01.
+Until decided, keep the array in the script; the other hardcoded list (`render_src.sh`'s
+`parse_dispatcher.sh` calls) goes with restructure/01.
 
 ## Comments
 
 - 2026-09-26: `yq '.nodes | keys'` in the original text was wrong; see the section above.
-- 2026-09-27: restructure/01 appends `src/nodes.yml` to `vars.yml` as a
-  top-level `nodes:` key. If `vars.yml` gets the `nodes:` reshape above, switch
-  `render_src.sh` from concatenation to a deep merge
-  (`yq eval-all '. as $f ireduce ({}; . * $f)' vars.yml src/nodes.yml`) so
-  `nodes.<node>.ip` and `nodes.<node>.services` sit side by side. A plain concatenation
-  would give a duplicate key and PyYAML keeps only the last one. The host list can
-  then come from `nodes.yml`, and the `parse_dispatcher.sh` list is already gone.
+- 2026-09-27: restructure/01 appends `src/nodes.yml` to `vars.yml` as a top-level `nodes:` key. If
+  `vars.yml` gets the `nodes:` reshape above, switch `render_src.sh` from concatenation to a deep
+  merge (`yq eval-all '. as $f ireduce ({}; . * $f)' vars.yml src/nodes.yml`) so `nodes.<node>.ip`
+  and `nodes.<node>.services` sit side by side. A plain concatenation would give a duplicate key and
+  PyYAML keeps only the last one. The host list can then come from `nodes.yml`, and the
+  `parse_dispatcher.sh` list is already gone.
 
-- 2026-09-27 maintainer: continuing past a failed host with an exit status of 0 is the intended behaviour (e.g. pve2 is often powered off). Commit 5013764 already names the host that failed, which covers the silent-continue concern.
+- 2026-09-27 maintainer: continuing past a failed host with an exit status of 0 is the intended
+  behaviour (e.g. pve2 is often powered off). Commit 5013764 already names the host that failed,
+  which covers the silent-continue concern.

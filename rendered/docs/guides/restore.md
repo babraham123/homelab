@@ -3,14 +3,16 @@ How to get a file, a VM or a whole Proxmox host back from the weekly backup.
 
 - What the backup holds: [Services: storage and backups](../services.md#storage-and-backups)
 - What pve1 must keep off-box: [pve1 disaster recovery](./pve1_recovery.md)
-- Everything in PBS is encrypted with `/root/secrets/pbs_client.key` on pve1; nothing restores without it. The escrow bundle that will hold it is *planned* (`backup-and-dr/04`)
+- Everything in PBS is encrypted with `/root/secrets/pbs_client.key` on pve1; nothing restores
+  without it. The escrow bundle that will hold it is *planned* (`backup-and-dr/04`)
 
 Three tiers, cheapest first:
 1. **The node's stage**, `/var/opt/backups/files/` on the node
    - The newest copy of its config trees and small volumes, paths as on the live system
    - No other machine needed; no application dumps (pve1 moves them out every run)
 2. **pve1's collection**, `/root/backups/<node>/files/` on pve1
-   - Every node's stage as of the last run, plus `repo/` (the repo and `vars.yml`, from every `tools/deploy_src.sh`)
+   - Every node's stage as of the last run, plus `repo/` (the repo and `vars.yml`, from every
+     `tools/deploy_src.sh`)
    - A non-empty `dumps/` means the last upload failed and PBS doesn't have them
 3. **PBS** (`pbs2`, on pve2), every weekly run; needs pve2 awake: `ssh autoadmin@router start_pve2`
    - The only home of application dumps
@@ -46,15 +48,18 @@ proxmox-backup-client restore host/vpnsvcs/2026-10-04T02:00:00Z vpnsvcs.pxar /tm
 - `catalog shell` does the same interactively (`ls`, `select`, `restore-selected`)
 
 ### Application restores
-Each dump restores into a fresh or stopped service; the file copies above cover the rest of `/etc/opt`.
+Each dump restores into a fresh or stopped service; the file copies above cover the rest of
+`/etc/opt`.
 
-- **Postgres** (Authelia, LLDAP, Gatus, Grafana, Guacamole), from `secsvcs/dumps/postgres/pg_dumpall-*.sql.zst`:
+- **Postgres** (Authelia, LLDAP, Gatus, Grafana, Guacamole), from
+  `secsvcs/dumps/postgres/pg_dumpall-*.sql.zst`:
 ```bash
 # On secsvcs, with every other service stopped so nothing writes during the load
 zstd -dc pg_dumpall-TIMESTAMP.sql.zst | podman exec -i postgres psql -U postgres
 ```
 - **Home Assistant**, from `homesvcs/dumps/hass/hass-*.tar`
-  - Settings >> System >> Backups >> upload, or copy it into the `hassconfig` volume's `backups/` and restore from there
+  - Settings >> System >> Backups >> upload, or copy it into the `hassconfig` volume's `backups/`
+    and restore from there
   - Recorder history (`hassdb`) isn't backed up; HA creates an empty one
 - **Headscale**, from `host/vpnsvcs`, `dumps/headscale/db-*.sqlite`:
 ```bash
@@ -64,12 +69,16 @@ rm -f /var/lib/headscale/db.sqlite-wal /var/lib/headscale/db.sqlite-shm
 chown headscale:headscale /var/lib/headscale/db.sqlite
 systemctl start headscale
 ```
-- **A Podman volume copy** (`files/volumes/<name>/`, e.g. `grafanadata`, `z2mdb`): stop the service, `cp -a` the contents into `podman volume inspect -f '{{ .Mountpoint }}' systemd-<name>`, start it
-- **The repo and `vars.yml`**, from `/root/backups/repo/homelab-*.tar.gz` on pve1: `tar -xzf` into an empty directory; `vars.yml` is in the archive root
+- **A Podman volume copy** (`files/volumes/<name>/`, e.g. `grafanadata`, `z2mdb`): stop the service,
+  `cp -a` the contents into
+  `podman volume inspect -f '{{ .Mountpoint }}' systemd-<name>`, start it
+- **The repo and `vars.yml`**, from `/root/backups/repo/homelab-*.tar.gz` on pve1: `tar -xzf` into
+  an empty directory; `vars.yml` is in the archive root
 
 ## A VM
 - From PBS, with pve2 awake
-- Each backup carries the VM config (disks, NICs, MAC, passthrough): the VM keeps its DHCP lease and startup order
+- Each backup carries the VM config (disks, NICs, MAC, passthrough): the VM keeps its DHCP lease and
+  startup order
 - **In place**, replacing a broken VM:
 ```bash
 # On the host that owns the VM
@@ -87,22 +96,35 @@ qm start 999
 # guestmount -a /dev/pve/vm-999-disk-0 -i --ro /mnt/scratch
 qm destroy 999 --purge
 ```
-- **UI**: the PBS storage >> Backups >> select >> Restore, or PBS's File Restore for single files (needs the key on the PVE storage: `pvesm set pbs2 --encryption-key`)
-- **devtop and gaming on pve2**: data disks with `backup=0` aren't in the image; re-attach with `qm set VMID --scsi1 local-games:vm-VMID-disk-1,backup=0` (the `local-games` storage is *planned*, `backup-and-dr/14`)
-- **The router**: pfSense's config is also in Auto Config Backup, but the VM restore is faster and keeps the NIC passthrough
+- **UI**: the PBS storage >> Backups >> select >> Restore, or PBS's File Restore for single files
+  (needs the key on the PVE storage: `pvesm set pbs2 --encryption-key`)
+- **devtop and gaming on pve2**: data disks with `backup=0` aren't in the image; re-attach with
+  `qm set VMID --scsi1 local-games:vm-VMID-disk-1,backup=0` (the `local-games` storage is *planned*,
+  `backup-and-dr/14`)
+- **The router**: pfSense's config is also in Auto Config Backup, but the VM restore is faster and
+  keeps the NIC passthrough
 
 ## A Proxmox host
 - **pve1**: [pve1 disaster recovery](./pve1_recovery.md)
 - **pve2** (and PBS with it), with pve1 intact:
-  1. Install Proxmox as in [the router guide](./router.md#install-proxmox), hostname `pve2`, static IP `192.168.2.10`; PBS as in [the Proxmox guide](./proxmox.md#backups); IOMMU and passthrough per [the GPU guide](./gpu.md) and [pve2 storage](./pve2_storage.md)
+  1. Install Proxmox as in [the router guide](./router.md#install-proxmox), hostname `pve2`, static
+     IP `192.168.2.10`; PBS as in [the Proxmox guide](./proxmox.md#backups); IOMMU and passthrough
+     per [the GPU guide](./gpu.md) and [pve2 storage](./pve2_storage.md)
   2. **Datastore intact** (the SATA SSD survived):
-     - Mount it where it was and recreate the datastore entry; PBS picks up the existing chunks and snapshots
-     - Restore `/etc/proxmox-backup` from pve1's `/root/backups/pve2/files/etc/proxmox-backup/` (users, tokens, ACLs, jobs), then `systemctl restart proxmox-backup proxmox-backup-proxy`
+     - Mount it where it was and recreate the datastore entry; PBS picks up the existing chunks and
+       snapshots
+     - Restore `/etc/proxmox-backup` from pve1's `/root/backups/pve2/files/etc/proxmox-backup/`
+       (users, tokens, ACLs, jobs), then `systemctl restart proxmox-backup proxmox-backup-proxy`
   3. **Datastore lost**:
-     - New `backup1` with namespaces `pve1`, `pve2` and `files`; recreate the `pve1@pbs!backup` token and ACLs ([Proxmox guide](./proxmox.md#backups)) and re-point pve1's `pbs2` storage
-     - Everything only in PBS is gone until the offsite copy exists (`backup-and-dr/03`); rebuild pve2's VMs from their guides and pve1's `/root/backups/websvcs`
-  4. Restore `/etc/pve/storage.cfg` and `priv/storage/pbs2.*` from `/root/backups/pve2/files/etc/pve/` (the `pbs2` storage and its key), then `qmrestore` websvcs, devtop and gaming as above
-  5. `tools/deploy_src.sh`; `install_dispatcher`, `install_vm_watchdog`, `install_certs_and_keys` on pve2; `install_all_svcs` on websvcs
+     - New `backup1` with namespaces `pve1`, `pve2` and `files`; recreate the `pve1@pbs!backup`
+       token and ACLs ([Proxmox guide](./proxmox.md#backups)) and re-point pve1's `pbs2` storage
+     - Everything only in PBS is gone until the offsite copy exists (`backup-and-dr/03`); rebuild
+       pve2's VMs from their guides and pve1's `/root/backups/websvcs`
+  4. Restore `/etc/pve/storage.cfg` and `priv/storage/pbs2.*` from
+     `/root/backups/pve2/files/etc/pve/` (the `pbs2` storage and its key), then `qmrestore` websvcs,
+     devtop and gaming as above
+  5. `tools/deploy_src.sh`; `install_dispatcher`, `install_vm_watchdog`, `install_certs_and_keys` on
+     pve2; `install_all_svcs` on websvcs
 
 ## Annual restore test
 Record the date in `docs/maintenance.md` when done.
@@ -111,5 +133,7 @@ Record the date in `docs/maintenance.md` when done.
    - `systemctl list-units 'Homelab*'` shows every service running
    - `podman exec postgres psql -U postgres -c '\l'` lists the databases
    - Destroy it
-2. Pull one file out of the newest host backup with `proxmox-backup-client restore ... --pattern`, e.g. the Headscale DB, and check it: `sqlite3 db-*.sqlite 'PRAGMA integrity_check'`
-3. Once the escrow bundle exists (*planned*, `backup-and-dr/04`): decrypt a copy of the client key from it, not pve1, to prove the escrow is current
+2. Pull one file out of the newest host backup with `proxmox-backup-client restore ... --pattern`,
+   e.g. the Headscale DB, and check it: `sqlite3 db-*.sqlite 'PRAGMA integrity_check'`
+3. Once the escrow bundle exists (*planned*, `backup-and-dr/04`): decrypt a copy of the client key
+   from it, not pve1, to prove the escrow is current

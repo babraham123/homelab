@@ -1,9 +1,7 @@
 # 02. Comment the intentional mv of rendered files in install_svcs.sh
 
-Status: ready-for-agent
-Type: task
-Repo: homelab
-Source: review finding 26 (maintainer: mv is intentional, add a comment)
+Status: ready-for-agent Type: task Repo: homelab Source: review finding 26 (maintainer: mv is
+intentional, add a comment)
 
 ## Change
 
@@ -16,7 +14,7 @@ At each `mv` of a rendered file — `src/nodes/secsvcs/install_svcs.sh:114`,
 # fail on purpose rather than install a stale render.
 ```
 
-Also document the rule in `docs/development.md#service-structure`: "files produced by a
-second render on the node are consumed with `mv`; the rendered tree is disposable".
+Also document the rule in `docs/development.md#service-structure`: "files produced by a second
+render on the node are consumed with `mv`; the rendered tree is disposable".
 
 ## Comments

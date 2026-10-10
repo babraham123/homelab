@@ -1,8 +1,8 @@
 # Authorization model
 
-Authelia currently gates every subdomain with one group and downgrades everything to
-one factor on the LAN/mesh. Introduce an admin group, group-based gating for telemetry
-tools, and fix the LLDAP key-seed coupling.
+Authelia currently gates every subdomain with one group and downgrades everything to one factor on
+the LAN/mesh. Introduce an admin group, group-based gating for telemetry tools, and fix the LLDAP
+key-seed coupling.
 
 ## Issues
 

@@ -1,15 +1,12 @@
 # 02. Survey: which containers support a HealthCmd, and with what
 
-Status: ready-for-agent
-Type: research
-Repo: homelab
-Source: review finding 16
+Status: ready-for-agent Type: research Repo: homelab Source: review finding 16
 
 ## Task
 
-For each quadlet, record the health endpoint/command, whether the image ships a client
-to call it (`curl`/`wget`/none — distroless and `scratch` images have neither), and the
-resulting `HealthCmd=`. Commit as a column in `docs/guides/container_hardening.md`.
+For each quadlet, record the health endpoint/command, whether the image ships a client to call it
+(`curl`/`wget`/none — distroless and `scratch` images have neither), and the resulting `HealthCmd=`.
+Commit as a column in `docs/guides/container_hardening.md`.
 
 Known starting points:
 
@@ -32,9 +29,8 @@ Known starting points:
 | olive_tin | `GET /` | check |
 
 For each with a client: `HealthCmd=...`, `HealthInterval=30s`, `HealthRetries=3`,
-`HealthOnFailure=kill` (so `Restart=on-failure` restarts a hung service). Also propose a
-vmalert rule on `podman` health state once a Podman exporter exists (observability/01
-notes this).
+`HealthOnFailure=kill` (so `Restart=on-failure` restarts a hung service). Also propose a vmalert
+rule on `podman` health state once a Podman exporter exists (observability/01 notes this).
 
 ## Acceptance
 

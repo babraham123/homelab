@@ -1,9 +1,11 @@
 # Podman setup
-Initial setup to install Podman on a Debian VM or the VPS and configure it with the relevant scripts and services.
+Initial setup to install Podman on a Debian VM or the VPS and configure it with the relevant scripts
+and services.
 
 - Setup [Debian Linux](./debian.md)
 - Make sure to do VM Host setup for [PVE1](./pve1.md) and [PVE2](./pve2.md).
-- Review container security measures, for example [ref](https://www.panoptica.app/research/7-ways-to-escape-a-container)
+- Review container security measures, for example
+  [ref](https://www.panoptica.app/research/7-ways-to-escape-a-container)
 
 ## Install Podman
 - Install dependencies
@@ -19,7 +21,8 @@ mv yq_linux_amd64 /usr/bin/yq
 rm yq* install-man-page.sh
 ```
 
-- Install podman: [ref](https://podman.io/docs/installation#linux-distributions), [ref2](https://computingforgeeks.com/how-to-install-podman-on-debian/)
+- Install podman: [ref](https://podman.io/docs/installation#linux-distributions),
+  [ref2](https://computingforgeeks.com/how-to-install-podman-on-debian/)
 ```bash
 source /etc/os-release
 curl -fsSL https://download.opensuse.org/repositories/home:/alvistack/Debian_$VERSION_ID/Release.key \
@@ -39,8 +42,10 @@ systemctl enable --now podman-auto-update.timer
 ```
 
 ## Networking
-- Account for conflicts between the podman network and the firewall, [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
-- On the VMs, reset the firewall. vpnsvcs keeps the rules from [its guide](./vpnsvcs.md#add-public-endpoint).
+- Account for conflicts between the podman network and the firewall,
+  [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
+- On the VMs, reset the firewall. vpnsvcs keeps the rules from [its
+  guide](./vpnsvcs.md#add-public-endpoint).
 ```bash
 ufw reset
 # SSH, HTTP
@@ -76,8 +81,8 @@ cp /home/manualadmin/.ssh/id_ed25519* /etc/opt/secrets
 chmod 600 /etc/opt/secrets/*
 cp /root/homelab-rendered/src/base/podman/containers.conf /etc/containers
 ```
-The secret helpers (`src/base/podman/*.sh`) run in place from `/root/homelab-rendered`;
-nothing is copied, so a deploy updates them.
+The secret helpers (`src/base/podman/*.sh`) run in place from `/root/homelab-rendered`; nothing is
+copied, so a deploy updates them.
 
 ## mDNS
 - Install dependencies and service

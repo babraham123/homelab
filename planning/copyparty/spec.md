@@ -1,22 +1,19 @@
 # copyparty and car data upload
 
-A file drop on websvcs (copyparty) behind Authelia, and a sync that turns Car Scanner
-Pro trip logs uploaded from the phone into VictoriaMetrics series with a Grafana
-dashboard.
+A file drop on websvcs (copyparty) behind Authelia, and a sync that turns Car Scanner Pro trip logs
+uploaded from the phone into VictoriaMetrics series with a Grafana dashboard.
 
 Maintainer decisions (2026-09-26):
 - The source is **Car Scanner Pro** CSV exports, uploaded from the phone.
 - copyparty runs on **websvcs**.
-- It may be reachable from the internet, **as long as every request is authenticated
-  by Authelia**. Traefik must still see the real client IP.
-- Raw CSVs are kept in copyparty as the long-term archive; VictoriaMetrics keeps its
-  current 14-day retention for now. Long-term retention for an allowlist of series is
-  explored in observability/09.
+- It may be reachable from the internet, **as long as every request is authenticated by Authelia**.
+  Traefik must still see the real client IP.
+- Raw CSVs are kept in copyparty as the long-term archive; VictoriaMetrics keeps its current 14-day
+  retention for now. Long-term retention for an allowlist of series is explored in observability/09.
 
 From `notes/TODO.md` "setup copyparty → car data upload".
 
-Constraint: websvcs is on pve2, which is on demand, so uploads only work while pve2 is
-up. Accepted.
+Constraint: websvcs is on pve2, which is on demand, so uploads only work while pve2 is up. Accepted.
 
 ## Issues
 

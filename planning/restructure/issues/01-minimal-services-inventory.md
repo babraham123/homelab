@@ -1,14 +1,12 @@
 # 01. Minimal per-node inventory that replaces parse_routes/parse_uptime_urls/parse_dispatcher/gen_dispatch_cmds
 
-Status: resolved
-Type: prototype
-Repo: homelab
-Source: user item 57 (previous prototype in planning/services-inventory judged too complex)
+Status: resolved Type: prototype Repo: homelab Source: user item 57 (previous prototype in
+planning/services-inventory judged too complex)
 
 ## Goal
 
-Not a full data model. Only the facts the four `parse_*`/`gen_*` scripts reverse-engineer
-from other files, expressed once, so those scripts can be deleted:
+Not a full data model. Only the facts the four `parse_*`/`gen_*` scripts reverse-engineer from other
+files, expressed once, so those scripts can be deleted:
 
 | Script | Variable it produces | Replace with |
 |---|---|---|
@@ -47,10 +45,10 @@ pve1: ...
 
 ## Mechanism
 
-`jinjanate` accepts more than one data file: `jinjanate -o out tmpl vars.yml src/nodes.yml`.
-So `render_src.sh` drops the `{ head vars.yml; parse_*.sh ...; } > all_vars.yml`
-assembly entirely and templates loop over `nodes.secsvcs.subdomains` etc. Templates to
-convert: `src/services/dns/unbound.conf.j2`, `src/services/haproxy/haproxy.cfg.j2`,
+`jinjanate` accepts more than one data file: `jinjanate -o out tmpl vars.yml src/nodes.yml`. So
+`render_src.sh` drops the `{ head vars.yml; parse_*.sh ...; } > all_vars.yml` assembly entirely and
+templates loop over `nodes.secsvcs.subdomains` etc. Templates to convert:
+`src/services/dns/unbound.conf.j2`, `src/services/haproxy/haproxy.cfg.j2`,
 `src/nodes/<node>/sudoers.j2`, `src/services/gatus/config.yaml.j2` (endpoints loop), and
 `src/nodes/<node>/dispatcher.sh` becomes `dispatcher.sh.j2` with the case block generated.
 `routes.yml`, quadlets, `install_svcs.sh` stay hand-written.
@@ -63,32 +61,28 @@ convert: `src/services/dns/unbound.conf.j2`, `src/services/haproxy/haproxy.cfg.j
 
 ## Acceptance
 
-- Rendered `unbound.conf`, `haproxy.cfg`, `sudoers`, `gatus/config.yaml` and each
-  `dispatcher.sh` are byte-identical (or semantically identical via yq) to today's
-  output *except* for the `ntfy-alertmanager` case that the regex bug currently drops.
+- Rendered `unbound.conf`, `haproxy.cfg`, `sudoers`, `gatus/config.yaml` and each `dispatcher.sh`
+  are byte-identical (or semantically identical via yq) to today's output *except* for the
+  `ntfy-alertmanager` case that the regex bug currently drops.
 - The four scripts are deleted.
 
 ## Comments
 
-- 2026-09-26: image-updater/02 adds `tools/parse_images.sh`, another script that
-  reverse-engineers install order and quadlet labels. Fold it into `nodes.yml` here.
-- 2026-09-27: Done; the four scripts are deleted, and ADR 0006 records the design.
-  Where it differs from the plan above:
-  - `jinjanate` takes one data file, so `render_src.sh` appends `nodes.yml` to
-    `vars.yml`.
-  - `services` is an ordered mapping, with `subdomain`/`uptime`/`uptime_path` on each
-    service, not separate maps.
-  - New keys `debian_services`, `install_all_svcs`, `commands[].run` and gaming
-    `triggers`.
+- 2026-09-26: image-updater/02 adds `tools/parse_images.sh`, another script that reverse-engineers
+  install order and quadlet labels. Fold it into `nodes.yml` here.
+- 2026-09-27: Done; the four scripts are deleted, and ADR 0006 records the design. Where it differs
+  from the plan above:
+  - `jinjanate` takes one data file, so `render_src.sh` appends `nodes.yml` to `vars.yml`.
+  - `services` is an ordered mapping, with `subdomain`/`uptime`/`uptime_path` on each service, not
+    separate maps.
+  - New keys `debian_services`, `install_all_svcs`, `commands[].run` and gaming `triggers`.
   - `src/nodes.jinja` derives every list.
-  - An added check compares the secsvcs/homesvcs subdomains with their `routes.yml`
-    `Host()` rules.
+  - An added check compares the secsvcs/homesvcs subdomains with their `routes.yml` `Host()` rules.
 
   Render diff against main is byte-identical except:
   - Gatus endpoint order (yq shows the same set);
   - pve1/pve2 dispatcher and OliveTin order, where `install_vm_watchdog` now comes first;
   - guacamole's random `state`.
 
-  Follow-ups are noted on image-updater/02 (no `parse_images.sh`), deploy/04,
-  observability/07, vaultwarden/01, restructure/02 and script-fixes/04 (`nodes:` key
-  collision).
+  Follow-ups are noted on image-updater/02 (no `parse_images.sh`), deploy/04, observability/07,
+  vaultwarden/01, restructure/02 and script-fixes/04 (`nodes:` key collision).
