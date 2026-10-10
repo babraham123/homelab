@@ -60,11 +60,11 @@ pfSense instead of the tailnet client.
 ## Comments
 
 - 2026-10-10: Tailscale v1.104.1 (2026-10-07) ships tailscale/tailscale#21060 and `27b2a7d1a`
-  ("netstack mode leaves pf and forwarding alone"), so with SNAT off tailscaled never touches pf
-  on any build the package can pick up. The pfSense package is still on the 1.94.1 port
-  (upstream FreeBSD ports: 1.102.5). Filed pfsense/FreeBSD-ports#1462 (Redmine #13905) exposing
-  the `SNAT Subnet Routes` checkbox: unchecked writes `tailscaled_env="TS_DEBUG_NETSTACK_SUBNETS=0"`
-  and passes `--snat-subnet-routes=false`, which works with 1.94.1 too. Until it ships, step 2
-  stays the manual `/etc/rc.conf.local` entry; the PR can be applied locally with the System
-  Patches package to test.
+  ("netstack mode leaves pf and forwarding alone"), so with SNAT off tailscaled never touches pf on
+  any build the package can pick up. The pfSense package is still on the 1.94.1 port (upstream
+  FreeBSD ports: 1.102.5). Filed pfsense/FreeBSD-ports#1462 (Redmine #13905) exposing the
+  `SNAT Subnet Routes` checkbox: unchecked writes `tailscaled_env="TS_DEBUG_NETSTACK_SUBNETS=0"` and
+  passes `--snat-subnet-routes=false`, which works with 1.94.1 too. Until it ships, step 2 stays the
+  manual `/etc/rc.conf.local` entry; the PR can be applied locally with the System Patches package
+  to test.
 - 2026-10-10: testing the PR on the router is router/06; its outcome replaces step 2 here.

@@ -40,8 +40,8 @@ ufw allow ssh
 ufw enable
 ```
 - Configure updates
-	- `vim /etc/apt/apt.conf.d/50unattended-upgrades`
-  - Uncomment `-updates`
+  - `vim /etc/apt/apt.conf.d/50unattended-upgrades`
+    - Uncomment `-updates`
 
 ## SSH
 - Set timezone

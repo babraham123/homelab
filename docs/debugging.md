@@ -8,7 +8,7 @@ Start with [General triage](#general-triage), then jump to the layer that looks 
 
 ## General triage
 
-Every homelab unit's description is prefixed with `Homelab: `, so it's easy to filter the managed
+Every homelab unit's description is prefixed with `Homelab:`, so it's easy to filter the managed
 services from the rest of systemd.
 
 ```bash

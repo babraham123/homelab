@@ -16,7 +16,7 @@ ForwardAuth), and Traefik then evaluates **child** routers — declared with `pa
 against the request *as modified by the parent's middlewares*. ForwardAuth copies
 `authResponseHeaders` (already includes `Remote-Groups` in
 `src/services/traefik/dynamic/authelia.yml.j2`) onto the request, so a child rule
-`HeaderRegexp(\`Remote-Groups\`, ...)` sees Authelia's verdict. Documented order: parent rule →
+``HeaderRegexp(`Remote-Groups`, ...)`` sees Authelia's verdict. Documented order: parent rule →
 parent middlewares → one child matches. Constraints: file provider only (fine), parents must have no
 `service`, `entryPoints`, `tls` or `observability`; those move to the children. Requires Traefik ≥
 v3.6 (you run v3.7 — verify the `parentRefs` key exists in that version's reference).

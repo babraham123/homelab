@@ -30,7 +30,9 @@ HAProxy half. The VPS vmagent that scrapes it is observability/08.
 4. **Alerts** in `src/services/vmalert/configs/vps.yml` (created by 08):
    - `HaproxyDown`: `up{job="haproxy"} == 0` for 2m;
    - `HaproxyBackendConnectErrors`:
-     `sum by (proxy) (rate(haproxy_backend_connection_errors_total{proxy=~".*svcs_https?_proxy"}[5m])) > 0`
+     ```promql
+     sum by (proxy) (rate(haproxy_backend_connection_errors_total{proxy=~".*svcs_https?_proxy"}[5m])) > 0
+     ```
      for 5m. Confirm the metric name against the live `/metrics` output first.
 5. **Dashboard.** Import Grafana.com 12693 as `src/services/grafana/dashboards/haproxy.json` and fix
    its datasource.

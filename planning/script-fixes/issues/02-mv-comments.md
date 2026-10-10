@@ -1,7 +1,7 @@
 # 02. Comment the intentional mv of rendered files in install_svcs.sh
 
-Status: wontfix Type: task Repo: homelab Source: review finding 26 (maintainer: mv is
-intentional, add a comment)
+Status: wontfix Type: task Repo: homelab Source: review finding 26 (maintainer: mv is intentional,
+add a comment)
 
 ## Change
 

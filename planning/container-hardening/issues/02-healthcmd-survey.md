@@ -41,15 +41,14 @@ rule on `podman` health state once a Podman exporter exists (observability/01 no
 - 2026-10-10: health column and per-container blocks are in
   [`container_hardening.md`](../container_hardening.md). Health checks only on core services:
   postgres, lldap, authelia, traefik, victoriametrics, vmagent, vmalert, alertmanager,
-  ntfy-alertmanager, ntfy, grafana, mosquitto (busybox `wget`/`nc` allowed). victorialogs,
-  gatus and fluentbit have no client; `up` covers them. Every other service lists a candidate
-  check but gets none. All checks run every 30s, kill after 3 failures. Traefik needs a
-  loopback `ping` entrypoint (`127.0.0.1:8083`); Authelia needs
-  `server.disable_healthcheck: true` to run read-only; alertmanager injects
-  `alertmanager_admin_password` for its basic auth. Alerting uses systemd's restart counter
-  instead of a Podman exporter: `--collector.systemd.enable-restarts-metrics` in
+  ntfy-alertmanager, ntfy, grafana, mosquitto (busybox `wget`/`nc` allowed). victorialogs, gatus and
+  fluentbit have no client; `up` covers them. Every other service lists a candidate check but gets
+  none. All checks run every 30s, kill after 3 failures. Traefik needs a loopback `ping` entrypoint
+  (`127.0.0.1:8083`); Authelia needs `server.disable_healthcheck: true` to run read-only;
+  alertmanager injects `alertmanager_admin_password` for its basic auth. Alerting uses systemd's
+  restart counter instead of a Podman exporter: `--collector.systemd.enable-restarts-metrics` in
   `node_runner.sh` and `ServiceRestartLoop` in `homelab.yml`. Fixed alongside: isso on 8080
   throughout (was routed to 8200), wyoming-addons download from `master`. Open (test on node):
-  - each `HealthCmd` through quadlet and systemd (the guide's escaping test), alertmanager's
-    `$$` first
+  - each `HealthCmd` through quadlet and systemd (the guide's escaping test), alertmanager's `$$`
+    first
   - busybox `nc -z` in the mosquitto image

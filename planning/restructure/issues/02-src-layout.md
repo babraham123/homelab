@@ -70,5 +70,7 @@ for `homelab-rendered/src/[a-z]` paths that don't exist.
   8. Router and gaming: nothing; their trees land at `/root/router-src` and `C:/Homelab/gaming-src`
      as before
   9. On each node,
-     `grep -rE "homelab-rendered/src/" /etc /usr/local/bin /var/lib/vz/snippets 2>/dev/null | grep -vE "src/(base|nodes|services)/"`
+     ```bash
+     grep -rE "homelab-rendered/src/" /etc /usr/local/bin /var/lib/vz/snippets 2>/dev/null | grep -vE "src/(base|nodes|services)/"
+     ```
      prints nothing

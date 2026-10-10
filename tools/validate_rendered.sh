@@ -11,6 +11,8 @@ cd "$1"
 fdfind="fdfind"
 $fdfind -h &> /dev/null || fdfind="fd"
 yamllint -c lint.yaml . || die "yaml linting failed"
+# Rules in .markdownlint-cli2.yaml. Findings go to stderr; stdout is only a banner.
+markdownlint-cli2 "**/*.md" > /dev/null || die "markdown linting failed"
 
 while read -r json; do
   jq -e . "$json" > /dev/null || die "json validation failed: ${json}"

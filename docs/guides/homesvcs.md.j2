@@ -76,11 +76,11 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE from {{ wired.iot.mask }} to 
   - Enable "Use a client certificate", set Broker cert validation to "Auto". Press Submit
   - From personal computer, copy out the client cert and key installed under
     `/etc/opt/home_assistant/certs`
-```bash
-ssh -t manualadmin@homesvcs 'sudo install -m 600 -o manualadmin /etc/opt/home_assistant/certs/client.pem /etc/opt/home_assistant/certs/client.key ~'
-scp 'manualadmin@homesvcs:client.*' ~/Downloads
-ssh manualadmin@homesvcs 'rm ~/client.pem ~/client.key'
-```
+    ```bash
+    ssh -t manualadmin@homesvcs 'sudo install -m 600 -o manualadmin /etc/opt/home_assistant/certs/client.pem /etc/opt/home_assistant/certs/client.key ~'
+    scp 'manualadmin@homesvcs:client.*' ~/Downloads
+    ssh manualadmin@homesvcs 'rm ~/client.pem ~/client.key'
+    ```
   - Upload the client cert and key. Press Submit
 - Connect to InfluxDB
   - Go to Settings >> Devices & Services >> Add Integration
@@ -97,16 +97,16 @@ ssh -t manualadmin@pve1 'sudo /root/homelab-rendered/src/nodes/pve1/secret_updat
 ```
 - Install HACS
   - Run the installer script
-```bash
-container=$(podman container ls | grep home_assistant | awk '{print $1}')
-podman exec -it "$container" bash
+    ```bash
+    container=$(podman container ls | grep home_assistant | awk '{print $1}')
+    podman exec -it "$container" bash
 
-# In the new shell
-wget -O - https://get.hacs.xyz | bash -
-exit
+    # In the new shell
+    wget -O - https://get.hacs.xyz | bash -
+    exit
 
-systemctl restart home_assistant
-```
+    systemctl restart home_assistant
+    ```
   - Go to Settings >> Devices & services
   - Reload the page. Click `Add Integration`. Search and install `HACS`
   - Perform device auth with Github

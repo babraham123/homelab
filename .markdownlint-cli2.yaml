@@ -1,0 +1,32 @@
+# markdownlint-cli2 config, read by tools/validate_rendered.sh (rendered docs), the pre-commit
+# hook (planning/) and the VS Code markdownlint extension.
+# Ref: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+# Only rules that catch markdown that renders wrong, broken links, or lines over 100 columns
+# are on; the rest are formatting style.
+---
+config:
+  default: false
+  MD001: true  # heading levels skip
+  MD005: true  # sibling list items at different indents
+  MD011: true  # reversed link syntax
+  MD013:
+    line_length: 100
+    code_blocks: false
+    tables: false
+  MD018: true  # no space after the heading hashes
+  MD019: true
+  MD020: true
+  MD021: true
+  MD023: true  # indented heading
+  MD037: true  # spaces inside emphasis markers
+  MD038: true  # spaces inside code spans
+  MD039: true  # spaces inside link text
+  MD042: true  # empty link
+  MD047: true  # missing final newline
+  MD051: true  # link to a heading that doesn't exist
+  MD052: true  # undefined reference link
+  MD056: true  # table row with the wrong number of cells
+  MD058: true  # table not surrounded by blank lines
+ignores:
+  - "**/plugins-local/**"  # vendored upstream source
+...

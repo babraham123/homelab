@@ -135,13 +135,14 @@ real values, so keep it out of shared paths such as a fixed `/tmp/homelab-render
 `.git`, `planning` and `notes` are never copied into it. The directory must be named
 `homelab-rendered`, since `upload_src.sh` moves it into place by that name.
 
-Rendering also validates YAML, JSON, checks for duplicate container IPs
-(`tools/validate_rendered.sh`), and checks the node inventory against the scripts and routes it
-describes: each node's `services` must be exactly its `install_svcs.sh` cases, every command must be
-a case in its script, subdomains must be unique, the secsvcs/homesvcs subdomains must match the
-`Host()` rules in their `traefik/routes.yml`, and each image's quadlet (copied by the service's
-case) must have `Image=localhost/` + its `upstream` ref without the registry host, or
-`Image=localhost/<build>:latest`.
+Rendering also validates YAML, JSON, lints markdown (`.markdownlint-cli2.yaml`: only rules for
+markdown that renders wrong, broken heading links and the 100-column line limit), checks for
+duplicate container IPs (`tools/validate_rendered.sh`), and checks the node inventory against the
+scripts and routes it describes: each node's `services` must be exactly its `install_svcs.sh` cases,
+every command must be a case in its script, subdomains must be unique, the secsvcs/homesvcs
+subdomains must match the `Host()` rules in their `traefik/routes.yml`, and each image's quadlet
+(copied by the service's case) must have `Image=localhost/` + its `upstream` ref without the
+registry host, or `Image=localhost/<build>:latest`.
 
 Upload rendered files to a specific server:
 ```bash
@@ -151,12 +152,13 @@ tools/upload_src.sh <hostname> "$out"
 ### Pre-commit hook and `rendered/`
 
 `.githooks/pre-commit` renders the staged tree against `vars.template.yml` in a temp dir, which runs
-every check above, then runs `shellcheck -x --severity=warning` over the rendered `*.sh` files (so
-`*.sh.j2` scripts are checked with their Jinja filled in). If everything passes it replaces
-`rendered/` with that render and stages it, so every commit carries a readable copy of what the
-nodes get, with example values. `rendered/` is generated: edit the templates, never the copy. It is
-left out of the deploy render and marked `linguist-generated` so GitHub collapses it in diffs. The
-hook takes about 7 s. Activate it once per clone:
+every check above, lints the markdown in `planning/` (never rendered), then runs
+`shellcheck -x --severity=warning` over the rendered `*.sh` files (so `*.sh.j2` scripts are checked
+with their Jinja filled in). If everything passes it replaces `rendered/` with that render and
+stages it, so every commit carries a readable copy of what the nodes get, with example values.
+`rendered/` is generated: edit the templates, never the copy. It is left out of the deploy render
+and marked `linguist-generated` so GitHub collapses it in diffs. The hook takes about 7 s. Activate
+it once per clone:
 ```bash
 git config core.hooksPath .githooks
 ```

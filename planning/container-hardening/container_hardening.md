@@ -1,84 +1,82 @@
 # Container hardening
 
-Per-container survey of `DropCapability`/`AddCapability`, `ReadOnly`, `Tmpfs`, `UserNS=auto`
-and `HealthCmd` for every quadlet, with the directive block to paste into each
-`src/**/*.container.j2`. Answers [01](issues/01-capabilities-readonly-tmpfs-survey.md)
-and [02](issues/02-healthcmd-survey.md).
+Per-container survey of `DropCapability`/`AddCapability`, `ReadOnly`, `Tmpfs`, `UserNS=auto` and
+`HealthCmd` for every quadlet, with the directive block to paste into each `src/**/*.container.j2`.
+Answers [01](issues/01-capabilities-readonly-tmpfs-survey.md) and
+[02](issues/02-healthcmd-survey.md).
 
 ## Scope and method
 
-- **Rootful stays.** Rootless is out (maintainer decision: it would replace the static-IP
-  bridge model). `UserNS=auto` is the rootful substitute for "root inside ≠ root on the VM".
-- **Inventory.** 34 quadlet templates (`find src -name '*.container*'`), not 31: the three
-  Traefik templates (secsvcs, homesvcs, websvcs) share one image, and `geoip_generator`
-  (vpnsvcs) is a timer-run job built locally. `fluentbit` runs on
-  4 nodes and `vmagent` on 3 from one template each. `vault` has no quadlet. The wyoming
-  trio is commented out of `src/nodes/websvcs/install_svcs.sh` (not in use). Every `Image=` is pinned in the quadlet itself, not in
-  `vars.template.yml`; most tags float (`latest`, `stable`, `release`) under
-  `AutoUpdate=registry`, so the resolved versions below are a snapshot of 2026-10-10 and
-  can drift.
-- **Podman version.** The nodes run Podman **5.8.2**. Every directive used here
-  (`DropCapability`, `AddCapability`, `ReadOnly`, `ReadOnlyTmpfs`, `Tmpfs`, `UserNS`,
-  `HealthCmd`, `HealthInterval`, `HealthRetries`, `HealthOnFailure`, `HealthStartPeriod`) is in
-  the [v5.8.2 quadlet key table][psu].
-- **Method.** Nothing was run on a node. Each claim comes from one of: the image config blob
-  for the pinned tag, fetched from the registry HTTP API (`User`, `Entrypoint`, `Cmd`,
-  `Healthcheck`, build history); a file listing of every layer of that image (whiteouts
-  applied) for `curl`/`wget`/`nc`/interpreters; the upstream Dockerfile and entrypoint at the
-  matching tag or commit; upstream docs. Sources are cited per container and listed at the end.
-- **Every block is source-derived, not tested.** Treat each as the starting point for the
-  loop below, not a final answer.
-- **Health checks only on core services**: identity (lldap, authelia), ingress (traefik),
-  the database (postgres), the telemetry and alerting stack (victoriametrics, vmagent,
-  vmalert, alertmanager, ntfy-alertmanager, ntfy, grafana) and the MQTT broker (mosquitto).
-  victorialogs, gatus and fluentbit are core too, but their images have no shell or client;
-  `up` covers them. Every other service gets caps and `ReadOnly` only, with a candidate check
-  noted in case it's wanted later.
+- **Rootful stays.** Rootless is out (maintainer decision: it would replace the static-IP bridge
+  model). `UserNS=auto` is the rootful substitute for "root inside ≠ root on the VM".
+- **Inventory.** 34 quadlet templates (`find src -name '*.container*'`), not 31: the three Traefik
+  templates (secsvcs, homesvcs, websvcs) share one image, and `geoip_generator` (vpnsvcs) is a
+  timer-run job built locally. `fluentbit` runs on 4 nodes and `vmagent` on 3 from one template
+  each. `vault` has no quadlet. The wyoming trio is commented out of
+  `src/nodes/websvcs/install_svcs.sh` (not in use). Every `Image=` is pinned in the quadlet itself,
+  not in `vars.template.yml`; most tags float (`latest`, `stable`, `release`) under
+  `AutoUpdate=registry`, so the resolved versions below are a snapshot of 2026-10-10 and can drift.
+- **Podman version.** The nodes run Podman **5.8.2**. Every directive used here (`DropCapability`,
+  `AddCapability`, `ReadOnly`, `ReadOnlyTmpfs`, `Tmpfs`, `UserNS`, `HealthCmd`, `HealthInterval`,
+  `HealthRetries`, `HealthOnFailure`, `HealthStartPeriod`) is in the [v5.8.2 quadlet key
+  table][psu].
+- **Method.** Nothing was run on a node. Each claim comes from one of: the image config blob for the
+  pinned tag, fetched from the registry HTTP API (`User`, `Entrypoint`, `Cmd`, `Healthcheck`, build
+  history); a file listing of every layer of that image (whiteouts applied) for
+  `curl`/`wget`/`nc`/interpreters; the upstream Dockerfile and entrypoint at the matching tag or
+  commit; upstream docs. Sources are cited per container and listed at the end.
+- **Every block is source-derived, not tested.** Treat each as the starting point for the loop
+  below, not a final answer.
+- **Health checks only on core services**: identity (lldap, authelia), ingress (traefik), the
+  database (postgres), the telemetry and alerting stack (victoriametrics, vmagent, vmalert,
+  alertmanager, ntfy-alertmanager, ntfy, grafana) and the MQTT broker (mosquitto). victorialogs,
+  gatus and fluentbit are core too, but their images have no shell or client; `up` covers them.
+  Every other service gets caps and `ReadOnly` only, with a candidate check noted in case it's
+  wanted later.
 
 ### Semantics that shape every block
 
-- `ReadOnly=true` with the default `ReadOnlyTmpfs=true` already mounts read-write tmpfs on
-  `/dev`, `/dev/shm`, `/run`, `/tmp` and `/var/tmp` ([read-only-tmpfs][opt-rotmpfs],
-  [podman-systemd.unit][psu]). So `Tmpfs=` below lists only app-specific paths; `/tmp` and
-  `/run` never need their own line. `/var/run` is a symlink to `/run` in every image surveyed
-  except fluent-bit and victoria-logs (layer listings).
-- Volumes, including the anonymous volumes Podman creates for an image's `VOLUME` paths,
-  stay writable under `ReadOnly` ([read-only][opt-ro]).
-- Podman's default capability set is already smaller than Docker's: `CHOWN DAC_OVERRIDE
-  FOWNER FSETID KILL NET_BIND_SERVICE SETFCAP SETGID SETPCAP SETUID SYS_CHROOT`, with no
-  `NET_RAW`, `MKNOD` or `AUDIT_WRITE` ([containers.conf(5)][containers-conf]). `DropCapability=all`
-  removes those eleven; nothing below needs one outside that set.
-- `HealthCmd` as a plain string runs under `/bin/sh -c` (busybox `ash` on the Alpine images,
-  which is fine); a JSON array runs directly ([health-cmd][opt-healthcmd]). The blocks use the
-  plain string. Setting it resets interval/retries/timeouts to Podman's defaults even if the
-  image has a `HEALTHCHECK`, hence the explicit `HealthInterval=30s`/`HealthRetries=3`. `HealthOnFailure=kill` kills the container on
-  `unhealthy` and lets systemd's `Restart=on-failure` restart it ([health-on-failure][opt-hof],
-  [podman-systemd.unit][psu]). `HealthStartPeriod` keeps a failing check in `starting`
-  instead of `unhealthy` until it elapses ([health-start-period][opt-hsp]).
-- **Frequency.** Podman runs each check from a systemd timer, every `HealthInterval` (30s),
-  as a `podman healthcheck run` that execs the command in the container. A check fails on a
-  non-zero exit or after `HealthTimeout` (default 30s). After 3 consecutive failures the
-  container is `unhealthy` and killed. So a hung service restarts about 1.5 minutes after
-  it hangs, or up to about 3 minutes if every probe times out. 12 core checks every 30s cost
-  one short `podman exec` per node every few seconds.
-- Quadlet copies these values into the generated `ExecStart=`, where systemd expands `$VAR`
-  and `%` specifiers, so a literal `$` in a `HealthCmd` is written `$$` (the existing
-  `vmalert.container.j2` does the same for `$$expr`). Only alertmanager's check has a `$`.
-  Check each one with [Testing HealthCmd escaping](#testing-healthcmd-escaping).
+- `ReadOnly=true` with the default `ReadOnlyTmpfs=true` already mounts read-write tmpfs on `/dev`,
+  `/dev/shm`, `/run`, `/tmp` and `/var/tmp` ([read-only-tmpfs][opt-rotmpfs],
+  [podman-systemd.unit][psu]). So `Tmpfs=` below lists only app-specific paths; `/tmp` and `/run`
+  never need their own line. `/var/run` is a symlink to `/run` in every image surveyed except
+  fluent-bit and victoria-logs (layer listings).
+- Volumes, including the anonymous volumes Podman creates for an image's `VOLUME` paths, stay
+  writable under `ReadOnly` ([read-only][opt-ro]).
+- Podman's default capability set is already smaller than Docker's:
+  `CHOWN DAC_OVERRIDE FOWNER FSETID KILL NET_BIND_SERVICE SETFCAP SETGID SETPCAP SETUID SYS_CHROOT`,
+  with no `NET_RAW`, `MKNOD` or `AUDIT_WRITE` ([containers.conf(5)][containers-conf]).
+  `DropCapability=all` removes those eleven; nothing below needs one outside that set.
+- `HealthCmd` as a plain string runs under `/bin/sh -c` (busybox `ash` on the Alpine images, which
+  is fine); a JSON array runs directly ([health-cmd][opt-healthcmd]). The blocks use the plain
+  string. Setting it resets interval/retries/timeouts to Podman's defaults even if the image has a
+  `HEALTHCHECK`, hence the explicit `HealthInterval=30s`/`HealthRetries=3`. `HealthOnFailure=kill`
+  kills the container on `unhealthy` and lets systemd's `Restart=on-failure` restart it
+  ([health-on-failure][opt-hof], [podman-systemd.unit][psu]). `HealthStartPeriod` keeps a failing
+  check in `starting` instead of `unhealthy` until it elapses ([health-start-period][opt-hsp]).
+- **Frequency.** Podman runs each check from a systemd timer, every `HealthInterval` (30s), as a
+  `podman healthcheck run` that execs the command in the container. A check fails on a non-zero exit
+  or after `HealthTimeout` (default 30s). After 3 consecutive failures the container is `unhealthy`
+  and killed. So a hung service restarts about 1.5 minutes after it hangs, or up to about 3 minutes
+  if every probe times out. 12 core checks every 30s cost one short `podman exec` per node every few
+  seconds.
+- Quadlet copies these values into the generated `ExecStart=`, where systemd expands `$VAR` and `%`
+  specifiers, so a literal `$` in a `HealthCmd` is written `$$` (the existing `vmalert.container.j2`
+  does the same for `$$expr`). Only alertmanager's check has a `$`. Check each one with [Testing
+  HealthCmd escaping](#testing-healthcmd-escaping).
 - Six images already carry a `HEALTHCHECK` in their config (authelia, esphome, guacd, lldap,
-  ntfy-alertmanager, homepage). If Podman honours them (unverified: `podman inspect
-  --format '{{.Config.Healthcheck}}' <name>`), those containers already report health, with
-  no action on failure. ntfy-alertmanager's probes `localhost:8080/health`, but the repo
-  listens on 2588, so it reports `unhealthy` until its `HealthCmd` below replaces it.
+  ntfy-alertmanager, homepage). If Podman honours them (unverified:
+  `podman inspect --format '{{.Config.Healthcheck}}' <name>`), those containers already report
+  health, with no action on failure. ntfy-alertmanager's probes `localhost:8080/health`, but the
+  repo listens on 2588, so it reports `unhealthy` until its `HealthCmd` below replaces it.
 - `UserNS=auto` (rootful) needs a `containers` entry in `/etc/subuid` and `/etc/subgid`
   ([userns][opt-userns]); nothing in this repo creates one, so it's a per-node prerequisite:
-  `echo containers:2147483647:2147483648 | tee -a /etc/subuid /etc/subgid`. Each new
-  container gets a fresh range, and quadlet containers are recreated every start, so host
-  files would appear with shifted owners. Append `idmap` to every `Volume=` (an idmapped mount
-  keeps host ownership as seen from inside, [volume][opt-volume]) rather than `:U`, which
-  re-chowns the host path, slowly, on every range change. "applied" in the UserNS column
-  means: prerequisite done, `UserNS=auto`, and `idmap` on each `Volume=`. Do it as a second
-  pass after caps/ReadOnly/health have settled.
+  `echo containers:2147483647:2147483648 | tee -a /etc/subuid /etc/subgid`. Each new container gets
+  a fresh range, and quadlet containers are recreated every start, so host files would appear with
+  shifted owners. Append `idmap` to every `Volume=` (an idmapped mount keeps host ownership as seen
+  from inside, [volume][opt-volume]) rather than `:U`, which re-chowns the host path, slowly, on
+  every range change. "applied" in the UserNS column means: prerequisite done, `UserNS=auto`, and
+  `idmap` on each `Volume=`. Do it as a second pass after caps/ReadOnly/health have settled.
 
 ### Verification loop (issue 01), per service
 
@@ -101,15 +99,15 @@ podman inspect --format '{{.State.Health.Status}}' "$svc"
 # start ReadOnly, read the first write failure, add the path, repeat.
 ```
 
-Exercise the app (log in, trigger the feature) before calling it done: some writes and
-capability uses only happen on a code path, not at startup.
+Exercise the app (log in, trigger the feature) before calling it done: some writes and capability
+uses only happen on a code path, not at startup.
 
 ### Testing HealthCmd escaping
 
-A `HealthCmd` passes through three parsers: quadlet writes it into `ExecStart=`, systemd
-unquotes it and expands `$`/`%`, and Podman stores it (a plain string as `CMD-SHELL`, run by
-`/bin/sh -c`). Check each stage, so a broken check is caught before `HealthOnFailure=kill`
-starts restarting the service:
+A `HealthCmd` passes through three parsers: quadlet writes it into `ExecStart=`, systemd unquotes it
+and expands `$`/`%`, and Podman stores it (a plain string as `CMD-SHELL`, run by `/bin/sh -c`).
+Check each stage, so a broken check is caught before `HealthOnFailure=kill` starts restarting the
+service:
 
 ```bash
 sudo su
@@ -130,14 +128,14 @@ systemctl list-timers --all | grep "$(podman inspect --format '{{.Id}}' "$svc")"
 
 Expected for alertmanager: stage 1 shows `$${AM_ADMIN_PASSWORD}`, and stages 2 and 3 show
 `${AM_ADMIN_PASSWORD}` literally, for the container's shell to expand. If stage 3 shows
-`http://admin:@127.0.0.1`, systemd expanded the variable (to nothing); double the `$` again.
-For ntfy, check the `| grep -q '"healthy":true'` survives with its quotes.
+`http://admin:@127.0.0.1`, systemd expanded the variable (to nothing); double the `$` again. For
+ntfy, check the `| grep -q '"healthy":true'` survives with its quotes.
 
 ## Summary
 
-Cells: *applied* (block below adds it), *blocked by X*, *n/a*. "Tmpfs" lists only paths
-beyond the automatic `/tmp`, `/run`, `/var/tmp`, `/dev/shm`. Client = what a `HealthCmd` can
-call, from the layer listing.
+Cells: *applied* (block below adds it), *blocked by X*, *n/a*. "Tmpfs" lists only paths beyond the
+automatic `/tmp`, `/run`, `/var/tmp`, `/dev/shm`. Client = what a `HealthCmd` can call, from the
+layer listing.
 
 | Node | Container | Image:tag (resolved) | Drop/AddCapability | ReadOnly | Tmpfs | UserNS=auto | HealthCmd | Client in image |
 |---|---|---|---|---|---|---|---|---|
@@ -176,29 +174,28 @@ call, from the layer listing.
 | websvcs | openwakeword | `localhost/openwakeword` (wyoming-addons) | applied: all, none added | applied | `/root/.cache` (unverified) | applied | none: not core (candidate: venv python socket on 10400) | python (venv) |
 | vpnsvcs | geoip_generator | `localhost/geoip_generator` (python:3-alpine) | applied: all, none added (root writes a root-owned host dir) | applied | none (works in `/tmp`) | applied | n/a: a oneshot job; failures show as `SystemdUnitFailed` | python, busybox |
 
-Easy (caps all dropped, read-only; health check if core): victoriametrics, vmagent,
-vmalert, alertmanager, ntfy-alertmanager, ntfy, grafana, victorialogs, gatus, fluentbit,
-olive_tin, zigbee2mqtt, isso, guacamole, guacd, go2rtc, finance_exporter, the wyoming trio.
-Need care: traefik (loopback `ping` entrypoint), postgres and nginx and mosquitto and homepage
-(entrypoints need CHOWN/SETUID/SETGID), authelia (config switch), lldap (read-only blocked
-while `UID=0`). Hard: home_assistant, esphome, archivebox, novnc.
+Easy (caps all dropped, read-only; health check if core): victoriametrics, vmagent, vmalert,
+alertmanager, ntfy-alertmanager, ntfy, grafana, victorialogs, gatus, fluentbit, olive_tin,
+zigbee2mqtt, isso, guacamole, guacd, go2rtc, finance_exporter, the wyoming trio. Need care: traefik
+(loopback `ping` entrypoint), postgres and nginx and mosquitto and homepage (entrypoints need
+CHOWN/SETUID/SETGID), authelia (config switch), lldap (read-only blocked while `UID=0`). Hard:
+home_assistant, esphome, archivebox, novnc.
 
 ## Per-container blocks
 
-Paste into the `[Container]` section next to the existing `NoNewPrivileges=true`. Lines
-already in the quadlet (`AddCapability=CAP_NET_BIND_SERVICE` on Traefik) are repeated so the
-block is complete. The `UserNS=auto` pass is listed separately per container.
+Paste into the `[Container]` section next to the existing `NoNewPrivileges=true`. Lines already in
+the quadlet (`AddCapability=CAP_NET_BIND_SERVICE` on Traefik) are repeated so the block is complete.
+The `UserNS=auto` pass is listed separately per container.
 
 ### secsvcs
 
 #### postgres (`docker.io/library/postgres:14-alpine`)
 
 Image runs as root; `docker-entrypoint.sh` creates `$PGDATA` and `/var/run/postgresql`,
-`find … -exec chown postgres` on both, then `exec gosu postgres` ([entrypoint][pg-entry]).
-Needs CHOWN, SETUID/SETGID (gosu), DAC_OVERRIDE (root traversing the 0700 `$PGDATA` owned
-by 70). The `chmod 00700 "$PGDATA" || :` would need FOWNER but its failure is ignored, so
-it's left out. `/var/run` → `/run` (layer listing), covered by `ReadOnlyTmpfs`; data is
-the named volume.
+`find … -exec chown postgres` on both, then `exec gosu postgres` ([entrypoint][pg-entry]). Needs
+CHOWN, SETUID/SETGID (gosu), DAC_OVERRIDE (root traversing the 0700 `$PGDATA` owned by 70). The
+`chmod 00700 "$PGDATA" || :` would need FOWNER but its failure is ignored, so it's left out.
+`/var/run` → `/run` (layer listing), covered by `ReadOnlyTmpfs`; data is the named volume.
 
 ```ini
 DropCapability=all
@@ -211,17 +208,16 @@ HealthOnFailure=kill
 HealthStartPeriod=60s
 ```
 
-UserNS pass: `UserNS=auto`; `Volume=postgresdb.volume:/var/lib/postgresql/data:idmap`, and
-`idmap` added to the init script and certificate mounts. Last on secsvcs.
+UserNS pass: `UserNS=auto`; `Volume=postgresdb.volume:/var/lib/postgresql/data:idmap`, and `idmap`
+added to the init script and certificate mounts. Last on secsvcs.
 
 #### lldap (`docker.io/lldap/lldap:stable`)
 
-`docker-entrypoint.sh` runs `find /app \! -user "$UID" -exec chown` and the same on
-`/data`, then `exec gosu "$UID:$GID" /app/lldap` under `set -euo pipefail`
-([entrypoint][lldap-entry]). With `Environment=UID=0 GID=0` every `/app` file (shipped
-owned by `lldap`, image history) is chowned on each start, which fails on a read-only root
-and aborts the script. Image has its own `HEALTHCHECK /app/lldap healthcheck --config-file
-/data/lldap_config.toml` (config blob).
+`docker-entrypoint.sh` runs `find /app \! -user "$UID" -exec chown` and the same on `/data`, then
+`exec gosu "$UID:$GID" /app/lldap` under `set -euo pipefail` ([entrypoint][lldap-entry]). With
+`Environment=UID=0 GID=0` every `/app` file (shipped owned by `lldap`, image history) is chowned on
+each start, which fails on a read-only root and aborts the script. Image has its own
+`HEALTHCHECK /app/lldap healthcheck --config-file /data/lldap_config.toml` (config blob).
 
 ```ini
 DropCapability=all
@@ -234,21 +230,21 @@ HealthStartPeriod=30s
 ```
 
 To unblock `ReadOnly`: switch to the image's default `UID=1000 GID=1000` and
-`chown -R 1000:1000 /etc/opt/lldap` on the host once; then `find /app` has nothing to chown
-and `ReadOnly=true` should hold (unverified). UserNS pass: `UserNS=auto`, `:idmap` on
+`chown -R 1000:1000 /etc/opt/lldap` on the host once; then `find /app` has nothing to chown and
+`ReadOnly=true` should hold (unverified). UserNS pass: `UserNS=auto`, `:idmap` on
 `/etc/opt/lldap:/data`.
 
 #### authelia (`docker.io/authelia/authelia:4.39`)
 
-`entrypoint.sh`: if `$1` is set and isn't `--config`, it `exec`s it; as root with
-`PUID=0` it otherwise runs `chown -R` on `/config` and `su-exec` ([entrypoint][authelia-entry]),
-and su-exec's `setgroups` needs SETGID. `Exec=authelia` takes the first branch, so
-nothing needs a capability (port 9091). At startup Authelia writes `/app/.healthcheck.env`
-and returns the error if it can't ([startup.go][authelia-startup]); on a read-only root
-that aborts startup, so set `server.disable_healthcheck: true` in
-`src/services/authelia/configuration.yml.j2` and probe directly with the same wget call the shipped
-`healthcheck.sh` makes ([healthcheck.sh][authelia-hc]); that `wget` is GNU Wget
-([baseimage Dockerfile][authelia-base]). Scheme is https: the repo config sets `server.tls`.
+`entrypoint.sh`: if `$1` is set and isn't `--config`, it `exec`s it; as root with `PUID=0` it
+otherwise runs `chown -R` on `/config` and `su-exec` ([entrypoint][authelia-entry]), and su-exec's
+`setgroups` needs SETGID. `Exec=authelia` takes the first branch, so nothing needs a capability
+(port 9091). At startup Authelia writes `/app/.healthcheck.env` and returns the error if it can't
+([startup.go][authelia-startup]); on a read-only root that aborts startup, so set
+`server.disable_healthcheck: true` in `src/services/authelia/configuration.yml.j2` and probe
+directly with the same wget call the shipped `healthcheck.sh` makes ([healthcheck.sh][authelia-hc]);
+that `wget` is GNU Wget ([baseimage Dockerfile][authelia-base]). Scheme is https: the repo config
+sets `server.tls`.
 
 ```ini
 Exec=authelia
@@ -265,16 +261,14 @@ UserNS pass: `UserNS=auto`, `:idmap` on `/config` and `/certificates`.
 
 #### traefik (`docker.io/library/traefik:v3.7`), same for homesvcs and websvcs
 
-Runs as root, binds 80/443 (and 465 on secsvcs): keep `NET_BIND_SERVICE`. The entrypoint
-only rewrites arguments ([entrypoint][traefik-entry]). Only remote plugins
-(`experimental.plugins`) are downloaded to `./plugins-storage/`; the static config declares
-only `experimental.localPlugins`, read from the read-only `/plugins-local` mount
-([plugins.go][traefik-plugins]), so no tmpfs is needed.
-`traefik healthcheck` reads the static config and fails with "please enable `ping`" unless
-`ping` is set, then sends `HEAD` to the ping entrypoint ([healthcheck.go][traefik-hc],
-[ping docs][traefik-ping]). Add a loopback-only entrypoint to
-`src/services/traefik/static.yml.j2` so `/ping` isn't reachable from the bridge (`:8082` is
-already the `metrics` entrypoint):
+Runs as root, binds 80/443 (and 465 on secsvcs): keep `NET_BIND_SERVICE`. The entrypoint only
+rewrites arguments ([entrypoint][traefik-entry]). Only remote plugins (`experimental.plugins`) are
+downloaded to `./plugins-storage/`; the static config declares only `experimental.localPlugins`,
+read from the read-only `/plugins-local` mount ([plugins.go][traefik-plugins]), so no tmpfs is
+needed. `traefik healthcheck` reads the static config and fails with "please enable `ping`" unless
+`ping` is set, then sends `HEAD` to the ping entrypoint ([healthcheck.go][traefik-hc], [ping
+docs][traefik-ping]). Add a loopback-only entrypoint to `src/services/traefik/static.yml.j2` so
+`/ping` isn't reachable from the bridge (`:8082` is already the `metrics` entrypoint):
 
 ```yaml
 entryPoints:
@@ -295,14 +289,14 @@ HealthOnFailure=kill
 HealthStartPeriod=60s
 ```
 
-UserNS pass: `UserNS=auto`, `:idmap` on `/config`, `/certificates` (ACME writes
-`acme.json` there) and `/plugins-local`. Last on every node.
+UserNS pass: `UserNS=auto`, `:idmap` on `/config`, `/certificates` (ACME writes `acme.json` there)
+and `/plugins-local`. Last on every node.
 
 #### victoriametrics, vmagent, vmalert (`docker.io/victoriametrics/*:latest`)
 
-Alpine-based (busybox `wget`), root, ports above 1024, write only to their volume
-(`/storage`, `/vmagentdata`; vmalert writes nothing). `/health` is answered before the
-`-httpAuth.*` check ([httpserver.go][vm-http]), so no credentials are needed.
+Alpine-based (busybox `wget`), root, ports above 1024, write only to their volume (`/storage`,
+`/vmagentdata`; vmalert writes nothing). `/health` is answered before the `-httpAuth.*` check
+([httpserver.go][vm-http]), so no credentials are needed.
 
 ```ini
 DropCapability=all
@@ -313,15 +307,15 @@ HealthRetries=3
 HealthOnFailure=kill
 ```
 
-Port per service: victoriametrics 8428, vmagent 8429, vmalert 8880. UserNS pass:
-`UserNS=auto`, `:idmap` on each volume.
+Port per service: victoriametrics 8428, vmagent 8429, vmalert 8880. UserNS pass: `UserNS=auto`,
+`:idmap` on each volume.
 
 #### victorialogs (`docker.io/victoriametrics/victoria-logs:latest`)
 
-Distroless (bazel-built Debian 13 base, history), only `/victoria-logs-prod`, no shell or
-client (layer listing). Options: (a) skip `HealthCmd`; (b) the binary as a probe: it has
-no health subcommand; (c) a sidecar. Recommended: **skip**; it's already scraped
-(`job: victorialogs`) and has a Gatus check.
+Distroless (bazel-built Debian 13 base, history), only `/victoria-logs-prod`, no shell or client
+(layer listing). Options: (a) skip `HealthCmd`; (b) the binary as a probe: it has no health
+subcommand; (c) a sidecar. Recommended: **skip**; it's already scraped (`job: victorialogs`) and has
+a Gatus check.
 
 ```ini
 DropCapability=all
@@ -332,9 +326,9 @@ UserNS pass: `UserNS=auto`, `vldata.volume:/storage:idmap`.
 
 #### gatus (`docker.io/twinproduction/gatus:latest`)
 
-Scratch: seven files, `/gatus`, its sample config and CA bundle (layer listing). `main.go`
-has no health subcommand ([main.go][gatus-main]). Storage is Postgres (repo config), so
-nothing is written locally. Recommended: **skip** `HealthCmd`; scraped as `job: gatus`.
+Scratch: seven files, `/gatus`, its sample config and CA bundle (layer listing). `main.go` has no
+health subcommand ([main.go][gatus-main]). Storage is Postgres (repo config), so nothing is written
+locally. Recommended: **skip** `HealthCmd`; scraped as `job: gatus`.
 
 ```ini
 DropCapability=all
@@ -345,12 +339,12 @@ UserNS pass: `UserNS=auto`, `:idmap` on both file mounts.
 
 #### alertmanager (`docker.io/prom/alertmanager:latest`)
 
-Runs as `nobody`; `/alertmanager` is an image `VOLUME` (history), so it stays writable.
-Busybox `wget` present. With `basic_auth_users` set, exporter-toolkit authenticates every
-path, `/-/healthy` included ([handler.go][et-handler]). Inject the existing
-`alertmanager_admin_password` secret and pass it in the URL (busybox wget sends URL userinfo
-as Basic auth). If the password ever contains URL-reserved characters, switch to `amtool
---http.config.file` with a `basic_auth.password_file` ([root.go][amtool-root]).
+Runs as `nobody`; `/alertmanager` is an image `VOLUME` (history), so it stays writable. Busybox
+`wget` present. With `basic_auth_users` set, exporter-toolkit authenticates every path, `/-/healthy`
+included ([handler.go][et-handler]). Inject the existing `alertmanager_admin_password` secret and
+pass it in the URL (busybox wget sends URL userinfo as Basic auth). If the password ever contains
+URL-reserved characters, switch to `amtool --http.config.file` with a `basic_auth.password_file`
+([root.go][amtool-root]).
 
 ```ini
 DropCapability=all
@@ -362,16 +356,16 @@ HealthRetries=3
 HealthOnFailure=kill
 ```
 
-UserNS pass: `UserNS=auto`, `:ro,idmap` on `/config`. The `ExecStartPre=chown nobody:nogroup`
-keeps working with idmap; without idmap it would need the shifted uid.
+UserNS pass: `UserNS=auto`, `:ro,idmap` on `/config`. The `ExecStartPre=chown nobody:nogroup` keeps
+working with idmap; without idmap it would need the shifted uid.
 
 #### ntfy-alertmanager (`docker.io/xenrox/ntfy-alertmanager:latest`)
 
-Alpine + `curl` (history). `GET /health` is registered on the outer mux, outside the auth
-middleware ([main.go][ntfy-am-main]). The image's own `HEALTHCHECK` is
+Alpine + `curl` (history). `GET /health` is registered on the outer mux, outside the auth middleware
+([main.go][ntfy-am-main]). The image's own `HEALTHCHECK` is
 `curl --fail http://localhost:8080/health` (config blob), but the repo listens on 2588
-(`http-address`), so that check fails. The `HealthCmd` below replaces it with the right port
-and adds `HealthOnFailure=kill`.
+(`http-address`), so that check fails. The `HealthCmd` below replaces it with the right port and
+adds `HealthOnFailure=kill`.
 
 ```ini
 DropCapability=all
@@ -386,10 +380,9 @@ UserNS pass: `UserNS=auto`, `:ro,idmap` on the config file.
 
 #### ntfy (`docker.io/binwiederhier/ntfy:latest`)
 
-Alpine (busybox wget), root, `ENTRYPOINT ["ntfy"]`. `server.yml` sets
-`smtp-server-listen: ":25"`, so NET_BIND_SERVICE stays. Health from ntfy's docs
-([install.md][ntfy-install]), port from `listen-http: ":2586"`. ntfy's JSON has no spaces,
-so a fixed-string grep works with busybox's.
+Alpine (busybox wget), root, `ENTRYPOINT ["ntfy"]`. `server.yml` sets `smtp-server-listen: ":25"`,
+so NET_BIND_SERVICE stays. Health from ntfy's docs ([install.md][ntfy-install]), port from
+`listen-http: ":2586"`. ntfy's JSON has no spaces, so a fixed-string grep works with busybox's.
 
 ```ini
 DropCapability=all
@@ -405,9 +398,9 @@ UserNS pass: `UserNS=auto`, `:idmap` on `/var/cache/ntfy` and `ntfydb.volume`.
 
 #### grafana (`docker.io/grafana/grafana-oss:latest`)
 
-`USER 472`; `run.sh` only `mkdir`s the plugins dir under the data path and forces
-`log.mode=console` ([run.sh][grafana-run]); data, plugins and dashboards live in
-`grafanadata.volume`. `preinstall_sync` downloads plugins on start, hence the start period.
+`USER 472`; `run.sh` only `mkdir`s the plugins dir under the data path and forces `log.mode=console`
+([run.sh][grafana-run]); data, plugins and dashboards live in `grafanadata.volume`.
+`preinstall_sync` downloads plugins on start, hence the start period.
 
 ```ini
 DropCapability=all
@@ -424,9 +417,9 @@ UserNS pass: `UserNS=auto`, `:idmap` on every mount (volume owned 472:0).
 #### olive_tin (`docker.io/jamesread/olivetin:latest-3k`)
 
 Fedora-minimal, `USER olivetin` (1000), `/config` is an image volume and a bind here
-([Dockerfile][olivetin-df]). `/readyz` returns 200 unauthenticated ([frontend.go][olivetin-fe]).
-SSH uses the read-only `~/.ssh` and host `/etc/ssh`; `ReadOnly` is fine unless ssh needs to
-write `known_hosts` (unverified: run one action).
+([Dockerfile][olivetin-df]). `/readyz` returns 200 unauthenticated ([frontend.go][olivetin-fe]). SSH
+uses the read-only `~/.ssh` and host `/etc/ssh`; `ReadOnly` is fine unless ssh needs to write
+`known_hosts` (unverified: run one action).
 
 ```ini
 DropCapability=all
@@ -440,12 +433,11 @@ UserNS pass: `UserNS=auto`, `:idmap` on all four mounts.
 
 #### fluentbit (`docker.io/fluent/fluent-bit:3.2`), all four nodes
 
-Distroless: `/fluent-bit/bin/fluent-bit`, certs and dpkg metadata only, `User 0` (config
-blob, layer listing). Reads the host journal (root-owned), writes its cursor DB to
-`/data/fb_journald.db` (`fbdata.volume`). `/api/v1/health` would also need
-`health_check: on` ([monitoring docs][fb-monitoring]) and a client. Recommended: **skip**
-`HealthCmd`; covered by `up{job="fluentbit"}` and the existing `NoOutputBytesProcessed`
-rule.
+Distroless: `/fluent-bit/bin/fluent-bit`, certs and dpkg metadata only, `User 0` (config blob, layer
+listing). Reads the host journal (root-owned), writes its cursor DB to `/data/fb_journald.db`
+(`fbdata.volume`). `/api/v1/health` would also need `health_check: on` ([monitoring
+docs][fb-monitoring]) and a client. Recommended: **skip** `HealthCmd`; covered by
+`up{job="fluentbit"}` and the existing `NoOutputBytesProcessed` rule.
 
 ```ini
 DropCapability=all
@@ -463,16 +455,17 @@ As on secsvcs (vmagent port 8429).
 
 #### mosquitto (`docker.io/eclipse-mosquitto:latest`)
 
-Entrypoint chowns `/mosquitto/data` to 1883 when run as root ([entrypoint][mosq-entry]),
-then the broker drops to `mosquitto` (the repo already chowns the key to 1883 for this,
+Entrypoint chowns `/mosquitto/data` to 1883 when run as root ([entrypoint][mosq-entry]), then the
+broker drops to `mosquitto` (the repo already chowns the key to 1883 for this,
 `src/nodes/homesvcs/commands.sh.j2`). Needs CHOWN, SETUID, SETGID. `/mosquitto/log` is an image
-volume. The only listener is 8883 with `require_certificate true`, so `mosquitto_sub`
-needs a client certificate the container doesn't have. Options: (a) TCP liveness with
-busybox `nc -z` (`-z` support in this busybox unverified); (b) issue a `healthcheck` client
-cert in `src/nodes/homesvcs/commands.sh.j2` like zigbee2mqtt's, then
-`mosquitto_sub -h mqtt.{{ site.url }} -p 8883 --cafile … --cert … --key …
--t '$$SYS/broker/uptime' -C 1 -W 5`. Recommended: (a) now, (b) if a hung-but-listening
-broker is ever seen.
+volume. The only listener is 8883 with `require_certificate true`, so `mosquitto_sub` needs a client
+certificate the container doesn't have. Options: (a) TCP liveness with busybox `nc -z` (`-z` support
+in this busybox unverified); (b) issue a `healthcheck` client cert in
+`src/nodes/homesvcs/commands.sh.j2` like zigbee2mqtt's, then
+```bash
+mosquitto_sub -h mqtt.{{ site.url }} -p 8883 --cafile … --cert … --key … -t '$$SYS/broker/uptime' -C 1 -W 5
+```
+Recommended: (a) now, (b) if a hung-but-listening broker is ever seen.
 
 ```ini
 DropCapability=all
@@ -488,10 +481,9 @@ UserNS pass: `UserNS=auto`, `:idmap` on all mounts.
 
 #### zigbee2mqtt (`ghcr.io/koenkk/zigbee2mqtt:latest`)
 
-Entrypoint only echoes the data dir ([entrypoint][z2m-entry]); root, no device: the
-coordinator is `port: mdns://slzb-06` (repo config), so the "serial device" concern in
-issue 01 doesn't apply. Writes `/app/data` (volume and config-file binds). Frontend on 8080,
-no `auth_token`.
+Entrypoint only echoes the data dir ([entrypoint][z2m-entry]); root, no device: the coordinator is
+`port: mdns://slzb-06` (repo config), so the "serial device" concern in issue 01 doesn't apply.
+Writes `/app/data` (volume and config-file binds). Frontend on 8080, no `auth_token`.
 
 ```ini
 DropCapability=all
@@ -506,12 +498,11 @@ UserNS pass: `UserNS=auto`, `:idmap` on all mounts.
 #### esphome (`docker.io/esphome/esphome:stable`)
 
 Root; the entrypoint puts PlatformIO platforms/packages and the ESP-IDF/nRF SDKs under
-`/config/.esphome`, but says it can't move PlatformIO's `core_dir` (`~/.platformio`, which
-holds `appstate.json`), and the dashboard is now `esphome-device-builder`
-([entrypoint][esphome-entry]). Compiles write under
-`/root`, so `ReadOnly` is blocked unless `/root` gets a volume (low value). No capability
-need is documented; `ESPHOME_DASHBOARD_USE_PING` uses ICMP, and `NET_RAW` isn't in Podman's
-default set today, so dropping all doesn't change ping. Health: keep the image's own probe
+`/config/.esphome`, but says it can't move PlatformIO's `core_dir` (`~/.platformio`, which holds
+`appstate.json`), and the dashboard is now `esphome-device-builder` ([entrypoint][esphome-entry]).
+Compiles write under `/root`, so `ReadOnly` is blocked unless `/root` gets a volume (low value). No
+capability need is documented; `ESPHOME_DASHBOARD_USE_PING` uses ICMP, and `NET_RAW` isn't in
+Podman's default set today, so dropping all doesn't change ping. Health: keep the image's own probe
 ([Dockerfile][esphome-df]).
 
 ```ini
@@ -521,17 +512,17 @@ DropCapability=all
 No `HealthCmd`: not a core service. Candidate if one is wanted later:
 `curl --fail -A HealthCheck -o /dev/null http://127.0.0.1:6052/version`.
 
-Unverified: a full compile + OTA with all caps dropped. UserNS pass: `UserNS=auto`,
-`:idmap` on `/config`.
+Unverified: a full compile + OTA with all caps dropped. UserNS pass: `UserNS=auto`, `:idmap` on
+`/config`.
 
 #### home_assistant (`docker.io/homeassistant/home-assistant:2026.3.1`)
 
-`ENTRYPOINT ["/init"]` (s6-overlay 3.1.6.2), service `run` execs `python3 -m
-homeassistant` as root ([run][ha-run]). In a container, HA installs integration
-requirements without `--target` ([requirements.py][ha-req]), i.e. into the image's
-site-packages (`UV_SYSTEM_PYTHON=true` in the config), so `ReadOnly` would break any
-integration or HACS component that pulls a package at runtime: **blocked**. Capabilities:
-s6-overlay's init needs are undocumented; start from the set below and remove one at a time.
+`ENTRYPOINT ["/init"]` (s6-overlay 3.1.6.2), service `run` execs `python3 -m homeassistant` as root
+([run][ha-run]). In a container, HA installs integration requirements without `--target`
+([requirements.py][ha-req]), i.e. into the image's site-packages (`UV_SYSTEM_PYTHON=true` in the
+config), so `ReadOnly` would break any integration or HACS component that pulls a package at
+runtime: **blocked**. Capabilities: s6-overlay's init needs are undocumented; start from the set
+below and remove one at a time.
 
 ```ini
 DropCapability=all
@@ -541,9 +532,9 @@ AddCapability=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_SETUID CAP_SETGID
 No `HealthCmd`: not a core service. Candidate if one is wanted later:
 `curl -fsS -o /dev/null http://127.0.0.1:8123/`.
 
-`Environment=PACKAGES=iputils` looks like a linuxserver.io convention; the official image's
-config `Env` and `run` script don't reference it (other s6 scripts unchecked). UserNS: deferred to last; four volumes
-and s6 untested.
+`Environment=PACKAGES=iputils` looks like a linuxserver.io convention; the official image's config
+`Env` and `run` script don't reference it (other s6 scripts unchecked). UserNS: deferred to last;
+four volumes and s6 untested.
 
 ### websvcs
 
@@ -553,13 +544,12 @@ As on secsvcs; websvcs Traefik binds 80/443 only.
 
 #### nginx (`docker.io/library/nginx:stable`)
 
-Master runs as root and workers as `nginx`; the image docs say read-only needs
-`/var/cache/nginx` and `/var/run` writable ([nginx docs][nginx-docs]); `/var/run` → `/run` is
-covered. Entrypoint scripts no-op on a read-only `/etc/nginx` (`10-listen-on-ipv6` exits
-on a failed `touch`, `20-envsubst` needs `/etc/nginx/templates`) ([entrypoint][nginx-entry],
-[10-listen][nginx-10]). Caps: CHOWN for the temp dirs, SETUID/SETGID for the workers.
-Health: any HTTP response proves the server is up independent of which content is deployed,
-so `curl` without `-f`.
+Master runs as root and workers as `nginx`; the image docs say read-only needs `/var/cache/nginx`
+and `/var/run` writable ([nginx docs][nginx-docs]); `/var/run` → `/run` is covered. Entrypoint
+scripts no-op on a read-only `/etc/nginx` (`10-listen-on-ipv6` exits on a failed `touch`,
+`20-envsubst` needs `/etc/nginx/templates`) ([entrypoint][nginx-entry], [10-listen][nginx-10]).
+Caps: CHOWN for the temp dirs, SETUID/SETGID for the workers. Health: any HTTP response proves the
+server is up independent of which content is deployed, so `curl` without `-f`.
 
 ```ini
 DropCapability=all
@@ -575,11 +565,11 @@ UserNS pass: `UserNS=auto`, `:ro,idmap` on both mounts.
 
 #### homepage (`ghcr.io/gethomepage/homepage:latest`)
 
-`USER root`; entrypoint chowns `/app/config` (and `/app/config/logs`) to `PUID:PGID` when
-they differ, then `su-exec 1000:1000` ([entrypoint][homepage-entry]). `/app/.next` ships
-owned 1000 so that chown is skipped. Next.js writes its image cache to `/app/.next/cache`
-(unverified path, hence the tmpfs). The image `HEALTHCHECK` probes `/api/healthcheck`
-([Dockerfile][homepage-df]); `127.0.0.1:3000` is always an allowed host ([docs][homepage-docs]).
+`USER root`; entrypoint chowns `/app/config` (and `/app/config/logs`) to `PUID:PGID` when they
+differ, then `su-exec 1000:1000` ([entrypoint][homepage-entry]). `/app/.next` ships owned 1000 so
+that chown is skipped. Next.js writes its image cache to `/app/.next/cache` (unverified path, hence
+the tmpfs). The image `HEALTHCHECK` probes `/api/healthcheck` ([Dockerfile][homepage-df]);
+`127.0.0.1:3000` is always an allowed host ([docs][homepage-docs]).
 
 ```ini
 DropCapability=all
@@ -597,9 +587,8 @@ UserNS pass: `UserNS=auto`, `:idmap` on both mounts.
 
 Root; `ENTRYPOINT` is gunicorn bound to `0.0.0.0:8080` with `--worker-tmp-dir /dev/shm`
 ([Dockerfile][isso-df]); `/db` and `/config` are image volumes, the DB is `issodb.volume`.
-`GET /config` is a cheap unauthenticated route ([comments.py][isso-views]). The repo uses
-port 8080 everywhere
-(quadlet comment, `[server] listen`, Traefik route), matching the gunicorn bind.
+`GET /config` is a cheap unauthenticated route ([comments.py][isso-views]). The repo uses port 8080
+everywhere (quadlet comment, `[server] listen`, Traefik route), matching the gunicorn bind.
 
 ```ini
 DropCapability=all
@@ -613,11 +602,11 @@ UserNS pass: `UserNS=auto`, `:idmap` on both mounts.
 
 #### guacamole (`docker.io/guacamole/guacamole:1.6.0`)
 
-`USER guacamole` (1001), Tomcat 9. The 1.6.0 entrypoint builds a fresh `GUACAMOLE_HOME`
-(links into the read-only `/etc/guacamole`) and a fresh `CATALINA_BASE` (`logs temp webapps
-work`, WAR symlink) under `/tmp` on every start ([100-generate-guacamole-home][guac-100],
-[500-generate-tomcat-catalina-base][guac-500], [999-start-tomcat][guac-999]), so read-only
-needs nothing beyond the automatic `/tmp`. The unpacked WAR lives in that tmpfs (RAM).
+`USER guacamole` (1001), Tomcat 9. The 1.6.0 entrypoint builds a fresh `GUACAMOLE_HOME` (links into
+the read-only `/etc/guacamole`) and a fresh `CATALINA_BASE` (`logs temp webapps work`, WAR symlink)
+under `/tmp` on every start ([100-generate-guacamole-home][guac-100],
+[500-generate-tomcat-catalina-base][guac-500], [999-start-tomcat][guac-999]), so read-only needs
+nothing beyond the automatic `/tmp`. The unpacked WAR lives in that tmpfs (RAM).
 
 ```ini
 DropCapability=all
@@ -631,8 +620,8 @@ UserNS pass: `UserNS=auto`, `:ro,idmap` on both mounts.
 
 #### guacd (`docker.io/guacamole/guacd:1.6.0`)
 
-`USER guacd` (1000), alpine with `netcat-openbsd`, `HEALTHCHECK nc -z 127.0.0.1 4822` every
-5 m ([Dockerfile][guacd-df]); entrypoint just execs `guacd -f -b 0.0.0.0` ([entrypoint][guacd-entry]).
+`USER guacd` (1000), alpine with `netcat-openbsd`, `HEALTHCHECK nc -z 127.0.0.1 4822` every 5 m
+([Dockerfile][guacd-df]); entrypoint just execs `guacd -f -b 0.0.0.0` ([entrypoint][guacd-entry]).
 Not a hard case: nothing in the sources writes outside `/tmp`.
 
 ```ini
@@ -640,20 +629,20 @@ DropCapability=all
 ReadOnly=true
 ```
 
-No `HealthCmd`: not a core service. Candidate if one is wanted later:
-`nc -z 127.0.0.1 4822` (the image's own).
+No `HealthCmd`: not a core service. Candidate if one is wanted later: `nc -z 127.0.0.1 4822` (the
+image's own).
 
 UserNS pass: `UserNS=auto` (no volumes).
 
 #### archivebox (`docker.io/archivebox/archivebox:stable`)
 
 `bin/docker_entrypoint.sh` (stable branch, [entrypoint][ab-entry]) expects root: `usermod`,
-`groupmod` (writes `/etc/passwd`, `/etc/group`), `chown` of `/data` and `/browsers`, `mkdir
-/browsers/permissions_test_safe_to_delete`, then `gosu`. The quadlet sets
-`User=archivebox`, under which `gosu` can't `setgroups`; unverified whether the container
-starts at all today (`systemctl status archivebox` on websvcs). Recommended: remove
-`User=archivebox` (the entrypoint drops to 911 itself) and grant what it uses. `ReadOnly`
-blocked by the `/etc` and `/browsers` writes. Health: `/health/` route ([urls.py][ab-urls]).
+`groupmod` (writes `/etc/passwd`, `/etc/group`), `chown` of `/data` and `/browsers`,
+`mkdir /browsers/permissions_test_safe_to_delete`, then `gosu`. The quadlet sets `User=archivebox`,
+under which `gosu` can't `setgroups`; unverified whether the container starts at all today
+(`systemctl status archivebox` on websvcs). Recommended: remove `User=archivebox` (the entrypoint
+drops to 911 itself) and grant what it uses. `ReadOnly` blocked by the `/etc` and `/browsers`
+writes. Health: `/health/` route ([urls.py][ab-urls]).
 
 ```ini
 DropCapability=all
@@ -668,10 +657,10 @@ UserNS: deferred; retest after the entrypoint runs cleanly.
 #### novnc (`localhost/novnc:latest`, built from babraham123/docker-novnc)
 
 Debian trixie, root, `supervisord` with Xvfb/x11vnc/fluxbox ([Dockerfile][novnc-df]).
-`entrypoint.sh` deletes `/app/conf.d/*.conf` for disabled programs ([entrypoint][novnc-entry]),
-and `supervisord.conf` sets no `pidfile`/`logfile` ([supervisord.conf][novnc-sup]), so
-supervisord writes them in its cwd `/`: `ReadOnly` blocked. Only run intermittently (quadlet
-comment), so lowest priority.
+`entrypoint.sh` deletes `/app/conf.d/*.conf` for disabled programs ([entrypoint][novnc-entry]), and
+`supervisord.conf` sets no `pidfile`/`logfile` ([supervisord.conf][novnc-sup]), so supervisord
+writes them in its cwd `/`: `ReadOnly` blocked. Only run intermittently (quadlet comment), so lowest
+priority.
 
 ```ini
 DropCapability=all
@@ -685,9 +674,9 @@ UserNS pass: `UserNS=auto` (no volumes).
 #### finance_exporter (`localhost/finance_exporter:latest`)
 
 `python:3-slim-bookworm`, root, `CMD sh -c "python3 finance-exporter.py -f ${CONFIG}"`
-([Dockerfile][fe-df]); `prometheus_client.start_http_server` on `port: 8002` (repo config).
-No curl/wget in slim; python is. yfinance keeps a cache under the user cache dir
-(unverified), hence the tmpfs.
+([Dockerfile][fe-df]); `prometheus_client.start_http_server` on `port: 8002` (repo config). No
+curl/wget in slim; python is. yfinance keeps a cache under the user cache dir (unverified), hence
+the tmpfs.
 
 ```ini
 DropCapability=all
@@ -702,11 +691,10 @@ UserNS pass: `UserNS=auto`, `:ro,idmap` on the config file.
 
 #### go2rtc (`docker.io/alexxit/go2rtc:latest`)
 
-`python:3.13-alpine` + `curl`, root, `tini` ([Dockerfile][go2rtc-df]). The API skips basic
-auth for loopback requests unless `local_auth` is set ([api.go][go2rtc-api]). `/dev/dri`
-render nodes are owned by host root, so container root opens them without
-DAC_OVERRIDE; that same ownership is what blocks `UserNS=auto` (unmapped owner → no
-access).
+`python:3.13-alpine` + `curl`, root, `tini` ([Dockerfile][go2rtc-df]). The API skips basic auth for
+loopback requests unless `local_auth` is set ([api.go][go2rtc-api]). `/dev/dri` render nodes are
+owned by host root, so container root opens them without DAC_OVERRIDE; that same ownership is what
+blocks `UserNS=auto` (unmapped owner → no access).
 
 ```ini
 DropCapability=all
@@ -721,12 +709,12 @@ Unverified: hardware transcoding with all caps dropped (`vainfo`-style open of
 
 #### piper, whisper, openwakeword (`localhost/*:latest`, built from rhasspy/wyoming-addons)
 
-`debian:bookworm-slim`, root, `bash /run.sh` → python server on 10200/10300/10400; models
-download to `/data` ([piper][wy-piper], [whisper][wy-whisper], [openwakeword][wy-oww]).
-Wyoming is raw TCP, so a probe would be a socket connect. openwakeword's python is the venv at
-`/usr/src/.venv`; Debian's system `python3` is also installed there. HuggingFace/torch may
-cache under `/root/.cache` (unverified). Whisper uses `PodmanArgs=--gpus=all`, which blocks
-`UserNS=auto` for the same reason as go2rtc.
+`debian:bookworm-slim`, root, `bash /run.sh` → python server on 10200/10300/10400; models download
+to `/data` ([piper][wy-piper], [whisper][wy-whisper], [openwakeword][wy-oww]). Wyoming is raw TCP,
+so a probe would be a socket connect. openwakeword's python is the venv at `/usr/src/.venv`;
+Debian's system `python3` is also installed there. HuggingFace/torch may cache under `/root/.cache`
+(unverified). Whisper uses `PodmanArgs=--gpus=all`, which blocks `UserNS=auto` for the same reason
+as go2rtc.
 
 ```ini
 DropCapability=all
@@ -736,8 +724,8 @@ Tmpfs=/root/.cache
 
 No `HealthCmd`: not a core service, and not in use. Candidate if one is wanted later:
 `python3 -c "import socket; socket.create_connection(('127.0.0.1', 10200), 5)"` with
-`HealthStartPeriod=5m` for the first-start model download. Port per service: piper 10200,
-whisper 10300, openwakeword 10400.
+`HealthStartPeriod=5m` for the first-start model download. Port per service: piper 10200, whisper
+10300, openwakeword 10400.
 
 ### vpnsvcs
 
@@ -747,15 +735,15 @@ As on secsvcs (vmagent port 8429).
 
 #### geoip_generator (`localhost/geoip_generator:latest`, built from `src/services/haproxy/`)
 
-`python:3-alpine` plus a static `haproxy-mapper`, root, `ENTRYPOINT ["python3",
-"/usr/local/bin/geoip_generator.py"]` (`geoip_generator.Containerfile`). A `Type=oneshot`
-unit started weekly by `geoip_generator.timer`. The script downloads and unpacks GeoLite2
-into a `tempfile.TemporaryDirectory()` (under `/tmp`, the automatic tmpfs), runs
+`python:3-alpine` plus a static `haproxy-mapper`, root,
+`ENTRYPOINT ["python3", "/usr/local/bin/geoip_generator.py"]` (`geoip_generator.Containerfile`). A
+`Type=oneshot` unit started weekly by `geoip_generator.timer`. The script downloads and unpacks
+GeoLite2 into a `tempfile.TemporaryDirectory()` (under `/tmp`, the automatic tmpfs), runs
 `haproxy-mapper` there, then rewrites `*.map` in `/etc/haproxy/countries`, the only volume
 (`geoip_generator.py`). That directory is created by root with `mkdir -p` and its maps are
-`chmod 644` (`install_svcs.sh.j2`, `haproxy`), so container root writes it as the owner and
-needs no capability. Python can't write `__pycache__` on a read-only root and skips it
-silently. The download and maps sit in RAM while it runs, a few tens of MB on the VPS.
+`chmod 644` (`install_svcs.sh.j2`, `haproxy`), so container root writes it as the owner and needs no
+capability. Python can't write `__pycache__` on a read-only root and skips it silently. The download
+and maps sit in RAM while it runs, a few tens of MB on the VPS.
 
 ```ini
 DropCapability=all
@@ -763,75 +751,72 @@ ReadOnly=true
 ```
 
 No `HealthCmd`: a oneshot job has no running state to probe. A failed run fails the unit
-(`SystemdUnitFailed`); `Restart=on-failure` retries also count toward `ServiceRestartLoop`.
-UserNS pass: `UserNS=auto`, `:idmap` on `/etc/haproxy/countries`, so the maps stay
-root-owned on the host and HAProxy still reads them.
+(`SystemdUnitFailed`); `Restart=on-failure` retries also count toward `ServiceRestartLoop`. UserNS
+pass: `UserNS=auto`, `:idmap` on `/etc/haproxy/countries`, so the maps stay root-owned on the host
+and HAProxy still reads them.
 
 ## Apply order
 
-The easy blocks (the "Easy" list under [Summary](#summary)) are in the quadlets, in one
-commit; install and check each with the [verification loop](#verification-loop-issue-01-per-service)
-in the order below. The rest go one service per commit, so a regression bisects to one quadlet.
-Caps + ReadOnly + health first; the `UserNS=auto` pass after, per node, once
-`/etc/subuid`/`/etc/subgid` exist.
+The easy blocks (the "Easy" list under [Summary](#summary)) are in the quadlets, in one commit;
+install and check each with the [verification loop](#verification-loop-issue-01-per-service) in the
+order below. The rest go one service per commit, so a regression bisects to one quadlet. Caps +
+ReadOnly + health first; the `UserNS=auto` pass after, per node, once `/etc/subuid`/`/etc/subgid`
+exist.
 
-- secsvcs: vmalert, victoriametrics, victorialogs, gatus, alertmanager, ntfy-alertmanager,
-  ntfy, fluentbit, grafana, olive_tin, lldap, authelia, traefik, postgres
+- secsvcs: vmalert, victoriametrics, victorialogs, gatus, alertmanager, ntfy-alertmanager, ntfy,
+  fluentbit, grafana, olive_tin, lldap, authelia, traefik, postgres
 - homesvcs: vmagent, fluentbit, zigbee2mqtt, mosquitto, esphome, home_assistant, traefik
-- websvcs: vmagent, fluentbit, finance_exporter, guacd, guacamole, isso, go2rtc, nginx,
-  homepage, novnc, archivebox, traefik
+- websvcs: vmagent, fluentbit, finance_exporter, guacd, guacamole, isso, go2rtc, nginx, homepage,
+  novnc, archivebox, traefik
 - vpnsvcs: vmagent, fluentbit, geoip_generator
 
 ## Alerting on health (issue 02)
 
-Chosen: systemd's restart counter, no new exporter. Every quadlet is a systemd service. When a
-check fails `HealthRetries` times, `HealthOnFailure=kill` kills the container, the unit's main
-process (`podman`) exits non-zero, and `Restart=on-failure` starts it again. systemd counts
-each automatic restart in `NRestarts` (`systemctl show -p NRestarts grafana`).
+Chosen: systemd's restart counter, no new exporter. Every quadlet is a systemd service. When a check
+fails `HealthRetries` times, `HealthOnFailure=kill` kills the container, the unit's main process
+(`podman`) exits non-zero, and `Restart=on-failure` starts it again. systemd counts each automatic
+restart in `NRestarts` (`systemctl show -p NRestarts grafana`).
 
-`node_exporter` already runs the systemd collector on every VM, filtered to the `Homelab:`
-units (`src/base/node_exporter/node_runner.sh`). `--collector.systemd.enable-restarts-metrics`
-exports `NRestarts` as `node_systemd_service_restart_total{name="grafana.service"}`
+`node_exporter` already runs the systemd collector on every VM, filtered to the `Homelab:` units
+(`src/base/node_exporter/node_runner.sh`). `--collector.systemd.enable-restarts-metrics` exports
+`NRestarts` as `node_systemd_service_restart_total{name="grafana.service"}`
 ([systemd_linux.go][ne-systemd]). Both pieces are in the repo:
 
 - the flag in `node_runner.sh`;
 - `ServiceRestartLoop` in `src/services/vmalert/configs/homelab.yml`:
-  `increase(node_systemd_service_restart_total[1h]) > 3`, next to the existing
-  `SystemdUnitFailed`, which takes over once `StartLimitBurst` stops the restarts.
+  `increase(node_systemd_service_restart_total[1h]) > 3`, next to the existing `SystemdUnitFailed`,
+  which takes over once `StartLimitBurst` stops the restarts.
 
 It also catches crash loops in services with no health check. What it can't tell you:
 
-- **Why the service restarted.** A failed health check and a crash look the same; the
-  journal says which (Podman logs `health_status=unhealthy`).
-- **Unhealthy but still running.** Only the image's own `HEALTHCHECK`s (no kill) end up there.
-  If that ever matters, [prometheus-podman-exporter][ppe-readme] exports
-  `podman_container_health` per container id, joined to names through `podman_container_info`
-  ([container.go][ppe-container]).
+- **Why the service restarted.** A failed health check and a crash look the same; the journal says
+  which (Podman logs `health_status=unhealthy`).
+- **Unhealthy but still running.** Only the image's own `HEALTHCHECK`s (no kill) end up there. If
+  that ever matters, [prometheus-podman-exporter][ppe-readme] exports `podman_container_health` per
+  container id, joined to names through `podman_container_info` ([container.go][ppe-container]).
 
 ## Open items (unverified, test on node)
 
 - Whether Podman runs the six image `HEALTHCHECK`s
   (`podman inspect --format '{{.Config.Healthcheck}}' <name>`).
-- Each `HealthCmd` survives quadlet and systemd
-  ([Testing HealthCmd escaping](#testing-healthcmd-escaping)); alertmanager's `$$` first.
+- Each `HealthCmd` survives quadlet and systemd ([Testing HealthCmd
+  escaping](#testing-healthcmd-escaping)); alertmanager's `$$` first.
 - Busybox `nc -z` in the mosquitto image.
-- Every capability set: especially postgres (first init on an empty volume too),
-  home_assistant (s6-overlay), esphome (compile + OTA), archivebox, novnc, go2rtc
-  (hardware transcoding).
-- Read-only paths: homepage `/app/.next/cache`, finance_exporter and wyoming
-  `/root/.cache`, olive_tin `known_hosts`, guacd recordings/drive if ever enabled.
+- Every capability set: especially postgres (first init on an empty volume too), home_assistant
+  (s6-overlay), esphome (compile + OTA), archivebox, novnc, go2rtc (hardware transcoding).
+- Read-only paths: homepage `/app/.next/cache`, finance_exporter and wyoming `/root/.cache`,
+  olive_tin `known_hosts`, guacd recordings/drive if ever enabled.
 - geoip_generator: one full run read-only (`systemctl start geoip_generator`, about 250 maps).
 - lldap read-only after switching to `UID=1000`.
 - archivebox: whether it starts at all with `User=archivebox`.
-- `UserNS=auto`: `/etc/subuid`/`/etc/subgid` prerequisite; `idmap` on file and named-volume
-  mounts; fluentbit reading the journal through idmap.
+- `UserNS=auto`: `/etc/subuid`/`/etc/subgid` prerequisite; `idmap` on file and named-volume mounts;
+  fluentbit reading the journal through idmap.
 
 ## Sources
 
-Image configs and layer listings: registry HTTP API (`registry-1.docker.io`, `ghcr.io`),
-manifest list → linux/amd64 manifest → config blob and layers, fetched 2026-10-10. Local
-builds (novnc, finance_exporter, wyoming) from their repos' default branch, as
-`install_svcs.sh` builds them.
+Image configs and layer listings: registry HTTP API (`registry-1.docker.io`, `ghcr.io`), manifest
+list → linux/amd64 manifest → config blob and layers, fetched 2026-10-10. Local builds (novnc,
+finance_exporter, wyoming) from their repos' default branch, as `install_svcs.sh` builds them.
 
 Podman:
 - [podman-systemd.unit(5) v5.8.2][psu]
@@ -841,8 +826,8 @@ Podman:
 - [containers.conf(5)][containers-conf]
 
 Images:
-- Traefik: [entrypoint][traefik-entry], [plugins.go v3.7.14][traefik-plugins],
-  [healthcheck.go v3.7.14][traefik-hc], [ping docs][traefik-ping]
+- Traefik: [entrypoint][traefik-entry], [plugins.go v3.7.14][traefik-plugins], [healthcheck.go
+  v3.7.14][traefik-hc], [ping docs][traefik-ping]
 - Postgres: [docker-entrypoint.sh][pg-entry]
 - lldap: [docker-entrypoint.sh][lldap-entry]
 - Authelia v4.39.28: [entrypoint.sh][authelia-entry], [healthcheck.sh][authelia-hc],
@@ -860,15 +845,14 @@ Images:
 - Home Assistant 2026.3.1: [s6 run][ha-run], [requirements.py][ha-req]
 - nginx: [image docs][nginx-docs], [docker-entrypoint.sh][nginx-entry],
   [10-listen-on-ipv6-by-default.sh][nginx-10]
-- Homepage v2.5.0: [docker-entrypoint.sh][homepage-entry], [Dockerfile][homepage-df],
-  [installation docs][homepage-docs]
+- Homepage v2.5.0: [docker-entrypoint.sh][homepage-entry], [Dockerfile][homepage-df], [installation
+  docs][homepage-docs]
 - Isso: [Dockerfile][isso-df], [views/comments.py][isso-views]
 - Guacamole 1.6.0: [100-generate-guacamole-home.sh][guac-100],
-  [500-generate-tomcat-catalina-base.sh][guac-500], [999-start-tomcat.sh][guac-999];
-  guacd: [Dockerfile][guacd-df], [entrypoint.sh][guacd-entry]
+  [500-generate-tomcat-catalina-base.sh][guac-500], [999-start-tomcat.sh][guac-999]; guacd:
+  [Dockerfile][guacd-df], [entrypoint.sh][guacd-entry]
 - ArchiveBox stable (d1136d7): [docker_entrypoint.sh][ab-entry], [core/urls.py][ab-urls]
-- docker-novnc: [Dockerfile][novnc-df], [entrypoint.sh][novnc-entry],
-  [supervisord.conf][novnc-sup]
+- docker-novnc: [Dockerfile][novnc-df], [entrypoint.sh][novnc-entry], [supervisord.conf][novnc-sup]
 - finance-exporter: [Dockerfile][fe-df]
 - go2rtc v1.9.14: [Dockerfile][go2rtc-df], [api.go][go2rtc-api]
 - wyoming-addons: [piper][wy-piper], [whisper][wy-whisper], [openwakeword][wy-oww]

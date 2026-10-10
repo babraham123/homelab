@@ -161,11 +161,11 @@ Improve latency when under heavy load
   - Paste in `src/nodes/pve1/resolv.conf`
     - `sudo nano /etc/resolv.conf`
 - In pfSense,
-	- Attach `vmbr0` as a network device
-	- Enable the interface as a LAN with a static address
-	- Enable the DHCP service, create a static lease for each PVE host
+  - Attach `vmbr0` as a network device
+  - Enable the interface as a LAN with a static address
+  - Enable the DHCP service, create a static lease for each PVE host
     - Go to Services >> DHCP Server >> PVE1 >> DHCP Static Mappings
-	- Copy the firewall rules from an existing LAN and apply them
+  - Copy the firewall rules from an existing LAN and apply them
 - Reboot the host
 
 ### Custom subdomains
@@ -184,11 +184,11 @@ For local-only overrides of existing routes
 
 ### Certificate
 - Setup cert import
-```bash
-wget https://raw.githubusercontent.com/stompro/pfsense-import-certificate/master/pfsense-import-certificate.php
-scp pfsense-import-certificate.php admin@router:/root
-rm pfsense-import-certificate.php
-```
+  ```bash
+  wget https://raw.githubusercontent.com/stompro/pfsense-import-certificate/master/pfsense-import-certificate.php
+  scp pfsense-import-certificate.php admin@router:/root
+  rm pfsense-import-certificate.php
+  ```
   - Remove the default cert
     - Go to System >> Certificates >> Certificates
     - delete `webConfigurator default`
@@ -364,7 +364,7 @@ I found the USB passthru to be a little flaky, after which I would have to resta
 
 ## References
 
-#### Networking
+### Networking
 - https://docs.netgate.com/pfsense/en/latest/recipes/virtualize-proxmox-ve.html#basic-proxmox-ve-networking
 - https://forum.proxmox.com/threads/proxmox-isp-modem-without-a-router.105338/
 - https://forum.proxmox.com/threads/proxmox-management-interface-and-pfsense.120231/
@@ -372,13 +372,13 @@ I found the USB passthru to be a little flaky, after which I would have to resta
 - https://pve.proxmox.com/wiki/Network_Configuration
 - https://pve.proxmox.com/pve-docs/chapter-sysadmin.html#_choosing_a_network_configuration
 
-#### VM sizing
+### VM sizing
 - https://docs.netgate.com/pfsense/en/latest/hardware/size.html
 - https://www.intel.com/content/www/us/en/products/sku/212328/intel-celeron-processor-n5105-4m-cache-up-to-2-90-ghz/specifications.html
 - https://www.reddit.com/r/Proxmox/comments/u3imdm/how_bad_is_the_overcommitting_of_cpu_and_memory/
 - https://www.aliexpress.us/item/3256804315368607.html?spm=a2g0o.order_detail.order_detail_item.3.3a7cf19cWI0ORL&gatewayAdapt=glo2usa&_randl_shipto=US
 
-#### Other
+### Other
 - https://www.servethehome.com/new-fanless-4x-2-5gbe-intel-n5105-i226-v-firewall-tested/
 - https://pve.proxmox.com/wiki/Pci_passthrough
 - https://pve.proxmox.com/wiki/SPICE

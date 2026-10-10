@@ -17,7 +17,9 @@ node.
 the image already present:
 
 - traefik:
-  `podman run --rm -v <rendered>:/cfg:ro traefik:v3.7 traefik healthcheck --configFile=/cfg/static.yml`
+  ```bash
+  podman run --rm -v <rendered>:/cfg:ro traefik:v3.7 traefik healthcheck --configFile=/cfg/static.yml
+  ```
   is a runtime check; for static validation use `traefik validate` if available in your version,
   otherwise start-and-ping in a throwaway network.
 - authelia: `authelia config validate`.
@@ -48,7 +50,9 @@ too.
   runs `render_src.sh`, so the nodes.yml checks already run in it. Untested authelia validate that
   passes the quadlet's secrets and env so the template filter can run, from `src/services/authelia`
   in the rendered tree:
-  `podman run --rm $(sed -nE 's/^Secret=/--secret=/p; s/^Environment=/--env=/p' authelia.container) -v "$PWD":/config:ro -v /etc/opt/authelia/certificates:/certificates:ro "$(sed -n 's/^Image=//p' authelia.container)" authelia config validate --config /config/configuration.yml`
+  ```bash
+  podman run --rm $(sed -nE 's/^Secret=/--secret=/p; s/^Environment=/--env=/p' authelia.container) -v "$PWD":/config:ro -v /etc/opt/authelia/certificates:/certificates:ro "$(sed -n 's/^Image=//p' authelia.container)" authelia config validate --config /config/configuration.yml
+  ```
 - 2026-10-07 (observability/10): Alertmanager's config is rendered with secrets by the unit's
   `ExecStartPre`, so `amtool check-config` has to run after that render, e.g. as a second
   `ExecStartPre` in `alertmanager.container` on the rendered file. Same for ntfy-alertmanager (no
