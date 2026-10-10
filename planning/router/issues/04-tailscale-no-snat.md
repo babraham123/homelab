@@ -67,3 +67,4 @@ pfSense instead of the tailnet client.
   and passes `--snat-subnet-routes=false`, which works with 1.94.1 too. Until it ships, step 2
   stays the manual `/etc/rc.conf.local` entry; the PR can be applied locally with the System
   Patches package to test.
+- 2026-10-10: testing the PR on the router is router/06; its outcome replaces step 2 here.
