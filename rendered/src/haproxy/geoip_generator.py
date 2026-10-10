@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # Generate individual HAProxy map files PER COUNTRY from MaxMind GeoLite2 data.
+# Runs in the geoip_generator container (geoip_generator.Containerfile), the license key
+# in MAXMIND_LICENSE_KEY.
 # Usage:
-#   /usr/local/bin/geoip_generator.py
+#   systemctl start geoip_generator
 
 import os
 import sys
@@ -13,17 +15,14 @@ import tempfile
 import subprocess
 import re
 import glob
-from pathlib import Path
 
 output_dir = "/etc/haproxy/countries"
 haproxy_mapper_bin = "/usr/local/bin/haproxy-mapper"
-maxmind_license_file = "/etc/opt/secrets/maxmind_license_key"
 
 def main():
-  try:
-    maxmind_key = Path(maxmind_license_file).read_text().strip()
-  except Exception as e:
-    print(f"Error: MaxMind license key not found. ({e})", file=sys.stderr)
+  maxmind_key = os.environ.get("MAXMIND_LICENSE_KEY", "").strip()
+  if not maxmind_key:
+    print("Error: MAXMIND_LICENSE_KEY is not set.", file=sys.stderr)
     sys.exit(1)
 
   if not shutil.which(haproxy_mapper_bin):

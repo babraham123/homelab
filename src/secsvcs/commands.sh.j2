@@ -67,15 +67,6 @@ case $1 in
     mv ./known_hosts /etc/opt/olive_tin/ssh
     chmod 644 /etc/opt/olive_tin/ssh/known_hosts
     ;;
-  build_haproxy_mapper)
-    # Doesn't need to run as root
-    git clone https://github.com/babraham123/haproxy-mapper.git mapper
-    cd mapper
-    podman build --platform linux/amd64 -o type=local,dest=. .
-    mv haproxy-mapper ..
-    cd ..
-    rm -rf mapper
-    ;;
   *)
     echo "error: unknown file type: $1" >&2
     exit 1

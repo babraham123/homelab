@@ -198,25 +198,6 @@ getent hosts metrics.janedoe.com   # should print 192.168.4.20
 - In your DNS provider, add a TXT record with the provided string (use host = @)
 - View the insights report
 
-### Geoblock by country
-
-- Download tool to map IPs to country
-```bash
-ssh manualadmin@pve1
-ssh autoadmin@secsvcs build_haproxy_mapper
-scp -3 autoadmin@secsvcs:/home/autoadmin/email.txt scp://autoadmin@vpnsvcs:2202//home/autoadmin
-# copy the license key on pve1
-sudo SOPS_AGE_KEY_FILE="/root/secrets/age.txt" sops /root/secrets/pve1.yaml | yq ".maxmind_license_key"
-exit
-
-# back on vpnsvcs, paste in the license key
-vim /etc/opt/secrets/maxmind_license_key
-chmod 600 /etc/opt/secrets/maxmind_license_key
-# install and run geoip service
-/root/homelab-rendered/src/vpnsvcs/install_svcs.sh geoip_generator
-systemctl start geoip_generator.service
-```
-
 ## Machine users (optional)
 - Create user and key
 ```bash
@@ -328,6 +309,23 @@ tailscaled, vmagent, fluentbit and node_exporter, and `logs.janedoe.com` shows t
 VPS's journal. If tailscaled stays down, bind its metrics elsewhere or drop the job from
 `src/vpnsvcs/prometheus.yml.j2`. The images are pulled by `podman-auto-update.timer`
 like the VMs'.
+
+## Geoblock by country
+`geoip_generator` is a quadlet built on the VPS (`src/haproxy/geoip_generator.Containerfile`:
+haproxy-mapper and the script) and run weekly by its timer. It needs the Podman setup
+from Telemetry agents, and `maxmind_license_key` in `/root/secrets/vpnsvcs.yaml` on pve1
+(copy it from `pve1.yaml`, then `sudo /root/homelab-rendered/src/pve1/secret_update.sh vpnsvcs`).
+```bash
+sudo su
+cd /root/homelab-rendered
+POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
+# Only the generator reaches the internet, for download.maxmind.com
+ufw route allow in on $POD_IFACE out on $NET_IFACE from 10.13.0.30 to any port 443 proto tcp
+src/vpnsvcs/install_svcs.sh geoip_generator
+systemctl start geoip_generator    # one run now; it reloads HAProxy when done
+ls /etc/haproxy/countries | wc -l  # about 250 maps
+```
 
 ## Dead-man switch
 `deadman.timer` checks every 5 minutes, over the tailnet, that Alertmanager on secsvcs

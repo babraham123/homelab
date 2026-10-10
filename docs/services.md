@@ -81,7 +81,7 @@ its own `tools/deploy_src.sh`. This repo owns only the nginx config and quadlet.
 | pve1 | cert_notifier (timer) | Email warnings before cert expiry (msmtp) |
 | vpnsvcs | haproxy | Public ingress ([Networking](networking.md#ingress-the-three-tier-chain)) |
 | vpnsvcs | headscale, tailscaled | Mesh VPN coordinator + client |
-| vpnsvcs | geoip_generator (timer) | Weekly GeoIP map refresh for HAProxy |
+| vpnsvcs | geoip_generator (quadlet + timer) | Weekly GeoIP map refresh for HAProxy, then a reload |
 | vpnsvcs | deadman (timer) | Watches the alerting path on secsvcs from outside ([Observability](#observability)) |
 | vpnsvcs | node_exporter, fluentbit, vmagent (quadlets) | Host metrics, journal and HAProxy metrics, pushed to secsvcs over the tailnet ([ADR 0007](adr/0007-vps-metrics-pushed.md)) |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |

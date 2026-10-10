@@ -50,19 +50,11 @@ case $1 in
     chmod 644 /etc/haproxy/countries/CN.map
     ;;
   geoip_generator)
-    mapper_bin="/home/autoadmin/haproxy-mapper"
-    if [ -f "$mapper_bin" ]; then
-      chown root:root "$mapper_bin"
-      chmod 500 "$mapper_bin"
-      mv "$mapper_bin" /usr/local/bin/
-    fi
-    cp haproxy/geoip_generator.py /usr/local/bin
-    chmod +x /usr/local/bin/geoip_generator.py
-    cp haproxy/geoip_generator.service /etc/systemd/system
+    podman build -t geoip_generator -f haproxy/geoip_generator.Containerfile haproxy
+    podman image prune -f
+    cp haproxy/geoip_generator.container /etc/containers/systemd
     cp haproxy/geoip_generator.timer /etc/systemd/system
-
     systemctl daemon-reload
-    systemctl enable geoip_generator.service
     systemctl enable geoip_generator.timer
     systemctl restart geoip_generator.timer
     exit 0

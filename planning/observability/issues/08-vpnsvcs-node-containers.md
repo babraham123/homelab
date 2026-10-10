@@ -112,3 +112,9 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   `ip_nonlocal_bind`; ufw admits only `<subnet>.7`. The "nothing off loopback"
   acceptance becomes "nothing new reachable from outside" (an `nmap` from off the VPS).
   ADR 0007 updated.
+- 2026-10-10: follow-up done. `geoip_generator` is a quadlet: `src/haproxy/geoip_generator.Containerfile`
+  builds haproxy-mapper from source and adds the script, built on the VPS by
+  `install_geoip_generator` (secsvcs's `build_haproxy_mapper` and the binary copy are
+  gone). The license key is a podman secret from `vpnsvcs.yaml`; the container runs
+  oneshot from the existing timer on the VPS's bridge (`.30`, the one IP ufw routes to
+  the internet) and reloads HAProxy afterwards.

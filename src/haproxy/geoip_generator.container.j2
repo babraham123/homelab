@@ -1,0 +1,30 @@
+# /etc/containers/systemd/geoip_generator.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# Run weekly by geoip_generator.timer, not at boot. The maps land in /etc/haproxy/countries
+# and HAProxy reloads to pick them up.
+
+[Unit]
+Description="Homelab: Generate IP to country maps for HAProxy"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=localhost/geoip_generator:latest
+ContainerName=geoip_generator
+NoNewPrivileges=true
+
+Network=net.network
+IP={{ vpnsvcs.container_subnet }}.30
+# Downloads from download.maxmind.com: ufw routes this IP out to the internet
+
+Environment=TZ={{ personal.timezone }}
+Secret=maxmind_license_key,type=env,target=MAXMIND_LICENSE_KEY
+Volume=/etc/haproxy/countries:/etc/haproxy/countries
+
+[Service]
+Type=oneshot
+ExecStartPost=/usr/bin/systemctl reload haproxy
+Restart=on-failure
+TimeoutStartSec=300

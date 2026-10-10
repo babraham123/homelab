@@ -107,9 +107,6 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   backup)
     sudo /root/homelab-rendered/src/secsvcs/backup.sh
     ;;
-  build_haproxy_mapper)
-    /root/homelab-rendered/src/secsvcs/commands.sh build_haproxy_mapper
-    ;;
   *)
     echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
     exit 1
