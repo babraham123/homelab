@@ -9,8 +9,8 @@ dir, whose path it prints.
 tools/render_src.sh
 ```
 
-Note: the guides ending in `.j2` are templates; render them with `tools/render_docs.sh <outdir>` for
-a readable copy, or read them in place; only IPs and domains are templated.
+Note: the guides ending in `.j2` are templates; read them in place, or in the render from the step
+above. Only IPs and domains are templated.
 
 Now follow the guides in this specific order:
 

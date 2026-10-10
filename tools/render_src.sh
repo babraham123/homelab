@@ -20,10 +20,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 project_dir=${1:-"$(mktemp -d)/homelab-rendered"}
 mkdir -p "$project_dir"
 # An exclude list rather than copy-then-delete, so personal details never touch the
-# output, even briefly
+# output, even briefly. docs/agents is instructions for coding agents, not a published doc.
 rsync -a --delete \
   --exclude /.git --exclude /.gitignore --exclude /.vscode --exclude /.fdignore \
   --exclude /.claude --exclude /.scratch --exclude /planning --exclude /notes \
+  --exclude /docs/agents \
   --exclude /rendered --exclude /.gitattributes \
   --exclude vars.yml --exclude all_vars.yml --exclude .DS_Store \
   ./ "$project_dir/"

@@ -24,7 +24,7 @@ under `src/nodes/<node>/traefik/` (the naming trap is then visibly "shared vs no
   on every node, including `src/gaming/Dispatcher.ps1` and the `$(hostname)` lookup in
   `debian/commands.sh install_dispatcher` (`src/nodes/$(hostname)/`).
 - `tools/*.sh`: `parse_*` (deleted by 01), `upload_src.sh` router/gaming special cases (`src/router`
-  → `src/nodes/router`), `render_docs.sh` (unaffected).
+  → `src/nodes/router`).
 - `.fdignore` globs (`src/grafana/dashboards/*.json`, `src/vmalert/configs/*.yml`).
 - `src/olive_tin/config.yaml.j2` if it references script paths; `src/homepage/*` icons.
 - `docs/**` references (many), `CONTEXT.md`, `AGENTS.md`, `README.md`.
