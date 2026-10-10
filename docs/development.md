@@ -30,11 +30,12 @@
 
 `src/` has three groups, plus `nodes.jinja`:
 - `src/nodes/<node>/`, one per node. May contain:
-  - `install_svcs.sh`: installs configs to `/etc/opt/<service>/` and container files to
-    `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not executable, since
-    `install` defaults to 755; a directory tree, like Traefik's `plugins-local/`, is removed and
-    copied again with `cp -r`), then reloads systemd. Runs from `/root/homelab-rendered/src`, so its
-    paths start with `base/`, `nodes/` or `services/`
+  - `install_svcs.sh`: one `case` per service that installs configs to `/etc/opt/<service>/` and
+    container files to `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not
+    executable, since `install` defaults to 755; a directory tree, like Traefik's `plugins-local/`,
+    is removed and copied again with `cp -r`), then ends with `reload_restart <unit>` if it installs
+    a unit. Runs from `/root/homelab-rendered/src`, so its paths start with `base/`, `nodes/` or
+    `services/`
   - `inventory.yml`: the node's part of the node inventory (keys documented in `src/nodes.jinja`)
   - `commands.sh` - Other tasks that run as root and are triggered remotely
   - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config
@@ -54,6 +55,9 @@
   `install_quadlet`, `reload_restart`. Scripts run in place source it relative to themselves; copies
   installed to `/usr/local/bin` with `install_bin` (and the dispatcher) source
   `/usr/local/lib/homelab/lib.sh`, which `install_lib` puts there
+- The container VMs' `install_svcs.sh` also source `src/base/podman/svcs_lib.sh`:
+  `install_traefik_config NODE` and `install_fluentbit_config [CONFIG]`, the config steps every
+  Traefik and Fluent Bit case shares. The case still installs the quadlet and restarts the unit
 - `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die` and `node_inventory` (the
   inventory files gathered under `nodes:`, shared by the render and the tests)
 - Router (`/bin/sh` on pfSense), gaming and macOS scripts get a copy of their own directory only, so
@@ -212,7 +216,7 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
 1. Add Traefik route config for the VM
 1. Create service container and config files in `src/services/<service>/`
 1. If cross-VM TLS is needed, add cert/key gen to `src/base/certificates/` and update `commands.sh`
-1. Add service to `install_svcs.sh`
+1. Add a case for it to `install_svcs.sh`, ending with `reload_restart <unit>`
 1. Add it under `services` in `src/nodes/<node>/inventory.yml`, in install order, with its
    `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health check isn't
    `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions). This

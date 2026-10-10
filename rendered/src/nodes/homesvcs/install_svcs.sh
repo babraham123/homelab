@@ -5,38 +5,40 @@
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+# shellcheck source=src/base/podman/svcs_lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/svcs_lib.sh"
 
 cd "$rendered"
 
 case $1 in
   traefik)
-    mkdir -p /etc/opt/traefik/certificates
-    rm -rf /etc/opt/traefik/config/dynamic/*
-    install -D -m 644 -t /etc/opt/traefik/config/dynamic nodes/homesvcs/traefik/*.yml services/traefik/dynamic/*.yml
-    install -D -m 644 services/traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
-    rm -rf /etc/opt/traefik/plugins-local
-    cp -r services/traefik/plugins-local /etc/opt/traefik/
+    install_traefik_config homesvcs
     install_quadlet nodes/homesvcs/traefik/traefik.container
+    reload_restart traefik
     ;;
   vmagent)
     install -D -m 644 -t /etc/opt/vmagent nodes/homesvcs/prometheus.yml
     base/podman/render_host.sh homesvcs services/victoriametrics/vmagent.container
     install_quadlet services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
+    reload_restart vmagent
     ;;
   mosquitto)
     mkdir -p /etc/opt/mosquitto/certificates
     install -D -m 644 -t /etc/opt/mosquitto services/mosquitto/mosquitto.conf
     install_quadlet services/mosquitto/mosquitto.container services/mosquitto/mqttdata.volume
+    reload_restart mosquitto
     ;;
   zigbee2mqtt)
     mkdir -p /etc/opt/zigbee2mqtt/certificates
     install -D -m 644 -t /etc/opt/zigbee2mqtt/config services/zigbee2mqtt/*.yaml
     install_quadlet services/zigbee2mqtt/zigbee2mqtt.container services/zigbee2mqtt/z2mdb.volume
+    reload_restart zigbee2mqtt
     ;;
   # Not in use: uncomment and add to src/nodes/homesvcs/inventory.yml to install again
 #   esphome)
 #     install -D -m 644 -t /etc/opt/esphome/config services/esphome/*.yaml
 #     install_quadlet services/esphome/esphome.container
+#     reload_restart esphome
 #     ;;
   home_assistant)
     mkdir -p /etc/opt/home_assistant/certs
@@ -57,18 +59,15 @@ case $1 in
       fi
     fi
     install_quadlet services/home_assistant/home_assistant.container services/home_assistant/hassdb.volume
+    reload_restart home_assistant
     ;;
   fluentbit)
-    install -D -m 644 services/fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
-    install -D -m 644 -t /etc/opt/fluentbit services/fluentbit/journald.lua
-    install -D -m 644 base/debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
-    systemctl restart systemd-journald
+    install_fluentbit_config
     base/podman/render_host.sh homesvcs services/fluentbit/fluentbit.container
     install_quadlet services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
+    reload_restart fluentbit
     ;;
   *)
     die "unknown service: $1"
     ;;
 esac
-
-reload_restart "$1"
