@@ -109,6 +109,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: devtop Host Key
+              icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
+              shell: ssh autoadmin@devtop host_key
+              id: devtop_host_key
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: devtop Install Dispatcher
               icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
               shell: ssh autoadmin@devtop install_dispatcher
@@ -221,6 +229,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: homesvcs Host Key
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs host_key
+              id: homesvcs_host_key
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: homesvcs Install Dispatcher
               icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
               shell: ssh autoadmin@homesvcs install_dispatcher
@@ -261,6 +277,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
               shell: ssh autoadmin@pve1 archive_repo
               id: pve1_archive_repo
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve1 Host Key
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 host_key
+              id: pve1_host_key
               maxConcurrent: 1
               timeout: 60
 
@@ -321,6 +345,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
               shell: ssh autoadmin@pve2 shutdown
               id: pve2_shutdown
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Host Key
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 host_key
+              id: pve2_host_key
               maxConcurrent: 1
               timeout: 60
 
@@ -501,6 +533,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: secsvcs Host Key
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs host_key
+              id: secsvcs_host_key
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: secsvcs Install Dispatcher
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_dispatcher
@@ -573,6 +613,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs install_geoip_generator
               id: vpnsvcs_install_geoip_generator
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpnsvcs Host Key
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs host_key
+              id: vpnsvcs_host_key
               maxConcurrent: 1
               timeout: 60
 
@@ -681,6 +729,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_all_svcs
               id: websvcs_install_all_svcs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Host Key
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs host_key
+              id: websvcs_host_key
               maxConcurrent: 1
               timeout: 60
 

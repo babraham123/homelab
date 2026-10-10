@@ -6,12 +6,11 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-cd /home/autoadmin
-
+# The install_* commands take their files on stdin, bundled by send_files.sh.
 case $1 in
   install_certs)
-    # Move the certificates into their respective locations.
-    chown root:root ./*.pem
+    receive_files homeproxy.janedoe.com.cert.pem homeproxy.janedoe.com.client_cert.pem mqtt.janedoe.com.cert.pem \
+      zigbee.janedoe.com.client_cert.pem home.janedoe.com.client_cert.pem ca-chain.cert.pem
     mkdir -p /etc/opt/traefik/certificates
     mkdir -p /etc/opt/mosquitto/certificates
     mkdir -p /etc/opt/zigbee2mqtt/certificates
@@ -30,12 +29,10 @@ case $1 in
     cp ca-chain.cert.pem /etc/opt/mosquitto/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/zigbee2mqtt/certificates/ca.chain.crt
     cp ca-chain.cert.pem /etc/opt/home_assistant/certs/ca.chain.pem
-
-    rm -rf ./*.pem
     ;;
   install_keys)
-    # Move the SSL keys into their respective locations.
-    chown root:root ./*.pem
+    receive_files homeproxy.janedoe.com.key.pem mqtt.janedoe.com.key.pem zigbee.janedoe.com.key.pem \
+      home.janedoe.com.key.pem
     mkdir -p /etc/opt/traefik/certificates
     mkdir -p /etc/opt/mosquitto/certificates
     mkdir -p /etc/opt/zigbee2mqtt/certificates
@@ -51,8 +48,6 @@ case $1 in
     mv zigbee.janedoe.com.key.pem /etc/opt/zigbee2mqtt/certificates/client.key
 
     mv home.janedoe.com.key.pem /etc/opt/home_assistant/certs/client.key
-
-    rm -rf ./*.pem
     ;;
   *)
     die "unknown file type: $1"

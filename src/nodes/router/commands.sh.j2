@@ -7,7 +7,20 @@ set -eu
 
 case "$1" in
   install_certs)
-    mv /home/autoadmin/router.* /root
+    # The certificate and key come on stdin, bundled by send_files.sh on pve1 with a
+    # SHA256SUMS manifest (receive_files in src/base/lib.sh, in POSIX sh)
+    dir=$(mktemp -d)
+    tar -xf - -C "$dir" --no-same-owner
+    for f in router.cert.pem router.key.pem; do
+      sum=$(sed -n "s/^\([0-9a-f]\{64\}\)  ${f}\$/\1/p" "$dir/SHA256SUMS")
+      [ -f "$dir/$f" ] && [ -n "$sum" ] && [ "$(sha256 -q "$dir/$f")" = "$sum" ] || {
+        rm -rf "$dir"
+        echo "error: ${f} missing or its checksum doesn't match" >&2
+        exit 1
+      }
+    done
+    mv "$dir/router.cert.pem" "$dir/router.key.pem" /root
+    rm -rf "$dir"
     php /root/pfsense-import-certificate.php /root/router.cert.pem /root/router.key.pem
     ;;
   install_dispatcher)

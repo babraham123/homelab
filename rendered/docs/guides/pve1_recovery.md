@@ -195,8 +195,7 @@ echo "@cert-authority *.janedoe.com $(cat /root/ssh/ca_ssh_host_key.pub)" > /etc
 - CA chain in pve1's own trust store (the `upload pve1` step of [CA infra](./pve1.md#ca-infra)):
 ```bash
 cd /root/ca
-scp intermediate/certs/ca-chain.cert.pem autoadmin@pve1:/home/autoadmin
-ssh autoadmin@pve1 install_ca
+/root/homelab-rendered/src/base/debian/send_files.sh intermediate/certs/ca-chain.cert.pem | ssh autoadmin@pve1 install_ca
 ```
 - [pve1 guide, ACME Certificates](./pve1.md#acme-certificates): `traefik-certs-dumper`,
   `mkdir -p /root/acme`

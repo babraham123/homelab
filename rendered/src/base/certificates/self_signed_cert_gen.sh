@@ -14,6 +14,7 @@ subj="/C=US/ST=California/L=Middletown/O=${org}"
 require_root
 require_reachable secsvcs websvcs homesvcs
 
+send="${rendered}/base/debian/send_files.sh"
 cd /root/ca/intermediate
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
 echo -n 'Enter intermediate CA passphrase: '
@@ -40,7 +41,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/ldap.janedoe.com.csr.pem \
   -out certs/ldap.janedoe.com.cert.pem
 chmod 444 certs/ldap.janedoe.com.cert.pem
-scp certs/ldap.janedoe.com.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/auth.janedoe.com.key.pem \
@@ -52,7 +52,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/auth.janedoe.com.csr.pem \
   -out certs/auth.janedoe.com.cert.pem
 chmod 444 certs/auth.janedoe.com.cert.pem
-scp certs/auth.janedoe.com.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/pgdb.janedoe.com.key.pem \
@@ -64,7 +63,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/pgdb.janedoe.com.csr.pem \
   -out certs/pgdb.janedoe.com.cert.pem
 chmod 444 certs/pgdb.janedoe.com.cert.pem
-scp certs/pgdb.janedoe.com.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/secproxy.janedoe.com.key.pem \
@@ -76,15 +74,12 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/secproxy.janedoe.com.csr.pem \
   -out certs/secproxy.janedoe.com.cert.pem
 chmod 444 certs/secproxy.janedoe.com.cert.pem
-scp certs/secproxy.janedoe.com.cert.pem autoadmin@secsvcs:/home/autoadmin
-scp certs/ca-chain.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/secproxy.janedoe.com.csr.pem \
   -out certs/secproxy.janedoe.com.client_cert.pem
 chmod 444 certs/secproxy.janedoe.com.client_cert.pem
-scp certs/secproxy.janedoe.com.client_cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/webproxy.janedoe.com.key.pem \
@@ -96,16 +91,12 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/webproxy.janedoe.com.csr.pem \
   -out certs/webproxy.janedoe.com.cert.pem
 chmod 444 certs/webproxy.janedoe.com.cert.pem
-scp certs/webproxy.janedoe.com.cert.pem autoadmin@websvcs:/home/autoadmin
-scp certs/ca-chain.cert.pem autoadmin@websvcs:/home/autoadmin
 
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/webproxy.janedoe.com.csr.pem \
   -out certs/webproxy.janedoe.com.client_cert.pem
 chmod 444 certs/webproxy.janedoe.com.client_cert.pem
-scp certs/webproxy.janedoe.com.client_cert.pem autoadmin@secsvcs:/home/autoadmin
-scp certs/webproxy.janedoe.com.client_cert.pem autoadmin@websvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/homeproxy.janedoe.com.key.pem \
@@ -117,16 +108,12 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/homeproxy.janedoe.com.csr.pem \
   -out certs/homeproxy.janedoe.com.cert.pem
 chmod 444 certs/homeproxy.janedoe.com.cert.pem
-scp certs/homeproxy.janedoe.com.cert.pem autoadmin@homesvcs:/home/autoadmin
-scp certs/ca-chain.cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/homeproxy.janedoe.com.csr.pem \
   -out certs/homeproxy.janedoe.com.client_cert.pem
 chmod 444 certs/homeproxy.janedoe.com.client_cert.pem
-scp certs/homeproxy.janedoe.com.client_cert.pem autoadmin@secsvcs:/home/autoadmin
-scp certs/homeproxy.janedoe.com.client_cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/mqtt.janedoe.com.key.pem \
@@ -138,7 +125,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/mqtt.janedoe.com.csr.pem \
   -out certs/mqtt.janedoe.com.cert.pem
 chmod 444 certs/mqtt.janedoe.com.cert.pem
-scp certs/mqtt.janedoe.com.cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/zigbee.janedoe.com.key.pem \
@@ -150,7 +136,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/zigbee.janedoe.com.csr.pem \
   -out certs/zigbee.janedoe.com.client_cert.pem
 chmod 444 certs/zigbee.janedoe.com.client_cert.pem
-scp certs/zigbee.janedoe.com.client_cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/home.janedoe.com.key.pem \
@@ -162,11 +147,31 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/home.janedoe.com.csr.pem \
   -out certs/home.janedoe.com.client_cert.pem
 chmod 444 certs/home.janedoe.com.client_cert.pem
-scp certs/home.janedoe.com.client_cert.pem autoadmin@homesvcs:/home/autoadmin
 
-ssh autoadmin@secsvcs "install_certs"
-ssh autoadmin@websvcs "install_certs"
-ssh autoadmin@homesvcs "install_certs"
+# Each node's files go on its install command's stdin
+"$send" \
+  certs/ldap.janedoe.com.cert.pem \
+  certs/auth.janedoe.com.cert.pem \
+  certs/pgdb.janedoe.com.cert.pem \
+  certs/secproxy.janedoe.com.cert.pem \
+  certs/secproxy.janedoe.com.client_cert.pem \
+  certs/webproxy.janedoe.com.client_cert.pem \
+  certs/homeproxy.janedoe.com.client_cert.pem \
+  certs/ca-chain.cert.pem |
+  ssh autoadmin@secsvcs install_certs
+"$send" \
+  certs/webproxy.janedoe.com.cert.pem \
+  certs/webproxy.janedoe.com.client_cert.pem \
+  certs/ca-chain.cert.pem |
+  ssh autoadmin@websvcs install_certs
+"$send" \
+  certs/homeproxy.janedoe.com.cert.pem \
+  certs/homeproxy.janedoe.com.client_cert.pem \
+  certs/mqtt.janedoe.com.cert.pem \
+  certs/zigbee.janedoe.com.client_cert.pem \
+  certs/home.janedoe.com.client_cert.pem \
+  certs/ca-chain.cert.pem |
+  ssh autoadmin@homesvcs install_certs
 
 date -u > /root/ca/date_self_signed_certs.txt
 echo -e '\nMake sure to restart all secure services'

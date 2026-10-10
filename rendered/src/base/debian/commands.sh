@@ -1,26 +1,22 @@
 #!/bin/bash
 # Usage:
 #   src/base/debian/commands.sh CMD
+# The install_* commands take their files on stdin, bundled by send_files.sh; nothing is
+# read from autoadmin's home.
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-cd /home/autoadmin
-
 case $1 in
   install_ssh_ca)
     # Moves SSH public keys into their respective locations and restarts sshd.
-    # First, so a stale upload without it fails before anything is moved
+    receive_files ca_ssh_key.pub ssh_host_key_cert.pub known_hosts
+    # First, so a stale rendered tree without it fails before anything is moved
     install -m 644 "${rendered}/base/debian/ssh_config" /etc/ssh/ssh_config.d/homelab.conf
 
-    chown root:root ca_ssh_key.pub
     mv ca_ssh_key.pub /etc/ssh
-
-    chown root:root ssh_host_key_cert.pub
     mv ssh_host_key_cert.pub /etc/ssh
-
-    chown root:root known_hosts
     mv known_hosts /etc/ssh/ssh_known_hosts
 
     systemctl restart sshd
@@ -42,13 +38,12 @@ case $1 in
     systemctl status sshd --no-pager
     ;;
   install_ca)
-    chown root:root ca-chain.cert.pem
+    receive_files ca-chain.cert.pem
     mv ca-chain.cert.pem /etc/ssl/certs/janedoe.com.ca_chain.cert.pem
     ;;
   copy_acme_certs)
-    # Only for hosts running traefik
-    cp /etc/opt/traefik/certificates/acme.json /home/autoadmin/acme.json
-    chown autoadmin:autoadmin /home/autoadmin/acme.json
+    # Only for hosts running traefik: the file on stdout, for acme_transfer.sh on pve1
+    cat /etc/opt/traefik/certificates/acme.json
     ;;
   *)
     die "unknown file type: $1"

@@ -46,6 +46,9 @@ case "$(hostname)" in
         require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
+      host_key)
+        cat /etc/ssh/ssh_host_ed25519_key.pub
+        ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
@@ -108,6 +111,9 @@ case "$(hostname)" in
         require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
+      host_key)
+        cat /etc/ssh/ssh_host_ed25519_key.pub
+        ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
@@ -141,6 +147,9 @@ case "$(hostname)" in
       install_ssh_ca)
         require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      host_key)
+        cat /etc/ssh/ssh_host_ed25519_key.pub
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
@@ -185,6 +194,9 @@ case "$(hostname)" in
       install_ssh_ca)
         require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      host_key)
+        cat /etc/ssh/ssh_host_ed25519_key.pub
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
@@ -280,6 +292,9 @@ case "$(hostname)" in
         require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
+      host_key)
+        cat /etc/ssh/ssh_host_ed25519_key.pub
+        ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
@@ -337,6 +352,9 @@ case "$(hostname)" in
       install_ssh_ca)
         require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      host_key)
+        cat /etc/ssh/ssh_host_ed25519_key.pub
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
@@ -411,6 +429,9 @@ case "$(hostname)" in
       install_ssh_ca)
         require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      host_key)
+        cat /etc/ssh/ssh_host_ed25519_key.pub
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher

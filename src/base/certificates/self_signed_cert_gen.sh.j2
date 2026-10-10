@@ -14,6 +14,7 @@ subj="/C={{ personal.country_code }}/ST={{ personal.state }}/L={{ personal.city 
 require_root
 require_reachable secsvcs websvcs homesvcs
 
+send="${rendered}/base/debian/send_files.sh"
 cd /root/ca/intermediate
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
 echo -n 'Enter intermediate CA passphrase: '
@@ -40,7 +41,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/ldap.{{ site.url }}.csr.pem \
   -out certs/ldap.{{ site.url }}.cert.pem
 chmod 444 certs/ldap.{{ site.url }}.cert.pem
-scp certs/ldap.{{ site.url }}.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/auth.{{ site.url }}.key.pem \
@@ -52,7 +52,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/auth.{{ site.url }}.csr.pem \
   -out certs/auth.{{ site.url }}.cert.pem
 chmod 444 certs/auth.{{ site.url }}.cert.pem
-scp certs/auth.{{ site.url }}.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/pgdb.{{ site.url }}.key.pem \
@@ -64,7 +63,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/pgdb.{{ site.url }}.csr.pem \
   -out certs/pgdb.{{ site.url }}.cert.pem
 chmod 444 certs/pgdb.{{ site.url }}.cert.pem
-scp certs/pgdb.{{ site.url }}.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/secproxy.{{ site.url }}.key.pem \
@@ -76,15 +74,12 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/secproxy.{{ site.url }}.csr.pem \
   -out certs/secproxy.{{ site.url }}.cert.pem
 chmod 444 certs/secproxy.{{ site.url }}.cert.pem
-scp certs/secproxy.{{ site.url }}.cert.pem autoadmin@secsvcs:/home/autoadmin
-scp certs/ca-chain.cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/secproxy.{{ site.url }}.csr.pem \
   -out certs/secproxy.{{ site.url }}.client_cert.pem
 chmod 444 certs/secproxy.{{ site.url }}.client_cert.pem
-scp certs/secproxy.{{ site.url }}.client_cert.pem autoadmin@secsvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/webproxy.{{ site.url }}.key.pem \
@@ -96,16 +91,12 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/webproxy.{{ site.url }}.csr.pem \
   -out certs/webproxy.{{ site.url }}.cert.pem
 chmod 444 certs/webproxy.{{ site.url }}.cert.pem
-scp certs/webproxy.{{ site.url }}.cert.pem autoadmin@websvcs:/home/autoadmin
-scp certs/ca-chain.cert.pem autoadmin@websvcs:/home/autoadmin
 
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/webproxy.{{ site.url }}.csr.pem \
   -out certs/webproxy.{{ site.url }}.client_cert.pem
 chmod 444 certs/webproxy.{{ site.url }}.client_cert.pem
-scp certs/webproxy.{{ site.url }}.client_cert.pem autoadmin@secsvcs:/home/autoadmin
-scp certs/webproxy.{{ site.url }}.client_cert.pem autoadmin@websvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/homeproxy.{{ site.url }}.key.pem \
@@ -117,16 +108,12 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/homeproxy.{{ site.url }}.csr.pem \
   -out certs/homeproxy.{{ site.url }}.cert.pem
 chmod 444 certs/homeproxy.{{ site.url }}.cert.pem
-scp certs/homeproxy.{{ site.url }}.cert.pem autoadmin@homesvcs:/home/autoadmin
-scp certs/ca-chain.cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/homeproxy.{{ site.url }}.csr.pem \
   -out certs/homeproxy.{{ site.url }}.client_cert.pem
 chmod 444 certs/homeproxy.{{ site.url }}.client_cert.pem
-scp certs/homeproxy.{{ site.url }}.client_cert.pem autoadmin@secsvcs:/home/autoadmin
-scp certs/homeproxy.{{ site.url }}.client_cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/mqtt.{{ site.url }}.key.pem \
@@ -138,7 +125,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/mqtt.{{ site.url }}.csr.pem \
   -out certs/mqtt.{{ site.url }}.cert.pem
 chmod 444 certs/mqtt.{{ site.url }}.cert.pem
-scp certs/mqtt.{{ site.url }}.cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/zigbee.{{ site.url }}.key.pem \
@@ -150,7 +136,6 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/zigbee.{{ site.url }}.csr.pem \
   -out certs/zigbee.{{ site.url }}.client_cert.pem
 chmod 444 certs/zigbee.{{ site.url }}.client_cert.pem
-scp certs/zigbee.{{ site.url }}.client_cert.pem autoadmin@homesvcs:/home/autoadmin
 
 openssl req -config openssl.cnf \
   -key private/home.{{ site.url }}.key.pem \
@@ -162,11 +147,31 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -in csr/home.{{ site.url }}.csr.pem \
   -out certs/home.{{ site.url }}.client_cert.pem
 chmod 444 certs/home.{{ site.url }}.client_cert.pem
-scp certs/home.{{ site.url }}.client_cert.pem autoadmin@homesvcs:/home/autoadmin
 
-ssh autoadmin@secsvcs "install_certs"
-ssh autoadmin@websvcs "install_certs"
-ssh autoadmin@homesvcs "install_certs"
+# Each node's files go on its install command's stdin
+"$send" \
+  certs/ldap.{{ site.url }}.cert.pem \
+  certs/auth.{{ site.url }}.cert.pem \
+  certs/pgdb.{{ site.url }}.cert.pem \
+  certs/secproxy.{{ site.url }}.cert.pem \
+  certs/secproxy.{{ site.url }}.client_cert.pem \
+  certs/webproxy.{{ site.url }}.client_cert.pem \
+  certs/homeproxy.{{ site.url }}.client_cert.pem \
+  certs/ca-chain.cert.pem |
+  ssh autoadmin@secsvcs install_certs
+"$send" \
+  certs/webproxy.{{ site.url }}.cert.pem \
+  certs/webproxy.{{ site.url }}.client_cert.pem \
+  certs/ca-chain.cert.pem |
+  ssh autoadmin@websvcs install_certs
+"$send" \
+  certs/homeproxy.{{ site.url }}.cert.pem \
+  certs/homeproxy.{{ site.url }}.client_cert.pem \
+  certs/mqtt.{{ site.url }}.cert.pem \
+  certs/zigbee.{{ site.url }}.client_cert.pem \
+  certs/home.{{ site.url }}.client_cert.pem \
+  certs/ca-chain.cert.pem |
+  ssh autoadmin@homesvcs install_certs
 
 date -u > /root/ca/date_self_signed_certs.txt
 echo -e '\nMake sure to restart all secure services'

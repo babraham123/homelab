@@ -6,12 +6,10 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-cd /home/autoadmin
-
+# The install_* commands take their files on stdin, bundled by send_files.sh.
 case $1 in
   install_certs)
-    # Move the certificates into their respective locations.
-    chown root:root ./*.pem
+    receive_files webproxy.janedoe.com.cert.pem webproxy.janedoe.com.client_cert.pem ca-chain.cert.pem
     mkdir -p /etc/opt/traefik/certificates
     mkdir -p /etc/opt/guacamole/certs
 
@@ -20,17 +18,12 @@ case $1 in
 
     cp ca-chain.cert.pem /etc/opt/traefik/certificates/ca.chain.crt
     cp ca-chain.cert.pem /etc/opt/guacamole/certs/ca.chain.pem
-
-    rm -rf ./*.pem
     ;;
   install_keys)
-    # Move the SSL keys into their respective locations.
-    chown root:root ./*.pem
+    receive_files webproxy.janedoe.com.key.pem
     mkdir -p /etc/opt/traefik/certificates
 
     mv webproxy.janedoe.com.key.pem /etc/opt/traefik/certificates/proxy.key
-
-    rm -rf ./*.pem
     ;;
   *)
     die "unknown file type: $1"

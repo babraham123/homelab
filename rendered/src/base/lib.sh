@@ -42,6 +42,27 @@ wait_for() {
 # Usage: wait_reachable HOST [TIMEOUT_S]
 wait_reachable() { wait_for "${2:-300}" "$1 unreachable" is_reachable "$1"; }
 
+# Usage: receive_files NAME...; for a command that takes files on stdin, bundled by
+# src/base/debian/send_files.sh. Extracts the stream into a private temp dir, which must
+# then hold exactly NAME... and SHA256SUMS, all regular files, every NAME listed in the
+# manifest and matching it; then cds there, so the caller moves the files by name. The
+# dir is removed when the script exits.
+receive_files() {
+  local dir found expected listed
+  dir=$(mktemp -d)
+  # shellcheck disable=SC2064 # expanded now on purpose: dir is local
+  trap "rm -rf '${dir}'" EXIT
+  tar -C "$dir" -x --no-same-owner
+  expected=$(printf '%s\n' SHA256SUMS "$@" | sort)
+  found=$(cd "$dir" && find . -mindepth 1 | sed 's|^\./||' | sort)
+  [[ $found == "$expected" ]] || die "received '$(tr '\n' ' ' <<< "$found")', expected exactly: SHA256SUMS $*"
+  [[ -z $(find "$dir" -mindepth 1 ! -type f) ]] || die "received something that isn't a regular file"
+  listed=$(sed 's/^[0-9a-f]\{64\}  //' "${dir}/SHA256SUMS" | sort)
+  [[ $listed == "$(printf '%s\n' "$@" | sort)" ]] || die "SHA256SUMS doesn't list exactly: $*"
+  (cd "$dir" && sha256sum -c --quiet --strict SHA256SUMS)
+  cd "$dir"
+}
+
 install_lib() { install -D -m 644 "${rendered}/base/lib.sh" /usr/local/lib/homelab/lib.sh; }
 # Usage: install_bin SCRIPT...; for scripts run from /usr/local/bin, which source the
 # installed library

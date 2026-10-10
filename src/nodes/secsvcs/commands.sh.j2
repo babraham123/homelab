@@ -6,12 +6,12 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-cd /home/autoadmin
-
+# The install_* commands take their files on stdin, bundled by send_files.sh.
 case $1 in
   install_certs)
-    # Move the certificates to their respective directories.
-    chown root:root ./*.pem
+    receive_files auth.{{ site.url }}.cert.pem ldap.{{ site.url }}.cert.pem pgdb.{{ site.url }}.cert.pem \
+      secproxy.{{ site.url }}.cert.pem secproxy.{{ site.url }}.client_cert.pem \
+      webproxy.{{ site.url }}.client_cert.pem homeproxy.{{ site.url }}.client_cert.pem ca-chain.cert.pem
     mkdir -p /etc/opt/authelia/certificates
     mkdir -p /etc/opt/lldap/certificates
     mkdir -p /etc/opt/traefik/certificates
@@ -40,12 +40,10 @@ case $1 in
     cp ca-chain.cert.pem /etc/opt/db/certificates/ca.chain.crt
     cp ca-chain.cert.pem /etc/opt/gatus/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/grafana/certificates/ca.chain.pem
-
-    rm -rf ./*.pem
     ;;
   install_keys)
-    # Move the SSL keys into their respective locations.
-    chown root:root ./*.pem
+    receive_files auth.{{ site.url }}.key.pem ldap.{{ site.url }}.key.pem secproxy.{{ site.url }}.key.pem \
+      pgdb.{{ site.url }}.key.pem
     mkdir -p /etc/opt/authelia/certificates
     mkdir -p /etc/opt/lldap/certificates
     mkdir -p /etc/opt/traefik/certificates
@@ -59,12 +57,10 @@ case $1 in
     mv pgdb.{{ site.url }}.key.pem /etc/opt/db/certificates/pgdb.key
     chown 70:70 /etc/opt/db/certificates/pgdb.key
     # https://github.com/docker-library/postgres/blob/master/14/alpine3.19/Dockerfile
-
-    rm -rf ./*.pem
     ;;
   install_olive_tin_cert)
+    receive_files id_ed25519 id_ed25519.pub id_ed25519-cert.pub known_hosts
     mkdir -p /etc/opt/olive_tin/ssh
-    ls id_ed25519-cert.pub
     mv ./id_ed25519* /etc/opt/olive_tin/ssh
     mv ./known_hosts /etc/opt/olive_tin/ssh
     chmod 644 /etc/opt/olive_tin/ssh/known_hosts

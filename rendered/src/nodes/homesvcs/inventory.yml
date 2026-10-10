@@ -14,6 +14,7 @@ commands:
   - {name: install_certs, script: nodes/homesvcs/commands.sh, key_ids: [pve1]}
   - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh], key_ids: [pve1]}
   - {name: install_ssh_ca, script: base/debian/commands.sh, key_ids: [pve1]}
+  - {name: host_key, run: [cat /etc/ssh/ssh_host_ed25519_key.pub]}
   - {name: install_dispatcher, script: base/debian/commands.sh}
   - {name: install_ca, script: base/debian/commands.sh, key_ids: [pve1]}
   - {name: copy_acme_certs, script: base/debian/commands.sh, key_ids: [pve1]}

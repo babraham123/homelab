@@ -163,7 +163,7 @@ cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/ce
 chmod 444 intermediate/certs/ca-chain.cert.pem
 
 # vpnsvcs's SSH port comes from the ssh_config that ssh_cert_gen.sh installed on pve1
-function upload() { scp intermediate/certs/ca-chain.cert.pem "autoadmin@${1}:/home/autoadmin"; ssh "autoadmin@${1}" "install_ca"; }
+function upload() { /root/homelab-rendered/src/base/debian/send_files.sh intermediate/certs/ca-chain.cert.pem | ssh "autoadmin@${1}" install_ca; }
 upload pve1
 upload pve2
 upload vpnsvcs

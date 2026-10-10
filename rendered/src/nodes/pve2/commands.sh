@@ -6,8 +6,6 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-cd /home/autoadmin
-
 case $1 in
   start_gaming_vm)
     ping -c1 -W1 192.168.2.21 && exit 0
@@ -43,16 +41,15 @@ case $1 in
     qm start "$vm_id" --timeout 30
     ;;
   install_certs_and_keys)
-    # Moves the certificates into their respective locations and restarts the services.
-    # Also configures the PBS cert fingerprint.
+    # Takes the certificates on stdin (send_files.sh), moves them into their respective
+    # locations and restarts the services. Also configures the PBS cert fingerprint.
+    receive_files pveproxy-ssl.pem pveproxy-ssl.key proxy.pem proxy.key
     cp pveproxy-ssl.* /etc/pve/nodes/pve2/
     # Ref: https://forum.proxmox.com/threads/proxmox-backup-tailscale-proxmox-backup-proxy-service-wont-boot.153204/
     cp proxy.* /etc/proxmox-backup/
 
     systemctl restart pveproxy.service
     systemctl reload proxmox-backup-proxy.service
-    rm -rf ./*.pem
-    rm -rf ./*.key
 
     # Update PBS fingerprint for PVE2
     # Ref: https://pbs.proxmox.com/docs/pve-integration.html

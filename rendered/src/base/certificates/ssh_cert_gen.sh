@@ -9,6 +9,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 require_root
 require_reachable devtop homesvcs pve2 secsvcs vpnsvcs websvcs router
 
+# Files go to the nodes on the install commands' stdin
+send="${rendered}/base/debian/send_files.sh"
 cd /root/ssh
 
 echo "@cert-authority *.janedoe.com $(cat ca_ssh_host_key.pub)" > known_hosts
@@ -22,20 +24,19 @@ function configure_server() {
     principals+=",vpn.janedoe.com"
   fi
   echo "Configuring SSH CA for ${host}"
-  scp ca_ssh_key.pub "autoadmin@${host}:/home/autoadmin"
-
-  scp "autoadmin@${host}:/etc/ssh/ssh_host_ed25519_key.pub" "public/${host}.ssh_host_key.pub"
+  # Over the authenticated session, not ssh-keyscan: a key read off the wire could be
+  # anyone's, and this one gets signed
+  ssh "autoadmin@${host}" host_key > "public/${host}.ssh_host_key.pub"
   addr=$(dig "${host}.janedoe.com" +short)
   ssh-keygen -s ca_ssh_host_key -I "$host" -h -n "${principals},${addr}" -V +395d "public/${host}.ssh_host_key.pub"
   chmod 444 "public/${host}.ssh_host_key-cert.pub"
-  scp "public/${host}.ssh_host_key-cert.pub" "autoadmin@${host}:/home/autoadmin/ssh_host_key_cert.pub"
-  scp known_hosts "autoadmin@${host}:/home/autoadmin"
 
-  ssh "autoadmin@${host}" "install_ssh_ca"
+  "$send" ca_ssh_key.pub known_hosts "public/${host}.ssh_host_key-cert.pub=ssh_host_key_cert.pub" | \
+    ssh "autoadmin@${host}" install_ssh_ca
 }
 
 # First: its install_ssh_ca puts src/base/debian/ssh_config on pve1, which is where this
-# script's ssh and scp find vpnsvcs's port
+# script's ssh finds vpnsvcs's port
 configure_server pve1
 for node in devtop homesvcs pve2 secsvcs vpnsvcs websvcs; do
   configure_server "$node"
@@ -73,16 +74,16 @@ ssh-keygen -t ed25519 -C "olive_tin@command.janedoe.com" -f /root/ssh/id_ed25519
 ssh-keygen -s ca_ssh_key -I "olive_tin" -n "autoadmin" -V +395d id_ed25519.pub
 chmod 644 id_ed25519*.pub
 chmod 600 id_ed25519
-scp id_ed25519* known_hosts autoadmin@secsvcs:/home/autoadmin
-ssh autoadmin@secsvcs "install_olive_tin_cert"
+"$send" id_ed25519 id_ed25519.pub id_ed25519-cert.pub known_hosts | \
+  ssh autoadmin@secsvcs install_olive_tin_cert
 rm id_ed25519*
 
-# local machine
-request_cmd "scp ~/.ssh/id_ed25519.pub autoadmin@pve1:/home/autoadmin/local.id_ed25519.pub"
-ssh-keygen -s ca_ssh_key -I "local" -n "manualadmin,autoadmin" -V +395d /home/autoadmin/local.id_ed25519.pub
-chmod 644 /home/autoadmin/local.id_ed25519-cert.pub
-request_cmd "scp autoadmin@pve1:/home/autoadmin/local.id_ed25519-cert.pub ~/.ssh/id_ed25519-cert.pub"
-rm /home/autoadmin/local.id_ed25519*
+# local machine, through manualadmin's home: autoadmin takes no files
+request_cmd "scp ~/.ssh/id_ed25519.pub manualadmin@pve1:local.id_ed25519.pub"
+ssh-keygen -s ca_ssh_key -I "local" -n "manualadmin,autoadmin" -V +395d /home/manualadmin/local.id_ed25519.pub
+chmod 644 /home/manualadmin/local.id_ed25519-cert.pub
+request_cmd "scp manualadmin@pve1:local.id_ed25519-cert.pub ~/.ssh/id_ed25519-cert.pub"
+rm /home/manualadmin/local.id_ed25519*
 
 echo "Edit ~/.ssh/known_hosts on your local machine to include the following line:"
 cat known_hosts

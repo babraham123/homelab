@@ -10,14 +10,15 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 require_root
 require_reachable pve1 pve2 router
 
+# Files go to the nodes on the install commands' stdin
+send="${rendered}/base/debian/send_files.sh"
 cd /root/acme
 
 function download() {
   host="$1"
   require_reachable "$host"
 
-  ssh "autoadmin@${host}" copy_acme_certs
-  scp "autoadmin@${host}:/home/autoadmin/acme.json" "/root/acme/${host}.acme.json"
+  ssh "autoadmin@${host}" copy_acme_certs > "/root/acme/${host}.acme.json"
   chmod 400 "${host}.acme.json"
   # Ref: https://github.com/ldez/traefik-certs-dumper#use-domain-as-sub-directory
   # Certificate is the full chain (I think)
@@ -34,13 +35,10 @@ cp pve1.janedoe.com/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
 cp pve1.janedoe.com/privatekey.key /etc/pve/nodes/pve1/pveproxy-ssl.key
 systemctl restart pveproxy.service
 
-scp pve2.janedoe.com/certificate.crt autoadmin@pve2:/home/autoadmin/pveproxy-ssl.pem
-scp pve2.janedoe.com/privatekey.key autoadmin@pve2:/home/autoadmin/pveproxy-ssl.key
 # Ref: https://pbs.proxmox.com/wiki/index.php/HTTPS_Certificate_Configuration
-scp pbs2.janedoe.com/certificate.crt autoadmin@pve2:/home/autoadmin/proxy.pem
-scp pbs2.janedoe.com/privatekey.key autoadmin@pve2:/home/autoadmin/proxy.key
-
-ssh autoadmin@pve2 "install_certs_and_keys" > pbs2_cert_info.txt
+"$send" pve2.janedoe.com/certificate.crt=pveproxy-ssl.pem pve2.janedoe.com/privatekey.key=pveproxy-ssl.key \
+  pbs2.janedoe.com/certificate.crt=proxy.pem pbs2.janedoe.com/privatekey.key=proxy.key | \
+  ssh autoadmin@pve2 install_certs_and_keys > pbs2_cert_info.txt
 
 # Update PBS fingerprint for PVE1
 # Ref: https://pbs.proxmox.com/docs/pve-integration.html
@@ -48,9 +46,8 @@ fingerprint=$(grep -E '^(\w\w:)+' pbs2_cert_info.txt | tr -d '\r')
 pvesm set pbs2 --fingerprint "$fingerprint"
 
 # Ref: https://github.com/stompro/pfsense-import-certificate
-scp router.janedoe.com/certificate.crt autoadmin@router:/home/autoadmin/router.cert.pem
-scp router.janedoe.com/privatekey.key autoadmin@router:/home/autoadmin/router.key.pem
-ssh autoadmin@router "install_certs"
+"$send" router.janedoe.com/certificate.crt=router.cert.pem router.janedoe.com/privatekey.key=router.key.pem | \
+  ssh autoadmin@router install_certs
 
 date -u > date_acme_certs.txt
 echo -e '\nDone!'
