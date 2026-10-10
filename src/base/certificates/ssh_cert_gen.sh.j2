@@ -16,26 +16,26 @@ chmod 644 known_hosts
 
 function configure_server() {
   host=$1
-  port="22"
   principals="${host}.{{ site.url }}"
   if [[ "$host" == "vpnsvcs" ]]; then
-    port="2202"
     # vpn.{{ site.url }} is the Headscale endpoint on the same box; callers still use it
     principals+=",vpn.{{ site.url }}"
   fi
   echo "Configuring SSH CA for ${host}"
-  scp -P "$port" ca_ssh_key.pub "autoadmin@${host}:/home/autoadmin"
+  scp ca_ssh_key.pub "autoadmin@${host}:/home/autoadmin"
 
-  scp -P "$port" "autoadmin@${host}:/etc/ssh/ssh_host_ed25519_key.pub" "public/${host}.ssh_host_key.pub"
+  scp "autoadmin@${host}:/etc/ssh/ssh_host_ed25519_key.pub" "public/${host}.ssh_host_key.pub"
   addr=$(dig "${host}.{{ site.url }}" +short)
   ssh-keygen -s ca_ssh_host_key -I "$host" -h -n "${principals},${addr}" -V +395d "public/${host}.ssh_host_key.pub"
   chmod 444 "public/${host}.ssh_host_key-cert.pub"
-  scp -P "$port" "public/${host}.ssh_host_key-cert.pub" "autoadmin@${host}:/home/autoadmin/ssh_host_key_cert.pub"
-  scp -P "$port" known_hosts "autoadmin@${host}:/home/autoadmin"
+  scp "public/${host}.ssh_host_key-cert.pub" "autoadmin@${host}:/home/autoadmin/ssh_host_key_cert.pub"
+  scp known_hosts "autoadmin@${host}:/home/autoadmin"
 
-  ssh -p "$port" "autoadmin@${host}" "install_ssh_ca"
+  ssh "autoadmin@${host}" "install_ssh_ca"
 }
 
+# First: its install_ssh_ca puts src/base/debian/ssh_config on pve1, which is where this
+# script's ssh and scp find vpnsvcs's port
 configure_server pve1
 configure_server secsvcs
 configure_server homesvcs

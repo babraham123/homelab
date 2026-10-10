@@ -162,11 +162,11 @@ openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pe
 cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
 chmod 444 intermediate/certs/ca-chain.cert.pem
 
-# Optional second argument: the SSH port (vpnsvcs listens on 2202)
-function upload() { scp -P "${2:-22}" intermediate/certs/ca-chain.cert.pem "autoadmin@${1}:/home/autoadmin"; ssh -p "${2:-22}" "autoadmin@${1}" "install_ca"; }
+# vpnsvcs's SSH port comes from the ssh_config that ssh_cert_gen.sh installed on pve1
+function upload() { scp intermediate/certs/ca-chain.cert.pem "autoadmin@${1}:/home/autoadmin"; ssh "autoadmin@${1}" "install_ca"; }
 upload pve1
 upload pve2
-upload vpnsvcs 2202
+upload vpnsvcs
 upload secsvcs
 upload homesvcs
 upload websvcs

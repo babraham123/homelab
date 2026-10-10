@@ -407,7 +407,7 @@ tcpdump -i eth0 -s 1500 \
   '(tcp[((tcp[12:1] & 0xf0) >> 2)+5:1] = 0x01) and (tcp[((tcp[12:1] & 0xf0) >> 2):1] = 0x16)' \
   -nnXSs0 -ttt -w sni.pcap
 # locally
-scp -P 2202 manualadmin@vpnsvcs:sni.pcap .
+scp manualadmin@vpnsvcs:sni.pcap .
 ```
 
 ### Traefik (container VMs)

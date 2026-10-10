@@ -16,11 +16,6 @@ if ! ping -c3 -W3 "${host}.${url}" > /dev/null; then
   die "${host} is not reachable"
 fi
 
-port="22"
-if [[ "$host" == "vpnsvcs" ]]; then
-  port="2202"
-fi
-
 if [[ "$host" == "router" ]]; then
   echo "router admin password:"
   ssh -t "admin@router.${url}" 'rm -rf /root/router-src'
@@ -34,9 +29,10 @@ if [[ "$host" == "gaming" ]]; then
   exit 0
 fi
 
-scp -qr -P "$port" -o LogLevel=QUIET "$project_dir" "manualadmin@${host}.${url}:/home/manualadmin"
+# vpnsvcs's SSH port comes from ~/.ssh/config (src/base/debian/ssh_config)
+scp -qr -o LogLevel=QUIET "$project_dir" "manualadmin@${host}.${url}:/home/manualadmin"
 echo "${host} root password:"
-ssh -p "$port" -t "manualadmin@${host}.${url}" '
+ssh -t "manualadmin@${host}.${url}" '
 sudo chown -R root:root homelab-rendered
 sudo rm -rf /root/homelab-rendered
 sudo mv homelab-rendered /root/homelab-rendered
