@@ -10,7 +10,7 @@
 # Usage:
 #   src/vpnsvcs/deadman.sh            # deadman.timer runs it every 5 minutes
 # Needs, root-only files in /etc/opt/secrets/: alertmanager_admin_password,
-# alert_smtp_password (the Alertmanager SMTP app password), deadman_ntfy_topic (a long
+# msmtp_password (pve1's, read through src/certificates/msmtprc.j2), deadman_ntfy_topic (a long
 # random topic name the phone's ntfy app also subscribes to).
 
 set -uo pipefail
@@ -18,7 +18,6 @@ export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 site="{{ site.url }}"
 mail_to="{{ site.email.replace('@', '+alert@') }}"
-smtp_user="{{ site.email }}"
 secrets=/etc/opt/secrets
 state=/var/lib/deadman
 threshold=3
@@ -29,10 +28,7 @@ notify() {
   curl -fsS -m 15 -H "Title: ${title}" -H "Priority: ${priority}" -H "Tags: rotating_light" \
     -d "$body" "https://ntfy.sh/$(cat "${secrets}/deadman_ntfy_topic")" > /dev/null ||
     echo "warning: ntfy.sh push failed" >&2
-  printf 'From: Deadman <admin@%s>\nTo: %s\nSubject: %s\n\n%s\n' "$site" "$mail_to" "$title" "$body" |
-    curl -fsS -m 30 --ssl-reqd --url smtp://smtp-relay.gmail.com:587 \
-      --user "${smtp_user}:$(cat "${secrets}/alert_smtp_password")" \
-      --mail-from "admin@${site}" --mail-rcpt "$mail_to" -T - ||
+  printf 'To: %s\nSubject: %s\n\n%s\n' "$mail_to" "$title" "$body" | msmtp -t ||
     echo "warning: email failed" >&2
 }
 

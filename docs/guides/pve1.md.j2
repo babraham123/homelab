@@ -218,14 +218,19 @@ mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
 /root/homelab-rendered/src/pve1/secret_update.sh secsvcs
 sops /root/secrets/pve1.yaml
 ```
-- Setup cert notifications
+- Setup notifications
 ```bash
 # Enable AppArmor
 apt install -y msmtp msmtp-mta
-# Update AppArmor profile, add "/root/homelab-rendered/src/pve1/msmtp_password.sh PUx,"
 vim /etc/apparmor.d/usr.bin.msmtp +82
+```
+```
+/usr/bin/hostname PUx,
+/root/homelab-rendered/src/pve1/msmtp_password.sh PUx,
+```
+- Install the notifier
+```bash
 apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
-
 cd /root/homelab-rendered
 cp src/certificates/msmtprc /etc
 src/pve1/install_svcs.sh cert_notifier

@@ -98,8 +98,7 @@ reachable over the tailnet, so it watches from outside.
   - Fire after **3 consecutive failures** (15 min) to ride out restarts and deploys.
     Notify once on fire and once on recovery. Keep state in `/var/lib/deadman/`.
 - **Notification independent of secsvcs:**
-  - email via `smtp-relay.gmail.com` (`msmtp`, same account as Alertmanager's
-    `alert_smtp_password`);
+  - email via `smtp.gmail.com` (`msmtp`, pve1's account and `msmtp_password`);
   - **and** a push to a random, unguessable topic on public `ntfy.sh`, which the phone
     app also subscribes to.
 
@@ -128,8 +127,9 @@ reachable over the tailnet, so it watches from outside.
   `prometheus.yml.j2` files that ntfy-alertmanager now tags on (one block per node,
   vpnsvcs included for 08). `Watchdog` is `src/vmalert/configs/pipeline.yml`, routed
   to a `null` receiver. The VPS checker is `src/vpnsvcs/deadman.sh.j2` with
-  `deadman.{service,timer}` and an `install_deadman` case; it uses curl for both SMTP
-  (no msmtp, no AppArmor edit) and the ntfy.sh push, with three hand-placed files in
+  `deadman.{service,timer}` and an `install_deadman` case; it mails through msmtp with
+  pve1's account (AppArmor override in `install_deadman`), pushes to ntfy.sh with curl,
+  and reads three hand-placed files in
   `/etc/opt/secrets/` (`docs/guides/vpnsvcs.md#dead-man-switch`). The test plan is
   `docs/maintenance.md#alerting-pipeline-test`. Remaining for the maintainer: run tests
   1–11 at the next deploy (`notes/apply-since-5a50097.md` steps 8 and 9) and record

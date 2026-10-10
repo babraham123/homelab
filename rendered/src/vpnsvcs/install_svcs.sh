@@ -112,10 +112,18 @@ case $1 in
     ;;
   deadman)
     # The checker's credentials are hand-placed, like hs_oidc_*; fail here, not at 02:00.
-    for f in alertmanager_admin_password alert_smtp_password deadman_ntfy_topic; do
+    for f in alertmanager_admin_password msmtp_password deadman_ntfy_topic; do
       [[ -s /etc/opt/secrets/$f ]] || { echo "error: missing /etc/opt/secrets/$f" >&2; exit 1; }
     done
-    apt install -y jq curl
+    # msmtprc finds the password script by hostname
+    [[ $(hostname -s) == vpnsvcs ]] || { echo "error: hostname is not vpnsvcs" >&2; exit 1; }
+    # msmtp as on pve1, AppArmor profile on; the local override lets it run the password script
+    echo "msmtp msmtp/apparmor boolean true" | debconf-set-selections
+    apt install -y jq curl msmtp
+    cp certificates/msmtprc /etc/msmtprc
+    printf '%s\n' "/usr/bin/hostname PUx," "/root/homelab-rendered/src/vpnsvcs/msmtp_password.sh PUx," \
+      > /etc/apparmor.d/local/usr.bin.msmtp
+    apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
     install -d -m 700 /var/lib/deadman
     cp vpnsvcs/deadman.service /etc/systemd/system
     cp vpnsvcs/deadman.timer /etc/systemd/system
