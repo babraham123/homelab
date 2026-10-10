@@ -56,3 +56,5 @@ the TLS terminator, plus a hard startup dependency on GitHub.
   read-only. Remaining for the human: create the GitHub fork (nothing fetches it; it only records
   where the vendored copy comes from), then on each node run `traefik` and check the acceptance
   items.
+- 2026-10-10: Fork created; the vendored source is pushed to it as 92d799d on `main`. Remaining: run
+  `traefik` on each node and check the acceptance items.
