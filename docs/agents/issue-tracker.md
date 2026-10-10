@@ -8,6 +8,7 @@ Issues and specs for this repo live as markdown files in `planning/`.
 - The spec is `planning/<feature-slug>/spec.md`
 - Implementation issues are one file per ticket at `planning/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
+- A finished issue is closed with `Status: resolved` (`wontfix` closes one that won't be done)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
 ## When a skill says "publish to the issue tracker"

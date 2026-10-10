@@ -22,7 +22,7 @@ Set-Service -Name SunshineService -StartupType Manual
 - Install Oculus App
   - Run as admin: `C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe`
   - Start the App
-  - [Enable mDNS reflection](./router.md)
+  - [Enable mDNS reflection](./router.md#mdns)
   - On Quest 2, Settings > System > Link, enable Air link, pair with computer
 - Install Yuzu, Ryujinx
   - Download [keys](https://theprodkeys.com/yuzu-encryption-keys-are-missing/) and copy to correct folder location
@@ -54,7 +54,16 @@ curl -1sLf 'https://dl.cloudsmith.io/public/moonlight-game-streaming/moonlight-q
 sudo apt install -y moonlight-qt vim less iproute2 git netcat
 sudo apt update
 sudo apt upgrade
-sudo vim /etc/systemd/system/moonlight.service
+```
+- Install the service, rendered from `src/moonlight/moonlight.service.j2`
+```bash
+# From your local machine
+out=$(mktemp -d)/homelab-rendered
+tools/render_src.sh "$out"
+scp "$out/src/moonlight/moonlight.service" manualadmin@SUBDOMAIN:
+# On the Pi
+sudo install -m 644 moonlight.service /etc/systemd/system/
+sudo systemctl daemon-reload
 sudo systemctl enable moonlight.service
 ```
 - In the Moonlight GUI, set resolution to 1080p, refresh rate to 60Hz

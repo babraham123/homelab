@@ -1,5 +1,5 @@
 # Podman setup
-Initial setup to install Proxmox and configure it with the relevant scripts and services.
+Initial setup to install Podman on a Debian VM or the VPS and configure it with the relevant scripts and services.
 
 - Setup [Debian Linux](./debian.md)
 - Make sure to do VM Host setup for [PVE1](./pve1.md) and [PVE2](./pve2.md).
@@ -40,7 +40,7 @@ systemctl enable --now podman-auto-update.timer
 
 ## Networking
 - Account for conflicts between the podman network and the firewall, [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
-- On the VMs, reset the firewall. vpnsvcs keeps the rules from [its guide](./vpnsvcs.md#vpn-setup).
+- On the VMs, reset the firewall. vpnsvcs keeps the rules from [its guide](./vpnsvcs.md#add-public-endpoint).
 ```bash
 ufw reset
 # SSH, HTTP
@@ -78,13 +78,11 @@ cp /root/homelab-rendered/src/podman/containers.conf /etc/containers
 ```
 The secret helpers (`src/podman/*.sh`) run in place from `/root/homelab-rendered`;
 nothing is copied, so a deploy updates them.
-```bash
-```
 
 ## mDNS
 - Install dependencies and service
 ```bash
-src/debian/install_svcs.sh mdns_repeater
+/root/homelab-rendered/src/debian/install_svcs.sh mdns_repeater
 ```
 
 ## Monitoring

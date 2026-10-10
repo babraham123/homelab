@@ -15,7 +15,7 @@ nonlocal_bind() {
 
 case $1 in
   headscale)
-    # sqlite3 takes the consistent DB snapshot for backup_full.sh
+    # sqlite3 takes the consistent DB snapshot for backup.sh
     apt install -y sqlite3
     nonlocal_bind
     HS_VERSION=$(curl -s "https://api.github.com/repos/juanfont/headscale/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')

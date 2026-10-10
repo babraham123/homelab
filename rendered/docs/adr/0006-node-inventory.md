@@ -2,6 +2,10 @@
 
 Status: accepted (2026-09-27)
 
+Amended: service entries also carry image facts (`upstream`, `build`, `update_last`,
+`containers`), and `src/nodes.jinja` also outputs `images`, each node's images in update
+order, which the render checks against the quadlets' `Image=`.
+
 ## Context
 
 Four scripts reverse-engineered template variables from other files at render time:

@@ -194,7 +194,7 @@ another command. After editing secrets, push them with `secret_update.sh` (see
 
 ## Container networking
 
-Each container VM runs a single bridge network, `systemd-net`, where containers
+Each container VM and the VPS run a single bridge network, `systemd-net`, where containers
 resolve each other by name.
 
 ### Debug shell on the container network
@@ -210,7 +210,7 @@ podman run --rm -it --name=test --network=systemd-net \
   docker.io/library/debian:trixie-slim /bin/bash
 apt update -y && apt install -y iputils-ping net-tools dnsutils curl ldap-utils
 ping nginx
-curl nginx/404.html | head
+curl nginx:8100/does-not-exist | head
 ```
 
 ### HTTP checks
@@ -337,8 +337,10 @@ NODE_PATH=$(npm root -g) node   # paste in test/mdns.js
 
 Don't leave `avahi-daemon` running on the container network: it answers and consumes
 query responses meant for Zigbee2MQTT and other clients. mDNS crosses VLANs via the
-router's mDNS bridge; `mdns-repeater` flags are documented in
-[its source](https://github.com/devsecurity-io/mdns-repeater/blob/master/mdns-repeater.c#L581).
+router's mDNS bridge. On secsvcs, homesvcs, and websvcs the `mdns_repeater` service
+repeats mDNS between the VM's NIC and `systemd-net` (interfaces in
+`/etc/default/mdns-repeater`); flags are documented in
+[its source](https://github.com/babraham123/mdns-repeater).
 
 ## VPN: Headscale and Tailscale
 
@@ -384,7 +386,7 @@ Known issues:
 
 ### HAProxy (VPS)
 
-The [configuration manual](https://www.haproxy.org/download/2.6/doc/configuration.txt)
+The [configuration manual](https://docs.haproxy.org/3.0/configuration.html)
 is the authoritative reference. Headscale's control protocol runs over
 [`/ts2021`](https://github.com/juanfont/headscale/issues/526), which must be passed
 through untouched.
@@ -469,35 +471,20 @@ openssl verify -CAfile /root/ca/intermediate/certs/ca-chain.cert.pem CERT.pem
 ### Signing a cert manually with the internal CA
 
 Normally `src/certificates/self_signed_cert_gen.sh` does this. To sign one CSR by
-hand with the passphrase from SOPS (on pve1):
+hand (on pve1; the CA passphrase is stored nowhere, so type it):
 
 ```bash
 cd /root/ca
+read -rs -p "CA passphrase: " CA_PASS; echo
 openssl ca -config intermediate/openssl.cnf \
   -extensions server_cert -days 395 -notext -md sha256 \
-  -passin "pass:$(sops -d /root/secrets/pve1.yaml | yq ".cert_passphrase" | head -c -1)" \
+  -passin "pass:$CA_PASS" \
   -in intermediate/csr/HOST.csr.pem \
   -out intermediate/certs/HOST.cert.pem
+unset CA_PASS
 chmod 444 intermediate/certs/HOST.cert.pem
 openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/HOST.cert.pem
 ```
-
-### ACME DNS challenge
-
-Test certificate issuance with [lego](https://go-acme.github.io/lego/usage/cli/obtain-a-certificate/)
-and the [acme-dns](https://github.com/cpu/goacmedns) provider, independent of Traefik:
-
-```bash
-LEGO_DEBUG_CLIENT_VERBOSE_ERROR=1 \
-ACME_DNS_API_BASE=https://dns.janedoe.com \
-ACME_DNS_STORAGE_PATH=/etc/opt/lego/acme_dns_accounts.json \
-lego --path /var/opt/lego --email jdoe@gmail.com \
-  --dns acme-dns --domains "router.janedoe.com" --accept-tos --dns-timeout 30 \
-  --server https://acme-staging-v02.api.letsencrypt.org/directory \
-  run
-```
-
-Drop `--server` once staging succeeds.
 
 ### CAA records
 
@@ -629,7 +616,8 @@ systemctl start postgres
 
 | Endpoint | What |
 |----------|------|
-| `metrics.janedoe.com/targets` | Scrape targets and their errors |
+| `metrics.janedoe.com/targets` | secsvcs scrape targets and their errors |
+| `vmagent:8429/targets` | Scrape targets on homesvcs, websvcs, vpnsvcs (from `systemd-net` on that node) |
 | `metrics.janedoe.com/vmui` | Ad hoc metric queries |
 | `logs.janedoe.com/select/vmui` | Ad hoc log queries |
 | `vmalert.janedoe.com` | Alert rules, current state |
@@ -654,12 +642,17 @@ curl -u "$VM_AUTH" -d 'test_measurement,host=debug value=1' \
 curl -u "$VL_AUTH" https://logs.janedoe.com/select/logsql/query \
   --data-urlencode 'query=_time:15m error'
 
-# Alerts currently firing
-curl https://vmalert.janedoe.com/api/v1/alerts
+# Alerts currently firing (vmalert.janedoe.com is behind Authelia; run from a debug
+# container on systemd-net on secsvcs, see Container networking)
+curl http://vmalert:8880/api/v1/alerts
+
+# Scrape targets on homesvcs, websvcs, vpnsvcs (debug container on that node)
+curl http://vmagent:8429/targets
 ```
 
 If logs are missing, check `journalctl -eu fluentbit` on the source VM. If metrics are
-missing, check the target on the targets page, then `vmagent` logs on that VM.
+missing, check the target on `metrics.janedoe.com/targets` (secsvcs) or that node's
+`vmagent:8429/targets`, then `journalctl -eu vmagent` there.
 
 ## Notifications: ntfy and email
 
@@ -671,15 +664,18 @@ curl -u ":TOKEN" -d "hello" https://push.janedoe.com/TOPIC
 ```
 
 ntfy also accepts email-to-topic over SMTP. `test/email.txt.j2` is a raw SMTP
-session:
+session. Traefik exposes it only as SMTPS on 465; plain SMTP on port 25 is reachable
+only from `systemd-net` on secsvcs:
 
 ```bash
-apt install -y netcat-openbsd
-nc -N push.janedoe.com 25 < test/email.txt
 openssl s_client -connect push.janedoe.com:465 -quiet < test/email.txt
+# Plain SMTP, from secsvcs
+podman run -i --rm --net systemd-net docker.io/nicolaka/netshoot:latest \
+  nc ntfy 25 < test/email.txt
 ```
 
-Test outbound mail from a host (used by cert_notifier and other alerts):
+Test outbound mail (used by cert_notifier and other alerts). msmtp is configured
+only on pve1 and vpnsvcs:
 
 ```bash
 echo "test" | msmtp jdoe@gmail.com
@@ -739,7 +735,7 @@ Key Proxmox settings if the router VM has to be rebuilt:
 | Disk | VirtIO SCSI single, discard on, IO thread, SSD emulation, no cache |
 | Boot order | `scsi0`, `ide2` |
 | Startup order | 1 (boots before everything else) |
-| Network | VirtIO on `vmbr0`, firewall on; keep the old MAC so DHCP reservations hold |
+| Network | None at creation; after install attach `vmbr0` (VirtIO, firewall on) to share connectivity with the PVE host; keep the old MAC so DHCP reservations hold |
 | PCI devices | NIC ports passed through as `hostpci0`–`hostpci3`, in port order |
 
 ## Host administration

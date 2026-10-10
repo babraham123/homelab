@@ -116,7 +116,7 @@ flowchart TB
         direction TB
         root["Root CA<br/>src/certificates/openssl.root.cnf"]
         inter["Intermediate CA<br/>pathlen:0, 30-day CRLs"]
-        svc["Per-service certs + client certs:<br/>authelia, lldap, postgres, traefik,<br/>gatus, grafana, mosquitto, zigbee2mqtt, guacamole"]
+        svc["Server certs: authelia, lldap, postgres,<br/>mosquitto, each Traefik<br/>Client certs: each Traefik,<br/>zigbee2mqtt, Home Assistant"]
         root -- "signs" --> inter -- "issues" --> svc
     end
 
@@ -232,4 +232,5 @@ fail2ban with a custom jail, and only 2202 (SSH), 80, 443, 3478 (STUN), and 4164
   there; containment relies on VLAN firewall rules.
 - Wired VLAN enforcement waits on a managed switch.
 
-These are tracked as issues under `planning/`.
+Only the ACLs are tracked as an issue
+([router/03](../planning/router/issues/03-headscale-acl-matrix.md)).

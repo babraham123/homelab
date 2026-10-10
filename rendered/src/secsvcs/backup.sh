@@ -12,7 +12,7 @@ source /root/homelab-rendered/src/debian/backup_lib.sh
 
 stage_init
 
-# Postgres: Authelia, LLDAP, Gatus, Guacamole and Isso state. Connect via the container
+# Postgres: Authelia, LLDAP, Gatus, Grafana and Guacamole state. Connect via the container
 # hostname, not the socket or loopback, so pg_hba's scram-sha-256 rule applies instead
 # of the image's trust rules.
 dir=$(dump_dir postgres)

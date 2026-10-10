@@ -42,24 +42,6 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_guacd)
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh guacd
     ;;
-  install_archivebox)
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh archivebox
-    ;;
-  install_finance_exporter)
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh finance_exporter
-    ;;
-  install_go2rtc)
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh go2rtc
-    ;;
-  install_piper)
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh piper
-    ;;
-  install_whisper)
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh whisper
-    ;;
-  install_openwakeword)
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh openwakeword
-    ;;
   install_fluentbit)
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh fluentbit
     ;;
@@ -74,12 +56,6 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh isso
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh guacamole
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh guacd
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh archivebox
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh finance_exporter
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh go2rtc
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh piper
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh whisper
-    sudo /root/homelab-rendered/src/websvcs/install_svcs.sh openwakeword
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh fluentbit
     sudo /root/homelab-rendered/src/websvcs/install_svcs.sh snapraid
     ;;

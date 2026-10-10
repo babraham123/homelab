@@ -5,7 +5,8 @@ Setups PVE1 from scratch to run pfsense as a VM on proxmox. You probably want a 
 - Make a [usb installer](https://www.lewan.com/blog/2012/02/10/making-a-bootable-usb-stick-on-an-apple-mac-os-x-from-an-iso) with proxmox [iso](https://www.proxmox.com/en/downloads/category/iso-images-pve)
 ```bash
 cd Downloads
-hdiutil convert -format UDRW -o proxmox.img proxmox-ve_8.0-2.iso
+# The latest proxmox-ve_9.x ISO
+hdiutil convert -format UDRW -o proxmox.img proxmox-ve_9.X-Y.iso
 mv proxmox.img.dmg proxmox.img
 diskutil list
 diskutil unmountDisk /dev/disk2

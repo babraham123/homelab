@@ -48,8 +48,8 @@ journalctl -eu authelia
 ```
 
 - Setup LLDAP
-  - In the traefik dynamic config, comment out the authelia middleware from the lldap service (line 33)
-    `vim /etc/opt/traefik/config/dynamic/traefik.yml`
+  - In the traefik dynamic config, give the lldap router its own middlewares without authelia: `middlewares: [secure-headers@file]`
+    `vim /etc/opt/traefik/config/dynamic/routes.yml`
   - Navigate to `ldap.janedoe.com` and login
     User = admin, get the password below
     `/root/homelab-rendered/src/podman/get_secret.sh lldap_admin_password`
@@ -58,8 +58,8 @@ journalctl -eu authelia
     - jane, jayden, jasper, 
   - Create the `authelia_gen_access`, `headscale_access` and `command_general` groups, add users to them
   - Create the `grafana_admin`, `hass_admin` and `command_admin` groups, add your user to it
-  - Uncomment out the authelia middleware
-    `vim /etc/opt/traefik/config/dynamic/traefik.yml`
+  - Restore the authelia middleware by reinstalling the traefik config
+    `/root/homelab-rendered/src/secsvcs/install_svcs.sh traefik`
 
 - Confirm that authelia is working, open https://auth.janedoe.com
 
@@ -115,7 +115,7 @@ systemctl stop postgres
 - Upgrade and restore from backup
 ```bash
 cd /root/backups
-src/secsvcs/install_svcs.sh postgres
+/root/homelab-rendered/src/secsvcs/install_svcs.sh postgres
 gunzip FILE.sql.gz
 container=$(podman container ls | grep postgres | awk '{print $1}')
 podman exec -it --user 70 "$container" psql -U postgres < FILE.sql

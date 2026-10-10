@@ -30,10 +30,11 @@ case $1 in
     install -D -m 644 -t /etc/opt/zigbee2mqtt/config zigbee2mqtt/*.yaml
     install -D -m 644 -t /etc/containers/systemd zigbee2mqtt/zigbee2mqtt.container zigbee2mqtt/z2mdb.volume
     ;;
-  esphome)
-    install -D -m 644 -t /etc/opt/esphome/config esphome/*.yaml
-    install -D -m 644 -t /etc/containers/systemd esphome/esphome.container
-    ;;
+  # Not in use: uncomment and add to src/nodes.yml to install again
+#   esphome)
+#     install -D -m 644 -t /etc/opt/esphome/config esphome/*.yaml
+#     install -D -m 644 -t /etc/containers/systemd esphome/esphome.container
+#     ;;
   home_assistant)
     mkdir -p /etc/opt/home_assistant/certs
     mkdir -p /var/opt/home_assistant/media/recordings

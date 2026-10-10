@@ -5,12 +5,13 @@
 
 set -euo pipefail
 
-function install_wyoming() {
-  rm -rf /etc/opt/wyoming/src
-  mkdir -p /etc/opt/wyoming/src
-  wget "https://github.com/rhasspy/wyoming-addons/archive/refs/heads/main.tar.gz" -O - | \
-    tar -xz -C /etc/opt/wyoming/src --strip-components=1
-}
+# Only the wyoming cases, not in use, call this
+# function install_wyoming() {
+#   rm -rf /etc/opt/wyoming/src
+#   mkdir -p /etc/opt/wyoming/src
+#   wget "https://github.com/rhasspy/wyoming-addons/archive/refs/heads/main.tar.gz" -O - | \
+#     tar -xz -C /etc/opt/wyoming/src --strip-components=1
+# }
 
 cd /root/homelab-rendered/src
 
@@ -59,67 +60,68 @@ case $1 in
     mkdir -p /etc/opt/guacd
     install -D -m 644 -t /etc/containers/systemd guacamole/guacd.container
     ;;
-  archivebox)
-    mkdir -p /var/opt/archivebox
-    chown -R 911:911 /var/opt/archivebox
-    install -D -m 644 -t /etc/containers/systemd archivebox/archivebox.container archivebox/chromium.volume
-
-    rm -rf /etc/opt/novnc/src
-    mkdir -p /etc/opt/novnc/src
-    wget "https://github.com/babraham123/docker-novnc/archive/refs/heads/master.tar.gz" -O - | \
-      tar -xz -C /etc/opt/novnc/src --strip-components=1
-    podman build -t novnc /etc/opt/novnc/src
-    install -D -m 644 -t /etc/containers/systemd archivebox/novnc.container
-    ;;
-  finance_exporter)
-    rm -rf /etc/opt/finance_exporter/src
-    mkdir -p /etc/opt/finance_exporter/src
-    install -D -m 644 -t /etc/opt/finance_exporter finance_exporter/config.yaml
-    wget "https://github.com/babraham123/finance-exporter/archive/refs/heads/main.tar.gz" -O - | \
-      tar -xz -C /etc/opt/finance_exporter/src --strip-components=1
-    podman build -t finance_exporter /etc/opt/finance_exporter/src
-    install -D -m 644 -t /etc/containers/systemd finance_exporter/finance_exporter.container
-    ;;
-  go2rtc)
-    install -D -m 644 -t /etc/opt/go2rtc go2rtc/config.yaml
-    install -D -m 644 -t /etc/containers/systemd go2rtc/go2rtc.container
-    ;;
-  piper)
-    mkdir -p /etc/opt/piper
-    mkdir -p /var/opt/piper
-    install_wyoming
-    WP_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-piper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    WY_VERSION=$(curl -s "https://api.github.com/repos/OHF-voice/wyoming/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    # TODO: Watch for migration to https://github.com/OHF-Voice/piper1-gpl
-    PI_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/piper/releases" | grep -Po '"tag_name": "v\K[0-9.]+' | head -1)
-
-    podman build -t piper /etc/opt/wyoming/src/piper \
-      --build-arg WYOMING_PIPER_VERSION="$WP_VERSION" \
-      --build-arg WYOMING_VERSION="$WY_VERSION" \
-      --build-arg BINARY_PIPER_VERSION="$PI_VERSION" \
-      --build-arg TARGETARCH="amd64" --build-arg TARGETVARIANT=""
-    install -D -m 644 -t /etc/containers/systemd wyoming/piper.container
-    ;;
-  whisper)
-    mkdir -p /etc/opt/whisper
-    mkdir -p /var/opt/whisper
-    install_wyoming
-    WW_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-faster-whisper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    
-    podman build -t whisper /etc/opt/wyoming/src/whisper \
-      --build-arg WYOMING_WHISPER_VERSION="$WW_VERSION"
-    install -D -m 644 -t /etc/containers/systemd wyoming/whisper.container
-    ;;
-  openwakeword)
-    mkdir -p /etc/opt/openwakeword
-    mkdir -p /var/opt/openwakeword
-    install_wyoming
-    OW_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-openwakeword/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    
-    podman build -t openwakeword /etc/opt/wyoming/src/openwakeword \
-      --build-arg WYOMING_OPENWAKEWORD_VERSION="$OW_VERSION"
-    install -D -m 644 -t /etc/containers/systemd wyoming/openwakeword.container
-    ;;
+  # Not in use: uncomment and add to src/nodes.yml to install again
+#   archivebox)
+#     mkdir -p /var/opt/archivebox
+#     chown -R 911:911 /var/opt/archivebox
+#     install -D -m 644 -t /etc/containers/systemd archivebox/archivebox.container archivebox/chromium.volume
+#
+#     rm -rf /etc/opt/novnc/src
+#     mkdir -p /etc/opt/novnc/src
+#     wget "https://github.com/babraham123/docker-novnc/archive/refs/heads/master.tar.gz" -O - | \
+#       tar -xz -C /etc/opt/novnc/src --strip-components=1
+#     podman build -t novnc /etc/opt/novnc/src
+#     install -D -m 644 -t /etc/containers/systemd archivebox/novnc.container
+#     ;;
+#   finance_exporter)
+#     rm -rf /etc/opt/finance_exporter/src
+#     mkdir -p /etc/opt/finance_exporter/src
+#     install -D -m 644 -t /etc/opt/finance_exporter finance_exporter/config.yaml
+#     wget "https://github.com/babraham123/finance-exporter/archive/refs/heads/main.tar.gz" -O - | \
+#       tar -xz -C /etc/opt/finance_exporter/src --strip-components=1
+#     podman build -t finance_exporter /etc/opt/finance_exporter/src
+#     install -D -m 644 -t /etc/containers/systemd finance_exporter/finance_exporter.container
+#     ;;
+#   go2rtc)
+#     install -D -m 644 -t /etc/opt/go2rtc go2rtc/config.yaml
+#     install -D -m 644 -t /etc/containers/systemd go2rtc/go2rtc.container
+#     ;;
+#   piper)
+#     mkdir -p /etc/opt/piper
+#     mkdir -p /var/opt/piper
+#     install_wyoming
+#     WP_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-piper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+#     WY_VERSION=$(curl -s "https://api.github.com/repos/OHF-voice/wyoming/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+#     # TODO: Watch for migration to https://github.com/OHF-Voice/piper1-gpl
+#     PI_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/piper/releases" | grep -Po '"tag_name": "v\K[0-9.]+' | head -1)
+#
+#     podman build -t piper /etc/opt/wyoming/src/piper \
+#       --build-arg WYOMING_PIPER_VERSION="$WP_VERSION" \
+#       --build-arg WYOMING_VERSION="$WY_VERSION" \
+#       --build-arg BINARY_PIPER_VERSION="$PI_VERSION" \
+#       --build-arg TARGETARCH="amd64" --build-arg TARGETVARIANT=""
+#     install -D -m 644 -t /etc/containers/systemd wyoming/piper.container
+#     ;;
+#   whisper)
+#     mkdir -p /etc/opt/whisper
+#     mkdir -p /var/opt/whisper
+#     install_wyoming
+#     WW_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-faster-whisper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+#
+#     podman build -t whisper /etc/opt/wyoming/src/whisper \
+#       --build-arg WYOMING_WHISPER_VERSION="$WW_VERSION"
+#     install -D -m 644 -t /etc/containers/systemd wyoming/whisper.container
+#     ;;
+#   openwakeword)
+#     mkdir -p /etc/opt/openwakeword
+#     mkdir -p /var/opt/openwakeword
+#     install_wyoming
+#     OW_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-openwakeword/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+#
+#     podman build -t openwakeword /etc/opt/wyoming/src/openwakeword \
+#       --build-arg WYOMING_OPENWAKEWORD_VERSION="$OW_VERSION"
+#     install -D -m 644 -t /etc/containers/systemd wyoming/openwakeword.container
+#     ;;
   fluentbit)
     install -D -m 644 fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
     install -D -m 644 -t /etc/opt/fluentbit fluentbit/journald.lua
@@ -145,6 +147,7 @@ case $1 in
       # No disks declared in vars.yml yet: the timers would only fail
       systemctl disable --now snapraid-sync.timer snapraid-scrub.timer 2> /dev/null || true
     fi
+    exit 0
     ;;
   *)
     echo "error: unknown service: $1" >&2

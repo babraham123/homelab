@@ -5,7 +5,7 @@ Initial setup for any Debian Linux instance. Configures the shell, ssh access an
 
 ## OS
 [Vid](https://www.youtube.com/watch?v=XEoO1FgIel4)
-- If running, temporarily stop the vm_watchdog service on PVE1.
+- If running, temporarily stop the vm_watchdog service on the VM's Proxmox host.
 - Use graphical install, run through the options.
   - Leave name blank, username: manualadmin
   - Partition disks: Guided - use entire disk
@@ -127,7 +127,8 @@ exit
 ```
 
 ## Backups
-- Setup a destination
+- Setup a destination for manual dumps. The weekly backup stages in `/var/opt/backups`
+  itself, see [Services](../services.md#storage-and-backups).
 ```bash
 mkdir /root/backups
 chmod 700 /root/backups

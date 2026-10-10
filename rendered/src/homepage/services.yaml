@@ -116,10 +116,10 @@
         icon: zigbee2mqtt.svg
         href: https://zigbee.janedoe.com/
         description: Zigbee network manager
-    - ESPHome:
-        icon: esphome.svg
-        href: https://iot.janedoe.com/
-        description: IoT device framework
+    # - ESPHome:
+    #     icon: esphome.svg
+    #     href: https://iot.janedoe.com/
+    #     description: IoT device framework
 
 # - Life:
 #     - Mealie:

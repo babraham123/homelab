@@ -8,7 +8,7 @@ Guide to setup websvcs on PVE2. Just service installation.
 - Generate init script. [Ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
 ```bash
 sudo su
-podman run --rm docker.io/guacamole/guacamole:1.6 /opt/guacamole/bin/initdb.sh --postgresql > initdb.sql
+podman run --rm docker.io/guacamole/guacamole:1.6.0 /opt/guacamole/bin/initdb.sh --postgresql > initdb.sql
 scp initdb.sql manualadmin@secsvcs:/home/manualadmin
 
 ssh manualadmin@secsvcs
@@ -32,7 +32,7 @@ src/websvcs/install_svcs.sh homepage
 src/websvcs/install_svcs.sh isso
 src/websvcs/install_svcs.sh guacd
 src/websvcs/install_svcs.sh guacamole
-src/websvcs/install_svcs.sh archivebox
+# src/websvcs/install_svcs.sh archivebox
 
 # src/websvcs/install_svcs.sh go2rtc
 # src/websvcs/install_svcs.sh piper

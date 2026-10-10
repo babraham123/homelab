@@ -33,9 +33,6 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   install_zigbee2mqtt)
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh zigbee2mqtt
     ;;
-  install_esphome)
-    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh esphome
-    ;;
   install_home_assistant)
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh home_assistant
     ;;
@@ -47,7 +44,6 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh vmagent
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh mosquitto
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh zigbee2mqtt
-    sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh esphome
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh home_assistant
     sudo /root/homelab-rendered/src/homesvcs/install_svcs.sh fluentbit
     ;;

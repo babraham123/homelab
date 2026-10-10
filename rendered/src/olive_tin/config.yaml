@@ -361,14 +361,6 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: homesvcs Install Esphome
-              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
-              shell: ssh autoadmin@homesvcs install_esphome
-              id: homesvcs_install_esphome
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
               title: homesvcs Install Home Assistant
               icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
               shell: ssh autoadmin@homesvcs install_home_assistant
@@ -521,54 +513,6 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_guacd
               id: websvcs_install_guacd
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: websvcs Install Archivebox
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_archivebox
-              id: websvcs_install_archivebox
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: websvcs Install Finance Exporter
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_finance_exporter
-              id: websvcs_install_finance_exporter
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: websvcs Install Go2rtc
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_go2rtc
-              id: websvcs_install_go2rtc
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: websvcs Install Piper
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_piper
-              id: websvcs_install_piper
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: websvcs Install Whisper
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_whisper
-              id: websvcs_install_whisper
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: websvcs Install Openwakeword
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_openwakeword
-              id: websvcs_install_openwakeword
               maxConcurrent: 1
               timeout: 60
 

@@ -2,7 +2,7 @@
 Initial setup for the primary VM host, PVE1. Handles the self signed CA and other certificates, secrets management, notifications and VM management services.
 
 - Make sure that [Proxmox setup](./proxmox.md) has been completed.
-- Create the secsvcs, homesvcs and websvcs VMs. Configure podman on them.
+- Create the secsvcs and homesvcs VMs (websvcs is on [PVE2](./pve2.md)). Configure podman on them.
 - PVE1 is where some maintenance actions occur, like refreshing TLS certs.
 
 ## Configs
@@ -190,7 +190,7 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/w
 ### Manage certs
 - Create domain specific keys and certs
 ```bash
-# Wait until the services in vpnsvcs, secsvcs, websvcs and homesvcs are setup but not yet started
+# Wait until the services in secsvcs, websvcs and homesvcs are setup but not yet started
 /root/homelab-rendered/src/certificates/self_signed_key_gen.sh
 /root/homelab-rendered/src/certificates/self_signed_cert_gen.sh
 ```
@@ -205,7 +205,7 @@ cd /root/acme
 TCD_VERSION=$(curl -s "https://api.github.com/repos/ldez/traefik-certs-dumper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
 wget "https://github.com/ldez/traefik-certs-dumper/releases/download/v${TCD_VERSION}/traefik-certs-dumper_v${TCD_VERSION}_linux_amd64.tar.gz" -O - | tar xz
 mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
-# Wait until the services in vpnsvcs, secsvcs, websvcs and homesvcs are started
+# Wait until the services in secsvcs, websvcs and homesvcs are started
 /root/homelab-rendered/src/certificates/acme_transfer.sh
 ```
 
@@ -234,4 +234,12 @@ apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
 cd /root/homelab-rendered
 cp src/certificates/msmtprc /etc
 src/pve1/install_svcs.sh cert_notifier
+```
+
+## Backups
+- Install the weekly backup. First add the `pbs2` storage and the client key from the
+  [Proxmox guide](./proxmox.md#backups).
+```bash
+cd /root/homelab-rendered
+src/pve1/install_svcs.sh backup_orchestrator
 ```

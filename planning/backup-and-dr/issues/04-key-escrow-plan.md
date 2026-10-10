@@ -26,7 +26,7 @@ Write `docs/guides/escrow.md` and implement it:
 3. **Second AGE recipient.** Generate an offline AGE key kept only on the sticks and add
    its public key as a recipient in `secret_update.sh` (`-R /root/secrets/age_escrow.pub`)
    so a future re-encryption of the secret files is possible without pve1.
-4. **Refresh cadence** (quarterly, or on any CA/secret rotation) and a checklist in
+4. **Refresh cadence** (annual, or on any CA/secret rotation) and a checklist in
    `docs/maintenance.md`.
 5. A `commands.sh export_escrow` on pve1 that assembles the bundle into an `age -p`
    encrypted tarball in one step, so the refresh is a single command + passphrase.

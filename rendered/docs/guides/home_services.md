@@ -70,7 +70,12 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 3232,8266,2040,88
   - Search MQTT and add
   - Set the broker hostname (mqtt.janedoe.com) and port (8883). Press Submit
   - Enable "Use a client certificate", set Broker cert validation to "Auto". Press Submit
-  - From personal computer: `scp 'manualadmin@homesvcs:/home/manualadmin/home.janedoe.com.*' ~/Downloads`
+  - From personal computer, copy out the client cert and key installed under `/etc/opt/home_assistant/certs`
+```bash
+ssh -t manualadmin@homesvcs 'sudo install -m 600 -o manualadmin /etc/opt/home_assistant/certs/client.pem /etc/opt/home_assistant/certs/client.key ~'
+scp 'manualadmin@homesvcs:client.*' ~/Downloads
+ssh manualadmin@homesvcs 'rm ~/client.pem ~/client.key'
+```
   - Upload the client cert and key. Press Submit
 - Connect to InfluxDB
   - Go to Settings >> Devices & Services >> Add Integration
@@ -79,7 +84,10 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 3232,8266,2040,88
   - To get the token, run `/root/homelab-rendered/src/podman/get_secret.sh victoriametrics_admin_creds_hash`
 - Create the backup token
   - As the `admin` user, go to Profile >> Security >> Long-lived access tokens >> Create token
-  - Store as `hass_backup_token` in src/homesvcs/secrets_template.yaml
+  - Store it as `hass_backup_token` in the homesvcs secrets
+```bash
+ssh -t manualadmin@pve1 'sudo /root/homelab-rendered/src/pve1/secret_update.sh homesvcs'
+```
 - Install HACS
   - Run the installer script
 ```bash

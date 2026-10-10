@@ -117,7 +117,6 @@ nodes:
       vmagent: {}
       mosquitto: {}
       zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt}
-      esphome: {subdomain: iot, uptime: esphome}
       home_assistant: {subdomain: home, uptime: home assistant, uptime_tier: 1}
       fluentbit: {}
     install_all_svcs: true
@@ -142,12 +141,6 @@ nodes:
       isso: {subdomain: comment}
       guacamole: {subdomain: remote, uptime: guacamole}
       guacd: {}
-      archivebox: {subdomain: archive, uptime: archivebox}
-      finance_exporter: {}
-      go2rtc: {}
-      piper: {}
-      whisper: {}
-      openwakeword: {}
       fluentbit: {}
       snapraid: {}
     install_all_svcs: true

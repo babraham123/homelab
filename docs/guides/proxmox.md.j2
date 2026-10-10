@@ -158,7 +158,7 @@ lsusb -t
 - Watchdog to prevent stuck VM
 ```bash
 sudo su
-src/debian/install_svcs.sh vm_watchdog
+/root/homelab-rendered/src/debian/install_svcs.sh vm_watchdog
 ```
 
 ## Networking
@@ -204,8 +204,6 @@ ufw allow in from any to any port 8007 proto tcp
 - Further [setup](https://www.youtube.com/watch?v=33ubleU4OFc), [setup2](https://www.youtube.com/watch?v=Px5eHcUKbbQ)
   - Storage >> Directory >> Create: Directory
   - Datastore >> backup1
-    - Content tab >> Add Namespace
-      - Add namespaces for pve1, pve2 under Root
     - Prune & GC tab: leave empty, both come from `prune.sh` (below)
 
 - Namespaces under Root: `pve1` and `pve2` for the VM images (and `host/vpnsvcs`),
@@ -227,16 +225,20 @@ proxmox-backup-client key create --kdf none /root/secrets/pbs_client.key
 chmod 400 /root/secrets/pbs_client.key
 ```
 - PVE storage on both hosts, [ref](https://pbs.proxmox.com/docs/pve-integration.html).
-  No fingerprint: the PBS cert is Let's Encrypt derived (`acme_transfer.sh`).
+  The PBS cert fingerprint is pinned; `acme_transfer.sh` (pve1) and `install_certs_and_keys`
+  (pve2) re-pin it after each cert change.
 ```bash
+# pve2: the fingerprint
+proxmox-backup-manager cert info | grep Fingerprint
 # pve1: the token, the key, namespace pve1
 pvesm add pbs pbs2 --server pbs2.{{ site.url }} --datastore backup1 --namespace pve1 \
   --username 'pve1@pbs!backup' --password "$(sops -d /root/secrets/pve1.yaml | yq .pbs2_backup_token)" \
-  --encryption-key /root/secrets/pbs_client.key --content backup
-# pve2: PBS is local; root@pam, namespace pve2. Same key (copied from pve1) so every
-# image in the datastore is ciphertext.
+  --fingerprint 'FINGERPRINT' --encryption-key /root/secrets/pbs_client.key --content backup
+# pve2: PBS is local; root@pam, namespace pve2. Same key, copied from pve1 to the same
+# path, so every image in the datastore is ciphertext.
 pvesm add pbs pbs2 --server pbs2.{{ site.url }} --datastore backup1 --namespace pve2 \
-  --username root@pam --password ROOT_PASSWORD --encryption-key /root/pbs_client.key --content backup
+  --username root@pam --password ROOT_PASSWORD --fingerprint 'FINGERPRINT' \
+  --encryption-key /root/secrets/pbs_client.key --content backup
 pvesm status
 ```
 - No backup jobs in the PVE UI (Datacenter >> Backup must be empty on both hosts) and
@@ -268,10 +270,12 @@ ufw allow in from {{ secsvcs.ip }} to any port 9100 proto tcp
   - Go to Datacenter >> Permissions >> Users >> Add, name = api_ro
   - Go to Permissions >> Add >> User Permission
   - path = /, user = api_ro@pam, role = PVEAuditor, propagate = check
-  - For PBS, Permissions -> Access Control, PVEAuditor -> Audit. Generate a user password:
+  - For PBS, Permissions -> Access Control, PVEAuditor -> Audit. Generate a user password,
+    stored as `pbs2_api_password`:
 ```bash
 ssh manualadmin@pve1
-sudo /root/homelab-rendered/src/pve1/secret_update.sh pve1
+sudo su
+sops /root/secrets/pve1.yaml
 ```
 
 Perform these steps after pve1, secsvcs and victoriametrics is configured (do this for pve1, pve2 and pbs2). [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
@@ -295,7 +299,7 @@ echo -n "admin:$password" | base64
 
 ### Minor version
 Consider pinning the kernel version
-- [PVE 8.4 guide](https://pve.proxmox.com/wiki/Downloads#Update_a_running_Proxmox_Virtual_Environment_8.x_to_latest_8.4)
+- [PVE 9.2 guide](https://pve.proxmox.com/wiki/Downloads#Update_a_running_Proxmox_Virtual_Environment_9_to_latest_9.2)
 ```bash
 sudo su
 apt update

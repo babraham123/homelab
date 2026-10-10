@@ -2043,14 +2043,12 @@ identity_providers:
         ## Audience this client is allowed to request.
         audience:
           - 'https://alert.janedoe.com'
-          - 'https://archive.janedoe.com'
           - 'https://auth.janedoe.com'
           - 'https://command.janedoe.com'
           - 'https://dash.janedoe.com'
           - 'https://graph.janedoe.com'
           - 'https://home.janedoe.com'
           - 'https://homeproxy.janedoe.com'
-          - 'https://iot.janedoe.com'
           - 'https://logs.janedoe.com'
           - 'https://metrics.janedoe.com'
           - 'https://push.janedoe.com'

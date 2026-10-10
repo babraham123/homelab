@@ -51,8 +51,8 @@ flowchart TB
     end
 
     subgraph store["Storage and backup"]
-        pbs2["Proxmox Backup Server (pbs2) on pve2<br/>VM disks, prune/GC"]
-        hdds["WD HDDs + Blu-ray<br/>bought, not installed in pve2"]
+        pbs2["Proxmox Backup Server (pbs2) on pve2<br/>VM images + host files, prune/GC"]
+        hdds["WD HDDs (websvcs media array) + Blu-ray<br/>bought, not installed in pve2"]
     end
 
     inet -- "TLS :443" --> haproxy
@@ -71,8 +71,8 @@ flowchart TB
     ap -. "VLAN 12" .-> guest
     zigbee -. "Zigbee2MQTT" .-> homesvcs
     sw -.- wdev
-    pve1 -. "backup" .-> pbs2
-    pve2 -. "backup" .-> pbs2
+    pve1 -. "backup_orchestrator:<br/>images + host files" .-> pbs2
+    pve2 -. "images" .-> pbs2
 
     style cloud stroke:#38bdf8,stroke-width:2px,fill:transparent
     style pve1 stroke:#a78bfa,stroke-width:2px,fill:transparent
@@ -144,9 +144,9 @@ pve2 runs `websvcs`, `devtop`, the Windows `gaming` VM, and Proxmox Backup Serve
 ### vpnsvcs: cloud VPS
 
 Smallest Linode shared-CPU instance. The only machine with a public IP. Runs HAProxy,
-Headscale, Tailscale, the GeoIP map generator and the dead-man checker directly on
-the host, as is node_exporter; Fluent Bit and vmagent are Podman quadlets on a
-bridge network with no published ports, as on the VMs.
+Headscale, Tailscale, the dead-man checker and node_exporter directly on the host;
+Fluent Bit, vmagent and the GeoIP map generator (weekly timer) are Podman quadlets on
+a bridge network with no published ports, as on the VMs.
 
 ### Network gear and peripherals
 
@@ -154,7 +154,7 @@ bridge network with no published ports, as on the VMs.
 |--------|--------|-------|
 | TP-Link EAP660 HD WiFi 6 AP | deployed | wall-mounted, tagged VLANs for trusted/IoT/guest SSIDs |
 | SMLight SLZB-06 Zigbee adapter | deployed | used by Zigbee2MQTT on `homesvcs` |
-| HDDs (WD 3.5") + Blu-ray drive | bought, not yet installed | future bulk media/backup storage on pve2 |
+| HDDs (WD 3.5") + Blu-ray drive | bought, not yet installed | HDDs: websvcs media array on pve2, snapraid + mergerfs ([backup-and-dr/13](../planning/backup-and-dr/issues/13-pve2-media-array.md)) |
 | 24-port PoE+ managed switch | planned | unblocks the wired VLANs (20/21) |
 | 4G LTE failover modem | planned | pfSense WAN failover |
 | Rack, patch panel, UPS, PiKVM | planned | |

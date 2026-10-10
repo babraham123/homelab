@@ -11,7 +11,10 @@
 
 - `vars.yml` contains specific/personal values for rendering (gitignored), `vars.template.yml` is an example
 - All `*.j2` files are processed through Jinja2 via `jinjanate` at render time
-- `*.j2.j2` files undergo a *second* render pass at service startup (e.g., for secrets injection via `src/podman/render_secrets.sh`)
+- `*.j2.j2` files undergo a *second* render pass on the node, by one of the `src/podman/render_*.sh` scripts:
+  - `render_host.sh`, at install time from `install_svcs.sh`: per-node values in the vmagent and Fluent Bit quadlets
+  - `render_secrets.sh`, at container start (`ExecStartPre`): secrets injection
+  - `render_services.sh`, at container start: Fluent Bit's config, with the node's "Homelab:" units
 - `src/nodes.yml` is the node inventory: each node's dispatcher entries (services in install order, other commands) and each service's subdomain, Gatus endpoint and container image facts (`upstream`/`build`, `update_last`, `containers`). `render_src.sh` appends it to `vars.yml` as `nodes:` in a private temp `all_vars.yml`, and templates import `src/nodes.jinja` for the lists derived from it (dispatcher cases, sudoers grants, OliveTin buttons, DNS/SNI subdomains, uptime endpoints, image update order). See [ADR 0006](adr/0006-node-inventory.md)
 
 ### Service Structure
@@ -58,7 +61,7 @@ flowchart TB
 
     subgraph node["On the node"]
         dispatch["install_&lt;svc&gt; → dispatcher.sh whitelist<br/>→ install_svcs.sh → quadlets into<br/>/etc/containers/systemd"]
-        second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with SOPS/AGE secrets"]
+        second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with SOPS/AGE secrets<br/>(render_host.sh already ran at install)"]
     end
 
     vars --> allvars
@@ -83,8 +86,9 @@ flowchart TB
 
 Only validated output ever ships, and secrets only materialize inside the node at
 container start; the rendered tree on disk still has secret placeholders in its
-`*.j2` files. `deploy_src.sh` runs render + upload for every node in one command
-(the gaming VM is skipped when powered off).
+`*.j2` files. `deploy_src.sh` runs render + upload for every node in one command,
+and archives the repo plus `vars.yml` to pve1 (`archive_repo`). It always skips the gaming
+VM and prints the upload command to run once it's started.
 
 ## Deploy changes
 

@@ -39,5 +39,5 @@ Maintenance:
   - Go to Services >> DNS Resolver >> Custom options, paste in config
 
 ## Backups
-- VM >> Backup >> Backup now
-- Datacenter >> Backup >> Add / Edit
+- No PVE backup jobs: the weekly run images every VM, see [Services](../services.md#storage-and-backups).
+  Restores: [the restore guide](./restore.md).

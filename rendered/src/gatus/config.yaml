@@ -119,10 +119,6 @@ endpoints:
     <<: *internal
     url: "https://zigbee.janedoe.com"
 
-  - name: esphome
-    <<: *internal
-    url: "https://iot.janedoe.com"
-
   - name: home assistant
     <<: *tier1
     url: "https://home.janedoe.com"
@@ -138,10 +134,6 @@ endpoints:
   - name: guacamole
     <<: *internal
     url: "https://remote.janedoe.com"
-
-  - name: archivebox
-    <<: *internal
-    url: "https://archive.janedoe.com"
 
 
   # Internal CA, year-long certs (src/certificates/self_signed_cert_gen.sh). LDAPS is

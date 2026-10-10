@@ -5,9 +5,9 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 
 ## Nodes and naming
 
-- **node** — a machine with a directory under `src/` holding its `install_svcs.sh`,
-  `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config, and an entry in
-  `src/nodes.yml`. The nodes:
+- **node** — a machine with a directory under `src/` holding, as applicable, its
+  `install_svcs.sh`, `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config,
+  and an entry in `src/nodes.yml`. The nodes:
   `pve1`, `pve2`, `router`, `vpnsvcs`, `secsvcs`, `homesvcs`, `websvcs`, `devtop`,
   `gaming`. `src/debian/` and `src/macos/` are shared base setups, not nodes.
 - **service** — any other directory under `src/`; one containerized (or host-level)
@@ -28,9 +28,10 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 - **render** (first pass) — `tools/render_src.sh`: jinjanate every `*.j2` against
   `vars.yml` plus the node inventory, stripping one `.j2` extension.
 - **second pass** — files named `*.j2.j2` survive the render as `*.j2` and are
-  rendered again *at container startup* by `render_secrets.sh` / `render_host.sh`,
-  injecting SOPS/AGE secrets or per-host parameters. Plaintext secrets never sit in
-  the rendered tree.
+  rendered again on the node: by `render_host.sh` at install time (`install_svcs.sh`)
+  for per-host parameters, or *at container startup* (`ExecStartPre`) by
+  `render_secrets.sh` for SOPS/AGE secrets (`render_services.sh` for Fluent Bit's
+  unit list). Plaintext secrets never sit in the rendered tree.
 - **node inventory** — `src/nodes.yml`: per node, the dispatcher entries (services
   in install order, other commands) and each service's subdomain, Gatus endpoint and
   image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI
@@ -49,7 +50,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   / `commands.sh` invocations. It and the node's sudoers file are rendered from the
   same node inventory entries, so the whitelist and the sudo grants can't diverge.
 - **commands.sh** — a node's grab-bag of root actions triggered remotely via the
-  dispatcher (cert installs, HAProxy map builds, VM start/stop).
+  dispatcher (cert installs, waking pve2, gaming VM start/stop, the repo archive).
 
 ## Networking and trust
 

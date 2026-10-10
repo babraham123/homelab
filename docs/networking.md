@@ -63,15 +63,16 @@ flowchart TB
     class ap,wired dev
 ```
 
-Each VM gets a static IP in its host's subnet via a systemd `net.network` file, and
-each container VM runs its own Podman bridge network for containers:
+Each VM gets a static IP in its host's subnet from a pfSense DHCP static mapping, and
+each container VM runs its own Podman bridge network for containers (`net.network`
+quadlet):
 
 | Node | VM IP | Container subnet |
 |------|-------|------------------|
 | secsvcs | 192.168.4.20 | 10.10.0.0/24 |
 | websvcs | 192.168.2.20 | 10.11.0.0/24 |
 | homesvcs | 192.168.4.21 | 10.12.0.0/24 |
-| vpnsvcs | public | 10.13.0.0/24 (telemetry only) |
+| vpnsvcs | public | 10.13.0.0/24 (telemetry, geoip_generator) |
 
 Containers have static IPs within their subnet (see [Services](services.md)); the
 render pipeline rejects duplicate container IPs at build time.
@@ -108,8 +109,8 @@ Unbound on pfSense serves split-horizon DNS for the site domain:
   and anything unlisted.
 - Internal-only names exist for `pgdb.` (Postgres) and `mqtt.` (Mosquitto); these
   resolve nowhere on the public internet.
-- `vpn.janedoe.com` is `transparent`: it resolves via public DNS to the VPS, even for
-  internal clients.
+- `vpn.janedoe.com` and `vpnsvcs.janedoe.com` are `transparent`: they resolve via
+  public DNS to the VPS, even for internal clients.
 
 Public DNS (at the registrar) points the domain and its subdomains at the VPS's public
 IP (12.34.56.78). So the same URL works everywhere: outside the house you traverse
@@ -142,7 +143,8 @@ External requests cross three layers, each with a distinct job:
    HTTPS: it inspects the TLS ClientHello's SNI and routes to a backend VM *without
    terminating TLS*. Rate limiting, geo-blocking, and attack-path filtering happen
    here (see [Security](security.md#the-edge-haproxy)).
-2. **Tailscale mesh.** HAProxy's backends are Tailscale addresses. The VPS funnels
+2. **Tailscale mesh.** HAProxy's backends are the VMs' LAN IPs, reached over the
+   tailnet through pfSense's advertised subnet route. The VPS funnels
    public traffic into the private network over WireGuard, filling a DMZ-like role.
    Headscale (self-hosted, on the same VPS) coordinates the mesh; its embedded DERP
    relay handles peers that can't connect directly.

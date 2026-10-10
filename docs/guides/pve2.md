@@ -1,4 +1,4 @@
-# PVE2 setup specific for hosting secsvcs
+# PVE2 setup specific for hosting websvcs, devtop, gaming and PBS
 Initial setup for the secondary VM host, PVE2. Handles VM management services.
 
 - Make sure that [Proxmox setup](./proxmox.md) has been completed.

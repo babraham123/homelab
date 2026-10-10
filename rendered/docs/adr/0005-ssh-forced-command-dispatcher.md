@@ -21,6 +21,8 @@ else. The node's sudoers file is *generated from the dispatcher itself*
 (`tools/parse_dispatcher.sh` at render time), granting `autoadmin` NOPASSWD for
 exactly the whitelisted commands. `tools/gen_dispatch_cmds.sh` derives dispatcher
 cases from `install_svcs.sh` so the whitelist tracks the real service list.
+*Superseded by [ADR 0006](0006-node-inventory.md): both tools are gone; the dispatcher
+and sudoers are rendered from `src/nodes.yml`.*
 
 ## Consequences
 
