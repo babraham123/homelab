@@ -1,0 +1,392 @@
+#!/bin/bash
+# SSH Forced Command Dispatcher, shared by the Debian nodes
+# This script is triggered by the SSH daemon when the specific automation key is used.
+# It parses $SSH_ORIGINAL_COMMAND to determine which action to take, from this node's
+# cases: the hostname is the node name.
+# Usage:
+#   ssh autoadmin@NODE CMD
+
+# shellcheck source=src/base/lib.sh
+source /usr/local/lib/homelab/lib.sh
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+# Modern scp (OpenSSH 9+) uses SFTP protocol by default
+if [[ "${SSH_ORIGINAL_COMMAND:-}" == "/usr/lib/openssh/sftp-server" ]]; then
+  exec /usr/lib/openssh/sftp-server
+fi
+echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
+
+unauthorized() {
+  echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
+  exit 1
+}
+
+case "$(hostname)" in
+  devtop)
+    case "${SSH_ORIGINAL_COMMAND:-}" in
+      check_gpu)
+        sudo /usr/bin/systemctl status nvidia-persistenced --no-pager
+        nvidia-smi
+        ;;
+      install_ssh_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      install_dispatcher)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        ;;
+      install_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      *)
+        unauthorized
+        ;;
+    esac
+    ;;
+  homesvcs)
+    case "${SSH_ORIGINAL_COMMAND:-}" in
+      install_mdns_repeater)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
+        ;;
+      install_node_exporter)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        ;;
+      install_traefik)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh traefik
+        ;;
+      install_vmagent)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh vmagent
+        ;;
+      install_mosquitto)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh mosquitto
+        ;;
+      install_zigbee2mqtt)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
+        ;;
+      install_home_assistant)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh home_assistant
+        ;;
+      install_fluentbit)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh fluentbit
+        ;;
+      install_all_svcs)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh vmagent
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh mosquitto
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh home_assistant
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh fluentbit
+        ;;
+      install_keys)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/commands.sh install_keys
+        ;;
+      install_certs)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/commands.sh install_certs
+        ;;
+      backup)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh
+        ;;
+      install_ssh_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      install_dispatcher)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        ;;
+      install_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      copy_acme_certs)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
+        ;;
+      *)
+        unauthorized
+        ;;
+    esac
+    ;;
+  pve1)
+    case "${SSH_ORIGINAL_COMMAND:-}" in
+      install_vm_watchdog)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh vm_watchdog
+        ;;
+      install_cert_notifier)
+        sudo /root/homelab-rendered/src/nodes/pve1/install_svcs.sh cert_notifier
+        ;;
+      install_backup_orchestrator)
+        sudo /root/homelab-rendered/src/nodes/pve1/install_svcs.sh backup_orchestrator
+        ;;
+      archive_repo)
+        sudo /root/homelab-rendered/src/nodes/pve1/commands.sh archive_repo
+        ;;
+      install_ssh_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      install_dispatcher)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        ;;
+      install_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      *)
+        unauthorized
+        ;;
+    esac
+    ;;
+  pve2)
+    case "${SSH_ORIGINAL_COMMAND:-}" in
+      install_vm_watchdog)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh vm_watchdog
+        ;;
+      install_certs_and_keys)
+        sudo /root/homelab-rendered/src/nodes/pve2/commands.sh install_certs_and_keys
+        ;;
+      start_gaming_vm)
+        sudo /root/homelab-rendered/src/nodes/pve2/commands.sh start_gaming_vm
+        ;;
+      stop_gaming_vm)
+        sudo /root/homelab-rendered/src/nodes/pve2/commands.sh stop_gaming_vm
+        ;;
+      install_hookscript)
+        sudo /root/homelab-rendered/src/nodes/pve2/commands.sh install_hookscript
+        ;;
+      backup)
+        sudo /root/homelab-rendered/src/nodes/pve2/backup.sh
+        ;;
+      prune)
+        sudo /root/homelab-rendered/src/nodes/pve2/prune.sh
+        ;;
+      shutdown)
+        sudo /usr/sbin/shutdown -h now
+        ;;
+      install_ssh_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      install_dispatcher)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        ;;
+      install_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      *)
+        unauthorized
+        ;;
+    esac
+    ;;
+  secsvcs)
+    case "${SSH_ORIGINAL_COMMAND:-}" in
+      install_mdns_repeater)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
+        ;;
+      install_node_exporter)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        ;;
+      install_postgres)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh postgres
+        ;;
+      install_lldap)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh lldap
+        ;;
+      install_authelia)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
+        ;;
+      install_traefik)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik
+        ;;
+      install_victoriametrics)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victoriametrics
+        ;;
+      install_victorialogs)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victorialogs
+        ;;
+      install_gatus)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh gatus
+        ;;
+      install_vmalert)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert
+        ;;
+      install_alertmanager)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh alertmanager
+        ;;
+      install_ntfy-alertmanager)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
+        ;;
+      install_ntfy)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy
+        ;;
+      install_grafana)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana
+        ;;
+      install_vault)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vault
+        ;;
+      install_olive_tin)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
+        ;;
+      install_fluentbit)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
+        ;;
+      install_all_svcs)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh postgres
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh lldap
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victoriametrics
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victorialogs
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh gatus
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh alertmanager
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vault
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
+        ;;
+      install_keys)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_keys
+        ;;
+      install_certs)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_certs
+        ;;
+      install_ssh_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      install_dispatcher)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        ;;
+      install_olive_tin_cert)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_olive_tin_cert
+        ;;
+      install_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      copy_acme_certs)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
+        ;;
+      backup)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh
+        ;;
+      *)
+        unauthorized
+        ;;
+    esac
+    ;;
+  vpnsvcs)
+    case "${SSH_ORIGINAL_COMMAND:-}" in
+      install_node_exporter)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        ;;
+      install_headscale)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
+        ;;
+      install_tailscaled)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh tailscaled
+        ;;
+      install_haproxy)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh haproxy
+        ;;
+      install_deadman)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh deadman
+        ;;
+      install_fluentbit)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh fluentbit
+        ;;
+      install_vmagent)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh vmagent
+        ;;
+      install_geoip_generator)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh geoip_generator
+        ;;
+      backup)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/backup.sh
+        ;;
+      install_ssh_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      install_dispatcher)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        ;;
+      install_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      *)
+        unauthorized
+        ;;
+    esac
+    ;;
+  websvcs)
+    case "${SSH_ORIGINAL_COMMAND:-}" in
+      install_mdns_repeater)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
+        ;;
+      install_node_exporter)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        ;;
+      install_traefik)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik
+        ;;
+      install_vmagent)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh vmagent
+        ;;
+      install_nginx)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh nginx
+        ;;
+      install_homepage)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh homepage
+        ;;
+      install_isso)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh isso
+        ;;
+      install_guacamole)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacamole
+        ;;
+      install_guacd)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
+        ;;
+      install_fluentbit)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
+        ;;
+      install_snapraid)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
+        ;;
+      install_all_svcs)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh vmagent
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh nginx
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh homepage
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh isso
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacamole
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
+        ;;
+      install_keys)
+        sudo /root/homelab-rendered/src/nodes/websvcs/commands.sh install_keys
+        ;;
+      install_certs)
+        sudo /root/homelab-rendered/src/nodes/websvcs/commands.sh install_certs
+        ;;
+      backup)
+        sudo /root/homelab-rendered/src/nodes/websvcs/backup.sh
+        ;;
+      install_ssh_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
+        ;;
+      install_dispatcher)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        ;;
+      install_ca)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      copy_acme_certs)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
+        ;;
+      *)
+        unauthorized
+        ;;
+    esac
+    ;;
+  *)
+    unauthorized
+    ;;
+esac
+echo "Completed command"
+exit 0

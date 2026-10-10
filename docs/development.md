@@ -46,7 +46,9 @@
   - `*.volume`: Podman volume definitions
   - Service configuration files
 - `src/base/`: setup shared across nodes: `debian/`, `podman/`, `macos/`, `certificates/`,
-  `node_exporter/`
+  `node_exporter/`. `debian/dispatcher.sh` and `debian/sudoers` are every Debian node's (all
+  but the router and gaming), selected at runtime by hostname; the router's and gaming's
+  dispatchers are in their node directories
 
 ### Shell scripts
 

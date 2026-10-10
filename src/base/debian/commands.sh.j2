@@ -27,14 +27,16 @@ case $1 in
     systemctl status sshd --no-pager
     ;;
   install_dispatcher)
+    # First: a broken sudoers file breaks sudo for every user on the node
+    visudo -cf "${rendered}/base/debian/sudoers"
     # This runs inside dispatcher.sh, which bash reads incrementally. Overwriting
     # it in place makes bash resume at the old byte offset in the new file; a
     # rename gives the new script its own inode and leaves the running one intact.
     install_lib
-    cp "${rendered}/nodes/$(hostname)/dispatcher.sh" /usr/local/bin/dispatcher.sh.new
+    cp "${rendered}/base/debian/dispatcher.sh" /usr/local/bin/dispatcher.sh.new
     mv /usr/local/bin/dispatcher.sh.new /usr/local/bin/dispatcher.sh
     cp "${rendered}/base/debian/autoadmin_sshd.conf" /etc/ssh/sshd_config.d
-    cp "${rendered}/nodes/$(hostname)/sudoers" /etc/sudoers.d/dispatcher
+    cp "${rendered}/base/debian/sudoers" /etc/sudoers.d/dispatcher
 
     systemctl restart sshd
     systemctl status sshd --no-pager

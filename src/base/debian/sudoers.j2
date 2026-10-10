@@ -1,0 +1,6 @@
+{% import 'src/nodes.jinja' as inv with context -%}
+# Allow autoadmin to run these specific commands without a password. Every Debian node
+# gets this same file; the host field limits each line to its own node.
+{% for node in inv.debian_nodes -%}
+autoadmin {{ node }}=(root) NOPASSWD: {{ inv.sudo_cmds[node] | join(', ') }}
+{% endfor -%}

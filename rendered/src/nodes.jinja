@@ -37,6 +37,8 @@
     commands[node]:   case names (OliveTin buttons)
     nodes_with[case]: nodes whose dispatcher has that case, in node-name order; how
                       scripts find e.g. the backup, install_ssh_ca or copy_acme_certs nodes
+    debian_nodes:     nodes whose install_dispatcher is src/base/debian/commands.sh's, so
+                      they share src/base/debian/dispatcher.sh and sudoers
     sudo_cmds[node]:  sorted commands the dispatcher runs with sudo (sudoers)
     subdomains[node]: sorted subdomains its Traefik serves (Unbound, HAProxy)
     uptime:           Gatus internal endpoints, [{name, host, url, tier, conditions}]
@@ -45,6 +47,7 @@
 {%- set dispatch = {} -%}
 {%- set commands = {} -%}
 {%- set nodes_with = {} -%}
+{%- set debian_nodes = [] -%}
 {%- set sudo_cmds = {} -%}
 {%- set subdomains = {} -%}
 {%- set uptime = [] -%}
@@ -77,6 +80,9 @@
     {%- else -%}
       {%- do entries.append({'name': cmd.name,
           'run': [('sudo ' if cmd.get('sudo', true) else '') ~ path(node, cmd.script) ~ ' ' ~ cmd.name]}) -%}
+    {%- endif -%}
+    {%- if cmd.name == 'install_dispatcher' and cmd.get('script') == 'base/debian/commands.sh' -%}
+      {%- do debian_nodes.append(node) -%}
     {%- endif -%}
   {%- endfor -%}
   {%- for trigger in spec.get('triggers', []) -%}

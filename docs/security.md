@@ -167,10 +167,15 @@ sharply different powers:
 - **`manualadmin`** is interactive SSH for a human: file uploads, exploratory work, full sudo with
   password.
 - **`autoadmin`** is the automation account. Its SSH key is bound to a `ForceCommand` script,
-  `src/nodes/<node>/dispatcher.sh`, which whitelists a fixed set of `$SSH_ORIGINAL_COMMAND` strings
+  `dispatcher.sh`, which whitelists a fixed set of `$SSH_ORIGINAL_COMMAND` strings
   (`install_traefik`, `install_all_svcs`, `copy_acme_certs`, …) and rejects everything else. The
   dispatcher and its sudoers entry are both rendered from the node's
   `src/nodes/<node>/inventory.yml`, so sudo grants NOPASSWD for exactly the whitelisted commands.
+  The Debian nodes all install the same `src/base/debian/dispatcher.sh` and `sudoers`: the
+  dispatcher runs only the cases under its own `$(hostname)`, and each sudoers line names its node
+  in the host field (`autoadmin secsvcs=(root) NOPASSWD: …`), so a node still grants only its own
+  commands. `install_dispatcher` checks the sudoers file with `visudo -c` before installing it. The
+  router (`/bin/sh` on pfSense) and the gaming VM (PowerShell) keep their own dispatchers.
 
 So automation (OliveTin buttons, deploy scripts, cert distribution) can trigger predefined actions
 remotely, but a stolen `autoadmin` key cannot run arbitrary commands. The render fails if a node's

@@ -64,3 +64,4 @@ Hand-written files stay the source for everything else: `routes.yml`, quadlets, 
   image updater (upstream/build, update-last, extra quadlets) and the source directories for
   per-node uploads.
 - Key order in `services` is meaningful; YAML tools that sort keys would change the install order.
+- Debian nodes share one dispatcher and sudoers (`src/base/debian/`) selected by hostname.

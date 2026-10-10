@@ -1,5 +1,5 @@
 #!/bin/bash
-# Checks a rendered copy of the repo: YAML, JSON and container IPs, then the node
+# Checks a rendered copy of the repo: YAML, JSON, markdown and container IPs, then the node
 # inventory (src/nodes/<node>/inventory.yml, ADR 0006) against the scripts, routes,
 # quadlets and OliveTin buttons it describes. Called by render_src.sh; tests/ runs it
 # against fixture trees.
@@ -82,6 +82,15 @@ check_json() {
   while read -r file; do
     jq empty "$file" 2> /dev/null || fail "$file" "invalid JSON"
   done < <(find . -name '*.json' | sed 's|^\./||')
+}
+
+# Rules in .markdownlint-cli2.yaml. Findings come on stderr as "FILE:LINE[:COL] error RULE
+# DESCRIPTION"; stdout is only a banner.
+check_markdown() {
+  local line
+  while read -r line; do
+    fail "${line%% *}" "${line#* error }"
+  done < <(markdownlint-cli2 "**/*.md" 2>&1 > /dev/null || true)
 }
 
 check_container_ips() {
@@ -217,6 +226,7 @@ check_olive_tin() {
 
 check_yaml
 check_json
+check_markdown
 check_container_ips
 check_upstream_refs
 check_quadlet_images

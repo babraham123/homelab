@@ -6,9 +6,10 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 ## Nodes and naming
 
 - **node** — a machine with a directory under `src/nodes/` holding, as applicable, its
-  `install_svcs.sh`, `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config, and an
-  `inventory.yml`. The nodes: `pve1`, `pve2`, `router`, `vpnsvcs`, `secsvcs`, `homesvcs`, `websvcs`,
-  `devtop`, `gaming`. `src/base/` holds the setups they share (`debian/`, `podman/`, `macos/`, ...).
+  `install_svcs.sh`, `commands.sh` and `traefik/` config, and an `inventory.yml`; the router and
+  gaming also hold their own dispatcher (and the router its `sudoers`). The nodes: `pve1`, `pve2`,
+  `router`, `vpnsvcs`, `secsvcs`, `homesvcs`, `websvcs`, `devtop`, `gaming`. `src/base/` holds the
+  setups they share (`debian/`, `podman/`, `macos/`, ...).
 - **service** — a directory under `src/services/`; one containerized (or host-level) application:
   its quadlet `*.container` file, volumes, and config templates.
 - **container VM** — one of `secsvcs`, `homesvcs`, `websvcs`: a Debian VM running Podman quadlets
@@ -43,10 +44,12 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 - **manualadmin** — the interactive human SSH account on each node (file uploads, full sudo with
   password).
 - **autoadmin** — the automation SSH account. Its key is bound to a ForceCommand.
-- **dispatcher** — `src/nodes/<node>/dispatcher.sh`, the ForceCommand script that whitelists exact
-  `$SSH_ORIGINAL_COMMAND` strings and maps them to `install_svcs.sh` / `commands.sh` invocations. It
-  and the node's sudoers file are rendered from the same node inventory entries, so the whitelist
-  and the sudo grants can't diverge.
+- **dispatcher** — the ForceCommand script that whitelists exact `$SSH_ORIGINAL_COMMAND` strings
+  and maps them to `install_svcs.sh` / `commands.sh` invocations. The Debian nodes share
+  `src/base/debian/dispatcher.sh` and `sudoers`, which hold every Debian node's cases and grants
+  and pick the node by hostname; the router and gaming have their own under `src/nodes/<node>/`.
+  Dispatcher and sudoers are rendered from the same node inventory entries, so the whitelist and
+  the sudo grants can't diverge.
 - **commands.sh** — a node's grab-bag of root actions triggered remotely via the dispatcher (cert
   installs, waking pve2, gaming VM start/stop, the repo archive).
 

@@ -1,10 +1,11 @@
 {% import 'src/nodes.jinja' as inv with context -%}
 #!/bin/bash
-# SSH Forced Command Dispatcher
+# SSH Forced Command Dispatcher, shared by the Debian nodes
 # This script is triggered by the SSH daemon when the specific automation key is used.
-# It parses $SSH_ORIGINAL_COMMAND to determine which action to take.
+# It parses $SSH_ORIGINAL_COMMAND to determine which action to take, from this node's
+# cases: the hostname is the node name.
 # Usage:
-#   ssh autoadmin@pve2 CMD
+#   ssh autoadmin@NODE CMD
 
 # shellcheck source=src/base/lib.sh
 source /usr/local/lib/homelab/lib.sh
@@ -16,11 +17,24 @@ if [[ "${SSH_ORIGINAL_COMMAND:-}" == "/usr/lib/openssh/sftp-server" ]]; then
 fi
 echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 
-case "${SSH_ORIGINAL_COMMAND:-}" in
-{{ inv.cases('pve2') }}
+unauthorized() {
+  echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
+  exit 1
+}
+
+case "$(hostname)" in
+{%- for node in inv.debian_nodes %}
+  {{ node }})
+    case "${SSH_ORIGINAL_COMMAND:-}" in
+{{ inv.cases(node) | indent(4, true) }}
+      *)
+        unauthorized
+        ;;
+    esac
+    ;;
+{%- endfor %}
   *)
-    echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
-    exit 1
+    unauthorized
     ;;
 esac
 echo "Completed command"
