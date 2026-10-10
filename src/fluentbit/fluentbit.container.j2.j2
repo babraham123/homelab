@@ -15,15 +15,9 @@ ContainerName=fluentbit
 AutoUpdate=registry
 NoNewPrivileges=true
 
-{% raw %}{% if subnet %}{% endraw %}
 Network=net.network
 HostName=log-collector.{{ site.url }}
 IP={% raw %}{{ subnet }}{% endraw %}.20
-{% raw %}{% else %}{% endraw %}
-# The VPS: host network, so no bridge and no nftables rules on the public host;
-# the config there listens on loopback only.
-Network=host
-{% raw %}{% endif %}{% endraw %}
 # port 2020, metrics
 
 # https://github.com/fluent/fluent-bit/blob/v3.2.0/dockerfiles/Dockerfile

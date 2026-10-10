@@ -1,7 +1,7 @@
 # The VPS pushes its metrics from a local vmagent (docs/adr/0007-vps-metrics-pushed.md),
 # so when the VPS, its tailnet link or that vmagent is down nothing arrives and
-# `up == 0` can't fire: absence is the signal. NodeDown (homelab.yml) still covers the
-# node_exporter container dying while vmagent lives.
+# `up == 0` can't fire: absence is the signal. NodeDown (homelab.yml) still covers
+# node_exporter dying while vmagent lives.
 ---
 groups:
   - name: vps

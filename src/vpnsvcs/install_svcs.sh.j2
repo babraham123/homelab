@@ -7,10 +7,17 @@ set -euo pipefail
 
 cd /root/homelab-rendered/src
 
+# HAProxy and Headscale serve metrics on the podman bridge gateway (net.network)
+nonlocal_bind() {
+  cp vpnsvcs/nonlocal_bind.conf /etc/sysctl.d/90-homelab-nonlocal-bind.conf
+  sysctl -p /etc/sysctl.d/90-homelab-nonlocal-bind.conf
+}
+
 case $1 in
   headscale)
     # sqlite3 takes the consistent DB snapshot for backup_full.sh
     apt install -y sqlite3
+    nonlocal_bind
     HS_VERSION=$(curl -s "https://api.github.com/repos/juanfont/headscale/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
     wget --output-document=headscale.deb "https://github.com/juanfont/headscale/releases/download/v${HS_VERSION}/headscale_${HS_VERSION}_linux_amd64.deb"
     dpkg --install headscale.deb
@@ -31,6 +38,7 @@ case $1 in
     ;;
   haproxy)
     apt install -y haproxy
+    nonlocal_bind
     debian/add_homelab_tag.sh /usr/lib/systemd/system/haproxy.service
     cp haproxy/haproxy.cfg /etc/haproxy
     curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
@@ -57,35 +65,9 @@ case $1 in
     systemctl restart geoip_generator.timer
     exit 0
     ;;
-  podman)
-    # Podman for the telemetry quadlets, set up as on the VMs (docs/guides/podman.md):
-    # Debian's package, the secret helpers' tools, jinjanator for the ExecStartPre
-    # renders. No podman network is created: every quadlet here uses Network=host.
-    apt install -y podman age jq python3-pip
-    pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible
-    if ! yq --version 2>/dev/null | grep -q mikefarah; then
-      YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-      wget -qO- "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" | tar xz -C /tmp yq_linux_amd64
-      mv /tmp/yq_linux_amd64 /usr/bin/yq
-    fi
-    install -d -m 700 /etc/opt/secrets
-    install -d /etc/containers/systemd
-    cp podman/containers.conf /etc/containers/containers.conf
-    systemctl enable --now podman-auto-update.timer
-    echo "Now run secret_update.sh vpnsvcs from pve1 (docs/guides/vpnsvcs.md#telemetry-agents)"
-    exit 0
-    ;;
-  node_exporter)
-    install -d -m 755 /var/lib/node_exporter/textfile_collector
-    cp vpnsvcs/node_exporter.container /etc/containers/systemd
-    systemctl daemon-reload
-    systemctl restart node_exporter
-    systemctl status node_exporter --no-pager
-    exit 0
-    ;;
   fluentbit)
     mkdir -p /etc/opt/fluentbit
-    cp vpnsvcs/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
+    cp fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
     cp fluentbit/journald.lua /etc/opt/fluentbit
     install -D -m 644 debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
     systemctl restart systemd-journald
@@ -113,8 +95,6 @@ case $1 in
     for f in alertmanager_admin_password msmtp_password deadman_ntfy_topic; do
       [[ -s /etc/opt/secrets/$f ]] || { echo "error: missing /etc/opt/secrets/$f" >&2; exit 1; }
     done
-    # msmtprc finds the password script by hostname
-    [[ $(hostname -s) == vpnsvcs ]] || { echo "error: hostname is not vpnsvcs" >&2; exit 1; }
     # msmtp as on pve1, AppArmor profile on; the local override lets it run the password script
     echo "msmtp msmtp/apparmor boolean true" | debconf-set-selections
     apt install -y jq curl msmtp

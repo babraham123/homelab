@@ -23,7 +23,8 @@ listen_addr: 0.0.0.0:8443
 # to keep this endpoint private to your internal
 # network
 #
-metrics_listen_addr: 127.0.0.1:9090
+# The podman bridge gateway, for vmagent only (ufw); needs ip_nonlocal_bind at boot
+metrics_listen_addr: {{ vpnsvcs.container_subnet }}.1:9090
 
 # Address to listen for gRPC.
 # gRPC is used for controlling a headscale server

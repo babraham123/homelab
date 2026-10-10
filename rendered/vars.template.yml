@@ -40,6 +40,7 @@ tail_domain: "janedoe.ts.net"
 # Hosts
 vpnsvcs:
   ip: 12.34.56.78
+  container_subnet: 10.13.0
 router:
   ip: 192.168.1.1
 secsvcs:

@@ -129,11 +129,12 @@ frontend http_all
 
     default_backend silent_drop_http
 
-# The built-in Prometheus exporter, on loopback for the local vmagent only
-# (src/vpnsvcs/prometheus.yml.j2); never bound to a public or tailnet address.
+# The built-in Prometheus exporter, on the podman bridge gateway for the local vmagent
+# only (src/vpnsvcs/prometheus.yml.j2, ufw); never bound to a public or tailnet address.
+# The bridge appears when the first container starts, hence ip_nonlocal_bind.
 frontend prometheus
     mode http
-    bind 127.0.0.1:8405
+    bind {{ vpnsvcs.container_subnet }}.1:8405
     http-request use-service prometheus-exporter if { path /metrics }
     http-request deny
     no log

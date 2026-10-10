@@ -40,22 +40,27 @@ systemctl enable --now podman-auto-update.timer
 
 ## Networking
 - Account for conflicts between the podman network and the firewall, [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
+- On the VMs, reset the firewall. vpnsvcs keeps the rules from [its guide](./vpnsvcs.md#vpn-setup).
 ```bash
 ufw reset
 # SSH, HTTP
 ufw allow in from any to any port 22,80,443 proto tcp
 # mDNS
 ufw allow in from any to any port 5353 proto udp
-
+```
+- Create the container network
+```bash
 cd /root/homelab-rendered
-mkdir /etc/containers/systemd
-cp src/$HOST/net.network /etc/containers/systemd
+mkdir -p /etc/containers/systemd
+cp src/$(hostname -s)/net.network /etc/containers/systemd
 systemctl daemon-reload
 systemctl start net-network
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
+```
+- On the VMs, let Traefik's traffic through to its container. vpnsvcs publishes nothing.
+```bash
 ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 80,443 proto tcp
-
 ufw enable
 ```
 
@@ -94,12 +99,14 @@ src/debian/install_svcs.sh node_exporter
 
 - Allow access from metrics container to host in order to scrape node_exporter
 ```bash
-# Use 10.10.0.7 on secsvcs, 10.11.0.7 on websvcs, 10.12.0.7 on homesvcs
+# Use 10.10.0.7 on secsvcs, 10.11.0.7 on websvcs, 10.12.0.7 on homesvcs,
+# 10.13.0.7 on vpnsvcs
 ufw allow in from 10.10.0.7 to any port 9100 proto tcp
 ```
 
 ## Backups
-The scheduled backup is each node's `backup.sh` (see [Services](../services.md#storage-and-backups)); what follows is the manual fallback for a volume it doesn't cover.
+The scheduled backup is each node's `backup.sh`, see [Services](../services.md#storage-and-backups).
+What follows is the manual fallback for a volume it doesn't cover.
 
 - Backup container volumes
 ```bash

@@ -64,15 +64,14 @@ nodes:
       - {name: start_pve2, script: router/commands.sh}
 
   vpnsvcs:
+    debian_services: [node_exporter]
     services:
       headscale: {}
       tailscaled: {}
       haproxy: {}
       geoip_generator: {}
       deadman: {}
-      # Telemetry quadlets on the host network (docs/adr/0007-vps-metrics-pushed.md)
-      podman: {}
-      node_exporter: {}
+      # Telemetry quadlets on the podman network (docs/adr/0007-vps-metrics-pushed.md)
       fluentbit: {}
       vmagent: {}
     commands:

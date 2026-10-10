@@ -154,11 +154,12 @@ flowchart LR
   `access_token` query strings and ships it with the journal. The "Traefik" dashboard
   has both; `Traefik5xxRate` and `TraefikCertExpiry` alert on the metrics. journald
   itself is capped at 1 GB per node (`src/debian/journald.conf`).
-- The VPS runs the same vmagent and Fluent Bit as quadlets on the host network, every
-  listener on loopback, and pushes to secsvcs over the tailnet (`metrics.SITE` and
-  `logs.SITE` pinned to secsvcs in its `/etc/hosts`); a 1 GiB disk queue rides out a
-  tailnet outage. It scrapes HAProxy's built-in exporter (`127.0.0.1:8405`), Headscale,
-  tailscaled and node_exporter. Since a pushing host can't raise `up == 0`,
+- The VPS runs the same node_exporter, vmagent and Fluent Bit as the VMs, on its own
+  Podman network with nothing published, and pushes to secsvcs over the tailnet
+  (`metrics.SITE` and `logs.SITE` pinned to secsvcs in its `/etc/hosts`); a 1 GiB disk
+  queue rides out a tailnet outage. HAProxy's built-in exporter (`:8405`) and Headscale's
+  metrics listen on the bridge gateway, with ufw letting only vmagent in; vmagent also
+  scrapes tailscaled and node_exporter. Since a pushing host can't raise `up == 0`,
   `VpsMetricsAbsent` fires on silence; `HaproxyDown` and `HaproxyBackendConnectErrors`
   cover the edge (`src/vmalert/configs/vps.yml`), and the "HAProxy" dashboard graphs
   what it drops.

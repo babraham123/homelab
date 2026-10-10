@@ -16,20 +16,14 @@ ContainerName=vmagent
 AutoUpdate=registry
 NoNewPrivileges=true
 
-{% if subnet %}
 Network=net.network
 HostName=metric-collector.janedoe.com
 IP={{ subnet }}.7
-{% else %}
-# The VPS: host network, so the loopback targets and 100.100.100.100 are reachable
-# and no bridge or nftables rules land on the public host; it listens on loopback.
-Network=host
-{% endif %}
 # port 8429
 # https://docs.victoriametrics.com/vmagent/#how-to-push-data-to-vmagent
 
 Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
-     --httpListenAddr="{{ '' if subnet else '127.0.0.1' }}:8429" \
+     --httpListenAddr=":8429" \
      --remoteWrite.url="https://metrics.janedoe.com/api/v1/write" \
      --remoteWrite.tmpDataPath="/vmagentdata" \
      --remoteWrite.maxDiskUsagePerURL="1GiB" \

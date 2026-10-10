@@ -103,3 +103,12 @@ Keep on the host: `haproxy` (needs the public IP and `chroot`), `headscale`, `ta
   `secret_update.sh vpnsvcs`. `vps.yml` has `VpsMetricsAbsent`; `NodeDown` keeps the VPS
   (it fires if the node_exporter container dies under a live vmagent). ADR 0007.
   `geoip_generator` stays a host unit. Acceptance checks are in the apply note, step 9.
+- 2026-10-10: networking revised (maintainer): the VPS now follows the Podman guide
+  with its own `net.network` bridge (`vpnsvcs.container_subnet`), so the shared vmagent
+  and Fluent Bit templates lose their `Network=host` branch, `render_host.sh vpnsvcs`
+  hands them the subnet, and the VPS copies of the Fluent Bit config and the
+  node_exporter quadlet are gone (node_exporter is the host binary, as on the VMs).
+  HAProxy's exporter and Headscale's metrics bind the bridge gateway with
+  `ip_nonlocal_bind`; ufw admits only `<subnet>.7`. The "nothing off loopback"
+  acceptance becomes "nothing new reachable from outside" (an `nmap` from off the VPS).
+  ADR 0007 updated.

@@ -51,11 +51,11 @@ sudo /root/homelab-rendered/src/certificates/ssh_cert_gen_windows.sh
 
 ## Backups
 - Runs itself every Saturday 02:00 from pve1; the ntfy `alert` topic gets a summary and `BackupStale` fires after 8 quiet days. Run it by hand with `sudo systemctl start backup_orchestrator` on pve1 (blocks for the run; `journalctl -u backup_orchestrator -f`).
-- Once a quarter: the [restore test](guides/restore.md#quarterly-restore-test). Last done: never.
+- Once a year: the [restore test](guides/restore.md#quarterly-restore-test). Last done: never.
 - Media array on pve2: `snapraid status` on websvcs; a failed disk follows [pve2 storage](guides/pve2_storage.md#day-to-day).
 
 ## Alerting pipeline test
-Once a quarter, with the backup restore test. Last done: never. Every alert goes
+Once a year, with the backup restore test. Last done: never. Every alert goes
 vmalert → Alertmanager → ntfy-alertmanager → ntfy → phone, plus two emails
 (`+alert@` from Alertmanager, `+alert2@` from ntfy-alertmanager); the VPS's `deadman`
 timer watches that path from outside and reports to `+alert@` and a private ntfy.sh

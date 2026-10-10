@@ -27,8 +27,7 @@ case $1 in
     subnet="10.12.0"
     ;;
   vpnsvcs)
-    # No podman network on the VPS: the templates take host networking when empty.
-    subnet=""
+    subnet="10.13.0"
     ;;
   *)
     echo "error: unknown service: $1" >&2

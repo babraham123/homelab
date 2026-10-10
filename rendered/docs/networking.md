@@ -71,6 +71,7 @@ each container VM runs its own Podman bridge network for containers:
 | secsvcs | 192.168.4.20 | 10.10.0.0/24 |
 | websvcs | 192.168.2.20 | 10.11.0.0/24 |
 | homesvcs | 192.168.4.21 | 10.12.0.0/24 |
+| vpnsvcs | public | 10.13.0.0/24 (telemetry only) |
 
 Containers have static IPs within their subnet (see [Services](services.md)); the
 render pipeline rejects duplicate container IPs at build time.

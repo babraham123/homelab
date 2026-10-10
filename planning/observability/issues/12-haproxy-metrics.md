@@ -66,3 +66,6 @@ this ticket is its HAProxy half. The VPS vmagent that scrapes it is observabilit
   backend connection errors) on top; it never used `haproxy_backend_up`. ADR 0007
   covers both tickets. Confirm the metric names and `haproxy -vv | grep -i prometheus`
   at apply (step 9).
+- 2026-10-10: the exporter frontend moved from `127.0.0.1:8405` to the VPS's podman
+  bridge gateway, `<vpnsvcs.container_subnet>.1:8405`, with observability/08's switch to
+  container networking.

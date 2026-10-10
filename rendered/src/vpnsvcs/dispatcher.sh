@@ -15,6 +15,9 @@ fi
 echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
 
 case "${SSH_ORIGINAL_COMMAND:-}" in
+  install_node_exporter)
+    sudo /root/homelab-rendered/src/debian/install_svcs.sh node_exporter
+    ;;
   install_headscale)
     sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh headscale
     ;;
@@ -29,12 +32,6 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     ;;
   install_deadman)
     sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh deadman
-    ;;
-  install_podman)
-    sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh podman
-    ;;
-  install_node_exporter)
-    sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh node_exporter
     ;;
   install_fluentbit)
     sudo /root/homelab-rendered/src/vpnsvcs/install_svcs.sh fluentbit

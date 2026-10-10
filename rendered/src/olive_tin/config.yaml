@@ -817,6 +817,14 @@ dashboards:
         contents:
 
           - inlineAction:
+              title: vpnsvcs Install Node Exporter
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_node_exporter
+              id: vpnsvcs_install_node_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: vpnsvcs Install Headscale
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs install_headscale
@@ -853,22 +861,6 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs install_deadman
               id: vpnsvcs_install_deadman
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: vpnsvcs Install Podman
-              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpnsvcs install_podman
-              id: vpnsvcs_install_podman
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: vpnsvcs Install Node Exporter
-              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
-              shell: ssh autoadmin@vpnsvcs install_node_exporter
-              id: vpnsvcs_install_node_exporter
               maxConcurrent: 1
               timeout: 60
 

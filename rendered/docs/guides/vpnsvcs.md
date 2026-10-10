@@ -290,34 +290,44 @@ EOF
 ```
 
 ## Telemetry agents
-node_exporter, Fluent Bit and vmagent run as Podman quadlets on the host network
-([ADR 0007](../adr/0007-vps-metrics-pushed.md)), each listening on loopback; vmagent
-pushes to secsvcs over the tailnet, so the `/etc/hosts` block under Telemetry must be
-in place first. HAProxy, Headscale and tailscaled stay on the host.
+Fluent Bit and vmagent run as Podman quadlets on the VPS's own bridge network, as on the
+VMs, with nothing published; node_exporter is the host binary
+([ADR 0007](../adr/0007-vps-metrics-pushed.md)). vmagent pushes to secsvcs over the
+tailnet, so the `/etc/hosts` block under Telemetry must be in place first. HAProxy,
+Headscale and tailscaled stay on the host; HAProxy's exporter and Headscale's metrics
+listen on the bridge gateway, `10.13.0.1`.
+
+Follow the [Podman guide](./podman.md): Install Podman, Networking (create the network
+only), Secrets and Monitoring. Then open the bridge to vmagent and the containers' path
+to secsvcs; ufw's default deny covers everything else:
 ```bash
 sudo su
 cd /root/homelab-rendered
-nft list ruleset > /root/nft.before
-src/vpnsvcs/install_svcs.sh podman
-# The podman secrets are read from an age file, as on the VMs: the VPS's ssh host key
-# is the identity, and pve1 holds /root/secrets/vpnsvcs.yaml (src/vpnsvcs/secrets_template.yaml)
-cp /home/manualadmin/.ssh/id_ed25519* /etc/opt/secrets
-chmod 600 /etc/opt/secrets/*
+POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+ufw allow in on $POD_IFACE from 10.13.0.7 to any port 8405,9090 proto tcp
+ufw allow in on $POD_IFACE from 10.13.0.0/24 to any port 53 proto udp
+ufw route allow in on $POD_IFACE out on tailscale0 to 192.168.4.20 port 443 proto tcp
+ufw route allow in on $POD_IFACE out on tailscale0 to 100.100.100.100 port 80 proto tcp
+# HAProxy and Headscale re-bind on the gateway (ip_nonlocal_bind, metrics_listen_addr)
+src/vpnsvcs/install_svcs.sh haproxy
+cp src/headscale/headscale_private.yaml /etc/headscale/config.yaml
+systemctl restart headscale
 ```
 On pve1: `sudo /root/homelab-rendered/src/pve1/secret_update.sh vpnsvcs` (fill in the two
 passwords from secsvcs.yaml). Back on the VPS:
 ```bash
-src/vpnsvcs/install_svcs.sh node_exporter
 src/vpnsvcs/install_svcs.sh fluentbit
 src/vpnsvcs/install_svcs.sh vmagent
-ss -ltnp | grep -v 127.0.0.1          # only sshd, haproxy, headscale: nothing new off loopback
-nft list ruleset | diff /root/nft.before -   # host networking adds no rules
-curl -s 127.0.0.1:9100/metrics | grep node_systemd_unit_state | head -3
-curl -s 127.0.0.1:8405/metrics | head -3     # HAProxy's exporter
+ss -ltnp | grep -E ':(8405|9090|9100) '   # 8405, 9090 on 10.13.0.1 only
+podman exec vmagent wget -qO- 10.13.0.1:8405/metrics | head -3
+podman exec vmagent wget -qO- 100.100.100.100/metrics | head -3   # tailscaled through tailscale0
 ```
-In VictoriaMetrics `up{host="vpnsvcs.janedoe.com"}` is 1 for haproxy, headscale,
+From outside, `nmap -Pn -p- 12.34.56.78` shows only the ports it showed before. In
+VictoriaMetrics `up{host="vpnsvcs.janedoe.com"}` is 1 for haproxy, headscale,
 tailscaled, vmagent, fluentbit and node_exporter, and `logs.janedoe.com` shows the
-VPS's journal. The images are pulled by `podman-auto-update.timer` like the VMs'.
+VPS's journal. If tailscaled stays down, bind its metrics elsewhere or drop the job from
+`src/vpnsvcs/prometheus.yml.j2`. The images are pulled by `podman-auto-update.timer`
+like the VMs'.
 
 ## Dead-man switch
 `deadman.timer` checks every 5 minutes, over the tailnet, that Alertmanager on secsvcs
