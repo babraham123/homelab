@@ -1,6 +1,6 @@
 # 03. Shared bash library sourced by all scripts
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: user item 54
@@ -49,3 +49,16 @@ reload_restart()    { systemctl daemon-reload; systemctl restart "$1"; systemctl
 - shellcheck clean.
 
 ## Comments
+
+- 2026-10-10: Done. `src/base/lib.sh` as above, plus `wait_for` (`wait_reachable` is
+  built on it; the orchestrator's own copy is gone), `install_lib`/`install_bin`, and no
+  `install_files` (`install -D -m 644 -t` already is that). Every Debian/PVE script sources
+  it; installed copies (dispatcher, `vm_watchdog`, `backup_orchestrator`, `cert_notifier`,
+  `snapraid_run`, node_exporter's runner) source `/usr/local/lib/homelab/lib.sh`, put
+  there by `install_dispatcher`, `install_bin` and the node_exporter case. The podman
+  helpers run in place now, so they use the relative path; nothing copies them.
+  `backup.sh` files source `lib.sh` then `backup_lib.sh`. `tools/lib.sh` is `set -euo
+  pipefail` plus `warn`/`die`. Not sourcing it, on purpose: `src/nodes/router/**` (pfSense
+  `/bin/sh`, gets only its own dir) and `src/base/macos/` (run from the Mac).
+  `ping` stays `-c3`, as in the old `is_reachable.sh`. deadman.sh sets `+e` after sourcing:
+  its checks are counted, not fatal. Cutover: `notes/apply-since-5a50097.md` step 3.

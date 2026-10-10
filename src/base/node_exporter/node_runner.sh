@@ -2,7 +2,9 @@
 # Wrapper script to run node_exporter with custom services.
 # Usage:
 #   /usr/local/bin/node_exporter_runner.sh
-set -euo pipefail
+
+# shellcheck source=src/base/lib.sh
+source /usr/local/lib/homelab/lib.sh
 
 # Filter for custom services
 SVC_LIST=$(systemctl list-units --type=service | \

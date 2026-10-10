@@ -6,14 +6,14 @@
 # Ref:
 # https://github.com/kpfleming/jinjanator
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 file=$1
 rm -f "$file"
 
 if [ ! -f "$file.j2" ]; then
-  echo "error: file template $file.j2 does not exist" >&2
-  exit 1
+  die "file template $file.j2 does not exist"
 fi
 
 SVCS=$(echo "homelab_services:"; \

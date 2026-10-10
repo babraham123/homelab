@@ -31,6 +31,12 @@
   - Service configuration files
 - `src/base/`: setup shared across nodes: `debian/`, `podman/`, `macos/`, `certificates/`, `node_exporter/`
 
+### Shell scripts
+
+- Every script that runs on a Debian or PVE node sources `src/base/lib.sh` first: strict mode, a fixed `PATH`, `log`/`warn`/`die`, `require_root`, `require_reachable`/`wait_reachable`, `install_quadlet`, `reload_restart`. Scripts run in place source it relative to themselves; copies installed to `/usr/local/bin` with `install_bin` (and the dispatcher) source `/usr/local/lib/homelab/lib.sh`, which `install_lib` puts there
+- `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die`
+- Router (`/bin/sh` on pfSense), gaming and macOS scripts get a copy of their own directory only, so they stand alone
+
 ### Diagrams
 
 Docs diagrams are Mermaid, rendered inline by GitHub. Conventions kept across all of

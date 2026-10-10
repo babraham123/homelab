@@ -6,9 +6,11 @@
 # Not staged, on purpose: the postgresdb volume (the dump replaces it), vmdata and
 # vldata (metrics and logs, large and rebuilt by collection), /var/opt/ntfy (cache).
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
 # shellcheck source=src/base/debian/backup_lib.sh
-source /root/homelab-rendered/src/base/debian/backup_lib.sh
+source "${rendered}/base/debian/backup_lib.sh"
 
 stage_init
 
@@ -17,13 +19,12 @@ stage_init
 # of the image's trust rules.
 dir=$(dump_dir postgres)
 dump="${dir}/pg_dumpall-$(date +%Y-%m-%dT%H%M%S).sql.zst"
-PGPASSWORD="$(/root/homelab-rendered/src/base/podman/get_secret.sh postgres_password)"
+PGPASSWORD="$("${rendered}/base/podman/get_secret.sh" postgres_password)"
 export PGPASSWORD
 if ! podman exec -e PGPASSWORD postgres \
     pg_dumpall -h pgdb.{{ site.url }} -U postgres | zstd -q -o "${dump}.tmp"; then
   rm -f "${dump}.tmp"
-  echo "error: pg_dumpall failed" >&2
-  exit 1
+  die "pg_dumpall failed"
 fi
 mv "${dump}.tmp" "$dump"
 

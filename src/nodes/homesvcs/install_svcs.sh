@@ -3,9 +3,10 @@
 # Usage:
 #   src/nodes/homesvcs/install_svcs.sh SERVICE_NAME
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
-cd /root/homelab-rendered/src
+cd "$rendered"
 
 case $1 in
   traefik)
@@ -13,32 +14,32 @@ case $1 in
     rm -rf /etc/opt/traefik/config/dynamic/*
     install -D -m 644 -t /etc/opt/traefik/config/dynamic nodes/homesvcs/traefik/*.yml services/traefik/dynamic/*.yml
     install -D -m 644 services/traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
-    install -D -m 644 -t /etc/containers/systemd nodes/homesvcs/traefik/traefik.container
+    install_quadlet nodes/homesvcs/traefik/traefik.container
     ;;
   vmagent)
     install -D -m 644 -t /etc/opt/vmagent nodes/homesvcs/prometheus.yml
-    /root/homelab-rendered/src/base/podman/render_host.sh homesvcs services/victoriametrics/vmagent.container
-    install -D -m 644 -t /etc/containers/systemd services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
+    base/podman/render_host.sh homesvcs services/victoriametrics/vmagent.container
+    install_quadlet services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
     ;;
   mosquitto)
     mkdir -p /etc/opt/mosquitto/certificates
     install -D -m 644 -t /etc/opt/mosquitto services/mosquitto/mosquitto.conf
-    install -D -m 644 -t /etc/containers/systemd services/mosquitto/mosquitto.container services/mosquitto/mqttdata.volume
+    install_quadlet services/mosquitto/mosquitto.container services/mosquitto/mqttdata.volume
     ;;
   zigbee2mqtt)
     mkdir -p /etc/opt/zigbee2mqtt/certificates
     install -D -m 644 -t /etc/opt/zigbee2mqtt/config services/zigbee2mqtt/*.yaml
-    install -D -m 644 -t /etc/containers/systemd services/zigbee2mqtt/zigbee2mqtt.container services/zigbee2mqtt/z2mdb.volume
+    install_quadlet services/zigbee2mqtt/zigbee2mqtt.container services/zigbee2mqtt/z2mdb.volume
     ;;
   # Not in use: uncomment and add to src/nodes.yml to install again
 #   esphome)
 #     install -D -m 644 -t /etc/opt/esphome/config services/esphome/*.yaml
-#     install -D -m 644 -t /etc/containers/systemd services/esphome/esphome.container
+#     install_quadlet services/esphome/esphome.container
 #     ;;
   home_assistant)
     mkdir -p /etc/opt/home_assistant/certs
     mkdir -p /var/opt/home_assistant/media/recordings
-    install -D -m 644 -t /etc/containers/systemd services/home_assistant/hassconfig.volume
+    install_quadlet services/home_assistant/hassconfig.volume
     systemctl daemon-reload
     systemctl start hassconfig-volume.service
     volpath=$(podman volume inspect -f '{{ .Mountpoint }}' systemd-hassconfig)
@@ -53,22 +54,19 @@ case $1 in
         exit 1
       fi
     fi
-    install -D -m 644 -t /etc/containers/systemd services/home_assistant/home_assistant.container services/home_assistant/hassdb.volume
+    install_quadlet services/home_assistant/home_assistant.container services/home_assistant/hassdb.volume
     ;;
   fluentbit)
     install -D -m 644 services/fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
     install -D -m 644 -t /etc/opt/fluentbit services/fluentbit/journald.lua
     install -D -m 644 base/debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
     systemctl restart systemd-journald
-    /root/homelab-rendered/src/base/podman/render_host.sh homesvcs services/fluentbit/fluentbit.container
-    install -D -m 644 -t /etc/containers/systemd services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
+    base/podman/render_host.sh homesvcs services/fluentbit/fluentbit.container
+    install_quadlet services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
     ;;
   *)
-    echo "error: unknown service: $1" >&2
-    exit 1
+    die "unknown service: $1"
     ;;
 esac
 
-systemctl daemon-reload
-systemctl restart "$1"
-systemctl status "$1" --no-pager
+reload_restart "$1"

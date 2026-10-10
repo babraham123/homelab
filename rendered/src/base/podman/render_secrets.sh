@@ -8,12 +8,12 @@
 # https://github.com/kpfleming/jinjanator
 # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_filters.html
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 file=$1
 if [ ! -f "$file.j2" ]; then
-  echo "error: file template $file.j2 does not exist" >&2
-  exit 1
+  die "file template $file.j2 does not exist"
 fi
 
 IFS=, read -ra secrets <<< "$2"

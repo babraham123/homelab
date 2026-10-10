@@ -2,8 +2,8 @@
 # Usage:
 #   src/nodes/pve1/commands.sh CMD
 
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 case $1 in
   archive_repo)
@@ -21,7 +21,6 @@ case $1 in
     ls -lh "$archive"
     ;;
   *)
-    echo "error: unknown command: $1" >&2
-    exit 1
+    die "unknown command: $1"
     ;;
 esac

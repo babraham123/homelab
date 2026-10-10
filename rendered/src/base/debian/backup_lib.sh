@@ -4,8 +4,8 @@
 # pve1's backup_orchestrator copies files/ into /root/backups/<node>/, moves the dumps
 # there, and sends the collection to PBS. Nothing here needs to be an archive: plain
 # trees dedup better in PBS than tarballs do.
-# Usage, from a backup.sh running as root:
-#   source /root/homelab-rendered/src/base/debian/backup_lib.sh
+# Usage, from a backup.sh running as root, after src/base/lib.sh:
+#   source "${rendered}/base/debian/backup_lib.sh"
 #   stage_init [OWNER]           # empties the stage; OWNER defaults to autoadmin, the
 #                                # user pve1 pulls as
 #   dump_dir NAME                # prints dumps/NAME, created
@@ -17,8 +17,6 @@
 #   stage_finish                 # ownership and permissions of the whole stage
 #   pve_task UPID                # waits for a PVE task (pvesh create returns its UPID),
 #                                # prints its log, fails unless it ended OK
-
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 stage=/var/opt/backups
 files="${stage}/files"
@@ -50,7 +48,7 @@ copy() {
 stage_paths() {
   local path present=()
   for path in "$@"; do
-    if [[ -e $path ]]; then present+=("${path#/}"); else echo "warning: not staged, missing: $path" >&2; fi
+    if [[ -e $path ]]; then present+=("${path#/}"); else warn "not staged, missing: $path"; fi
   done
   copy / "$files" "${present[@]}"
 }
@@ -78,8 +76,6 @@ pve_task() {
     sleep 15
   done
   pvesh get "/nodes/${node}/tasks/${upid}/log" --output-format json | jq -r '.[].t'
-  [[ $(jq -r .exitstatus <<< "$status") == OK ]] || {
-    echo "error: task ${upid} ended with $(jq -r .exitstatus <<< "$status")" >&2
-    return 1
-  }
+  [[ $(jq -r .exitstatus <<< "$status") == OK ]] ||
+    die "task ${upid} ended with $(jq -r .exitstatus <<< "$status")"
 }

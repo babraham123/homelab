@@ -5,7 +5,8 @@
 #   cd ~/project/dir
 #   tools/deploy_src.sh
 
-set -euo pipefail
+# shellcheck source=tools/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 # A private (0700) parent dir; upload_src.sh needs the name homelab-rendered
 render_dir=$(mktemp -d)

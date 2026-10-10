@@ -3,12 +3,13 @@
 # Usage:
 #   /root/homelab-rendered/src/services/ntfy/chat.sh TITLE MESSAGE [PRIORITY]
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 title="$1"
 msg="$2"
 priority="${3:-3}"
-password=$(/root/homelab-rendered/src/base/podman/get_secret.sh "ntfy_person_password")
+password=$("${rendered}/base/podman/get_secret.sh" "ntfy_person_password")
 hash=$(echo -n "person:$password" | base64)
 curl -X POST \
   -H "Authorization: Basic $hash" \

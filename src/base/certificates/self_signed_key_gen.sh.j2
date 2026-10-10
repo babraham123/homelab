@@ -2,12 +2,12 @@
 # Generate SSL keys and distribute them to the secsvcs, websvcs and homesvcs servers.
 # Usage:
 #   /root/homelab-rendered/src/base/certificates/self_signed_key_gen.sh
-set -euo pipefail
 
-/root/homelab-rendered/src/base/debian/is_root.sh
-/root/homelab-rendered/src/base/debian/is_reachable.sh secsvcs
-/root/homelab-rendered/src/base/debian/is_reachable.sh websvcs
-/root/homelab-rendered/src/base/debian/is_reachable.sh homesvcs
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
+require_root
+require_reachable secsvcs websvcs homesvcs
 
 cd /root/ca/intermediate
 

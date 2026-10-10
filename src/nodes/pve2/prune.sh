@@ -7,7 +7,8 @@
 # Usage:
 #   src/nodes/pve2/prune.sh
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 store=backup1
 
@@ -19,10 +20,8 @@ pbs_task() {
     sleep 15
   done
   proxmox-backup-manager task log "$upid" || true
-  [[ $(jq -r .status <<< "$task") == OK ]] || {
-    echo "error: PBS task ${upid} ended with $(jq -r .status <<< "$task")" >&2
-    return 1
-  }
+  [[ $(jq -r .status <<< "$task") == OK ]] ||
+    die "PBS task ${upid} ended with $(jq -r .status <<< "$task")"
 }
 
 # Usage: prune_job NAME NAMESPACE KEEP_OPTS...

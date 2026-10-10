@@ -2,8 +2,9 @@
 # Usage:
 #   src/nodes/secsvcs/commands.sh CMD
 
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
 cd /home/autoadmin
 
 case $1 in
@@ -68,7 +69,6 @@ case $1 in
     chmod 644 /etc/opt/olive_tin/ssh/known_hosts
     ;;
   *)
-    echo "error: unknown file type: $1" >&2
-    exit 1
+    die "unknown file type: $1"
     ;;
 esac

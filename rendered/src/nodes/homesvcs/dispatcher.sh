@@ -5,8 +5,8 @@
 # Usage:
 #   ssh autoadmin@homesvcs CMD
 
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source /usr/local/lib/homelab/lib.sh
 
 # Modern scp (OpenSSH 9+) uses SFTP protocol by default
 if [[ "${SSH_ORIGINAL_COMMAND:-}" == "/usr/lib/openssh/sftp-server" ]]; then

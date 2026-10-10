@@ -13,8 +13,11 @@
 # msmtp_password (pve1's, read through src/base/certificates/msmtprc.j2), deadman_ntfy_topic (a long
 # random topic name the phone's ntfy app also subscribes to).
 
-set -uo pipefail
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
+# A failed check is counted below, not a reason to stop
+set +e
 
 site="{{ site.url }}"
 mail_to="{{ site.email.replace('@', '+alert@') }}"
@@ -27,9 +30,9 @@ notify() {
   local priority=$1 title=$2 body=$3
   curl -fsS -m 15 -H "Title: ${title}" -H "Priority: ${priority}" -H "Tags: rotating_light" \
     -d "$body" "https://ntfy.sh/$(cat "${secrets}/deadman_ntfy_topic")" > /dev/null ||
-    echo "warning: ntfy.sh push failed" >&2
+    warn "ntfy.sh push failed"
   printf 'To: %s\nSubject: %s\n\n%s\n' "$mail_to" "$title" "$body" | msmtp -t ||
-    echo "warning: email failed" >&2
+    warn "email failed"
 }
 
 install -d -m 700 "$state"
@@ -47,7 +50,7 @@ count=$(cat "${state}/failures" 2>/dev/null || echo 0)
 if [[ -n $failure ]]; then
   count=$((count + 1))
   echo "$count" > "${state}/failures"
-  echo "check failed (${count}/${threshold}): ${failure}" >&2
+  warn "check failed (${count}/${threshold}): ${failure}"
   if (( count == threshold )); then
     touch "${state}/firing"
     notify urgent "Homelab alerting is down" "$failure. Nothing routed through Alertmanager reaches you until this recovers."

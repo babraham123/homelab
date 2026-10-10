@@ -3,13 +3,14 @@
 # Usage:
 #   /root/homelab-rendered/src/nodes/pve1/secret_update.sh SUBDOMAIN
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 host="$1"
 addr="manualadmin@${host}"
 
-/root/homelab-rendered/src/base/debian/is_root.sh
-/root/homelab-rendered/src/base/debian/is_reachable.sh "$host"
+require_root
+require_reachable "$host"
 
 SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)
 export SOPS_AGE_RECIPIENTS

@@ -2,17 +2,18 @@
 # Usage:
 #   src/nodes/pve2/commands.sh CMD
 
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
 cd /home/autoadmin
 
 case $1 in
   start_gaming_vm)
     ping -c1 -W1 {{ gaming.ip }} && exit 0
-    vm_id=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop)
+    vm_id=$("${rendered}/nodes/pve2/get_vm_id.sh" devtop)
     qm shutdown "$vm_id" --timeout 30
     # If the VM is stuck it will be stopped by the hookscript
-    vm_id=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh gaming)
+    vm_id=$("${rendered}/nodes/pve2/get_vm_id.sh" gaming)
     qm start "$vm_id" --timeout 30
     # Poll until the guest is reachable so callers that chain an SSH command into
     # it don't race the OS boot (sshd/scheduled tasks aren't up yet).
@@ -28,16 +29,16 @@ case $1 in
   # this refreshes it and (re)attaches it to the two GPU VMs.
   install_hookscript)
     mkdir -p /var/lib/vz/snippets
-    cp /root/homelab-rendered/src/nodes/pve2/hookscript.pl /var/lib/vz/snippets/hookscript.pl
+    cp "${rendered}/nodes/pve2/hookscript.pl" /var/lib/vz/snippets/hookscript.pl
     for vm in devtop gaming; do
-      qm set "$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh "$vm")" --hookscript local:snippets/hookscript.pl
+      qm set "$("${rendered}/nodes/pve2/get_vm_id.sh" "$vm")" --hookscript local:snippets/hookscript.pl
     done
     ;;
   stop_gaming_vm)
-    vm_id=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh gaming)
+    vm_id=$("${rendered}/nodes/pve2/get_vm_id.sh" gaming)
     qm shutdown "$vm_id" --timeout 30
     # If the VM is stuck it will be stopped by the hookscript
-    vm_id=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop)
+    vm_id=$("${rendered}/nodes/pve2/get_vm_id.sh" devtop)
     qm start "$vm_id" --timeout 30
     ;;
   install_certs_and_keys)
@@ -61,7 +62,6 @@ case $1 in
     echo "$fingerprint"
     ;;
   *)
-    echo "error: unknown command: $1" >&2
-    exit 1
+    die "unknown command: $1"
     ;;
 esac

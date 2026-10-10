@@ -2,16 +2,12 @@
 # Generate SSH certificates and distribute them to all servers.
 # Usage:
 #   /root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
-set -euo pipefail
 
-/root/homelab-rendered/src/base/debian/is_root.sh
-/root/homelab-rendered/src/base/debian/is_reachable.sh pve2
-/root/homelab-rendered/src/base/debian/is_reachable.sh vpnsvcs
-/root/homelab-rendered/src/base/debian/is_reachable.sh secsvcs
-/root/homelab-rendered/src/base/debian/is_reachable.sh websvcs
-/root/homelab-rendered/src/base/debian/is_reachable.sh homesvcs
-/root/homelab-rendered/src/base/debian/is_reachable.sh devtop
-/root/homelab-rendered/src/base/debian/is_reachable.sh router
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
+require_root
+require_reachable pve2 vpnsvcs secsvcs websvcs homesvcs devtop router
 
 cd /root/ssh
 
@@ -61,7 +57,6 @@ scpsoc public/router.ssh_host_key-cert.pub admin@router:/etc/ssh/ssh_host_key_ce
 scpsoc known_hosts admin@router:/etc/ssh/ssh_known_hosts
 
 ssh -S ~/.ssh/ssh-socket-%r-%h-%p -O exit admin@router
-
 
 # SSH clients
 

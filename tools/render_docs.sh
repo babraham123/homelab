@@ -8,7 +8,8 @@
 # https://manpages.debian.org/buster/fd-find/fdfind.1.en.html
 # https://github.com/kpfleming/jinjanator
 
-set -euo pipefail
+# shellcheck source=tools/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 # Prepare the output directory
 project_dir=$1

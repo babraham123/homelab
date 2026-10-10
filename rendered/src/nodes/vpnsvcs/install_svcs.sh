@@ -3,9 +3,10 @@
 # Usage:
 #   src/nodes/vpnsvcs/install_svcs.sh SERVICE_NAME
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
-cd /root/homelab-rendered/src
+cd "$rendered"
 
 # HAProxy and Headscale serve metrics on the podman bridge gateway (net.network)
 nonlocal_bind() {
@@ -52,7 +53,7 @@ case $1 in
   geoip_generator)
     podman build -t geoip_generator -f services/haproxy/geoip_generator.Containerfile services/haproxy
     podman image prune -f
-    install -D -m 644 -t /etc/containers/systemd services/haproxy/geoip_generator.container
+    install_quadlet services/haproxy/geoip_generator.container
     install -D -m 644 -t /etc/systemd/system services/haproxy/geoip_generator.timer
     systemctl daemon-reload
     systemctl enable geoip_generator.timer
@@ -64,13 +65,13 @@ case $1 in
     install -D -m 644 -t /etc/opt/fluentbit services/fluentbit/journald.lua
     install -D -m 644 base/debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
     systemctl restart systemd-journald
-    /root/homelab-rendered/src/base/podman/render_host.sh vpnsvcs services/fluentbit/fluentbit.container
-    install -D -m 644 -t /etc/containers/systemd services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
+    base/podman/render_host.sh vpnsvcs services/fluentbit/fluentbit.container
+    install_quadlet services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
     ;;
   vmagent)
     install -D -m 644 -t /etc/opt/vmagent nodes/vpnsvcs/prometheus.yml
-    /root/homelab-rendered/src/base/podman/render_host.sh vpnsvcs services/victoriametrics/vmagent.container
-    install -D -m 644 -t /etc/containers/systemd services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
+    base/podman/render_host.sh vpnsvcs services/victoriametrics/vmagent.container
+    install_quadlet services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
     ;;
   deadman)
     install -d -m 700 /var/lib/deadman
@@ -82,12 +83,9 @@ case $1 in
     exit 0
     ;;
   *)
-    echo "error: unknown service: $1" >&2
-    exit 1
+    die "unknown service: $1"
     ;;
 esac
 
-systemctl daemon-reload
 systemctl enable "$1"
-systemctl restart "$1"
-systemctl status "$1" --no-pager
+reload_restart "$1"

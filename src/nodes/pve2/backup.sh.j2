@@ -5,9 +5,11 @@
 # Usage:
 #   src/nodes/pve2/backup.sh
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
 # shellcheck source=src/base/debian/backup_lib.sh
-source /root/homelab-rendered/src/base/debian/backup_lib.sh
+source "${rendered}/base/debian/backup_lib.sh"
 
 node=$(hostname)
 
@@ -28,9 +30,9 @@ stage_paths /etc/pve /etc/proxmox-backup /etc/network/interfaces /etc/resolv.con
   /root/.ssh /var/lib/vz/snippets /usr/local/bin
 stage_finish
 
-websvcs=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs)
-devtop=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop)
-gaming=$(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh gaming)
+websvcs=$("${rendered}/nodes/pve2/get_vm_id.sh" websvcs)
+devtop=$("${rendered}/nodes/pve2/get_vm_id.sh" devtop)
+gaming=$("${rendered}/nodes/pve2/get_vm_id.sh" gaming)
 
 # devtop and gaming share the GPU. vzdump launches a paused QEMU, GPU attached, to read
 # a stopped VM's disks whatever the mode, and the hookscript then stops the other VM.

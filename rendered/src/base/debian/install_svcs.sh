@@ -3,9 +3,10 @@
 # Usage:
 #   src/base/debian/install_svcs.sh SERVICE_NAME
 
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
-set -euo pipefail
-cd /root/homelab-rendered/src
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
+cd "$rendered"
 
 case $1 in
   mdns_repeater)
@@ -35,21 +36,19 @@ case $1 in
     install -d -o node_exporter -g node_exporter /var/lib/node_exporter \
       /var/lib/node_exporter/textfile_collector
 
+    install_lib
     install -D -o node_exporter -g node_exporter base/node_exporter/node_runner.sh \
       /usr/local/bin/node_exporter_runner.sh
     install -D -m 644 -t /etc/systemd/system base/node_exporter/node_exporter.service
     ;;
   vm_watchdog)
-    install -D -t /usr/local/bin nodes/pve1/vm_watchdog.sh
+    install_bin nodes/pve1/vm_watchdog.sh
     install -D -m 644 -t /etc/systemd/system nodes/pve1/vm_watchdog.service
     ;;
   *)
-    echo "error: unknown service: $1" >&2
-    exit 1
+    die "unknown service: $1"
     ;;
 esac
 
-systemctl daemon-reload
 systemctl enable "$1"
-systemctl restart "$1"
-systemctl status "$1" --no-pager
+reload_restart "$1"

@@ -9,15 +9,14 @@
 # Adding a node: give it a backup.sh and a `backup` dispatcher command, then list it in
 # NODES. Adding another step: write a step_<name> function and list it in STEPS.
 
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source /usr/local/lib/homelab/lib.sh
 
 storage=pbs2
 backups=/root/backups
 metrics=/var/lib/node_exporter/textfile_collector/homelab_backup.prom
 ssh_opts=(-o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
 ssh=(ssh "${ssh_opts[@]}")
-is_reachable=/root/homelab-rendered/src/base/debian/is_reachable.sh
 keyfile=/root/secrets/pbs_client.key
 
 # In step order. The VMs first, so their dumps are on the VM disks before the hosts'
@@ -30,7 +29,7 @@ STEPS+=(upload prune)
 
 step_wake_pve2() {
   "${ssh[@]}" autoadmin@router start_pve2
-  wait_for 600 "pbs2 unreachable" "$is_reachable" pbs2
+  wait_reachable pbs2 600
   wait_for 300 "PBS storage $storage inactive" storage_active
 }
 
@@ -46,7 +45,7 @@ pull() {
   rm -rf "${dest}/files"
   install -d -m 700 "$dest" "${dest}/dumps"
   if [[ $node == pve1 ]]; then
-    /root/homelab-rendered/src/nodes/pve1/backup.sh
+    "${rendered}/nodes/pve1/backup.sh"
     cp -a "${src}/files" "${dest}/files"
     cp -a "${src}/dumps/." "${dest}/dumps/"
     find "${src}/dumps" -type f -delete
@@ -75,7 +74,7 @@ done
 # image and takes that retention; everything else goes to the `files` namespace.
 # Dumps are deleted once both uploads succeed: PBS holds them from here on.
 step_upload() {
-  [[ -f $keyfile ]] || { echo "error: ${keyfile} missing" >&2; return 1; }
+  [[ -f $keyfile ]] || die "${keyfile} missing"
   export PBS_REPOSITORY='pve1@pbs!backup@pbs2.janedoe.com:backup1'
   PBS_PASSWORD=$(secret pbs2_backup_token)
   export PBS_PASSWORD
@@ -98,21 +97,7 @@ step_sleep_pve2() {
 }
 
 storage_active() { pvesm status --storage "$storage" | grep -qw active; }
-is_down() { ! "$is_reachable" "$1"; }
-
-# Usage: wait_for TIMEOUT_S ERROR_MSG CMD...
-wait_for() {
-  local timeout=$1 msg=$2 t=0
-  shift 2
-  until "$@" &>/dev/null; do
-    (( t += 10 ))
-    if (( t >= timeout )); then
-      echo "error: ${msg} after ${timeout}s" >&2
-      return 1
-    fi
-    sleep 10
-  done
-}
+is_down() { ! is_reachable "$1"; }
 
 # Usage: secret NAME. Reads pve1's own secrets file; pve1 holds every host's SOPS file.
 secret() {
@@ -136,7 +121,7 @@ run() {
     done_at[$1]=$(date +%s)
   else
     failed+=("$1")
-    echo "error: step $1 failed (exit $rc)" >&2
+    log "error: step $1 failed (exit $rc)" >&2
   fi
 }
 
@@ -179,12 +164,12 @@ notify() {
     -H "X-Priority: $3" \
     -H "X-Tags: floppy_disk" \
     -d "$2" "https://push.janedoe.com/alert" \
-    || echo "warning: ntfy post failed" >&2
+    || warn "ntfy post failed"
 }
 
 started=$(date +%s)
 pve2_was_on=0
-"$is_reachable" pve2 &>/dev/null && pve2_was_on=1
+is_reachable pve2 && pve2_was_on=1
 echo "pve2 initially $( (( pve2_was_on )) && echo on || echo off )"
 
 run wake_pve2

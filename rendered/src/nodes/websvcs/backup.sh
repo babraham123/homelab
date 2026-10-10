@@ -10,9 +10,11 @@
 # secsvcs. The homesite releases are in the homesite repo; only the live release is
 # kept here.
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
 # shellcheck source=src/base/debian/backup_lib.sh
-source /root/homelab-rendered/src/base/debian/backup_lib.sh
+source "${rendered}/base/debian/backup_lib.sh"
 
 stage_init
 

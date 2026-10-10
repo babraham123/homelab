@@ -3,7 +3,8 @@
 # Usage:
 #   /root/homelab-rendered/src/nodes/pve1/lookup_docker_tag.sh REPO TAG
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 repo="$1"
 tag="$2"

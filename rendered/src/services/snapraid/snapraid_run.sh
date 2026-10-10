@@ -6,14 +6,14 @@
 # Usage:
 #   /usr/local/bin/snapraid_run.sh sync|scrub
 
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source /usr/local/lib/homelab/lib.sh
 
 job=${1:-}
 textfile=/var/lib/node_exporter/textfile_collector
 disks=(/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AA /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AB /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AC /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AD)
 mounts=(/mnt/disk1 /mnt/disk2 /mnt/disk3 /mnt/parity)
-(( ${#disks[@]} )) || { echo "error: no disks in websvcs.media.disks (vars.yml)" >&2; exit 1; }
+(( ${#disks[@]} )) || die "no disks in websvcs.media.disks (vars.yml)"
 
 # Usage: write_prom FILE LINES...; atomic, node_exporter only reads *.prom
 write_prom() {
@@ -40,21 +40,20 @@ case $job in
   sync)
     # Every mount must be present, or snapraid would sync a missing disk as deleted.
     for mount in "${mounts[@]}"; do
-      mountpoint -q "$mount" || { echo "error: ${mount} is not mounted" >&2; exit 1; }
+      mountpoint -q "$mount" || die "${mount} is not mounted"
     done
     # diff exits 2 when there are changes, 0 when there are none, 1 on error.
     set +e
     diff=$(snapraid diff 2>&1)
     rc=$?
     set -e
-    (( rc == 0 || rc == 2 )) || { echo "$diff" >&2; exit 1; }
+    (( rc == 0 || rc == 2 )) || die "$diff"
     # A bad rm or ransomware would otherwise be written into parity.
     threshold=200
     removed=$(awk '/removed$/ {print $1}' <<< "$diff")
     if (( removed > threshold )); then
-      echo "error: ${removed} files removed since the last sync, over the threshold of ${threshold}." >&2
-      echo "If that is intended: snapraid sync --force-empty, or run this with the threshold raised." >&2
-      exit 1
+      die "${removed} files removed since the last sync, over the threshold of ${threshold}." \
+        "If that is intended: snapraid sync --force-empty, or run this with the threshold raised."
     fi
     snapraid sync
     ;;
@@ -63,8 +62,7 @@ case $job in
     snapraid scrub -p 8 -o 10
     ;;
   *)
-    echo "usage: $0 sync|scrub" >&2
-    exit 1
+    die "usage: $0 sync|scrub"
     ;;
 esac
 

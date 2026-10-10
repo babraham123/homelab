@@ -3,18 +3,18 @@
 # ACME certificates to pve1, pve2, pbs2 and pfsense.
 # Usage:
 #   /root/homelab-rendered/src/base/certificates/acme_transfer.sh
-set -euo pipefail
 
-/root/homelab-rendered/src/base/debian/is_root.sh
-/root/homelab-rendered/src/base/debian/is_reachable.sh pve1
-/root/homelab-rendered/src/base/debian/is_reachable.sh pve2
-/root/homelab-rendered/src/base/debian/is_reachable.sh router
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
+require_root
+require_reachable pve1 pve2 router
 
 cd /root/acme
 
 function download() {
   host="$1"
-  /root/homelab-rendered/src/base/debian/is_reachable.sh "$host"
+  require_reachable "$host"
 
   ssh "autoadmin@${host}" copy_acme_certs
   scp "autoadmin@${host}:/home/autoadmin/acme.json" "/root/acme/${host}.acme.json"

@@ -5,15 +5,15 @@
 #   cd ~/project/dir
 #   tools/upload_src.sh SUBDOMAIN /dir/to/store/rendered/copy
 
-set -euo pipefail
+# shellcheck source=tools/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 host=$1
 project_dir=$2
 url=$(yq --yaml-fix-merge-anchor-to-spec=true ".site.url" vars.yml)
 
 if ! ping -c3 -W3 "${host}.${url}" > /dev/null; then
-  echo "error: ${host} is not reachable" >&2
-  exit 1
+  die "${host} is not reachable"
 fi
 
 port="22"

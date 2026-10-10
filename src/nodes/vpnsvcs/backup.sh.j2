@@ -6,11 +6,13 @@
 # Usage:
 #   src/nodes/vpnsvcs/backup.sh
 
-set -euo pipefail
-# shellcheck source=src/base/debian/backup_lib.sh
-source /root/homelab-rendered/src/base/debian/backup_lib.sh
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
-command -v sqlite3 > /dev/null || { echo "error: sqlite3 is not installed" >&2; exit 1; }
+# shellcheck source=src/base/debian/backup_lib.sh
+source "${rendered}/base/debian/backup_lib.sh"
+
+command -v sqlite3 > /dev/null || die "sqlite3 is not installed"
 stage_init
 
 # Headscale's DB is in WAL mode, so copying its files mid-write can capture a torn
@@ -21,8 +23,7 @@ snapshot="${dir}/db-$(date +%Y-%m-%dT%H%M%S).sqlite"
 sqlite3 "$db" ".backup '${snapshot}'"
 sqlite3 "$snapshot" 'PRAGMA integrity_check' | grep -qx ok || {
   rm -f "$snapshot"
-  echo "error: Headscale DB snapshot failed its integrity check" >&2
-  exit 1
+  die "Headscale DB snapshot failed its integrity check"
 }
 
 # The live DB files are excluded in favour of the snapshot. /var/lib/headscale also

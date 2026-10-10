@@ -2,17 +2,17 @@
 # Generate self-signed certificates and distribute them to the secsvcs, websvcs and homesvcs servers.
 # Usage:
 #   /root/homelab-rendered/src/base/certificates/self_signed_cert_gen.sh
-set -euo pipefail
+
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 # site.name is free text: backslash-escaped for -subj, where / and + separate fields,
 # then shell-quoted once here rather than inside each -subj.
 org='JD'"'"'s System'
 subj="/C=US/ST=California/L=Middletown/O=${org}"
 
-/root/homelab-rendered/src/base/debian/is_root.sh
-/root/homelab-rendered/src/base/debian/is_reachable.sh secsvcs
-/root/homelab-rendered/src/base/debian/is_reachable.sh websvcs
-/root/homelab-rendered/src/base/debian/is_reachable.sh homesvcs
+require_root
+require_reachable secsvcs websvcs homesvcs
 
 cd /root/ca/intermediate
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B

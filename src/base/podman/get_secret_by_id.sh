@@ -3,14 +3,14 @@
 # Usage:
 #   SECRET_ID=XX src/base/podman/get_secret_by_id.sh
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
-[[ -n "${SECRET_ID:-}" ]] || { echo "SECRET_ID unset" >&2; exit 1; }
+[[ -n "${SECRET_ID:-}" ]] || die "SECRET_ID unset"
 
 SECRET_NAME=$(jq -r --arg id "$SECRET_ID" '.idToName[$id]' /var/lib/containers/storage/secrets/secrets.json)
 if [[ "$SECRET_NAME" == "null" ]]; then
-  echo "no secret with ID ${SECRET_ID}" >&2
-  exit 1
+  die "no secret with ID ${SECRET_ID}"
 fi
 
 "$(dirname "$0")/get_secret.sh" "$SECRET_NAME" | head -c -1

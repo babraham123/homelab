@@ -3,7 +3,9 @@
 # If those certs are in danger of expiring, send an email to the site owner.
 # Usage:
 #   /usr/local/bin/cert_notifier.sh
-set -eo pipefail
+
+# shellcheck source=src/base/lib.sh
+source /usr/local/lib/homelab/lib.sh
 
 now=$(date +%s)
 last_update=$(date -r /root/ssh/date_ssh_certs.txt +%s || echo 0)

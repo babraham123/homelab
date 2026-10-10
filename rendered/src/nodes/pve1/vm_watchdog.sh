@@ -6,7 +6,8 @@
 # https://github.com/rtadams89/ProxmoxVMMonitoring/blob/main/reset_frozen_vms.sh
 # https://pve.proxmox.com/pve-docs/qm.1.html
 
-set -euo pipefail
+# shellcheck source=src/base/lib.sh
+source /usr/local/lib/homelab/lib.sh
 
 finish=0
 trap 'finish=1' SIGTERM
