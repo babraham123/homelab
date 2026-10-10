@@ -61,7 +61,7 @@ case $1 in
     mkdir -p /etc/opt/guacd
     install_quadlet services/guacamole/guacd.container
     ;;
-  # Not in use: uncomment and add to src/nodes.yml to install again
+  # Not in use: uncomment and add to src/nodes/websvcs/inventory.yml to install again
 #   archivebox)
 #     mkdir -p /var/opt/archivebox
 #     chown -R 911:911 /var/opt/archivebox

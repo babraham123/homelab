@@ -1,0 +1,30 @@
+# secsvcs's part of the node inventory; src/nodes.jinja documents the keys.
+# yamllint disable rule:document-start rule:document-end
+debian_services: [mdns_repeater, node_exporter]
+services:
+  postgres: {}
+  lldap: {subdomain: ldap}
+  authelia: {subdomain: auth, uptime: authelia, uptime_path: /api/health, uptime_tier: 1,
+             uptime_conditions: ['[BODY].status == OK']}
+  traefik: {subdomain: secproxy, uptime: traefik secsvcs, uptime_tier: 1}
+  victoriametrics: {subdomain: metrics, uptime: victoriametrics}
+  victorialogs: {subdomain: logs, uptime: victorialogs}
+  gatus: {subdomain: uptime}
+  vmalert: {subdomain: vmalert, uptime: vmalert}
+  alertmanager: {subdomain: alert, uptime: alertmanager}
+  ntfy-alertmanager: {subdomain: ntfy-alertmanager}
+  ntfy: {subdomain: push, uptime: ntfy health check, uptime_path: /v1/health, uptime_tier: 1}
+  grafana: {subdomain: graph, uptime: grafana, uptime_tier: 1}
+  vault: {}
+  olive_tin: {subdomain: command, uptime: olive_tin}
+  fluentbit: {}
+install_all_svcs: true
+commands:
+  - {name: install_keys, script: nodes/secsvcs/commands.sh}
+  - {name: install_certs, script: nodes/secsvcs/commands.sh}
+  - {name: install_ssh_ca, script: base/debian/commands.sh}
+  - {name: install_dispatcher, script: base/debian/commands.sh}
+  - {name: install_olive_tin_cert, script: nodes/secsvcs/commands.sh}
+  - {name: install_ca, script: base/debian/commands.sh}
+  - {name: copy_acme_certs, script: base/debian/commands.sh}
+  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh]}

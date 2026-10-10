@@ -68,7 +68,7 @@ endpoints:
     # <<: *public
     # url: "https://{{ site.url }}"
 
-  # Internal endpoints come from the uptime entries in src/nodes.yml. A merge key
+  # Internal endpoints come from the uptime entries in src/nodes/*/inventory.yml. A merge key
   # replaces lists, so extra conditions repeat the anchor's.
 {% for endpoint in inv.uptime %}
   - name: {{ endpoint.name }}

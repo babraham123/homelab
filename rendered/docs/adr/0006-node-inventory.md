@@ -6,6 +6,10 @@ Amended: service entries also carry image facts (`upstream`, `build`, `update_la
 and `src/nodes.jinja` also outputs `images`, each node's images in update order, which the render
 checks against the quadlets' `Image=`.
 
+Amended: the inventory is split by node, `src/nodes/<node>/inventory.yml`, next to the rest of the
+node's files; `render_src.sh` gathers them under `nodes:` in node-name order. The key reference is
+in `src/nodes.jinja`.
+
 ## Context
 
 Four scripts reverse-engineered template variables from other files at render time:
@@ -19,7 +23,8 @@ complex.
 
 ## Decision
 
-`src/nodes.yml` declares only the facts those scripts inferred, per node:
+The node inventory (`src/nodes/<node>/inventory.yml`) declares only the facts those scripts
+inferred, per node:
 
 - `debian_services`, `services` and `commands`: the dispatcher entries. `services` is a mapping
   whose key order is the install order, so a service can carry attributes; today those are
@@ -47,7 +52,7 @@ Hand-written files stay the source for everything else: `routes.yml`, quadlets, 
 - The dispatcher whitelist and the sudo grants come from the same list, so they still can't diverge
   (the property ADR 0005 relies on). The list can't drift from the scripts either, because the
   render fails.
-- Adding a service means one `install_svcs.sh` case plus one `nodes.yml` line; a route on
+- Adding a service means one `install_svcs.sh` case plus one `inventory.yml` line; a route on
   secsvcs/homesvcs also needs its `subdomain`.
 - Dispatcher case order is canonical: debian services, services, `install_all_svcs`, then commands.
   OliveTin button order follows it.

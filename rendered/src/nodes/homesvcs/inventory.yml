@@ -1,0 +1,19 @@
+# homesvcs's part of the node inventory; src/nodes.jinja documents the keys.
+# yamllint disable rule:document-start rule:document-end
+debian_services: [mdns_repeater, node_exporter]
+services:
+  traefik: {subdomain: homeproxy, uptime: traefik homesvcs, uptime_tier: 1}
+  vmagent: {}
+  mosquitto: {}
+  zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt}
+  home_assistant: {subdomain: home, uptime: home assistant, uptime_tier: 1}
+  fluentbit: {}
+install_all_svcs: true
+commands:
+  - {name: install_keys, script: nodes/homesvcs/commands.sh}
+  - {name: install_certs, script: nodes/homesvcs/commands.sh}
+  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh]}
+  - {name: install_ssh_ca, script: base/debian/commands.sh}
+  - {name: install_dispatcher, script: base/debian/commands.sh}
+  - {name: install_ca, script: base/debian/commands.sh}
+  - {name: copy_acme_certs, script: base/debian/commands.sh}

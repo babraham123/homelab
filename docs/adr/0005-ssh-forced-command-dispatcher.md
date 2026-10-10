@@ -1,8 +1,8 @@
 # ADR 0005: SSH forced-command dispatcher instead of a config-management agent
 
 Status: accepted (backfilled 2026-08-30; decision predates this record). The generation mechanism is
-amended by [ADR 0006](0006-node-inventory.md): the dispatcher and sudoers are both rendered from
-`src/nodes.yml`.
+amended by [ADR 0006](0006-node-inventory.md): the dispatcher and sudoers are both rendered from the
+node inventory (`src/nodes/<node>/inventory.yml`).
 
 ## Context
 
@@ -20,8 +20,8 @@ account: its SSH key is bound to a `ForceCommand` script, `dispatcher.sh`, that 
 dispatcher itself* (`tools/parse_dispatcher.sh` at render time), granting `autoadmin` NOPASSWD for
 exactly the whitelisted commands. `tools/gen_dispatch_cmds.sh` derives dispatcher cases from
 `install_svcs.sh` so the whitelist tracks the real service list. *Superseded by [ADR
-0006](0006-node-inventory.md): both tools are gone; the dispatcher and sudoers are rendered from
-`src/nodes.yml`.*
+0006](0006-node-inventory.md): both tools are gone; the dispatcher and sudoers are rendered from the
+node inventory (`src/nodes/<node>/inventory.yml`).*
 
 ## Consequences
 

@@ -18,21 +18,23 @@
     Fluent Bit quadlets
   - `render_secrets.sh`, at container start (`ExecStartPre`): secrets injection
   - `render_services.sh`, at container start: Fluent Bit's config, with the node's "Homelab:" units
-- `src/nodes.yml` is the node inventory: each node's dispatcher entries (services in install order,
-  other commands) and each service's subdomain, Gatus endpoint and container image facts
-  (`upstream`/`build`, `update_last`, `containers`). `render_src.sh` appends it to `vars.yml` as
-  `nodes:` in a private temp `all_vars.yml`, and templates import `src/nodes.jinja` for the lists
-  derived from it (dispatcher cases, sudoers grants, OliveTin buttons, DNS/SNI subdomains, uptime
-  endpoints, image update order). See [ADR 0006](adr/0006-node-inventory.md)
+- `src/nodes/<node>/inventory.yml`, one per node, is the node inventory: each node's dispatcher
+  entries (services in install order, other commands) and each service's subdomain, Gatus endpoint
+  and container image facts (`upstream`/`build`, `update_last`, `containers`). `render_src.sh`
+  appends it to `vars.yml` as `nodes:` in a private temp `all_vars.yml`, and templates import
+  `src/nodes.jinja` for the lists derived from it (dispatcher cases, sudoers grants, OliveTin
+  buttons, DNS/SNI subdomains, uptime endpoints, image update order). See [ADR
+  0006](adr/0006-node-inventory.md)
 
 ### Service Structure
 
-`src/` has three groups, plus `nodes.yml` and `nodes.jinja`:
+`src/` has three groups, plus `nodes.jinja`:
 - `src/nodes/<node>/`, one per node. May contain:
   - `install_svcs.sh`: installs configs to `/etc/opt/<service>/` and container files to
     `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not executable, since
     `install` defaults to 755), then reloads systemd. Runs from `/root/homelab-rendered/src`, so its
     paths start with `base/`, `nodes/` or `services/`
+  - `inventory.yml`: the node's part of the node inventory (keys documented in `src/nodes.jinja`)
   - `commands.sh` - Other tasks that run as root and are triggered remotely
   - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config
     shared by every node is `src/services/traefik/`
@@ -77,10 +79,10 @@ From template to running container, a change passes through five stages:
 flowchart TB
     subgraph local["Local workstation"]
         vars["vars.yml<br/>real values, gitignored"]
-        inventory["src/nodes.yml inventory:<br/>dispatcher entries, subdomains,<br/>Gatus endpoints"]
+        inventory["src/nodes/*/inventory.yml:<br/>dispatcher entries, subdomains,<br/>Gatus endpoints"]
         allvars["all_vars.yml<br/>private temp dir, deleted after the render"]
         render["render_src.sh: jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
-        validate["Validation: yamllint, jq on all JSON,<br/>duplicate container-IP check,<br/>nodes.yml vs install_svcs.sh / routes.yml / quadlet Image="]
+        validate["Validation: yamllint, jq on all JSON,<br/>duplicate container-IP check,<br/>inventory.yml vs install_svcs.sh / routes.yml / quadlet Image="]
         upload["upload_src.sh per node: scp as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
     end
 
@@ -133,7 +135,7 @@ real values, so keep it out of shared paths such as a fixed `/tmp/homelab-render
 `homelab-rendered`, since `upload_src.sh` moves it into place by that name.
 
 Rendering also validates YAML, JSON, checks for duplicate container IPs
-(`tools/validate_rendered.sh`), and checks `src/nodes.yml` against the scripts and routes it
+(`tools/validate_rendered.sh`), and checks the node inventory against the scripts and routes it
 describes: each node's `services` must be exactly its `install_svcs.sh` cases, every command must be
 a case in its script, subdomains must be unique, the secsvcs/homesvcs subdomains must match the
 `Host()` rules in their `traefik/routes.yml`, and each image's quadlet (copied by the service's
@@ -175,10 +177,10 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
 1. Create service container and config files in `src/services/<service>/`
 1. If cross-VM TLS is needed, add cert/key gen to `src/base/certificates/` and update `commands.sh`
 1. Add service to `install_svcs.sh`
-1. Add it under the node's `services` in `src/nodes.yml`, in install order, with its `subdomain`
-   and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health check isn't `/`,
-   `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions). This adds
-   the dispatcher case, sudoers grant, OliveTin button, DNS/SNI routing and uptime check
+1. Add it under `services` in `src/nodes/<node>/inventory.yml`, in install order, with its
+   `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health check isn't
+   `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions). This
+   adds the dispatcher case, sudoers grant, OliveTin button, DNS/SNI routing and uptime check
 1. Update Authelia config if OIDC auth is available (`src/services/authelia/`)
 1. Add Homepage dashboard entry (`src/services/homepage/`)
 1. Update the relevant guide in `docs/guides/`

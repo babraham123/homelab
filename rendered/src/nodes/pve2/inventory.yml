@@ -1,0 +1,14 @@
+# pve2's part of the node inventory; src/nodes.jinja documents the keys.
+# yamllint disable rule:document-start rule:document-end
+debian_services: [vm_watchdog]
+commands:
+  - {name: install_certs_and_keys, script: nodes/pve2/commands.sh}
+  - {name: start_gaming_vm, script: nodes/pve2/commands.sh}
+  - {name: stop_gaming_vm, script: nodes/pve2/commands.sh}
+  - {name: install_hookscript, script: nodes/pve2/commands.sh}
+  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/pve2/backup.sh]}
+  - {name: prune, run: [sudo /root/homelab-rendered/src/nodes/pve2/prune.sh]}
+  - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}
+  - {name: install_ssh_ca, script: base/debian/commands.sh}
+  - {name: install_dispatcher, script: base/debian/commands.sh}
+  - {name: install_ca, script: base/debian/commands.sh}

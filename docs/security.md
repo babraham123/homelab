@@ -169,12 +169,12 @@ sharply different powers:
 - **`autoadmin`** is the automation account. Its SSH key is bound to a `ForceCommand` script,
   `src/nodes/<node>/dispatcher.sh`, which whitelists a fixed set of `$SSH_ORIGINAL_COMMAND` strings
   (`install_traefik`, `install_all_svcs`, `copy_acme_certs`, …) and rejects everything else. The
-  dispatcher and its sudoers entry are both rendered from the node's entries in `src/nodes.yml`, so
-  sudo grants NOPASSWD for exactly the whitelisted commands.
+  dispatcher and its sudoers entry are both rendered from the node's
+  `src/nodes/<node>/inventory.yml`, so sudo grants NOPASSWD for exactly the whitelisted commands.
 
 So automation (OliveTin buttons, deploy scripts, cert distribution) can trigger predefined actions
 remotely, but a stolen `autoadmin` key cannot run arbitrary commands. The render fails if a node's
-`services` in `src/nodes.yml` differ from its `install_svcs.sh` cases, so the whitelist stays in
+`services` in its `inventory.yml` differ from its `install_svcs.sh` cases, so the whitelist stays in
 sync with the services that exist (see [ADR 0006](adr/0006-node-inventory.md)).
 
 ## Secrets

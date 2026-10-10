@@ -1,0 +1,3 @@
+# gaming's part of the node inventory; src/nodes.jinja documents the keys.
+# yamllint disable rule:document-start rule:document-end
+triggers: [StartSunshine, StopSunshine, InstallAutomation]

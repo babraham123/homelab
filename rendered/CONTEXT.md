@@ -6,10 +6,9 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 ## Nodes and naming
 
 - **node** — a machine with a directory under `src/nodes/` holding, as applicable, its
-  `install_svcs.sh`, `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config, and an entry
-  in `src/nodes.yml`. The nodes: `pve1`, `pve2`, `router`, `vpnsvcs`, `secsvcs`, `homesvcs`,
-  `websvcs`, `devtop`, `gaming`. `src/base/` holds the setups they share (`debian/`, `podman/`,
-  `macos/`, ...).
+  `install_svcs.sh`, `dispatcher.sh`, `commands.sh`, `sudoers`, and `traefik/` config, and an
+  `inventory.yml`. The nodes: `pve1`, `pve2`, `router`, `vpnsvcs`, `secsvcs`, `homesvcs`, `websvcs`,
+  `devtop`, `gaming`. `src/base/` holds the setups they share (`debian/`, `podman/`, `macos/`, ...).
 - **service** — a directory under `src/services/`; one containerized (or host-level) application:
   its quadlet `*.container` file, volumes, and config templates.
 - **container VM** — one of `secsvcs`, `homesvcs`, `websvcs`: a Debian VM running Podman quadlets
@@ -30,11 +29,11 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   container startup* (`ExecStartPre`) by `render_secrets.sh` for SOPS/AGE secrets
   (`render_services.sh` for Fluent Bit's unit list). Plaintext secrets never sit in the rendered
   tree.
-- **node inventory** — `src/nodes.yml`: per node, the dispatcher entries (services in install order,
-  other commands) and each service's subdomain, Gatus endpoint and image facts. `src/nodes.jinja`
-  derives the dispatcher cases, sudoers grants, DNS/SNI subdomain lists, uptime endpoints and image
-  update order from it; the render checks it against `install_svcs.sh`, `routes.yml` and the
-  quadlets' `Image=`.
+- **node inventory** — `src/nodes/<node>/inventory.yml`, one per node: per node, the dispatcher
+  entries (services in install order, other commands) and each service's subdomain, Gatus endpoint
+  and image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI subdomain
+  lists, uptime endpoints and image update order from it; the render checks it against
+  `install_svcs.sh`, `routes.yml` and the quadlets' `Image=`.
 - **rendered tree** — `/root/homelab-rendered` on each node: the uploaded output of a render, the
   only thing scripts on the node execute from.
 

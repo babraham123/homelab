@@ -1,0 +1,11 @@
+# pve1's part of the node inventory; src/nodes.jinja documents the keys.
+# yamllint disable rule:document-start rule:document-end
+debian_services: [vm_watchdog]
+services:
+  cert_notifier: {}
+  backup_orchestrator: {}
+commands:
+  - {name: archive_repo, script: nodes/pve1/commands.sh}
+  - {name: install_ssh_ca, script: base/debian/commands.sh}
+  - {name: install_dispatcher, script: base/debian/commands.sh}
+  - {name: install_ca, script: base/debian/commands.sh}

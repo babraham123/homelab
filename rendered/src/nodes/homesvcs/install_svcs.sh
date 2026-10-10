@@ -31,7 +31,7 @@ case $1 in
     install -D -m 644 -t /etc/opt/zigbee2mqtt/config services/zigbee2mqtt/*.yaml
     install_quadlet services/zigbee2mqtt/zigbee2mqtt.container services/zigbee2mqtt/z2mdb.volume
     ;;
-  # Not in use: uncomment and add to src/nodes.yml to install again
+  # Not in use: uncomment and add to src/nodes/homesvcs/inventory.yml to install again
 #   esphome)
 #     install -D -m 644 -t /etc/opt/esphome/config services/esphome/*.yaml
 #     install_quadlet services/esphome/esphome.container

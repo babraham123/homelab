@@ -1,0 +1,10 @@
+# devtop's part of the node inventory; src/nodes.jinja documents the keys.
+# yamllint disable rule:document-start rule:document-end
+commands:
+  - name: check_gpu
+    run:
+      - sudo /usr/bin/systemctl status nvidia-persistenced --no-pager
+      - nvidia-smi
+  - {name: install_ssh_ca, script: base/debian/commands.sh}
+  - {name: install_dispatcher, script: base/debian/commands.sh}
+  - {name: install_ca, script: base/debian/commands.sh}

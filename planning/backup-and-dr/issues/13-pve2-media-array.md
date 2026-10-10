@@ -33,9 +33,9 @@ NVMe, which the weekly image backup then carries to PBS.
 ## Code (done)
 
 `src/services/snapraid/` (`snapraid.conf.j2`, `media.fstab.j2`, `snapraid_run.sh.j2`, the four
-units), `install_snapraid` in `src/nodes/websvcs/install_svcs.sh` (listed under websvcs `services`
-in `nodes.yml`; timers are only enabled once `websvcs.media.disks` is set), `websvcs.media.disks` in
-`vars.template.yml`, `docs/guides/pve2_storage.md`.
+units), `install_snapraid` in `src/nodes/websvcs/install_svcs.sh` (listed under `services` in
+`src/nodes/websvcs/inventory.yml`; timers are only enabled once `websvcs.media.disks` is set),
+`websvcs.media.disks` in `vars.template.yml`, `docs/guides/pve2_storage.md`.
 
 ## Human steps
 

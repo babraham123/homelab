@@ -128,5 +128,6 @@ retention:
   hass_days: 14
 
 
-# tools/render_src.sh appends src/nodes.yml (the `nodes:` key) here at render time.
+# tools/render_src.sh appends the node inventory (src/nodes/<node>/inventory.yml, as the
+# `nodes:` key) here at render time.
 ...

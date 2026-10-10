@@ -29,17 +29,27 @@ rsync -a --delete \
   ./ "$project_dir/"
 
 # Assemble jinja2 config file. jinjanate takes one data file, so the node inventory
-# is appended to vars.yml rather than passed alongside it. It holds everything in
+# (src/nodes/<node>/inventory.yml, gathered under `nodes:` in node-name order) is
+# appended to vars.yml rather than passed alongside it. It holds everything in
 # vars.yml, so it lives in its own private temp dir, outside the repo and the output.
 vars_dir=$(mktemp -d)
 trap 'rm -rf "$vars_dir"' EXIT
+nodes_yml="${vars_dir}/nodes.yml"
 all_vars="${vars_dir}/all_vars.yml"
+{
+  echo "nodes:"
+  for inventory in src/nodes/*/inventory.yml; do
+    node=$(basename "$(dirname "$inventory")")
+    echo "  ${node}:"
+    sed 's/^/    /' "$inventory"
+  done
+} > "$nodes_yml"
 cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
 {
   # Exclude the ending "..."
   head -n "$((cut_line-1))" vars.yml
   echo
-  cat src/nodes.yml
+  cat "$nodes_yml"
   echo -e "...\n"
 } > "$all_vars"
 
@@ -57,11 +67,11 @@ $fdfind . --extension pl --exec chmod +x "{}"
 
 tools/validate_rendered.sh .
 
-# Validate each image in src/nodes.yml against the quadlet its install case copies. The
+# Validate each image in the node inventory against the quadlet its install case copies. The
 # image updater loads images under these names, so a mismatch would never be updated.
 upstreams='.. | select(tag == "!!map" and has("upstream")) | .upstream'
-bad=$(yq "$upstreams" src/nodes.yml | grep -vE '^[^/]+\.[^/]+/[^/]+/[^/]+' || true)
-[ -z "$bad" ] || die "src/nodes.yml upstream refs need a registry host and namespace: ${bad}"
+bad=$(yq "$upstreams" "$nodes_yml" | grep -vE '^[^/]+\.[^/]+/[^/]+/[^/]+' || true)
+[ -z "$bad" ] || die "inventory.yml upstream refs need a registry host and namespace: ${bad}"
 
 cat > "${vars_dir}/images.j2" <<'EOF'
 {% import 'src/nodes.jinja' as inv with context -%}
@@ -76,42 +86,42 @@ jinjanate --quiet "${vars_dir}/images.j2" "$all_vars" | \
     quadlet=$(awk -v c="${svc})" '$1 == c {f=1; next} f && /;;/ {exit} f' "src/nodes/${node}/install_svcs.sh" | \
       grep -oE "[a-zA-Z0-9_./-]+/${container}\.container" | head -n 1 || true)
     [ -n "$quadlet" ] || \
-      die "the ${svc} case in src/nodes/${node}/install_svcs.sh copies no ${container}.container (src/nodes.yml)"
+      die "the ${svc} case in src/nodes/${node}/install_svcs.sh copies no ${container}.container (src/nodes/${node}/inventory.yml)"
     # A *.container.j2.j2 source is still *.container.j2 until install time
     file="src/${quadlet}"
     [ -f "$file" ] || file+=".j2"
     actual=$(sed -n 's/^Image=//p' "$file")
     [[ "$actual" == "$image" ]] || \
-      die "${file}: Image=${actual}, expected Image=${image} (src/nodes.yml ${node}.services.${svc})"
+      die "${file}: Image=${actual}, expected Image=${image} (src/nodes/${node}/inventory.yml services.${svc})"
   done
 
 # Validate the node inventory against the scripts its dispatcher cases call
 cases() { sed -nE 's/^[[:space:]]+([a-zA-Z0-9_-]+)\).*$/\1/p' "$1" | sort -u; }
-inventory() { node="$1" yq "$2" src/nodes.yml; }
+inventory() { node="$1" yq "$2" "$nodes_yml"; }
 
-for node in $(yq '.nodes | keys | .[]' src/nodes.yml); do
+for node in $(yq '.nodes | keys | .[]' "$nodes_yml"); do
   install_file="src/nodes/${node}/install_svcs.sh"
   actual=""
   [ -f "$install_file" ] && actual=$(cases "$install_file")
   listed=$(inventory "$node" '.nodes[strenv(node)].services // {} | keys | .[]' | sort -u)
   [[ "$listed" == "$actual" ]] || \
-    die "src/nodes.yml ${node}.services doesn't match the cases in ${install_file}"
+    die "src/nodes/${node}/inventory.yml services don't match the cases in ${install_file}"
 
   for svc in $(inventory "$node" '.nodes[strenv(node)].debian_services // [] | .[]'); do
     cases src/base/debian/install_svcs.sh | grep -qx "$svc" || \
-      die "src/base/debian/install_svcs.sh has no ${svc} case (src/nodes.yml ${node}.debian_services)"
+      die "src/base/debian/install_svcs.sh has no ${svc} case (src/nodes/${node}/inventory.yml debian_services)"
   done
 
   inventory "$node" '.nodes[strenv(node)].commands // [] | .[] | select(has("script")) | .name + " " + .script' | \
     while read -r name script; do
-      [ -f "src/${script}" ] || die "src/${script} doesn't exist (src/nodes.yml ${node}.commands)"
+      [ -f "src/${script}" ] || die "src/${script} doesn't exist (src/nodes/${node}/inventory.yml commands)"
       cases "src/${script}" | grep -qx "$name" || die "src/${script} has no ${name} case"
     done
 done
 
 subdomains='.nodes[] | select(has("services")) | .services[] | select(has("subdomain")) | .subdomain'
-dups=$(yq "$subdomains" src/nodes.yml | sort | uniq -d)
-[ -z "$dups" ] || die "subdomains listed more than once in src/nodes.yml: ${dups}"
+dups=$(yq "$subdomains" "$nodes_yml" | sort | uniq -d)
+[ -z "$dups" ] || die "subdomains listed more than once across src/nodes/*/inventory.yml: ${dups}"
 
 # The subdomain lists drive DNS and SNI routing, so they must match what Traefik serves.
 # websvcs is the default route and needs no entries.
@@ -121,7 +131,7 @@ for node in secsvcs homesvcs; do
     grep -oE 'Host\(`[^.`]+\.' | sed -E 's/^Host\(`//; s/\.$//' | sort -u)
   listed=$(inventory "$node" '.nodes[strenv(node)].services[] | select(has("subdomain")) | .subdomain' | sort -u)
   [[ "$routed" == "$listed" ]] || \
-    die "src/nodes.yml ${node} subdomains don't match the Host() rules in src/nodes/${node}/traefik/routes.yml"
+    die "src/nodes/${node}/inventory.yml subdomains don't match the Host() rules in src/nodes/${node}/traefik/routes.yml"
 done
 
 find . -name .DS_Store -delete

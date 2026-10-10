@@ -8,9 +8,9 @@ Container catalog, host services, observability and backups. Hostnames use the p
 - The catalog is what the repo defines; what runs is whatever `install_svcs.sh` installed
   (`systemctl list-units "*.service"` on the node)
 - Raw list: `grep -rn "^IP=" src --include="*.container.j2*"`
-- Not in use, so not in `src/nodes.yml` or the tables below, though their quadlets exist: esphome
-  (homesvcs), go2rtc, finance_exporter, archivebox, novnc and the `wyoming` quadlets piper, whisper
-  and openwakeword (websvcs)
+- Not in use, so not in any `inventory.yml` or the tables below, though their quadlets exist:
+  esphome (homesvcs), go2rtc, finance_exporter, archivebox, novnc and the `wyoming` quadlets piper,
+  whisper and openwakeword (websvcs)
 
 ## secsvcs: identity, certificates, observability (pve1, 10.10.0.0/24)
 
@@ -173,8 +173,8 @@ flowchart LR
   VictoriaLogs, so one dashboard variable filters both
 - **Retention** for metrics, logs and Home Assistant history: `vars.yml`
 - **Gatus**, independent of the metrics pipeline:
-  - HTTPS checks generated from the `uptime` keys in `src/nodes.yml`, every 10 minutes; every 2 for
-    `uptime_tier: 1` (the proxies, the login portal, the pages opened first)
+  - HTTPS checks generated from the `uptime` keys in `src/nodes/<node>/inventory.yml`, every 10
+    minutes; every 2 for `uptime_tier: 1` (the proxies, the login portal, the pages opened first)
   - Every HTTPS check fails with under 14 days of cert left; a `tls://` check covers LDAPS;
     cert_notifier emails cover Postgres and Mosquitto
   - No notifier of its own: results are scraped, and `EndpointDown` and the cert rules fire through

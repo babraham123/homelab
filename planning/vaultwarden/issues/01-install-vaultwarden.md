@@ -124,9 +124,9 @@ Not adopted from the guide: hiding under a secret subdir. With `SSO_ONLY` and Au
 
 ## Comments
 
-- 2026-09-27: restructure/01 landed: the dispatcher, sudoers and `install_all_svcs` come from
-  `src/nodes.yml`. Rename the `vault: {}` entry under secsvcs `services` to
-  `vaultwarden: {subdomain: vault}` (add `uptime` for a Gatus check). There's no
+- 2026-09-27: restructure/01 landed: the dispatcher, sudoers and `install_all_svcs` come from the
+  node inventory, now `src/nodes/secsvcs/inventory.yml`. Rename the `vault: {}` entry under
+  `services` to `vaultwarden: {subdomain: vault}` (add `uptime` for a Gatus check). There's no
   `gen_dispatch_cmds.sh` to run, and `secsvcs_subdomains` is now `inv.subdomains.secsvcs`.
 - 2026-09-27: backup-and-dr/01 landed, so this is now blocked only on auth/06. The weekly
   orchestrator runs `pg_dumpall` on secsvcs before snapshotting the VM, so a Postgres-backed
