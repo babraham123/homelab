@@ -152,7 +152,7 @@
     ],
     "files.associations": {
         "*.hujson": "json",
-        "*.container.js": "quadlet",
+        "*.container.j2": "quadlet",
         "*.hujson.j2": "jinja-json"
     }
 }

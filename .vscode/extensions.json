@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "anthropic.claude-code",
+        "davidanson.vscode-markdownlint",
+        "donjayamanne.githistory",
+        "hangxingliu.vscode-systemd-support",
+        "mads-hartmann.bash-ide-vscode",
+        "mk12.better-git-line-blame",
+        "onlyati.quadlet-lsp",
+        "samuelcolvin.jinjahtml",
+        "streetsidesoftware.code-spell-checker"
+    ]
+}
