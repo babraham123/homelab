@@ -18,6 +18,8 @@
 #   pve_task UPID                # waits for a PVE task (pvesh create returns its UPID),
 #                                # prints its log, fails unless it ended OK
 
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
 stage=/var/opt/backups
 files="${stage}/files"
 dumps="${stage}/dumps"

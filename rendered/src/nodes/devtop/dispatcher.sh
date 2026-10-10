@@ -7,6 +7,7 @@
 
 # shellcheck source=src/base/lib.sh
 source /usr/local/lib/homelab/lib.sh
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 # Modern scp (OpenSSH 9+) uses SFTP protocol by default
 if [[ "${SSH_ORIGINAL_COMMAND:-}" == "/usr/lib/openssh/sftp-server" ]]; then

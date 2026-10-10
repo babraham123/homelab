@@ -6,9 +6,11 @@
 # Copies installed outside the tree (install_bin, the dispatcher, node_exporter's runner)
 # source the copy install_lib puts in /usr/local/lib/homelab, readable by any user:
 #   source /usr/local/lib/homelab/lib.sh
+# PATH is left alone: scripts that pin it export it after sourcing; the rest need the
+# caller's, e.g. render_*.sh run jinjanate from /usr/local/bin. Scripts that run without
+# some of these options turn them back off after sourcing.
 
 set -euo pipefail
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 rendered=/root/homelab-rendered/src
 

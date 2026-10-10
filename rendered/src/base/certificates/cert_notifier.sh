@@ -6,6 +6,7 @@
 
 # shellcheck source=src/base/lib.sh
 source /usr/local/lib/homelab/lib.sh
+set +u
 
 now=$(date +%s)
 last_update=$(date -r /root/ssh/date_ssh_certs.txt +%s || echo 0)

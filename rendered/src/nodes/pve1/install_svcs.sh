@@ -5,6 +5,7 @@
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 cd "$rendered"
 

@@ -60,5 +60,12 @@ reload_restart()    { systemctl daemon-reload; systemctl restart "$1"; systemctl
   `backup.sh` files source `lib.sh` then `backup_lib.sh`. `tools/lib.sh` is `set -euo
   pipefail` plus `warn`/`die`. Not sourcing it, on purpose: `src/nodes/router/**` (pfSense
   `/bin/sh`, gets only its own dir) and `src/base/macos/` (run from the Mac).
+  `msmtp_password.sh` (run by msmtp, no options) also stands alone.
   `ping` stays `-c3`, as in the old `is_reachable.sh`. deadman.sh sets `+e` after sourcing:
   its checks are counted, not fatal. Cutover: `notes/apply-since-5a50097.md` step 3.
+- 2026-10-10: Every script keeps the options and PATH it had. `lib.sh` sets `-euo
+  pipefail` only, which is what nearly all of them used. `cert_notifier.sh` (`-eo`) adds
+  `set +u`, and `deadman.sh` (`-uo`) adds `set +e`. There's no `export PATH` in the lib:
+  the scripts that pinned PATH still export it themselves, and the others keep the
+  caller's PATH. A pinned PATH in the lib would have hidden `/usr/local/bin/jinjanate`
+  from the `render_*.sh` `ExecStartPre`s.

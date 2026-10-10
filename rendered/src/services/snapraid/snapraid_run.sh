@@ -8,6 +8,7 @@
 
 # shellcheck source=src/base/lib.sh
 source /usr/local/lib/homelab/lib.sh
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 job=${1:-}
 textfile=/var/lib/node_exporter/textfile_collector

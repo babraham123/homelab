@@ -11,6 +11,7 @@
 
 # shellcheck source=src/base/lib.sh
 source /usr/local/lib/homelab/lib.sh
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 storage=pbs2
 backups=/root/backups
