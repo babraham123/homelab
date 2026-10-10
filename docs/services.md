@@ -244,7 +244,7 @@ flowchart LR
   5. A `homelab_backup_last_success_timestamp_seconds{job}` metric per step, `BackupStale` after 8
      days (`src/services/vmalert/configs/backups.yml`), an ntfy summary, and pve2 off again if it
      was off
-- **Retention**, PBS prune jobs per namespace:
+- **Retention**, PBS prune jobs per namespace, set in `src/nodes/pve2/prune.sh`:
   - images (`pve1`, `pve2`, including `host/vpnsvcs`): last 1, weekly 2, monthly 2
   - `files`: last 1, weekly 3, monthly 6
 - PVE and PBS configs (`/etc/pve`, `/etc/proxmox-backup`) are in the hosts' stages, so PBS's own

@@ -249,8 +249,8 @@ pvesm status
 - No backup jobs in the PVE UI (Datacenter >> Backup must be empty on both hosts) and no prune or GC
   job made in the PBS UI: the schedule is `src/nodes/pve1/backup_orchestrator.timer` (Saturday
   02:00), and its last step runs pve2's `prune.sh`, which creates or updates the prune jobs
-  `images-pve1`, `images-pve2` (keep last 1, weekly 2, monthly 2) and `files` (last 1, weekly 3,
-  monthly 6), runs them, then garbage collection.
+  `images-pve1`, `images-pve2` and `files` ([retention](../services.md#storage-and-backups)), runs
+  them, then garbage collection.
 - The host configs (`/etc/pve`, `/etc/proxmox-backup`) are staged by each host's `backup.sh` and end
   up in pve1's `/root/backups/`, so PBS's own config is kept outside PBS. Restores: [the restore
   guide](./restore.md).

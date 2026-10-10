@@ -23,8 +23,5 @@ stage_paths /etc/pve /etc/network/interfaces /etc/resolv.conf /etc/hosts /etc/ho
   /var/lib/vz/snippets /usr/local/bin
 stage_finish
 
-# router, secsvcs, homesvcs. Snapshot mode keeps them running; PBS stores only the
-# chunks that changed since the last run.
-upid=$(pvesh create "/nodes/$(hostname)/vzdump" --all 1 --storage pbs2 --mode snapshot \
-  --notes-template '{% raw %}{{guestname}}{% endraw %}')
-pve_task "$upid"
+# router, secsvcs, homesvcs.
+vzdump_to_pbs --all 1

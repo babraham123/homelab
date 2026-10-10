@@ -16,8 +16,9 @@ Three tiers, cheapest first:
    - A non-empty `dumps/` means the last upload failed and PBS doesn't have them
 3. **PBS** (`pbs2`, on pve2), every weekly run; needs pve2 awake: `ssh autoadmin@router start_pve2`
    - The only home of application dumps
-   - Namespace `files`: `host/pve1`, the collection (last 1, weekly 3, monthly 6)
-   - Namespaces `pve1`, `pve2`: the VM images and `host/vpnsvcs` (last 1, weekly 2, monthly 2)
+   - Namespace `files`: `host/pve1`, the collection
+   - Namespaces `pve1`, `pve2`: the VM images and `host/vpnsvcs`
+   - Retention per namespace: [Storage and backups](../services.md#storage-and-backups)
 
 ## A file or an application's data
 ### From the stage or pve1's collection

@@ -11,16 +11,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 # shellcheck source=src/base/debian/backup_lib.sh
 source "${rendered}/base/debian/backup_lib.sh"
 
-node=$(hostname)
-
 vm_running() { qm status "$1" | grep -qw running; }
-
-backup_vm() {
-  local upid
-  upid=$(pvesh create "/nodes/${node}/vzdump" --vmid "$1" --storage pbs2 --mode snapshot \
-    --notes-template '{% raw %}{{guestname}}{% endraw %}')
-  pve_task "$upid"
-}
+backup_vm() { vzdump_to_pbs --vmid "$1"; }
 
 stage_init
 # /etc/proxmox-backup is PBS itself: datastore and namespace definitions, users,
