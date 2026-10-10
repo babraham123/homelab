@@ -6,53 +6,43 @@
 set -euo pipefail
 
 cd /root/homelab-rendered/src
-mkdir -p /etc/containers/systemd
 
 case $1 in
   traefik)
-    mkdir -p /etc/opt/traefik/config/dynamic
-    mkdir -p /etc/opt/traefik/config/static
     mkdir -p /etc/opt/traefik/certificates
     rm -rf /etc/opt/traefik/config/dynamic/*
-    cp homesvcs/traefik/*.yml /etc/opt/traefik/config/dynamic
-    cp traefik/dynamic/*.yml /etc/opt/traefik/config/dynamic
-    cp traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
-    cp homesvcs/traefik/traefik.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/traefik/config/dynamic homesvcs/traefik/*.yml traefik/dynamic/*.yml
+    install -D -m 644 traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
+    install -D -m 644 -t /etc/containers/systemd homesvcs/traefik/traefik.container
     ;;
   vmagent)
-    mkdir -p /etc/opt/vmagent
-    cp homesvcs/prometheus.yml /etc/opt/vmagent
+    install -D -m 644 -t /etc/opt/vmagent homesvcs/prometheus.yml
     /root/homelab-rendered/src/podman/render_host.sh homesvcs victoriametrics/vmagent.container
-    mv victoriametrics/vmagent.container /etc/containers/systemd
-    cp victoriametrics/vmagentdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd victoriametrics/vmagent.container victoriametrics/vmagentdata.volume
     ;;
   mosquitto)
     mkdir -p /etc/opt/mosquitto/certificates
-    cp mosquitto/mosquitto.conf /etc/opt/mosquitto
-    cp mosquitto/mosquitto.container /etc/containers/systemd
-    cp mosquitto/mqttdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/mosquitto mosquitto/mosquitto.conf
+    install -D -m 644 -t /etc/containers/systemd mosquitto/mosquitto.container mosquitto/mqttdata.volume
     ;;
   zigbee2mqtt)
     mkdir -p /etc/opt/zigbee2mqtt/certificates
-    mkdir -p /etc/opt/zigbee2mqtt/config
-    cp zigbee2mqtt/*.yaml /etc/opt/zigbee2mqtt/config
-    cp zigbee2mqtt/zigbee2mqtt.container /etc/containers/systemd
-    cp zigbee2mqtt/z2mdb.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/zigbee2mqtt/config zigbee2mqtt/*.yaml
+    install -D -m 644 -t /etc/containers/systemd zigbee2mqtt/zigbee2mqtt.container zigbee2mqtt/z2mdb.volume
     ;;
   esphome)
-    mkdir -p /etc/opt/esphome/config
-    cp esphome/*.yaml /etc/opt/esphome/config
-    cp esphome/esphome.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/esphome/config esphome/*.yaml
+    install -D -m 644 -t /etc/containers/systemd esphome/esphome.container
     ;;
   home_assistant)
     mkdir -p /etc/opt/home_assistant/certs
     mkdir -p /var/opt/home_assistant/media/recordings
-    cp home_assistant/hassconfig.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd home_assistant/hassconfig.volume
     systemctl daemon-reload
     systemctl start hassconfig-volume.service
     volpath=$(podman volume inspect -f '{{ .Mountpoint }}' systemd-hassconfig)
     if [ ! -e "$volpath"/configuration.yaml ]; then
-      cp home_assistant/*.yaml "$volpath"
+      install -m 644 -t "$volpath" home_assistant/*.yaml
     else
       echo "$volpath"
       ls "$volpath"
@@ -62,18 +52,15 @@ case $1 in
         exit 1
       fi
     fi
-    cp home_assistant/home_assistant.container /etc/containers/systemd
-    cp home_assistant/hassdb.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd home_assistant/home_assistant.container home_assistant/hassdb.volume
     ;;
   fluentbit)
-    mkdir -p /etc/opt/fluentbit
-    cp fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
-    cp fluentbit/journald.lua /etc/opt/fluentbit
+    install -D -m 644 fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
+    install -D -m 644 -t /etc/opt/fluentbit fluentbit/journald.lua
     install -D -m 644 debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
     systemctl restart systemd-journald
     /root/homelab-rendered/src/podman/render_host.sh homesvcs fluentbit/fluentbit.container
-    mv fluentbit/fluentbit.container /etc/containers/systemd
-    cp fluentbit/fbdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd fluentbit/fluentbit.container fluentbit/fbdata.volume
     ;;
   *)
     echo "error: unknown service: $1" >&2

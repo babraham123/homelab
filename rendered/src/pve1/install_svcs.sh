@@ -9,9 +9,8 @@ cd /root/homelab-rendered/src
 
 case $1 in
   cert_notifier)
-    cp certificates/cert_notifier.sh /usr/local/bin
-    cp certificates/cert_notifier.service /etc/systemd/system
-    cp certificates/cert_notifier.timer /etc/systemd/system
+    install -D -t /usr/local/bin certificates/cert_notifier.sh
+    install -D -m 644 -t /etc/systemd/system certificates/cert_notifier.{service,timer}
 
     systemctl daemon-reload
     systemctl enable cert_notifier.service
@@ -22,9 +21,8 @@ case $1 in
   backup_orchestrator)
     # The client uploads /root/backups to PBS as a host backup.
     apt-get install -y proxmox-backup-client
-    cp pve1/backup_orchestrator.sh /usr/local/bin
-    cp pve1/backup_orchestrator.service /etc/systemd/system
-    cp pve1/backup_orchestrator.timer /etc/systemd/system
+    install -D -t /usr/local/bin pve1/backup_orchestrator.sh
+    install -D -m 644 -t /etc/systemd/system pve1/backup_orchestrator.{service,timer}
 
     # Only the timer is enabled; the service is a oneshot it triggers.
     systemctl daemon-reload

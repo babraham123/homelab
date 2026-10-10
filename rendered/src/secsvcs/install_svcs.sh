@@ -6,114 +6,92 @@
 set -euo pipefail
 
 cd /root/homelab-rendered/src
-mkdir -p /etc/containers/systemd
 
 case $1 in
   postgres)
     mkdir -p /etc/opt/db/certificates
-    cp postgres/pg_init.sql /var/opt/db
-    cp postgres/postgres.container /etc/containers/systemd
-    cp postgres/postgresdb.volume /etc/containers/systemd
+    install -D -m 644 -t /var/opt/db postgres/pg_init.sql
+    install -D -m 644 -t /etc/containers/systemd postgres/postgres.container postgres/postgresdb.volume
     ;;
   lldap)
     mkdir -p /etc/opt/lldap/certificates
-    cp lldap/lldap_config.toml /etc/opt/lldap
-    cp lldap/lldap.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/lldap lldap/lldap_config.toml
+    install -D -m 644 -t /etc/containers/systemd lldap/lldap.container
     ;;
   authelia)
-    mkdir -p /etc/opt/authelia/config
     mkdir -p /etc/opt/authelia/certificates
-    cp authelia/configuration.yml /etc/opt/authelia/config
-    cp authelia/authelia.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/authelia/config authelia/configuration.yml
+    install -D -m 644 -t /etc/containers/systemd authelia/authelia.container
     ;;
   traefik)
-    mkdir -p /etc/opt/traefik/config/dynamic
-    mkdir -p /etc/opt/traefik/config/static
     mkdir -p /etc/opt/traefik/certificates
     rm -rf /etc/opt/traefik/config/dynamic/*
-    cp secsvcs/traefik/*.yml /etc/opt/traefik/config/dynamic
-    cp traefik/dynamic/*.yml /etc/opt/traefik/config/dynamic
-    cp traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
-    cp secsvcs/traefik/traefik.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/traefik/config/dynamic secsvcs/traefik/*.yml traefik/dynamic/*.yml
+    install -D -m 644 traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
+    install -D -m 644 -t /etc/containers/systemd secsvcs/traefik/traefik.container
     ;;
   victoriametrics)
-    mkdir -p /etc/opt/victoriametrics
-    cp secsvcs/prometheus.yml /etc/opt/victoriametrics
-    cp victoriametrics/victoriametrics.container /etc/containers/systemd
-    cp victoriametrics/vmdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/victoriametrics secsvcs/prometheus.yml
+    install -D -m 644 -t /etc/containers/systemd victoriametrics/victoriametrics.container victoriametrics/vmdata.volume
     ;;
   victorialogs)
     mkdir -p /etc/opt/victorialogs
-    cp victorialogs/victorialogs.container /etc/containers/systemd
-    cp victorialogs/vldata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd victorialogs/victorialogs.container victorialogs/vldata.volume
     ;;
   gatus)
     mkdir -p /etc/opt/gatus/certificates
     mkdir -p /var/opt/gatus
-    cp gatus/config.yaml /etc/opt/gatus
-    cp gatus/gatus.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/gatus gatus/config.yaml
+    install -D -m 644 -t /etc/containers/systemd gatus/gatus.container
     ;;
   vmalert)
-    mkdir -p /etc/opt/vmalert
     rm -f /etc/opt/vmalert/*.yml
-    cp vmalert/configs/*.yml /etc/opt/vmalert
-    cp vmalert/vmalert.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/vmalert vmalert/configs/*.yml
+    install -D -m 644 -t /etc/containers/systemd vmalert/vmalert.container
     ;;
   alertmanager)
-    mkdir -p /etc/opt/alertmanager
-    cp alertmanager/config.yml.j2 /etc/opt/alertmanager
-    cp alertmanager/web_config.yml.j2 /etc/opt/alertmanager
-    cp alertmanager/alertmanager.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/alertmanager alertmanager/config.yml.j2 alertmanager/web_config.yml.j2
+    install -D -m 644 -t /etc/containers/systemd alertmanager/alertmanager.container
     ;;
   ntfy-alertmanager)
-    mkdir -p /etc/opt/ntfy-alertmanager
-    cp alertmanager/ntfy-alertmanager.scfg.j2 /etc/opt/ntfy-alertmanager/config.scfg.j2
-    cp alertmanager/ntfy-alertmanager.container /etc/containers/systemd
+    install -D -m 644 alertmanager/ntfy-alertmanager.scfg.j2 /etc/opt/ntfy-alertmanager/config.scfg.j2
+    install -D -m 644 -t /etc/containers/systemd alertmanager/ntfy-alertmanager.container
     ;;
   ntfy)
-    mkdir -p /etc/opt/ntfy
     mkdir -p /var/opt/ntfy
-    cp ntfy/config.yml.j2 /etc/opt/ntfy
-    cp ntfy/ntfy.container /etc/containers/systemd
-    cp ntfy/ntfydb.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/ntfy ntfy/config.yml.j2
+    install -D -m 644 -t /etc/containers/systemd ntfy/ntfy.container ntfy/ntfydb.volume
     ;;
   grafana)
     mkdir -p /etc/opt/grafana/certificates
     chown -R 472:0 /var/opt/grafana
-    cp grafana/grafana.ini /etc/opt/grafana
-    cp grafana/datasources.yml /etc/opt/grafana
-    cp grafana/dashboard.yml /etc/opt/grafana
+    install -D -m 644 -t /etc/opt/grafana grafana/grafana.ini grafana/datasources.yml grafana/dashboard.yml
     # Clear old dashboards so ones deleted from the repo stop being provisioned
-    mkdir -p /etc/opt/grafana/dashboards
     rm -f /etc/opt/grafana/dashboards/*.json
-    cp -r grafana/dashboards /etc/opt/grafana
-    cp grafana/grafana.container /etc/containers/systemd
-    cp grafana/grafanadata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/grafana/dashboards grafana/dashboards/*.json
+    install -D -m 644 -t /etc/containers/systemd grafana/grafana.container grafana/grafanadata.volume
     ;;
   vault)
     echo "TODO: Implement vault"
-    # cp vault/vault.container /etc/containers/systemd
+    # install -D -m 644 -t /etc/containers/systemd vault/vault.container
     exit 0
     ;;
   olive_tin)
-    mkdir -p /etc/opt/olive_tin/config
     # ssh keys should already be in place
     ls /etc/opt/olive_tin/ssh/id_ed25519-cert.pub
-    cp olive_tin/config.yaml /etc/opt/olive_tin/config
-    cp debian/ssh_config /etc/opt/olive_tin/ssh/config
+    install -D -m 644 -t /etc/opt/olive_tin/config olive_tin/config.yaml
+    install -D -m 644 debian/ssh_config /etc/opt/olive_tin/ssh/config
     touch /etc/opt/olive_tin/config/sessions.yaml
     chown -R 1000:1000 /etc/opt/olive_tin
-    cp olive_tin/olive_tin.container /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd olive_tin/olive_tin.container
     ;;
   fluentbit)
-    mkdir -p /etc/opt/fluentbit
-    cp secsvcs/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
-    cp fluentbit/journald.lua /etc/opt/fluentbit
+    install -D -m 644 secsvcs/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
+    install -D -m 644 -t /etc/opt/fluentbit fluentbit/journald.lua
     install -D -m 644 debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
     systemctl restart systemd-journald
     /root/homelab-rendered/src/podman/render_host.sh secsvcs fluentbit/fluentbit.container
-    mv fluentbit/fluentbit.container /etc/containers/systemd
-    cp fluentbit/fbdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd fluentbit/fluentbit.container fluentbit/fbdata.volume
     ;;
   *)
     echo "error: unknown service: $1" >&2

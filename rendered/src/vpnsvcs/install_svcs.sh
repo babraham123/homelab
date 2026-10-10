@@ -9,7 +9,7 @@ cd /root/homelab-rendered/src
 
 # HAProxy and Headscale serve metrics on the podman bridge gateway (net.network)
 nonlocal_bind() {
-  cp vpnsvcs/nonlocal_bind.conf /etc/sysctl.d/90-homelab-nonlocal-bind.conf
+  install -D -m 644 vpnsvcs/nonlocal_bind.conf /etc/sysctl.d/90-homelab-nonlocal-bind.conf
   sysctl -p /etc/sysctl.d/90-homelab-nonlocal-bind.conf
 }
 
@@ -23,8 +23,8 @@ case $1 in
     dpkg --install headscale.deb
     rm headscale.deb
     debian/add_homelab_tag.sh /usr/lib/systemd/system/headscale.service
-    cp headscale/headscale.yaml /etc/headscale/config.yaml
-    cp headscale/headscale_acl.hujson /etc/headscale/acl.hujson
+    install -D -m 644 headscale/headscale.yaml /etc/headscale/config.yaml
+    install -D -m 644 headscale/headscale_acl.hujson /etc/headscale/acl.hujson
     touch /etc/opt/secrets/hs_oidc_id
     oidc_id=$(cat /etc/opt/secrets/hs_oidc_id | tr -d '\n')
     sed -i "s/PLACEHOLDER_ID/$oidc_id/g" /etc/headscale/config.yaml
@@ -40,7 +40,7 @@ case $1 in
     apt install -y haproxy
     nonlocal_bind
     debian/add_homelab_tag.sh /usr/lib/systemd/system/haproxy.service
-    cp haproxy/haproxy.cfg /etc/haproxy
+    install -D -m 644 -t /etc/haproxy haproxy/haproxy.cfg
     curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
     mkdir -p /etc/haproxy/countries
 
@@ -52,34 +52,29 @@ case $1 in
   geoip_generator)
     podman build -t geoip_generator -f haproxy/geoip_generator.Containerfile haproxy
     podman image prune -f
-    cp haproxy/geoip_generator.container /etc/containers/systemd
-    cp haproxy/geoip_generator.timer /etc/systemd/system
+    install -D -m 644 -t /etc/containers/systemd haproxy/geoip_generator.container
+    install -D -m 644 -t /etc/systemd/system haproxy/geoip_generator.timer
     systemctl daemon-reload
     systemctl enable geoip_generator.timer
     systemctl restart geoip_generator.timer
     exit 0
     ;;
   fluentbit)
-    mkdir -p /etc/opt/fluentbit
-    cp fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
-    cp fluentbit/journald.lua /etc/opt/fluentbit
+    install -D -m 644 fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
+    install -D -m 644 -t /etc/opt/fluentbit fluentbit/journald.lua
     install -D -m 644 debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
     systemctl restart systemd-journald
     /root/homelab-rendered/src/podman/render_host.sh vpnsvcs fluentbit/fluentbit.container
-    mv fluentbit/fluentbit.container /etc/containers/systemd
-    cp fluentbit/fbdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd fluentbit/fluentbit.container fluentbit/fbdata.volume
     ;;
   vmagent)
-    mkdir -p /etc/opt/vmagent
-    cp vpnsvcs/prometheus.yml /etc/opt/vmagent
+    install -D -m 644 -t /etc/opt/vmagent vpnsvcs/prometheus.yml
     /root/homelab-rendered/src/podman/render_host.sh vpnsvcs victoriametrics/vmagent.container
-    mv victoriametrics/vmagent.container /etc/containers/systemd
-    cp victoriametrics/vmagentdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd victoriametrics/vmagent.container victoriametrics/vmagentdata.volume
     ;;
   deadman)
     install -d -m 700 /var/lib/deadman
-    cp vpnsvcs/deadman.service /etc/systemd/system
-    cp vpnsvcs/deadman.timer /etc/systemd/system
+    install -D -m 644 -t /etc/systemd/system vpnsvcs/deadman.{service,timer}
 
     systemctl daemon-reload
     systemctl enable deadman.timer

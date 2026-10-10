@@ -13,16 +13,14 @@ case $1 in
     git clone https://github.com/babraham123/mdns-repeater
     cd mdns-repeater
     make all
-    chmod +x mdns-repeater
-    cp mdns-repeater /usr/local/bin
+    install -D -t /usr/local/bin mdns-repeater
     from=$(ip -j -4 route show to default | jq -r '.[0].dev')
     to=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
     echo "Enabling mdns over the following interfaces: $from -> $to"
     echo "# Options to pass to mdns-repeater" > /etc/default/mdns-repeater
     echo "MDNS_REPEATER_OPTS=\"$from $to\"" >> /etc/default/mdns-repeater
     ../debian/add_homelab_tag.sh mdns-repeater.service
-    chmod 644 mdns-repeater.service
-    mv mdns-repeater.service /etc/systemd/system/mdns_repeater.service
+    install -D -m 644 mdns-repeater.service /etc/systemd/system/mdns_repeater.service
     cd ..
     rm -rf mdns*
     ;;
@@ -30,19 +28,20 @@ case $1 in
     NE_VERSION=$(curl -s "https://api.github.com/repos/prometheus/node_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
     wget --output-document=ne.tar.gz "https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}/node_exporter-${NE_VERSION}.linux-amd64.tar.gz"
     tar xzf ne.tar.gz
-    mv "node_exporter-${NE_VERSION}.linux-amd64/node_exporter" /usr/local/bin/
+    install -D -o node_exporter -g node_exporter -t /usr/local/bin \
+      "node_exporter-${NE_VERSION}.linux-amd64/node_exporter"
     rm -rf "node_exporter-${NE_VERSION}.linux-amd64" ne.tar.gz
 
-    mkdir -p /var/lib/node_exporter/textfile_collector
-    chown -R node_exporter:node_exporter /var/lib/node_exporter
+    install -d -o node_exporter -g node_exporter /var/lib/node_exporter \
+      /var/lib/node_exporter/textfile_collector
 
-    cp node_exporter/node_runner.sh /usr/local/bin/node_exporter_runner.sh
-    chown node_exporter:node_exporter /usr/local/bin/node_exporter*
-    cp node_exporter/node_exporter.service /etc/systemd/system
+    install -D -o node_exporter -g node_exporter node_exporter/node_runner.sh \
+      /usr/local/bin/node_exporter_runner.sh
+    install -D -m 644 -t /etc/systemd/system node_exporter/node_exporter.service
     ;;
   vm_watchdog)
-    cp pve1/vm_watchdog.sh /usr/local/bin
-    cp pve1/vm_watchdog.service /etc/systemd/system
+    install -D -t /usr/local/bin pve1/vm_watchdog.sh
+    install -D -m 644 -t /etc/systemd/system pve1/vm_watchdog.service
     ;;
   *)
     echo "error: unknown service: $1" >&2

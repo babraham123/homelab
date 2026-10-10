@@ -17,7 +17,7 @@
 ### Service Structure
 
 Some directories under `src/` map to a node. They may contain:
-- `install_svcs.sh`: copies configs to `/etc/opt/<service>/` and container files to `/etc/containers/systemd/`, then reloads systemd
+- `install_svcs.sh`: installs configs to `/etc/opt/<service>/` and container files to `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not executable, since `install` defaults to 755), then reloads systemd
 - `commands.sh` - Other tasks that run as root and are triggered remotely
 - `traefik/`: reverse proxy routing rules (HTTP routers, middlewares)
 - `secrets_template.yaml`: template for SOPS-encrypted secrets

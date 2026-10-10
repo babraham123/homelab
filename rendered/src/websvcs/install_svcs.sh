@@ -7,96 +7,82 @@ set -euo pipefail
 
 function install_wyoming() {
   rm -rf /etc/opt/wyoming/src
+  mkdir -p /etc/opt/wyoming/src
   wget "https://github.com/rhasspy/wyoming-addons/archive/refs/heads/main.tar.gz" -O - | \
     tar -xz -C /etc/opt/wyoming/src --strip-components=1
 }
 
 cd /root/homelab-rendered/src
-mkdir -p /etc/containers/systemd
 
 case $1 in
   traefik)
-    mkdir -p /etc/opt/traefik/config/dynamic
-    mkdir -p /etc/opt/traefik/config/static
     mkdir -p /etc/opt/traefik/certificates
     rm -rf /etc/opt/traefik/config/dynamic/*
-    cp websvcs/traefik/*.yml /etc/opt/traefik/config/dynamic
-    cp traefik/dynamic/*.yml /etc/opt/traefik/config/dynamic
-    cp traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
-    cp websvcs/traefik/traefik.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/traefik/config/dynamic websvcs/traefik/*.yml traefik/dynamic/*.yml
+    install -D -m 644 traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
+    install -D -m 644 -t /etc/containers/systemd websvcs/traefik/traefik.container
     ;;
   vmagent)
-    mkdir -p /etc/opt/vmagent
-    cp websvcs/prometheus.yml /etc/opt/vmagent
+    install -D -m 644 -t /etc/opt/vmagent websvcs/prometheus.yml
     /root/homelab-rendered/src/podman/render_host.sh websvcs victoriametrics/vmagent.container
-    mv victoriametrics/vmagent.container /etc/containers/systemd
-    cp victoriametrics/vmagentdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd victoriametrics/vmagent.container victoriametrics/vmagentdata.volume
     ;;
   nginx)
-    mkdir -p /etc/opt/nginx/conf
-    cp nginx/nginx.conf /etc/opt/nginx/conf
-    cp nginx/mime.types /etc/opt/nginx/conf
-    cp nginx/nginx.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/nginx/conf nginx/nginx.conf nginx/mime.types
+    install -D -m 644 -t /etc/containers/systemd nginx/nginx.container
     # Placeholder release; homesite's deploy swaps the www symlink to newer ones.
     if [ ! -e /var/opt/nginx/www ]; then
-      mkdir -p /var/opt/nginx/releases/00000000T000000Z/www
-      mkdir -p /var/opt/nginx/releases/00000000T000000Z/error
-      cp nginx/index.html /var/opt/nginx/releases/00000000T000000Z/www
-      cp nginx/404.html /var/opt/nginx/releases/00000000T000000Z/error
+      install -D -m 644 -t /var/opt/nginx/releases/00000000T000000Z/www nginx/index.html
+      install -D -m 644 -t /var/opt/nginx/releases/00000000T000000Z/error nginx/404.html
       ln -s releases/00000000T000000Z /var/opt/nginx/www
     fi
     ;;
   homepage)
-    mkdir -p /etc/opt/homepage/config
     rm -rf /etc/opt/homepage/config/*
-    cp homepage/*.yaml /etc/opt/homepage/config
+    install -D -m 744 -t /etc/opt/homepage/config homepage/*.yaml
     chown -R 1000:1000 /etc/opt/homepage/config
-    chmod -R 744 /etc/opt/homepage/config
-    cp -r homepage/images /etc/opt/homepage
-    cp homepage/homepage.container /etc/containers/systemd
+    chmod 744 /etc/opt/homepage/config
+    install -D -m 644 -t /etc/opt/homepage/images homepage/images/*
+    install -D -m 644 -t /etc/containers/systemd homepage/homepage.container
     ;;
   isso)
-    mkdir -p /etc/opt/isso/config
-    cp isso/homesite.cfg /etc/opt/isso/config
-    cp isso/isso.container /etc/containers/systemd
-    cp isso/issodb.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/isso/config isso/homesite.cfg
+    install -D -m 644 -t /etc/containers/systemd isso/isso.container isso/issodb.volume
     ;;
   guacamole)
     mkdir -p /etc/opt/guacamole/certs
     mkdir -p /etc/opt/guacamole/config
     chown -R 1001:1001 /etc/opt/guacamole
-    cp guacamole/guacamole.container /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd guacamole/guacamole.container
     ;;
   guacd)
     mkdir -p /etc/opt/guacd
-    cp guacamole/guacd.container /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd guacamole/guacd.container
     ;;
   archivebox)
     mkdir -p /var/opt/archivebox
     chown -R 911:911 /var/opt/archivebox
-    cp archivebox/archivebox.container /etc/containers/systemd
-    cp archivebox/chromium.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd archivebox/archivebox.container archivebox/chromium.volume
 
     rm -rf /etc/opt/novnc/src
     mkdir -p /etc/opt/novnc/src
     wget "https://github.com/babraham123/docker-novnc/archive/refs/heads/master.tar.gz" -O - | \
       tar -xz -C /etc/opt/novnc/src --strip-components=1
     podman build -t novnc /etc/opt/novnc/src
-    cp archivebox/novnc.container /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd archivebox/novnc.container
     ;;
   finance_exporter)
     rm -rf /etc/opt/finance_exporter/src
     mkdir -p /etc/opt/finance_exporter/src
-    cp finance_exporter/config.yaml /etc/opt/finance_exporter
+    install -D -m 644 -t /etc/opt/finance_exporter finance_exporter/config.yaml
     wget "https://github.com/babraham123/finance-exporter/archive/refs/heads/main.tar.gz" -O - | \
       tar -xz -C /etc/opt/finance_exporter/src --strip-components=1
     podman build -t finance_exporter /etc/opt/finance_exporter/src
-    cp finance_exporter/finance_exporter.container /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd finance_exporter/finance_exporter.container
     ;;
   go2rtc)
-    mkdir -p /etc/opt/go2rtc
-    cp go2rtc/config.yaml /etc/opt/go2rtc
-    cp go2rtc/go2rtc.container /etc/containers/systemd
+    install -D -m 644 -t /etc/opt/go2rtc go2rtc/config.yaml
+    install -D -m 644 -t /etc/containers/systemd go2rtc/go2rtc.container
     ;;
   piper)
     mkdir -p /etc/opt/piper
@@ -112,7 +98,7 @@ case $1 in
       --build-arg WYOMING_VERSION="$WY_VERSION" \
       --build-arg BINARY_PIPER_VERSION="$PI_VERSION" \
       --build-arg TARGETARCH="amd64" --build-arg TARGETVARIANT=""
-    cp wyoming/piper.container /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd wyoming/piper.container
     ;;
   whisper)
     mkdir -p /etc/opt/whisper
@@ -122,7 +108,7 @@ case $1 in
     
     podman build -t whisper /etc/opt/wyoming/src/whisper \
       --build-arg WYOMING_WHISPER_VERSION="$WW_VERSION"
-    cp wyoming/whisper.container /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd wyoming/whisper.container
     ;;
   openwakeword)
     mkdir -p /etc/opt/openwakeword
@@ -132,17 +118,15 @@ case $1 in
     
     podman build -t openwakeword /etc/opt/wyoming/src/openwakeword \
       --build-arg WYOMING_OPENWAKEWORD_VERSION="$OW_VERSION"
-    cp wyoming/openwakeword.container /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd wyoming/openwakeword.container
     ;;
   fluentbit)
-    mkdir -p /etc/opt/fluentbit
-    cp fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
-    cp fluentbit/journald.lua /etc/opt/fluentbit
+    install -D -m 644 fluentbit/fluentbit.yaml.j2 /etc/opt/fluentbit/config.yaml.j2
+    install -D -m 644 -t /etc/opt/fluentbit fluentbit/journald.lua
     install -D -m 644 debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
     systemctl restart systemd-journald
     /root/homelab-rendered/src/podman/render_host.sh websvcs fluentbit/fluentbit.container
-    mv fluentbit/fluentbit.container /etc/containers/systemd
-    cp fluentbit/fbdata.volume /etc/containers/systemd
+    install -D -m 644 -t /etc/containers/systemd fluentbit/fluentbit.container fluentbit/fbdata.volume
     ;;
   snapraid)
     # Media array: snapraid parity over the passed-through HDDs, mergerfs union, SMART
@@ -150,9 +134,9 @@ case $1 in
     # (partitions, mkfs, fstab, first sync) is manual: docs/guides/pve2_storage.md.
     apt-get install -y snapraid mergerfs smartmontools
     mkdir -p /var/snapraid
-    cp snapraid/snapraid.conf /etc/snapraid.conf
-    cp snapraid/snapraid_run.sh /usr/local/bin
-    cp snapraid/snapraid-*.service snapraid/snapraid-*.timer /etc/systemd/system
+    install -D -m 644 snapraid/snapraid.conf /etc/snapraid.conf
+    install -D -t /usr/local/bin snapraid/snapraid_run.sh
+    install -D -m 644 -t /etc/systemd/system snapraid/snapraid-*.service snapraid/snapraid-*.timer
     systemctl daemon-reload
     systemctl enable --now smartmontools
     if grep -q '^/dev/disk' snapraid/media.fstab; then
