@@ -16,7 +16,7 @@ rootful. Evaluate **four** directives for **each** of the 31 quadlets:
 
 ## Task
 
-Produce `docs/guides/container_hardening.md`: one row per container with the four columns above
+Produce [`container_hardening.md`](../container_hardening.md): one row per container with the four columns above
 filled in as *applied* / *blocked by X* / *n/a*, plus the resulting directive block to paste into
 the quadlet. Then a follow-up issue per node applies them (one service per commit so a regression is
 bisectable; Traefik and Postgres last).
@@ -37,3 +37,21 @@ hard cases: home_assistant, esphome, archivebox, zigbee2mqtt (serial device), gu
   n/a) and a tested directive block.
 
 ## Comments
+
+- 2026-10-10: survey written to [`container_hardening.md`](../container_hardening.md): one row per quadlet
+  with all four columns decided, a directive block per container, and the apply order per
+  node. Source-derived only (image config + layer listings from the registry, upstream
+  entrypoints at the pinned tag); no block is tested yet. Count is 34 quadlet templates (the
+  three Traefik templates share one image; `geoip_generator`, added later, isn't surveyed).
+  `ReadOnlyTmpfs` defaults to true, so `/tmp` and `/run` need no `Tmpfs=` line. `UserNS=auto`
+  needs a `containers` range in `/etc/subuid`/`/etc/subgid` on each node, which the repo
+  doesn't create, and `idmap` on every `Volume=`. Open (test on node):
+  - capability sets, especially postgres (first init), home_assistant (s6-overlay),
+    esphome (compile + OTA), archivebox, novnc, go2rtc (hardware transcoding)
+  - read-only paths: homepage `/app/.next/cache`, finance_exporter and wyoming
+    `/root/.cache`, olive_tin `known_hosts`
+  - lldap read-only after switching from `UID=0` to 1000 (the entrypoint chowns `/app`
+    while `UID=0`)
+  - archivebox: whether it starts at all with `User=archivebox` (entrypoint needs root)
+  - `UserNS=auto`: subuid prerequisite, `idmap` on file and named-volume mounts, fluentbit
+    reading the journal through idmap

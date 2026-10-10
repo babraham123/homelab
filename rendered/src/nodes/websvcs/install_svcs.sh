@@ -10,7 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 # function install_wyoming() {
 #   rm -rf /etc/opt/wyoming/src
 #   mkdir -p /etc/opt/wyoming/src
-#   wget "https://github.com/rhasspy/wyoming-addons/archive/refs/heads/main.tar.gz" -O - | \
+#   wget "https://github.com/rhasspy/wyoming-addons/archive/refs/heads/master.tar.gz" -O - | \
 #     tar -xz -C /etc/opt/wyoming/src --strip-components=1
 # }
 

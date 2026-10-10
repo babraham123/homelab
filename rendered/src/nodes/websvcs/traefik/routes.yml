@@ -64,7 +64,7 @@ http:
     isso:
       loadBalancer:
         servers:
-          - url: http://comment.janedoe.com:8200/
+          - url: http://comment.janedoe.com:8080/
     guacamole:
       loadBalancer:
         servers:

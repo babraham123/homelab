@@ -66,6 +66,16 @@ groups:
         annotations:
           summary: "{{ $labels.name }} failed on {{ $labels.instance }}"
           description: "journalctl -u {{ $labels.name }} on the node."
+      - alert: ServiceRestartLoop
+        # Counts systemd's automatic restarts (Restart=on-failure), including the ones after
+        # HealthOnFailure=kill; a manual restart doesn't count. Once StartLimitBurst stops the
+        # restarts, SystemdUnitFailed takes over.
+        expr: increase(node_systemd_service_restart_total[1h]) > 3
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.name }} on {{ $labels.instance }} restarted {{ $value | printf \"%.0f\" }} times in 1h"
+          description: "A crash or a failed health check. journalctl -u {{ $labels.name }} on the node."
       - alert: ClockSkew
         expr: abs(node_timex_offset_seconds) > 0.5 or node_timex_sync_status == 0
         for: 10m

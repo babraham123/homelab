@@ -17,7 +17,7 @@ NoNewPrivileges=true
 Network=net.network
 HostName=comment.janedoe.com
 IP=10.11.0.10
-# port 8200
+# port 8080
 
 Environment=TZ=America/Los_Angeles
 Environment=ISSO_SETTINGS="/etc/isso.d/homesite.cfg"

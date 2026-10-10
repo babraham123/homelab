@@ -17,4 +17,5 @@ SVC_LIST=$(systemctl list-units --type=service | \
 /usr/local/bin/node_exporter \
   --collector.textfile.directory /var/lib/node_exporter/textfile_collector \
   --collector.systemd \
+  --collector.systemd.enable-restarts-metrics \
   --collector.systemd.unit-include="($SVC_LIST)\\.service"

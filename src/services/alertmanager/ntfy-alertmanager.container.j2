@@ -17,7 +17,7 @@ NoNewPrivileges=true
 Network=net.network
 HostName=ntfy-alertmanager.{{ site.url }}
 IP={{ secsvcs.container_subnet }}.14
-# port 2588
+# port 8080
 
 Exec=--config="/etc/ntfy-alertmanager/config.scfg"
 
