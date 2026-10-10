@@ -343,8 +343,25 @@ vim /etc/opt/secrets/msmtp_password
 # A long random topic name; subscribe to https://ntfy.sh/<topic> in the phone's ntfy app
 LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32 | tee /etc/opt/secrets/deadman_ntfy_topic; echo
 chmod 600 /etc/opt/secrets/*
-/root/homelab-rendered/src/vpnsvcs/install_svcs.sh deadman
+```
+- Setup email, msmtp as on [pve1](./pve1.md#notifications)
+```bash
+# Enable AppArmor
+apt install -y jq curl msmtp
+vim /etc/apparmor.d/usr.bin.msmtp +82
+```
+```
+/usr/bin/hostname PUx,
+/root/homelab-rendered/src/vpnsvcs/msmtp_password.sh PUx,
+```
+```bash
+apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
+cp /root/homelab-rendered/src/certificates/msmtprc /etc
 echo test | msmtp -a default jdoe@gmail.com   # msmtp, its password script and AppArmor
+```
+- Install the checker
+```bash
+/root/homelab-rendered/src/vpnsvcs/install_svcs.sh deadman
 journalctl -u deadman --no-pager | tail       # silent when the path is healthy
 ```
 State lives in `/var/lib/deadman/` (`failures` counter, `firing` flag).

@@ -66,10 +66,6 @@ case $1 in
     /root/homelab-rendered/src/podman/render_host.sh vpnsvcs fluentbit/fluentbit.container
     mv fluentbit/fluentbit.container /etc/containers/systemd
     cp fluentbit/fbdata.volume /etc/containers/systemd
-    systemctl daemon-reload
-    systemctl restart fluentbit
-    systemctl status fluentbit --no-pager
-    exit 0
     ;;
   vmagent)
     mkdir -p /etc/opt/vmagent
@@ -77,23 +73,8 @@ case $1 in
     /root/homelab-rendered/src/podman/render_host.sh vpnsvcs victoriametrics/vmagent.container
     mv victoriametrics/vmagent.container /etc/containers/systemd
     cp victoriametrics/vmagentdata.volume /etc/containers/systemd
-    systemctl daemon-reload
-    systemctl restart vmagent
-    systemctl status vmagent --no-pager
-    exit 0
     ;;
   deadman)
-    # The checker's credentials are hand-placed, like hs_oidc_*; fail here, not at 02:00.
-    for f in alertmanager_admin_password msmtp_password deadman_ntfy_topic; do
-      [[ -s /etc/opt/secrets/$f ]] || { echo "error: missing /etc/opt/secrets/$f" >&2; exit 1; }
-    done
-    # msmtp as on pve1, AppArmor profile on; the local override lets it run the password script
-    echo "msmtp msmtp/apparmor boolean true" | debconf-set-selections
-    apt install -y jq curl msmtp
-    cp certificates/msmtprc /etc/msmtprc
-    printf '%s\n' "/usr/bin/hostname PUx," "/root/homelab-rendered/src/vpnsvcs/msmtp_password.sh PUx," \
-      > /etc/apparmor.d/local/usr.bin.msmtp
-    apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
     install -d -m 700 /var/lib/deadman
     cp vpnsvcs/deadman.service /etc/systemd/system
     cp vpnsvcs/deadman.timer /etc/systemd/system
@@ -101,8 +82,6 @@ case $1 in
     systemctl daemon-reload
     systemctl enable deadman.timer
     systemctl restart deadman.timer
-    systemctl start deadman.service
-    systemctl status deadman.timer --no-pager
     exit 0
     ;;
   *)
