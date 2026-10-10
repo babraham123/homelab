@@ -84,6 +84,10 @@
   {%- endfor -%}
   {%- do dispatch.update({node: entries}) -%}
   {%- do commands.update({node: entries | map(attribute='name') | list}) -%}
+  {#- nodes_with inverts dispatch: case name → the nodes that have it. A node's case
+      list is the inventory's record of what it runs (a backup.sh, an SSH CA, ACME
+      certs), so scripts that act on "every node that does X" read the list here
+      rather than keeping their own. -#}
   {%- for entry in entries -%}
     {%- do nodes_with.update({entry.name: nodes_with.get(entry.name, []) + [node]}) -%}
   {%- endfor -%}
