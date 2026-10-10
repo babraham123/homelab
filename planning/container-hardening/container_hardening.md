@@ -11,7 +11,7 @@ and [02](issues/02-healthcmd-survey.md).
   bridge model). `UserNS=auto` is the rootful substitute for "root inside ≠ root on the VM".
 - **Inventory.** 34 quadlet templates (`find src -name '*.container*'`), not 31: the three
   Traefik templates (secsvcs, homesvcs, websvcs) share one image, and `geoip_generator`
-  (vpnsvcs, a timer-run job) was added after this survey and isn't covered. `fluentbit` runs on
+  (vpnsvcs) is a timer-run job built locally. `fluentbit` runs on
   4 nodes and `vmagent` on 3 from one template each. `vault` has no quadlet. The wyoming
   trio is commented out of `src/nodes/websvcs/install_svcs.sh` (not in use). Every `Image=` is pinned in the quadlet itself, not in
   `vars.template.yml`; most tags float (`latest`, `stable`, `release`) under
@@ -68,8 +68,8 @@ and [02](issues/02-healthcmd-survey.md).
 - Six images already carry a `HEALTHCHECK` in their config (authelia, esphome, guacd, lldap,
   ntfy-alertmanager, homepage). If Podman honours them (unverified: `podman inspect
   --format '{{.Config.Healthcheck}}' <name>`), those containers already report health, with
-  no action on failure. ntfy-alertmanager's probes `localhost:8080/health`, the port the
-  repo listens on.
+  no action on failure. ntfy-alertmanager's probes `localhost:8080/health`, but the repo
+  listens on 2588, so it reports `unhealthy` until its `HealthCmd` below replaces it.
 - `UserNS=auto` (rootful) needs a `containers` entry in `/etc/subuid` and `/etc/subgid`
   ([userns][opt-userns]); nothing in this repo creates one, so it's a per-node prerequisite:
   `echo containers:2147483647:2147483648 | tee -a /etc/subuid /etc/subgid`. Each new
@@ -150,7 +150,7 @@ call, from the layer listing.
 | secsvcs | gatus | `gatus:latest` (rev c9aa339) | applied: all, none added | applied | none | applied | n/a: scratch image, binary has no health subcommand; covered by `up{job="gatus"}` | none |
 | secsvcs | vmalert | `vmalert:latest` (v1.153.0) | applied: all, none added | applied | none | applied | wget `/health` | busybox |
 | secsvcs | alertmanager | `prom/alertmanager:latest` (built 2026-09-17) | applied: all, none added (runs as `nobody`) | applied | none (`/alertmanager` is an image volume) | applied | wget `/-/healthy` with basic auth | busybox, amtool |
-| secsvcs | ntfy-alertmanager | `xenrox/ntfy-alertmanager:latest` (built 2026-08-25) | applied: all, none added | applied | none | applied | curl `/health` on 8080 (outside auth; the image's own check) | curl, busybox |
+| secsvcs | ntfy-alertmanager | `xenrox/ntfy-alertmanager:latest` (built 2026-08-25) | applied: all, none added | applied | none | applied | curl `/health` on 2588 (outside auth; overrides the image's 8080 check) | curl, busybox |
 | secsvcs | ntfy | `binwiederhier/ntfy:latest` (built 2026-10-07) | applied: all; add NET_BIND_SERVICE (SMTP `:25`) | applied | none | applied | wget `/v1/health` | busybox |
 | secsvcs | grafana | `grafana-oss:latest` (13.0.2) | applied: all, none added (runs as 472) | applied | none | applied (volume 472:0) | curl `/api/health` | curl, busybox |
 | secsvcs | olive_tin | `olivetin:latest-3k` (3000.20.0) | applied: all, none added (runs as 1000) | applied | none | applied | none: not core (candidate: curl `/readyz`) | curl, bash |
@@ -174,7 +174,7 @@ call, from the layer listing.
 | websvcs | piper | `localhost/piper` (wyoming-addons) | applied: all, none added | applied | `/root/.cache` (unverified) | applied | none: not core (candidate: python socket on 10200) | curl, python |
 | websvcs | whisper | `localhost/whisper` (wyoming-addons) | applied: all, none added | applied | `/root/.cache` (unverified) | blocked by `--gpus=all` device nodes | none: not core (candidate: python socket on 10300) | python |
 | websvcs | openwakeword | `localhost/openwakeword` (wyoming-addons) | applied: all, none added | applied | `/root/.cache` (unverified) | applied | none: not core (candidate: venv python socket on 10400) | python (venv) |
-| vpnsvcs | geoip_generator | `localhost/geoip_generator` | not surveyed (added after the survey) | not surveyed | not surveyed | not surveyed | none: a timer-run job, not a service | |
+| vpnsvcs | geoip_generator | `localhost/geoip_generator` (python:3-alpine) | applied: all, none added (root writes a root-owned host dir) | applied | none (works in `/tmp`) | applied | n/a: a oneshot job; failures show as `SystemdUnitFailed` | python, busybox |
 
 Easy (caps all dropped, read-only; health check if core): victoriametrics, vmagent,
 vmalert, alertmanager, ntfy-alertmanager, ntfy, grafana, victorialogs, gatus, fluentbit,
@@ -369,13 +369,14 @@ keeps working with idmap; without idmap it would need the shifted uid.
 
 Alpine + `curl` (history). `GET /health` is registered on the outer mux, outside the auth
 middleware ([main.go][ntfy-am-main]). The image's own `HEALTHCHECK` is
-`curl --fail http://localhost:8080/health` (config blob); the repo now listens on 8080 to
-match. The explicit `HealthCmd` is still needed to add `HealthOnFailure=kill`.
+`curl --fail http://localhost:8080/health` (config blob), but the repo listens on 2588
+(`http-address`), so that check fails. The `HealthCmd` below replaces it with the right port
+and adds `HealthOnFailure=kill`.
 
 ```ini
 DropCapability=all
 ReadOnly=true
-HealthCmd=curl -fsS -o /dev/null http://127.0.0.1:8080/health
+HealthCmd=curl -fsS -o /dev/null http://127.0.0.1:2588/health
 HealthInterval=30s
 HealthRetries=3
 HealthOnFailure=kill
@@ -738,6 +739,34 @@ No `HealthCmd`: not a core service, and not in use. Candidate if one is wanted l
 `HealthStartPeriod=5m` for the first-start model download. Port per service: piper 10200,
 whisper 10300, openwakeword 10400.
 
+### vpnsvcs
+
+#### vmagent, fluentbit
+
+As on secsvcs (vmagent port 8429).
+
+#### geoip_generator (`localhost/geoip_generator:latest`, built from `src/services/haproxy/`)
+
+`python:3-alpine` plus a static `haproxy-mapper`, root, `ENTRYPOINT ["python3",
+"/usr/local/bin/geoip_generator.py"]` (`geoip_generator.Containerfile`). A `Type=oneshot`
+unit started weekly by `geoip_generator.timer`. The script downloads and unpacks GeoLite2
+into a `tempfile.TemporaryDirectory()` (under `/tmp`, the automatic tmpfs), runs
+`haproxy-mapper` there, then rewrites `*.map` in `/etc/haproxy/countries`, the only volume
+(`geoip_generator.py`). That directory is created by root with `mkdir -p` and its maps are
+`chmod 644` (`install_svcs.sh.j2`, `haproxy`), so container root writes it as the owner and
+needs no capability. Python can't write `__pycache__` on a read-only root and skips it
+silently. The download and maps sit in RAM while it runs, a few tens of MB on the VPS.
+
+```ini
+DropCapability=all
+ReadOnly=true
+```
+
+No `HealthCmd`: a oneshot job has no running state to probe. A failed run fails the unit
+(`SystemdUnitFailed`); `Restart=on-failure` retries also count toward `ServiceRestartLoop`.
+UserNS pass: `UserNS=auto`, `:idmap` on `/etc/haproxy/countries`, so the maps stay
+root-owned on the host and HAProxy still reads them.
+
 ## Apply order
 
 One service per commit, so a regression bisects to one quadlet. Caps + ReadOnly + health
@@ -748,7 +777,7 @@ first; the `UserNS=auto` pass after, per node, once `/etc/subuid`/`/etc/subgid` 
 - homesvcs: vmagent, fluentbit, zigbee2mqtt, mosquitto, esphome, home_assistant, traefik
 - websvcs: vmagent, fluentbit, finance_exporter, guacd, guacamole, isso, go2rtc, nginx,
   homepage, novnc, archivebox, traefik
-- vpnsvcs: vmagent, fluentbit
+- vpnsvcs: vmagent, fluentbit, geoip_generator
 
 ## Alerting on health (issue 02)
 
@@ -788,7 +817,7 @@ It also catches crash loops in services with no health check. What it can't tell
   (hardware transcoding).
 - Read-only paths: homepage `/app/.next/cache`, finance_exporter and wyoming
   `/root/.cache`, olive_tin `known_hosts`, guacd recordings/drive if ever enabled.
-- geoip_generator: not surveyed.
+- geoip_generator: one full run read-only (`systemctl start geoip_generator`, about 250 maps).
 - lldap read-only after switching to `UID=1000`.
 - archivebox: whether it starts at all with `User=archivebox`.
 - `UserNS=auto`: `/etc/subuid`/`/etc/subgid` prerequisite; `idmap` on file and named-volume

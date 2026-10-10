@@ -42,7 +42,7 @@ hard cases: home_assistant, esphome, archivebox, zigbee2mqtt (serial device), gu
   with all four columns decided, a directive block per container, and the apply order per
   node. Source-derived only (image config + layer listings from the registry, upstream
   entrypoints at the pinned tag); no block is tested yet. Count is 34 quadlet templates (the
-  three Traefik templates share one image; `geoip_generator`, added later, isn't surveyed).
+  three Traefik templates share one image).
   `ReadOnlyTmpfs` defaults to true, so `/tmp` and `/run` need no `Tmpfs=` line. `UserNS=auto`
   needs a `containers` range in `/etc/subuid`/`/etc/subgid` on each node, which the repo
   doesn't create, and `idmap` on every `Volume=`. Open (test on node):

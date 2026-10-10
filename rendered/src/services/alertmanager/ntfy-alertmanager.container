@@ -17,7 +17,7 @@ NoNewPrivileges=true
 Network=net.network
 HostName=ntfy-alertmanager.janedoe.com
 IP=10.10.0.14
-# port 8080
+# port 2588
 
 Exec=--config="/etc/ntfy-alertmanager/config.scfg"
 

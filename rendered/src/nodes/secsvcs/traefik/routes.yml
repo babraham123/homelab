@@ -160,7 +160,7 @@ http:
     ntfy-alertmanager:
       loadBalancer:
         servers:
-          - url: http://ntfy-alertmanager.janedoe.com:8080/
+          - url: http://ntfy-alertmanager.janedoe.com:2588/
     # vault:
     #   loadBalancer:
     #     servers:

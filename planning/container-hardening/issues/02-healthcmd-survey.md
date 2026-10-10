@@ -49,8 +49,7 @@ rule on `podman` health state once a Podman exporter exists (observability/01 no
   `alertmanager_admin_password` for its basic auth. Alerting uses systemd's restart counter
   instead of a Podman exporter: `--collector.systemd.enable-restarts-metrics` in
   `node_runner.sh` and `ServiceRestartLoop` in `homelab.yml`. Fixed alongside: isso on 8080
-  throughout (was routed to 8200), ntfy-alertmanager on 8080 (the image's own check),
-  wyoming-addons download from `master`. Open (test on node):
+  throughout (was routed to 8200), wyoming-addons download from `master`. Open (test on node):
   - each `HealthCmd` through quadlet and systemd (the guide's escaping test), alertmanager's
     `$$` first
   - busybox `nc -z` in the mosquitto image

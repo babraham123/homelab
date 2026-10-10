@@ -94,7 +94,7 @@ receivers:
       - to: '{{ site.email.replace('@', '+alert@') }}'
         send_resolved: true
     webhook_configs:
-      - url: "http://ntfy-alertmanager.{{ site.url }}:8080/"
+      - url: "http://ntfy-alertmanager.{{ site.url }}:2588/"
         http_config:
           basic_auth:
             username: "admin"
