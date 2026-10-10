@@ -10,7 +10,7 @@ Type=oneshot
 
 Environment=TZ={{ personal.timezone }}
 
-ExecStart=/usr/local/bin/backup_orchestrator.sh
+ExecStart=/root/homelab-rendered/src/nodes/pve1/backup_orchestrator.sh
 
 # Bounds a hung ssh or vzdump; a full run is well under this.
 TimeoutStartSec=6h

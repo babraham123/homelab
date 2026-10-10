@@ -1,9 +1,9 @@
 #!/bin/bash
-# Shared by every node's backup.sh. Each run rebuilds /var/opt/backups from scratch:
-# config trees and volume copies under files/, application dumps under dumps/<name>/.
-# pve1's backup_orchestrator copies files/ into /root/backups/<node>/, moves the dumps
-# there, and sends the collection to PBS. Nothing here needs to be an archive: plain
-# trees dedup better in PBS than tarballs do.
+# The backup stage, both ends. Every node's backup.sh rebuilds /var/opt/backups from
+# scratch: config trees and volume copies under files/, application dumps under
+# dumps/<name>/. pve1's backup_orchestrator collects each stage into
+# /root/backups/<node>/ and sends that to PBS. Nothing here needs to be an archive:
+# plain trees dedup better in PBS than tarballs do.
 # Usage, from a backup.sh running as root, after src/base/lib.sh:
 #   source "${rendered}/base/debian/backup_lib.sh"
 #   stage_init [OWNER]           # empties the stage; OWNER defaults to autoadmin, the
@@ -17,14 +17,19 @@
 #   stage_finish                 # ownership and permissions of the whole stage
 #   pve_task UPID                # waits for a PVE task (pvesh create returns its UPID),
 #                                # prints its log, fails unless it ended OK
+# and from pve1's backup_orchestrator, after src/base/lib.sh:
+#   stage_collect NODE DEST      # runs NODE's backup.sh and brings its stage into DEST
+# BACKUP_STAGE overrides the stage root on this machine, e.g. a temp dir to try a run.
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-stage=/var/opt/backups
+stage_default=/var/opt/backups
+stage=${BACKUP_STAGE:-$stage_default}
 files="${stage}/files"
 dumps="${stage}/dumps"
 stage_owner=autoadmin
 excludes=(--exclude='*.tmp' --exclude=lost+found)
+ssh_opts=(-o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
 
 stage_init() {
   stage_owner=${1:-autoadmin}
@@ -66,6 +71,44 @@ stage_finish() {
   chown -R "${stage_owner}:${stage_owner}" "$stage"
   chmod -R u=rwX,go= "$stage"
   echo "Staged $(du -sh "$stage" | cut -f1) in ${stage}"
+}
+
+# Usage: stage_collect NODE DEST. files/ in DEST is replaced, dumps/ is moved (the node
+# keeps none once they are in DEST). Only the newest dump of each kind is kept, so a
+# failed upload leaves one behind, not a pile.
+stage_collect() {
+  local node=$1 dest=$2 dir
+  rm -rf "${dest}/files"
+  install -d -m 700 "$dest" "${dest}/dumps"
+  if [[ $node == "$(hostname)" ]]; then
+    # shellcheck disable=SC2154 # rendered is set by src/base/lib.sh, sourced first
+    "${rendered}/nodes/${node}/backup.sh"
+    cp -a "${stage}/files" "${dest}/files"
+    cp -a "${stage}/dumps/." "${dest}/dumps/"
+    find "${stage}/dumps" -type f -delete
+  else
+    stage_fetch "$node" "$dest"
+  fi
+  for dir in "${dest}"/dumps/*/; do
+    if [[ -d $dir ]]; then
+      find "$dir" -maxdepth 1 -type f | sort | head -n -1 | xargs -r rm -f --
+    fi
+  done
+}
+
+# Usage: stage_fetch NODE DEST. The transport for another node: runs its backup.sh
+# through the dispatcher, copies files/ and dumps/ into DEST, then deletes the node's
+# dumps. sftp is the one transfer the dispatcher passes through, and the stage is owned
+# by autoadmin so sftp reads all of it. Symlinks are not copied: sftp skips them with a
+# warning. The dispatcher passes no environment, so the node's stage is the default.
+stage_fetch() {
+  local node=$1 dest=$2 src=$stage_default
+  ssh "${ssh_opts[@]}" "autoadmin@${node}" backup
+  sftp -q -b - "${ssh_opts[@]}" "autoadmin@${node}" <<EOF
+get -pr ${src}/files ${dest}
+get -pr ${src}/dumps ${dest}
+-rm ${src}/dumps/*/*
+EOF
 }
 
 # vzdump through the API returns at once with a UPID; the task runs on. Polling its

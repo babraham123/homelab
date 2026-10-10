@@ -23,7 +23,9 @@ case $1 in
   backup_orchestrator)
     # The client uploads /root/backups to PBS as a host backup.
     apt-get install -y proxmox-backup-client
-    install_bin nodes/pve1/backup_orchestrator.sh
+    # The unit runs the script in place, so a deploy updates it together with the
+    # backup_lib.sh it sources; a copy in /usr/local/bin would lag behind.
+    rm -f /usr/local/bin/backup_orchestrator.sh
     install -D -m 644 -t /etc/systemd/system nodes/pve1/backup_orchestrator.{service,timer}
 
     # Only the timer is enabled; the service is a oneshot it triggers.

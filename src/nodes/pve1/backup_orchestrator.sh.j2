@@ -1,22 +1,25 @@
 #!/bin/bash
-# Weekly backup run. Wakes pve2 (PBS lives there), runs backup.sh on every node, pulls
-# each node's stage into /root/backups/<node>/, sends /root/backups to PBS as host
-# backups, has pve2 prune and garbage-collect PBS, records per-step success metrics,
-# then powers pve2 back off if it was off to begin with. Posts a one-line ntfy summary
-# at the end.
+# Weekly backup run. Wakes pve2 (PBS lives there), runs backup.sh on every node,
+# collects each node's stage into /root/backups/<node>/ (backup_lib's stage_collect),
+# sends /root/backups to PBS as host backups, has pve2 prune and garbage-collect PBS,
+# records per-step success metrics, then powers pve2 back off if it was off to begin
+# with. Posts a one-line ntfy summary at the end.
 # Usage:
-#   /usr/local/bin/backup_orchestrator.sh
+#   src/nodes/pve1/backup_orchestrator.sh
 # Adding a node: give it a backup.sh and a `backup` dispatcher command, then list it in
 # NODES. Adding another step: write a step_<name> function and list it in STEPS.
 
 # shellcheck source=src/base/lib.sh
-source /usr/local/lib/homelab/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+# shellcheck source=src/base/debian/backup_lib.sh
+source "${rendered}/base/debian/backup_lib.sh"
 
 storage=pbs2
 backups=/root/backups
 metrics=/var/lib/node_exporter/textfile_collector/homelab_backup.prom
-ssh_opts=(-o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
+# backup_lib's ssh_opts, so these calls and the stage transport behave alike.
 ssh=(ssh "${ssh_opts[@]}")
 keyfile=/root/secrets/pbs_client.key
 
@@ -34,38 +37,8 @@ step_wake_pve2() {
   wait_for 300 "PBS storage $storage inactive" storage_active
 }
 
-# Usage: pull NODE. Runs the node's backup.sh and brings its stage here: files/ is
-# replaced, dumps/ is moved (the node keeps nothing once they are here). Only the
-# newest dump of each kind is kept, so a failed upload leaves one behind, not a pile.
-# Remote stages come over sftp, the one transfer the dispatcher passes through; the
-# stage is owned by autoadmin so sftp reads all of it. Symlinks are not copied: sftp
-# skips them with a warning.
-pull() {
-  local node=$1 src="/var/opt/backups" dir dest
-  dest="${backups}/${node}"
-  rm -rf "${dest}/files"
-  install -d -m 700 "$dest" "${dest}/dumps"
-  if [[ $node == pve1 ]]; then
-    "${rendered}/nodes/pve1/backup.sh"
-    cp -a "${src}/files" "${dest}/files"
-    cp -a "${src}/dumps/." "${dest}/dumps/"
-    find "${src}/dumps" -type f -delete
-  else
-    "${ssh[@]}" "autoadmin@${node}" backup
-    sftp -q -b - "${ssh_opts[@]}" "autoadmin@${node}" <<EOF
-get -pr ${src}/files ${dest}
-get -pr ${src}/dumps ${dest}
--rm ${src}/dumps/*/*
-EOF
-  fi
-  for dir in "${dest}"/dumps/*/; do
-    if [[ -d $dir ]]; then
-      find "$dir" -maxdepth 1 -type f | sort | head -n -1 | xargs -r rm -f --
-    fi
-  done
-}
 for node in "${NODES[@]}"; do
-  eval "step_backup_${node}() { pull ${node}; }"
+  eval "step_backup_${node}() { stage_collect ${node} ${backups}/${node}; }"
 done
 
 # Host backups of the collection, encrypted on this side with the client key, so PBS,
