@@ -32,8 +32,9 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 - **node inventory** — `src/nodes/<node>/inventory.yml`, one per node: per node, the dispatcher
   entries (services in install order, other commands) and each service's subdomain, Gatus endpoint
   and image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI subdomain
-  lists, uptime endpoints and image update order from it; the render checks it against
-  `install_svcs.sh`, `routes.yml` and the quadlets' `Image=`.
+  lists, uptime endpoints and image update order from it; the render (`tools/check_rendered.sh`)
+  checks it against the scripts its dispatcher cases run, `routes.yml`, the quadlets' `Image=` and
+  the OliveTin buttons.
 - **rendered tree** — `/root/homelab-rendered` on each node: the uploaded output of a render, the
   only thing scripts on the node execute from.
 

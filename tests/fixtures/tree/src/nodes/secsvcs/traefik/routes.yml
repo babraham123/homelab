@@ -1,0 +1,9 @@
+# yamllint disable rule:document-start rule:document-end
+http:
+  routers:
+    web: &router
+      rule: Host(`www.example.com`)
+      service: web@file
+    web-api:
+      <<: *router
+      rule: Host(`www.example.com`) && PathPrefix(`/api`)

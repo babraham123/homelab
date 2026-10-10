@@ -1,0 +1,2 @@
+# yamllint disable rule:document-start rule:document-end
+triggers: [StartSunshine, StopSunshine]

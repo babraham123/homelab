@@ -1,0 +1,3 @@
+# The vars.yml stand-in for fixture inventories; tests append the inventory to it.
+site:
+  url: example.com

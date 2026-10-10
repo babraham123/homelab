@@ -1,0 +1,4 @@
+# The router runs its scripts from /root/router-src, not the rendered tree.
+# yamllint disable rule:document-start rule:document-end
+commands:
+  - {name: install_certs, script: nodes/router/commands.sh}

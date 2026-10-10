@@ -1,8 +1,8 @@
 #!/bin/bash
 # Renders the staged tree against vars.template.yml, which runs every render-time check
-# (see tools/validate_rendered.sh), lints planning/'s markdown, then shellchecks the
-# rendered scripts so *.sh.j2 files are checked without their Jinja. If everything
-# passes, the render replaces rendered/ and is staged with the commit.
+# (see tools/check_rendered.sh), lints planning/'s markdown, runs the fixture tests in
+# tests/, then shellchecks the rendered scripts so *.sh.j2 files are checked without their
+# Jinja. If everything passes, the render replaces rendered/ and is staged with the commit.
 # Activate with: git config core.hooksPath .githooks
 # Skip once with: git commit --no-verify
 
@@ -29,6 +29,14 @@ tools/render_src.sh "${tmp}/rendered" > "${tmp}/render.log" 2>&1 || {
 
 # planning/ is never rendered, so its markdown is linted here rather than by the render.
 markdownlint-cli2 "planning/**/*.md" > /dev/null || status=1
+
+# The render is the passing case against the real tree, so only the fixture tests run
+# here. tests/ isn't rendered, so its scripts are shellchecked in place.
+tests/run.sh --fast > "${tmp}/tests.log" 2>&1 || {
+  status=1
+  cat "${tmp}/tests.log" >&2
+}
+shellcheck -x --severity=warning tests/*.sh || status=1
 
 # A failed render may stop before every file is rendered; check what exists.
 if [ -d "${tmp}/rendered" ]; then cd "${tmp}/rendered" || exit 1; fi

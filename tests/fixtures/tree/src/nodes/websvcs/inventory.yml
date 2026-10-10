@@ -1,0 +1,4 @@
+# The default-route node: its routes.yml may route hosts it doesn't list.
+# yamllint disable rule:document-start rule:document-end
+services:
+  blog: {subdomain: blog}

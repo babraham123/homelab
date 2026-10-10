@@ -1,0 +1,9 @@
+# The default route, so it serves the bare domain and the wifi alias without them
+# being listed in its inventory.yml.
+# yamllint disable rule:document-start rule:document-end
+http:
+  routers:
+    blog:
+      rule: Host(`blog.example.com`)
+    root:
+      rule: Host(`example.com`) || Host(`wifi.example.com`)

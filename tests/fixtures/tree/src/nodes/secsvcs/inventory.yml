@@ -1,0 +1,13 @@
+# A node routed exactly: every subdomain is a Host() rule in traefik/routes.yml and
+# every Host() rule is listed. tests/check_rendered_test.sh breaks one invariant at a
+# time in this tree.
+# yamllint disable rule:document-start rule:document-end
+debian_services: [node_exporter]
+services:
+  db: {}
+  web: {subdomain: www, upstream: docker.io/library/nginx:stable}
+install_all_svcs: true
+commands:
+  - {name: install_certs, script: nodes/secsvcs/commands.sh}
+  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh]}
+  - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}

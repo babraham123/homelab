@@ -1,0 +1,3 @@
+# yamllint disable rule:document-start rule:document-end
+commands:
+  - {name: install_certs, script: nodes/router/commands.sh}

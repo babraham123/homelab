@@ -54,7 +54,8 @@
   `install_quadlet`, `reload_restart`. Scripts run in place source it relative to themselves; copies
   installed to `/usr/local/bin` with `install_bin` (and the dispatcher) source
   `/usr/local/lib/homelab/lib.sh`, which `install_lib` puts there
-- `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die`
+- `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die` and `node_inventory` (the
+  inventory files gathered under `nodes:`, shared by the render and the tests)
 - Router (`/bin/sh` on pfSense), gaming and macOS scripts get a copy of their own directory only, so
   they stand alone; `msmtp_password.sh` runs under msmtp with no options set, so it stands alone too
 
@@ -83,7 +84,7 @@ flowchart TB
         inventory["src/nodes/*/inventory.yml:<br/>dispatcher entries, subdomains,<br/>Gatus endpoints"]
         allvars["all_vars.yml<br/>private temp dir, deleted after the render"]
         render["render_src.sh: jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
-        validate["Validation: yamllint, jq on all JSON,<br/>duplicate container-IP check,<br/>inventory.yml vs install_svcs.sh / routes.yml / quadlet Image="]
+        validate["check_rendered.sh: yamllint, jq on all JSON,<br/>duplicate container-IP check,<br/>inventory.yml vs scripts / routes.yml / quadlet Image= / OliveTin"]
         upload["upload_src.sh per node: scp as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
     end
 
@@ -135,14 +136,22 @@ real values, so keep it out of shared paths such as a fixed `/tmp/homelab-render
 `.git`, `planning` and `notes` are never copied into it. The directory must be named
 `homelab-rendered`, since `upload_src.sh` moves it into place by that name.
 
-Rendering also validates YAML, JSON, lints markdown (`.markdownlint-cli2.yaml`: only rules for
-markdown that renders wrong, broken heading links and the 100-column line limit), checks for
-duplicate container IPs (`tools/validate_rendered.sh`), and checks the node inventory against the
-scripts and routes it describes: each node's `services` must be exactly its `install_svcs.sh` cases,
-every command must be a case in its script, subdomains must be unique, the secsvcs/homesvcs
-subdomains must match the `Host()` rules in their `traefik/routes.yml`, and each image's quadlet
-(copied by the service's case) must have `Image=localhost/` + its `upstream` ref without the
-registry host, or `Image=localhost/<build>:latest`.
+Rendering ends with `tools/check_rendered.sh`, which reports every failure as `error: FILE: MESSAGE`.
+It lints YAML (`yamllint`) and JSON (`jq`), rejects duplicate container `IP=`s, and checks the node
+inventory, through the lists `src/nodes.jinja` derives from it, against the files it describes:
+
+- every repo script a dispatcher case runs exists and has the case it is called with (services,
+  `debian_services`, `commands[].script` and the paths in `commands[].run`);
+- every `install_svcs.sh` case is in the node's `services`;
+- subdomains are unique; each is a `Host()` rule in its node's `traefik/routes.yml`, and every
+  routed host is listed, except on websvcs, the default route;
+- `upstream` refs name a registry host and namespace, and the quadlet each service's case copies has
+  `Image=localhost/` + the ref without its host, or `Image=localhost/<build>:latest`;
+- the OliveTin config has a button for every dispatcher case, and every `ssh autoadmin@NODE CASE` it
+  runs names a real case.
+
+Each check is one function in the script; add an invariant as a new function plus a fixture test
+(see [Tests](#tests)).
 
 Upload rendered files to a specific server:
 ```bash
@@ -152,18 +161,39 @@ tools/upload_src.sh <hostname> "$out"
 ### Pre-commit hook and `rendered/`
 
 `.githooks/pre-commit` renders the staged tree against `vars.template.yml` in a temp dir, which runs
-every check above, lints the markdown in `planning/` (never rendered), then runs
-`shellcheck -x --severity=warning` over the rendered `*.sh` files (so `*.sh.j2` scripts are checked
-with their Jinja filled in). If everything passes it replaces `rendered/` with that render and
-stages it, so every commit carries a readable copy of what the nodes get, with example values.
-`rendered/` is generated: edit the templates, never the copy. It is left out of the deploy render
-and marked `linguist-generated` so GitHub collapses it in diffs. The hook takes about 7 s. Activate
-it once per clone:
+every check above, runs `tests/run.sh --fast`, then runs `shellcheck -x --severity=warning` over
+`tests/*.sh` and the rendered `*.sh` files (so `*.sh.j2` scripts are checked with their Jinja filled
+in). If everything passes it replaces `rendered/` with that render and stages it, so every commit
+carries a readable copy of what the nodes get, with example values. `rendered/` is generated: edit
+the templates, never the copy. It is left out of the deploy render and marked `linguist-generated`
+so GitHub collapses it in diffs. The hook takes about 10 s. Activate it once per clone:
 ```bash
 git config core.hooksPath .githooks
 ```
 Skip it for one commit with `git commit --no-verify`; `rendered/` is then stale until the next
 commit that runs the hook.
+
+### Tests
+
+```bash
+tests/run.sh          # everything, about 9 s
+tests/run.sh --fast   # skips the full render, about 3 s
+```
+
+`tests/run.sh` runs every `test_*` function in `tests/*_test.sh`, each in its own subshell from the
+repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plain bash, no extra
+tools.
+
+- `check_rendered_test.sh`: `tools/check_rendered.sh` on `tests/fixtures/tree`, a minimal rendered
+  tree in the repo's layout (`src/nodes/<node>/inventory.yml` and all) that passes; each test breaks
+  one invariant and expects that invariant's error alone.
+- `nodes_jinja_test.sh`: the dispatcher cases, sudoers grants, OliveTin buttons, subdomains, uptime
+  endpoints and image update order `src/nodes.jinja` derives from `tests/fixtures/nodes/`, written
+  out from ADR 0006.
+- `render_test.sh`: a full render of `vars.template.yml` passes every check (skipped by `--fast`,
+  since the pre-commit hook renders anyway).
+
+`tests/` is left out of the render.
 
 ### Update a web service
 
