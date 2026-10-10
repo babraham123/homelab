@@ -10,10 +10,10 @@ services:
   fluentbit: {}
 install_all_svcs: true
 commands:
-  - {name: install_keys, script: nodes/homesvcs/commands.sh}
-  - {name: install_certs, script: nodes/homesvcs/commands.sh}
-  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh]}
-  - {name: install_ssh_ca, script: base/debian/commands.sh}
+  - {name: install_keys, script: nodes/homesvcs/commands.sh, key_ids: [pve1]}
+  - {name: install_certs, script: nodes/homesvcs/commands.sh, key_ids: [pve1]}
+  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh], key_ids: [pve1]}
+  - {name: install_ssh_ca, script: base/debian/commands.sh, key_ids: [pve1]}
   - {name: install_dispatcher, script: base/debian/commands.sh}
-  - {name: install_ca, script: base/debian/commands.sh}
-  - {name: copy_acme_certs, script: base/debian/commands.sh}
+  - {name: install_ca, script: base/debian/commands.sh, key_ids: [pve1]}
+  - {name: copy_acme_certs, script: base/debian/commands.sh, key_ids: [pve1]}

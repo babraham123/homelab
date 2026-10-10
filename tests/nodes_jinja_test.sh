@@ -44,6 +44,7 @@ EOF
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
     ;;
   install_keys)
+    require_key_id pve1 local
     sudo /root/homelab-rendered/src/nodes/alpha/commands.sh install_keys
     ;;
   build_map)
@@ -100,17 +101,22 @@ EOF
 EOF
 }
 
-test_olive_tin_buttons_follow_case_order() {
+# Buttons follow case order and skip gated cases (install_keys has key_ids)
+test_olive_tin_buttons() {
   out=$(render_inventory "$inventory" <<'EOF'
 {% for node in nodes -%}
 {{ node }}: {{ inv.commands[node] | join(' ') }}
+{{ node }} buttons: {{ inv.buttons[node] | join(' ') }}
 {% endfor -%}
 EOF
 )
   assert_eq "$out" <<'EOF'
 alpha: install_node_exporter install_mdns_repeater install_zeta install_app install_pod install_plain install_all_svcs install_keys build_map check_gpu backup install_ca
+alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_app install_pod install_plain install_all_svcs build_map check_gpu backup install_ca
 gaming: StartSunshine StopSunshine
+gaming buttons: StartSunshine StopSunshine
 router: install_certs
+router buttons: install_certs
 EOF
 }
 

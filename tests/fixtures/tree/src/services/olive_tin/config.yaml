@@ -6,7 +6,6 @@ actions:
   - shell: ssh autoadmin@secsvcs install_web
   - shell: ssh autoadmin@secsvcs install_all_svcs
   - shell: ssh autoadmin@secsvcs install_certs
-  - shell: ssh autoadmin@secsvcs backup
   - shell: ssh autoadmin@secsvcs shutdown
   - shell: ssh autoadmin@websvcs install_blog
   - shell: ssh autoadmin@router install_certs

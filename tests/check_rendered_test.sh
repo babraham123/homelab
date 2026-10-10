@@ -167,9 +167,18 @@ EOF
 
 test_olive_tin_button_missing() {
   fixture_tree
-  edit src/services/olive_tin/config.yaml '/autoadmin@secsvcs backup$/d'
+  edit src/services/olive_tin/config.yaml '/autoadmin@secsvcs shutdown$/d'
   expect_errors <<'EOF'
-error: src/services/olive_tin/config.yaml: no button runs secsvcs dispatcher case backup
+error: src/services/olive_tin/config.yaml: no button runs secsvcs dispatcher case shutdown
+EOF
+}
+
+# backup has key_ids in the fixture: no button, and a button for it is an error
+test_olive_tin_gated_case() {
+  fixture_tree
+  edit src/services/olive_tin/config.yaml 's/^  - shell: ssh autoadmin@secsvcs shutdown$/&\n  - shell: ssh autoadmin@secsvcs backup/'
+  expect_errors <<'EOF'
+error: src/services/olive_tin/config.yaml: runs ssh autoadmin@secsvcs backup, which only key IDs pve1 may run
 EOF
 }
 

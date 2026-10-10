@@ -2,7 +2,8 @@
 # SSH Forced Command Dispatcher, shared by the Debian nodes
 # This script is triggered by the SSH daemon when the specific automation key is used.
 # It parses $SSH_ORIGINAL_COMMAND to determine which action to take, from this node's
-# cases: the hostname is the node name.
+# cases: the hostname is the node name. Commands carry data on stdin (file installs)
+# and stdout (backup, copy_acme_certs), so everything the dispatcher says goes to stderr.
 # Usage:
 #   ssh autoadmin@NODE CMD
 
@@ -10,15 +11,28 @@
 source /usr/local/lib/homelab/lib.sh
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-# Modern scp (OpenSSH 9+) uses SFTP protocol by default
-if [[ "${SSH_ORIGINAL_COMMAND:-}" == "/usr/lib/openssh/sftp-server" ]]; then
-  exec /usr/lib/openssh/sftp-server
-fi
-echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}"
+echo "Request received: '${SSH_ORIGINAL_COMMAND:-}' from ${SSH_CLIENT:-}" >&2
 
 unauthorized() {
-  echo "Unauthorized command: '${SSH_ORIGINAL_COMMAND:-}'"
+  echo "Unauthorized: $*" >&2
   exit 1
+}
+
+# Usage: require_key_id ID...; the certificate this session logged in with must carry one
+# of these key IDs (ssh_cert_gen.sh's -I). sshd writes the credential that authenticated
+# the session to $SSH_USER_AUTH (ExposeAuthInfo in autoadmin_sshd.conf), the whole
+# certificate for a certificate login.
+require_key_id() {
+  local tmp id want
+  tmp=$(mktemp)
+  grep -m1 '^publickey [^ ]*-cert-v01@openssh\.com ' "${SSH_USER_AUTH:-/dev/null}" | \
+    cut -d' ' -f2- > "$tmp" || true
+  id=$(ssh-keygen -L -f "$tmp" 2> /dev/null | sed -n 's/^ *Key ID: "\(.*\)"$/\1/p' || true)
+  rm -f "$tmp"
+  for want in "$@"; do
+    [[ $id == "$want" ]] && return 0
+  done
+  unauthorized "key ID '${id}' may not run '${SSH_ORIGINAL_COMMAND:-}'"
 }
 
 case "$(hostname)" in
@@ -29,16 +43,18 @@ case "$(hostname)" in
         nvidia-smi
         ;;
       install_ssh_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       *)
-        unauthorized
+        unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;
     esac
     ;;
@@ -77,28 +93,34 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh fluentbit
         ;;
       install_keys)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/homesvcs/commands.sh install_keys
         ;;
       install_certs)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/homesvcs/commands.sh install_certs
         ;;
       backup)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh
         ;;
       install_ssh_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       copy_acme_certs)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
         ;;
       *)
-        unauthorized
+        unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;
     esac
     ;;
@@ -117,16 +139,18 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/pve1/commands.sh archive_repo
         ;;
       install_ssh_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       *)
-        unauthorized
+        unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;
     esac
     ;;
@@ -136,6 +160,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh vm_watchdog
         ;;
       install_certs_and_keys)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/pve2/commands.sh install_certs_and_keys
         ;;
       start_gaming_vm)
@@ -148,6 +173,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/pve2/commands.sh install_hookscript
         ;;
       backup)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/pve2/backup.sh
         ;;
       prune)
@@ -157,16 +183,18 @@ case "$(hostname)" in
         sudo /usr/sbin/shutdown -h now
         ;;
       install_ssh_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       *)
-        unauthorized
+        unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;
     esac
     ;;
@@ -241,31 +269,38 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
         ;;
       install_keys)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_keys
         ;;
       install_certs)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_certs
         ;;
       install_ssh_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_olive_tin_cert)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_olive_tin_cert
         ;;
       install_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       copy_acme_certs)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
         ;;
       backup)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh
         ;;
       *)
-        unauthorized
+        unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;
     esac
     ;;
@@ -296,19 +331,22 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh geoip_generator
         ;;
       backup)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/backup.sh
         ;;
       install_ssh_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       *)
-        unauthorized
+        unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;
     esac
     ;;
@@ -359,34 +397,40 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
         ;;
       install_keys)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/websvcs/commands.sh install_keys
         ;;
       install_certs)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/websvcs/commands.sh install_certs
         ;;
       backup)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/nodes/websvcs/backup.sh
         ;;
       install_ssh_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       install_dispatcher)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       copy_acme_certs)
+        require_key_id pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
         ;;
       *)
-        unauthorized
+        unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;
     esac
     ;;
   *)
-    unauthorized
+    unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
     ;;
 esac
-echo "Completed command"
+echo "Completed command" >&2
 exit 0

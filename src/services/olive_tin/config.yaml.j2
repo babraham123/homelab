@@ -100,7 +100,7 @@ dashboards:
 {%- set icons = {'secsvcs': 'security', 'homesvcs': 'home', 'websvcs': 'cloud',
     'pve1': 'host-rounded', 'pve2': 'host-sharp', 'vpnsvcs': 'vpn-key', 'router': 'router',
     'gaming': 'videogame-asset', 'devtop': 'desktop-windows-outline'} %}
-{%- for node, cmds in inv.commands.items() if cmds %}
+{%- for node, cmds in inv.buttons.items() if cmds %}
       - title: {{ node }}
         type: fieldset
         contents:

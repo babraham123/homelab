@@ -31,6 +31,8 @@ trap 'rm -rf "$work"' EXIT
 #   node NODE
 #   service NODE SVC                        services, install order
 #   case NODE NAME                          dispatcher cases
+#   button NODE NAME                        cases OliveTin gets a button for
+#   gated NODE NAME ID...                   cases only these certificate key IDs may run
 #   run NODE LINE...                        a line a dispatcher case runs
 #   subdomain NODE SUBDOMAIN
 #   image NODE SVC CONTAINER IMAGE UPSTREAM upstream is - for built images
@@ -43,6 +45,11 @@ service {{ node }} {{ svc }}
 {% endfor -%}
 {% for entry in inv.dispatch[node] -%}
 case {{ node }} {{ entry.name }}
+{% if entry.key_ids -%}
+gated {{ node }} {{ entry.name }} {{ entry.key_ids | join(' ') }}
+{% else -%}
+button {{ node }} {{ entry.name }}
+{% endif -%}
 {% for line in entry.run -%}
 run {{ node }} {{ line }}
 {% endfor -%}
@@ -205,23 +212,27 @@ check_routes() {
   done
 }
 
-# Every dispatcher case gets an OliveTin button, and every `ssh autoadmin@NODE CASE`
-# OliveTin runs, chained or not, names a real case.
+# Every ungated dispatcher case gets an OliveTin button; every `ssh autoadmin@NODE CASE`
+# OliveTin runs, chained or not, names a real case that OliveTin's own key may run.
 check_olive_tin() {
-  local config=src/services/olive_tin/config.yaml expected referenced node name
+  local config=src/services/olive_tin/config.yaml buttons referenced node name ids
   if [ ! -f "$config" ]; then
     fail "$config" "missing"
     return
   fi
-  expected=$(facts case | sort -u)
+  buttons=$(facts button | sort -u)
   referenced=$(yq '.. | select(tag == "!!map" and has("shell")) | .shell' "$config" | \
     grep -oE 'ssh autoadmin@[^ ]+ [^ &;|]+' | sed 's/^ssh autoadmin@//' | sort -u || true)
   while read -r node name; do
     fail "$config" "no button runs ${node} dispatcher case ${name}"
-  done < <(comm -23 <(lines "$expected") <(lines "$referenced"))
+  done < <(comm -23 <(lines "$buttons") <(lines "$referenced"))
   while read -r node name; do
-    fail "$config" "runs ssh autoadmin@${node} ${name}, which isn't a ${node} dispatcher case"
-  done < <(comm -13 <(lines "$expected") <(lines "$referenced"))
+    if ids=$(facts gated | grep "^${node} ${name} " | cut -d' ' -f3-) && [ -n "$ids" ]; then
+      fail "$config" "runs ssh autoadmin@${node} ${name}, which only key IDs ${ids} may run"
+    elif ! facts case | grep -qxF "${node} ${name}"; then
+      fail "$config" "runs ssh autoadmin@${node} ${name}, which isn't a ${node} dispatcher case"
+    fi
+  done < <(comm -13 <(lines "$buttons") <(lines "$referenced"))
 }
 
 check_yaml

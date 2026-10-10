@@ -1,6 +1,6 @@
 # router's part of the node inventory; src/nodes.jinja documents the keys.
 # yamllint disable rule:document-start rule:document-end
 commands:
-  - {name: install_certs, script: nodes/router/commands.sh}
+  - {name: install_certs, script: nodes/router/commands.sh, key_ids: [pve1]}
   - {name: install_dispatcher, script: nodes/router/commands.sh}
   - {name: start_pve2, script: nodes/router/commands.sh}

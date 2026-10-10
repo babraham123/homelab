@@ -9,5 +9,5 @@ services:
 install_all_svcs: true
 commands:
   - {name: install_certs, script: nodes/secsvcs/commands.sh}
-  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh]}
+  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh], key_ids: [pve1]}
   - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}

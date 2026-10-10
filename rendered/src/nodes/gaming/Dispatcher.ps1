@@ -6,12 +6,7 @@
 $originalCommand = $env:SSH_ORIGINAL_COMMAND
 $sshClient = $env:SSH_CLIENT
 
-# Modern scp (OpenSSH 9+) uses SFTP protocol by default
 Add-Content -Path "$env:TEMP\dispatch.log" -Value "$originalCommand from $sshClient"
-if ($originalCommand -eq "C:\Windows\System32\OpenSSH\sftp-server.exe") {
-    & "C:\Windows\System32\OpenSSH\sftp-server.exe"
-    exit $LASTEXITCODE
-}
 Write-Host "Request received: '${originalCommand}' from ${sshClient}"
 
 $whitelist = @("StartSunshine", "StopSunshine", "InstallAutomation")
