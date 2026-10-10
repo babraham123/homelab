@@ -47,14 +47,14 @@ the TLS terminator, plus a hard startup dependency on GitHub.
 
 ## Comments
 
-- 2026-10-10: Steps 1-5 done in the repo. The source is v0.0.1 (e2421fa) of the upstream, vendored at
-  `src/services/traefik/plugins-local/src/github.com/babraham123/traefik-plugin-rewrite-headers/`
+- 2026-10-10: Steps 1-5 done in the repo. The source is v0.0.1 (e2421fa) of the upstream, vendored
+  at `src/services/traefik/plugins-local/src/github.com/babraham123/traefik-plugin-rewrite-headers/`
   with `go.mod`, `.traefik.yml` and the readme pointing at `babraham123`, the `Host` block ported
   without the debug line, and two tests added: `Host` (header and `req.Host`) and the `Token` →
   `Basic` rewrite used by `vm-auth-token`. `go test` and `yaegi test` pass. Each node's
   `install_svcs.sh traefik` replaces `/etc/opt/traefik/plugins-local`; the quadlets mount it
   read-only. Remaining for the human: create the GitHub fork (nothing fetches it; it only records
-  where the vendored copy comes from), then on each node run `traefik` and check the acceptance
-  items.
+  where the vendored copy comes from), then on each node run `install_traefik` and check the
+  acceptance items.
 - 2026-10-10: Fork created; the vendored source is pushed to it as 92d799d on `main`. Remaining: run
-  `traefik` on each node and check the acceptance items.
+  `install_traefik` on each node and check the acceptance items.
