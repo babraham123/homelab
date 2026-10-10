@@ -13,6 +13,9 @@ Image=localhost/finance_exporter:latest
 ContainerName=finance_exporter
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+Tmpfs=/root/.cache
 
 Network=net.network
 HostName=finance-exporter.janedoe.com

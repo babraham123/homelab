@@ -13,6 +13,8 @@ Image=docker.io/twinproduction/gatus:latest
 ContainerName=gatus
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
 
 # http web front-end, port = 8080
 Network=net.network

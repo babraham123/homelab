@@ -14,6 +14,12 @@ Image=docker.io/victoriametrics/victoria-metrics:latest
 ContainerName=victoriametrics
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+HealthCmd=wget -q -O /dev/null http://127.0.0.1:8428/health
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
 
 # http web front-end, ":8428/vmui"
 Network=net.network

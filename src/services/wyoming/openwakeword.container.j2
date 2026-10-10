@@ -13,6 +13,9 @@ Image=localhost/openwakeword:latest
 ContainerName=openwakeword
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+Tmpfs=/root/.cache
 
 Network=net.network
 HostName=wake.{{ site.url }}

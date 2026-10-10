@@ -14,6 +14,12 @@ Image=docker.io/prom/alertmanager:latest
 ContainerName=alertmanager
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+HealthCmd=wget -q -O /dev/null http://admin:$${AM_ADMIN_PASSWORD}@127.0.0.1:9093/-/healthy
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
 
 Network=net.network
 HostName=alert.{{ site.url }}
@@ -24,6 +30,7 @@ Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.ym
 
 Environment=TZ={{ personal.timezone }}
 Volume=/etc/opt/alertmanager:/config:ro
+Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
 
 [Service]
 Restart=on-failure

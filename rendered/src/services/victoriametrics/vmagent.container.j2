@@ -15,6 +15,12 @@ Image=docker.io/victoriametrics/vmagent:latest
 ContainerName=vmagent
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+HealthCmd=wget -q -O /dev/null http://127.0.0.1:8429/health
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
 
 Network=net.network
 HostName=metric-collector.janedoe.com

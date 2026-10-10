@@ -13,6 +13,9 @@ Image=localhost/whisper:latest
 ContainerName=whisper
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+Tmpfs=/root/.cache
 
 Network=net.network
 HostName=stt.{{ site.url }}

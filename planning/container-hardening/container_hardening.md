@@ -769,8 +769,11 @@ root-owned on the host and HAProxy still reads them.
 
 ## Apply order
 
-One service per commit, so a regression bisects to one quadlet. Caps + ReadOnly + health
-first; the `UserNS=auto` pass after, per node, once `/etc/subuid`/`/etc/subgid` exist.
+The easy blocks (the "Easy" list under [Summary](#summary)) are in the quadlets, in one
+commit; install and check each with the [verification loop](#verification-loop-issue-01-per-service)
+in the order below. The rest go one service per commit, so a regression bisects to one quadlet.
+Caps + ReadOnly + health first; the `UserNS=auto` pass after, per node, once
+`/etc/subuid`/`/etc/subgid` exist.
 
 - secsvcs: vmalert, victoriametrics, victorialogs, gatus, alertmanager, ntfy-alertmanager,
   ntfy, fluentbit, grafana, olive_tin, lldap, authelia, traefik, postgres

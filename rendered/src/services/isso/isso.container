@@ -13,6 +13,8 @@ Image=ghcr.io/isso-comments/isso:release
 ContainerName=isso
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
 
 Network=net.network
 HostName=comment.janedoe.com

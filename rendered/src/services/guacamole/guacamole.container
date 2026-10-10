@@ -13,6 +13,8 @@ Image=docker.io/guacamole/guacamole:1.6.0
 ContainerName=guacamole
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
 
 Network=net.network
 HostName=remote.janedoe.com

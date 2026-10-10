@@ -13,6 +13,12 @@ Image=docker.io/xenrox/ntfy-alertmanager:latest
 ContainerName=ntfy-alertmanager
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+HealthCmd=curl -fsS -o /dev/null http://127.0.0.1:2588/health
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
 
 Network=net.network
 HostName=ntfy-alertmanager.{{ site.url }}

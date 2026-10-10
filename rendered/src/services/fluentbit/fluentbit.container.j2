@@ -14,6 +14,8 @@ Image=docker.io/fluent/fluent-bit:3.2
 ContainerName=fluentbit
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
 
 Network=net.network
 HostName=log-collector.janedoe.com

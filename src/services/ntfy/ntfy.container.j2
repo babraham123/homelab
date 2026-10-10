@@ -13,6 +13,13 @@ Image=docker.io/binwiederhier/ntfy:latest
 ContainerName=ntfy
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+AddCapability=CAP_NET_BIND_SERVICE
+ReadOnly=true
+HealthCmd=wget -q --tries=1 -O - http://127.0.0.1:2586/v1/health | grep -q '"healthy":true'
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
 
 # port 2586, web UI at /, /<topic> for pubsub
 # port 2587 for metrics

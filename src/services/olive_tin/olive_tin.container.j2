@@ -13,6 +13,8 @@ Image=docker.io/jamesread/olivetin:latest-3k
 ContainerName=olive_tin
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
 
 Network=net.network
 HostName=command.{{ site.url }}

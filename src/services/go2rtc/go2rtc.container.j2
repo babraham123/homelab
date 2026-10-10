@@ -13,6 +13,8 @@ Image=docker.io/alexxit/go2rtc:latest
 ContainerName=go2rtc
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
 
 Network=net.network
 HostName=stream.{{ site.url }}

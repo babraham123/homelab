@@ -16,6 +16,12 @@ Image=docker.io/victoriametrics/vmalert:latest
 ContainerName=vmalert
 AutoUpdate=registry
 NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+HealthCmd=wget -q -O /dev/null http://127.0.0.1:8880/health
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
 
 Network=net.network
 HostName=vmalert.janedoe.com
