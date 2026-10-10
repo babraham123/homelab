@@ -13,7 +13,7 @@ scrape_configs:
     metrics_path: /metrics
     relabel_configs: &host
       - target_label: host
-        replacement: homesvcs.{{ site.url }}
+        replacement: homesvcs
   - job_name: 'fluentbit'
     static_configs:
       - targets: ['log-collector.{{ site.url }}:2020']
@@ -27,7 +27,7 @@ scrape_configs:
       - target_label: instance
         replacement: homeproxy.{{ site.url }}
       - target_label: host
-        replacement: homesvcs.{{ site.url }}
+        replacement: homesvcs
   - job_name: 'node_exporter'
     static_configs:
       - targets:
@@ -37,5 +37,5 @@ scrape_configs:
       - target_label: instance
         replacement: homesvcs.{{ site.url }}:9100
       - target_label: host
-        replacement: homesvcs.{{ site.url }}
+        replacement: homesvcs
 ...

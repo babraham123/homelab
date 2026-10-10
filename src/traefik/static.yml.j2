@@ -13,8 +13,9 @@ log:
 # One JSON line per request to stdout, so Fluent Bit's journald tailer ships it to
 # VictoriaLogs with the fields split out (src/fluentbit/). Traefik is the only hop
 # that sees decrypted HTTP, and the only record of LAN-side requests, which never
-# touch HAProxy. Headers are dropped except the three worth having; the Lua filter
-# redacts access_token query strings (Vaultwarden's websocket carries one).
+# touch HAProxy. Headers are dropped except the three worth having. The Lua filter
+# redacts access_token query strings (Vaultwarden's websocket carries one) only in
+# what reaches VictoriaLogs: the node's own journal keeps the raw line.
 accessLog:
   format: json
   bufferingSize: 100

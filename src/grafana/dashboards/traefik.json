@@ -1415,7 +1415,7 @@
           },
           "refId": "A",
           "queryType": "statsRange",
-          "expr": "{service=\"traefik\"} RequestMethod:* | stats by (_time:$__interval, DownstreamStatus) count() requests",
+          "expr": "{service=\"traefik\"} hostname:~\"^${host:regex}$\" RequestMethod:* | stats by (_time:$__interval, DownstreamStatus) count() requests",
           "legendFormat": "{{DownstreamStatus}}"
         }
       ],
@@ -1455,7 +1455,7 @@
           },
           "refId": "A",
           "queryType": "instant",
-          "expr": "{service=\"traefik\"} RequestMethod:* | sort by (_time) desc | limit 500"
+          "expr": "{service=\"traefik\"} hostname:~\"^${host:regex}$\" RequestMethod:* | sort by (_time) desc | limit 500"
         }
       ],
       "options": {

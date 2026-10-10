@@ -107,6 +107,14 @@ http:
     #   <<: *service
     #   rule: Host(`vault.janedoe.com`)
     #   service: vault@file
+    # # The websocket URL carries ?access_token=<JWT>, and Traefik can't redact a query
+    # # parameter, so keep these requests out of the access log (and the journal) entirely.
+    # vault-notifications:
+    #   <<: *service
+    #   rule: Host(`vault.janedoe.com`) && PathPrefix(`/notifications/`)
+    #   service: vault@file
+    #   observability:
+    #     accessLogs: false
     olive_tin:
       <<: *service
       rule: Host(`command.janedoe.com`)

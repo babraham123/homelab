@@ -93,8 +93,10 @@ and alerting on logs.
 - **Postgres:** add a `vaultwarden` user and DB block to `src/postgres/pg_init.sql`.
   `initdb.d` only runs on an empty cluster, so for the existing one, also run it once by
   hand with `podman exec postgres psql …`, and document that in the case.
-- **Logs:** the websocket URL carries `access_token=<JWT>`. Redact it in Traefik access
-  logs before they are stored (comment added to observability/02).
+- **Logs:** the websocket URL carries `access_token=<JWT>`, and Traefik can't redact a
+  query parameter. Uncomment the `vault-notifications` router in
+  `src/secsvcs/traefik/routes.yml.j2` alongside `vault`: it has access logs off, so
+  `/notifications/` requests never reach the journal or VictoriaLogs.
 - **Brute-force alerting instead of fail2ban:** fail2ban on secsvcs can't block at the
   edge, which is HAProxy on the VPS, and `SSO_ONLY` moves login to Authelia anyway. Add a
   VictoriaLogs-backed alert on repeated Vaultwarden `Invalid admin token` or
@@ -143,3 +145,5 @@ in front of `/admin`, it adds friction for little gain.
   it gets a file-level copy.
 - 2026-10-07 (observability/02): `access_token=` in `RequestPath` is redacted by
   `src/fluentbit/journald.lua.j2` before the line leaves the node.
+- 2026-10-10: the Lua redaction only covers VictoriaLogs; the node's journal keeps the
+  raw line. The websocket now gets its own router with access logs off (see **Logs**).

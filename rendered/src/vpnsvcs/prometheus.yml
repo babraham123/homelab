@@ -14,7 +14,7 @@ scrape_configs:
     metrics_path: /metrics
     relabel_configs: &host
       - target_label: host
-        replacement: vpnsvcs.janedoe.com
+        replacement: vpnsvcs
   - job_name: 'fluentbit'
     static_configs:
       - targets: ['log-collector.janedoe.com:2020']
@@ -29,7 +29,7 @@ scrape_configs:
       - target_label: instance
         replacement: vpnsvcs.janedoe.com:8405
       - target_label: host
-        replacement: vpnsvcs.janedoe.com
+        replacement: vpnsvcs
   - job_name: 'headscale'
     # metrics_listen_addr in src/headscale/headscale.yaml.j2
     static_configs:
@@ -39,7 +39,7 @@ scrape_configs:
       - target_label: instance
         replacement: vpnsvcs.janedoe.com:9090
       - target_label: host
-        replacement: vpnsvcs.janedoe.com
+        replacement: vpnsvcs
   - job_name: 'tailscaled'
     # Client metrics, tailscale >= 1.78: https://tailscale.com/kb/1482/client-metrics.
     # Routed out tailscale0 from the container; tailscaled answers it like a local request.
@@ -50,7 +50,7 @@ scrape_configs:
       - target_label: instance
         replacement: vpnsvcs.janedoe.com:tailscaled
       - target_label: host
-        replacement: vpnsvcs.janedoe.com
+        replacement: vpnsvcs
   - job_name: 'node_exporter'
     static_configs:
       - targets: ['10.13.0.1:9100']
@@ -59,5 +59,5 @@ scrape_configs:
       - target_label: instance
         replacement: vpnsvcs.janedoe.com:9100
       - target_label: host
-        replacement: vpnsvcs.janedoe.com
+        replacement: vpnsvcs
 ...

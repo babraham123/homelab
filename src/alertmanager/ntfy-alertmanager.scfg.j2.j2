@@ -47,7 +47,7 @@ labels {
   # Label values match exactly, so `host` (the node, no port; src/<node>/prometheus.yml.j2)
   # rather than `instance`, which carries a port.
 {% for node in ['pve1', 'pve2', 'secsvcs', 'homesvcs', 'websvcs', 'vpnsvcs'] %}
-  host "{{ node }}.{{ site.url }}" {
+  host "{{ node }}" {
     tags "computer,{{ node }}"
   }
 {% endfor %}

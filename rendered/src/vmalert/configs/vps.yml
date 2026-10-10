@@ -7,7 +7,7 @@ groups:
   - name: vps
     rules:
       - alert: VpsMetricsAbsent
-        expr: absent_over_time(up{job="node_exporter",host=~"vpnsvcs\\..*"}[5m])
+        expr: absent_over_time(up{job="node_exporter",host="vpnsvcs"}[5m])
         for: 5m
         labels:
           severity: critical

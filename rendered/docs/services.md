@@ -168,7 +168,9 @@ flowchart LR
     (ufw lets only vmagent in), tailscaled and node_exporter
   - `VpsMetricsAbsent` fires on silence, since a pushing host can't raise `up == 0`;
     `HaproxyDown` and `HaproxyBackendConnectErrors` cover the edge; "HAProxy" dashboard
-- **Scrape targets**: by hand in each node's `src/<node>/prometheus.yml.j2`
+- **Scrape targets**: by hand in each node's `src/<node>/prometheus.yml.j2`, each
+  relabelled with `host` = the bare node name (`secsvcs`), the same value as the
+  journal's `hostname` field in VictoriaLogs, so one dashboard variable filters both
 - **Retention** for metrics, logs and Home Assistant history: `vars.yml`
 - **Gatus**, independent of the metrics pipeline:
   - HTTPS checks generated from the `uptime` keys in `src/nodes.yml`, every 10 minutes;

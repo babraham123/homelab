@@ -13,7 +13,7 @@ scrape_configs:
     metrics_path: /metrics
     relabel_configs: &host
       - target_label: host
-        replacement: websvcs.janedoe.com
+        replacement: websvcs
   - job_name: 'fluentbit'
     static_configs:
       - targets: ['log-collector.janedoe.com:2020']
@@ -32,7 +32,7 @@ scrape_configs:
       - target_label: instance
         replacement: webproxy.janedoe.com
       - target_label: host
-        replacement: websvcs.janedoe.com
+        replacement: websvcs
   - job_name: 'node_exporter'
     static_configs:
       - targets:
@@ -42,12 +42,12 @@ scrape_configs:
       - target_label: instance
         replacement: websvcs.janedoe.com:9100
       - target_label: host
-        replacement: websvcs.janedoe.com
+        replacement: websvcs
   - job_name: 'node_exporter_pve'
     static_configs:
       - targets: ['pve2.janedoe.com:9100']
     metrics_path: /metrics
     relabel_configs:
       - target_label: host
-        replacement: pve2.janedoe.com
+        replacement: pve2
 ...
