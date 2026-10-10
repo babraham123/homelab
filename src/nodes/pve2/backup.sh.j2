@@ -12,7 +12,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 source "${rendered}/base/debian/backup_lib.sh"
 
 vm_running() { qm status "$1" | grep -qw running; }
-backup_vm() { vzdump_to_pbs --vmid "$1"; }
+backup_vm() { vzdump_to pbs2 --vmid "$1"; }
 
 stage_init
 # /etc/proxmox-backup is PBS itself: datastore and namespace definitions, users,

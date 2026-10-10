@@ -102,8 +102,15 @@ qm destroy 999 --purge
 - **devtop and gaming on pve2**: data disks with `backup=0` aren't in the image; re-attach with
   `qm set VMID --scsi1 local-games:vm-VMID-disk-1,backup=0` (the `local-games` storage is *planned*,
   `backup-and-dr/14`)
-- **The router**: pfSense's config is also in Auto Config Backup, but the VM restore is faster and
+- **The router**: the newest image is also on pve1's own disk, so it restores with pve2 off and
+  the network down. pfSense's config is also in Auto Config Backup, but a VM restore is faster and
   keeps the NIC passthrough
+```bash
+# On pve1's console
+ls /var/lib/vz/dump/    # vzdump-qemu-VMID-TIMESTAMP.vma.zst
+qm stop VMID
+qmrestore /var/lib/vz/dump/vzdump-qemu-VMID-TIMESTAMP.vma.zst VMID --storage local-lvm --force
+```
 
 ## A Proxmox host
 - **pve1**: [pve1 disaster recovery](./pve1_recovery.md)

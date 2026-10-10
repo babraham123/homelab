@@ -220,7 +220,9 @@ flowchart LR
 - **Media array** on pve2: four HDDs on a passed-through SATA card, snapraid parity, mergerfs, owned
   by websvcs. Not backed up; parity is its protection ([pve2 storage guide](guides/pve2_storage.md))
 - **pfSense**: the Auto Config Backup package
-- **Weekly run**, Saturday 02:00, `backup_orchestrator.service` on pve1. It wakes pve2 (PBS), then:
+- **Weekly run**, Saturday 02:00, `backup_orchestrator.service` on pve1. First it dumps the router
+  VM to pve1's `local` storage (`/var/lib/vz/dump`, newest copy only), so the router restores
+  without pve2 or PBS, both of which need it. Then it wakes pve2 (PBS) and:
   1. `backup.sh` on every node (homesvcs, secsvcs, vpnsvcs, websvcs, then pve1 and pve2) through the
      SSH dispatcher as `backup` (pve1's runs directly), rebuilding `/var/opt/backups/`:
      - `dumps/`: `pg_dumpall`, Home Assistant's native backup, a Headscale SQLite snapshot

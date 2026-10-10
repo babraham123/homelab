@@ -15,8 +15,9 @@
 #                                # system, so files/etc/opt/... restores to /
 #   stage_volume VOLUME [NAME]   # copies a Podman volume into files/volumes/NAME
 #   stage_finish                 # ownership and permissions of the whole stage
-#   vzdump_to_pbs VZDUMP_ARG...  # snapshot-mode vzdump to PBS, e.g. --all 1 or --vmid ID;
-#                                # blocks, prints its log, fails unless it ended OK
+#   vzdump_to STORAGE VZDUMP_ARG...  # snapshot-mode vzdump, e.g. pbs2 --all 1 or
+#                                    # local --vmid ID; blocks, prints its log, fails
+#                                    # unless it ended OK
 # and from pve1's backup_orchestrator, after src/base/lib.sh:
 #   stage_collect NODE DEST      # runs NODE's backup.sh and brings its stage into DEST
 # BACKUP_STAGE overrides the stage root on this machine, e.g. a temp dir to try a run.
@@ -127,9 +128,10 @@ pve_task() {
 
 # Snapshot mode keeps the VMs running; PBS stores only the chunks that changed since
 # the last run. The notes template names each backup after its guest in the PBS UI.
-vzdump_to_pbs() {
-  local upid
-  upid=$(pvesh create "/nodes/$(hostname)/vzdump" "$@" --storage pbs2 --mode snapshot \
+vzdump_to() {
+  local storage=$1 upid
+  shift
+  upid=$(pvesh create "/nodes/$(hostname)/vzdump" "$@" --storage "$storage" --mode snapshot \
     --notes-template '{{guestname}}')
   pve_task "$upid"
 }

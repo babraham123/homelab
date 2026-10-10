@@ -1,13 +1,15 @@
 #!/bin/bash
-# Weekly backup run. Wakes pve2 (PBS lives there), runs backup.sh on every node,
-# collects each node's stage into /root/backups/<node>/ (backup_lib's stage_collect),
-# sends /root/backups to PBS as host backups, has pve2 prune and garbage-collect PBS,
-# records per-step success metrics, then powers pve2 back off if it was off to begin
-# with. Posts a one-line ntfy summary at the end.
+# Weekly backup run. Dumps the router VM to pve1's own disk, wakes pve2 (PBS lives
+# there), runs backup.sh on every node, collects each node's stage into
+# /root/backups/<node>/ (backup_lib's stage_collect), sends /root/backups to PBS as host
+# backups, has pve2 prune and garbage-collect PBS, records per-step success metrics,
+# then powers pve2 back off if it was off to begin with. Posts a one-line ntfy summary
+# at the end.
 # Usage:
 #   src/nodes/pve1/backup_orchestrator.sh
 # Adding a node: give it a backup.sh and a `backup` dispatcher command, which puts it
-# in NODES. Adding another step: write a step_<name> function and list it in STEPS.
+# in NODES. Adding another step: write a step_<name> function and list it in
+# LOCAL_STEPS if it doesn't need pve2, else PBS_STEPS.
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
@@ -27,10 +29,23 @@ keyfile=/root/secrets/pbs_client.key
 # backup.sh images them; pve1 runs its own backup.sh, so it has no `backup` command.
 # prune comes after upload so this week's snapshots count.
 NODES=(homesvcs secsvcs vpnsvcs websvcs pve1 pve2)
+# Run before wake_pve2, and whether or not it succeeds.
+LOCAL_STEPS=(router_local)
 # wake_pve2 and sleep_pve2 bracket these.
-STEPS=()
-for node in "${NODES[@]}"; do STEPS+=("backup_${node}"); done
-STEPS+=(upload prune)
+PBS_STEPS=()
+for node in "${NODES[@]}"; do PBS_STEPS+=("backup_${node}"); done
+PBS_STEPS+=(upload prune)
+STEPS=("${LOCAL_STEPS[@]}" "${PBS_STEPS[@]}")
+
+# The router is the network: with it broken, pve2 can't be woken and PBS can't be
+# reached, so its newest image is also kept where pve1 restores it alone. One copy;
+# vzdump prunes the older one once the new one is written.
+step_router_local() {
+  local vmid
+  vmid=$(qm list | awk '$2 == "router" { print $1 }')
+  [[ -n $vmid ]] || die "no router VM"
+  vzdump_to local --vmid "$vmid" --compress zstd --prune-backups keep-last=1
+}
 
 step_wake_pve2() {
   "${ssh[@]}" autoadmin@router start_pve2
@@ -147,9 +162,12 @@ pve2_was_on=0
 is_reachable pve2 && pve2_was_on=1
 echo "pve2 initially $( (( pve2_was_on )) && echo on || echo off )"
 
+for step in "${LOCAL_STEPS[@]}"; do
+  run "$step"
+done
 run wake_pve2
-if [[ -z "${failed[*]}" ]]; then
-  for step in "${STEPS[@]}"; do
+if [[ ${done_at[wake_pve2]+set} ]]; then
+  for step in "${PBS_STEPS[@]}"; do
     run "$step"
   done
 fi

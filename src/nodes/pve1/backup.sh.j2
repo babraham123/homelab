@@ -24,4 +24,4 @@ stage_paths /etc/pve /etc/network/interfaces /etc/resolv.conf /etc/hosts /etc/ho
 stage_finish
 
 # router, secsvcs, homesvcs.
-vzdump_to_pbs --all 1
+vzdump_to pbs2 --all 1
