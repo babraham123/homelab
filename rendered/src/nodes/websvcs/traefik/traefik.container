@@ -27,6 +27,7 @@ Exec="--configFile=/config/static/traefik.yml"
 Environment=TZ=America/Los_Angeles
 Volume=/etc/opt/traefik/config:/config
 Volume=/etc/opt/traefik/certificates:/certificates
+Volume=/etc/opt/traefik/plugins-local:/plugins-local:ro
 
 [Service]
 Restart=on-failure

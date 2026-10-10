@@ -33,6 +33,7 @@ Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
 Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
 Volume=/etc/opt/traefik/config:/config
 Volume=/etc/opt/traefik/certificates:/certificates
+Volume=/etc/opt/traefik/plugins-local:/plugins-local:ro
 
 [Service]
 Restart=on-failure

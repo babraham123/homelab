@@ -32,7 +32,8 @@
 - `src/nodes/<node>/`, one per node. May contain:
   - `install_svcs.sh`: installs configs to `/etc/opt/<service>/` and container files to
     `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not executable, since
-    `install` defaults to 755), then reloads systemd. Runs from `/root/homelab-rendered/src`, so its
+    `install` defaults to 755; a directory tree, like Traefik's `plugins-local/`, is removed and
+    copied again with `cp -r`), then reloads systemd. Runs from `/root/homelab-rendered/src`, so its
     paths start with `base/`, `nodes/` or `services/`
   - `inventory.yml`: the node's part of the node inventory (keys documented in `src/nodes.jinja`)
   - `commands.sh` - Other tasks that run as root and are triggered remotely

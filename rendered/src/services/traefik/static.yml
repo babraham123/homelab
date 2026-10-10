@@ -37,11 +37,12 @@ providers:
   file:
     watch: false
     directory: /config/dynamic
+# Vendored under plugins-local/ and mounted at /plugins-local, so startup never fetches
+# from GitHub
 experimental:
-  plugins:
+  localPlugins:
     rewriteHeaders:
-      modulename: "github.com/bitrvmpd/traefik-plugin-rewrite-headers"
-      version: "v0.0.1"
+      moduleName: "github.com/babraham123/traefik-plugin-rewrite-headers"
 entryPoints:
   # Scraped by the node's collector over the podman network; never published.
   metrics:

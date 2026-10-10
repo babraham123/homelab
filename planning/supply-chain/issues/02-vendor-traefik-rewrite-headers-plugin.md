@@ -1,6 +1,6 @@
 # 02. Fork and vendor the Traefik rewrite-headers plugin as a local plugin
 
-Status: ready-for-agent Type: task Repo: homelab Source: review finding 10
+Status: ready-for-human Type: task Repo: homelab Source: review finding 10
 
 ## Problem
 
@@ -46,3 +46,13 @@ the TLS terminator, plus a hard startup dependency on GitHub.
   path.
 
 ## Comments
+
+- 2026-10-10: Steps 1-5 done in the repo. The source is v0.0.1 (e2421fa) of the upstream, vendored at
+  `src/services/traefik/plugins-local/src/github.com/babraham123/traefik-plugin-rewrite-headers/`
+  with `go.mod`, `.traefik.yml` and the readme pointing at `babraham123`, the `Host` block ported
+  without the debug line, and two tests added: `Host` (header and `req.Host`) and the `Token` →
+  `Basic` rewrite used by `vm-auth-token`. `go test` and `yaegi test` pass. Each node's
+  `install_svcs.sh traefik` replaces `/etc/opt/traefik/plugins-local`; the quadlets mount it
+  read-only. Remaining for the human: create the GitHub fork (nothing fetches it; it only records
+  where the vendored copy comes from), then on each node run `traefik` and check the acceptance
+  items.

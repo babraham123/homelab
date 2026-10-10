@@ -22,6 +22,8 @@ case $1 in
     rm -rf /etc/opt/traefik/config/dynamic/*
     install -D -m 644 -t /etc/opt/traefik/config/dynamic nodes/websvcs/traefik/*.yml services/traefik/dynamic/*.yml
     install -D -m 644 services/traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
+    rm -rf /etc/opt/traefik/plugins-local
+    cp -r services/traefik/plugins-local /etc/opt/traefik/
     install_quadlet nodes/websvcs/traefik/traefik.container
     ;;
   vmagent)
