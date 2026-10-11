@@ -1,6 +1,6 @@
 # 01. Survey: DropCapability, ReadOnly, Tmpfs and UserNS=auto for every container
 
-Status: ready-for-agent Type: research Repo: homelab Source: review finding 15
+Status: resolved Type: research Repo: homelab Source: review finding 15
 
 ## Scope
 
@@ -54,3 +54,8 @@ hard cases: home_assistant, esphome, archivebox, zigbee2mqtt (serial device), gu
   - archivebox: whether it starts at all with `User=archivebox` (entrypoint needs root)
   - `UserNS=auto`: subuid prerequisite, `idmap` on file and named-volume mounts, fluentbit reading
     the journal through idmap
+
+- 2026-10-11: Resolved. The survey's blocks are applied in `958b1ad` (capabilities, read-only
+  root) and `88477b0`; `UserNS=auto` is split out as 04 and memory limits as 03. The open on-node
+  checks above run with the deploy, in the per-service checks of
+  `notes/apply-since-5a50097.md`.

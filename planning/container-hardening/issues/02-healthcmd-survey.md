@@ -1,6 +1,6 @@
 # 02. Survey: which containers support a HealthCmd, and with what
 
-Status: ready-for-agent Type: research Repo: homelab Source: review finding 16
+Status: resolved Type: research Repo: homelab Source: review finding 16
 
 ## Task
 
@@ -52,3 +52,7 @@ rule on `podman` health state once a Podman exporter exists (observability/01 no
   - each `HealthCmd` through quadlet and systemd (the guide's escaping test), alertmanager's `$$`
     first
   - busybox `nc -z` in the mosquitto image
+
+- 2026-10-11: Resolved. The core-service health checks and `ServiceRestartLoop` are applied in
+  `958b1ad`. The open on-node checks above (escaping, busybox `nc -z`) run with the deploy, in the
+  health-check step of `notes/apply-since-5a50097.md`.
