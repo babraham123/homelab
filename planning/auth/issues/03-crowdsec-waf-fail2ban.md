@@ -1,0 +1,106 @@
+# 03. Edge defense: CrowdSec bans at the VPS, CrowdSec WAF in Traefik, fail2ban for SSH
+
+Status: needs-info Type: task Repo: homelab Source: review finding 14; maintainer request
+2026-10-11 (replaces the HAProxy TODO block) Blocked by: 06 (part B only)
+
+## Problem
+
+The public edge only has static rules. HAProxy (`src/services/haproxy/haproxy.cfg.j2`) rate-limits
+per source with 30 s stick tables, geo-blocks, and drops scanner paths on `:80`. It runs `:443` in
+TCP mode, so it never sees a request: nothing on the public HTTPS path filters HTTP. Nothing learns
+from what the services see:
+- Authelia's `regulation` bans by **user** (`modes: ['user']`), so credential stuffing across many
+  usernames from one IP is never banned;
+- a scanner that Traefik answers with 404s, or a Vaultwarden brute force (vaultwarden/01), can't be
+  blocked at the edge, and HAProxy on the VPS is the only place that can drop it;
+- fail2ban on the VPS protects sshd (`src/base/debian/jail.local`), but is installed by hand from
+  the guide, and its port is appended with `echo`.
+
+## Design
+
+One CrowdSec Local API (LAPI) on secsvcs decides; the VPS enforces at its firewall; each Traefik
+runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet and secsvcs.
+
+| Layer | Where | Does |
+|---|---|---|
+| HAProxy stick tables, geo-block | VPS | Flood control and countries, unchanged |
+| CrowdSec firewall bouncer (nftables) | VPS, host package | Drops banned IPs before HAProxy; pulls decisions from the LAPI |
+| fail2ban `sshd`, `recidive` | VPS, host | Bans SSH brute force locally; works with the tailnet or secsvcs down |
+| CrowdSec engine + LAPI | secsvcs, container | Reads logs from VictoriaLogs, runs scenarios, holds decisions |
+| CrowdSec AppSec (WAF) | secsvcs, homesvcs, websvcs, container | Inspects each request the Traefik plugin forwards |
+| Traefik bouncer plugin | secsvcs, homesvcs, websvcs | Blocks banned IPs; forwards requests to the local AppSec |
+
+- **Detection reads VictoriaLogs**, not files: the VictoriaLogs data source (CrowdSec ≥ 1.8), one
+  acquisition per program: Traefik access logs (JSON, all three VMs), Authelia, HAProxy and sshd on
+  the VPS, Vaultwarden once vaultwarden/01 lands. No log agent per node; Fluent Bit already ships
+  every log.
+- **Collections:** `crowdsecurity/traefik`, `crowdsecurity/http-cve`,
+  `crowdsecurity/base-http-scenarios`, `LePresidente/authelia`, `crowdsecurity/haproxy`,
+  `crowdsecurity/sshd`, `crowdsecurity/whitelist-good-actors`.
+- **Never ban our own addresses:** a whitelist for the LAN subnets, the tailnet range, the VPS's
+  tailnet IP and the container subnets. Banning the VPS's tailnet IP would cut off all public
+  traffic, the failure auth/06 exists to rule out.
+- **AppSec stays on the node.** The plugin forwards headers and bodies (passwords included) to the
+  AppSec listener; on the node's Podman network that never leaves the VM. Each node's AppSec
+  container is a CrowdSec agent with only the `appsec` acquisition, registered to the LAPI, so WAF
+  hits still become alerts and decisions.
+- **WAF rules:** `crowdsecurity/appsec-virtual-patching` and `crowdsecurity/appsec-generic-rules`
+  in-band (block); `crowdsecurity/appsec-crs` out-of-band (detect only) until a few weeks of logs
+  show its false positives (Home Assistant websockets, Grafana and OliveTin APIs, Guacamole), then
+  in-band with exclusions.
+- **LAPI exposure:** TLS on a published port with the private CA, like LLDAP's 6360, and ufw route
+  rules by source for homesvcs, websvcs and the VPS's tailnet IP. Never a subdomain, which would put
+  it in HAProxy's SNI list. Each bouncer and agent has its own key from the secsvcs secrets.
+- **Fail open.** The firewall bouncer keeps its last set while the LAPI is unreachable; the Traefik
+  plugin passes traffic (`crowdsecAppsecUnreachableBlock: false`), so a secsvcs reboot doesn't take
+  the sites down.
+- **Supply chain:** the Traefik plugin is vendored under `src/services/traefik/plugins-local/` as
+  in supply-chain/02; `crowdsec` is an inventory service with `upstream` image facts and the
+  container-hardening directives; the firewall bouncer comes from CrowdSec's apt repo with a pinned
+  signing key.
+
+## Change
+
+**Part A: decisions and the VPS** (not blocked)
+1. `crowdsec` service on secsvcs: engine + LAPI, VictoriaLogs acquisitions, collections, whitelist,
+   LAPI TLS port; `install_svcs.sh` case and inventory entry.
+2. VPS: a `crowdsec_firewall_bouncer` case (package, LAPI URL and key, nftables mode,
+   `deny_action: DROP`).
+3. fail2ban as code: a `fail2ban` case on vpnsvcs installs a `jail.local` with `port = 2202` in
+   `[sshd]` and a `recidive` jail; the guide calls it instead of the manual steps.
+4. Monitoring: vmagent scrapes the engine's and the bouncer's Prometheus endpoints; alerts when the
+   bouncer's last pull is older than 10 min or the LAPI is down; a Grafana dashboard.
+
+**Part B: Traefik** (needs auth/06, so bans key on the real client IP)
+5. `crowdsec_appsec` container on secsvcs, homesvcs and websvcs; the vendored bouncer plugin; a
+   `crowdsec` middleware in `src/services/traefik/dynamic/` on every `websecure` router.
+6. CRS in-band after the tuning window.
+
+**Docs:** `docs/security.md#the-edge-haproxy` and `#vps-hardening` describe the layers above; the
+vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and AppSec per node.
+
+## Open decision
+
+- **Community blocklist (CAPI):** registering the LAPI with crowdsec.net pulls the community
+  blocklist and, in return, shares this site's alerts (attacker IP, scenario, timestamp).
+  Recommended: enroll with sharing on; for a small site the blocklist is most of CrowdSec's value.
+  Without it, decisions come only from our own logs.
+
+## Acceptance
+
+- From an outside IP, a burst of 404s (`crowdsecurity/http-probing`) gets the IP dropped at the VPS:
+  `cscli decisions list` on secsvcs shows it, `nft list ruleset` on the VPS has it, and connections
+  to `:443` time out.
+- Five failed Authelia logins for different usernames from one outside IP ban that IP.
+- `curl 'https://www.SITE/?q=<script>alert(1)</script>'` from outside gets a 403 from the WAF and an
+  alert in `cscli alerts list`; the same from the LAN is logged with the LAN IP and not banned.
+- With the crowdsec container on secsvcs stopped, every site stays reachable.
+- With secsvcs powered off, SSH brute force on 2202 is still banned by fail2ban.
+- The VPS's tailnet IP and LAN addresses never appear in `cscli decisions list`.
+
+## Comments
+
+- 2026-10-11: rescoped from "add a TODO block to haproxy.cfg" (stricter stick tables for
+  `auth.SITE`, a sticky ban on `https_all`, a longer expiry). The stick tables stay as flood
+  control; IP bans move to CrowdSec, which learns from every service's logs. Authelia's
+  `regulation` block stays as is.
