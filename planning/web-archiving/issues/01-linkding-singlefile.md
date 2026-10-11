@@ -41,19 +41,32 @@ Follow "Add a new service" in `docs/development.md`, with `src/isso/` as the mod
   linkding's own backup command if it has one, or `sqlite3 .backup` like
   `src/vpnsvcs/backup.sh.j2`. Decide whether snapshot files are backed up or excluded
   as large, and say which in the header comment.
-- Doc for the maintainer (the guide or `docs/services.md`): SingleFile setup on each
-  client. Set "upload to a REST form API" to
-  `https://archive.{{ site.url }}/api/bookmarks/singlefile/`, the token to the linkding
-  REST token, the data field name to `file`, and the URL field name to `url`.
-  Clients: desktop extension, Firefox for Android, and SingleFile for Safari (check
-  whether the iOS build supports REST upload).
+- Doc for the maintainer (the guide or `docs/services.md`): browser setup on each
+  client, following
+  [linkding's archiving guide](https://linkding.link/archiving/#using-the-linkding-browser-extension).
+  1. Install SingleFile and set its destination to "upload to a REST form API", with
+     the URL `https://archive.{{ site.url }}/api/bookmarks/singlefile/`, the linkding
+     REST token as the authorization token, `file` as the data field name and `url` as
+     the URL field name.
+  2. Install the linkding extension from the **same store** as SingleFile; the
+     integration fails if they come from different stores, a trap on Edge. Point it
+     at `https://archive.{{ site.url }}` with the same token.
+  3. In the linkding extension, enable "Run Singlefile after adding new bookmark".
+     Adding a bookmark, with tags such as `toread` (03), then uploads a snapshot.
+  - Note the limits: the extension doesn't run SingleFile when an existing bookmark is
+    edited, so re-snapshot with the SingleFile button.
+  - Clients: desktop browsers and Firefox for Android. Check whether the linkding
+    extension and SingleFile for Safari on iOS support this; if not, document the
+    iOS fallback (share sheet to linkding, no snapshot).
 
 ## Acceptance
 
 - The render passes, and `archive.` appears in DNS, Gatus, OliveTin, sudoers and the
   dispatcher.
 - Logged in through Authelia, linkding opens as the Authelia user with no second login.
-- From the LAN or VPN, a SingleFile upload creates a bookmark with an HTML snapshot.
+- From the LAN or VPN, adding a bookmark with the linkding extension creates it with
+  its tags and an HTML snapshot uploaded by SingleFile. A SingleFile upload alone
+  creates the bookmark with a snapshot.
   From outside both networks, `/api/` is refused.
 - A backup run stages a database that opens with `sqlite3 … 'PRAGMA integrity_check'`.
 
