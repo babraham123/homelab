@@ -25,11 +25,10 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
   - Volumes:
     - `/var/opt/storyteller:/data` for the database, uploads and Storyteller's own
       aligned books.
-    - `/srv/media/books/readalouds:/library:ro` for Calliope's output.
-    - Read-only is deliberate: Storyteller writes metadata edits back into files it
-      imports from watched folders, and Calliope owns those files. Check that
-      auto-import works read-only. If it doesn't, mount read-write and document that
-      metadata edits change the files.
+    - `/srv/media/books/readalouds:/library` for Calliope's output, read-write for
+      now. Storyteller writes metadata edits back into files it imports from watched
+      folders, so document that editing a book in Storyteller changes Calliope's
+      output, and that re-running Calliope on a book overwrites those edits.
   - `STORYTELLER_SECRET_KEY_FILE` from a podman secret (`storyteller_secret_key` in
     `src/websvcs/secrets_template.yaml`, generated with `openssl rand -base64 32`).
     Set `PUID`/`PGID` to an owner that can read the library. Use the CPU whisper
@@ -41,8 +40,8 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
     callback URL Storyteller shows for the provider.
   - Map Authelia groups to Storyteller permissions, with admins in the "change server
     settings" group.
-  - Keep password login on: OPDS clients and possibly the mobile apps can't use
-    OAuth. Check whether the apps can, and document the result.
+  - Keep password login on: OPDS clients can't use OAuth, and the mobile apps may
+    not either. 05 researches mobile access.
   - Authelia access rule: bypass `^/api/` and `^/opds/` on `books.{{ site.url }}`
     for the `internal` and `vpn` networks, like web-archiving/01. Storyteller still
     enforces its own login there.
@@ -59,7 +58,7 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
   read-along books are on the media pool.
 - **Docs:** clients are the Storyteller app for Android and iOS, and Readest or
   KOReader through OPDS at `https://books.{{ site.url }}/opds/v2`, from the LAN or
-  VPN.
+  VPN. 05 settles how phones reach it away from home.
 
 ## Acceptance
 
