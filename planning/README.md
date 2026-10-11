@@ -21,3 +21,5 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
 - [Router and network](router/spec.md) — 6 issues (maintainer request, added 2026-09-26)
 - [Homepage dashboard](homepage/spec.md) — 2 issues (maintainer request, added 2026-09-27)
 - [autoadmin file access](autoadmin-sftp/spec.md) — 1 issue (architecture review, added 2026-10-10)
+- [Web archiving and read-it-later](web-archiving/spec.md) — 3 issues (maintainer request, added
+  2026-10-11)
