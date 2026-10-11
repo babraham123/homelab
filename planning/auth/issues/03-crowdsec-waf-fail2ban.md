@@ -1,6 +1,6 @@
 # 03. Edge defense: CrowdSec bans at the VPS, CrowdSec WAF in Traefik, fail2ban for SSH
 
-Status: needs-info Type: task Repo: homelab Source: review finding 14; maintainer request
+Status: ready-for-agent Type: task Repo: homelab Source: review finding 14; maintainer request
 2026-10-11 (replaces the HAProxy TODO block) Blocked by: 06 (part B only)
 
 ## Problem
@@ -58,6 +58,9 @@ runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet 
   in supply-chain/02; `crowdsec` is an inventory service with `upstream` image facts and the
   container-hardening directives; the firewall bouncer comes from CrowdSec's apt repo with a pinned
   signing key.
+- **Community blocklist (CAPI):** the LAPI registers with crowdsec.net and pulls the community
+  blocklist, sharing this site's alerts (attacker IP, scenario, timestamp) in return. Its online
+  API credentials go in the secsvcs secrets, so a rebuilt container keeps its identity.
 
 ## Change
 
@@ -79,13 +82,6 @@ runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet 
 **Docs:** `docs/security.md#the-edge-haproxy` and `#vps-hardening` describe the layers above; the
 vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and AppSec per node.
 
-## Open decision
-
-- **Community blocklist (CAPI):** registering the LAPI with crowdsec.net pulls the community
-  blocklist and, in return, shares this site's alerts (attacker IP, scenario, timestamp).
-  Recommended: enroll with sharing on; for a small site the blocklist is most of CrowdSec's value.
-  Without it, decisions come only from our own logs.
-
 ## Acceptance
 
 - From an outside IP, a burst of 404s (`crowdsecurity/http-probing`) gets the IP dropped at the VPS:
@@ -104,3 +100,4 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
   `auth.SITE`, a sticky ban on `https_all`, a longer expiry). The stick tables stay as flood
   control; IP bans move to CrowdSec, which learns from every service's logs. Authelia's
   `regulation` block stays as is.
+- 2026-10-11: maintainer decision: join the community blocklist, with alert sharing.
