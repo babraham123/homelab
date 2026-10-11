@@ -23,3 +23,5 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
 - [autoadmin file access](autoadmin-sftp/spec.md) — 1 issue (architecture review, added 2026-10-10)
 - [Web archiving and read-it-later](web-archiving/spec.md) — 3 issues (maintainer request, added
   2026-10-11)
+- [Narrated ebooks with Calliope](narrated-ebooks/spec.md) — 2 issues (maintainer request, added
+  2026-10-11)
