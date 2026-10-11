@@ -28,6 +28,8 @@ Readeck without being saved a second time.
     tagged `toread` so the next run retries it. Never retry within a run.
   - Log one line per handoff and per failure to the journal; fluentbit already ships
     it.
+  - Put token loading, logging and the API call wrapper in a sourced helper.
+    narrated-ebooks/04 (`readeck_narrate.sh`) reuses it.
 - Tokens: `linkding_api_token` and `readeck_api_token` in
   `src/websvcs/secrets_template.yaml`. The script reads them the way host-side scripts
   read secrets under ADR 0004. Don't put them in unit files.

@@ -19,10 +19,12 @@ folder and later get a read-along EPUB, without logging in to the VM.
   image-updater/04 has landed, put the recipe in `src/calliope/build.sh` instead.
 - **Inbox and outbox** on the media pool:
   - `/srv/media/books/narrate/inbox`: drop `Title.epub` here, optionally with
-    `Title.json` holding `{"lang": "en", "voice": "name"}`.
+    `Title.json` holding `{"lang": "en", "voice": "name", "collection": "books"}`.
   - `/srv/media/books/narrate/work`: the per-book cache for resuming.
-  - `/srv/media/books/readalouds`: finished `Title.readaloud.epub` files plus
-    their reports. A Storyteller watch folder or an OPDS server can point here later.
+  - `/srv/media/books/readalouds/<collection>/<Title>/`: the finished
+    `Title.readaloud.epub` and its report. `collection` defaults to `books`. Each
+    book gets its own folder because Storyteller's auto-import (03) expects one
+    folder per book.
   - `/srv/media/books/narrate/failed`: inputs that failed, plus their reports.
   - `/etc/opt/calliope/voices/*.wav`: reference voices, about 15 s each.
     `default.wav` is used when no voice is given.

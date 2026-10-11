@@ -14,8 +14,11 @@ Maintainer decisions (2026-10-11):
 - Runs on websvcs, on the Tesla P4 it shares with whisper. Jobs are batch, one book
   at a time; speed is secondary.
 - Chatterbox Turbo for English (faster), Multilingual for other languages.
-- Output is read in Readest or Storyteller's apps; Calibre-side integration is out of
-  scope here.
+- Storyteller (stable 2.x) on websvcs is the read-along library: it auto-imports
+  Calliope's output and serves it to its apps and over OPDS (Readest, KOReader).
+  Calibre integration is out of scope.
+- Readeck articles labelled `listen` are narrated automatically into a Storyteller
+  **Articles** collection; the label then becomes `narrated`.
 
 Constraints:
 - The P4 (Pascal, sm_61) only runs PyTorch builds for CUDA 12.6 or older; Chatterbox
@@ -29,3 +32,5 @@ Constraints:
 |---|---|---|---|
 | [01](issues/01-harden-calliope.md) | Fork and harden Calliope | `ready-for-agent` | task |
 | [02](issues/02-deploy-calliope-websvcs.md) | Run Calliope on websvcs as a GPU batch job | `ready-for-agent` | task |
+| [03](issues/03-deploy-storyteller.md) | Run Storyteller on websvcs as the read-along library | `ready-for-agent` | task |
+| [04](issues/04-readeck-listen-handoff.md) | Narrate Readeck articles labelled `listen` into Storyteller | `ready-for-agent` | task |
