@@ -23,6 +23,8 @@ src/nodes/secsvcs/install_svcs.sh ntfy
 src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
 # src/nodes/secsvcs/install_svcs.sh vault
 src/nodes/secsvcs/install_svcs.sh olive_tin
+# needs the prerequisites in CrowdSec below
+src/nodes/secsvcs/install_svcs.sh crowdsec
 src/nodes/secsvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
@@ -68,6 +70,55 @@ journalctl -eu authelia
     `/root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik`
 
 - Confirm that authelia is working, open https://auth.janedoe.com
+
+## CrowdSec
+- Engine and Local API (LAPI): reads Traefik's and Authelia's logs from VictoriaLogs, bans by IP,
+  pulls the community blocklist and shares this site's alerts with crowdsec.net; the VPS's firewall
+  bouncer enforces ([ADR 0009](../adr/0009-crowdsec-lapi-on-secsvcs.md), [VPS
+  guide](./vpnsvcs.md#crowdsec-bouncer))
+- Prerequisites:
+  - The `crowdsec.janedoe.com` key and certificate: pve1's `self_signed_key_gen.sh` and
+    `self_signed_cert_gen.sh` (they install every node's, so restart the secure services after)
+  - `crowdsec_bouncer_vpnsvcs` in `/root/secrets/secsvcs.yaml` on pve1, then `sudo
+    /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
+- Admit the VPS to the LAPI's published port. While the router SNATs tailnet traffic (router/04) the
+  VPS arrives as the router's address on this subnet; after that, as its tailnet IP
+```bash
+sudo su
+cd /root/homelab-rendered
+POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
+ufw allow in from 192.168.4.1 to any port 8080 proto tcp
+ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.4.1 to any port 8080 proto tcp
+```
+- Install and check
+```bash
+src/nodes/secsvcs/install_svcs.sh crowdsec
+podman exec crowdsec cscli lapi status
+podman exec crowdsec cscli capi status          # registered, community blocklist pulled
+podman exec crowdsec cscli metrics show acquisition parsers   # traefik and authelia lines parsed
+# Fluent Bit picks up the new "Homelab:" unit's journal
+src/nodes/secsvcs/install_svcs.sh fluentbit
+```
+- The online API credentials are in `/etc/opt/crowdsec/config/online_api_credentials.yaml`, kept
+  across container rebuilds and in the backup; deleting the file and the `online_client` block in
+  `config.yaml` registers a new identity on the next start
+- Day to day
+```bash
+podman exec crowdsec cscli decisions list             # local bans; add -a for the blocklist
+podman exec crowdsec cscli alerts list
+podman exec crowdsec cscli decisions delete --ip IP   # unban
+```
+- Test from an outside IP (a phone off Wi-Fi). A burst of 404s is banned by
+  `crowdsecurity/http-probing`: it shows in `cscli decisions list`, in `nft list ruleset` on the VPS,
+  and `:443` times out
+```bash
+for i in $(seq 40); do curl -s -o /dev/null https://www.janedoe.com/nope$i; done
+```
+- Six failed logins from outside for different usernames at `auth.janedoe.com` trip
+  `LePresidente/authelia-bf_user-enum`
+- The LAN, tailnet and VPS addresses never appear in `cscli decisions list`
+- Grafana: "CrowdSec" dashboard; alerts in `src/services/vmalert/configs/crowdsec.yml`
 
 ## Ntfy
 

@@ -30,6 +30,16 @@ scrape_configs:
         replacement: vpnsvcs.{{ site.url }}:8405
       - target_label: host
         replacement: vpnsvcs
+  - job_name: 'crowdsec_firewall_bouncer'
+    # prometheus.listen_addr in src/services/crowdsec/crowdsec-firewall-bouncer.yaml.local.j2
+    static_configs:
+      - targets: ['{{ vpnsvcs.container_subnet }}.1:60601']
+    metrics_path: /metrics
+    relabel_configs:
+      - target_label: instance
+        replacement: vpnsvcs.{{ site.url }}:60601
+      - target_label: host
+        replacement: vpnsvcs
   - job_name: 'headscale'
     # metrics_listen_addr in src/services/headscale/headscale.yaml.j2
     static_configs:

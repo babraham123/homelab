@@ -1,0 +1,38 @@
+# /etc/opt/crowdsec/config/acquis.d/victorialogs.yaml
+# Ref: https://docs.crowdsec.net/docs/next/log_processor/data_sources/victorialogs
+# Every node's logs arrive through Fluent Bit (src/services/fluentbit/), so the engine
+# tails VictoriaLogs instead of running an agent per node. The data source hands the
+# parsers each record's _msg; `type` picks the parser. CrowdSec expands ${VAR} from the
+# container's environment.
+---
+# Traefik's access log, all three VMs. journald.lua replaced _msg with a one-line
+# summary and kept the request fields, so pack_json rebuilds the JSON line
+# crowdsecurity/traefik-logs parses.
+source: victorialogs
+mode: tail
+url: http://logs.janedoe.com:9428
+auth:
+  username: admin
+  password: ${VL_ADMIN_PASSWORD}
+query: >-
+  service:=traefik RequestMethod:*
+  | copy _time as time
+  | pack_json fields (time, ClientHost, ClientAddr, RequestAddr, RequestHost, RequestMethod,
+  RequestPath, RequestProtocol, DownstreamStatus, DownstreamContentSize, Duration, RouterName,
+  ServiceAddr, "request_User-Agent") as _msg
+  | fields _time, _stream_id, _msg
+labels:
+  type: traefik
+...
+---
+# Authelia's text log, unchanged in _msg; LePresidente/authelia-logs reads remote_ip
+source: victorialogs
+mode: tail
+url: http://logs.janedoe.com:9428
+auth:
+  username: admin
+  password: ${VL_ADMIN_PASSWORD}
+query: 'service:=authelia | fields _time, _stream_id, _msg'
+labels:
+  type: authelia
+...

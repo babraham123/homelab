@@ -1,0 +1,38 @@
+# CrowdSec fails open: with the LAPI down or the bouncer stale every site stays up, but
+# nothing new gets banned. These make that silent state loud.
+---
+groups:
+  - name: crowdsec
+    rules:
+      - alert: CrowdsecDown
+        expr: up{job="crowdsec"} == 0
+        for: 5m
+        labels:
+          severity: error
+        annotations:
+          summary: "CrowdSec's engine and LAPI on secsvcs are down"
+          description: "No new bans; the VPS's firewall bouncer keeps its current set. systemctl status crowdsec on secsvcs."
+      - alert: CrowdsecBouncerStale
+        # The bouncer pulls every 10s; the LAPI counts each pull
+        expr: >-
+          ((sum(increase(cs_lapi_bouncer_requests_total{bouncer="vpnsvcs"}[10m])) or on() vector(0)) < 1)
+          and on() (up{job="crowdsec"} == 1)
+        for: 2m
+        labels:
+          severity: error
+        annotations:
+          summary: "The VPS's firewall bouncer hasn't pulled decisions for 10 minutes"
+          description: "New bans don't reach the VPS. On vpnsvcs: systemctl status crowdsec-firewall-bouncer; the tailnet path to secsvcs:8080 (ufw, Headscale ACL)."
+      - alert: CrowdsecNotParsing
+        # Gatus alone sends Traefik a request every 2 minutes, so a quiet hour means the
+        # VictoriaLogs query or the parser broke, not that nobody visited
+        expr: >-
+          ((sum(increase(cs_parser_hits_ok_total{acquis_type="traefik"}[1h])) or on() vector(0)) == 0)
+          and on() (up{job="crowdsec"} == 1)
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CrowdSec parsed no Traefik access logs in the last hour"
+          description: "Scenarios see nothing. On secsvcs: podman exec crowdsec cscli metrics show acquisition parsers; check acquis.d/victorialogs.yaml against VictoriaLogs."
+...

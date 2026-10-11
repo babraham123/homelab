@@ -14,7 +14,8 @@ cd "$rendered"
 # before any quadlet is copied; a blocked image stops the install here.
 base/podman/image_updater.sh install "${1:?usage: $0 SERVICE_NAME}"
 
-# HAProxy and Headscale serve metrics on the podman bridge gateway (net.network)
+# HAProxy, Headscale and the CrowdSec bouncer serve metrics on the podman bridge gateway
+# (net.network)
 nonlocal_bind() {
   install -D -m 644 nodes/vpnsvcs/nonlocal_bind.conf /etc/sysctl.d/90-homelab-nonlocal-bind.conf
   sysctl -p /etc/sysctl.d/90-homelab-nonlocal-bind.conf
@@ -59,6 +60,39 @@ case $1 in
     chmod 644 /etc/haproxy/countries/{{ country }}.map{% endfor %}
     systemctl enable haproxy
     reload_restart haproxy
+    ;;
+  fail2ban)
+    apt install -y fail2ban python3-systemd
+    install -D -m 644 -t /etc/fail2ban nodes/vpnsvcs/jail.local
+    base/debian/add_homelab_tag.sh /usr/lib/systemd/system/fail2ban.service
+    systemctl enable fail2ban
+    reload_restart fail2ban
+    fail2ban-client status
+    ;;
+  crowdsec_firewall_bouncer)
+    # CrowdSec's apt repo, trusted only if its signing key has the fingerprint pinned here
+    apt install -y gpg
+    key=$(mktemp)
+    curl -fsSL https://packagecloud.io/crowdsec/crowdsec/gpgkey -o "$key"
+    fpr=$(gpg --show-keys --with-colons "$key" | awk -F: '$1 == "fpr" { print $10; exit }')
+    [[ $fpr == 6A89E3C2303A901A889971D3376ED5326E93CD0C ]] || die "unexpected CrowdSec repo key: ${fpr}"
+    install -d -m 755 /etc/apt/keyrings
+    gpg --dearmor --yes -o /etc/apt/keyrings/crowdsec.gpg "$key"
+    rm "$key"
+    echo "deb [signed-by=/etc/apt/keyrings/crowdsec.gpg] https://packagecloud.io/crowdsec/crowdsec/any/ any main" \
+      > /etc/apt/sources.list.d/crowdsec.list
+    apt update
+    apt install -y crowdsec-firewall-bouncer-nftables
+    nonlocal_bind
+    conf=/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local
+    install -D -m 600 services/crowdsec/crowdsec-firewall-bouncer.yaml.local "$conf"
+    # The key is the LAPI's crowdsec_bouncer_vpnsvcs secret on secsvcs
+    key=$(tr -d '\n' < /etc/opt/secrets/crowdsec_bouncer_key)
+    [[ -n $key ]] || die "/etc/opt/secrets/crowdsec_bouncer_key is empty"
+    sed -i "s/PLACEHOLDER_KEY/${key}/" "$conf"
+    base/debian/add_homelab_tag.sh /usr/lib/systemd/system/crowdsec-firewall-bouncer.service
+    systemctl enable crowdsec-firewall-bouncer
+    reload_restart crowdsec-firewall-bouncer
     ;;
   geoip_generator)
     podman build -t geoip_generator -f services/haproxy/geoip_generator.Containerfile services/haproxy

@@ -81,6 +81,19 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -out certs/secproxy.{{ site.url }}.client_cert.pem
 chmod 444 certs/secproxy.{{ site.url }}.client_cert.pem
 
+# CrowdSec's LAPI, a published port on secsvcs that the VPS's bouncer reaches over the
+# tailnet
+openssl req -config openssl.cnf \
+  -key private/crowdsec.{{ site.url }}.key.pem \
+  -subj "${subj}/OU=secsvcs/CN=crowdsec.{{ site.url }}" \
+  -addext 'subjectAltName = DNS:crowdsec.{{ site.url }}' \
+  -new -sha256 -out csr/crowdsec.{{ site.url }}.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions server_cert -days 395 -notext -md sha256 \
+  -in csr/crowdsec.{{ site.url }}.csr.pem \
+  -out certs/crowdsec.{{ site.url }}.cert.pem
+chmod 444 certs/crowdsec.{{ site.url }}.cert.pem
+
 openssl req -config openssl.cnf \
   -key private/webproxy.{{ site.url }}.key.pem \
   -subj "${subj}/OU=websvcs/CN=webproxy.{{ site.url }}" \
@@ -157,6 +170,7 @@ chmod 444 certs/home.{{ site.url }}.client_cert.pem
   certs/secproxy.{{ site.url }}.client_cert.pem \
   certs/webproxy.{{ site.url }}.client_cert.pem \
   certs/homeproxy.{{ site.url }}.client_cert.pem \
+  certs/crowdsec.{{ site.url }}.cert.pem \
   certs/ca-chain.cert.pem |
   ssh autoadmin@secsvcs install_certs
 "$send" \

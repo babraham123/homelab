@@ -31,6 +31,17 @@ HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy
   weekly from the MaxMind GeoIP database by the `geoip_generator` systemd timer.
 - **Attack-path filtering.** HTTP requests for `.env`, `.git`, `.aws`, `wp-admin`, `phpmyadmin`, and
   similar scanner bait are silently dropped.
+- **IP bans learned from the services.** HAProxy's rules are static and see no HTTP on :443, so bans
+  come from CrowdSec ([ADR 0009](adr/0009-crowdsec-lapi-on-secsvcs.md)). Its engine on secsvcs tails
+  Traefik's access logs (all three VMs) and Authelia's log in VictoriaLogs and runs the community
+  scenarios: scanners, probing, known CVE paths, and Authelia brute force and user enumeration by
+  source IP, which Authelia's own per-user `regulation` misses. Decisions, plus the community
+  blocklist from crowdsec.net (this site's alerts are shared in return: IP, scenario, time), sit in
+  its Local API. The VPS's firewall bouncer pulls them every 10 s over the tailnet and drops banned
+  sources in nftables, ahead of ufw and HAProxy. The LAN, tailnet, container and VPS addresses are
+  whitelisted (`src/services/crowdsec/whitelist.yaml.j2`). It fails open: with the LAPI down the
+  bouncer keeps its last set and every site stays up; `CrowdsecDown` and `CrowdsecBouncerStale`
+  report it.
 
 Because HAProxy never terminates TLS (see [ADR 0002](adr/0002-haproxy-sni-passthrough.md)), a
 compromise of the VPS exposes traffic metadata but not plaintext.
@@ -224,9 +235,11 @@ SOPS + AGE, kept out of git and written to disk encrypted (see [ADR
 
 ## VPS hardening
 
-The one public machine gets extra care: SSH moved to port 2202 with `ufw deny 22`, fail2ban with a
-custom jail, and only 2202 (SSH), 80, 443, 3478 (STUN), and 41641 (WireGuard) open. Headscale admin
-operations happen over localhost, not the public interface.
+The one public machine gets extra care: SSH moved to port 2202 with `ufw deny 22`, and only 2202
+(SSH), 80, 443, 3478 (STUN), and 41641 (WireGuard) open. fail2ban (`src/nodes/vpnsvcs/jail.local`)
+bans SSH brute force on 2202, and `recidive` bans repeat offenders on every port for a week; it runs
+locally, so it keeps working with the tailnet or secsvcs down, unlike the CrowdSec bouncer. Headscale
+admin operations happen over localhost, not the public interface.
 
 ## Known gaps
 

@@ -85,13 +85,14 @@
         "gaming:47984,47989,47998-48000,48010",
       ]
     },
-    // public endpoint (HAProxy on the VPS, user `public`): only the web front doors.
-    // Mirrors the ufw egress rules in docs/guides/vpnsvcs.md.j2.
+    // public endpoint (HAProxy on the VPS, user `public`): only the web front doors, plus
+    // CrowdSec's LAPI for the VPS's firewall bouncer. Mirrors the ufw egress rules in
+    // docs/guides/vpnsvcs.md.j2.
     {
       "action": "accept",
       "src": ["public@"],
       "dst": [
-        "secsvcs:80,443",
+        "secsvcs:80,443,8080",
         "websvcs:80,443",
         "homesvcs:80,443",
       ]
@@ -131,10 +132,12 @@
       ],
       "deny": ["{{ wifi.iot.subnet }}.50:80", "{{ wifi.guest.subnet }}.50:80"],
     },
-    // public endpoint (HAProxy): web front doors only
+    // public endpoint (HAProxy): web front doors and the CrowdSec LAPI only
     {
       "src": "public@",
-      "accept": ["{{ websvcs.ip }}:443", "{{ secsvcs.ip }}:80", "{{ homesvcs.ip }}:443"],
+      "accept": [
+        "{{ websvcs.ip }}:443", "{{ secsvcs.ip }}:80", "{{ homesvcs.ip }}:443", "{{ secsvcs.ip }}:8080",
+      ],
       "deny": [
         "{{ pve2.ip }}:443", "{{ pve2.subnet }}.1:443", "{{ secsvcs.ip }}:22",
         "{{ homesvcs.ip }}:8123", "{{ router.ip }}:443", "{{ lan.subnet }}.50:443",

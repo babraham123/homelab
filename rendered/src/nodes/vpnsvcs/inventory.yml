@@ -2,9 +2,11 @@
 # yamllint disable rule:document-start rule:document-end
 debian_services: [node_exporter, image_updater]
 services:
+  fail2ban: {}
   headscale: {}
   tailscaled: {}
   haproxy: {}
+  crowdsec_firewall_bouncer: {}
   deadman: {}
   # Quadlets on the podman network (docs/adr/0007-vps-metrics-pushed.md)
   fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}

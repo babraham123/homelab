@@ -31,12 +31,11 @@ runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet 
 | Traefik bouncer plugin | secsvcs, homesvcs, websvcs | Blocks banned IPs; forwards requests to the local AppSec |
 
 - **Detection reads VictoriaLogs**, not files: the VictoriaLogs data source (CrowdSec ≥ 1.8), one
-  acquisition per program: Traefik access logs (JSON, all three VMs), Authelia, HAProxy and sshd on
-  the VPS, Vaultwarden once vaultwarden/01 lands. No log agent per node; Fluent Bit already ships
-  every log.
-- **Collections:** `crowdsecurity/traefik`, `crowdsecurity/http-cve`,
-  `crowdsecurity/base-http-scenarios`, `LePresidente/authelia`, `crowdsecurity/haproxy`,
-  `crowdsecurity/sshd`, `crowdsecurity/whitelist-good-actors`.
+  acquisition per program: Traefik access logs (all three VMs; `pack_json` rebuilds the JSON line
+  from the fields `journald.lua` keeps) and Authelia; Vaultwarden once vaultwarden/01 lands. No log
+  agent per node; Fluent Bit already ships every log.
+- **Collections:** `crowdsecurity/traefik` (with `base-http-scenarios`), `crowdsecurity/http-cve`,
+  `LePresidente/authelia`, `crowdsecurity/whitelist-good-actors`.
 - **Never ban our own addresses:** a whitelist for the LAN subnets, the tailnet range, the VPS's
   tailnet IP and the container subnets. Banning the VPS's tailnet IP would cut off all public
   traffic, the failure auth/06 exists to rule out.
@@ -55,12 +54,13 @@ runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet 
   plugin passes traffic (`crowdsecAppsecUnreachableBlock: false`), so a secsvcs reboot doesn't take
   the sites down.
 - **Supply chain:** the Traefik plugin is vendored under `src/services/traefik/plugins-local/` as
-  in supply-chain/02; `crowdsec` is an inventory service with `upstream` image facts and the
-  container-hardening directives; the firewall bouncer comes from CrowdSec's apt repo with a pinned
-  signing key.
+  in supply-chain/02; `crowdsec` is an inventory service with an `upstream` image fact and the
+  container-hardening directives; the firewall bouncer comes from CrowdSec's apt repo, trusted
+  only if its signing key matches the pinned fingerprint.
 - **Community blocklist (CAPI):** the LAPI registers with crowdsec.net and pulls the community
   blocklist, sharing this site's alerts (attacker IP, scenario, timestamp) in return. Its online
-  API credentials go in the secsvcs secrets, so a rebuilt container keeps its identity.
+  API credentials stay in `/etc/opt/crowdsec/config`, which survives container rebuilds and is in
+  secsvcs's backup.
 
 ## Change
 
@@ -87,7 +87,8 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
 - From an outside IP, a burst of 404s (`crowdsecurity/http-probing`) gets the IP dropped at the VPS:
   `cscli decisions list` on secsvcs shows it, `nft list ruleset` on the VPS has it, and connections
   to `:443` time out.
-- Five failed Authelia logins for different usernames from one outside IP ban that IP.
+- Six failed Authelia logins for different usernames from one outside IP ban that IP
+  (`LePresidente/authelia-bf_user-enum`, capacity 5).
 - `curl 'https://www.SITE/?q=<script>alert(1)</script>'` from outside gets a 403 from the WAF and an
   alert in `cscli alerts list`; the same from the LAN is logged with the LAN IP and not banned.
 - With the crowdsec container on secsvcs stopped, every site stays reachable.
@@ -101,3 +102,15 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
   control; IP bans move to CrowdSec, which learns from every service's logs. Authelia's
   `regulation` block stays as is.
 - 2026-10-11: maintainer decision: join the community blocklist, with alert sharing.
+- 2026-10-11: Part A implemented, not yet applied to the nodes: `crowdsec` on secsvcs
+  (`src/services/crowdsec/`, LAPI on published port 8080 with a `crowdsec.SITE` certificate),
+  `crowdsec_firewall_bouncer` and `fail2ban` on vpnsvcs (`jail.local` moved to
+  `src/nodes/vpnsvcs/`), the Headscale ACL and Unbound entries, scrape jobs, `crowdsec.yml` alerts,
+  the "CrowdSec" dashboard, guides, security/services docs and ADR 0009. Changed from the design:
+  - No HAProxy or sshd acquisitions. HAProxy logs no `httplog`/`tcplog` lines, and every HTTP
+    request it forwards is in Traefik's log; sshd's journal isn't shipped (Fluent Bit takes only
+    "Homelab:" units), and fail2ban guards SSH.
+  - The CAPI credentials stay in the config dir instead of SOPS: the entrypoint registers and
+    rewrites them itself, and the dir is already persistent and backed up.
+  - Untested: the `pack_json` tail query, the `.yaml.local` bouncer override and the read-only,
+    no-capability container are source-derived. Check them with the guides' steps on first apply.

@@ -1,0 +1,20 @@
+# /etc/fail2ban/jail.local
+# Ref: https://github.com/fail2ban/fail2ban/blob/master/config/jail.conf
+# Debian bug: https://github.com/fail2ban/fail2ban/issues/3292
+# The VPS's SSH guard. Local on purpose: it keeps working with the tailnet or secsvcs
+# (CrowdSec's LAPI) down.
+
+[DEFAULT]
+# Debian 12 has no log files, just journalctl
+backend = systemd
+logtarget = SYSTEMD-JOURNAL
+
+[sshd]
+enabled = true
+# docs/guides/vpnsvcs.md moves sshd here
+port = 2202
+
+# Bans an address on every port for a week once it has been banned 5 times in a day;
+# its filter reads fail2ban's own journal
+[recidive]
+enabled = true

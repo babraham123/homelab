@@ -269,6 +269,9 @@ case "$(hostname)" in
       install_olive_tin)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
         ;;
+      install_crowdsec)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
+        ;;
       install_fluentbit)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
         ;;
@@ -287,6 +290,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vault
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
         ;;
       install_keys)
@@ -336,6 +340,9 @@ case "$(hostname)" in
       install_image_updater)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
         ;;
+      install_fail2ban)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh fail2ban
+        ;;
       install_headscale)
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
         ;;
@@ -344,6 +351,9 @@ case "$(hostname)" in
         ;;
       install_haproxy)
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh haproxy
+        ;;
+      install_crowdsec_firewall_bouncer)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh crowdsec_firewall_bouncer
         ;;
       install_deadman)
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh deadman

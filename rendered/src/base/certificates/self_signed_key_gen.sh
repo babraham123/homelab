@@ -43,12 +43,16 @@ chmod 400 private/zigbee.janedoe.com.key.pem
 openssl genrsa -out private/home.janedoe.com.key.pem 2048
 chmod 400 private/home.janedoe.com.key.pem
 
+openssl genrsa -out private/crowdsec.janedoe.com.key.pem 2048
+chmod 400 private/crowdsec.janedoe.com.key.pem
+
 # Each node's files go on its install command's stdin
 "$send" \
   private/ldap.janedoe.com.key.pem \
   private/auth.janedoe.com.key.pem \
   private/pgdb.janedoe.com.key.pem \
-  private/secproxy.janedoe.com.key.pem |
+  private/secproxy.janedoe.com.key.pem \
+  private/crowdsec.janedoe.com.key.pem |
   ssh autoadmin@secsvcs install_keys
 "$send" private/webproxy.janedoe.com.key.pem | \
   ssh autoadmin@websvcs install_keys

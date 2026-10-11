@@ -81,6 +81,19 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -out certs/secproxy.janedoe.com.client_cert.pem
 chmod 444 certs/secproxy.janedoe.com.client_cert.pem
 
+# CrowdSec's LAPI, a published port on secsvcs that the VPS's bouncer reaches over the
+# tailnet
+openssl req -config openssl.cnf \
+  -key private/crowdsec.janedoe.com.key.pem \
+  -subj "${subj}/OU=secsvcs/CN=crowdsec.janedoe.com" \
+  -addext 'subjectAltName = DNS:crowdsec.janedoe.com' \
+  -new -sha256 -out csr/crowdsec.janedoe.com.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions server_cert -days 395 -notext -md sha256 \
+  -in csr/crowdsec.janedoe.com.csr.pem \
+  -out certs/crowdsec.janedoe.com.cert.pem
+chmod 444 certs/crowdsec.janedoe.com.cert.pem
+
 openssl req -config openssl.cnf \
   -key private/webproxy.janedoe.com.key.pem \
   -subj "${subj}/OU=websvcs/CN=webproxy.janedoe.com" \
@@ -157,6 +170,7 @@ chmod 444 certs/home.janedoe.com.client_cert.pem
   certs/secproxy.janedoe.com.client_cert.pem \
   certs/webproxy.janedoe.com.client_cert.pem \
   certs/homeproxy.janedoe.com.client_cert.pem \
+  certs/crowdsec.janedoe.com.cert.pem \
   certs/ca-chain.cert.pem |
   ssh autoadmin@secsvcs install_certs
 "$send" \

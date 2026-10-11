@@ -46,6 +46,12 @@ scrape_configs:
       - targets: ['uptime.{{ site.url }}:8080']
     metrics_path: /metrics
     relabel_configs: *host
+  - job_name: 'crowdsec'
+    # Engine and LAPI; cs_lapi_bouncer_requests_total shows each bouncer's pulls
+    static_configs:
+      - targets: ['crowdsec.{{ site.url }}:6060']
+    metrics_path: /metrics
+    relabel_configs: *host
   - job_name: 'ntfy'
     static_configs:
       - targets: ['push.{{ site.url }}:2587']

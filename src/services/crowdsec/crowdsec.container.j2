@@ -1,0 +1,63 @@
+# /etc/containers/systemd/crowdsec.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/crowdsecurity/crowdsec/blob/master/build/docker/README.md
+# The decision point for the edge (docs/adr/0009-crowdsec-lapi-on-secsvcs.md): the engine
+# reads every node's logs from VictoriaLogs, and the Local API (LAPI) holds the decisions
+# the VPS's firewall bouncer pulls.
+
+[Unit]
+Description="Homelab: CrowdSec engine and Local API, bans IPs from the services' logs"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=victorialogs.service
+Wants=network.target
+After=network-online.target victorialogs.service
+
+[Container]
+Image=localhost/crowdsecurity/crowdsec:latest
+ContainerName=crowdsec
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+# Checks the LAPI over TLS with the agent's own credentials
+HealthCmd=cscli lapi status
+HealthInterval=30s
+HealthRetries=3
+HealthStartPeriod=120s
+HealthOnFailure=kill
+
+# LAPI (TLS), port = 8080; Prometheus metrics, port = 6060
+Network=net.network
+HostName=crowdsec.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.16
+# hostPort:containerPort; ufw admits the VPS only (docs/guides/secsvcs.md)
+PublishPort=8080:8080
+
+Environment=TZ={{ personal.timezone }}
+Environment="COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve LePresidente/authelia crowdsecurity/whitelist-good-actors"
+Environment=USE_TLS=true
+Environment=LAPI_CERT_FILE=/certificates/crowdsec.cert.pem
+Environment=LAPI_KEY_FILE=/certificates/crowdsec.key.pem
+Environment=CACERT_FILE=/certificates/ca.chain.pem
+# The in-container agent reaches the LAPI by the name on its certificate
+Environment=LOCAL_API_URL=https://crowdsec.{{ site.url }}:8080
+Environment=LEVEL_WARN=true
+# Read by acquis.d/victorialogs.yaml
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
+# Registers bouncer `vpnsvcs` with this key on first start; a changed key needs
+# `cscli bouncers delete vpnsvcs` and a restart
+Secret=crowdsec_bouncer_vpnsvcs,type=env,target=BOUNCER_KEY_vpnsvcs
+
+# Config, hub and the online API credentials; populated on first start
+Volume=/etc/opt/crowdsec/config:/etc/crowdsec
+Volume=/etc/opt/crowdsec/certificates:/certificates:ro
+# Decisions and alerts (SQLite), and the hub's data files
+Volume=crowdsecdb.volume:/var/lib/crowdsec/data
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

@@ -27,6 +27,8 @@ services:
   vault: {}
   olive_tin: {subdomain: command, uptime: olive_tin,
               upstream: docker.io/jamesread/olivetin:latest-3k}
+  # No subdomain: its LAPI is a published port, never in HAProxy's SNI list
+  crowdsec: {upstream: docker.io/crowdsecurity/crowdsec:latest}
   fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
 install_all_svcs: true
 commands:

@@ -541,6 +541,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: secsvcs Install Crowdsec
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_crowdsec
+              id: secsvcs_install_crowdsec
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: secsvcs Install Fluentbit
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_fluentbit
@@ -593,6 +601,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: vpnsvcs Install Fail2ban
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_fail2ban
+              id: vpnsvcs_install_fail2ban
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: vpnsvcs Install Headscale
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs install_headscale
@@ -613,6 +629,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs install_haproxy
               id: vpnsvcs_install_haproxy
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: vpnsvcs Install Crowdsec Firewall Bouncer
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_crowdsec_firewall_bouncer
+              id: vpnsvcs_install_crowdsec_firewall_bouncer
               maxConcurrent: 1
               timeout: 60
 

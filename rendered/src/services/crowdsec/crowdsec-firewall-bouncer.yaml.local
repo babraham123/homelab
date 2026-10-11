@@ -1,0 +1,44 @@
+# /etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local
+# Ref: https://docs.crowdsec.net/u/bouncers/firewall
+# On the VPS: pulls decisions from the LAPI on secsvcs over the tailnet and drops banned
+# sources in its own nftables table, at a priority ahead of ufw and HAProxy. While the
+# LAPI is unreachable it keeps the set it has. Merged over the package's .yaml, which
+# stays the package's conffile.
+---
+mode: nftables
+update_frequency: 10s
+log_mode: stdout
+log_level: info
+# The /etc/hosts block in docs/guides/vpnsvcs.md points this name at secsvcs
+api_url: https://crowdsec.janedoe.com:8080/
+# Replaced from /etc/opt/secrets/crowdsec_bouncer_key at install
+api_key: PLACEHOLDER_KEY
+ca_cert_path: /etc/ssl/certs/janedoe.com.ca_chain.cert.pem
+insecure_skip_verify: false
+disable_ipv6: false
+deny_action: DROP
+deny_log: false
+supported_decisions_types:
+  - ban
+nftables:
+  ipv4:
+    enabled: true
+    set-only: false
+    table: crowdsec
+    chain: crowdsec-chain
+    priority: -10
+  ipv6:
+    enabled: true
+    set-only: false
+    table: crowdsec6
+    chain: crowdsec6-chain
+    priority: -10
+# The VPS forwards nothing public
+nftables_hooks:
+  - input
+# On the podman bridge gateway for the local vmagent only, like HAProxy's exporter
+prometheus:
+  enabled: true
+  listen_addr: 10.13.0.1
+  listen_port: 60601
+...

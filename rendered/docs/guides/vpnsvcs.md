@@ -33,18 +33,16 @@ ufw allow 3478
 ufw allow 41641
 ufw enable
 ```
-- Block brute force attempts
+- Block brute force attempts: fail2ban's `sshd` jail on 2202 and `recidive`
+  (`src/nodes/vpnsvcs/jail.local`)
 ```bash
 cd /root/homelab-rendered
-apt install -y fail2ban python3-systemd
-cp src/base/debian/jail.local /etc/fail2ban
-echo "port = 2202" >> /etc/fail2ban/jail.local
-systemctl enable fail2ban
-systemctl restart fail2ban
+src/nodes/vpnsvcs/install_svcs.sh fail2ban
 
-# Verify that the jail is enabled and configured correctly
+# Verify that the jails are enabled and configured correctly
 fail2ban-client status sshd
-fail2ban-client -d | grep sshd
+fail2ban-client status recidive
+fail2ban-client -d | grep "'sshd'.*port"
 ```
 
 ### VPN setup
@@ -198,8 +196,8 @@ ufw status verbose
   above already allows the traffic.
 ```bash
 cat >> /etc/hosts <<'EOF'
-# homelab: telemetry endpoints on secsvcs, reached over the tailnet
-192.168.4.20 metrics.janedoe.com logs.janedoe.com alert.janedoe.com push.janedoe.com
+# homelab: telemetry endpoints and CrowdSec's LAPI on secsvcs, reached over the tailnet
+192.168.4.20 metrics.janedoe.com logs.janedoe.com alert.janedoe.com push.janedoe.com crowdsec.janedoe.com
 EOF
 getent hosts metrics.janedoe.com   # should print 192.168.4.20
 ```
@@ -328,6 +326,40 @@ src/nodes/vpnsvcs/install_svcs.sh geoip_generator
 systemctl start geoip_generator    # one run now
 ls /etc/haproxy/countries | wc -l  # about 250 maps
 ```
+
+## CrowdSec bouncer
+- Drops the IPs CrowdSec's LAPI on secsvcs has banned, in nftables ahead of ufw and HAProxy
+  ([Security](../security.md#the-edge-haproxy), [ADR 0009](../adr/0009-crowdsec-lapi-on-secsvcs.md))
+- Needs the LAPI ([secsvcs guide](./secsvcs.md#crowdsec)), the `/etc/hosts` block from [Add public
+  endpoint](#add-public-endpoint), the CA chain (`install_ca`, from pve1's cert scripts) and the
+  Podman bridge from [Telemetry agents](#telemetry-agents)
+- The Headscale ACL lets `public@` reach `secsvcs:8080`: reload it as in [ACL policy](#acl-policy)
+- The bouncer's LAPI key, root-only
+```bash
+sudo su
+# From pve1: sops -d /root/secrets/secsvcs.yaml | yq .crowdsec_bouncer_vpnsvcs
+vim /etc/opt/secrets/crowdsec_bouncer_key
+chmod 600 /etc/opt/secrets/*
+```
+- Open the LAPI over the tailnet and the bouncer's metrics to vmagent, then install
+```bash
+cd /root/homelab-rendered
+POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
+ufw allow out on tailscale0 from any to 192.168.4.20 port 8080 proto tcp
+ufw allow in on $POD_IFACE from 10.13.0.7 to any port 60601 proto tcp
+src/nodes/vpnsvcs/install_svcs.sh crowdsec_firewall_bouncer
+nft list tables                       # crowdsec and crowdsec6
+journalctl -u crowdsec-firewall-bouncer --no-pager | tail   # no TLS or 403 errors
+```
+- On secsvcs, `podman exec crowdsec cscli bouncers list` shows `vpnsvcs` with a last pull seconds ago
+- Test a ban with a documentation address, from secsvcs:
+```bash
+sudo podman exec crowdsec cscli decisions add --ip 203.0.113.7 --duration 5m --reason test
+```
+  then on the VPS `nft list ruleset | grep 203.0.113.7` within 10 s, and gone after
+  `cscli decisions delete --ip 203.0.113.7`
+- A changed key: update both secrets, then on secsvcs `podman exec crowdsec cscli bouncers delete
+  vpnsvcs` and `systemctl restart crowdsec`, and rerun the install here
 
 ## Dead-man switch
 - `deadman.timer` checks every 5 minutes, over the tailnet, that Alertmanager still holds the

@@ -63,6 +63,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .8 | mosquitto | eclipse-mosquitto | MQTT broker | mqtt (internal DNS only) |
 | .9 | zigbee2mqtt | zigbee2mqtt | Zigbee ↔ MQTT bridge | zigbee.janedoe.com |
 | .11 | home_assistant | home-assistant | Home automation hub | home.janedoe.com |
+| .16 | crowdsec | crowdsec | IP bans from the logs, LAPI for the VPS's bouncer ([Security](security.md#the-edge-haproxy)) | crowdsec (internal DNS only), port 8080 |
 | .20 | fluentbit | fluent-bit:3.2 | Journal → VictoriaLogs forwarder | n/a |
 
 ## vpnsvcs: public edge (Linode, 10.13.0.0/24)
@@ -86,6 +87,8 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | websvcs | snapraid sync/scrub (timers), smartmontools | Media array parity and disk health |
 | vpnsvcs | haproxy | Public ingress ([Networking](networking.md#ingress-the-three-tier-chain)) |
 | vpnsvcs | headscale, tailscaled | Mesh VPN coordinator + client |
+| vpnsvcs | crowdsec-firewall-bouncer | Drops CrowdSec's banned IPs in nftables ([Security](security.md#the-edge-haproxy)) |
+| vpnsvcs | fail2ban | SSH brute-force bans ([Security](security.md#vps-hardening)) |
 | vpnsvcs | deadman (timer) | Watches the alerting path from outside ([Observability](#observability)) |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
@@ -169,6 +172,8 @@ flowchart LR
     vmagent in), tailscaled and node_exporter
   - `VpsMetricsAbsent` fires on silence, since a pushing host can't raise `up == 0`; `HaproxyDown`
     and `HaproxyBackendConnectErrors` cover the edge; "HAProxy" dashboard
+- **CrowdSec**: the engine's and LAPI's metrics (`:6060`) scraped on secsvcs, the VPS's firewall
+  bouncer (`:60601` on the bridge gateway) by the VPS's vmagent; "CrowdSec" dashboard
 - **Scrape targets**: by hand in each node's `src/nodes/<node>/prometheus.yml.j2`, each relabelled
   with `host` = the bare node name (`secsvcs`), the same value as the journal's `hostname` field in
   VictoriaLogs, so one dashboard variable filters both
@@ -188,6 +193,8 @@ flowchart LR
     `CertExpiringSoon` (14 days), `CertExpiringCritical` (3 days)
   - `backups.yml`: `BackupStale`, `BackupNeverRan`, `SnapraidStale`, `DiskUnhealthy`
   - `vps.yml`: `VpsMetricsAbsent`, `HaproxyDown`, `HaproxyBackendConnectErrors`
+  - `crowdsec.yml`: `CrowdsecDown`, `CrowdsecBouncerStale` (no pull in 10 minutes),
+    `CrowdsecNotParsing` (no Traefik line parsed in an hour)
   - `pipeline.yml`: `Watchdog`
   - `health.yml`, `vmagent.yml`, `vmalert.yml`, `vmsingle.yml`, `fluentbit.yml`: the pipeline's own
     components, upstream rule sets
