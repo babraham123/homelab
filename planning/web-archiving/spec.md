@@ -1,8 +1,9 @@
 # Web archiving and read-it-later
 
 Replaces ArchiveBox, which was removed along with its noVNC sidecar because Chromium
-needed a display to log in to sites. The new setup has no browser on the server:
-pages are captured in the user's own logged-in browser.
+needed a display to log in to sites. The new setup needs no display on the
+server: pages are captured in the user's own logged-in browser, with linkding's
+headless snapshot as the fallback.
 
 - **linkding** on websvcs is the bookmark library and page archive. The SingleFile
   browser extension uploads full-page snapshots to it.
@@ -10,7 +11,9 @@ pages are captured in the user's own logged-in browser.
 - A timer hands off any linkding bookmark tagged `toread` to Readeck.
 
 Maintainer decisions (2026-10-11):
-- linkding's base image, not `latest-plus`, which adds server-side Chromium.
+- linkding's `latest-plus` image, so bookmarks saved without SingleFile (from Pinkt,
+  the Android client) still get a server-side snapshot. Chromium runs only during a
+  snapshot.
 - linkding trusts Authelia's `Remote-User` header. Readeck uses Authelia OIDC, since
   0.23 removed proxy-header auth.
 - The handoff tag is `toread`. After a handoff, the bookmark's `toread` tag is swapped

@@ -15,10 +15,17 @@ including pages behind a login.
 Follow "Add a new service" in `docs/development.md`, with `src/isso/` as the model.
 
 - `src/linkding/linkding.container.j2`:
-  - `Image=docker.io/sissbruecker/linkding:latest` (the base image, not
-    `latest-plus`), `ContainerName=linkding`, `HostName=archive.{{ site.url }}`,
-    `IP={{ websvcs.container_subnet }}.17`, port 9090, `NoNewPrivileges=true`,
-    `AutoUpdate=registry` like the other quadlets.
+  - `Image=docker.io/sissbruecker/linkding:latest-plus`, `ContainerName=linkding`,
+    `HostName=archive.{{ site.url }}`, `IP={{ websvcs.container_subnet }}.17`, port
+    9090, `NoNewPrivileges=true`, `AutoUpdate=registry` like the other quadlets.
+  - `latest-plus` adds server-side snapshots for bookmarks saved where SingleFile
+    can't run, such as from Pinkt. linkding starts headless Chromium only for each
+    snapshot job, and it exits afterwards. Check that it works without adding
+    capabilities or `SecurityLabelDisable`; if Chromium needs more, record what and
+    why in the quadlet. Check websvcs has about 1 GB of RAM to spare for a snapshot
+    in progress.
+  - Server-side snapshots fetch anonymously, so pages behind a login still need the
+    browser capture below.
   - Data: `/var/opt/linkding:/etc/linkding/data`, a host path, since snapshots
     accumulate there.
   - Auth proxy: `LD_ENABLE_AUTH_PROXY=True`,
@@ -57,7 +64,12 @@ Follow "Add a new service" in `docs/development.md`, with `src/isso/` as the mod
     edited, so re-snapshot with the SingleFile button.
   - Clients: desktop browsers and Firefox for Android. Check whether the linkding
     extension and SingleFile for Safari on iOS support this; if not, document the
-    iOS fallback (share sheet to linkding, no snapshot).
+    iOS fallback (share sheet to linkding, with a server-side snapshot).
+  - In linkding's settings, enable automatic HTML snapshots so bookmarks added
+    without SingleFile get a server-side one.
+  - Android app: [Pinkt](https://github.com/fibelatti/pinboard-kotlin) from the Play
+    Store, set to linkding with `https://archive.{{ site.url }}` and a REST token.
+    It uses `/api/`, so it works only from the LAN or the VPN.
 
 ## Acceptance
 
@@ -66,8 +78,10 @@ Follow "Add a new service" in `docs/development.md`, with `src/isso/` as the mod
 - Logged in through Authelia, linkding opens as the Authelia user with no second login.
 - From the LAN or VPN, adding a bookmark with the linkding extension creates it with
   its tags and an HTML snapshot uploaded by SingleFile. A SingleFile upload alone
-  creates the bookmark with a snapshot.
-  From outside both networks, `/api/` is refused.
+  creates the bookmark with a snapshot. From outside both networks, `/api/` is
+  refused.
+- A bookmark shared from Pinkt gets a server-side snapshot, and no Chromium process
+  is left running afterwards.
 - A backup run stages a database that opens with `sqlite3 … 'PRAGMA integrity_check'`.
 
 ## Comments
