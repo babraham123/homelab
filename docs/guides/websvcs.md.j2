@@ -132,7 +132,7 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
     `config.json`, which can't assign collections.
 - Calliope: put a clean, roughly 15 s reference recording at
   `/etc/opt/calliope/voices/default.wav`, and others next to it as `<name>.wav`. Install
-  `calliope` once `github.com/babraham123/calliope` exists, then `readeck_narrate`.
+  `calliope`, then `readeck_narrate`.
 
 ## Setup homepage widgets
 

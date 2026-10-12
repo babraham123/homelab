@@ -198,7 +198,7 @@ case $1 in
       /srv/media/books/readalouds/{books,articles}
     rm -rf /etc/opt/calliope/src
     mkdir -p /etc/opt/calliope/src
-    wget "https://github.com/babraham123/calliope/archive/refs/heads/main.tar.gz" -O - | \
+    wget "https://github.com/babraham123/TTS-Narrated-Ebook-Creator/archive/refs/heads/main.tar.gz" -O - | \
       tar -xz -C /etc/opt/calliope/src --strip-components=1
     podman build -t calliope /etc/opt/calliope/src
     install -D -m 644 -t /etc/opt/calliope services/calliope/calliope_batch.py

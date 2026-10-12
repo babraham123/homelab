@@ -2,7 +2,7 @@
 
 Status: ready-for-human
 Type: task
-Repo: babraham123/calliope (fork of hugohammer/TTS-Narrated-Ebook-Creator)
+Repo: babraham123/TTS-Narrated-Ebook-Creator (fork of hugohammer/TTS-Narrated-Ebook-Creator)
 Source: maintainer request 2026-10-11
 
 ## Problem
@@ -13,7 +13,7 @@ garbled sentences, and has no container image.
 
 ## Change
 
-Fork to `github.com/babraham123/calliope`, like the other forks the homelab builds
+Fork to `github.com/babraham123/TTS-Narrated-Ebook-Creator`, like the other forks the homelab builds
 from. Keep upstream's layout so fixes can go back as PRs.
 
 - **Model choice:** a `--model turbo|multilingual` flag. Turbo
@@ -59,8 +59,8 @@ from. Keep upstream's layout so fixes can go back as PRs.
 
 ## Comments
 
-2026-10-11: implemented on branch `harden` of a local clone of upstream, in 12
-commits. The GitHub fork hasn't been created and nothing is pushed.
+2026-10-11: implemented in 12 commits, fast-forwarded onto the fork's `main`
+(`89954aa`).
 - **CLI:** `calliope IN.epub OUT.epub --voice WAV --lang xx [--model turbo|multilingual]
   [--work-dir DIR]`, plus QA flags (`--max-retries`, `--max-silence`,
   `--whisper-check`, `--wer-threshold`).

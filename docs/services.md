@@ -49,7 +49,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .18 | readeck | readeck | Read-it-later reader | read.janedoe.com |
 | .20 | fluentbit | fluent-bit | journald → VictoriaLogs forwarder | n/a |
 | .21 | storyteller | storyteller:web-v2 | Read-along book library, OPDS | books.janedoe.com |
-| .22 | calliope | built from babraham123/calliope | GPU batch job: EPUB → read-along EPUB | n/a |
+| .22 | calliope | built from babraham123/TTS-Narrated-Ebook-Creator | GPU batch job: EPUB → read-along EPUB | n/a |
 
 - `nginx` serves `/var/opt/nginx/www` by subdomain (`www/`, `wifi/` (redirects to the AP's admin
   page), shared `error/`; `src/services/nginx/nginx.conf.j2`)
