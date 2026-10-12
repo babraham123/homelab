@@ -46,8 +46,14 @@ In the fork (sections 3, 5, 6, 7, 8 and 9 of the research doc):
   (a rerun makes no requests) and fallback on bad JSON, HTTP 500 and timeouts; SIGTERM mid-pass
   then resume; `--speakers` fixture where editing one quote re-synthesizes exactly one clip;
   `assign_voices` determinism, gender match, pool exhaustion, series reuse.
-- An opt-in accuracy script (not in CI) over a PDNC subset and one hand-labelled non-English
-  chapter, used to pick the model and prompt.
+- An opt-in accuracy script (not in CI) that scores a `speakers.json` against PDNC's gold quote and
+  speaker annotations for one novel (e.g. Pride and Prejudice, public domain), and against one
+  hand-labelled non-English chapter. Used to pick the model and prompt.
+- Head-to-head on that same PDNC novel: BookNLP (big model) and Qwen3-8B, each attributing the
+  whole book, scored by the same script on the same gold quotes. Run BookNLP in a throwaway venv
+  or container (it pins old transformers), on CPU or the P4; it never goes into the Calliope image.
+  Score both with PDNC's gold quote spans, so the comparison measures attribution alone, then
+  Qwen3-8B again with `quotes.py`'s spans for the end-to-end number.
 
 In the homelab:
 
@@ -61,6 +67,11 @@ In the homelab:
 
 ## Acceptance
 
+- The head-to-head is recorded in this ticket: accuracy on all quotes and on implicit ones
+  (no speaker named nearby), for BookNLP and for Qwen3-8B with both quote sources, plus each one's
+  runtime. Qwen3-8B must clearly beat BookNLP on the same book (published PDNC figures: about 40%
+  for BookNLP, 88–91% for an 8B LLM given a gold character list); if it doesn't, stop and revisit
+  the model choice before wiring voices.
 - On the P4, one English novel in `multi` mode: record attribution minutes, peak VRAM and the
   share of misattributed quotes in one hand-checked chapter, in this ticket.
 - The same for one non-English book with dash dialogue.
