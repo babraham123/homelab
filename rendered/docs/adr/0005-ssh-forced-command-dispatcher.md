@@ -17,18 +17,18 @@ node.
 
 Two accounts per node. `manualadmin` is for interactive human use. `autoadmin` is the automation
 account: its SSH key is bound to a `ForceCommand` script, `dispatcher.sh`, that matches
-`$SSH_ORIGINAL_COMMAND` against an exact whitelist (`install_traefik`, `install_all_svcs`,
+`$SSH_ORIGINAL_COMMAND` against an exact allowlist (`install_traefik`, `install_all_svcs`,
 `copy_acme_certs`, …) and rejects anything else. The node's sudoers file is *generated from the
 dispatcher itself* (`tools/parse_dispatcher.sh` at render time), granting `autoadmin` NOPASSWD for
-exactly the whitelisted commands. `tools/gen_dispatch_cmds.sh` derives dispatcher cases from
-`install_svcs.sh` so the whitelist tracks the real service list. *Superseded by [ADR
+exactly the allowlisted commands. `tools/gen_dispatch_cmds.sh` derives dispatcher cases from
+`install_svcs.sh` so the allowlist tracks the real service list. *Superseded by [ADR
 0006](0006-node-inventory.md): both tools are gone; the dispatcher and sudoers are rendered from the
 node inventory (`src/nodes/<node>/inventory.yml`).*
 
 ## Consequences
 
 - A stolen automation key can only replay predefined, parameterless actions: no shell, no arbitrary
-  commands, and the sudo grants can't drift from the whitelist.
+  commands, and the sudo grants can't drift from the allowlist.
 - No agent daemon, no config-management runtime on the nodes; transport is plain SSH.
 - Every new remote action requires touching the dispatcher (or regenerating it) and redeploying,
   which is deliberate friction.
@@ -37,7 +37,7 @@ node inventory (`src/nodes/<node>/inventory.yml`).*
 
 ## Amendment 2026-10-10: file transfer and key-ID gating
 
-The dispatchers used to exec `sftp-server` for the autoadmin key before the whitelist, so cert
+The dispatchers used to exec `sftp-server` for the autoadmin key before the allowlist, so cert
 distribution and the backup pull could scp files through `/home/autoadmin`. That gave any autoadmin
 key, OliveTin's included, read and write access to everything autoadmin owned: the backup stage (host
 keys, secrets files, root's `.ssh` on two nodes), the files the root install commands move into
@@ -47,7 +47,7 @@ research.
 
 Decision:
 
-- No passthrough. The whitelist is the whole interface. Dispatcher chatter goes to stderr so stdout
+- No passthrough. The allowlist is the whole interface. Dispatcher chatter goes to stderr so stdout
   can carry data.
 - Commands move data themselves, still parameterless: `backup` streams the stage as a tar with a
   `SHA256SUMS` manifest and deletes it; `copy_acme_certs` and `host_key` print a file; the

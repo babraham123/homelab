@@ -39,7 +39,7 @@ HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy
   blocklist from crowdsec.net (this site's alerts are shared in return: IP, scenario, time), sit in
   its Local API. The VPS's firewall bouncer pulls them every 10 s over the tailnet and drops banned
   sources in nftables, ahead of ufw and HAProxy. The LAN, tailnet, container and VPS addresses are
-  whitelisted (`src/services/crowdsec/whitelist.yaml.j2`). It fails open: with the LAPI down the
+  allowlisted (`src/services/crowdsec/allowlist.yaml.j2`). It fails open: with the LAPI down the
   bouncer keeps its last set and every site stays up; `CrowdsecDown` and `CrowdsecBouncerStale`
   report it.
 
@@ -178,16 +178,16 @@ sharply different powers:
 - **`manualadmin`** is interactive SSH for a human: file uploads, exploratory work, full sudo with
   password.
 - **`autoadmin`** is the automation account. Its SSH key is bound to a `ForceCommand` script,
-  `dispatcher.sh`, which whitelists a fixed set of `$SSH_ORIGINAL_COMMAND` strings
+  `dispatcher.sh`, which allowlists a fixed set of `$SSH_ORIGINAL_COMMAND` strings
   (`install_traefik`, `install_all_svcs`, `copy_acme_certs`, …) and rejects everything else. The
   dispatcher and its sudoers entry are both rendered from the node's
-  `src/nodes/<node>/inventory.yml`, so sudo grants NOPASSWD for exactly the whitelisted commands.
+  `src/nodes/<node>/inventory.yml`, so sudo grants NOPASSWD for exactly the allowlisted commands.
   The Debian nodes all install the same `src/base/debian/dispatcher.sh` and `sudoers`: the
   dispatcher runs only the cases under its own `$(hostname)`, and each sudoers line names its node
   in the host field (`autoadmin secsvcs=(root) NOPASSWD: …`), so a node still grants only its own
   commands. `install_dispatcher` checks the sudoers file with `visudo -c` before installing it. The
   router (`/bin/sh` on pfSense) and the gaming VM (PowerShell) keep their own dispatchers.
-- There is no file transfer outside the whitelist: no sftp or scp as `autoadmin`. Commands that
+- There is no file transfer outside the allowlist: no sftp or scp as `autoadmin`. Commands that
   need data carry it on stdin or stdout, still without arguments. `backup` streams the node's stage
   as a tar with a `SHA256SUMS` manifest; `copy_acme_certs` and `host_key` print a file; the
   `install_*` commands take their files on stdin, bundled by `src/base/debian/send_files.sh` with a
@@ -206,7 +206,7 @@ sharply different powers:
 So automation (OliveTin buttons, deploy scripts, cert distribution) can trigger predefined actions
 remotely, but a stolen `autoadmin` key cannot run arbitrary commands or read or write files, and only
 pve1's key reaches the secrets. The render fails if a node's `services` in its `inventory.yml` differ
-from its `install_svcs.sh` cases, so the whitelist stays in sync with the services that exist (see
+from its `install_svcs.sh` cases, so the allowlist stays in sync with the services that exist (see
 [ADR 0006](adr/0006-node-inventory.md)).
 
 ## Secrets

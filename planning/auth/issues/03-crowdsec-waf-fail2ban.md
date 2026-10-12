@@ -36,7 +36,7 @@ runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet 
   agent per node; Fluent Bit already ships every log.
 - **Collections:** `crowdsecurity/traefik` (with `base-http-scenarios`), `crowdsecurity/http-cve`,
   `LePresidente/authelia`, `crowdsecurity/whitelist-good-actors`.
-- **Never ban our own addresses:** a whitelist for the LAN subnets, the tailnet range, the VPS's
+- **Never ban our own addresses:** a allowlist for the LAN subnets, the tailnet range, the VPS's
   tailnet IP and the container subnets. Banning the VPS's tailnet IP would cut off all public
   traffic, the failure auth/06 exists to rule out.
 - **AppSec stays on the node.** The plugin forwards headers and bodies (passwords included) to the
@@ -65,7 +65,7 @@ runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet 
 ## Change
 
 **Part A: decisions and the VPS** (not blocked)
-1. `crowdsec` service on secsvcs: engine + LAPI, VictoriaLogs acquisitions, collections, whitelist,
+1. `crowdsec` service on secsvcs: engine + LAPI, VictoriaLogs acquisitions, collections, allowlist,
    LAPI TLS port; `install_svcs.sh` case and inventory entry.
 2. VPS: a `crowdsec_firewall_bouncer` case (package, LAPI URL and key, nftables mode,
    `deny_action: DROP`).

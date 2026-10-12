@@ -49,11 +49,11 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   password).
 - **autoadmin** — the automation SSH account. Its key is bound to a ForceCommand; it has no file
   access (no sftp), and its home is root-owned.
-- **dispatcher** — the ForceCommand script that whitelists exact `$SSH_ORIGINAL_COMMAND` strings
+- **dispatcher** — the ForceCommand script that allowlists exact `$SSH_ORIGINAL_COMMAND` strings
   and maps them to `install_svcs.sh` / `commands.sh` invocations. The Debian nodes share
   `src/base/debian/dispatcher.sh` and `sudoers`, which hold every Debian node's cases and grants
   and pick the node by hostname; the router and gaming have their own under `src/nodes/<node>/`.
-  Dispatcher and sudoers are rendered from the same node inventory entries, so the whitelist and
+  Dispatcher and sudoers are rendered from the same node inventory entries, so the allowlist and
   the sudo grants can't diverge. Commands carry data on stdin (`install_*`, via `send_files.sh`
   and `receive_files`) or stdout (`backup`, `copy_acme_certs`, `host_key`); the dispatcher's own
   output goes to stderr.

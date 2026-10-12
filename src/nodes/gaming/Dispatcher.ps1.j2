@@ -9,8 +9,8 @@ $sshClient = $env:SSH_CLIENT
 Add-Content -Path "$env:TEMP\dispatch.log" -Value "$originalCommand from $sshClient"
 Write-Host "Request received: '${originalCommand}' from ${sshClient}"
 
-$whitelist = @("{{ nodes.gaming.triggers | join('", "') }}")
-if ($originalCommand -notin $whitelist) {
+$allowlist = @("{{ nodes.gaming.triggers | join('", "') }}")
+if ($originalCommand -notin $allowlist) {
     Write-Error "Unauthorized command: '${originalCommand}'"
     exit 1
 }

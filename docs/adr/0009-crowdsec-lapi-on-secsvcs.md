@@ -48,5 +48,5 @@ auth/03 has the full design.
 - secsvcs is in the ban path: while it is down, bans stop being added (the existing ones stay).
 - The acquisitions depend on the fields `journald.lua` keeps for Traefik; dropping one breaks the
   parser, which `CrowdsecNotParsing` catches.
-- A ban keyed on the wrong address is only as safe as the whitelist: while the router SNATs tailnet
-  traffic (router/04), the VPS's requests to the VMs come from the router, which is whitelisted.
+- A ban keyed on the wrong address is only as safe as the allowlist: while the router SNATs tailnet
+  traffic (router/04), the VPS's requests to the VMs come from the router, which is allowlisted.

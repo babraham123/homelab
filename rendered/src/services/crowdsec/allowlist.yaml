@@ -1,31 +1,31 @@
-# /etc/opt/crowdsec/config/parsers/s02-enrich/homelab-whitelist.yaml
+# /etc/opt/crowdsec/config/parsers/s02-enrich/homelab-allowlist.yaml
 # Ref: https://docs.crowdsec.net/docs/next/log_processor/whitelist/format
 # Events from these sources never reach a scenario, so they never become decisions.
 # Banning the VPS's addresses or the router's (the source of tailnet traffic while it
 # SNATs, router/04) would cut off all public traffic.
 ---
-name: homelab/whitelist
+name: homelab/allowlist
 description: "Never ban the homelab's own addresses"
 whitelist:
   reason: "homelab address"
   ip:
-    - "{{ vpnsvcs.ip }}"
+    - "12.34.56.78"
   cidr:
     - "127.0.0.0/8"
     # Tailnet: `prefixes` in src/services/headscale/headscale.yaml.j2
     - "100.64.0.0/10"
     - "fd7a:115c:a1e0::/48"
-    - "{{ lan.mask }}"
-    - "{{ lan2.mask }}"
-    - "{{ pve1.mask }}"
-    - "{{ pve2.mask }}"
-{%- for vlan in wifi.values() %}
-    - "{{ vlan.mask }}"
-{%- endfor %}
-{%- for vlan in wired.values() %}
-    - "{{ vlan.mask }}"
-{%- endfor %}
-{%- for node in [secsvcs, homesvcs, websvcs, vpnsvcs] %}
-    - "{{ node.container_subnet }}.0/24"
-{%- endfor %}
+    - "192.168.1.0/24"
+    - "192.168.3.0/24"
+    - "192.168.4.0/24"
+    - "192.168.2.0/24"
+    - "192.168.10.0/24"
+    - "192.168.11.0/24"
+    - "192.168.12.0/24"
+    - "192.168.20.0/24"
+    - "192.168.21.0/24"
+    - "10.10.0.0/24"
+    - "10.12.0.0/24"
+    - "10.11.0.0/24"
+    - "10.13.0.0/24"
 ...

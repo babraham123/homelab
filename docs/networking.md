@@ -90,7 +90,7 @@ scope.
 | 21 | WiredIoT | 192.168.21.0/24 | n/a | planned |
 
 The intent is three-tier segmentation: trusted devices, poorly-secured IoT devices, and
-internet-only guests. IoT → trusted traffic is blocked by default with specific whitelisted services
+internet-only guests. IoT → trusted traffic is blocked by default with specific allowlisted services
 (Home Assistant, MQTT); the guest VLAN routes only to the internet. The AP's management interface
 lives on the trusted VLAN.
 

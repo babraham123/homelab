@@ -20,7 +20,7 @@ Four scripts reverse-engineered template variables from other files at render ti
 `parse_routes.sh` (subdomains from Traefik `routes.yml`), `parse_uptime_urls.sh` (Gatus URLs from
 the Gatus config), `parse_dispatcher.sh` (sudoers grants and OliveTin buttons from `dispatcher.sh`)
 and `gen_dispatch_cmds.sh` (dispatcher cases from `install_svcs.sh`, pasted in by hand). Each regex
-was a place for a bug to hide (a hyphenated service name silently dropped out of the whitelist), and
+was a place for a bug to hide (a hyphenated service name silently dropped out of the allowlist), and
 the image updater would have added a fifth parser for install order. An earlier prototype
 (`planning/services-inventory/`) that generated routes, quadlets and secrets as well was judged too
 complex.
@@ -35,7 +35,7 @@ inferred, per node:
   `subdomain`, `uptime` (the Gatus endpoint name), `uptime_path`, `uptime_tier` and
   `uptime_conditions`.
 - `install_all_svcs: true` on the container VMs only.
-- `triggers` for the gaming VM's PowerShell whitelist.
+- `triggers` for the gaming VM's PowerShell allowlist.
 
 `tools/render_src.sh` appends it to `vars.yml` as `nodes:`, since `jinjanate` takes a single data
 file. `src/nodes.jinja` (imported, never rendered on its own) turns it into the dispatcher `case`
@@ -53,7 +53,7 @@ Hand-written files stay the source for everything else: `routes.yml`, quadlets, 
 
 ## Consequences
 
-- The dispatcher whitelist and the sudo grants come from the same list, so they still can't diverge
+- The dispatcher allowlist and the sudo grants come from the same list, so they still can't diverge
   (the property ADR 0005 relies on). The list can't drift from the scripts either, because the
   render fails.
 - Adding a service means one `install_svcs.sh` case plus one `inventory.yml` line; a route on

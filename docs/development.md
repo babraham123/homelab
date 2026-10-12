@@ -96,7 +96,7 @@ flowchart TB
     end
 
     subgraph node["On the node"]
-        dispatch["install_&lt;svc&gt; → dispatcher.sh whitelist<br/>→ install_svcs.sh → quadlets into<br/>/etc/containers/systemd"]
+        dispatch["install_&lt;svc&gt; → dispatcher.sh allowlist<br/>→ install_svcs.sh → quadlets into<br/>/etc/containers/systemd"]
         second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with SOPS/AGE secrets<br/>(render_host.sh already ran at install)"]
     end
 

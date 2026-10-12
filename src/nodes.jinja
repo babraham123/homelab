@@ -28,7 +28,7 @@
                          {name, script}: runs `sudo <script> <name>`; script is under src/;
                                          `sudo: false` drops the sudo
                          {name, run}:    runs these lines verbatim
-      triggers:        gaming only: Dispatcher.ps1 whitelist
+      triggers:        gaming only: Dispatcher.ps1 allowlist
 
     This file derives lists from it, keyed by node. Not a .j2, so it is only imported:
       {% import 'src/nodes.jinja' as inv with context %}

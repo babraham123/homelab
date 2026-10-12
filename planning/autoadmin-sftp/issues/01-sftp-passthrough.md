@@ -5,7 +5,7 @@ Status: resolved Type: research Repo: homelab Source: architecture review 2026-1
 ## Problem
 
 Every dispatcher (`src/nodes/*/dispatcher.sh.j2`, router's and gaming's `Dispatcher.ps1.j2`
-included) execs `sftp-server` for the autoadmin key before the whitelist `case`. So any holder of
+included) execs `sftp-server` for the autoadmin key before the allowlist `case`. So any holder of
 an autoadmin key, OliveTin's included (`-I olive_tin -n autoadmin` in
 `src/base/certificates/ssh_cert_gen.sh.j2`), can read, write and delete whatever autoadmin can.
 ADR 0005 and `docs/security.md` ("Host access: the SSH dispatcher") say a stolen key can only
@@ -45,7 +45,7 @@ one):
 sftp-server flags don't fix it (`-R` breaks every upload; allowlists still expose the stage) and
 `ChrootDirectory` breaks the dispatcher's sudo. The candidate fix:
 
-- Drop the sftp passthrough everywhere; move data through whitelisted commands' stdout/stdin.
+- Drop the sftp passthrough everywhere; move data through allowlisted commands' stdout/stdin.
 - `backup` streams the stage as a tar on stdout; the stage stays root-owned and the node deletes
   it after sending. `stage_collect`'s local and remote paths become the same pipe. The
   dispatchers' own `echo`s move to stderr so they don't corrupt the stream.

@@ -217,7 +217,7 @@ flowchart LR
 
 - **Zigbee**: devices → SMLight SLZB-06 coordinator → Zigbee2MQTT → Mosquitto → Home Assistant,
   which records them and exports entity state to VictoriaMetrics
-- **Remote admin**: OliveTin (command.janedoe.com, behind Authelia) buttons run whitelisted commands
+- **Remote admin**: OliveTin (command.janedoe.com, behind Authelia) buttons run allowlisted commands
   over SSH as `autoadmin`, e.g. waking pve2 ([Security](security.md#host-access-the-ssh-dispatcher))
 
 ## Storage and backups
