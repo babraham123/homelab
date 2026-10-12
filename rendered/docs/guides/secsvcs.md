@@ -65,6 +65,8 @@ journalctl -eu authelia
     - jane, jayden, jasper, 
   - Create the `authelia_gen_access`, `headscale_access` and `command_general` groups, add users to
     them
+  - Create the `telemetry` group (VictoriaMetrics, VictoriaLogs, Alertmanager and ntfy UIs), add
+    your user to it
   - Create the `grafana_admin`, `hass_admin` and `command_admin` groups, add your user to it
   - Restore the authelia middleware by reinstalling the traefik config
     `/root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik`

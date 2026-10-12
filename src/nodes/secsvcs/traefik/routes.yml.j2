@@ -4,7 +4,37 @@
 #   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
 #   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
 #   - https://doc.traefik.io/traefik/routing/routers/#priority
+#   - https://doc.traefik.io/traefik/reference/routing-configuration/http/routing/multi-layer-routing/
 # yamllint disable rule:document-start rule:document-end
+{#
+  Browser UI of a telemetry tool whose own auth is a shared admin login. The parent
+  authenticates; its children then match on the Remote-Groups header ForwardAuth set
+  (Traefik deletes any client-sent copy first), so only the telemetry group gets the
+  injected admin credentials and everyone else gets the 403 page.
+#}
+{%- macro telemetry_ui(name, rule, service, auth) %}
+    {{ name }}-ui:
+      rule: {{ rule }}
+      entryPoints: websecure
+      middlewares:
+        - authelia@file
+        - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    {{ name }}-ui-telemetry:
+      parentRefs: [{{ name }}-ui]
+      # Authelia joins groups with a bare comma
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      service: {{ service }}@file
+      middlewares:
+        - {{ auth }}@file
+    {{ name }}-ui-denied:
+      parentRefs: [{{ name }}-ui]
+      rule: PathPrefix(`/`)
+      priority: 1
+      service: s403@file
+{%- endmacro -%}
 http:
   routers:
     traefik: &service
@@ -35,14 +65,7 @@ http:
       <<: *service
       rule: Host(`graph.{{ site.url }}`)
       service: grafana@file
-    victoriametrics-ui:
-      <<: *service
-      rule: Host(`metrics.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
-      service: victoriametrics@file
-      middlewares:
-        - authelia@file
-        - vm-auth@file
-        - secure-headers@file
+{{- telemetry_ui('victoriametrics', 'Host(`metrics.' ~ site.url ~ '`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)', 'victoriametrics', 'vm-auth') }}
     victoriametrics-hass-api:
       <<: *service
       rule: Host(`metrics.{{ site.url }}`) && HeaderRegexp(`Authorization`, `^Token .+$`)
@@ -54,14 +77,7 @@ http:
       rule: Host(`metrics.{{ site.url }}`)
       service: victoriametrics@file
       middlewares: []
-    victorialogs-ui:
-      <<: *service
-      rule: Host(`logs.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
-      service: victorialogs@file
-      middlewares:
-        - authelia@file
-        - vl-auth@file
-        - secure-headers@file
+{{- telemetry_ui('victorialogs', 'Host(`logs.' ~ site.url ~ '`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)', 'victorialogs', 'vl-auth') }}
     victorialogs-api:
       <<: *service
       rule: Host(`logs.{{ site.url }}`)
@@ -71,28 +87,14 @@ http:
       <<: *service
       rule: Host(`vmalert.{{ site.url }}`)
       service: vmalert@file
-    alertmanager-ui:
-      <<: *service
-      rule: Host(`alert.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
-      service: alertmanager@file
-      middlewares:
-        - authelia@file
-        - alertmanager-auth@file
-        - secure-headers@file
+{{- telemetry_ui('alertmanager', 'Host(`alert.' ~ site.url ~ '`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)', 'alertmanager', 'alertmanager-auth') }}
     alertmanager-api:
       <<: *service
       rule: Host(`alert.{{ site.url }}`)
       service: alertmanager@file
       middlewares: []
-    ntfy-ui:
-      <<: *service
-      # Ref: https://github.com/binwiederhier/ntfy/issues/893#issuecomment-1731314679
-      rule: Host(`push.{{ site.url }}`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`) && !PathPrefix(`/file/`)
-      service: ntfy@file
-      middlewares:
-        - authelia@file
-        - ntfy-auth@file
-        - secure-headers@file
+    # Ref: https://github.com/binwiederhier/ntfy/issues/893#issuecomment-1731314679
+{{- telemetry_ui('ntfy', 'Host(`push.' ~ site.url ~ '`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`) && !PathPrefix(`/file/`)', 'ntfy', 'ntfy-auth') }}
     ntfy-api:
       <<: *service
       rule: Host(`push.{{ site.url }}`)
@@ -169,3 +171,7 @@ http:
       loadBalancer:
         servers:
           - url: http://command.{{ site.url }}:1337/
+    s403:
+      loadBalancer:
+        servers:
+          - url: https://www.{{ site.url }}/error/403.html

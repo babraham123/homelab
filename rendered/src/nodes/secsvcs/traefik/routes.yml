@@ -4,6 +4,7 @@
 #   - https://www.simplecto.com/use-traefik-with-nginx-apache-caddyserver-serve-static-files/
 #   - https://doc.traefik.io/traefik/reference/dynamic-configuration/file/
 #   - https://doc.traefik.io/traefik/routing/routers/#priority
+#   - https://doc.traefik.io/traefik/reference/routing-configuration/http/routing/multi-layer-routing/
 # yamllint disable rule:document-start rule:document-end
 http:
   routers:
@@ -36,13 +37,26 @@ http:
       rule: Host(`graph.janedoe.com`)
       service: grafana@file
     victoriametrics-ui:
-      <<: *service
       rule: Host(`metrics.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
-      service: victoriametrics@file
+      entryPoints: websecure
       middlewares:
         - authelia@file
-        - vm-auth@file
         - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    victoriametrics-ui-telemetry:
+      parentRefs: [victoriametrics-ui]
+      # Authelia joins groups with a bare comma
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      service: victoriametrics@file
+      middlewares:
+        - vm-auth@file
+    victoriametrics-ui-denied:
+      parentRefs: [victoriametrics-ui]
+      rule: PathPrefix(`/`)
+      priority: 1
+      service: s403@file
     victoriametrics-hass-api:
       <<: *service
       rule: Host(`metrics.janedoe.com`) && HeaderRegexp(`Authorization`, `^Token .+$`)
@@ -55,13 +69,26 @@ http:
       service: victoriametrics@file
       middlewares: []
     victorialogs-ui:
-      <<: *service
       rule: Host(`logs.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
-      service: victorialogs@file
+      entryPoints: websecure
       middlewares:
         - authelia@file
-        - vl-auth@file
         - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    victorialogs-ui-telemetry:
+      parentRefs: [victorialogs-ui]
+      # Authelia joins groups with a bare comma
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      service: victorialogs@file
+      middlewares:
+        - vl-auth@file
+    victorialogs-ui-denied:
+      parentRefs: [victorialogs-ui]
+      rule: PathPrefix(`/`)
+      priority: 1
+      service: s403@file
     victorialogs-api:
       <<: *service
       rule: Host(`logs.janedoe.com`)
@@ -72,27 +99,53 @@ http:
       rule: Host(`vmalert.janedoe.com`)
       service: vmalert@file
     alertmanager-ui:
-      <<: *service
       rule: Host(`alert.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
-      service: alertmanager@file
+      entryPoints: websecure
       middlewares:
         - authelia@file
-        - alertmanager-auth@file
         - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    alertmanager-ui-telemetry:
+      parentRefs: [alertmanager-ui]
+      # Authelia joins groups with a bare comma
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      service: alertmanager@file
+      middlewares:
+        - alertmanager-auth@file
+    alertmanager-ui-denied:
+      parentRefs: [alertmanager-ui]
+      rule: PathPrefix(`/`)
+      priority: 1
+      service: s403@file
     alertmanager-api:
       <<: *service
       rule: Host(`alert.janedoe.com`)
       service: alertmanager@file
       middlewares: []
+    # Ref: https://github.com/binwiederhier/ntfy/issues/893#issuecomment-1731314679
     ntfy-ui:
-      <<: *service
-      # Ref: https://github.com/binwiederhier/ntfy/issues/893#issuecomment-1731314679
       rule: Host(`push.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`) && !PathPrefix(`/file/`)
-      service: ntfy@file
+      entryPoints: websecure
       middlewares:
         - authelia@file
-        - ntfy-auth@file
         - secure-headers@file
+      tls:
+        options: intermediate@file
+        certResolver: le-http-production
+    ntfy-ui-telemetry:
+      parentRefs: [ntfy-ui]
+      # Authelia joins groups with a bare comma
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      service: ntfy@file
+      middlewares:
+        - ntfy-auth@file
+    ntfy-ui-denied:
+      parentRefs: [ntfy-ui]
+      rule: PathPrefix(`/`)
+      priority: 1
+      service: s403@file
     ntfy-api:
       <<: *service
       rule: Host(`push.janedoe.com`)
@@ -169,3 +222,7 @@ http:
       loadBalancer:
         servers:
           - url: http://command.janedoe.com:1337/
+    s403:
+      loadBalancer:
+        servers:
+          - url: https://www.janedoe.com/error/403.html

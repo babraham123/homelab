@@ -1,6 +1,6 @@
 # 02. Gate VictoriaMetrics/VictoriaLogs/Alertmanager/ntfy UIs on a telemetry LDAP group
 
-Status: ready-for-agent Type: task Repo: homelab Source: review finding 13
+Status: ready-for-human Type: task Repo: homelab Source: review finding 13
 
 ## Problem
 
@@ -71,3 +71,14 @@ rule. Confirm on your version.
 - HA → `metrics.SITE` with `Authorization: Token` (the `-hass-api` router) is unaffected.
 
 ## Comments
+
+- 2026-10-12 agent: done in `src/nodes/secsvcs/traefik/routes.yml.j2` (a `telemetry_ui` macro
+  emits the parent and two children per tool). The Traefik reference contradicts the sketch above:
+  `entryPoints` and `tls` belong on the parent, and children must not have them. `secure-headers`
+  also moved to the parent so the 403 gets it too. Non-members get `s403@file`, the same
+  `www/error/403.html` proxy websvcs uses for pve/pbs. ForwardAuth deletes each
+  `authResponseHeaders` entry before copying Authelia's value, and Authelia joins groups with a bare
+  comma, so the regex is `(^|,)telemetry(,|$)`. The setup step is in `docs/guides/secsvcs.md.j2`
+  and the model is in `docs/security.md#identity-lldap--authelia`. Remaining for a human: create
+  the LLDAP `telemetry` group, add yourself, redeploy secsvcs Traefik, then run the three
+  acceptance checks live.
