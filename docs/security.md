@@ -245,8 +245,9 @@ admin operations happen over localhost, not the public interface.
 
 - Headscale ACLs disabled (above): network-layer zero trust is not real today.
 - Traefik→Authelia mutual TLS is disabled pending a certificate fix: Traefik presents client certs,
-  but Authelia's `client_certificates` check is commented out. LLDAP doesn't verify Authelia's
-  client cert either; that connection is still LDAPS.
+  but Authelia's `client_certificates` check is commented out.
+- Authelia→LLDAP is server-verified LDAPS plus the bind password: LLDAP can't verify client certs
+  (`.with_no_client_auth()`), so Authelia presents none.
 - ESP32-class IoT devices talk plaintext on their VLAN; TLS costs too much CPU/RAM there;
   containment relies on VLAN firewall rules.
 - Wired VLAN enforcement waits on a managed switch.

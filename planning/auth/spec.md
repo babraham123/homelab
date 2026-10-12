@@ -17,4 +17,4 @@ key-seed coupling.
 | [07](issues/07-guacamole-private-client.md) | Move Guacamole to a private OIDC client with code flow and PKCE | `ready-for-agent` | task |
 | [08](issues/08-password-management-research.md) | Research: manage SSH, sudo, CA and recovery passwords better than offline notes | `ready-for-agent` | research |
 | [09](issues/09-headscale-oidc-groups.md) | Drive Headscale ACL groups from LLDAP groups once headscale supports OIDC groups | `needs-info` | task |
-| [10](issues/10-authelia-lldap-client-cert.md) | Give Authelia a real client cert for LLDAP, and make LLDAP verify it (or drop it) | `ready-for-agent` | task |
+| [10](issues/10-authelia-lldap-client-cert.md) | Give Authelia a real client cert for LLDAP, and make LLDAP verify it (or drop it) | `resolved` | task |

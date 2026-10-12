@@ -31,8 +31,6 @@ Environment=TZ=America/Los_Angeles
 Environment=X_AUTHELIA_CONFIG=/config/configuration.yml
 Environment=X_AUTHELIA_CONFIG_FILTERS=template
 # https://www.authelia.com/configuration/methods/secrets/
-Environment=AUTHELIA_AUTHENTICATION_BACKEND_LDAP_TLS_PRIVATE_KEY_FILE=/certificates/auth.key
-Environment=AUTHELIA_AUTHENTICATION_BACKEND_LDAP_TLS_CERTIFICATE_CHAIN_FILE=/certificates/auth.cert.pem
 Environment=AUTHELIA_NOTIFIER_SMTP_TLS_PRIVATE_KEY_FILE=/certificates/auth.key
 Environment=AUTHELIA_NOTIFIER_SMTP_TLS_CERTIFICATE_CHAIN_FILE=/certificates/auth.cert.pem
 

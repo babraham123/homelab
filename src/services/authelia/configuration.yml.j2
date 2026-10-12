@@ -519,6 +519,7 @@ authentication_backend:
 
       ## The certificate chain used with the private_key if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
+      # Unset: LLDAP never requests a client cert (planning/auth/issues/10-authelia-lldap-client-cert.md).
       # certificate_chain: |
         # -----BEGIN CERTIFICATE-----
         # ...

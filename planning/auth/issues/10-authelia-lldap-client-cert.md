@@ -1,6 +1,6 @@
 # 10. Give Authelia a real client cert for LLDAP, and make LLDAP verify it (or drop it)
 
-Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-10-11;
+Status: resolved Type: task Repo: homelab Source: maintainer request 2026-10-11;
 `docs/security.md` Known gaps ("LLDAP doesn't verify Authelia's client cert either")
 
 ## Problem
@@ -60,3 +60,10 @@ LLDAP can't verify client certs as of v0.6.3 (`main` pushed 2026-09-26). `get_tl
 `.with_no_client_auth()`, and `LdapsOptions` in `server/src/configuration.rs` has only `enabled`,
 `port`, `cert_file`, `key_file`. No upstream issue or PR asks for client-cert auth (searched
 "client certificate", "mTLS"). Take step 3; an upstream feature request is the optional part.
+
+### 2026-10-11: resolved, unsupported branch
+
+Removed the two `AUTHELIA_AUTHENTICATION_BACKEND_LDAP_TLS_*` env vars from `authelia.container.j2`;
+`docs/security.md` Known gaps now states the Authelia→LLDAP gap as it is. The SMTP notifier's
+`auth.key`/`auth.cert.pem` pair is untouched. Upstream feature request drafted, not filed. Host
+check (Authelia logs in against LLDAP) is part of `install_authelia` in the apply notes.
