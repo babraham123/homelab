@@ -65,5 +65,6 @@ LLDAP can't verify client certs as of v0.6.3 (`main` pushed 2026-09-26). `get_tl
 
 Removed the two `AUTHELIA_AUTHENTICATION_BACKEND_LDAP_TLS_*` env vars from `authelia.container.j2`;
 `docs/security.md` Known gaps now states the Authelia→LLDAP gap as it is. The SMTP notifier's
-`auth.key`/`auth.cert.pem` pair is untouched. Upstream feature request drafted, not filed. Host
-check (Authelia logs in against LLDAP) is part of `install_authelia` in the apply notes.
+`auth.key`/`auth.cert.pem` pair is untouched. Upstream feature request:
+[lldap/lldap#1526](https://github.com/lldap/lldap/issues/1526). Host check (Authelia logs in
+against LLDAP) is part of `install_authelia` in the apply notes.
