@@ -50,4 +50,24 @@ scrape_configs:
     relabel_configs:
       - target_label: host
         replacement: pve2
+  # pve2's GPUs are passed through, so their exporters run in the VMs holding them:
+  # the Tesla P4 in websvcs, the RTX 3060 Ti in devtop or gaming.
+  - job_name: 'nvidia_gpu'
+    static_configs:
+      - targets: ['host.containers.internal:9835']
+    metrics_path: /metrics
+    relabel_configs:
+      - target_label: instance
+        replacement: websvcs.{{ site.url }}:9835
+      - target_label: host
+        replacement: websvcs
+  # devtop and gaming share the 3060 Ti and rarely run at once, so one of these is
+  # usually down; homelab.yml's TargetDown skips this job.
+  - job_name: 'nvidia_gpu_desktops'
+    static_configs:
+      - targets: ['devtop.{{ site.url }}:9835']
+        labels: {host: devtop}
+      - targets: ['gaming.{{ site.url }}:9835']
+        labels: {host: gaming}
+    metrics_path: /metrics
 ...

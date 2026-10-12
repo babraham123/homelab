@@ -79,6 +79,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 |------|---------|---------|
 | container VMs | mdns_repeater | Bridge mDNS between VM NIC and Podman network |
 | container VMs, vpnsvcs, pve1, pve2 | node_exporter | Host metrics |
+| websvcs, devtop, gaming | nvidia_gpu_exporter | GPU metrics (temperature) for the cards pve2 passes through |
 | pve1, pve2 | vm_watchdog | VM health watchdog |
 | pve1 | cert_notifier (timer) | Email warnings before cert expiry (msmtp) |
 | pve1 | backup_orchestrator (timer) | Weekly backup run ([Storage and backups](#storage-and-backups)) |

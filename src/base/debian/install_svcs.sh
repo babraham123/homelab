@@ -42,6 +42,16 @@ case $1 in
       /usr/local/bin/node_exporter_runner.sh
     install -D -m 644 -t /etc/systemd/system base/node_exporter/node_exporter.service
     ;;
+  nvidia_gpu_exporter)
+    # The deb adds the nvidia_gpu_exporter user and unit; it serves :9835/metrics.
+    NGE_VERSION=$(curl -s "https://api.github.com/repos/utkuozdemir/nvidia_gpu_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    deb="nvidia-gpu-exporter_${NGE_VERSION}_linux_amd64.deb"
+    url="https://github.com/utkuozdemir/nvidia_gpu_exporter/releases/download/v${NGE_VERSION}"
+    wget "$url/$deb" "$url/checksums.txt"
+    sha256sum --check --ignore-missing checksums.txt || die "checksum mismatch: $deb"
+    apt install -y "./$deb"
+    rm "$deb" checksums.txt
+    ;;
   image_updater)
     # 30 minutes apart; the notification path on secsvcs goes last
     case $(hostname) in

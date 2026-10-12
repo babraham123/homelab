@@ -2,6 +2,16 @@
 Guide to stream games from the windows VM to my living room TV. First stand up the [Windows
 VM](./vm_windows.md)
 
+## GPU metrics
+- Export GPU metrics, scraped by websvcs' vmagent. As administrator in PowerShell:
+```PowerShell
+winget install --scope machine utkuozdemir.nvidia_gpu_exporter
+nvidia_gpu_exporter install
+# LocalSubnet is pve2's subnet, which holds websvcs
+New-NetFirewallRule -DisplayName "Nvidia GPU Exporter" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 9835 -Profile Any -RemoteAddress LocalSubnet
+Start-Service nvidia_gpu_exporter
+```
+
 ## Streaming
 
 ### Windows streaming server and game platforms

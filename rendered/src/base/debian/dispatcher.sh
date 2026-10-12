@@ -38,6 +38,9 @@ require_key_id() {
 case "$(hostname)" in
   devtop)
     case "${SSH_ORIGINAL_COMMAND:-}" in
+      install_nvidia_gpu_exporter)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh nvidia_gpu_exporter
+        ;;
       check_gpu)
         sudo /usr/bin/systemctl status nvidia-persistenced --no-pager
         nvidia-smi
@@ -384,6 +387,9 @@ case "$(hostname)" in
         ;;
       install_node_exporter)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        ;;
+      install_nvidia_gpu_exporter)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh nvidia_gpu_exporter
         ;;
       install_image_updater)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater

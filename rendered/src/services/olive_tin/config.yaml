@@ -101,6 +101,14 @@ dashboards:
         contents:
 
           - inlineAction:
+              title: devtop Install Nvidia Gpu Exporter
+              icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
+              shell: ssh autoadmin@devtop install_nvidia_gpu_exporter
+              id: devtop_install_nvidia_gpu_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: devtop Check Gpu
               icon: <iconify-icon icon="material-symbols:desktop-windows-outline"></iconify-icon>
               shell: ssh autoadmin@devtop check_gpu
@@ -673,6 +681,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_node_exporter
               id: websvcs_install_node_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Nvidia Gpu Exporter
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_nvidia_gpu_exporter
+              id: websvcs_install_nvidia_gpu_exporter
               maxConcurrent: 1
               timeout: 60
 

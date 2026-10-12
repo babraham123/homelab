@@ -34,6 +34,15 @@ source ~/.zshrc
 sudo apt install -y build-essential python3-pip g++ freeglut3-dev libx11-dev libxmu-dev libxi-dev libglu1-mesa-dev libfreeimage-dev libglfw3-dev
 ```
 
+- Export GPU metrics, scraped by websvcs' vmagent
+```bash
+sudo su
+cd /root/homelab-rendered
+src/base/debian/install_svcs.sh nvidia_gpu_exporter
+ufw allow in from 192.168.2.20 to any port 9835 proto tcp
+exit
+```
+
 ## Support remote VNC
 - Enable copy paste
 ```bash

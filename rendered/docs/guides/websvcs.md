@@ -50,6 +50,16 @@ systemctl list-units | grep Homelab
 src/base/podman/image_updater.sh --dry-run
 ```
 
+## GPU metrics
+- With the Tesla P4's drivers installed ([GPU guide](./gpu.md)), install the exporter and let vmagent
+  scrape it
+```bash
+cd /root/homelab-rendered
+src/base/debian/install_svcs.sh nvidia_gpu_exporter
+ufw allow in from 10.11.0.7 to any port 9835 proto tcp
+curl -s localhost:9835/metrics | grep nvidia_smi_temperature_gpu
+```
+
 ## Bootstrap the Guacamole admin
 
 The OpenID extension only proves who a user is. Their permissions come from Postgres, and

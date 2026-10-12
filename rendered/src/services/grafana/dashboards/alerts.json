@@ -431,6 +431,57 @@
         },
         "overrides": []
       }
+    },
+    {
+      "id": 8,
+      "title": "pve2 temperatures",
+      "type": "timeseries",
+      "description": "CPU package/cores from pve2 node_exporter hwmon; GPUs from nvidia_gpu_exporter in the VM holding each card (P4: websvcs, 3060 Ti: devtop or gaming).",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
+          "expr": "max by (host) (node_hwmon_temp_celsius{host=\"pve2\", chip=~\"platform_coretemp_.*\"})",
+          "legendFormat": "pve2 CPU",
+          "format": "time_series",
+          "instant": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
+          "expr": "nvidia_smi_temperature_gpu * on (uuid, instance) group_left (name) nvidia_smi_gpu_info",
+          "legendFormat": "{{name}} ({{host}})",
+          "format": "time_series",
+          "instant": false,
+          "refId": "B"
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 0,
+          "custom": {
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      }
     }
   ],
   "refresh": "1m",

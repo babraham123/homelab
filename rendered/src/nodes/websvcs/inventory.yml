@@ -2,7 +2,7 @@
 # yamllint disable rule:document-start rule:document-end
 # websvcs is the default route, so its subdomains need no DNS or SNI entries; they
 # only name the uptime URLs.
-debian_services: [mdns_repeater, node_exporter, image_updater]
+debian_services: [mdns_repeater, node_exporter, nvidia_gpu_exporter, image_updater]
 services:
   traefik: {subdomain: webproxy, uptime: traefik websvcs, uptime_tier: 1,
             upstream: docker.io/library/traefik:v3.7}
