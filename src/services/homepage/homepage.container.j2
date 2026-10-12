@@ -9,9 +9,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=ghcr.io/gethomepage/homepage:latest
+Image=localhost/gethomepage/homepage:latest
 ContainerName=homepage
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 
 Network=net.network

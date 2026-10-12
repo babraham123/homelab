@@ -153,4 +153,18 @@ groups:
           severity: critical
         annotations:
           summary: "{{ $labels.name }} certificate expires in {{ $value | humanizeDuration }}"
+
+  - name: image_updater
+    # From the textfile metrics src/base/podman/image_updater.sh writes. Age, not absent():
+    # a powered-off websvcs has no series, so it doesn't alert. One that boots after days
+    # off catches up within half an hour (Persistent=true), inside the `for`.
+    rules:
+      - alert: ImageUpdaterStale
+        expr: time() - image_updater_last_success_timestamp_seconds > 36 * 3600
+        for: 1h
+        labels:
+          severity: error
+        annotations:
+          summary: "{{ $labels.host }}'s image updater hasn't finished cleanly in {{ $value | humanizeDuration }}"
+          description: "Its containers aren't getting updates or CVE fixes. See journalctl -u image_updater, and systemctl list-timers image_updater.timer."
 ...

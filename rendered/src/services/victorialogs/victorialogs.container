@@ -10,9 +10,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/victoriametrics/victoria-logs:latest
+Image=localhost/victoriametrics/victoria-logs:latest
 ContainerName=victorialogs
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

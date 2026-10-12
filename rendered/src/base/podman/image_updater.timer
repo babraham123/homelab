@@ -1,0 +1,16 @@
+# /etc/systemd/system/image_updater.timer
+# OnCalendar comes from the image_updater.timer.d/slot.conf drop-in that
+# src/base/debian/install_svcs.sh writes: each VM has its own slot.
+
+[Unit]
+Description="Homelab: Runs image_updater.service every night"
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+# Run if machine was off
+Persistent=true
+Unit=image_updater.service
+
+[Install]
+WantedBy=timers.target

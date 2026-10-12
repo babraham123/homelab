@@ -10,6 +10,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/svcs_lib.sh"
 
 cd "$rendered"
 
+# Every image the case's quadlets name is downloaded (or built) and passes the scan gate
+# before any quadlet is copied; a blocked image stops the install here.
+base/podman/image_updater.sh install "${1:?usage: $0 SERVICE_NAME}"
+
 # HAProxy and Headscale serve metrics on the podman bridge gateway (net.network)
 nonlocal_bind() {
   install -D -m 644 nodes/vpnsvcs/nonlocal_bind.conf /etc/sysctl.d/90-homelab-nonlocal-bind.conf

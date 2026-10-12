@@ -10,10 +10,10 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/library/traefik:v3.7
+Image=localhost/library/traefik:v3.7
 ContainerName=traefik
 AddCapability=CAP_NET_BIND_SERVICE
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 
 Network=net.network

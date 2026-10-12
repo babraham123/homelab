@@ -10,9 +10,10 @@ After=network-online.target
 
 [Container]
 # https://why-upgrade.depesz.com/
-Image=docker.io/library/postgres:14-alpine
+Image=localhost/library/postgres:14-alpine
 ContainerName=postgres
-# No auto-update for data safety
+# The major version is in the tag, so updates stay within it
+AutoUpdate=local
 NoNewPrivileges=true
 
 Network=net.network

@@ -2,16 +2,18 @@
 # yamllint disable rule:document-start rule:document-end
 # websvcs is the default route, so its subdomains need no DNS or SNI entries; they
 # only name the uptime URLs.
-debian_services: [mdns_repeater, node_exporter]
+debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
-  traefik: {subdomain: webproxy, uptime: traefik websvcs, uptime_tier: 1}
-  vmagent: {}
-  nginx: {subdomain: www}
-  homepage: {subdomain: dash, uptime: homepage, uptime_tier: 1}
-  isso: {subdomain: comment}
-  guacamole: {subdomain: remote, uptime: guacamole}
-  guacd: {}
-  fluentbit: {}
+  traefik: {subdomain: webproxy, uptime: traefik websvcs, uptime_tier: 1,
+            upstream: docker.io/library/traefik:v3.7}
+  vmagent: {upstream: docker.io/victoriametrics/vmagent:latest}
+  nginx: {subdomain: www, upstream: docker.io/library/nginx:stable}
+  homepage: {subdomain: dash, uptime: homepage, uptime_tier: 1,
+             upstream: ghcr.io/gethomepage/homepage:latest}
+  isso: {subdomain: comment, upstream: ghcr.io/isso-comments/isso:release}
+  guacamole: {subdomain: remote, uptime: guacamole, upstream: docker.io/guacamole/guacamole:1.6.0}
+  guacd: {upstream: docker.io/guacamole/guacd:1.6.0}
+  fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
   snapraid: {}
 install_all_svcs: true
 commands:

@@ -10,9 +10,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=ghcr.io/koenkk/zigbee2mqtt:latest
+Image=localhost/koenkk/zigbee2mqtt:latest
 ContainerName=zigbee2mqtt
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

@@ -9,9 +9,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/guacamole/guacamole:1.6.0
+Image=localhost/guacamole/guacamole:1.6.0
 ContainerName=guacamole
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

@@ -14,9 +14,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/homeassistant/home-assistant:2026.3.1
+Image=localhost/homeassistant/home-assistant:2026.3.1
 ContainerName=home_assistant
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 
 Network=net.network

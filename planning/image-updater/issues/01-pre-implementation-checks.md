@@ -16,7 +16,7 @@ Quick tests on one VM each. None blocks the design, but 3 and 6 decide the timer
    finishes and the run starts.
 4. **Rollback behavior.** Force a failing `AutoUpdate=local` update on a test container. Record the
    `Updated` value in `podman auto-update --format json` and where the tag points afterwards.
-5. **Gatus heartbeat.** Confirm external-endpoint heartbeats work in the deployed `gatus:latest`.
+5. ~~**Gatus heartbeat.**~~ Dropped with the heartbeat (2026-10-11).
 6. **Run duration.** Time `skopeo inspect` + `skopeo copy` + `trivy image --input` over every image
    on each VM; the schedule assumes each run fits in 30 minutes.
 

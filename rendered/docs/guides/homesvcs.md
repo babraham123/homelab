@@ -13,7 +13,8 @@ I use the SMLight SLZB-06M adapter, it's reasonably priced and very feature rich
 - [Flash over USB](https://smlight.tech/flasher/#home) if you get locked out
 
 ## Setup containers
-- Install and start services
+- Install and start services. Each install loads its images through the [image
+  updater](./podman.md#image-updater) first, which stops on a blocked image
 ```bash
 sudo su
 cd /root/homelab-rendered
@@ -28,6 +29,8 @@ src/nodes/homesvcs/install_svcs.sh fluentbit
 systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
+# Every image unchanged: the installs just loaded them
+src/base/podman/image_updater.sh --dry-run
 ```
 
 - On initial install, disable HA OIDC

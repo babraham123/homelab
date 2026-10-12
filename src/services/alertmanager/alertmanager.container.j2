@@ -10,9 +10,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/prom/alertmanager:latest
+Image=localhost/prom/alertmanager:latest
 ContainerName=alertmanager
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

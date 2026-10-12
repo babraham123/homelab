@@ -9,9 +9,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/alexxit/go2rtc:latest
+Image=localhost/alexxit/go2rtc:latest
 ContainerName=go2rtc
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

@@ -10,9 +10,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/fluent/fluent-bit:3.2
+Image=localhost/fluent/fluent-bit:3.2
 ContainerName=fluentbit
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

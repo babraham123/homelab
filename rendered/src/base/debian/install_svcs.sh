@@ -42,6 +42,31 @@ case $1 in
       /usr/local/bin/node_exporter_runner.sh
     install -D -m 644 -t /etc/systemd/system base/node_exporter/node_exporter.service
     ;;
+  image_updater)
+    # 30 minutes apart; the notification path on secsvcs goes last
+    case $(hostname) in
+      vpnsvcs) slot=20:00 ;;
+      homesvcs) slot=20:30 ;;
+      websvcs) slot=21:00 ;;
+      secsvcs) slot=21:30 ;;
+      *) die "no image_updater slot for $(hostname)" ;;
+    esac
+    apt install -y skopeo wget gnupg
+    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | \
+      gpg --dearmor --yes -o /usr/share/keyrings/trivy.gpg
+    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
+      > /etc/apt/sources.list.d/trivy.list
+    apt update
+    apt install -y trivy
+    install -D -m 644 -t /etc/systemd/system base/podman/image_updater.service \
+      base/podman/image_updater.timer
+    mkdir -p /etc/systemd/system/image_updater.timer.d
+    printf '[Timer]\nOnCalendar=*-*-* %s:00\n' "$slot" > /etc/systemd/system/image_updater.timer.d/slot.conf
+    systemctl daemon-reload
+    # Enabling the timer is the per-VM cutover from podman-auto-update.timer
+    # (docs/maintenance.md), so installing leaves it as it was.
+    exit 0
+    ;;
   vm_watchdog)
     install_bin nodes/pve1/vm_watchdog.sh
     install -D -m 644 -t /etc/systemd/system nodes/pve1/vm_watchdog.service

@@ -11,9 +11,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/victoriametrics/vmagent:latest
+Image=localhost/victoriametrics/vmagent:latest
 ContainerName=vmagent
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

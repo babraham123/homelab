@@ -19,3 +19,6 @@ systemctl list-timers image_updater.timer
 - The first scheduled run on each VM completes and writes its textfile metric.
 
 ## Comments
+
+- 2026-10-11: vpnsvcs is in scope too (it shares the fluentbit and vmagent quadlets); its slot is
+  20:00. Fresh nodes get the updater timer from `podman.md`, so this is only for nodes built before.

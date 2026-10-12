@@ -150,8 +150,11 @@ du -sh "$(podman volume inspect --format '{{ .Mountpoint }}' systemd-vmdata)"
 # Find every tag that points at the same digest as TAG (run on pve1)
 /root/homelab-rendered/src/nodes/pve1/lookup_docker_tag.sh homeassistant/home-assistant stable
 
-# Preview what AutoUpdate=registry would pull
-podman auto-update --dry-run
+# What the image updater would load, with scan results
+/root/homelab-rendered/src/base/podman/image_updater.sh --dry-run
+# The digest each container's image was last updated to, and how it went
+head /var/lib/image_updater/state/*
+podman images --filter reference='localhost/*'
 ```
 
 Building an image inside a quadlet: see

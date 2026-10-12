@@ -1,6 +1,6 @@
 # 05. Quadlet labels, localhost/ images, install-time scan; per-VM rollout
 
-Status: ready-for-agent Type: task Repo: homelab Source: notes/image-updater-design.md "Image
+Status: ready-for-human Type: task Repo: homelab Source: notes/image-updater-design.md "Image
 references", "Scan gate and overrides", "Changes, in rollout order" step 4 Blocked by: 03, 04
 
 ## Change
@@ -26,5 +26,24 @@ under the new names and check them, then `install_<svc>` the new quadlets.
 - The render check from 02 passes for every quadlet.
 - On each VM, `podman ps --format '{{.Image}}'` shows only `localhost/` images and every service is
   healthy in Gatus.
+
+## Answer
+
+Code done 2026-10-11; the rollout below is what's left.
+
+- Facts are in the node inventories, not quadlet labels (see 02): `upstream:` on every service with
+  an image on secsvcs, homesvcs, websvcs and vpnsvcs, `update_last: true` on traefik,
+  victoriametrics, vmalert, alertmanager, ntfy-alertmanager and ntfy (secsvcs).
+- Every quadlet, in use or not, has `Image=localhost/…` and `AutoUpdate=local`; postgres gained
+  it, and `eclipse-mosquitto` is `library/eclipse-mosquitto`.
+- vpnsvcs shares the fluentbit and vmagent quadlets, so it runs the updater too (decided
+  2026-10-11), in a 20:00 slot.
+- Install-time gate: each node's `install_svcs.sh` runs
+  `base/podman/image_updater.sh install "$1"` before its `case`, so every case loads and scans its
+  images before copying quadlets.
+
+Rollout per node, vpnsvcs included (homesvcs → websvcs → secsvcs → vpnsvcs): add the new secrets
+(`secret_update.sh`), deploy, `install_image_updater`, run `image_updater.sh` once, which loads the
+images under their new names, then `install_all_svcs` (or each service on vpnsvcs).
 
 ## Comments

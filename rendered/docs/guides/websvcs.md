@@ -22,7 +22,8 @@ exit
 - Remember to handle any subsequent upgrades
 
 ## Setup containers
-- Install and start containers
+- Install and start containers. Each install loads its images through the [image
+  updater](./podman.md#image-updater) first, which stops on a blocked image
 ```bash
 cd /root/homelab-rendered
 src/nodes/websvcs/install_svcs.sh traefik
@@ -45,6 +46,8 @@ src/nodes/websvcs/install_svcs.sh fluentbit
 systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
+# Every image unchanged: the installs just loaded them
+src/base/podman/image_updater.sh --dry-run
 ```
 
 ## Bootstrap the Guacamole admin

@@ -1,14 +1,14 @@
 # vpnsvcs's part of the node inventory; src/nodes.jinja documents the keys.
 # yamllint disable rule:document-start rule:document-end
-debian_services: [node_exporter]
+debian_services: [node_exporter, image_updater]
 services:
   headscale: {}
   tailscaled: {}
   haproxy: {}
   deadman: {}
   # Quadlets on the podman network (docs/adr/0007-vps-metrics-pushed.md)
-  fluentbit: {}
-  vmagent: {}
+  fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
+  vmagent: {upstream: docker.io/victoriametrics/vmagent:latest}
   geoip_generator: {build: geoip_generator}
 commands:
   - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/vpnsvcs/backup.sh], key_ids: [pve1]}

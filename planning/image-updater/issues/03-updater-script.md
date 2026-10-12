@@ -1,6 +1,6 @@
 # 03. Updater script, accept, --dry-run, units, Trivy/skopeo install
 
-Status: ready-for-agent Type: task Repo: homelab Source: notes/image-updater-design.md "Per-image
+Status: resolved Type: task Repo: homelab Source: notes/image-updater-design.md "Per-image
 pipeline", "Scan gate and overrides", "Scheduling", "Notifications and monitoring" Blocked by: 02
 
 ## Change
@@ -34,6 +34,38 @@ pipeline", "Scan gate and overrides", "Scheduling", "Notifications and monitorin
 - `--dry-run` on homesvcs lists every image with digest-changed / scan result, changes nothing.
 - A forced CVE block leaves the old image running and sends priority 3.
 - A forced failing update points the name back at `:rollback` and sends priority 4.
+
+## Answer
+
+Done in `src/base/podman/image_updater.sh.j2` (run in place from the rendered tree, like the
+other node scripts), `image_updater.service.j2` and `image_updater.timer`.
+
+- Image list: `inv.images[node]` per node, selected by hostname; nodes are
+  `inv.nodes_with.install_image_updater`.
+- Subcommands: default run, `--dry-run`, `install SERVICE` (05's install-time gate) and
+  `accept CONTAINER` (`SUDO_USER` must be manualadmin).
+- Scans use JSON output with `--exit-code 3`, so a finding (3) and a Trivy error (anything else)
+  are told apart. Notifications list the CVE IDs.
+- State: `state/<container>` holds `<digest> <outcome>`; `state/<container>.blocked` holds when the
+  gate first blocked it. A blocked digest isn't recorded, so it's rescanned each night against the
+  new DB and `.trivyignore`. A missing local image forces a reload even if the digest matches.
+- Each image runs in an errexit subshell; any unexpected failure counts as `broken` (priority 5 at
+  the end), and registry errors as `error` (no notification).
+- Metrics: `image_updater_last_success_timestamp_seconds` (kept from the last clean run on
+  failure), `image_updater_images{result}`, `image_updater_blocked_days{container}`.
+- Timer slots come from a `slot.conf` drop-in that the `image_updater` case of
+  `src/base/debian/install_svcs.sh` writes per hostname. That case installs skopeo and Trivy (Aqua
+  apt repo) and the units, and leaves the timer as it was (06 enables it).
+- `image_updater` is in `debian_services` for secsvcs, homesvcs, websvcs and vpnsvcs, which
+  regenerates the dispatcher, sudoers and OliveTin buttons.
+- Secrets: `docker_hub_username`/`docker_hub_token` on all four nodes, `ntfy_alert_token` added
+  on homesvcs and vpnsvcs.
+- No Gatus heartbeat (dropped 2026-10-11): the completion status already reaches VictoriaMetrics
+  through the textfile metrics, and Gatus would alert through the same vmalert path.
+- Checked with a stubbed podman/skopeo/trivy harness: dry run changes nothing; a forced CVE block
+  keeps the old image and sends priority 3; a forced `failed` from auto-update retags `:rollback`
+  and sends priority 4; a DB refresh failure sends priority 5 and keeps the last success time.
+  Not run on a VM yet: that's 01's checks and 05's rollout.
 
 ## Comments
 

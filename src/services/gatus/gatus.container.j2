@@ -9,9 +9,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/twinproduction/gatus:latest
+Image=localhost/twinproduction/gatus:latest
 ContainerName=gatus
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

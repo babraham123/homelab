@@ -12,9 +12,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/victoriametrics/vmalert:latest
+Image=localhost/victoriametrics/vmalert:latest
 ContainerName=vmalert
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

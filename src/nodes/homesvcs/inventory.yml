@@ -1,13 +1,15 @@
 # homesvcs's part of the node inventory; src/nodes.jinja documents the keys.
 # yamllint disable rule:document-start rule:document-end
-debian_services: [mdns_repeater, node_exporter]
+debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
-  traefik: {subdomain: homeproxy, uptime: traefik homesvcs, uptime_tier: 1}
-  vmagent: {}
-  mosquitto: {}
-  zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt}
-  home_assistant: {subdomain: home, uptime: home assistant, uptime_tier: 1}
-  fluentbit: {}
+  traefik: {subdomain: homeproxy, uptime: traefik homesvcs, uptime_tier: 1,
+            upstream: docker.io/library/traefik:v3.7}
+  vmagent: {upstream: docker.io/victoriametrics/vmagent:latest}
+  mosquitto: {upstream: docker.io/library/eclipse-mosquitto:latest}
+  zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt, upstream: ghcr.io/koenkk/zigbee2mqtt:latest}
+  home_assistant: {subdomain: home, uptime: home assistant, uptime_tier: 1,
+                   upstream: docker.io/homeassistant/home-assistant:2026.3.1}
+  fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
 install_all_svcs: true
 commands:
   - {name: install_keys, script: nodes/homesvcs/commands.sh, key_ids: [pve1]}

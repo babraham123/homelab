@@ -59,6 +59,45 @@ sudo /root/homelab-rendered/src/base/certificates/ssh_cert_gen_windows.sh
 - Media array on pve2: `snapraid status` on websvcs; a failed disk follows [pve2
   storage](guides/pve2_storage.md#day-to-day).
 
+## Container images
+`image_updater.timer` updates every image on vpnsvcs (20:00), homesvcs (20:30), websvcs (21:00)
+and secsvcs (21:30) each night, behind a Trivy scan: a fixable HIGH or CRITICAL CVE blocks the new
+image, and the old one keeps running. Design: [ADR 0008](adr/0008-scanned-image-updater.md).
+
+| ntfy `alert` topic | Priority |
+|---|---|
+| Update blocked by the scan, daily | 3; 5 after 7 days, with the `accept` command |
+| Update failed, rolled back to the previous image | 4 |
+| Updater broken, or the Trivy DB refresh failed | 5 |
+
+`ImageUpdaterStale` fires after 36 h without a clean run.
+
+```bash
+ssh manualadmin@NODE
+sudo journalctl -u image_updater
+# What would change, with scan results; loads and restarts nothing
+sudo /root/homelab-rendered/src/base/podman/image_updater.sh --dry-run
+# A run now
+sudo systemctl start image_updater
+```
+
+- Override a blocked image, after reading its findings. Either:
+  - every digest until a date: add the CVE to `src/services/<service>/.trivyignore` with the
+    reason, then deploy
+    ```text
+    # Not reachable: the vulnerable parser only reads files from the image itself
+    CVE-2026-12345 exp:2026-12-31
+    ```
+  - that digest only: on the node, as manualadmin (never through the dispatcher or OliveTin),
+    `sudo /root/homelab-rendered/src/base/podman/image_updater.sh accept CONTAINER`. It rescans,
+    prints the findings, records the digest and notifies; the next run loads it.
+- Built images: a service with a `src/services/<service>/build.sh` (`versions`, `build TAG`) is
+  rebuilt when its release versions change. One without, like `geoip_generator`, is rebuilt by
+  installing it again.
+- Roll back by hand: `podman tag localhost/NAME:rollback localhost/NAME:TAG`, then
+  `systemctl restart CONTAINER`. The updater doesn't retry that digest; it moves on when upstream
+  does.
+
 ## Alerting pipeline test
 Once a year, with the backup restore test. Last done: never. Every alert goes vmalert → Alertmanager
 → ntfy-alertmanager → ntfy → phone, plus two emails (`+alert@` from Alertmanager, `+alert2@` from

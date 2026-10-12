@@ -10,9 +10,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/lldap/lldap:stable
+Image=localhost/lldap/lldap:stable
 ContainerName=lldap
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 
 # For LDAP, port = 3890

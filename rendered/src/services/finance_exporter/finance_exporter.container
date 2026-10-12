@@ -11,7 +11,7 @@ After=network-online.target
 [Container]
 Image=localhost/finance_exporter:latest
 ContainerName=finance_exporter
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

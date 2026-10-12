@@ -35,7 +35,8 @@
     executable, since `install` defaults to 755; a directory tree, like Traefik's `plugins-local/`,
     is removed and copied again with `cp -r`), then ends with `reload_restart <unit>` if it installs
     a unit. Runs from `/root/homelab-rendered/src`, so its paths start with `base/`, `nodes/` or
-    `services/`
+    `services/`. Before the case, `src/base/podman/image_updater.sh install SERVICE` loads the
+    service's images and passes them through the scan gate, or stops the install
   - `inventory.yml`: the node's part of the node inventory (keys documented in `src/nodes.jinja`)
   - `commands.sh` - Other tasks that run as root and are triggered remotely
   - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config
@@ -216,13 +217,19 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
 ### Add a new service
 
 1. Add Traefik route config for the VM
-1. Create service container and config files in `src/services/<service>/`
+1. Create service container and config files in `src/services/<service>/`. The quadlet takes
+   `Image=localhost/` + the upstream ref without its registry host (`localhost/library/nginx:stable`)
+   or, for an image built on the node, `localhost/<name>:latest`, and `AutoUpdate=local`. Optional:
+   `.trivyignore` for CVEs accepted until an `exp:` date, each with a `#` reason; `build.sh` for a
+   built image the updater should rebuild (`versions`, `build TAG`)
 1. If cross-VM TLS is needed, add cert/key gen to `src/base/certificates/` and update `commands.sh`
 1. Add a case for it to `install_svcs.sh`, ending with `reload_restart <unit>`
 1. Add it under `services` in `src/nodes/<node>/inventory.yml`, in install order, with its
    `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health check isn't
-   `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions). This
-   adds the dispatcher case, sudoers grant, OliveTin button, DNS/SNI routing and uptime check
+   `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions) and
+   its image (`upstream: <full ref>` or `build: <name>`; `update_last: true` for the notification
+   path on secsvcs). This adds the dispatcher case, sudoers grant, OliveTin button, DNS/SNI
+   routing, uptime check and the image's place in the nightly update
 1. Update Authelia config if OIDC auth is available (`src/services/authelia/`)
 1. Add Homepage dashboard entry (`src/services/homepage/`)
 1. Update the relevant guide in `docs/guides/`

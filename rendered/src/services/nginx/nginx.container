@@ -9,9 +9,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/library/nginx:stable
+Image=localhost/library/nginx:stable
 ContainerName=nginx
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 
 # Listening to port 8100

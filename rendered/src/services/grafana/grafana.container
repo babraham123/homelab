@@ -14,9 +14,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/grafana/grafana-oss:latest
+Image=localhost/grafana/grafana-oss:latest
 ContainerName=grafana
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

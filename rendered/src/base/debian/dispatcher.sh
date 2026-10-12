@@ -69,6 +69,9 @@ case "$(hostname)" in
       install_node_exporter)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
         ;;
+      install_image_updater)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
+        ;;
       install_traefik)
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh traefik
         ;;
@@ -218,6 +221,9 @@ case "$(hostname)" in
       install_node_exporter)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
         ;;
+      install_image_updater)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
+        ;;
       install_postgres)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh postgres
         ;;
@@ -324,6 +330,9 @@ case "$(hostname)" in
       install_node_exporter)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
         ;;
+      install_image_updater)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
+        ;;
       install_headscale)
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
         ;;
@@ -375,6 +384,9 @@ case "$(hostname)" in
         ;;
       install_node_exporter)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        ;;
+      install_image_updater)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
         ;;
       install_traefik)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik

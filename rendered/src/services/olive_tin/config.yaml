@@ -173,6 +173,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: homesvcs Install Image Updater
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_image_updater
+              id: homesvcs_install_image_updater
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: homesvcs Install Traefik
               icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
               shell: ssh autoadmin@homesvcs install_traefik
@@ -405,6 +413,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: secsvcs Install Image Updater
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_image_updater
+              id: secsvcs_install_image_updater
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: secsvcs Install Postgres
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_postgres
@@ -561,6 +577,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: vpnsvcs Install Image Updater
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_image_updater
+              id: vpnsvcs_install_image_updater
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: vpnsvcs Install Headscale
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs install_headscale
@@ -649,6 +673,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_node_exporter
               id: websvcs_install_node_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Image Updater
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_image_updater
+              id: websvcs_install_image_updater
               maxConcurrent: 1
               timeout: 60
 

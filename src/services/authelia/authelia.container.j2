@@ -11,9 +11,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=docker.io/authelia/authelia:4.39
+Image=localhost/authelia/authelia:4.39
 ContainerName=authelia
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 
 Network=net.network

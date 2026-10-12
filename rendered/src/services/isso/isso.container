@@ -9,9 +9,9 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=ghcr.io/isso-comments/isso:release
+Image=localhost/isso-comments/isso:release
 ContainerName=isso
-AutoUpdate=registry
+AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true

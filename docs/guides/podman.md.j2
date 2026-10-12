@@ -36,11 +36,6 @@ apt -y upgrade
 apt -y install podman podman-netavark podman-aardvark-dns podman-compose libgpgme11-dev buildah libyajl2 uidmap
 ```
 
-- Enable container auto updating
-```bash
-systemctl enable --now podman-auto-update.timer
-```
-
 ## Networking
 - Account for conflicts between the podman network and the firewall,
   [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
@@ -105,6 +100,19 @@ src/base/debian/install_svcs.sh node_exporter
 # Use {{ secsvcs.container_subnet }}.7 on secsvcs, {{ websvcs.container_subnet }}.7 on websvcs, {{ homesvcs.container_subnet }}.7 on homesvcs,
 # {{ vpnsvcs.container_subnet }}.7 on vpnsvcs
 ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
+```
+
+## Image updater
+Quadlets only run `localhost/` images. The image updater downloads (or builds) each one, scans it
+with Trivy and loads it, when a service is installed and every night after: see
+[Maintenance](../maintenance.md#container-images).
+- The node's secrets file needs `docker_hub_username`, `docker_hub_token` and `ntfy_alert_token`
+- Install it before any service, since every `install_svcs.sh` case scans its images through it
+```bash
+cd /root/homelab-rendered
+src/base/debian/install_svcs.sh image_updater
+systemctl enable --now image_updater.timer
+systemctl list-timers image_updater.timer
 ```
 
 ## Backups
