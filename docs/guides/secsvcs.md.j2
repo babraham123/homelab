@@ -81,15 +81,15 @@ journalctl -eu authelia
     `self_signed_cert_gen.sh` (they install every node's, so restart the secure services after)
   - `crowdsec_bouncer_vpnsvcs` in `/root/secrets/secsvcs.yaml` on pve1, then `sudo
     /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
-- Admit the VPS to the LAPI's published port. While the router SNATs tailnet traffic (router/04) the
-  VPS arrives as the router's address on this subnet; after that, as its tailnet IP
+- Admit the VPS to the LAPI's published port. The router routes tailnet traffic without SNAT
+  (router/04), so the VPS arrives from its tailnet IP
 ```bash
 sudo su
 cd /root/homelab-rendered
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
-ufw allow in from {{ pve1.subnet }}.1 to any port 8080 proto tcp
-ufw route allow in on $NET_IFACE out on $POD_IFACE from {{ pve1.subnet }}.1 to any port 8080 proto tcp
+ufw allow in from {{ vpnsvcs.tailnet_ip }} to any port 8080 proto tcp
+ufw route allow in on $NET_IFACE out on $POD_IFACE from {{ vpnsvcs.tailnet_ip }} to any port 8080 proto tcp
 ```
 - Install and check
 ```bash

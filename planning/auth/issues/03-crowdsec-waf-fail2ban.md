@@ -1,7 +1,7 @@
 # 03. Edge defense: CrowdSec bans at the VPS, CrowdSec WAF in Traefik, fail2ban for SSH
 
 Status: ready-for-agent Type: task Repo: homelab Source: review finding 14; maintainer request
-2026-10-11 (replaces the HAProxy TODO block) Blocked by: 06 (part B only)
+2026-10-11 (replaces the HAProxy TODO block)
 
 ## Problem
 
@@ -74,7 +74,7 @@ runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet 
 4. Monitoring: vmagent scrapes the engine's and the bouncer's Prometheus endpoints; alerts when the
    bouncer's last pull is older than 10 min or the LAPI is down; a Grafana dashboard.
 
-**Part B: Traefik** (needs auth/06, so bans key on the real client IP)
+**Part B: Traefik** (bans key on the real client IP, auth/06)
 5. `crowdsec_appsec` container on secsvcs, homesvcs and websvcs; the vendored bouncer plugin; a
    `crowdsec` middleware in `src/services/traefik/dynamic/` on every `websecure` router.
 6. CRS in-band after the tuning window.

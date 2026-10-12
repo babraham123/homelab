@@ -57,21 +57,22 @@ entryPoints:
           scheme: https
     proxyProtocol:
       insecure: false
-      # Tailscale subnet IP needed due to https://github.com/tailscale/tailscale/issues/5573
-      trustedIPs: [{{ vpnsvcs.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
+      # HAProxy reaches Traefik over the tailnet; pfSense routes it without SNAT, so it arrives
+      # from vpnsvcs's tailnet address
+      trustedIPs: [{{ vpnsvcs.tailnet_ip }}]
     forwardedHeaders:
       insecure: false
-      trustedIPs: [{{ vpnsvcs.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
+      trustedIPs: [{{ vpnsvcs.tailnet_ip }}]
   websecure:
     address: ":443/tcp"
     http:
       aliasHeadersStrategy: delete
     proxyProtocol:
       insecure: false
-      trustedIPs: [{{ vpnsvcs.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
+      trustedIPs: [{{ vpnsvcs.tailnet_ip }}]
     forwardedHeaders:
       insecure: false
-      trustedIPs: [{{ vpnsvcs.ip }}, {{ pve1.subnet }}.1, {{ pve2.subnet }}.1]
+      trustedIPs: [{{ vpnsvcs.tailnet_ip }}]
   smtp:
     address: ":465/tcp"
     http:

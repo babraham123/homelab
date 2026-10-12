@@ -1,8 +1,7 @@
 # /etc/opt/crowdsec/config/parsers/s02-enrich/homelab-allowlist.yaml
 # Ref: https://docs.crowdsec.net/docs/next/log_processor/whitelist/format
 # Events from these sources never reach a scenario, so they never become decisions.
-# Banning the VPS's addresses or the router's (the source of tailnet traffic while it
-# SNATs, router/04) would cut off all public traffic.
+# Banning the VPS's public or tailnet address would cut off all public traffic.
 ---
 name: homelab/allowlist
 description: "Never ban the homelab's own addresses"

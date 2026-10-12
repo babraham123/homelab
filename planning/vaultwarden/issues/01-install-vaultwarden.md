@@ -5,7 +5,6 @@ Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26 ("the vault TODO sprinkled in a few places"; public if the
 Vaultwarden hardening guidance is sufficient)
-Blocked by: auth/06
 
 Settings below are checked against Vaultwarden 1.37.4 and Authelia v4.39.28; sources for each are
 in [research-01.md](../research-01.md).
@@ -217,3 +216,6 @@ Not adopted from the guide: hiding under a secret subdir. With `SSO_ONLY` and Au
 - 2026-10-12: folded in [research-01.md](../research-01.md): 1.37.4, non-root volume ownership,
   no `secure-headers` on the Vaultwarden routers, a group-gated Authelia policy, Basic client auth,
   a 30-day refresh lifespan, `SSO_SIGNUPS_ALLOWED`, `AddHost`, and secrets passed with `Secret=`.
+- 2026-10-12: no longer blocked by auth/06. The router routes tailnet traffic without SNAT through
+  a System Patches change (router/04), so Traefik gets the real client IP; auth/06 stays open to
+  watch for pfsense/FreeBSD-ports#1462 shipping.

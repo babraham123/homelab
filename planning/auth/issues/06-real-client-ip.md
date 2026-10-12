@@ -1,6 +1,6 @@
 # 06. Verify the real client IP reaches Traefik and apps through HAProxy
 
-Status: ready-for-human Type: task Blocked by: router/04 Repo: homelab Source: maintainer request
+Status: ready-for-human Type: task Repo: homelab Source: maintainer request
 2026-09-26 (copyparty/01 "keep the client IP check"; needed again by vaultwarden/01)
 
 ## Problem
@@ -45,6 +45,21 @@ the router can also assert a client IP.
 - Six failed Authelia logins for different usernames from the phone get the phone's IP banned by
   CrowdSec (auth/03), not the VPS.
 
+## Recurring check until pfsense/FreeBSD-ports#1462 ships
+
+The no-SNAT routing this ticket relies on is a System Patches change on the router (router/04). A
+pfSense-pkg-Tailscale update overwrites it without warning, and Traefik then logs every public client
+as the gateway `.1`. Monthly, and after every pfSense or Tailscale package update:
+1. `gh pr view 1462 -R pfsense/FreeBSD-ports --json state,mergedAt`, and the installed
+   pfSense-pkg-Tailscale version (System → Package Manager → Installed Packages).
+2. System → Patches lists the patch as applied. If not, re-apply it and restart Tailscale twice
+   (router/04).
+3. `procstat -e $(pgrep tailscaled)` on the router shows `TS_DEBUG_NETSTACK_SUBNETS=0`, and
+   Traefik's access log shows public clients' own IPs, not `.1`.
+
+When an installed package version includes #1462: delete the patch, leave **SNAT Subnet Routes**
+unchecked, repeat check 3, then resolve this ticket and router/04.
+
 ## Comments
 
 - 2026-09-26: the SNAT that forces the `.1` gateway entries is removable once router/04 (kernel
@@ -68,3 +83,8 @@ the router can also assert a client IP.
     assert a client IP, LAN/VLAN clients can't (inter-VLAN routing doesn't SNAT).
   **Remaining:** the acceptance checks (phone on mobile data, LAN, forged header, CrowdSec IP ban),
   and dropping the `.1` entries from `src/services/traefik/static.yml.j2` once router/04 lands.
+- 2026-10-12: router/04's no-SNAT routing is live via the System Patches change (env var confirmed
+  with `procstat`). Both Traefik `trustedIPs` lists are now only `vpnsvcs.tailnet_ip` (new var), the
+  secsvcs CrowdSec LAPI rule admits the VPS by its tailnet IP, and `docs/networking.md` matches.
+  vaultwarden/01, copyparty/01 and auth/03 part B no longer wait on this ticket; it stays open for
+  the acceptance checks (`notes/apply-since-5a50097.md` step 16) and the recurring check above.

@@ -187,12 +187,12 @@ key on the client IP, so each hop passes it on and trusts it only from the hop b
 | Traefik → app | `X-Forwarded-For` and `X-Real-Ip`, with the client IP Traefik resolved | the app's trusted-proxy setting |
 | Traefik → Authelia (ForwardAuth, `trustForwardHeader`) | `X-Forwarded-For` | any peer that reaches :9091 |
 
-Both Traefik `trustedIPs` lists are vpnsvcs plus the pve1 and pve2 subnet gateways (`.1`).
-Tailscale subnet routing on pfSense SNATs tailnet traffic to the gateway address
-([tailscale#5573](https://github.com/tailscale/tailscale/issues/5573)), so HAProxy's connections
-arrive from `.1`. Any tailnet client routed through pfSense arrives from `.1` too, so it can assert
-any client IP; LAN and VLAN clients are routed without SNAT and can't. Kernel subnet routing
-without SNAT (router/04) removes the gateway entries.
+Both Traefik `trustedIPs` lists hold only vpnsvcs's tailnet address (`vpnsvcs.tailnet_ip`).
+pfSense routes tailnet traffic in the kernel without SNAT (router/04), so HAProxy's connections
+keep that source address and every other tailnet, LAN or VLAN client arrives from its own address,
+which can't assert a client IP. If pfSense falls back to SNAT (for example after a Tailscale package
+update overwrites the System Patches change), HAProxy's connections arrive from the subnet gateway
+`.1`, which isn't trusted: Traefik ignores the PROXY header and logs every public client as `.1`.
 
 Per app:
 - **Authelia** has no trusted-proxy setting: it takes the first `X-Forwarded-For` entry from any
