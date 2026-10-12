@@ -119,5 +119,5 @@ exit
 - Generate the SSH certs
 ```
 ssh manualadmin@pve1
-sudo /root/homelab-rendered/src/base/certificates/ssh_cert_gen_windows.sh
+sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ```

@@ -47,7 +47,7 @@ ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N ""
 
 # Wait until all of the VMs have been created. On the first run it will
 # ask you for the root password of various hosts.
-/root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 # The cert for the gaming VM will be generated later
 ```
 
@@ -193,8 +193,8 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/w
 - Create domain specific keys and certs
 ```bash
 # Wait until the services in secsvcs, websvcs and homesvcs are setup but not yet started
-/root/homelab-rendered/src/base/certificates/self_signed_key_gen.sh
-/root/homelab-rendered/src/base/certificates/self_signed_cert_gen.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/self_signed_key_gen.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/self_signed_cert_gen.sh
 ```
 
 ## ACME Certificates
@@ -208,7 +208,7 @@ TCD_VERSION=$(curl -s "https://api.github.com/repos/ldez/traefik-certs-dumper/re
 wget "https://github.com/ldez/traefik-certs-dumper/releases/download/v${TCD_VERSION}/traefik-certs-dumper_v${TCD_VERSION}_linux_amd64.tar.gz" -O - | tar xz
 mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
 # Wait until the services in secsvcs, websvcs and homesvcs are started
-/root/homelab-rendered/src/base/certificates/acme_transfer.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh
 ```
 
 ## Notifications
@@ -235,7 +235,7 @@ vim /etc/apparmor.d/usr.bin.msmtp +82
 ```bash
 apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
 cd /root/homelab-rendered
-cp src/base/certificates/msmtprc /etc
+cp src/base/debian/msmtprc /etc
 src/nodes/pve1/install_svcs.sh cert_notifier
 ```
 

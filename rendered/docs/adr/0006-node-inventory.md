@@ -35,6 +35,8 @@ inferred, per node:
   `subdomain`, `uptime` (the Gatus endpoint name), `uptime_path`, `uptime_tier` and
   `uptime_conditions`.
 - `install_all_svcs: true` on the container VMs only.
+- `dirs` per service: the `src/` dirs `upload_src.sh` ships to the node besides `src/base/` and
+  its own node dir (`tools/node_dirs.sh`), so each node holds only the services it runs.
 - `triggers` for the gaming VM's PowerShell allowlist.
 
 `tools/render_src.sh` appends it to `vars.yml` as `nodes:`, since `jinjanate` takes a single data
@@ -48,6 +50,7 @@ Hand-written files stay the source for everything else: `routes.yml`, quadlets, 
 
 - a node's `services` are exactly the cases in its `install_svcs.sh`;
 - `debian_services` and every `commands[].script` + name exist as cases;
+- every node and service dir a node's files use is among the dirs it is shipped;
 - subdomains are unique, and the secsvcs/homesvcs subdomains equal the `Host()` rules in that node's
   `routes.yml` (websvcs is the default route, so its subdomains only name uptime URLs).
 

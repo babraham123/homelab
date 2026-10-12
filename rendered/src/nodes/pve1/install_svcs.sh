@@ -11,8 +11,8 @@ cd "$rendered"
 
 case $1 in
   cert_notifier)
-    install_bin base/certificates/cert_notifier.sh
-    install -D -m 644 -t /etc/systemd/system base/certificates/cert_notifier.{service,timer}
+    install_bin nodes/pve1/certificates/cert_notifier.sh
+    install -D -m 644 -t /etc/systemd/system nodes/pve1/certificates/cert_notifier.{service,timer}
 
     systemctl daemon-reload
     systemctl enable cert_notifier.service

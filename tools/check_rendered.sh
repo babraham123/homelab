@@ -13,6 +13,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 all_vars=$2
 [[ "$all_vars" == /* ]] || all_vars="${PWD}/${all_vars}"
+tools=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 cd "$1"
 
 # Traefik's fallback route: it serves hosts that have no DNS or SNI entry, so it may
@@ -235,6 +236,49 @@ check_olive_tin() {
   done < <(comm -13 <(lines "$buttons") <(lines "$referenced"))
 }
 
+# upload_src.sh ships a debian node all of base/ but only the node and service dirs
+# node_dirs.sh lists, in the same tree shape, so every nodes/ and services/ path it uses
+# must be among them. That is every absolute (/root/homelab-rendered/src/...,
+# ${rendered}/...) or ../ path in its node and service dirs, plus the src/-relative paths
+# in its node dir, dispatcher lines and debian_services cases. base/ is skipped: its
+# scripts serve every node and name other nodes' dirs only in what those nodes run,
+# like svcs_lib.sh's traefik install.
+check_upload_dirs() {
+  local anchored='(homelab-rendered/src/|\$\{?rendered\}?/|\.\./)'
+  local node paths path svc ref
+  # Prints the nodes/ and services/ paths in stdin that follow the prefix regex $1,
+  # without comment lines
+  src_refs() {
+    grep -v '^[[:space:]]*#' | grep -oE "$1(nodes|services)/[A-Za-z0-9_.-]+" | \
+      grep -oE '(nodes|services)/[A-Za-z0-9_.-]+$' || true
+  }
+  for node in $(facts node); do
+    if ! paths=$("${tools}/node_dirs.sh" "$node" 2>&1); then
+      fail "$(inventory "$node")" "${paths#"error: $(inventory "$node"): "}"
+      continue
+    fi
+    [ -n "$paths" ] || continue
+    for ref in $(
+      {
+        for path in $paths; do [ "$path" == base ] || echo "src/${path}"; done | \
+          xargs grep -rhI '' | src_refs "$anchored"
+        {
+          grep -rhI '' "src/nodes/${node}"
+          facts run | sed -n "s/^${node} //p"
+          for svc in $(yq '.debian_services // [] | .[]' "$(inventory "$node")"); do
+            awk -v c="${svc})" '$1 == c {f=1; next} f && /;;/ {exit} f' src/base/debian/install_svcs.sh
+          done
+        } | src_refs "(${anchored}|^|[^A-Za-z0-9_./-])"
+      } | sort -u
+    ); do
+      # Other paths that happen to match, like a container's /data/services/
+      [ -e "src/${ref}" ] || continue
+      grep -qxF "$ref" <<< "$paths" || \
+        fail "$(inventory "$node")" "uses src/${ref}, which upload_src.sh doesn't ship to it; add it to a service's dirs"
+    done
+  done
+}
+
 check_yaml
 check_json
 check_markdown
@@ -246,4 +290,5 @@ check_install_cases
 check_unique_subdomains
 check_routes
 check_olive_tin
+check_upload_dirs
 exit "$status"

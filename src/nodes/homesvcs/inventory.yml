@@ -4,7 +4,7 @@ debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
   traefik: {subdomain: homeproxy, uptime: traefik homesvcs, uptime_tier: 1,
             upstream: docker.io/library/traefik:v3.7}
-  vmagent: {upstream: docker.io/victoriametrics/vmagent:latest}
+  vmagent: {upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
   mosquitto: {upstream: docker.io/library/eclipse-mosquitto:latest}
   zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt, upstream: ghcr.io/koenkk/zigbee2mqtt:latest}
   home_assistant: {subdomain: home, uptime: home assistant, uptime_tier: 1,

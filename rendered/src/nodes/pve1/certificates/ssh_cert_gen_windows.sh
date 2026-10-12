@@ -1,17 +1,17 @@
 #!/bin/bash
 # Generate SSH certificates and distribute them to all servers.
 # Usage:
-#   /root/homelab-rendered/src/base/certificates/ssh_cert_gen_windows.sh
+#   /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 
 # shellcheck source=src/base/lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../../base/lib.sh"
 
 require_root
 require_reachable gaming
 
 cd /root/ssh
 
-echo "@cert-authority *.{{ site.url }} $(cat ca_ssh_host_key.pub)" > known_hosts
+echo "@cert-authority *.janedoe.com $(cat ca_ssh_host_key.pub)" > known_hosts
 chmod 644 known_hosts
 
 ssh -M -S ~/.ssh/ssh-socket-%r-%h-%p -f -N admin@gaming
@@ -21,7 +21,7 @@ function scpsoc() { scp -o ControlPath=~/.ssh/ssh-socket-%r-%h-%p "$@"; }
 scpsoc ca_ssh_key.pub admin@gaming:"c:/ProgramData/ssh"
 
 scpsoc admin@gaming:"c:/ProgramData/ssh/ssh_host_ed25519_key.pub" public/gaming.ssh_host_key.pub
-ssh-keygen -s ca_ssh_host_key -I gaming -h -n "gaming.{{ site.url }},{{ gaming.ip }}" -V +395d public/gaming.ssh_host_key.pub
+ssh-keygen -s ca_ssh_host_key -I gaming -h -n "gaming.janedoe.com,192.168.2.21" -V +395d public/gaming.ssh_host_key.pub
 chmod 444 public/gaming.ssh_host_key-cert.pub
 scpsoc public/gaming.ssh_host_key-cert.pub admin@gaming:"c:/ProgramData/ssh/ssh_host_key_cert.pub"
 scpsoc known_hosts admin@gaming:"c:/ProgramData/ssh/ssh_known_hosts"

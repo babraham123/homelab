@@ -189,3 +189,42 @@ test_olive_tin_unknown_case() {
 error: src/services/olive_tin/config.yaml: runs ssh autoadmin@websvcs install_certs, which isn't a websvcs dispatcher case
 EOF
 }
+
+# secsvcs is a debian node in the fixture, so upload_src.sh ships it only base/ and its
+# node_dirs.sh paths; a case copying from a dir no service of it names isn't among them
+test_upload_dir_not_shipped() {
+  fixture_tree
+  mkdir -p "${tmp}/tree/src/services/shared"
+  touch "${tmp}/tree/src/services/shared/db.conf"
+  edit src/nodes/secsvcs/install_svcs.sh 's|mkdir -p /var/opt/db|cp services/shared/db.conf /var/opt/db|'
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/inventory.yml: uses src/services/shared, which upload_src.sh doesn't ship to it; add it to a service's dirs
+EOF
+}
+
+# The router isn't a debian node: it gets only its own dir, by a path of its own
+test_upload_dir_other_node_unchecked() {
+  fixture_tree
+  mkdir -p "${tmp}/tree/src/services/shared"
+  edit src/nodes/router/commands.sh 's|^case|cp services/shared/x /tmp\ncase|'
+  out=$(check_tree) || flunk "$out"
+  assert_eq "$out" < /dev/null
+}
+
+test_upload_dir_in_service_dirs() {
+  fixture_tree
+  mkdir -p "${tmp}/tree/src/services/shared"
+  touch "${tmp}/tree/src/services/shared/db.conf"
+  edit src/nodes/secsvcs/install_svcs.sh 's|mkdir -p /var/opt/db|cp services/shared/db.conf /var/opt/db|'
+  edit src/nodes/secsvcs/inventory.yml 's|^  db: \{\}|  db: {dirs: [services/shared]}|'
+  out=$(check_tree) || flunk "$out"
+  assert_eq "$out" < /dev/null
+}
+
+test_upload_dir_missing() {
+  fixture_tree
+  edit src/nodes/secsvcs/inventory.yml 's|^  db: \{\}|  db: {dirs: [services/nope]}|'
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/inventory.yml: src/services/nope doesn't exist
+EOF
+}

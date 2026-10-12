@@ -1,10 +1,10 @@
 #!/bin/bash
 # Generate self-signed certificates and distribute them to the secsvcs, websvcs and homesvcs servers.
 # Usage:
-#   /root/homelab-rendered/src/base/certificates/self_signed_cert_gen.sh
+#   /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_cert_gen.sh
 
 # shellcheck source=src/base/lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../../base/lib.sh"
 
 # site.name is free text: backslash-escaped for -subj, where / and + separate fields,
 # then shell-quoted once here rather than inside each -subj.

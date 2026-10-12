@@ -389,7 +389,7 @@ vim /etc/apparmor.d/usr.bin.msmtp +82
 ```
 ```bash
 apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
-cp /root/homelab-rendered/src/base/certificates/msmtprc /etc
+cp /root/homelab-rendered/src/base/debian/msmtprc /etc
 echo test | msmtp -a default jdoe@gmail.com
 ```
 - Install the checker

@@ -148,7 +148,7 @@ endpoints:
     url: "https://books.janedoe.com/api/health"
 
 
-  # Internal CA, year-long certs (src/base/certificates/self_signed_cert_gen.sh). LDAPS is
+  # Internal CA, year-long certs (src/nodes/pve1/certificates/self_signed_cert_gen.sh). LDAPS is
   # the one TLS-on-connect service without client-certificate auth: Postgres negotiates
   # TLS after connecting and Mosquitto requires a client certificate, so cert_notifier
   # covers those. No dns-resolver here: the container's resolver is the internal DNS.

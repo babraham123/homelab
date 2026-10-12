@@ -105,7 +105,7 @@ timers; see the [reading guide](guides/reading.md).
 pve1, pve2, pbs2 and the router serve their own web UIs as pve1/pve2/pbs2/router.janedoe.com:
 - websvcs Traefik's ACME routes (`src/nodes/websvcs/traefik/acme_routes.yml.j2`) only obtain the
   certs; requests to them get a 403
-- `acme_transfer.sh` (`src/base/certificates/`) installs the certs on each host
+- `acme_transfer.sh` (`src/nodes/pve1/certificates/`) installs the certs on each host
 
 ## Observability
 

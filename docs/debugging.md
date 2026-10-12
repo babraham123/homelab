@@ -470,7 +470,7 @@ openssl verify -CAfile /root/ca/intermediate/certs/ca-chain.cert.pem CERT.pem
 
 ### Signing a cert manually with the internal CA
 
-Normally `src/base/certificates/self_signed_cert_gen.sh` does this. To sign one CSR by hand (on
+Normally `src/nodes/pve1/certificates/self_signed_cert_gen.sh` does this. To sign one CSR by hand (on
 pve1; the CA passphrase is stored nowhere, so type it):
 
 ```bash

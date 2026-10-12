@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copies the source code to a particular homelab server.
+# Copies the rendered files a particular homelab server uses to it.
 # Run from root of the project directory.
 # Usage:
 #   cd ~/project/dir
@@ -29,8 +29,18 @@ if [[ "$host" == "gaming" ]]; then
   exit 0
 fi
 
+# Only the src/ paths this node uses, in the same tree shape so the
+# /root/homelab-rendered/src/... paths in its scripts hold
+paths=$(cd "$project_dir" && tools/node_dirs.sh "$host")
+[ -n "$paths" ] || die "${host} isn't a debian node (tools/node_dirs.sh), so nothing to upload"
+stage=$(mktemp -d)
+trap 'rm -rf "$stage"' EXIT
+mkdir -p "${stage}/homelab-rendered/src"
+# shellcheck disable=SC2086 # one path per word
+tar -C "${project_dir}/src" -cf - $paths | tar -C "${stage}/homelab-rendered/src" -xf -
+
 # vpnsvcs's SSH port comes from ~/.ssh/config (src/base/debian/ssh_config)
-scp -qr -o LogLevel=QUIET "$project_dir" "manualadmin@${host}.${url}:/home/manualadmin"
+scp -qr -o LogLevel=QUIET "${stage}/homelab-rendered" "manualadmin@${host}.${url}:/home/manualadmin"
 echo "${host} root password:"
 ssh -t "manualadmin@${host}.${url}" '
 sudo chown -R root:root homelab-rendered

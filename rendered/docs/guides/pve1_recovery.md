@@ -35,7 +35,7 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
 | `/root/ca/private/ca.key.pem`, `certs/ca.cert.pem`, `index.txt`, `serial`, `crlnumber` | root CA | Escrow, PBS host backup | [Only the private CA is lost](#only-the-private-ca-is-lost) |
 | `/root/ca/intermediate/private/intermediate.key.pem`, `certs/intermediate.cert.pem`, `certs/ca-chain.cert.pem`, `index.txt`, `serial`, `crlnumber`, `crl/` | intermediate CA | Escrow, PBS host backup | same |
 | `/root/ca/intermediate/private/*.janedoe.com.key.pem`, `certs/`, `csr/` | per-service keys, certs and CSRs | Escrow (part of `/root/ca`), PBS host backup | `self_signed_key_gen.sh` + `self_signed_cert_gen.sh` |
-| `/root/ca/openssl.cnf`, `/root/ca/intermediate/openssl.cnf` | CA config | Regenerate | rendered `src/base/certificates/openssl.{root,intermediate}.cnf` |
+| `/root/ca/openssl.cnf`, `/root/ca/intermediate/openssl.cnf` | CA config | Regenerate | rendered `src/nodes/pve1/certificates/openssl.{root,intermediate}.cnf` |
 | `/root/ssh/ca_ssh_key`, `ca_ssh_key.pub` | SSH user CA: signs client keys for `manualadmin`/`autoadmin` | Escrow, PBS host backup | [Only the SSH CA is lost](#only-the-ssh-ca-is-lost) |
 | `/root/ssh/ca_ssh_host_key`, `ca_ssh_host_key.pub` | SSH host CA: behind every `@cert-authority` line | Escrow, PBS host backup | same |
 | `/root/ssh/known_hosts`, `public/`, `date_ssh_certs*.txt` | host pubkeys and certs, `@cert-authority` line, renewal timestamps | Regenerate | `ssh_cert_gen.sh`, `ssh_cert_gen_windows.sh` |
@@ -187,7 +187,7 @@ ssh-keygen -s /root/ssh/ca_ssh_key -I pve1 -n manualadmin,autoadmin -V +395d /ro
 # Trust the host CA before contacting other hosts; same line ssh_cert_gen.sh writes
 echo "@cert-authority *.janedoe.com $(cat /root/ssh/ca_ssh_host_key.pub)" > /etc/ssh/ssh_known_hosts
 # Signs pve1's new host key and refreshes the rest; needs pve2, vpnsvcs, websvcs, devtop and router up
-/root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 ```
 - `ssh_cert_gen_windows.sh` isn't needed: the gaming VM's host cert and the CA are unchanged
 
@@ -206,7 +206,7 @@ cd /root/ca
 
 ### 12. Certificates
 ```bash
-/root/homelab-rendered/src/base/certificates/acme_transfer.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh
 ```
 - Refills `/root/acme`, installs pve1's `pveproxy` cert, pushes certs to pve2, pbs2 and the router,
   re-pins the `pbs2` fingerprint
@@ -287,12 +287,12 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
 - Rebuild before the next [yearly renewal](../maintenance.md#refresh-certificates), in one sitting:
   services reject each other until all have the new chain
 - Follow [CA infra](./pve1.md#ca-infra) in full: new root and intermediate, new passphrases,
-  `openssl.cnf` from the rendered `src/base/certificates/openssl.{root,intermediate}.cnf`. Its
+  `openssl.cnf` from the rendered `src/nodes/pve1/certificates/openssl.{root,intermediate}.cnf`. Its
   `upload` loop installs the chain on every host
 - Re-issue and redistribute every service key and cert:
 ```bash
-/root/homelab-rendered/src/base/certificates/self_signed_key_gen.sh
-/root/homelab-rendered/src/base/certificates/self_signed_cert_gen.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/self_signed_key_gen.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/self_signed_cert_gen.sh
 ```
 - Restart the secure services on secsvcs, homesvcs and websvcs, as the script asks
 - Browser TLS is Let's Encrypt; if you added the private CA to a device's trust store by hand,
@@ -305,10 +305,10 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
 - Re-sign and redistribute everything, then the gaming VM
   ([Maintenance](../maintenance.md#refresh-certificates)):
 ```bash
-/root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 ssh autoadmin@router start_pve2
 ssh autoadmin@pve2 start_gaming_vm
-/root/homelab-rendered/src/base/certificates/ssh_cert_gen_windows.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ```
 - Expect host-key prompts: pve1 trusts the new host CA before the script reaches every host
 - Replace the `@cert-authority` line in `~/.ssh/known_hosts` on the workstation and other clients
@@ -318,7 +318,8 @@ ssh autoadmin@pve2 start_gaming_vm
 - Take it from the newest `/root/backups/repo/homelab-*.tar.gz` on pve1 (`vars.yml` is in the
   archive root), the PBS host backup, or escrow
 - None of those: reconstruct it by diffing a render of the template against a host's
-  `/root/homelab-rendered`, rendered with the real values at the last deploy
+  `/root/homelab-rendered`, rendered with the real values at the last deploy. A host holds only
+  its own `src/` paths, so diff several (pve1 and each container VM) to cover every value
 ```bash
 # On the workstation, repo root, ideally at the last deployed commit
 cp vars.template.yml vars.yml

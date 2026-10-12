@@ -9,7 +9,8 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   `install_svcs.sh`, `commands.sh` and `traefik/` config, and an `inventory.yml`; the router and
   gaming also hold their own dispatcher (and the router its `sudoers`). The nodes: `pve1`, `pve2`,
   `router`, `vpnsvcs`, `secsvcs`, `homesvcs`, `websvcs`, `devtop`, `gaming`. `src/base/` holds the
-  setups they share (`debian/`, `podman/`, `macos/`, ...).
+  setups they share (`debian/`, `podman/`, ...); `src/clients/` holds setups for devices that
+  aren't nodes, such as the personal Mac.
 - **service** — a directory under `src/services/`; one containerized (or host-level) application:
   its quadlet `*.container` file, volumes, and config templates.
 - **container VM** — one of `secsvcs`, `homesvcs`, `websvcs`: a Debian VM running Podman quadlets
@@ -40,8 +41,8 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   night, and when a service is installed, it downloads (or builds) each image, passes it through the
   **scan gate** (Trivy: a fixable HIGH or CRITICAL CVE blocks it, unless a `.trivyignore` entry or
   `accept` overrides it) and loads it under its `localhost/` name, which is all a quadlet can run.
-- **rendered tree** — `/root/homelab-rendered` on each node: the uploaded output of a render, the
-  only thing scripts on the node execute from.
+- **rendered tree** — `/root/homelab-rendered` on each node: the part of a render that node uses
+  (`tools/node_dirs.sh`), the only thing scripts on the node execute from.
 
 ## Access model
 
@@ -69,7 +70,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   Traefik (TLS termination + ForwardAuth). Documented in [docs/networking.md](docs/networking.md).
 - **site domain** — the public domain (`janedoe.com` in templates); **tail domain** — the
   Tailscale/Headscale mesh domain (`janedoe.ts.net` in templates).
-- **internal CA** — the two-tier private X.509 hierarchy in `src/base/certificates/` (root +
+- **internal CA** — the two-tier private X.509 hierarchy in `src/nodes/pve1/certificates/` (root +
   intermediate) for service-to-service TLS. Distinct from the **SSH CA** (host certificates) and
   from **ACME** (public Let's Encrypt certs via Traefik).
 - **VLAN-ID-as-third-octet** — each VLAN's subnet embeds its ID: VLAN 10 → `192.168.10.0/24`. VLAN

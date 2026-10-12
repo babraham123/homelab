@@ -34,20 +34,20 @@ You should receive email notifications several weeks in advance of certificate e
 ```bash
 ssh manualadmin@pve1
 # Copy over the ACME generated certs 
-sudo /root/homelab-rendered/src/base/certificates/acme_transfer.sh
+sudo /root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh
 ```
 
 - Once a year
 ```bash
 ssh manualadmin@pve1
 # Generate self signed certs
-sudo /root/homelab-rendered/src/base/certificates/self_signed_cert_gen.sh
+sudo /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_cert_gen.sh
 # Generate SSH certs
-sudo /root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
+sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 # Generate SSH certs for the Gaming VM
 ssh autoadmin@router start_pve2
 ssh autoadmin@pve2 start_gaming_vm
-sudo /root/homelab-rendered/src/base/certificates/ssh_cert_gen_windows.sh
+sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ```
 
 ## Backups

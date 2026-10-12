@@ -1,10 +1,10 @@
 #!/bin/bash
 # Generate SSL keys and distribute them to the secsvcs, websvcs and homesvcs servers.
 # Usage:
-#   /root/homelab-rendered/src/base/certificates/self_signed_key_gen.sh
+#   /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_key_gen.sh
 
 # shellcheck source=src/base/lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../../base/lib.sh"
 
 require_root
 require_reachable secsvcs websvcs homesvcs

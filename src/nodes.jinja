@@ -20,6 +20,10 @@
                                       without its host
                          build:       built image name; Image= must be localhost/<build>:latest
                          update_last: true moves the image to the end of the update run
+                         dirs:        src/-relative dirs its case uses beyond base/;
+                                      default [services/<service>] if it exists.
+                                      upload_src.sh ships a debian node only base/,
+                                      its src/nodes/<node>/ and these (tools/node_dirs.sh)
                          containers:  {<quadlet name>: {upstream | build, update_last}}, in
                                       place of the keys above, when the case installs
                                       other quadlets than <service>.container

@@ -1,12 +1,11 @@
-{% import 'src/nodes.jinja' as inv with context -%}
 #!/bin/bash
 # Copy the acme.json files from the Traefik nodes (those with copy_acme_certs) to pve1. Parse
 # and distribute the ACME certificates to pve1, pve2, pbs2 and pfsense.
 # Usage:
-#   /root/homelab-rendered/src/base/certificates/acme_transfer.sh
+#   /root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh
 
 # shellcheck source=src/base/lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../../base/lib.sh"
 
 require_root
 require_reachable pve1 pve2 router
@@ -27,18 +26,18 @@ function download() {
     --source "${host}.acme.json" --dest /root/acme --version v2
 }
 
-for node in {{ inv.nodes_with.copy_acme_certs | join(' ') }}; do
+for node in homesvcs secsvcs websvcs; do
   download "$node"
 done
 
 # Ref: https://pve.proxmox.com/wiki/Certificate_Management
-cp pve1.{{ site.url }}/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
-cp pve1.{{ site.url }}/privatekey.key /etc/pve/nodes/pve1/pveproxy-ssl.key
+cp pve1.janedoe.com/certificate.crt /etc/pve/nodes/pve1/pveproxy-ssl.pem
+cp pve1.janedoe.com/privatekey.key /etc/pve/nodes/pve1/pveproxy-ssl.key
 systemctl restart pveproxy.service
 
 # Ref: https://pbs.proxmox.com/wiki/index.php/HTTPS_Certificate_Configuration
-"$send" pve2.{{ site.url }}/certificate.crt=pveproxy-ssl.pem pve2.{{ site.url }}/privatekey.key=pveproxy-ssl.key \
-  pbs2.{{ site.url }}/certificate.crt=proxy.pem pbs2.{{ site.url }}/privatekey.key=proxy.key | \
+"$send" pve2.janedoe.com/certificate.crt=pveproxy-ssl.pem pve2.janedoe.com/privatekey.key=pveproxy-ssl.key \
+  pbs2.janedoe.com/certificate.crt=proxy.pem pbs2.janedoe.com/privatekey.key=proxy.key | \
   ssh autoadmin@pve2 install_certs_and_keys > pbs2_cert_info.txt
 
 # Update PBS fingerprint for PVE1
@@ -47,7 +46,7 @@ fingerprint=$(grep -E '^(\w\w:)+' pbs2_cert_info.txt | tr -d '\r')
 pvesm set pbs2 --fingerprint "$fingerprint"
 
 # Ref: https://github.com/stompro/pfsense-import-certificate
-"$send" router.{{ site.url }}/certificate.crt=router.cert.pem router.{{ site.url }}/privatekey.key=router.key.pem | \
+"$send" router.janedoe.com/certificate.crt=router.cert.pem router.janedoe.com/privatekey.key=router.key.pem | \
   ssh autoadmin@router install_certs
 
 date -u > date_acme_certs.txt

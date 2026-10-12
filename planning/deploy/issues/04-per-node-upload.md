@@ -1,6 +1,6 @@
 # 04. Render everything once, upload only what each node needs
 
-Status: ready-for-agent Type: task Repo: homelab Source: user item 52 / review structure note
+Status: resolved Type: task Repo: homelab Source: user item 52 / review structure note
 Blocked by: restructure/01, restructure/02
 
 ## Problem
@@ -33,3 +33,17 @@ whole network map on the least-trusted VM.
   always its directory (vmagent → victoriametrics/, guacd → guacamole/, piper/whisper/openwakeword →
   wyoming/, ntfy-alertmanager → alertmanager/, traefik → traefik/ + <node>/traefik/, fluentbit also
   uses <node>/). Add the dirs as a per-service attribute rather than parsing `cp` lines.
+- 2026-10-12: Done.
+  - Every debian node gets all of `src/base/` (kept out of the inventory to avoid per-node
+    lists), its `src/nodes/<node>/`, and per-service `dirs` (`src/`-relative), defaulting to
+    `services/<service>` when it exists. The router and gaming VM keep their own upload path.
+  - `tools/node_dirs.sh NODE` resolves the set; `upload_src.sh` stages just those under
+    `homelab-rendered/src/` before `scp`.
+  - `check_rendered.sh` `check_upload_dirs` fails if a node uses a node or service dir it isn't
+    shipped: absolute and `../` paths in its node and service dirs, `src/`-relative ones in its
+    node dir, dispatcher lines and `debian_services` cases. Fixture tests cover it.
+  - vm_watchdog moved from `src/nodes/pve1/` to `src/base/vm_watchdog/`: pve2 installs it and
+    shouldn't get pve1's dir.
+  - `src/base/` holds pve1's certificate scripts and the debian dispatcher and sudoers, which
+    list every debian node's cases and script paths, so every debian node still has those (no
+    IPs or routes).

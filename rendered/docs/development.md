@@ -46,10 +46,12 @@
   - `*.container`: Podman quadlet systemd unit files
   - `*.volume`: Podman volume definitions
   - Service configuration files
-- `src/base/`: setup shared across nodes: `debian/`, `podman/`, `macos/`, `certificates/`,
-  `node_exporter/`. `debian/dispatcher.sh` and `debian/sudoers` are every Debian node's (all
-  but the router and gaming), selected at runtime by hostname; the router's and gaming's
-  dispatchers are in their node directories
+- `src/base/`: setup shared across nodes, all shipped to every Debian node: `debian/`, `podman/`,
+  `node_exporter/`, `vm_watchdog/`. `debian/dispatcher.sh` and `debian/sudoers` are every Debian
+  node's (all but the router and gaming), selected at runtime by hostname; the router's and
+  gaming's dispatchers are in their node directories
+- `src/clients/`: setup for devices that aren't nodes and never get an upload: `macos/`, the
+  personal Mac's VPN switching ([guide](guides/mac_personal.md))
 
 ### Shell scripts
 
@@ -92,7 +94,7 @@ flowchart TB
         allvars["all_vars.yml<br/>private temp dir, deleted after the render"]
         render["render_src.sh: jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
         validate["check_rendered.sh: yamllint, jq on all JSON,<br/>duplicate container-IP check,<br/>inventory.yml vs scripts / routes.yml / quadlet Image= / OliveTin"]
-        upload["upload_src.sh per node: scp as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
+        upload["upload_src.sh per node: scp its src/ paths<br/>(tools/node_dirs.sh) as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
     end
 
     subgraph node["On the node"]
@@ -157,7 +159,10 @@ it, against the files it describes:
 - `upstream` refs name a registry host and namespace, and the quadlet each service's case copies has
   `Image=localhost/` + the ref without its host, or `Image=localhost/<build>:latest`;
 - the OliveTin config has a button for every dispatcher case without `key_ids`, none for a gated
-  one, and every `ssh autoadmin@NODE CASE` it runs names a real case.
+  one, and every `ssh autoadmin@NODE CASE` it runs names a real case;
+- every node and service dir a node uses is among those `tools/node_dirs.sh` ships it: absolute
+  and `../` paths in its node and service dirs, and `src/`-relative ones in its node dir,
+  dispatcher lines and `debian_services` cases.
 
 Each check is one function in the script; add an invariant as a new function plus a fixture test
 (see [Tests](#tests)).
@@ -166,6 +171,9 @@ Upload rendered files to a specific server:
 ```bash
 tools/upload_src.sh <hostname> "$out"
 ```
+A debian node gets only `src/base/`, its `src/nodes/<node>/` and its services' `dirs` (default:
+`src/services/<service>/` if it exists), in the same tree shape: no `docs/`, `tools/` or other
+nodes' files. The router and gaming VM get only their node dir.
 
 ### Pre-commit hook and `rendered/`
 
@@ -222,7 +230,7 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
    or, for an image built on the node, `localhost/<name>:latest`, and `AutoUpdate=local`. Optional:
    `.trivyignore` for CVEs accepted until an `exp:` date, each with a `#` reason; `build.sh` for a
    built image the updater should rebuild (`versions`, `build TAG`)
-1. If cross-VM TLS is needed, add cert/key gen to `src/base/certificates/` and update `commands.sh`
+1. If cross-VM TLS is needed, add cert/key gen to `src/nodes/pve1/certificates/` and update `commands.sh`
 1. Add a case for it to `install_svcs.sh`, ending with `reload_restart <unit>`
 1. Add it under `services` in `src/nodes/<node>/inventory.yml`, in install order, with its
    `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health check isn't

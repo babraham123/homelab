@@ -1,10 +1,10 @@
 #!/bin/bash
 # Generate SSH certificates and distribute them to all servers.
 # Usage:
-#   /root/homelab-rendered/src/base/certificates/ssh_cert_gen.sh
+#   /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 
 # shellcheck source=src/base/lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../../base/lib.sh"
 
 require_root
 require_reachable devtop homesvcs pve2 secsvcs vpnsvcs websvcs router

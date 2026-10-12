@@ -78,8 +78,8 @@ case $1 in
     exit 0
     ;;
   vm_watchdog)
-    install_bin nodes/pve1/vm_watchdog.sh
-    install -D -m 644 -t /etc/systemd/system nodes/pve1/vm_watchdog.service
+    install_bin base/vm_watchdog/vm_watchdog.sh
+    install -D -m 644 -t /etc/systemd/system base/vm_watchdog/vm_watchdog.service
     ;;
   *)
     die "unknown service: $1"

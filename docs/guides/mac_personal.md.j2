@@ -79,9 +79,9 @@ networksetup -switchtolocation Home
 ```bash
 sudo ipconfig setverbose 1
 networksetup -switchtolocation Automatic
-sudo cp base/macos/vpn.sh /usr/local/bin
-sudo cp base/macos/detect_wifi_change.sh /usr/local/bin
-cp base/macos/com.my.detect.wifi.change.plist ~/Library/LaunchAgents
+sudo cp clients/macos/vpn.sh /usr/local/bin
+sudo cp clients/macos/detect_wifi_change.sh /usr/local/bin
+cp clients/macos/com.my.detect.wifi.change.plist ~/Library/LaunchAgents
 launchctl load ~/Library/LaunchAgents/com.my.detect.wifi.change.plist
 ```
 - Test by switching WiFi networks, confirm location changes

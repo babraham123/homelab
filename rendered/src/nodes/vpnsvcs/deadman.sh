@@ -10,7 +10,7 @@
 # Usage:
 #   src/nodes/vpnsvcs/deadman.sh            # deadman.timer runs it every 5 minutes
 # Needs, root-only files in /etc/opt/secrets/: alertmanager_admin_password,
-# msmtp_password (pve1's, read through src/base/certificates/msmtprc.j2), deadman_ntfy_topic (a long
+# msmtp_password (pve1's, read through src/base/debian/msmtprc.j2), deadman_ntfy_topic (a long
 # random topic name the phone's ntfy app also subscribes to).
 
 # shellcheck source=src/base/lib.sh

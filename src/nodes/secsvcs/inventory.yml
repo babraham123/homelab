@@ -18,7 +18,7 @@ services:
             upstream: docker.io/victoriametrics/vmalert:latest, update_last: true}
   alertmanager: {subdomain: alert, uptime: alertmanager,
                  upstream: docker.io/prom/alertmanager:latest, update_last: true}
-  ntfy-alertmanager: {subdomain: ntfy-alertmanager,
+  ntfy-alertmanager: {subdomain: ntfy-alertmanager, dirs: [services/alertmanager],
                       upstream: docker.io/xenrox/ntfy-alertmanager:latest, update_last: true}
   ntfy: {subdomain: push, uptime: ntfy health check, uptime_path: /v1/health, uptime_tier: 1,
          upstream: docker.io/binwiederhier/ntfy:latest, update_last: true}
