@@ -5,7 +5,7 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
 
 - [Backups and disaster recovery](backup-and-dr/spec.md) — 14 issues
 - [Supply chain and upgrade safety](supply-chain/spec.md) — 2 issues
-- [Authorization model](auth/spec.md) — 9 issues
+- [Authorization model](auth/spec.md) — 10 issues
 - [Container hardening](container-hardening/spec.md) — 2 issues
 - [Observability gaps](observability/spec.md) — 12 issues
 - [Shell script correctness fixes](script-fixes/spec.md) — 7 issues
