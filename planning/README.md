@@ -25,3 +25,5 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
   2026-10-11)
 - [Narrated ebooks with Calliope](narrated-ebooks/spec.md) — 7 issues (maintainer request, added
   2026-10-11)
+- [VR modes on the gaming VM](vr-streaming/spec.md) — 6 issues (maintainer requests, added
+  2026-10-12)
