@@ -1,0 +1,10 @@
+# Gitignored paths copied into each new worktree, in .gitignore syntax.
+# `git worktree add` checks out tracked files only, so anything ignored starts
+# out missing. Only read by Claude Code.
+
+notes
+
+# AI artifacts
+.claude/settings.local.json
+CLAUDE.local.md
+
