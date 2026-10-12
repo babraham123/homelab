@@ -26,8 +26,9 @@ Follow "Add a new service" in `docs/development.md`, with `src/services/isso/` a
     in progress.
   - Server-side snapshots fetch anonymously, so pages behind a login still need the
     browser capture below.
-  - Data: `/var/opt/linkding:/etc/linkding/data`, a host path, since snapshots
-    accumulate there.
+  - Data: `/var/opt/linkding:/etc/linkding/data` for the database on the SSD, and
+    `/srv/media/archive/linkding:/etc/linkding/data/assets` so the snapshots accumulate on
+    the HDD array (maintainer decision 2026-10-12).
   - Auth proxy: `LD_ENABLE_AUTH_PROXY=True`,
     `LD_AUTH_PROXY_USERNAME_HEADER=HTTP_REMOTE_USER`,
     `LD_AUTH_PROXY_LOGOUT_URL=https://dash.{{ site.url }}`,
@@ -94,8 +95,9 @@ Follow "Add a new service" in `docs/development.md`, with `src/services/isso/` a
 - `LD_AUTH_PROXY_LOGOUT_URL` is Authelia's `/logout`, not `dash.`: going to `dash.`
   would leave the Authelia session up.
 - Backups use `dump_sqlite` (new in `backup_lib.sh`, shared with vpnsvcs) plus the data
-  tree, snapshots included. `full_backup` was not used: it zips every snapshot on every
-  run, which defeats PBS dedup.
+  tree. The snapshots on the HDD array are not staged; snapraid parity is their only
+  protection (maintainer decision 2026-10-12). `full_backup` was not used: it zips every
+  snapshot on every run, which defeats PBS dedup.
 - iOS has no Safari extension for linkding (linkding-extension#157). The reading guide
   uses linkding's "Add To Linkding" shortcut, with a server snapshot.
 - Still to check on the host: Chromium memory during a snapshot, that no Chromium

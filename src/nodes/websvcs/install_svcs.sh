@@ -90,13 +90,15 @@ case $1 in
     ;;
   linkding)
     install_sqlite3
-    mkdir -p /var/opt/linkding
+    require_media
+    mkdir -p /var/opt/linkding /srv/media/archive/linkding
     install_quadlet services/linkding/linkding.container
     reload_restart linkding
     ;;
   readeck)
     install_sqlite3
-    mkdir -p /var/opt/readeck
+    require_media
+    mkdir -p /var/opt/readeck /srv/media/archive/readeck
     install_quadlet services/readeck/readeck.container
     reload_restart readeck
     ;;
@@ -185,9 +187,11 @@ case $1 in
   storyteller)
     install_sqlite3
     require_media
-    mkdir -p /var/opt/storyteller /srv/media/books/readalouds/{books,articles}
+    mkdir -p /var/opt/storyteller /srv/media/books/readalouds/{books,articles} \
+      /srv/media/books/storyteller/{assets,uploads}
     # Storyteller runs as 1000:1000 and writes metadata edits into the books.
-    chown 1000:1000 /srv/media/books/readalouds /srv/media/books/readalouds/{books,articles}
+    chown 1000:1000 /srv/media/books/readalouds /srv/media/books/readalouds/{books,articles} \
+      /srv/media/books/storyteller/{assets,uploads}
     install -D -m 644 -t /etc/opt/storyteller services/storyteller/config.json
     install_quadlet services/storyteller/storyteller.container
     reload_restart storyteller

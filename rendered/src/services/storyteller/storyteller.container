@@ -32,8 +32,11 @@ Secret=storyteller_oidc_id,type=mount,target=/run/secrets/storyteller_oidc_id
 Secret=storyteller_oidc_secret,type=mount,target=/run/secrets/storyteller_oidc_secret
 
 # Starts as root to chown /data, then runs as PUID:PGID (1000 by default), which
-# must own the library.
+# must own the library. The database and caches stay on the SSD (SQLite over mergerfs
+# is unsafe); processed books and uploaded audio go on the media array.
 Volume=/var/opt/storyteller:/data
+Volume=/srv/media/books/storyteller/assets:/data/assets
+Volume=/srv/media/books/storyteller/uploads:/data/uploads
 Volume=/etc/opt/storyteller/config.json:/config/config.json:ro
 # Read-write: Storyteller writes metadata edits back into the EPUBs it imports.
 Volume=/srv/media/books/readalouds:/library

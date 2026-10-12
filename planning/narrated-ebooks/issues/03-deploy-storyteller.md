@@ -24,8 +24,10 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
     `AutoUpdate=local`. Use `.21`: copyparty/01 claims `.19` and fluentbit has
     `.20`.
   - Volumes:
-    - `/var/opt/storyteller:/data` for the database, uploads and Storyteller's own
-      aligned books.
+    - `/var/opt/storyteller:/data` for the database and caches, with
+      `/srv/media/books/storyteller/{assets,uploads}` over `/data/assets` and `/data/uploads`
+      so Storyteller's own books and uploaded audio sit on the HDD array (maintainer decision
+      2026-10-12).
     - `/srv/media/books/readalouds:/library` for Calliope's output, read-write for
       now. Storyteller writes metadata edits back into files it imports from watched
       folders, so document that editing a book in Storyteller changes Calliope's

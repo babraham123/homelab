@@ -19,7 +19,9 @@ an OIDC client on websvcs.
   - `Image=codeberg.org/readeck/readeck:latest`, `ContainerName=readeck`,
     `HostName=read.{{ site.url }}`, `IP={{ websvcs.container_subnet }}.18`, port 8000,
     `NoNewPrivileges=true`, `AutoUpdate=local`.
-  - Data: `/var/opt/readeck:/readeck`.
+  - Data: `/var/opt/readeck:/readeck` for `config.toml` and the database on the SSD, and
+    `/srv/media/archive/readeck:/readeck/data/bookmarks` so the archived articles sit on the
+    HDD array (maintainer decision 2026-10-12).
   - Set the server's public URL and trusted proxy (Traefik,
     `{{ websvcs.container_subnet }}.6`) and the OIDC settings. Readeck 0.23 added OIDC;
     take the exact keys from its 0.23.0 changelog and docs, not from memory.
@@ -60,7 +62,8 @@ an OIDC client on websvcs.
   for the LAN and VPN. Its browser pages (`/authorize`, `/device`) go through Authelia
   as usual.
 - Backups use a `dump_sqlite` snapshot plus `/var/opt/readeck`, `config.toml`
-  included, rather than `readeck export`, matching linkding and Storyteller. The
-  export doesn't contain the secret key that tokens depend on. To restore, put the
-  directory back with the snapshot as `data/db.sqlite3`.
+  included, rather than `readeck export`, matching linkding and Storyteller. The export
+  doesn't contain the secret key that tokens depend on. To restore, put the directory back
+  with the snapshot as `data/db.sqlite3`. The archived articles on the HDD array are not
+  staged; snapraid parity is their only protection (maintainer decision 2026-10-12).
 - The uptime check is `/api/info`, which needs no auth.

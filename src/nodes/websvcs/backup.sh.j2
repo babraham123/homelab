@@ -4,13 +4,12 @@
 # Usage:
 #   src/nodes/websvcs/backup.sh
 # Not staged, on purpose: the whisper/piper/openwakeword and Calliope model caches
-# (downloaded on use), Storyteller's processed assets, uploads and caches (rebuilt
-# from the library, or re-uploaded), and the media array under /srv/media and its
-# member disks: snapraid parity is the media's only protection, read-along books
-# included. Guacamole's state is in Postgres on secsvcs. The homesite releases are in
-# the homesite repo; only the live release is kept here.
-# linkding's page snapshots are staged: pages captured behind a login can't be
-# fetched again.
+# (downloaded on use), Storyteller's caches (rebuilt from the library), and the media
+# array under /srv/media and its member disks: snapraid parity is the media's only
+# protection, the web archive (linkding snapshots, Readeck articles), read-along books
+# and Storyteller's processed books and uploads included. Guacamole's state is in
+# Postgres on secsvcs. The homesite releases are in the homesite repo; only the live
+# release is kept here.
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
@@ -31,8 +30,6 @@ excludes+=(--exclude=etc/opt/wyoming/src
   --exclude='var/opt/linkding/db.sqlite3*'
   --exclude='var/opt/readeck/data/db.sqlite3*'
   --exclude='var/opt/storyteller/storyteller.db*'
-  --exclude=var/opt/storyteller/assets
-  --exclude=var/opt/storyteller/uploads
   --exclude=var/opt/storyteller/cache
   --exclude=var/opt/storyteller/image-cache)
 # Readeck's config.toml holds the secret key its API tokens are signed with.

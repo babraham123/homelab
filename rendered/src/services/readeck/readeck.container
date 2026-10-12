@@ -7,6 +7,7 @@ StartLimitIntervalSec=30
 StartLimitBurst=10
 Wants=network.target
 After=network-online.target
+RequiresMountsFor=/srv/media
 
 [Container]
 Image=localhost/readeck/readeck:latest
@@ -34,7 +35,10 @@ Environment=READECK_AUTH_OIDC_PROVIDERS_AUTHELIA_PROVISIONING=true
 Secret=readeck_oidc_id,type=env,target=READECK_AUTH_OIDC_PROVIDERS_AUTHELIA_CLIENT_ID
 Secret=readeck_oidc_secret,type=env,target=READECK_AUTH_OIDC_PROVIDERS_AUTHELIA_CLIENT_SECRET
 
+# config.toml and the database stay on the SSD (SQLite over mergerfs is unsafe); each
+# bookmark's archived article (data/bookmarks/*.zip) goes on the media array.
 Volume=/var/opt/readeck:/readeck
+Volume=/srv/media/archive/readeck:/readeck/data/bookmarks
 
 [Service]
 Restart=on-failure

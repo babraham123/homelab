@@ -425,6 +425,12 @@ case "$(hostname)" in
       install_guacd)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
         ;;
+      install_fluentbit)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
+        ;;
+      install_snapraid)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
+        ;;
       install_linkding)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding
         ;;
@@ -433,12 +439,6 @@ case "$(hostname)" in
         ;;
       install_linkding_handoff)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding_handoff
-        ;;
-      install_fluentbit)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
-        ;;
-      install_snapraid)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
         ;;
       install_storyteller)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh storyteller
@@ -457,11 +457,11 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh isso
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacamole
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding_handoff
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh storyteller
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh calliope
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck_narrate

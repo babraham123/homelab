@@ -96,6 +96,10 @@ systemctl list-timers 'snapraid-*'
 ## Day to day
 - Media goes under `/srv/media`; mergerfs puts new files on the disk with the most free space.
   Services read the pool, never `/mnt/disk*`
+  - `archive/linkding`, `archive/readeck`: page snapshots and archived articles
+  - `books/narrate`, `books/readalouds`: Calliope's inbox, work and output; `books/storyteller`:
+    Storyteller's processed books and uploads
+  - Databases stay on the VM disk under `/var/opt`: SQLite over mergerfs is unsafe
 - **A disk failed** ([manual](https://www.snapraid.it/manual#recover)):
   1. Replace it and format as in step 3, same label and mount point
   2. Update its id in `vars.yml`, `tools/deploy_src.sh`, then

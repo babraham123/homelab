@@ -7,6 +7,7 @@ StartLimitIntervalSec=30
 StartLimitBurst=10
 Wants=network.target
 After=network-online.target
+RequiresMountsFor=/srv/media
 
 [Container]
 # -plus adds headless Chromium for server-side snapshots of bookmarks saved without
@@ -33,8 +34,11 @@ Environment=LD_AUTH_PROXY_USERNAME_HEADER=HTTP_REMOTE_USER
 Environment=LD_AUTH_PROXY_LOGOUT_URL=https://auth.{{ site.url }}/logout
 Environment=LD_CSRF_TRUSTED_ORIGINS=https://archive.{{ site.url }}
 
-# Starts as root to chown the data dir, then runs as www-data.
+# Starts as root to chown the data dir, then runs as www-data. The database, favicons
+# and previews stay on the SSD (SQLite over mergerfs is unsafe); the page snapshots go
+# on the media array.
 Volume=/var/opt/linkding:/etc/linkding/data
+Volume=/srv/media/archive/linkding:/etc/linkding/data/assets
 
 [Service]
 Restart=on-failure

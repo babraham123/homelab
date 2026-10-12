@@ -33,12 +33,12 @@ src/nodes/websvcs/install_svcs.sh homepage
 src/nodes/websvcs/install_svcs.sh isso
 src/nodes/websvcs/install_svcs.sh guacd
 src/nodes/websvcs/install_svcs.sh guacamole
+# Once the media array is mounted (pve2_storage.md): the web archive and books live on it
 src/nodes/websvcs/install_svcs.sh linkding
 src/nodes/websvcs/install_svcs.sh readeck
+src/nodes/websvcs/install_svcs.sh storyteller
 # Once the API tokens are in the secrets file (Bootstrap the reading apps)
 src/nodes/websvcs/install_svcs.sh linkding_handoff
-# Once the media array is mounted (pve2_storage.md)
-src/nodes/websvcs/install_svcs.sh storyteller
 # Once the GPU is set up (Hardware acceleration) and a voice is in place
 # src/nodes/websvcs/install_svcs.sh calliope
 # src/nodes/websvcs/install_svcs.sh readeck_narrate
