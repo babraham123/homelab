@@ -66,5 +66,5 @@ the router can also assert a client IP.
   - **SNAT** still happens: the pfSense package is on tailscaled 1.94.1 in netstack mode (router/04).
     The `.1` entries stay in both `trustedIPs` lists; any tailnet client routed through pfSense can
     assert a client IP, LAN/VLAN clients can't (inter-VLAN routing doesn't SNAT).
-  **Remaining:** the acceptance checks (phone on mobile data, LAN, forged header, Authelia IP ban),
+  **Remaining:** the acceptance checks (phone on mobile data, LAN, forged header, CrowdSec IP ban),
   and dropping the `.1` entries from `src/services/traefik/static.yml.j2` once router/04 lands.
