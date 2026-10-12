@@ -9,8 +9,8 @@ Container catalog, host services, observability and backups. Hostnames use the p
   (`systemctl list-units "*.service"` on the node)
 - Raw list: `grep -rn "^IP=" src --include="*.container.j2*"`
 - Not in use, so not in any `inventory.yml` or the tables below, though their quadlets exist:
-  esphome (homesvcs), go2rtc, finance_exporter, archivebox, novnc and the `wyoming` quadlets piper,
-  whisper and openwakeword (websvcs)
+  esphome (homesvcs), go2rtc, finance_exporter and the `wyoming` quadlets piper, whisper and
+  openwakeword (websvcs)
 
 ## secsvcs: identity, certificates, observability (pve1, 10.10.0.0/24)
 

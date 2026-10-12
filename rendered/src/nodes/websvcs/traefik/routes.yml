@@ -37,11 +37,6 @@ http:
         - authelia@file
         - no-buffering@file
         - secure-headers@file
-    # Not in use
-    # archivebox:
-    #   <<: *service
-    #   rule: Host(`archive.janedoe.com`)
-    #   service: archivebox@file
     static-files:
       <<: *service
       rule: Host(`www.janedoe.com`) || Host(`wifi.janedoe.com`)
@@ -69,10 +64,6 @@ http:
       loadBalancer:
         servers:
           - url: http://remote.janedoe.com:8080/
-    # archivebox:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://archive.janedoe.com:8000/
     nginx:
       loadBalancer:
         servers:

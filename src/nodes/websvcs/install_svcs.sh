@@ -72,19 +72,6 @@ case $1 in
     reload_restart guacd
     ;;
   # Not in use: uncomment and add to src/nodes/websvcs/inventory.yml to install again
-#   archivebox)
-#     mkdir -p /var/opt/archivebox
-#     chown -R 911:911 /var/opt/archivebox
-#     install_quadlet services/archivebox/archivebox.container services/archivebox/chromium.volume
-#
-#     rm -rf /etc/opt/novnc/src
-#     mkdir -p /etc/opt/novnc/src
-#     wget "https://github.com/babraham123/docker-novnc/archive/refs/heads/master.tar.gz" -O - | \
-#       tar -xz -C /etc/opt/novnc/src --strip-components=1
-#     podman build -t novnc /etc/opt/novnc/src
-#     install_quadlet services/archivebox/novnc.container
-#     reload_restart archivebox
-#     ;;
 #   finance_exporter)
 #     rm -rf /etc/opt/finance_exporter/src
 #     mkdir -p /etc/opt/finance_exporter/src

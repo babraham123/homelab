@@ -5,14 +5,14 @@ Status: resolved Type: task Repo: homelab Source: notes/image-updater-design.md 
 
 ## Change
 
-- Move each `podman build` recipe out of `src/nodes/websvcs/install_svcs.sh` (`novnc`,
-  `finance_exporter`, `piper`, `whisper`, `openwakeword`) into `src/services/<service>/build.sh`,
+- Move each `podman build` recipe out of `src/nodes/websvcs/install_svcs.sh`
+  (`finance_exporter`, `piper`, `whisper`, `openwakeword`) into `src/services/<service>/build.sh`,
   called by both `install_svcs.sh` and the updater. Each prints the release versions it resolved.
   Built images keep single-segment names (`localhost/piper:latest`).
 - Updater: for piper, whisper and openwakeword, check GitHub releases nightly; on a version change
   build to `:candidate`, `podman save` + `trivy --input`, then old → `:rollback`, `:candidate` →
   `:latest`. The wyoming context stays on `wyoming-addons` branch HEAD.
-- `src/nodes/websvcs/commands.sh build_novnc` / `build_finance_exporter` (no parameters), added to
+- `src/nodes/websvcs/commands.sh build_finance_exporter` (no parameters), added to
   the websvcs dispatcher.
 
 ## Acceptance

@@ -33,7 +33,6 @@ src/nodes/websvcs/install_svcs.sh homepage
 src/nodes/websvcs/install_svcs.sh isso
 src/nodes/websvcs/install_svcs.sh guacd
 src/nodes/websvcs/install_svcs.sh guacamole
-# src/nodes/websvcs/install_svcs.sh archivebox
 
 # src/nodes/websvcs/install_svcs.sh go2rtc
 # src/nodes/websvcs/install_svcs.sh piper

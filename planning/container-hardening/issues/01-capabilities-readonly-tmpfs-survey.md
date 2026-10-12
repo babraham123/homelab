@@ -29,7 +29,7 @@ vmalert, alertmanager, ntfy-alertmanager, gatus, go2rtc) need no capabilities an
 Expected easy wins: traefik, vmagent, vmalert, alertmanager, ntfy-alertmanager,
 victoriametrics/victorialogs (write only to their storage volume), gatus, fluentbit,
 node_exporter-like exporters, go2rtc, isso, nginx (needs `Tmpfs=/var/cache/nginx` `/run`). Expected
-hard cases: home_assistant, esphome, archivebox, zigbee2mqtt (serial device), guacd.
+hard cases: home_assistant, esphome, zigbee2mqtt (serial device), guacd.
 
 ## Acceptance
 

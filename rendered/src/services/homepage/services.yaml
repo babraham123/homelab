@@ -145,10 +145,6 @@
         icon: guacamole.svg
         href: https://remote.janedoe.com/
         description: Remote UI access
-    - ArchiveBox:
-        icon: si-internetarchive
-        href: https://archive.janedoe.com/
-        description: Archive websites and web content
 #     - Forgejo:
 #         icon: forgejo.svg
 #         href: https://git.janedoe.com/

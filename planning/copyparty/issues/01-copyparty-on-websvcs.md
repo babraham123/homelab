@@ -11,7 +11,7 @@ directory the sync (03) can read.
 ## Change
 
 - `src/services/copyparty/copyparty.container.j2`, following
-  `src/services/archivebox/archivebox.container.j2`: `Image=docker.io/copyparty/ac:latest`,
+  `src/services/isso/isso.container.j2`: `Image=docker.io/copyparty/ac:latest`,
   `ContainerName=copyparty`, `HostName=files.{{ site.url }}`, `IP={{ websvcs.container_subnet }}.19`
   (next free; `.18` is taken), port 3923, `NoNewPrivileges=true`.
   - Bind mounts: `/etc/opt/copyparty:/cfg:ro`, `/var/opt/copyparty/data:/w`. Use a host path rather

@@ -12,8 +12,7 @@ Status: resolved Type: task Repo: homelab Source: notes/image-updater-design.md
   otherwise a freshly built VM runs both mechanisms.
 - The three service guides: updater install and timer.
 - `docs/maintenance.md`: override procedure (`.trivyignore` with `exp:` + reason,
-  `sudo image_updater.sh accept <container>`), manual builds (`build_novnc`,
-  `build_finance_exporter`).
+  `sudo image_updater.sh accept <container>`), manual builds (`build_finance_exporter`).
 - `docs/development.md` "Add a new service": labels, `Image=localhost/…`, optional `.trivyignore`.
 - `docs/adr/0007-scanned-image-updater.md`: "Per-VM scanned image updater instead of registry
   auto-update", with the dropped alternatives from the design (zot registry, `Pull=newer`, central
