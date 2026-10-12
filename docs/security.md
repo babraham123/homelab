@@ -51,7 +51,9 @@ compromise of the VPS exposes traffic metadata but not plaintext.
 Headscale (self-hosted Tailscale coordinator, see [ADR 0003](adr/0003-self-hosted-headscale.md))
 runs the WireGuard mesh that connects the VPS, the VMs, and personal devices. HAProxy reaches
 backend VMs only through this mesh; the home network never accepts inbound connections from the
-internet directly. An embedded DERP relay covers peers that can't hole-punch.
+internet directly. UPnP and NAT-PMP are disabled on the router, so no LAN device can open a WAN port;
+direct peer connections come from the endpoint-independent outbound NAT rule instead (see
+[Networking](networking.md#outbound-nat)). An embedded DERP relay covers peers that can't hole-punch.
 
 **Current state:** the network layer is not yet zero-trust. The intended group-based Headscale ACL
 matrix exists in `src/services/headscale/headscale_acl.hujson.j2` but is marked "not currently in

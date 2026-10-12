@@ -195,7 +195,7 @@ For local-only overrides of existing routes
 - Setup API access, [Ref](https://github.com/jaredhendrickson13/pfsense-api)
 ```bash
 # Reinstall after update
-pkg-static add https://github.com/jaredhendrickson13/pfsense-api/releases/latest/download/pfSense-2.8.0-pkg-RESTAPI.pkg && /etc/rc.restart_webgui
+pkg-static add https://github.com/jaredhendrickson13/pfsense-api/releases/latest/download/pfSense-2.9.0-pkg-RESTAPI.pkg && /etc/rc.restart_webgui
 ```
 
 ### mDNS
@@ -257,6 +257,28 @@ TODO: configure wired VLANs when I get a proper switch
   - Connect to the other trusted SSID and refresh the page
 - Assign the previous trusted SSID to the trusted VLAN
 - Backup
+
+### Tailscale outbound NAT
+pfSense rewrites each UDP flow's source port per destination (symmetric NAT), which defeats
+Tailscale's hole punching. An endpoint-independent mapping (EIM) rule keeps one external port per
+client across all destinations, so peers connect directly without opening inbound ports.
+- Go to Firewall >> Aliases >> IP >> Add
+  - Name = TS_NETS, Type = Network(s)
+  - 192.168.4.0/24, 192.168.2.0/24, 192.168.10.0/24, 192.168.20.0/24
+- Go to Firewall >> NAT >> Outbound
+  - Select "Hybrid Outbound NAT rule generation", Save
+  - Add a rule at the top
+    - Interface = WAN, Address Family = IPv4, Protocol = UDP
+    - Source = Network or Alias, TS_NETS
+    - Translation Address = WAN address, Port blank
+    - Static Port unchecked (EIM has no effect with it, and the two together crashed pre-release
+      builds)
+    - Endpoint-independent Mapping checked
+  - Save, Apply Changes
+- Go to Services >> UPnP IGD & PMP. Leave it disabled: NAT-PMP would let any LAN device open WAN
+  ports, and EIM makes it unnecessary
+- Verify from a LAN client: `tailscale netcheck` shows `MappingVariesByDestIP: false` and an empty
+  `PortMapping`
 
 ## PVE1 remaining setup
 Do the following sections from the [proxmox guide](./proxmox.md):

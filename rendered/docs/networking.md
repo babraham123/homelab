@@ -205,6 +205,15 @@ Per app:
 
 From the LAN there is no HAProxy hop: Traefik sees the client's own address.
 
+## Outbound NAT
+
+Outbound NAT is Hybrid: automatic rules plus one manual rule that gives UDP from the Tailscale
+subnets (pve1, pve2, the trusted VLANs) an endpoint-independent mapping, a "Port Restricted Cone"
+NAT. Each client keeps one external port across all destinations, so Tailscale peers hole-punch
+directly instead of falling back to DERP. Everything else gets the default symmetric NAT. UPnP and
+NAT-PMP are off, and no rule uses static port except pfSense's automatic one for IPsec (ISAKMP).
+See [the router guide](guides/router.md).
+
 ## Router extras
 
 pfSense also runs CoDel traffic shaping (bufferbloat control), ntopng for traffic inspection,

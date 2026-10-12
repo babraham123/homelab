@@ -1,6 +1,6 @@
 # 01. Upgrade to pfSense CE 2.9.0; replace NAT-PMP / static-port NAT with EIM outbound NAT
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26;
+Status: resolved Type: task Repo: homelab Source: maintainer request 2026-09-26;
 tailscale/tailscale#18035 (https://github.com/tailscale/tailscale/issues/18035)
 
 ## Problem
@@ -27,7 +27,7 @@ destinations without static port NAT, so none of the workarounds should be neede
      (`MappingVariesByDestIP`), and `tailscale status` showing direct vs relay (DERP) per peer.
 2. **Upgrade** to CE 2.9.0 per the Netgate upgrade guide. Reinstall packages:
    - mDNS-Bridge, nmap, ntopng, ARPwatch, Service Watchdog, Tailscale, telegraf;
-   - the REST API package. Change `docs/guides/router.md.j2:187` from
+   - the REST API package. In `docs/guides/router.md.j2` "Certificate", change
      `pfSense-2.8.0-pkg-RESTAPI.pkg` to `pfSense-2.9.0-pkg-RESTAPI.pkg`, which the latest
      pfsense-api release ships. Check that the `src/nodes/router/plugins/` telegraf scripts still
      report.
@@ -37,9 +37,9 @@ destinations without static port NAT, so none of the workarounds should be neede
      mapping enabled.
    - Delete the static-port outbound NAT rule for Tailscale, if present.
    - Services → UPnP IGD & PMP: **disable** the service and remove its ACLs.
-4. **Randomized client port:** the repo already has `randomize_client_port: false` in
-   `src/services/headscale/headscale.yaml.j2` and `headscale_private.yaml.j2`, and
-   `randomizeClientPort` is not in `headscale_acl.hujson.j2`.
+4. **Randomized client port:** the repo sets neither `randomize_client_port` in
+   `src/services/headscale/headscale.yaml.j2` / `headscale_private.yaml.j2` (Headscale defaults it
+   to `false`) nor `randomizeClientPort` in `headscale_acl.hujson.j2`.
    - Confirm the running Headscale config matches: `grep randomize /etc/headscale/config.yaml` on
      the VPS. Also check any per-client `--port` / `TS_PORT` overrides on LAN nodes (e.g.
      `src/services/headscale/tailscale.service.j2`, the pfSense Tailscale package's listen port).
@@ -71,3 +71,18 @@ destinations without static port NAT, so none of the workarounds should be neede
 
 - The upgrade procedure written for ci-and-docs/04 ("Upgrade all systems": pfSense upgrade) should
   reuse this run's notes.
+- 2026-10-12, run notes:
+  - Upgraded to CE 2.9.0 and reinstalled the packages, including
+    `pfSense-2.9.0-pkg-RESTAPI.pkg`.
+  - Outbound NAT is Hybrid with one manual rule at the top: WAN, IPv4, UDP, source alias `TS_NETS`
+    (pve1, pve2, WiFi and wired trusted), translation to the WAN address, Static Port off,
+    Endpoint-independent Mapping on. The rules list shows it as "Randomize Source Port" + "EIM".
+  - There was no manual static-port rule to delete. The automatic ISAKMP (UDP 500) static-port rule
+    stays; it is for IPsec. UPnP IGD & PMP is disabled.
+  - The rule took effect only after a second pass on the config; the first `netcheck` still showed
+    `MappingVariesByDestIP: true`. Check that change is applied when repeating this.
+  - Verified: `tailscale netcheck` from the trusted WiFi VLAN shows `MappingVariesByDestIP: false`
+    and empty `PortMapping`. devtop reaches its peers `direct`, and two LAN nodes pinging the VPS
+    at the same time get separate external ports. That rules out the collision reported on the
+    Netgate forum (https://forum.netgate.com/post/1230518).
+  - Follow-up: delete the router VM's `qm snapshot` after a few days of normal operation.
