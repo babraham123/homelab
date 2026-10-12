@@ -12,7 +12,7 @@ hosts see the client's 100.x address. The PR has only been linted; Netgate will 
 firewall, and the result decides whether 04 step 2 keeps its manual `/etc/rc.conf.local` entry.
 
 The runtime files are patched in place with the System Patches package. The PR's `Makefile` hunk is
-a build-time version bump and is left out, so the installed package stays `0.1.9_2` and the next
+a build-time version bump and is left out, so the installed package keeps its version and the next
 package update overwrites the patched files (System Patches lists them as "not applied" again,
 nothing breaks).
 
@@ -23,18 +23,30 @@ nothing breaks).
 2. **Install System Patches** (System → Package Manager → Available Packages → `System_Patches`).
 3. **Add the patch**: System → Patches → Add. Description `FreeBSD-ports#1462 tailscale snat knob`,
    paste the patch below into Patch Contents, Path Strip Count `1`, Base Directory `/`, leave Auto
-   Apply off. Save, then **Test**; it must report that the patch can be applied. Then **Apply**.
+   Apply off. Save, then **Test**; it must report that the patch can be applied
+   ("does not revert cleanly" is expected before Apply), then **Apply**. Copy the patch from the
+   raw file (e.g. `pbcopy`), not a rendered view: it needs its tabs, a trailing space and an en dash
+   intact.
 4. **Reload the page** VPN → Tailscale → Settings. The Routing section now shows
-   `SNAT Subnet Routes`, checked. Save once without changes and confirm nothing restarts and
-   `/usr/local/etc/rc.conf.d/pfsense_tailscaled` contains
+   `SNAT Subnet Routes`, checked. Save without changes. The first Save restarts Tailscale once: the
+   two new variables are missing from the rcconf files, so `sysrc -c` reports a change. Save again
+   and confirm nothing restarts and `/usr/local/etc/rc.conf.d/pfsense_tailscaled` contains
    `pfsense_tailscaled_snat_subnet_routes="YES"` and `/usr/local/etc/rc.conf.d/tailscaled` contains
    `tailscaled_env=""`.
-5. **Allow the kernel path through pf**: Firewall → Rules → Tailscale tab, add a pass rule,
-   IPv4+IPv6, source `100.64.0.0/10` and `fd7a:115c:a1e0::/48` (two rules or an alias), destination
-   the advertised subnets. Apply. Without this the kernel-forwarded packets hit the default deny;
-   netstack traffic today never enters pf on `tailscale0`.
-6. **Exit node**: Firewall → NAT → Outbound, mode Hybrid, add a WAN rule translating source
-   `100.64.0.0/10` to the WAN address.
+5. **Allow the kernel path through pf**: Firewall → Rules → Tailscale tab, add pass rules. Without
+   them the kernel-forwarded packets hit the default deny; netstack traffic today never enters pf on
+   `tailscale0`.
+   - Subnet routes: IPv4+IPv6, source `100.64.0.0/10` and `fd7a:115c:a1e0::/48` (two rules or an
+     alias), destination the advertised subnets.
+   - Exit node: IPv4, source `100.64.0.0/10`, destination the `RFC1918` alias with Invert match.
+     Exit-node traffic is kernel-forwarded too, so it needs its own pass rule. The inversion keeps
+     unadvertised LAN subnets closed.
+
+   Apply.
+6. **Exit node NAT**: Firewall → NAT → Outbound (Hybrid since router/01), add a rule: WAN, IPv4,
+   protocol any, source `100.64.0.0/10`, translation WAN address, Static Port and EIM off. Automatic
+   rules only cover assigned interfaces, so without it exit-node packets leave with their
+   unroutable 100.x source. IPv4 only: the WAN has no IPv6. Harmless while SNAT is on.
 7. **Uncheck the box**, Save. The package rewrites both rcconf files and restarts
    `pfsense_tailscaled`. Verify from the shell:
    ```sh
@@ -59,7 +71,8 @@ nothing breaks).
 
 ## Patch
 
-Runtime files only, paths relative to `/`
+Applies cleanly to package 0.1.9_2 (the public `devel` branch) and 0.1.10 (CE 2.9.0), whose
+`auto-update=false` change doesn't touch these hunks. Runtime files only, paths relative to `/`
 (`git diff devel..tailscale-snat-knob --relative=security/pfSense-pkg-Tailscale/files/` on the PR
 branch):
 
@@ -199,3 +212,31 @@ index 3b11772df..12b0e508d 100644
 - Results posted on pfsense/FreeBSD-ports#1462.
 
 ## Comments
+
+- 2026-10-12, steps 1–7 on pfSense CE 2.9.0, package 0.1.10, Tailscale 1.98.5:
+  - The patch applies cleanly to 0.1.10 (see the Patch note). Step 4: the first Save restarts
+    Tailscale once, as expected.
+  - **The PR breaks `tailscale up` on Tailscale < 1.104.** It always passes `--snat-subnet-routes`
+    or `--snat-subnet-routes=false`, but FreeBSD's CLI only defines that flag from 1.104
+    (tailscale/tailscale#21060); `tailscale up --help | grep -c snat-subnet-routes` is `0` on 1.98.5.
+    So `up` fails with "flag provided but not defined" on every restart, **with the box checked
+    too**. The follow-on `tailscale set --auto-update=false` is skipped as well. The node stays up on
+    its saved prefs, so nothing visibly breaks, and `tailscale debug prefs` shows `"NoSNAT": false`
+    after unchecking. Fix for the PR: pass the flag only when `tailscale up --help` lists it, and
+    rely on `TS_DEBUG_NETSTACK_SUBNETS=0` alone on older builds.
+  - The failure is silent because the package's error branch runs
+    `logger -s -t "Unable to bring up …"`, which makes the message the tag and logs nothing
+    useful. This is an existing package bug, not from the PR.
+  - On < 1.104 the env var alone gives kernel routing without SNAT (FreeBSD has no SNAT code for
+    that path before 1.104), so `NoSNAT` doesn't matter there and step 8 is still a valid test.
+  - The env var didn't reach tailscaled on the first restart after unchecking the box. That restart
+    (04:53:15) logged `pfsense_tailscaled stop` exiting 1 ("Waiting for PIDS: 58095") and started a
+    tailscaled without `TS_DEBUG_NETSTACK_SUBNETS`, although `rc.conf.d/tailscaled` already had it.
+    A manual restart from the package page picked it up. Possibly a stop/start race; recheck with
+    `procstat -e` after the step 8 reboot.
+  - The package logs `--auth-key=…` in plaintext in `system.log` on every start, so the Headscale
+    pre-auth key leaked to the logs. pfsense/FreeBSD-ports#1437 (open since 2026-04-19, no review)
+    redacts it. Its context line `up … || {` predates 0.1.10's `up … && { tailscale_set } || {`, so
+    it needs a rebase and may conflict with 1462's rc.d hunks. Expired the leaked key
+    (`headscale preauthkeys expire`) and reset the router's log files.
+

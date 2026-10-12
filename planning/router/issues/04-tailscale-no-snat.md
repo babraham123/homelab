@@ -64,7 +64,11 @@ pfSense instead of the tailnet client.
   any build the package can pick up. The pfSense package is still on the 1.94.1 port (upstream
   FreeBSD ports: 1.102.5). Filed pfsense/FreeBSD-ports#1462 (Redmine #13905) exposing the
   `SNAT Subnet Routes` checkbox: unchecked writes `tailscaled_env="TS_DEBUG_NETSTACK_SUBNETS=0"` and
-  passes `--snat-subnet-routes=false`, which works with 1.94.1 too. Until it ships, step 2 stays the
+  passes `--snat-subnet-routes=false`. Until it ships, step 2 stays the
   manual `/etc/rc.conf.local` entry; the PR can be applied locally with the System Patches package
   to test.
 - 2026-10-10: testing the PR on the router is router/06; its outcome replaces step 2 here.
+- 2026-10-12: correction to the comment above: `--snat-subnet-routes` doesn't exist on FreeBSD
+  before 1.104, so with the PR applied `tailscale up` fails on the 1.94.1 / 1.98.5 builds (pfSense
+  CE 2.9.0 ships 1.98.5). The env var still works on those builds and is what gives no-SNAT
+  routing. Details in router/06.
