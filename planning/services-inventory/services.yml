@@ -68,10 +68,8 @@ secrets:
   lldap_pg_password:        {owner: lldap,        gen: *alnum20}
   lldap_db_url:             {owner: lldap,        gen: "postgres://lldap:${lldap_pg_password}@pgdb/lldap"}
   lldap_admin_password:     {owner: lldap,        gen: *alnum20, shared_with: [authelia]}
+  lldap_key_seed:           {owner: lldap,        gen: *alnum64}
   lldap_smtp_password:      {owner: lldap,        gen: *smtp}
-  # FINDING: lldap_admin_password is currently bound to BOTH LLDAP_LDAP_USER_PASS
-  # and LLDAP_KEY_SEED. The key seed derives LLDAP's server key and should be
-  # independent material. Split into lldap_key_seed when you next rotate.
   gatus_pg_password:        {owner: gatus,        gen: *alnum20}
   gatus_oidc_id:            {owner: gatus,        gen: *oidc_id}
   gatus_oidc_secret:        {owner: gatus,        gen: *oidc_hash}

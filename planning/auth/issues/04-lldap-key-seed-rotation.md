@@ -1,6 +1,6 @@
 # 04. Decouple LLDAP_KEY_SEED from the admin password; document password rotation
 
-Status: ready-for-agent Type: research Repo: homelab Source: review finding 17
+Status: ready-for-human Type: research Repo: homelab Source: review finding 17
 
 ## Problem
 
@@ -11,11 +11,12 @@ and `LLDAP_KEY_SEED`.
 
 LLDAP derives its server private key from `key_seed`. That key is the server side of the OPAQUE
 password-authenticated key exchange: every stored user password verifier is bound to it. **Changing
-the seed invalidates every user's password** — including the admin's — and LLDAP will refuse to
-start against an existing database with a mismatched key unless `force_ldap_user_pass_reset` / a
-reset flow is used. Rotating the admin password today would therefore silently break login for every
-user. Confirm against the current LLDAP docs for the exact behaviour of `LLDAP_KEY_SEED` /
-`key_file` before executing.
+the seed invalidates every user's password**, the admin's included. LLDAP stores a hash of the key
+in its database and refuses to start when the key differs ("The private key encoding the passwords
+has changed since last successful startup"), unless started once with
+`LLDAP_FORCE_UPDATE_PRIVATE_KEY=true` (`server/src/main.rs`, checked 2026-10-12). Rotating the
+admin password while it was also the seed would therefore have stopped LLDAP from starting, and
+forcing past that would have broken login for every user.
 
 ## Change
 
@@ -39,3 +40,14 @@ Document steps 4–5 in `docs/maintenance.md` under "Update secrets".
 ## Comments
 
 - 2026-09-21 maintainer: approved as written.
+- 2026-10-12 agent: repo side done (steps 1 and 3). `lldap_key_seed` is in the secsvcs secrets
+  template and the LLDAP quadlet binds it to `LLDAP_KEY_SEED`. Step 4 needs no LLDAP flag:
+  `force_ldap_user_pass_reset = "always"` already resets the admin to `lldap_admin_password` on
+  every start. Step 5, if ever: set a new seed, start LLDAP once with
+  `LLDAP_FORCE_UPDATE_PRIVATE_KEY=true` and `LLDAP_FORCE_LDAP_USER_PASS_RESET=true` (it updates the
+  stored key hash, then exits on purpose), start it again without them, and every user resets their
+  password.
+- 2026-10-12 maintainer: the rotation steps stay out of `docs/maintenance.md`. The migration (step 2
+  before installing the new quadlet, then step 4 and the acceptance checks) is in the apply notes
+  (`notes/apply-since-5a50097.md`, steps 0 and 8). If the quadlet lands first, LLDAP fails to
+  start on the key-hash check; nothing is lost, set the secret and restart.
