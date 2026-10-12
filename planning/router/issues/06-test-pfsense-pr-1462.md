@@ -1,6 +1,6 @@
 # 06. Test pfsense/FreeBSD-ports#1462 (Tailscale SNAT knob) on the router
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-10-10;
+Status: resolved Type: task Repo: homelab Source: maintainer request 2026-10-10;
 pfsense/FreeBSD-ports#1462, pfSense Redmine #13905 Blocked by: none (04 depends on the outcome)
 
 ## Problem
@@ -239,4 +239,18 @@ index 3b11772df..12b0e508d 100644
     redacts it. Its context line `up … || {` predates 0.1.10's `up … && { tailscale_set } || {`, so
     it needs a rebase and may conflict with 1462's rc.d hunks. Expired the leaked key
     (`headscale preauthkeys expire`) and reset the router's log files.
-
+- 2026-10-12, step 8 passes on 1.98.5 with the box unchecked (env var only):
+  - phone on mobile data → Proxmox UI on 192.168.7.10:8006: the states on `tailscale0` and `PVE1`
+    both show `100.64.0.4` untranslated, and pveproxy's access log shows `100.64.0.4`;
+  - exit-node browsing works: `tailscale0` state from `100.64.0.4`, WAN state translated to the WAN
+    address by the step 6 rule;
+  - both still work after a reboot (tailscaled started at boot with the env var) and after a filter
+    reload.
+- 2026-10-12, step 9 passes: checking the box and saving writes `tailscaled_env=""`, the restarted
+  tailscaled has no `TS_DEBUG_NETSTACK_SUBNETS`, and the PVE1 states show the router's
+  `192.168.7.1` as the source with no `tailscale0` state.
+- 2026-10-12: posted the results on the PR
+  (https://github.com/pfsense/FreeBSD-ports/pull/1462#issuecomment-6124857832), with a version
+  gate for the flag, the `logger -t` fix, the restart miss, the missing exit-node pass rule in the
+  help text, and #1437. Step 7's `NoSNAT` check can't pass on < 1.104; everything else passed.
+  Until a fixed PR ships, 04 step 2 keeps the manual `tailscaled_env` entry.
