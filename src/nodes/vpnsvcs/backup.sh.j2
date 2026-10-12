@@ -12,19 +12,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 # shellcheck source=src/base/debian/backup_lib.sh
 source "${rendered}/base/debian/backup_lib.sh"
 
-command -v sqlite3 > /dev/null || die "sqlite3 is not installed"
 stage_init
 
-# Headscale's DB is in WAL mode, so copying its files mid-write can capture a torn
-# state. .backup snapshots it consistently while headscale keeps serving.
-db=/var/lib/headscale/db.sqlite
-dir=$(dump_dir headscale)
-snapshot="${dir}/db-$(date +%Y-%m-%dT%H%M%S).sqlite"
-sqlite3 "$db" ".backup '${snapshot}'"
-sqlite3 "$snapshot" 'PRAGMA integrity_check' | grep -qx ok || {
-  rm -f "$snapshot"
-  die "Headscale DB snapshot failed its integrity check"
-}
+dump_sqlite headscale /var/lib/headscale/db.sqlite
 
 # The live DB files are excluded in favour of the snapshot. /var/lib/headscale also
 # holds the noise and DERP private keys: losing them re-registers every tailnet node.

@@ -95,7 +95,11 @@ case $node in
       "isso isso localhost/isso-comments/isso:release upstream ghcr.io/isso-comments/isso:release"
       "guacamole guacamole localhost/guacamole/guacamole:1.6.0 upstream docker.io/guacamole/guacamole:1.6.0"
       "guacd guacd localhost/guacamole/guacd:1.6.0 upstream docker.io/guacamole/guacd:1.6.0"
+      "linkding linkding localhost/sissbruecker/linkding:latest-plus upstream docker.io/sissbruecker/linkding:latest-plus"
+      "readeck readeck localhost/readeck/readeck:latest upstream codeberg.org/readeck/readeck:latest"
       "fluentbit fluentbit localhost/fluent/fluent-bit:3.2 upstream docker.io/fluent/fluent-bit:3.2"
+      "storyteller storyteller localhost/storyteller-platform/storyteller:web-v2 upstream registry.gitlab.com/storyteller-platform/storyteller:web-v2"
+      "calliope calliope localhost/calliope:latest build calliope"
     )
     # Container subnets are local to each node, so ntfy is reached through Traefik.
     ntfy_url="https://push.janedoe.com/alert"

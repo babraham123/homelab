@@ -1,0 +1,11 @@
+# /etc/systemd/system/readeck_narrate.service
+
+[Unit]
+Description="Homelab: Queues Readeck articles labelled listen for narration"
+Wants=network-online.target
+After=network-online.target readeck.service
+RequiresMountsFor=/srv/media
+
+[Service]
+Type=oneshot
+ExecStart=/root/homelab-rendered/src/services/readeck/readeck_narrate.sh

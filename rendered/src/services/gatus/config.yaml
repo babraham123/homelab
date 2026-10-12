@@ -135,6 +135,18 @@ endpoints:
     <<: *internal
     url: "https://remote.janedoe.com"
 
+  - name: linkding
+    <<: *internal
+    url: "https://archive.janedoe.com/health"
+
+  - name: readeck
+    <<: *internal
+    url: "https://read.janedoe.com/api/info"
+
+  - name: storyteller
+    <<: *internal
+    url: "https://books.janedoe.com/api/health"
+
 
   # Internal CA, year-long certs (src/base/certificates/self_signed_cert_gen.sh). LDAPS is
   # the one TLS-on-connect service without client-certificate auth: Postgres negotiates

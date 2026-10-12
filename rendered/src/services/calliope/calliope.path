@@ -1,0 +1,13 @@
+# /etc/systemd/system/calliope.path
+
+[Unit]
+Description="Homelab: Starts calliope.service while the narration inbox has EPUBs"
+RequiresMountsFor=/srv/media
+
+[Path]
+# Retriggers after each run while EPUBs remain, so the inbox drains one book at a time.
+PathExistsGlob=/srv/media/books/narrate/inbox/*.epub
+Unit=calliope.service
+
+[Install]
+WantedBy=paths.target

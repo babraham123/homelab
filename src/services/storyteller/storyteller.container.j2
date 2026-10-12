@@ -1,0 +1,46 @@
+# /etc/containers/systemd/storyteller.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: Storyteller read-along library"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+RequiresMountsFor=/srv/media
+
+[Container]
+# web-v2 follows stable 2.x releases only. The CPU build: alignment is rare here, since
+# Calliope's books arrive aligned, and the CUDA builds target newer GPUs than the P4.
+Image=localhost/storyteller-platform/storyteller:web-v2
+ContainerName=storyteller
+AutoUpdate=local
+NoNewPrivileges=true
+
+Network=net.network
+HostName=books.{{ site.url }}
+IP={{ websvcs.container_subnet }}.21
+# port 8001
+
+Environment=TZ={{ personal.timezone }}
+# Ref: https://storyteller-platform.gitlab.io/storyteller/docs/installation/self-hosting
+Environment=AUTH_URL=https://books.{{ site.url }}/api/v2/auth
+# Read once at startup; the settings it holds are locked in the UI.
+Environment=STORYTELLER_CONFIG=/config/config.json
+Secret=storyteller_secret_key,type=env,target=STORYTELLER_SECRET_KEY
+Secret=storyteller_oidc_id,type=mount,target=/run/secrets/storyteller_oidc_id
+Secret=storyteller_oidc_secret,type=mount,target=/run/secrets/storyteller_oidc_secret
+
+# Starts as root to chown /data, then runs as PUID:PGID (1000 by default), which
+# must own the library.
+Volume=/var/opt/storyteller:/data
+Volume=/etc/opt/storyteller/config.json:/config/config.json:ro
+# Read-write: Storyteller writes metadata edits back into the EPUBs it imports.
+Volume=/srv/media/books/readalouds:/library
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

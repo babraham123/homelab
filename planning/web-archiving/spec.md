@@ -29,6 +29,6 @@ while pve2 is up. Accepted.
 
 | # | Title | Status | Type |
 |---|---|---|---|
-| [01](issues/01-linkding-singlefile.md) | Run linkding on websvcs with SingleFile uploads | `ready-for-agent` | task |
-| [02](issues/02-readeck.md) | Run Readeck on websvcs with Authelia OIDC | `ready-for-agent` | task |
-| [03](issues/03-toread-handoff.md) | Hand off `toread` bookmarks from linkding to Readeck | `ready-for-agent` | task |
+| [01](issues/01-linkding-singlefile.md) | Run linkding on websvcs with SingleFile uploads | `ready-for-human` | task |
+| [02](issues/02-readeck.md) | Run Readeck on websvcs with Authelia OIDC | `ready-for-human` | task |
+| [03](issues/03-toread-handoff.md) | Hand off `toread` bookmarks from linkding to Readeck | `ready-for-human` | task |

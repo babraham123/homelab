@@ -1,6 +1,6 @@
 # 03. Hand off `toread` bookmarks from linkding to Readeck
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-11
@@ -13,7 +13,7 @@ Readeck without being saved a second time.
 
 ## Change
 
-- `src/readeck/linkding_handoff.sh` (or a name that fits the repo better), run on
+- `src/services/readeck/linkding_handoff.sh` (or a name that fits the repo better), run on
   websvcs by a systemd `.service` and `.timer` pair like
   `src/haproxy/geoip_generator.*`, every 15 minutes with `Persistent=true`.
   - Reach both apps on their container IPs (`.17:9090`, `.18:8000`) from the host, not
@@ -31,10 +31,10 @@ Readeck without being saved a second time.
   - Put token loading, logging and the API call wrapper in a sourced helper.
     narrated-ebooks/04 (`readeck_narrate.sh`) reuses it.
 - Tokens: `linkding_api_token` and `readeck_api_token` in
-  `src/websvcs/secrets_template.yaml`. The script reads them the way host-side scripts
+  `src/nodes/websvcs/secrets_template.yaml`. The script reads them the way host-side scripts
   read secrets under ADR 0004. Don't put them in unit files.
 - Install it from the `readeck` case in `install_svcs.sh`, or give it its own case and
-  `src/nodes.yml` entry if that fits the dispatcher better.
+  `src/nodes/websvcs/inventory.yml` entry if that fits the dispatcher better.
 - Document the `toread` tag in the guide next to the SingleFile setup.
 
 ## Acceptance
@@ -48,3 +48,12 @@ Readeck without being saved a second time.
 - `shellcheck` passes as part of the render.
 
 ## Comments
+
+2026-10-11, implemented in the repo; acceptance needs a deploy to websvcs.
+- `src/services/readeck/linkding_handoff.sh.j2` and its `.service`/`.timer` are installed by
+  their own `linkding_handoff` case. The shared helper is `src/services/readeck/handoff_lib.sh`.
+- The script reaches the apps with `curl --resolve <subdomain>:<port>:<container IP>`,
+  so the Host header stays the app's own name.
+- Duplicates: Readeck's API has no URL filter to check against. The script records
+  each linkding id Readeck accepts in `/var/lib/linkding_handoff/sent`. If retagging
+  then fails, the next run only retags the bookmark and doesn't send it again.

@@ -1,0 +1,46 @@
+# /etc/containers/systemd/calliope.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# A oneshot batch job, not a server: calliope.path and calliope.timer start it, and
+# each run narrates one book from the inbox (calliope_batch.py).
+
+[Unit]
+Description="Homelab: narrates one EPUB from the inbox into a read-along EPUB"
+After=network-online.target
+RequiresMountsFor=/srv/media
+
+[Container]
+Image=localhost/calliope:latest
+ContainerName=calliope
+AutoUpdate=local
+NoNewPrivileges=true
+
+Network=net.network
+HostName=calliope.{{ site.url }}
+# Static, so a dynamic address can't take a server's while a book runs.
+IP={{ websvcs.container_subnet }}.22
+
+PodmanArgs=--gpus=all
+Entrypoint=python3
+Exec=/opt/calliope_batch.py
+
+Environment=TZ={{ personal.timezone }}
+# Model weights (Chatterbox, faster-whisper) download here on first use.
+Environment=HF_HOME=/cache
+Environment=NTFY_URL=https://push.{{ site.url }}/alert
+# Storyteller's PUID:PGID
+Environment=READALOUDS_OWNER=1000:1000
+Secret=ntfy_alert_token,type=env,target=NTFY_ALERT_ACCESS_TOKEN
+
+Volume=/etc/opt/calliope/calliope_batch.py:/opt/calliope_batch.py:ro
+Volume=/srv/media/books/narrate:/narrate
+Volume=/srv/media/books/readalouds:/readalouds
+Volume=/etc/opt/calliope/voices:/voices:ro
+Volume=calliope_cache.volume:/cache
+
+[Service]
+Type=oneshot
+# The GPU is shared with whisper; keep the CPU side of a book out of its way too.
+Nice=10
+# A book takes hours; stopping only interrupts it, and the next run resumes it.
+TimeoutStartSec=infinity
+TimeoutStopSec=90

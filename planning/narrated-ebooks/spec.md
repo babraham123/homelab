@@ -31,7 +31,7 @@ Constraints:
 | # | Title | Status | Type |
 |---|---|---|---|
 | [01](issues/01-harden-calliope.md) | Fork and harden Calliope | `ready-for-agent` | task |
-| [02](issues/02-deploy-calliope-websvcs.md) | Run Calliope on websvcs as a GPU batch job | `ready-for-agent` | task |
-| [03](issues/03-deploy-storyteller.md) | Run Storyteller on websvcs as the read-along library | `ready-for-agent` | task |
-| [04](issues/04-readeck-listen-handoff.md) | Narrate Readeck articles labelled `listen` into Storyteller | `ready-for-agent` | task |
-| [05](issues/05-storyteller-mobile-access-research.md) | Research: how phones reach Storyteller, at home and away | `ready-for-agent` | research |
+| [02](issues/02-deploy-calliope-websvcs.md) | Run Calliope on websvcs as a GPU batch job | `ready-for-human` | task |
+| [03](issues/03-deploy-storyteller.md) | Run Storyteller on websvcs as the read-along library | `ready-for-human` | task |
+| [04](issues/04-readeck-listen-handoff.md) | Narrate Readeck articles labelled `listen` into Storyteller | `ready-for-human` | task |
+| [05](issues/05-storyteller-mobile-access-research.md) | Research: how phones reach Storyteller, at home and away | `resolved` | research |

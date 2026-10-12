@@ -16,6 +16,23 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/svcs_lib.sh"
 #     tar -xz -C /etc/opt/wyoming/src --strip-components=1
 # }
 
+# backup.sh snapshots the apps' SQLite databases.
+install_sqlite3() {
+  command -v sqlite3 > /dev/null || apt-get install -y sqlite3
+}
+
+# Usage: install_timer DIR NAME; NAME.service is a oneshot that NAME.timer starts
+install_timer() {
+  install -D -m 644 -t /etc/systemd/system "$1/$2.service" "$1/$2.timer"
+  systemctl daemon-reload
+  systemctl enable --now "$2.timer"
+}
+
+require_media() {
+  # Unmounted, mkdir would put the library on the root disk.
+  mountpoint -q /srv/media || die "/srv/media is not mounted"
+}
+
 cd "$rendered"
 
 # Every image the case's quadlets name is downloaded (or built) and passes the scan gate
@@ -70,6 +87,21 @@ case $1 in
     mkdir -p /etc/opt/guacd
     install_quadlet services/guacamole/guacd.container
     reload_restart guacd
+    ;;
+  linkding)
+    install_sqlite3
+    mkdir -p /var/opt/linkding
+    install_quadlet services/linkding/linkding.container
+    reload_restart linkding
+    ;;
+  readeck)
+    install_sqlite3
+    mkdir -p /var/opt/readeck
+    install_quadlet services/readeck/readeck.container
+    reload_restart readeck
+    ;;
+  linkding_handoff)
+    install_timer services/readeck linkding_handoff
     ;;
   # Not in use: uncomment and add to src/nodes/websvcs/inventory.yml to install again
 #   finance_exporter)
@@ -149,6 +181,36 @@ case $1 in
       # No disks declared in vars.yml yet: the timers would only fail
       systemctl disable --now snapraid-sync.timer snapraid-scrub.timer 2> /dev/null || true
     fi
+    ;;
+  storyteller)
+    install_sqlite3
+    require_media
+    mkdir -p /var/opt/storyteller /srv/media/books/readalouds/{books,articles}
+    # Storyteller runs as 1000:1000 and writes metadata edits into the books.
+    chown 1000:1000 /srv/media/books/readalouds /srv/media/books/readalouds/{books,articles}
+    install -D -m 644 -t /etc/opt/storyteller services/storyteller/config.json
+    install_quadlet services/storyteller/storyteller.container
+    reload_restart storyteller
+    ;;
+  calliope)
+    require_media
+    mkdir -p /etc/opt/calliope/voices /srv/media/books/narrate/{inbox,work,failed} \
+      /srv/media/books/readalouds/{books,articles}
+    rm -rf /etc/opt/calliope/src
+    mkdir -p /etc/opt/calliope/src
+    wget "https://github.com/babraham123/calliope/archive/refs/heads/main.tar.gz" -O - | \
+      tar -xz -C /etc/opt/calliope/src --strip-components=1
+    podman build -t calliope /etc/opt/calliope/src
+    install -D -m 644 -t /etc/opt/calliope services/calliope/calliope_batch.py
+    install_quadlet services/calliope/calliope.container services/calliope/calliope_cache.volume
+    install -D -m 644 -t /etc/systemd/system services/calliope/calliope.path \
+      services/calliope/calliope.timer
+    # calliope.service is a oneshot; the path unit and the timer start it.
+    systemctl daemon-reload
+    systemctl enable --now calliope.path calliope.timer
+    ;;
+  readeck_narrate)
+    install_timer services/readeck readeck_narrate
     ;;
   *)
     die "unknown service: $1"

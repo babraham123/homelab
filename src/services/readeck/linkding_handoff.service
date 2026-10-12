@@ -1,0 +1,10 @@
+# /etc/systemd/system/linkding_handoff.service
+
+[Unit]
+Description="Homelab: Sends linkding bookmarks tagged toread to Readeck"
+Wants=network-online.target
+After=network-online.target linkding.service readeck.service
+
+[Service]
+Type=oneshot
+ExecStart=/root/homelab-rendered/src/services/readeck/linkding_handoff.sh

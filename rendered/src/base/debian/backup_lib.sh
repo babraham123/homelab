@@ -15,7 +15,9 @@
 #   stage_paths PATH...          # copies each path into files/, paths as on the live
 #                                # system, so files/etc/opt/... restores to /
 #   stage_volume VOLUME [NAME]   # copies a Podman volume into files/volumes/NAME
-#   stage_send                   # permissions, SHA256SUMS of every file, the tar on
+#   dump_sqlite NAME DB          # consistent snapshot of a live SQLite DB into
+#                                # dumps/NAME, integrity-checked; needs sqlite3
+#   stage_send                  # permissions, SHA256SUMS of every file, the tar on
 #                                # stdout, then the stage is deleted
 #   vzdump_to STORAGE VZDUMP_ARG...  # snapshot-mode vzdump, e.g. pbs2 --all 1 or
 #                                    # local --vmid ID; blocks, prints its log, fails
@@ -66,6 +68,21 @@ stage_paths() {
 stage_volume() {
   local volume=$1 name=${2:-$1}
   copy "$(podman volume inspect -f '{{ .Mountpoint }}' "systemd-${volume}")" "${files}/volumes/${name}" .
+}
+
+# A DB in WAL mode copied mid-write can be torn; .backup snapshots it consistently
+# while the app keeps serving.
+dump_sqlite() {
+  local name=$1 db=$2 snapshot
+  # sqlite3 would create an empty DB in its place.
+  [[ -f $db ]] || { warn "not dumped, missing: $db"; return 0; }
+  command -v sqlite3 > /dev/null || die "sqlite3 is not installed"
+  snapshot="$(dump_dir "$name")/$(basename "$db" | sed 's/\.[^.]*$//')-$(date +%Y-%m-%dT%H%M%S).sqlite"
+  sqlite3 "$db" ".backup '${snapshot}'"
+  sqlite3 "$snapshot" 'PRAGMA integrity_check' | grep -qx ok || {
+    rm -f "$snapshot"
+    die "${name} DB snapshot failed its integrity check"
+  }
 }
 
 # The manifest lets the receiver tell a complete stage from a truncated stream or a file

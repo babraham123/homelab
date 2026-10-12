@@ -1,6 +1,6 @@
 # 02. Run Calliope on websvcs as a GPU batch job
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-11
@@ -13,10 +13,10 @@ folder and later get a read-along EPUB, without logging in to the VM.
 
 ## Change
 
-- **Build:** a `calliope` case in `src/websvcs/install_svcs.sh` that downloads the
+- **Build:** a `calliope` case in `src/nodes/websvcs/install_svcs.sh` that downloads the
   fork's tarball and runs `podman build -t calliope`, like `finance_exporter`. Add it
-  to `src/nodes.yml` (no subdomain or uptime; it isn't a web service). If
-  image-updater/04 has landed, put the recipe in `src/calliope/build.sh` instead.
+  to `src/nodes/websvcs/inventory.yml` (no subdomain or uptime; it isn't a web service). If
+  image-updater/04 has landed, put the recipe in `src/services/calliope/build.sh` instead.
 - **Inbox and outbox** on the media pool:
   - `/srv/media/books/narrate/inbox`: drop `Title.epub` here, optionally with
     `Title.json` holding `{"lang": "en", "voice": "name", "collection": "books"}`.
@@ -28,7 +28,7 @@ folder and later get a read-along EPUB, without logging in to the VM.
   - `/srv/media/books/narrate/failed`: inputs that failed, plus their reports.
   - `/etc/opt/calliope/voices/*.wav`: reference voices, about 15 s each.
     `default.wav` is used when no voice is given.
-- **Runner:** `src/calliope/calliope.container.j2` as a oneshot quadlet
+- **Runner:** `src/services/calliope/calliope.container.j2` as a oneshot quadlet
   (`Type=oneshot` in `[Service]`, no `[Install]`), with `PodmanArgs=--gpus=all` like
   `src/wyoming/whisper.container.j2` and the model cache in a named volume. It's
   started by a `calliope.path` unit that watches the inbox, plus a `calliope.timer`
@@ -59,3 +59,19 @@ folder and later get a read-along EPUB, without logging in to the VM.
 - The render passes, including shellcheck of the wrapper.
 
 ## Comments
+
+2026-10-11, implemented in the repo; acceptance needs 01's fork on GitHub and a deploy.
+- The wrapper is `src/services/calliope/calliope_batch.py`, in Python rather than shell. It
+  runs inside the image (the quadlet mounts it from the rendered tree and sets it as the
+  entrypoint), so it reads the per-book JSON and posts to ntfy without adding jq or curl
+  to the image.
+  - It narrates the oldest book, writes into `readalouds` atomically (report first,
+    EPUB last), and chowns the output to Storyteller's 1000:1000.
+  - On SIGTERM it leaves the book in the inbox.
+  - It moves bad options (unknown voice, unsafe collection name) and calliope failures
+    to `failed/`.
+  - Smoke-tested on macOS with a fake `calliope`: ordering, collections, failure paths.
+- The quadlet has a static IP (`.22`), so its dynamic address can't take a server's.
+- The snapraid config excludes `/books/narrate/work/`.
+- Not done, needs the P4: measuring whisper's and Calliope's peak VRAM together, and
+  the real-time factor for the docs. `Nice=10` only lowers CPU priority.

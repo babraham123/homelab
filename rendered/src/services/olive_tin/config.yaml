@@ -781,6 +781,30 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: websvcs Install Linkding
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_linkding
+              id: websvcs_install_linkding
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Readeck
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_readeck
+              id: websvcs_install_readeck
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Linkding Handoff
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_linkding_handoff
+              id: websvcs_install_linkding_handoff
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: websvcs Install Fluentbit
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_fluentbit
@@ -793,6 +817,30 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_snapraid
               id: websvcs_install_snapraid
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Storyteller
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_storyteller
+              id: websvcs_install_storyteller
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Calliope
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_calliope
+              id: websvcs_install_calliope
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Readeck Narrate
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_readeck_narrate
+              id: websvcs_install_readeck_narrate
               maxConcurrent: 1
               timeout: 60
 

@@ -37,6 +37,18 @@ http:
         - authelia@file
         - no-buffering@file
         - secure-headers@file
+    linkding:
+      <<: *service
+      rule: Host(`archive.janedoe.com`)
+      service: linkding@file
+    readeck:
+      <<: *service
+      rule: Host(`read.janedoe.com`)
+      service: readeck@file
+    storyteller:
+      <<: *service
+      rule: Host(`books.janedoe.com`)
+      service: storyteller@file
     static-files:
       <<: *service
       rule: Host(`www.janedoe.com`) || Host(`wifi.janedoe.com`)
@@ -64,6 +76,18 @@ http:
       loadBalancer:
         servers:
           - url: http://remote.janedoe.com:8080/
+    linkding:
+      loadBalancer:
+        servers:
+          - url: http://archive.janedoe.com:9090/
+    readeck:
+      loadBalancer:
+        servers:
+          - url: http://read.janedoe.com:8000/
+    storyteller:
+      loadBalancer:
+        servers:
+          - url: http://books.janedoe.com:8001/
     nginx:
       loadBalancer:
         servers:

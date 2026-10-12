@@ -1,6 +1,6 @@
 # 01. Run linkding on websvcs with SingleFile uploads
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-11
@@ -12,12 +12,12 @@ including pages behind a login.
 
 ## Change
 
-Follow "Add a new service" in `docs/development.md`, with `src/isso/` as the model.
+Follow "Add a new service" in `docs/development.md`, with `src/services/isso/` as the model.
 
-- `src/linkding/linkding.container.j2`:
+- `src/services/linkding/linkding.container.j2`:
   - `Image=docker.io/sissbruecker/linkding:latest-plus`, `ContainerName=linkding`,
     `HostName=archive.{{ site.url }}`, `IP={{ websvcs.container_subnet }}.17`, port
-    9090, `NoNewPrivileges=true`, `AutoUpdate=registry` like the other quadlets.
+    9090, `NoNewPrivileges=true`, `AutoUpdate=local` like the other quadlets.
   - `latest-plus` adds server-side snapshots for bookmarks saved where SingleFile
     can't run, such as from Pinkt. linkding starts headless Chromium only for each
     snapshot job, and it exits afterwards. Check that it works without adding
@@ -33,18 +33,18 @@ Follow "Add a new service" in `docs/development.md`, with `src/isso/` as the mod
     `LD_AUTH_PROXY_LOGOUT_URL=https://dash.{{ site.url }}`,
     `LD_CSRF_TRUSTED_ORIGINS=https://archive.{{ site.url }}`. Check the names against
     linkding's `docs/src/content/docs/options.md` before writing them.
-- `src/websvcs/install_svcs.sh` case `linkding`; `src/nodes.yml` entry
+- `src/nodes/websvcs/install_svcs.sh` case `linkding`; `src/nodes/websvcs/inventory.yml` entry
   `linkding: {subdomain: archive, uptime: linkding}` (add `uptime_path` if `/` is
   not a 200 behind Authelia).
-- Traefik router and service in `src/websvcs/traefik/routes.yml.j2`
+- Traefik router and service in `src/nodes/websvcs/traefik/routes.yml.j2`
   (`http://archive.{{ site.url }}:9090/`).
 - Authelia: SingleFile sends `Authorization: Bearer <token>`, which Authelia's forward
   auth doesn't accept. Add a rule before the generic `*.{{ site.url }}` rules that
   bypasses `resources: ['^/api/']` on `archive.{{ site.url }}`, limited to the
   `internal` and `vpn` networks. linkding still enforces the token.
 - Homepage tile under Productivity, and the install line in
-  `docs/guides/web_services.md.j2`.
-- Backups: stage the SQLite database consistently in `src/websvcs/backup.sh.j2`, using
+  `docs/guides/websvcs.md.j2`.
+- Backups: stage the SQLite database consistently in `src/nodes/websvcs/backup.sh.j2`, using
   linkding's own backup command if it has one, or `sqlite3 .backup` like
   `src/vpnsvcs/backup.sh.j2`. Decide whether snapshot files are backed up or excluded
   as large, and say which in the header comment.
@@ -85,3 +85,18 @@ Follow "Add a new service" in `docs/development.md`, with `src/isso/` as the mod
 - A backup run stages a database that opens with `sqlite3 … 'PRAGMA integrity_check'`.
 
 ## Comments
+
+2026-10-11, implemented in the repo; acceptance needs a deploy to websvcs.
+- Checked against linkding v1.47.0. The plus image runs Chromium with `--no-sandbox`,
+  so the quadlet adds no capabilities. It sets `--shm-size=512m`, since Chromium
+  renders through `/dev/shm` and Podman's default is 64 MB. Whether that's needed is
+  unverified.
+- `LD_AUTH_PROXY_LOGOUT_URL` is Authelia's `/logout`, not `dash.`: going to `dash.`
+  would leave the Authelia session up.
+- Backups use `dump_sqlite` (new in `backup_lib.sh`, shared with vpnsvcs) plus the data
+  tree, snapshots included. `full_backup` was not used: it zips every snapshot on every
+  run, which defeats PBS dedup.
+- iOS has no Safari extension for linkding (linkding-extension#157). The reading guide
+  uses linkding's "Add To Linkding" shortcut, with a server snapshot.
+- Still to check on the host: Chromium memory during a snapshot, that no Chromium
+  process is left over after a Pinkt save, and that `/api/` is refused from outside.

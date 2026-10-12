@@ -13,8 +13,18 @@ services:
   isso: {subdomain: comment, upstream: ghcr.io/isso-comments/isso:release}
   guacamole: {subdomain: remote, uptime: guacamole, upstream: docker.io/guacamole/guacamole:1.6.0}
   guacd: {upstream: docker.io/guacamole/guacd:1.6.0}
+  linkding: {subdomain: archive, uptime: linkding, uptime_path: /health,
+             upstream: docker.io/sissbruecker/linkding:latest-plus}
+  readeck: {subdomain: read, uptime: readeck, uptime_path: /api/info,
+            upstream: codeberg.org/readeck/readeck:latest}
+  linkding_handoff: {}
   fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
   snapraid: {}
+  # These need the media array mounted.
+  storyteller: {subdomain: books, uptime: storyteller, uptime_path: /api/health,
+                upstream: registry.gitlab.com/storyteller-platform/storyteller:web-v2}
+  calliope: {build: calliope}
+  readeck_narrate: {}
 install_all_svcs: true
 commands:
   - {name: install_keys, script: nodes/websvcs/commands.sh, key_ids: [pve1]}

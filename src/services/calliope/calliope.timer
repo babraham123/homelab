@@ -1,0 +1,15 @@
+# /etc/systemd/system/calliope.timer
+
+[Unit]
+Description="Homelab: Runs calliope.service hourly"
+
+[Timer]
+# Backstop for calliope.path: resumes a book cut off by pve2 stopping, and restarts the
+# queue if the path unit hit its trigger limit.
+Persistent=true
+OnCalendar=hourly
+OnBootSec=5min
+Unit=calliope.service
+
+[Install]
+WantedBy=timers.target

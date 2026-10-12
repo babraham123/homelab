@@ -33,6 +33,15 @@ src/nodes/websvcs/install_svcs.sh homepage
 src/nodes/websvcs/install_svcs.sh isso
 src/nodes/websvcs/install_svcs.sh guacd
 src/nodes/websvcs/install_svcs.sh guacamole
+src/nodes/websvcs/install_svcs.sh linkding
+src/nodes/websvcs/install_svcs.sh readeck
+# Once the API tokens are in the secrets file (Bootstrap the reading apps)
+src/nodes/websvcs/install_svcs.sh linkding_handoff
+# Once the media array is mounted (pve2_storage.md)
+src/nodes/websvcs/install_svcs.sh storyteller
+# Once the GPU is set up (Hardware acceleration) and a voice is in place
+# src/nodes/websvcs/install_svcs.sh calliope
+# src/nodes/websvcs/install_svcs.sh readeck_narrate
 
 # src/nodes/websvcs/install_svcs.sh go2rtc
 # src/nodes/websvcs/install_svcs.sh piper
@@ -86,6 +95,44 @@ exit
 ```
 - Log in through Authelia and confirm that Settings >> Connections >> New Connection appears
 - Go to Settings >> Users, delete `guacadmin`
+
+## Bootstrap the reading apps
+
+linkding, Readeck, Storyteller and Calliope; using them is in the [reading guide](./reading.md).
+
+- In LLDAP, create the `readeck_admin` and `storyteller_admin` groups and add yourself to
+  both before signing in to either app. Readeck resets a user's group from LLDAP at every
+  sign-in, so without `readeck_admin` its admin becomes a plain user. Storyteller sets
+  permissions only at a user's first sign-in; later group changes need Users >> edit.
+- Generate the `readeck_oidc_*` and `storyteller_oidc_*` secrets for secsvcs, copy the ids
+  and plain secrets into websvcs's file, add `storyteller_secret_key`, and reinstall
+  Authelia
+```bash
+ssh manualadmin@pve1
+sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs
+sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs
+# on secsvcs
+sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
+```
+- linkding: open `https://archive.{{ site.url }}`, which signs you in as your Authelia user.
+  Under Settings >> Integrations, create a REST API token and save it as
+  `linkding_api_token`. Under Settings >> General, check that automatic HTML snapshots are
+  on.
+- Readeck: sign in at `https://read.{{ site.url }}` with Authelia. Under Profile >> API
+  tokens, create a token with `bookmarks:read` and `bookmarks:write` and save it as
+  `readeck_api_token`. Then install `linkding_handoff`.
+- Storyteller: the first visit to `https://books.{{ site.url }}` asks for a local admin.
+  Create one with a long password and keep it in the password manager: OPDS readers sign
+  in with a local account, since they can't use Authelia. Then sign out and in again with
+  Authelia, and as that user:
+  - Collections >> New: `Articles`
+  - Settings >> Import: add a watch rule for `/library/books`, and one for
+    `/library/articles` assigned to the Articles collection. Import mode `reference` (the
+    default) leaves the files where Calliope put them. These can't live in
+    `config.json`, which can't assign collections.
+- Calliope: put a clean, roughly 15 s reference recording at
+  `/etc/opt/calliope/voices/default.wav`, and others next to it as `<name>.wav`. Install
+  `calliope` once `github.com/babraham123/calliope` exists, then `readeck_narrate`.
 
 ## Setup homepage widgets
 

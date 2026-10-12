@@ -1,0 +1,44 @@
+# /etc/containers/systemd/linkding.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: linkding bookmarks and page archive"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+# -plus adds headless Chromium for server-side snapshots of bookmarks saved without
+# SingleFile (Pinkt, the iOS shortcut). It starts per snapshot job, with --no-sandbox,
+# so it needs no extra capabilities.
+Image=localhost/sissbruecker/linkding:latest-plus
+ContainerName=linkding
+AutoUpdate=local
+NoNewPrivileges=true
+
+Network=net.network
+HostName=archive.{{ site.url }}
+IP={{ websvcs.container_subnet }}.17
+# port 9090
+# Chromium renders through /dev/shm; Podman's default is 64 MB.
+PodmanArgs=--shm-size=512m
+
+Environment=TZ={{ personal.timezone }}
+# Ref: https://linkding.link/options/
+# Authelia's forward auth sets Remote-User; the API uses linkding's own tokens.
+Environment=LD_ENABLE_AUTH_PROXY=True
+Environment=LD_AUTH_PROXY_USERNAME_HEADER=HTTP_REMOTE_USER
+# linkding's default, /login, would sign straight back in through the proxy.
+Environment=LD_AUTH_PROXY_LOGOUT_URL=https://auth.{{ site.url }}/logout
+Environment=LD_CSRF_TRUSTED_ORIGINS=https://archive.{{ site.url }}
+
+# Starts as root to chown the data dir, then runs as www-data.
+Volume=/var/opt/linkding:/etc/linkding/data
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

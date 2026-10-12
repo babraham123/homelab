@@ -77,9 +77,9 @@ Two integration models:
    Authelia, which returns 200 or a 302 to the login portal. This is the default for all protected
    routes; the flow is shown in the [networking sequence
    diagram](networking.md#ingress-the-three-tier-chain).
-2. **OIDC** (apps with native SSO support): Authelia is the issuer for six clients: Headscale
-   (two-factor), Grafana, Home Assistant, Guacamole, Gatus, and OliveTin. OIDC gives the app
-   group-based role mapping, not just a yes/no at the proxy.
+2. **OIDC** (apps with native SSO support): Authelia is the issuer for eight clients: Headscale
+   (two-factor), Grafana, Home Assistant, Guacamole, Gatus, OliveTin, Readeck and Storyteller.
+   OIDC gives the app group-based role mapping, not just a yes/no at the proxy.
 
 ```mermaid
 sequenceDiagram

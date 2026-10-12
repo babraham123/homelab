@@ -145,6 +145,18 @@
         icon: guacamole.svg
         href: https://remote.janedoe.com/
         description: Remote UI access
+    - linkding:
+        icon: linkding.svg
+        href: https://archive.janedoe.com/
+        description: Bookmarks and page archive
+    - Readeck:
+        icon: readeck.svg
+        href: https://read.janedoe.com/
+        description: Read it later
+    - Storyteller:
+        icon: sh-storyteller.svg
+        href: https://books.janedoe.com/
+        description: Read-along books
 #     - Forgejo:
 #         icon: forgejo.svg
 #         href: https://git.janedoe.com/

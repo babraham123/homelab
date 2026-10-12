@@ -425,11 +425,29 @@ case "$(hostname)" in
       install_guacd)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
         ;;
+      install_linkding)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding
+        ;;
+      install_readeck)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck
+        ;;
+      install_linkding_handoff)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding_handoff
+        ;;
       install_fluentbit)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
         ;;
       install_snapraid)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
+        ;;
+      install_storyteller)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh storyteller
+        ;;
+      install_calliope)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh calliope
+        ;;
+      install_readeck_narrate)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck_narrate
         ;;
       install_all_svcs)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik
@@ -439,8 +457,14 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh isso
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacamole
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding_handoff
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh storyteller
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh calliope
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck_narrate
         ;;
       install_keys)
         require_key_id pve1

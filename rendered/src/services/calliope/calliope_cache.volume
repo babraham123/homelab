@@ -1,0 +1,7 @@
+# /etc/containers/systemd/calliope_cache.volume
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#volume-units-volume
+# Model weights, downloaded on first use; not backed up.
+
+[Volume]
+User=root
+Group=root

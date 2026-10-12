@@ -1,6 +1,6 @@
 # 04. Narrate Readeck articles labelled `listen` into Storyteller
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-11
@@ -16,7 +16,7 @@ read-along books in Storyteller, with no manual export.
 Flow: Readeck label `listen` → Readeck EPUB export → Calliope inbox →
 `readalouds/articles/<Title>/` → Storyteller's **Articles** collection.
 
-- `src/readeck/readeck_narrate.sh`, run by a systemd `.service` and `.timer` on
+- `src/services/readeck/readeck_narrate.sh`, run by a systemd `.service` and `.timer` on
   websvcs every 15 minutes with `Persistent=true`. Build it on the same skeleton as
   web-archiving/03's `linkding_handoff.sh`: shared token loading, journal logging and
   the "change the label only after success" rule. Put the shared parts in a sourced
@@ -49,3 +49,11 @@ Flow: Readeck label `listen` → Readeck EPUB export → Calliope inbox →
 - `shellcheck` passes as part of the render.
 
 ## Comments
+
+2026-10-11, implemented in the repo as `src/services/readeck/readeck_narrate.sh.j2` with its
+own `readeck_narrate` case and timer; acceptance needs a deploy.
+- To avoid queueing an article twice, the script relabels without downloading when
+  `<slug>` is already in the inbox, `readalouds/articles` or `failed`. That covers a
+  run where the download worked but the relabel failed.
+- `lang` is Readeck's `lang` reduced to its base code (`en-US` → `en`), defaulting to
+  `en`.

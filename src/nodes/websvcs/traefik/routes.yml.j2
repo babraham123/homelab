@@ -37,6 +37,18 @@ http:
         - authelia@file
         - no-buffering@file
         - secure-headers@file
+    linkding:
+      <<: *service
+      rule: Host(`archive.{{ site.url }}`)
+      service: linkding@file
+    readeck:
+      <<: *service
+      rule: Host(`read.{{ site.url }}`)
+      service: readeck@file
+    storyteller:
+      <<: *service
+      rule: Host(`books.{{ site.url }}`)
+      service: storyteller@file
     static-files:
       <<: *service
       rule: Host(`www.{{ site.url }}`) || Host(`wifi.{{ site.url }}`)
@@ -64,6 +76,18 @@ http:
       loadBalancer:
         servers:
           - url: http://remote.{{ site.url }}:8080/
+    linkding:
+      loadBalancer:
+        servers:
+          - url: http://archive.{{ site.url }}:9090/
+    readeck:
+      loadBalancer:
+        servers:
+          - url: http://read.{{ site.url }}:8000/
+    storyteller:
+      loadBalancer:
+        servers:
+          - url: http://books.{{ site.url }}:8001/
     nginx:
       loadBalancer:
         servers:

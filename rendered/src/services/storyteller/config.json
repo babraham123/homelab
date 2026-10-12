@@ -1,0 +1,24 @@
+{
+  "webUrl": "https://books.janedoe.com",
+  "opdsEnabled": true,
+  "authProviders": [
+    {
+      "kind": "custom",
+      "name": "Authelia",
+      "type": "oidc",
+      "issuer": "https://auth.janedoe.com",
+      "clientId_file": "/run/secrets/storyteller_oidc_id",
+      "clientSecret_file": "/run/secrets/storyteller_oidc_secret",
+      "allowRegistration": true,
+      "groupPermissions": {
+        "storyteller_admin": [
+          "bookRead", "bookDownload", "bookList", "bookCreate", "bookDelete",
+          "bookProcess", "bookUpdate", "collectionCreate", "inviteList", "inviteDelete",
+          "userCreate", "userList", "userRead", "userDelete", "userUpdate",
+          "userPasswordReset", "settingsUpdate"
+        ],
+        "authelia_gen_access": ["bookRead", "bookDownload", "bookList"]
+      }
+    }
+  ]
+}

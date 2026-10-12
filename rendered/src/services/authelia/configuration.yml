@@ -783,6 +783,25 @@ access_control:
         - 'www.janedoe.com'
       policy: 'bypass'
 
+    # API clients that authenticate with the app's own tokens: SingleFile, the browser
+    # extensions, Pinkt, the Readeck and Storyteller apps, OPDS readers. LAN and VPN
+    # only: Storyteller has no brute-force protection. Traefik drops any Remote-User a
+    # client sends, so a bypassed request can't pose as an Authelia user.
+    - domain: 'archive.janedoe.com'
+      resources: ['^/api/']
+      networks: ['internal', 'vpn']
+      policy: 'bypass'
+
+    - domain: 'read.janedoe.com'
+      resources: ['^/api/', '^/\.well-known/oauth-authorization-server']
+      networks: ['internal', 'vpn']
+      policy: 'bypass'
+
+    - domain: 'books.janedoe.com'
+      resources: ['^/api/', '^/opds']
+      networks: ['internal', 'vpn']
+      policy: 'bypass'
+
     - domain: '*.janedoe.com'
       subject: 'oauth2:client:{{ mustEnv "GATUS_OIDC_ID" }}'
       policy: 'one_factor'
@@ -1449,6 +1468,9 @@ identity_providers:
       grafana:
         id_token: ['email', 'name', 'groups', 'preferred_username']
 
+      readeck:
+        id_token: ['email', 'groups', 'preferred_username']
+
     # scopes:
       ## Gives the arbitrary scope 'scope_name` access to the 'claim_name' and 'extra_claim_name' claims.
       # scope_name:
@@ -2044,7 +2066,9 @@ identity_providers:
         ## Audience this client is allowed to request.
         audience:
           - 'https://alert.janedoe.com'
+          - 'https://archive.janedoe.com'
           - 'https://auth.janedoe.com'
+          - 'https://books.janedoe.com'
           - 'https://command.janedoe.com'
           - 'https://dash.janedoe.com'
           - 'https://graph.janedoe.com'
@@ -2053,6 +2077,7 @@ identity_providers:
           - 'https://logs.janedoe.com'
           - 'https://metrics.janedoe.com'
           - 'https://push.janedoe.com'
+          - 'https://read.janedoe.com'
           - 'https://remote.janedoe.com'
           - 'https://secproxy.janedoe.com'
           - 'https://vmalert.janedoe.com'
@@ -2115,5 +2140,53 @@ identity_providers:
 
         ## The consent mode controls how consent is obtained.
         # consent_mode: implicit
+
+      -
+        # Ref: https://readeck.org/en/docs/external-auth
+        client_id: '{{ mustEnv "READECK_OIDC_ID" }}'
+        client_name: 'Readeck'
+        client_secret: '{{ mustEnv "READECK_OIDC_HASH" }}'
+        redirect_uris:
+          - 'https://read.janedoe.com/login/oidc'
+        claims_policy: 'readeck'
+        scopes:
+          - 'openid'
+          - 'groups'
+          - 'email'
+          - 'profile'
+        grant_types:
+          - 'authorization_code'
+        response_types:
+          - 'code'
+        authorization_policy: 'gen_access'
+        consent_mode: 'implicit'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        token_endpoint_auth_method: 'client_secret_basic'
+
+      -
+        # Ref: https://storyteller-platform.gitlab.io/storyteller/docs/settings
+        # Storyteller reads the claims from the userinfo endpoint.
+        client_id: '{{ mustEnv "STORYTELLER_OIDC_ID" }}'
+        client_name: 'Storyteller'
+        client_secret: '{{ mustEnv "STORYTELLER_OIDC_HASH" }}'
+        # The last segment is the provider's name in src/storyteller/config.json.j2,
+        # lowercased.
+        redirect_uris:
+          - 'https://books.janedoe.com/api/v2/auth/callback/authelia'
+        scopes:
+          - 'openid'
+          - 'groups'
+          - 'email'
+          - 'profile'
+        grant_types:
+          - 'authorization_code'
+        response_types:
+          - 'code'
+        authorization_policy: 'gen_access'
+        consent_mode: 'implicit'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        token_endpoint_auth_method: 'client_secret_basic'
 
 ...

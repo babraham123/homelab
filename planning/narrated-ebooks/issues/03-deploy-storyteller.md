@@ -1,6 +1,6 @@
 # 03. Run Storyteller on websvcs as the read-along library
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-11
@@ -15,13 +15,14 @@ them to phones, with reading and listening progress synced across devices.
 Follow "Add a new service" in `docs/development.md`, with Readeck
 (web-archiving/02) as the model for an OIDC client on websvcs.
 
-- `src/storyteller/storyteller.container.j2`:
+- `src/services/storyteller/storyteller.container.j2`:
   - Image: `registry.gitlab.com/storyteller-platform/storyteller`, pinned to the
     stable 2.x line (2.14.23 on 2026-10-02), not the v3 beta. Note the move to v3 as a
     follow-up once it's stable.
   - `ContainerName=storyteller`, `HostName=books.{{ site.url }}`,
-    `IP={{ websvcs.container_subnet }}.20`, port 8001, `NoNewPrivileges=true`,
-    `AutoUpdate=registry`. Use `.20` because copyparty/01 claims `.19`.
+    `IP={{ websvcs.container_subnet }}.21`, port 8001, `NoNewPrivileges=true`,
+    `AutoUpdate=local`. Use `.21`: copyparty/01 claims `.19` and fluentbit has
+    `.20`.
   - Volumes:
     - `/var/opt/storyteller:/data` for the database, uploads and Storyteller's own
       aligned books.
@@ -30,7 +31,7 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
       folders, so document that editing a book in Storyteller changes Calliope's
       output, and that re-running Calliope on a book overwrites those edits.
   - `STORYTELLER_SECRET_KEY_FILE` from a podman secret (`storyteller_secret_key` in
-    `src/websvcs/secrets_template.yaml`, generated with `openssl rand -base64 32`).
+    `src/nodes/websvcs/secrets_template.yaml`, generated with `openssl rand -base64 32`).
     Set `PUID`/`PGID` to an owner that can read the library. Use the CPU whisper
     variant: alignment is rare here, since Calliope books are already aligned, and the
     image's CUDA 12.9 build may not run on the P4.
@@ -50,7 +51,7 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
   - Add a collection **Articles** that watches `/library/articles`, which 04 fills.
   - Configure these in `STORYTELLER_CONFIG` (JSON) if it supports watch folders and
     collections, so they live in the repo. Otherwise document them as manual steps.
-- **Integration:** an `install_svcs.sh` case, a `src/nodes.yml` entry
+- **Integration:** an `install_svcs.sh` case, a `src/nodes/websvcs/inventory.yml` entry
   `storyteller: {subdomain: books, uptime: storyteller}`, a Traefik router and
   service, a Homepage tile, and the guide line.
 - **Backups:** stage the SQLite database consistently with `sqlite3 .backup`. Exclude
@@ -71,3 +72,24 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
 - A backup run stages a database that passes `PRAGMA integrity_check`.
 
 ## Comments
+
+2026-10-11, implemented in the repo; acceptance needs a deploy to websvcs.
+- Checked against `web-v2.14.23`.
+  - The image tag is `web-v2`, which follows stable 2.x only; it is the CPU build. The
+    CUDA builds are 11.8, 12.9 and 13.1.
+  - The IP is `.21`, since fluentbit has `.20`.
+  - The uptime check is `/api/health`, which needs no auth.
+- `STORYTELLER_CONFIG` (`src/services/storyteller/config.json.j2`) holds the Authelia provider,
+  `opdsEnabled` and `webUrl`. It reads the client id and secret from mounted podman
+  secrets through `clientId_file` and `clientSecret_file`.
+  - `groupPermissions` gives `storyteller_admin` everything and `authelia_gen_access`
+    read, download and list.
+  - Storyteller sets permissions only at a user's first sign-in.
+- Watch folders and the Articles collection are manual steps in the guide. The config
+  file can't assign a rule to a collection, and rules defined there are locked in the
+  UI.
+- `disablePasswordLogin` only hides the form: the token endpoint and OPDS Basic auth
+  still accept passwords, and there's no rate limiting. That's why `/api/` and `/opds`
+  are bypassed only for the LAN and VPN (see 05).
+- The library is mounted read-write. The install case and Calliope give it to
+  1000:1000, Storyteller's default PUID:PGID.

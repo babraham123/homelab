@@ -45,7 +45,11 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .10 | isso | isso | Blog comments | comment.janedoe.com |
 | .15 | guacd | guacd | Guacamole protocol daemon | n/a |
 | .16 | guacamole | guacamole | Browser remote desktop | remote.janedoe.com |
+| .17 | linkding | linkding:latest-plus | Bookmarks and page archive | archive.janedoe.com |
+| .18 | readeck | readeck | Read-it-later reader | read.janedoe.com |
 | .20 | fluentbit | fluent-bit | journald → VictoriaLogs forwarder | n/a |
+| .21 | storyteller | storyteller:web-v2 | Read-along book library, OPDS | books.janedoe.com |
+| .22 | calliope | built from babraham123/calliope | GPU batch job: EPUB → read-along EPUB | n/a |
 
 - `nginx` serves `/var/opt/nginx/www` by subdomain (`www/`, `wifi/` (redirects to the AP's admin
   page), shared `error/`; `src/services/nginx/nginx.conf.j2`)
@@ -53,6 +57,9 @@ Container catalog, host services, observability and backups. Hostnames use the p
   symlink swap; the container mounts all of `/var/opt/nginx` at `/srv`
 - The content isn't in this repo, e.g. [homesite](https://github.com/babraham123/homesite) deploys
   with its own `tools/deploy_src.sh`; this repo owns the nginx config and quadlet
+
+linkding, Readeck, Calliope and Storyteller form one pipeline, joined by two host
+timers; see the [reading guide](guides/reading.md).
 
 ## homesvcs: home automation (pve1, 10.12.0.0/24)
 
@@ -90,6 +97,9 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | vpnsvcs | crowdsec-firewall-bouncer | Drops CrowdSec's banned IPs in nftables ([Security](security.md#the-edge-haproxy)) |
 | vpnsvcs | fail2ban | SSH brute-force bans ([Security](security.md#vps-hardening)) |
 | vpnsvcs | deadman (timer) | Watches the alerting path from outside ([Observability](#observability)) |
+| websvcs | linkding_handoff (timer) | linkding bookmarks tagged `toread` → Readeck |
+| websvcs | readeck_narrate (timer) | Readeck articles labelled `listen` → Calliope inbox |
+| websvcs | calliope (path + timer) | Starts the Calliope job while its inbox has EPUBs |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
 pve1, pve2, pbs2 and the router serve their own web UIs as pve1/pve2/pbs2/router.janedoe.com:

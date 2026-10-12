@@ -784,6 +784,25 @@ access_control:
         - 'www.{{ site.url }}'
       policy: 'bypass'
 
+    # API clients that authenticate with the app's own tokens: SingleFile, the browser
+    # extensions, Pinkt, the Readeck and Storyteller apps, OPDS readers. LAN and VPN
+    # only: Storyteller has no brute-force protection. Traefik drops any Remote-User a
+    # client sends, so a bypassed request can't pose as an Authelia user.
+    - domain: 'archive.{{ site.url }}'
+      resources: ['^/api/']
+      networks: ['internal', 'vpn']
+      policy: 'bypass'
+
+    - domain: 'read.{{ site.url }}'
+      resources: ['^/api/', '^/\.well-known/oauth-authorization-server']
+      networks: ['internal', 'vpn']
+      policy: 'bypass'
+
+    - domain: 'books.{{ site.url }}'
+      resources: ['^/api/', '^/opds']
+      networks: ['internal', 'vpn']
+      policy: 'bypass'
+
     - domain: '*.{{ site.url }}'
       subject: 'oauth2:client:{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
       policy: 'one_factor'
@@ -1450,6 +1469,9 @@ identity_providers:
       grafana:
         id_token: ['email', 'name', 'groups', 'preferred_username']
 
+      readeck:
+        id_token: ['email', 'groups', 'preferred_username']
+
     # scopes:
       ## Gives the arbitrary scope 'scope_name` access to the 'claim_name' and 'extra_claim_name' claims.
       # scope_name:
@@ -2102,5 +2124,53 @@ identity_providers:
 
         ## The consent mode controls how consent is obtained.
         # consent_mode: implicit
+
+      -
+        # Ref: https://readeck.org/en/docs/external-auth
+        client_id: '{% raw %}{{ mustEnv "READECK_OIDC_ID" }}{% endraw %}'
+        client_name: 'Readeck'
+        client_secret: '{% raw %}{{ mustEnv "READECK_OIDC_HASH" }}{% endraw %}'
+        redirect_uris:
+          - 'https://read.{{ site.url }}/login/oidc'
+        claims_policy: 'readeck'
+        scopes:
+          - 'openid'
+          - 'groups'
+          - 'email'
+          - 'profile'
+        grant_types:
+          - 'authorization_code'
+        response_types:
+          - 'code'
+        authorization_policy: 'gen_access'
+        consent_mode: 'implicit'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        token_endpoint_auth_method: 'client_secret_basic'
+
+      -
+        # Ref: https://storyteller-platform.gitlab.io/storyteller/docs/settings
+        # Storyteller reads the claims from the userinfo endpoint.
+        client_id: '{% raw %}{{ mustEnv "STORYTELLER_OIDC_ID" }}{% endraw %}'
+        client_name: 'Storyteller'
+        client_secret: '{% raw %}{{ mustEnv "STORYTELLER_OIDC_HASH" }}{% endraw %}'
+        # The last segment is the provider's name in src/storyteller/config.json.j2,
+        # lowercased.
+        redirect_uris:
+          - 'https://books.{{ site.url }}/api/v2/auth/callback/authelia'
+        scopes:
+          - 'openid'
+          - 'groups'
+          - 'email'
+          - 'profile'
+        grant_types:
+          - 'authorization_code'
+        response_types:
+          - 'code'
+        authorization_policy: 'gen_access'
+        consent_mode: 'implicit'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        token_endpoint_auth_method: 'client_secret_basic'
 
 ...
