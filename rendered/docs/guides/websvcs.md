@@ -134,20 +134,6 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
   `/etc/opt/calliope/voices/default.wav`, and others next to it as `<name>.wav`. Install
   `calliope`, then `readeck_narrate`.
 
-## Setup homepage widgets
-
-- Create an API token in the PVE console (for pve1, pve2 and pbs2)
-  - Go to Datacenter >> Permissions >> API Tokens >> Add
-  - user = api_ro@pam, token ID = homepage
-  - Record the secret
-```bash
-ssh manualadmin@pve1
-sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs
-```
-  - Go to Permissions >> Add >> API Token Permission
-  - path = /, token = api_ro@..., role = PVEAuditor, propagate = check
-  - For PBS, Permissions -> Access Control, PVEAuditor -> Audit
-
 ## Hardware acceleration
 This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other models), an Intel iGPU
 (video transcoding) and a Coral TPU (Frigate object detection).
