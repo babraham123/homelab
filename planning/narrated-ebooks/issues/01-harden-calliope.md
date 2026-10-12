@@ -1,6 +1,6 @@
 # 01. Fork and harden Calliope
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: babraham123/calliope (fork of hugohammer/TTS-Narrated-Ebook-Creator)
 Source: maintainer request 2026-10-11
@@ -58,3 +58,38 @@ from. Keep upstream's layout so fixes can go back as PRs.
 - The report gives the P4's real-time factor for Turbo and Multilingual.
 
 ## Comments
+
+2026-10-11: implemented on branch `harden` of a local clone of upstream, in 12
+commits. The GitHub fork hasn't been created and nothing is pushed.
+- **CLI:** `calliope IN.epub OUT.epub --voice WAV --lang xx [--model turbo|multilingual]
+  [--work-dir DIR]`, plus QA flags (`--max-retries`, `--max-silence`,
+  `--whisper-check`, `--wer-threshold`).
+  - The report is `OUT.report.json`, OUT with its extension replaced.
+  - `real_time_factor` is wall seconds per audio second, so lower is faster.
+  - Exit codes: 0 ok, 1 failure, 2 usage, 143 on SIGTERM, which leaves the cache
+    valid.
+  - Test hook: `CALLIOPE_FORCE_SILENCE`.
+- **Verified names:**
+  - `chatterbox.tts_turbo.ChatterboxTurboTTS`, weights `ResembleAI/chatterbox-turbo`.
+  - `chatterbox.mtl_tts.ChatterboxMultilingualTTS`, weights `ResembleAI/chatterbox`.
+- **Pins:**
+  - `chatterbox-tts==0.1.7`
+  - `torch`/`torchaudio==2.6.0+cu124`; the cu124 build includes sm_60, which runs on
+    the P4's sm_61.
+  - `ctranslate2==4.6.2`, the last build for CUDA 12.4.
+  - `setuptools<82`: resemble-perth needs `pkg_resources`. Without the pin, no fresh
+    install loads either model.
+  - A cross-platform `uv.lock`.
+- **Container:** `Containerfile` on `nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04`,
+  with Python 3.12 from uv in `/opt/venv` and `HF_HOME=/cache`.
+- **Tested:**
+  - 24 pytest tests with a fake backend: resume gives a byte-identical EPUB, SIGTERM
+    at two points, QA retries, whisper flagging, report contents, SMIL and package
+    structure.
+  - epubcheck 5.4.0 passes.
+  - Real CPU runs of Turbo (English) and Multilingual (Norwegian) worked.
+- **Not yet done:**
+  - Building the image (no podman on the Mac).
+  - Any GPU or P4 run, so the real-time factors are still missing.
+  - Upstream PRs. Most commits depend on the first, which restructures the code into
+    a package.
