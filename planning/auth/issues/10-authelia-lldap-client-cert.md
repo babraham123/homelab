@@ -52,3 +52,11 @@ gap.
   accurately.
 
 ## Comments
+
+### 2026-10-11: step 1 answer, unsupported
+
+LLDAP can't verify client certs as of v0.6.3 (`main` pushed 2026-09-26). `get_tls_acceptor` in
+`server/src/ldap_server.rs` builds the rustls `ServerConfig` with a hardcoded
+`.with_no_client_auth()`, and `LdapsOptions` in `server/src/configuration.rs` has only `enabled`,
+`port`, `cert_file`, `key_file`. No upstream issue or PR asks for client-cert auth (searched
+"client certificate", "mTLS"). Take step 3; an upstream feature request is the optional part.
