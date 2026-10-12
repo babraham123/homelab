@@ -19,6 +19,9 @@ Maintainer decisions (2026-10-11):
   Calibre integration is out of scope.
 - Readeck articles labelled `listen` are narrated automatically into a Storyteller
   **Articles** collection; the label then becomes `narrated`.
+- Books get a voice per character (06, 07): quotes found by rules, speakers attributed by a local
+  LLM on the P4 before TTS. Articles stay in one voice. The RTX 3060 Ti is not used: same 8 GB, and
+  it belongs to the gaming VM. Research: [multivoice-research.md](multivoice-research.md).
 
 Constraints:
 - The P4 (Pascal, sm_61) only runs PyTorch builds for CUDA 12.6 or older; Chatterbox
@@ -35,3 +38,5 @@ Constraints:
 | [03](issues/03-deploy-storyteller.md) | Run Storyteller on websvcs as the read-along library | `ready-for-human` | task |
 | [04](issues/04-readeck-listen-handoff.md) | Narrate Readeck articles labelled `listen` into Storyteller | `ready-for-human` | task |
 | [05](issues/05-storyteller-mobile-access-research.md) | Research: how phones reach Storyteller, at home and away | `resolved` | research |
+| [06](issues/06-dialogue-voice.md) | Split dialogue from narration and speak it in a second voice | `ready-for-agent` | task |
+| [07](issues/07-speaker-attribution.md) | Give each character in a book its own voice, attributed on the P4 | `ready-for-agent` | task |
