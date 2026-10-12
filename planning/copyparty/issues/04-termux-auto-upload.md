@@ -1,47 +1,70 @@
-# 04. Auto-upload Car Scanner Pro exports from the phone with Termux
+# 04. Auto-upload Car Scanner Pro recordings from the phone with Termux
 
-Status: ready-for-agent Type: research Repo: homelab Source: maintainer request 2026-09-26
-(https://wiki.termux.com/wiki/Intents_and_Hooks) Blocked by: 01
+Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-09-26
+(https://wiki.termux.com/wiki/Intents_and_Hooks); research 2026-10-12 Blocked by: 01
 
 ## Problem
 
-Manual uploads through the copyparty web UI work (01), but they are a chore after every drive.
-Termux can run a script when a file is shared to it, or on a schedule.
+Manual uploads through the copyparty web UI work (01), but exporting from Car Scanner and uploading
+after every drive is a chore.
 
-## Options
+## Findings
 
-1. **Share-sheet hook.** Car Scanner → Share → Termux runs `~/bin/termux-file-editor <path>`, which
-   `curl`s the file to `https://files.SITE/car/`. One tap per trip, no background process.
-2. **Scheduled folder sync.** If Car Scanner can auto-save logs to a folder:
-   - `termux-setup-storage`, then a `termux-job-scheduler` job (Termux:API) that uploads new files
-     from that folder and records what it has sent;
-   - optionally only when on home WiFi (`termux-wifi-connectioninfo`) or while charging.
+- Car Scanner has no auto-export. CSV/BRC export goes through the Share sheet only, and the app
+  documents no intents, Tasker actions or folder sync
+  ([carscanner.info/records](https://www.carscanner.info/records/)).
+- It does save every recording on its own: a `.brc` file, written when the adapter disconnects or
+  recording is switched off ("Data recording" is on by default). The files live in
+  `/sdcard/Android/data/com.ovz.carscanner/files/records/`
+  ([rav4world](https://www.rav4world.com/threads/how-to-view-carscanner-data-on-a-full-size-desktop-computer.335453/)).
+  03 parses BRC directly; the format is documented there.
+- Android 11+ blocks apps, Termux included, from reading `Android/data`. The `shell` UID (adb) can
+  still read it, and [Shizuku](https://shizuku.rikka.app/) + `rish` gives Termux a shell-UID process
+  without root
+  ([setup on Android 14](https://oddity.oddineers.co.uk/2024/01/14/termux-shizuku-and-rish-configuration-for-android-14/)).
+  Non-root Shizuku has to be restarted after each phone reboot over wireless debugging
+  ([Shizuku#462](https://github.com/RikkaApps/Shizuku/discussions/462)).
+- Car Scanner only records the sensors on the open screen. Keep one dashboard/list screen with the
+  sensors 03 charts open while driving.
+- `HeaderAuthorization` with `Basic` is already enabled on Authelia's forward-auth endpoint
+  (`src/services/authelia/configuration.yml.j2`), so a non-interactive upload identity needs only a
+  user and an access rule.
 
-## The auth problem (main question)
+## Change
 
-Every request must pass Authelia (maintainer decision in `copyparty/spec.md`), but a `curl` script
-can't complete an interactive two-factor login. Evaluate:
+- **Upload identity:**
+  - LLDAP user `car_uploader`, not in `authelia_gen_access`.
+  - Authelia rule above the generic `two_factor` rule: domain `files.{{ site.url }}`,
+    `subject: user:car_uploader`, `methods: [PUT, POST]`, `resources: ['^/car/']`,
+    `policy: one_factor`. Every other request from that user falls to `default_policy: deny`.
+  - copyparty: `car_uploader` gets `w` (write-only) on `/car`.
+  - Check that copyparty ignores the forwarded `Authorization: Basic` header when `idp-h-usr` is
+    set; otherwise strip it in Traefik.
+- **`src/services/copyparty/termux/car_upload.sh`**:
+  1. `rish -c 'ls /sdcard/Android/data/com.ovz.carscanner/files/records'`; skip names listed in
+     `~/.car_upload/sent`.
+  2. `rish -c 'cat …/<f>.brc' | curl -fsS --netrc-file ~/.car_upload/netrc -T - https://files.SITE/car/<f>.brc`.
+  3. Append the name to `sent` on success.
+- **Triggers:** `termux-job-scheduler --period-ms 900000 --network unmetered` and, optionally,
+  Tasker (Termux:Tasker) on Bluetooth disconnect from the vLinker, which is when the `.brc` gets
+  written.
+- **`docs/guides/car_upload.md`**: phone setup (Termux, Termux:API, Shizuku + `rish`, netrc,
+  scheduler, restarting Shizuku after a reboot).
+- **`docs/security.md`**: record `car_uploader` as a one-factor credential stored on the phone,
+  limited to `PUT`/`POST` on `files.SITE/car/`.
+- **Fallback** if Shizuku proves unreliable: Share → BRC → Termux, where
+  `~/bin/termux-file-editor <path>` runs the same `curl`. That costs one tap per trip.
 
-- **Authelia `HeaderAuthorization`** on the forward-auth endpoint
-  (`server.endpoints.authz.forward-auth.authn_strategies`; confirm key names for 4.39, see
-  ci-and-docs/01):
-  - a dedicated LLDAP service user `car_uploader` sends basic auth;
-  - an access rule allows it at `one_factor` for `files.SITE` only, ideally limited to the `/car`
-    path and to `PUT`/`POST`;
-  - copyparty gives that user write-only access to `/car` (no read, no delete).
+Out of scope: a WiCAN Pro dongle would push OBD data to MQTT over home Wi-Fi with no phone involved
+([meatpi](https://www.crowdsupply.com/meatpi-electronics/wican-pro/updates/wican-firmware-update-improved-support-for-home-assistant)),
+but it would need a different pipeline from 03.
 
-  This keeps Authelia in the path, but it is a one-factor credential stored on the phone. Check how
-  it interacts with auth/01's two-factor rules and Authelia's regulation (ban) settings.
-- **Session cookie reuse.** Log in once in a browser and copy the `authelia_session` cookie into
-  Termux. It expires, so this is fragile. Probably reject it.
-- Record the chosen approach in `docs/security.md`, since it is a new non-interactive credential.
+## Acceptance
 
-## Deliverable
-
-- Recommendation between options 1 and 2 (depends on Car Scanner's auto-save support, see
-  copyparty/02).
-- The Termux script, committed under `src/services/copyparty/termux/` with setup steps in
-  `docs/guides/`.
-- The Authelia and copyparty config for the upload identity, if option A above is chosen.
+- After a drive, the recording appears in `/var/opt/copyparty/data/car/` within one scheduler
+  period of the phone joining home Wi-Fi, with no taps.
+- Each file is uploaded once, and nothing is lost when an upload fails while websvcs is down.
+- `car_uploader` can't list, read or delete anything, can't write outside `/car`, and can't log in
+  to any other service.
 
 ## Comments
