@@ -1,6 +1,6 @@
 # 06. Verify the real client IP reaches Traefik and apps through HAProxy
 
-Status: ready-for-agent Type: task Blocked by: router/04 Repo: homelab Source: maintainer request
+Status: ready-for-human Type: task Blocked by: router/04 Repo: homelab Source: maintainer request
 2026-09-26 (copyparty/01 "keep the client IP check"; needed again by vaultwarden/01)
 
 ## Problem
@@ -42,9 +42,29 @@ the router can also assert a client IP.
   phone's public IP in Traefik and in the app.
 - From the LAN, the LAN client IP is logged (no HAProxy hop).
 - A forged `X-Forwarded-For` sent from the internet is not trusted.
-- Three failed Authelia logins from the phone ban the phone's IP, not the VPS.
+- Six failed Authelia logins for different usernames from the phone get the phone's IP banned by
+  CrowdSec (auth/03), not the VPS.
 
 ## Comments
 
 - 2026-09-26: the SNAT that forces the `.1` gateway entries is removable once router/04 (kernel
   subnet routing without SNAT on pfSense) is done.
+- 2026-10-12 agent: repo side done, short of the gateway entries.
+  - Chain documented in `docs/networking.md` ("The client IP").
+  - **Authelia** has no trusted-proxy setting: `RequestCtxRemoteIP` (v4.39, `internal/middlewares/wrap.go`)
+    takes the first `X-Forwarded-For` entry from any peer. Traefik's ForwardAuth passes the entrypoint's
+    sanitized header, so internet clients can't forge it; the boundary is who reaches :9091 (secsvcs
+    Traefik, and the websvcs and homesvcs VMs per secsvcs `ufw`). Re-enabling Authelia's mTLS
+    `client_certificates` (TODO in its config) would narrow it to the Traefiks.
+  - **Authelia regulation** is `modes: ['user']`: it bans users, never IPs, so the "bans the VPS"
+    failure in the problem statement can't happen. IP bans are CrowdSec's (auth/03 decided
+    regulation stays as is), from the client IP in Authelia's and Traefik's logs; acceptance updated
+    to match.
+  - **Vaultwarden** and **copyparty** aren't installed; vaultwarden/01 and copyparty/01 already carry
+    the settings (`IP_HEADER_TRUSTED_PROXIES` / `xff-src` = `.6`). Vaultwarden takes the rightmost
+    untrusted `X-Forwarded-For` entry, so it ignores a forged leading entry even from a trusted source.
+  - **SNAT** still happens: the pfSense package is on tailscaled 1.94.1 in netstack mode (router/04).
+    The `.1` entries stay in both `trustedIPs` lists; any tailnet client routed through pfSense can
+    assert a client IP, LAN/VLAN clients can't (inter-VLAN routing doesn't SNAT).
+  **Remaining:** the acceptance checks (phone on mobile data, LAN, forged header, Authelia IP ban),
+  and dropping the `.1` entries from `src/services/traefik/static.yml.j2` once router/04 lands.

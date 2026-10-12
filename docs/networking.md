@@ -175,6 +175,36 @@ so Traefik can answer ACME HTTP-01 challenges and redirect the rest to HTTPS.
 Internal clients never touch tiers 1–2: Unbound resolves the service name straight to the VM, where
 Traefik does the same TLS + ForwardAuth work.
 
+### The client IP
+
+CrowdSec's bans (it reads Traefik's and Authelia's logs), app rate limits and the access logs all
+key on the client IP, so each hop passes it on and trusts it only from the hop before:
+
+| Hop | Carries the client IP as | Trusted from |
+|---|---|---|
+| HAProxy → Traefik | PROXY protocol v2 (`send-proxy-v2` on every node backend) | Traefik `proxyProtocol.trustedIPs` |
+| Traefik entrypoint | `X-Forwarded-*` sent by the client; from any other source Traefik drops them | Traefik `forwardedHeaders.trustedIPs` |
+| Traefik → app | `X-Forwarded-For` and `X-Real-Ip`, with the client IP Traefik resolved | the app's trusted-proxy setting |
+| Traefik → Authelia (ForwardAuth, `trustForwardHeader`) | `X-Forwarded-For` | any peer that reaches :9091 |
+
+Both Traefik `trustedIPs` lists are vpnsvcs plus the pve1 and pve2 subnet gateways (`.1`).
+Tailscale subnet routing on pfSense SNATs tailnet traffic to the gateway address
+([tailscale#5573](https://github.com/tailscale/tailscale/issues/5573)), so HAProxy's connections
+arrive from `.1`. Any tailnet client routed through pfSense arrives from `.1` too, so it can assert
+any client IP; LAN and VLAN clients are routed without SNAT and can't. Kernel subnet routing
+without SNAT (router/04) removes the gateway entries.
+
+Per app:
+- **Authelia** has no trusted-proxy setting: it takes the first `X-Forwarded-For` entry from any
+  peer. The boundary is who can reach :9091: Traefik on secsvcs over the podman network, and the
+  websvcs and homesvcs VMs (secsvcs `ufw`). Authelia's mTLS client certificates (off for now) would
+  narrow it to the three Traefiks.
+- **Vaultwarden**: `IP_HEADER=X-Forwarded-For`, `IP_HEADER_TRUSTED_PROXIES` = Traefik's container
+  IP (`.6`). It takes the rightmost untrusted entry, so a forged leading entry is ignored.
+- **copyparty**: `xff-src` = Traefik's container IP (`.6`), `rproxy: 1`.
+
+From the LAN there is no HAProxy hop: Traefik sees the client's own address.
+
 ## Router extras
 
 pfSense also runs CoDel traffic shaping (bufferbloat control), ntopng for traffic inspection,

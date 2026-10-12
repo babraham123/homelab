@@ -13,7 +13,7 @@ key-seed coupling.
 | [03](issues/03-crowdsec-waf-fail2ban.md) | Edge defense: CrowdSec bans at the VPS, CrowdSec WAF in Traefik, fail2ban for SSH | `ready-for-agent` | task |
 | [04](issues/04-lldap-key-seed-rotation.md) | Decouple LLDAP_KEY_SEED from the admin password; document password rotation | `ready-for-human` | research |
 | [05](issues/05-olivetin-oidc-groups.md) | Test OliveTin OIDC group claims and drop the allow-everyone workaround | `ready-for-human` | task |
-| [06](issues/06-real-client-ip.md) | Verify the real client IP reaches Traefik and apps through HAProxy | `ready-for-agent` | task |
+| [06](issues/06-real-client-ip.md) | Verify the real client IP reaches Traefik and apps through HAProxy | `ready-for-human` | task |
 | [07](issues/07-guacamole-private-client.md) | Move Guacamole to a private OIDC client with code flow and PKCE | `ready-for-agent` | task |
 | [08](issues/08-password-management-research.md) | Research: manage SSH, sudo, CA and recovery passwords better than offline notes | `ready-for-agent` | research |
 | [09](issues/09-headscale-oidc-groups.md) | Drive Headscale ACL groups from LLDAP groups once headscale supports OIDC groups | `needs-info` | task |
