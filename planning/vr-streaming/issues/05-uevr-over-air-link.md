@@ -1,40 +1,36 @@
 # 05. Prove a UEVR game over Air Link, injected without a keyboard
 
-Status: needs-info Type: prototype Repo: homelab Source: maintainer request 2026-10-12 Blocked by:
-01
+Status: needs-info Type: prototype Repo: homelab Source: maintainer request 2026-10-12; research
+in [uevr-research.md](../uevr-research.md) Blocked by: 01
 
 Starts once 01 has VR mode working by script.
 
 ## Question
 
 With VR mode up, can a flat Unreal Engine game be launched from Playnite in the Link desktop view
-and have UEVR injected automatically, so nobody has to click in the UEVR frontend on a desktop?
-06 automates the answer.
+and have UEVR injected automatically, with no clicks in the UEVR frontend? The research says
+`UEVRInjector.exe --attach=<exe>` does it; this checks it on the VM. 06 automates the answer.
 
 ## Steps
 
-- Install the latest UEVR release on the VM. Note the version: nightlies change often, and profiles
-  can break across versions.
-- Pick one well-supported single-player UE4/UE5 game from the Steam library. Check that it has no
-  anti-cheat.
-- Go into VR mode the way 01 does. In the headset, open the Link desktop view and start Playnite.
-- Launch the game, then inject:
-  - first by hand in the UEVR frontend (OpenXR runtime), to get a working baseline and save its
-    profile;
-  - then from a Playnite "after game started" script that runs the injector with no clicks.
+[investigation.md](../investigation.md) part 7: install a UEVR nightly and the .NET 6 Desktop
+Runtime, pick OpenXR once in the frontend, make Link the active OpenXR runtime, then inject into one
+single-player UE game by hand and through a temporary Playnite global script.
 
 ## Record under ## Answer
 
-- How to inject without the GUI: a frontend command-line option to attach to a process name, or a
-  wrapper tool (for example Rai Pal) if there isn't one. Also how long to wait after launch before
-  injecting.
-- Whether OpenXR on the Oculus runtime works, or the game needs OpenVR/SteamVR.
-- Where profiles live (`%APPDATA%\UnrealVRMod\<game exe>\`), and whether one profile is enough to
-  make the game playable.
+- The UEVR nightly build number, and the test game.
+- Whether the Playnite-started `--attach` injects with no clicks, and with which delay after launch
+  (none, 3 s, 10 s). Whether the frontend stays running after the game exits.
+- Whether injection needs admin when Playnite and the game run as admin's normal token.
+- Whether OpenXR on the Oculus runtime works, or the game needs OpenVR/SteamVR. The value of
+  `HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime` when Link is active.
+- Controllers: whether Touch input reaches the game only after closing the Link desktop view.
+- The profile folder (`%APPDATA%\UnrealVRMod\<exe stem>\`) and whether one profile makes the game
+  playable.
 - Performance on the 3060 Ti, measured with the Oculus Debug Tool HUD:
-  - native stereo vs synchronized sequential rendering;
-  - the in-game resolution and upscaler that hold the headset refresh rate.
-- Whether the game's window or controller input fights with Link: focus, and the XInput emulation
-  through Link's controllers.
+  - Native Stereo first; Synchronized Sequential only if Native Stereo glitches;
+  - with `VR_PassDepthToRuntime=true`;
+  - the `OpenXR_ResolutionScale` and in-game settings that hold the headset refresh rate.
 
 ## Comments
