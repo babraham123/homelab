@@ -10,15 +10,7 @@ secrets management, notifications and VM management services.
 - Install tools
 ```bash
 sudo su
-cd /root
-pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
-
-# Install yq
-YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-wget "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" -O - | tar xz
-mv yq_linux_amd64 /usr/bin/yq
-./install-man-page.sh
-rm yq* install-man-page.sh
+/root/homelab-rendered/src/base/debian/install_render_tools.sh
 ```
 
 ## SSH Certificates
@@ -27,23 +19,8 @@ rm yq* install-man-page.sh
 [Ref](https://free-pmx.org/guides/ssh-certs/)
 - Generate the CA keys. They should be kept as secure as possible.
 ```bash
-mkdir -p /root/ssh/public
-cd /root/ssh
-chmod 700 public
-
-# Include passphrase, remember it
-ssh-keygen -t ed25519 -f ca_ssh_key -C "SSH CA for janedoe.com"
-chmod 444 ca_ssh_key.pub
-chmod 400 ca_ssh_key
-
-# Leave the passphrase blank
-ssh-keygen -t ed25519 -f ca_ssh_host_key -C "SSH Host CA for janedoe.com"
-chmod 444 ca_ssh_host_key.pub
-chmod 400 ca_ssh_host_key
-
-# root's client key, signed by ssh_cert_gen.sh as manualadmin/autoadmin.
-# No passphrase: pve1's scripts SSH to the other hosts with it unprompted.
-ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N ""
+# Include a passphrase for the user CA, remember it
+/root/homelab-rendered/src/nodes/pve1/certificates/init_ssh_ca.sh
 
 ```
 - Wait until all of the VMs have been created, then bootstrap trust in the CA. `ssh_cert_gen.sh`
@@ -72,25 +49,9 @@ done
 ## Secrets
 - Generate the AGE keys
 ```bash
-apt install -y age curl moreutils jq
-
-# Install SOPS
-SOPS_VERSION=$(curl -s "https://api.github.com/repos/getsops/sops/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-curl -Lo sops.deb "https://github.com/getsops/sops/releases/latest/download/sops_${SOPS_VERSION}_amd64.deb"
-apt --fix-broken install ./sops.deb
-rm -rf sops.deb
-echo -e '\nexport SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)' >> ~/.zshrc
-echo -e 'export SOPS_AGE_KEY_FILE="/root/secrets/age.txt"' >> ~/.zshrc
+/root/homelab-rendered/src/nodes/pve1/init_secrets.sh
 source ~/.zshrc
-echo -e '\nexport SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)' >> ~/.bashrc
-echo -e 'export SOPS_AGE_KEY_FILE="/root/secrets/age.txt"' >> ~/.bashrc
-
-mkdir /root/secrets
-chmod 700 /root/secrets
 cd /root/secrets
-age-keygen -o age.txt
-age-keygen -y age.txt > age.pub
-chmod 400 age.*
 ```
 
 - Generate the SOPS pve1 secrets file
@@ -131,68 +92,14 @@ Use self-signed certs for server to server traffic. Use Let's Encrypt certs for 
 - Setup CA infrastructure for self signed certs. The root CA key should be kept as secure as
   possible.
 ```bash
-# root CA
-mkdir /root/ca
-cd /root/ca
-mkdir certs crl newcerts private
-chmod 700 private
-touch index.txt
-echo 1000 > serial
-vim /root/ca/openssl.cnf
-# include passphrase, remember it
-openssl genrsa -aes256 -out private/ca.key.pem 4096
-chmod 400 private/ca.key.pem
-openssl req -config openssl.cnf \
-  -key private/ca.key.pem \
-  -new -x509 -days 7300 -sha256 -extensions v3_ca \
-  -out certs/ca.cert.pem
-chmod 444 certs/ca.cert.pem
-# confirm cert
-openssl x509 -noout -text -in certs/ca.cert.pem
-
-# intermediate CA
-mkdir /root/ca/intermediate
-cd /root/ca/intermediate
-mkdir certs crl csr newcerts private
-chmod 700 private
-touch index.txt
-echo 1000 > serial
-echo 1000 > /root/ca/intermediate/crlnumber
-vim /root/ca/intermediate/openssl.cnf
-# include passphrase, remember it
-openssl genrsa -aes256 -out private/intermediate.key.pem 4096
-chmod 400 private/intermediate.key.pem
-openssl req -config openssl.cnf -new -sha256 \
-  -key private/intermediate.key.pem \
-  -out csr/intermediate.csr.pem
-cd /root/ca
-openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
-  -days 3650 -notext -md sha256 \
-  -in intermediate/csr/intermediate.csr.pem \
-  -out intermediate/certs/intermediate.cert.pem
-chmod 444 intermediate/certs/intermediate.cert.pem
-# confirm cert and DB entry
-cat index.txt
-openssl x509 -noout -text -in intermediate/certs/intermediate.cert.pem
-openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pem
-
-# copy and create a CA certificate chain
-cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
-chmod 444 intermediate/certs/ca-chain.cert.pem
-
-# vpnsvcs's SSH port comes from the ssh_config that ssh_cert_gen.sh installed on pve1
-function upload() { /root/homelab-rendered/src/base/debian/send_files.sh intermediate/certs/ca-chain.cert.pem | ssh "autoadmin@${1}" install_ca; }
-upload pve1
-upload pve2
-upload vpnsvcs
-upload secsvcs
-upload homesvcs
-upload websvcs
-upload devtop
+# Include a passphrase for each CA key, remember them
+/root/homelab-rendered/src/nodes/pve1/certificates/init_ca.sh
+/root/homelab-rendered/src/nodes/pve1/certificates/upload_ca_chain.sh
 ```
 
 - Example cert, normally done via gen script
 ```bash
+cd /root/ca
 openssl genrsa -out intermediate/private/www.example.com.key.pem 2048
 chmod 400 intermediate/private/www.example.com.key.pem
 openssl req -config intermediate/openssl.cnf \

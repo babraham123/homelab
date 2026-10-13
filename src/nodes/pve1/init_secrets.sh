@@ -1,0 +1,31 @@
+#!/bin/bash
+# Installs age and SOPS, and creates the AGE key that encrypts every node's secrets.
+# Run once, on pve1.
+# Usage:
+#   /root/homelab-rendered/src/nodes/pve1/init_secrets.sh
+
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+
+require_root
+[[ ! -e /root/secrets ]] || die "/root/secrets already exists"
+
+apt install -y age curl moreutils jq
+
+SOPS_VERSION=$(curl -s "https://api.github.com/repos/getsops/sops/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+curl -Lo /tmp/sops.deb "https://github.com/getsops/sops/releases/latest/download/sops_${SOPS_VERSION}_amd64.deb"
+apt --fix-broken install -y /tmp/sops.deb
+rm -f /tmp/sops.deb
+
+for rc in /root/.zshrc /root/.bashrc; do
+  # shellcheck disable=SC2016 # expanded by the shell that sources the rc file
+  echo -e '\nexport SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)' >> "$rc"
+  echo 'export SOPS_AGE_KEY_FILE="/root/secrets/age.txt"' >> "$rc"
+done
+
+mkdir /root/secrets
+chmod 700 /root/secrets
+cd /root/secrets
+age-keygen -o age.txt
+age-keygen -y age.txt > age.pub
+chmod 400 age.*

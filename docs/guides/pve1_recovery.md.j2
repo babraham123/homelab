@@ -192,7 +192,8 @@ echo "@cert-authority *.{{ site.url }} $(cat /root/ssh/ca_ssh_host_key.pub)" > /
 - `ssh_cert_gen_windows.sh` isn't needed: the gaming VM's host cert and the CA are unchanged
 
 ### 11. Host services
-- CA chain in pve1's own trust store (the `upload pve1` step of [CA infra](./pve1.md#ca-infra)):
+- CA chain in pve1's own trust store (what `upload_ca_chain.sh` does for pve1 in
+  [CA infra](./pve1.md#ca-infra)):
 ```bash
 cd /root/ca
 /root/homelab-rendered/src/base/debian/send_files.sh intermediate/certs/ca-chain.cert.pem | ssh autoadmin@pve1 install_ca
@@ -286,9 +287,10 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
   only issuing is blocked
 - Rebuild before the next [yearly renewal](../maintenance.md#refresh-certificates), in one sitting:
   services reject each other until all have the new chain
-- Follow [CA infra](./pve1.md#ca-infra) in full: new root and intermediate, new passphrases,
-  `openssl.cnf` from the rendered `src/nodes/pve1/certificates/openssl.{root,intermediate}.cnf`. Its
-  `upload` loop installs the chain on every host
+- Follow [CA infra](./pve1.md#ca-infra) in full: new root and intermediate, new passphrases.
+  `init_ca.sh` takes each `openssl.cnf` from the rendered
+  `src/nodes/pve1/certificates/openssl.{root,intermediate}.cnf`, and `upload_ca_chain.sh` installs
+  the chain on every host
 - Re-issue and redistribute every service key and cert:
 ```bash
 /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_key_gen.sh

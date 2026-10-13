@@ -5,18 +5,11 @@ Guide to setup websvcs on PVE2. Just service installation.
 
 ## Initialize Guacamole DB
 
-- Generate init script. [Ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
+- Create the tables from Guacamole's init script.
+  [Ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
 ```bash
-sudo su
-podman run --rm docker.io/guacamole/guacamole:1.6.0 /opt/guacamole/bin/initdb.sh --postgresql > initdb.sql
-scp initdb.sql manualadmin@secsvcs:/home/manualadmin
-
 ssh manualadmin@secsvcs
-sudo su
-container=$(podman container ls | grep postgres | awk '{print $1}')
-cat initdb.sql | podman exec -i -e PGPASSWORD="$(/root/homelab-rendered/src/base/podman/get_secret.sh guacamole_pg_password)" --user 70 "$container" psql -U guacamole -d guacamole
-rm initdb.sql
-exit
+sudo /root/homelab-rendered/src/nodes/secsvcs/init_guacamole_db.sh
 exit
 ```
 - Remember to handle any subsequent upgrades
@@ -151,16 +144,5 @@ This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other mode
   [ref](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 ```bash
 sudo su
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-
-apt update
-apt install -y nvidia-container-toolkit nvidia-container-toolkit-base libnvidia-container-tools libnvidia-container1
-
-# Generate the CDI spec
-nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
-# Check the names of the generated devices
-nvidia-ctk cdi list
+/root/homelab-rendered/src/base/podman/install_nvidia_toolkit.sh
 ```

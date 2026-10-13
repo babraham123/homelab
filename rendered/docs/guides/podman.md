@@ -11,57 +11,24 @@ and services.
 - Install dependencies
 ```bash
 sudo su
-apt install -y age jq python3-pip gnupg2 zstd
-pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
-
-YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-wget "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" -O - | tar xz
-mv yq_linux_amd64 /usr/bin/yq
-./install-man-page.sh
-rm yq* install-man-page.sh
+apt install -y age jq gnupg2 zstd
+/root/homelab-rendered/src/base/debian/install_render_tools.sh
 ```
 
 - Install podman: [ref](https://podman.io/docs/installation#linux-distributions),
   [ref2](https://computingforgeeks.com/how-to-install-podman-on-debian/)
 ```bash
-source /etc/os-release
-curl -fsSL https://download.opensuse.org/repositories/home:/alvistack/Debian_$VERSION_ID/Release.key \
-  | gpg --dearmor \
-  | tee /etc/apt/trusted.gpg.d/alvistack.gpg > /dev/null
-echo "deb http://downloadcontent.opensuse.org/repositories/home:/alvistack/Debian_$VERSION_ID/ /" \
-  | tee /etc/apt/sources.list.d/alvistack.list > /dev/null
-
-apt update
-apt -y upgrade
-apt -y install podman podman-netavark podman-aardvark-dns podman-compose libgpgme11-dev buildah libyajl2 uidmap
+/root/homelab-rendered/src/base/podman/install_podman.sh
 ```
 
 ## Networking
 - Account for conflicts between the podman network and the firewall,
   [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
-- On the VMs, reset the firewall. vpnsvcs keeps the rules from [its
-  guide](./vpnsvcs.md#add-public-endpoint).
+- Create the container network. On the VMs this also resets the firewall and lets Traefik's
+  traffic through to its container; vpnsvcs keeps the rules from [its
+  guide](./vpnsvcs.md#add-public-endpoint) and publishes nothing.
 ```bash
-ufw reset
-# SSH, HTTP
-ufw allow in from any to any port 22,80,443 proto tcp
-# mDNS
-ufw allow in from any to any port 5353 proto udp
-```
-- Create the container network
-```bash
-cd /root/homelab-rendered
-mkdir -p /etc/containers/systemd
-cp src/nodes/$(hostname -s)/net.network /etc/containers/systemd
-systemctl daemon-reload
-systemctl start net-network
-POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
-```
-- On the VMs, let Traefik's traffic through to its container. vpnsvcs publishes nothing.
-```bash
-ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 80,443 proto tcp
-ufw enable
+/root/homelab-rendered/src/base/podman/install_network.sh
 ```
 
 ## Secrets
