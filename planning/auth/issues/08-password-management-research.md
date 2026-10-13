@@ -170,3 +170,4 @@ glass; the 30-day offline limit for Bitwarden clients (2022 blog post only).
   they want: `manualadmin`'s sudo password, not root's. The first-run bootstrap of `ssh_cert_gen.sh`
   (finding 3 in the notes) is documented in the pve1 guide's CA certs section and the recovery
   guide's Nothing escrowed path.
+- 2026-10-13: the open follow-up tasks (1–8, 10–13) are ticketed as auth/11.
