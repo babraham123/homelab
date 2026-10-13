@@ -2,50 +2,45 @@
 
 -- \set var `echo "$ENV_VAR"`
 
+-- Each app owns its database: from Postgres 15, GRANT ALL ON DATABASE no longer lets a role
+-- create tables in the public schema, but the database owner can.
+
 --- Set up LLDAP DB for first time ---
 \set pw1 `echo "'$LLDAP_POSTGRES_PASSWORD'"`
 CREATE USER lldap WITH ENCRYPTED PASSWORD :pw1;
-CREATE DATABASE lldap;
-GRANT ALL PRIVILEGES ON DATABASE lldap TO lldap;
+CREATE DATABASE lldap OWNER lldap;
 
 --- Set up Authelia DB for first time ---
 \set pw2 `echo "'$AUTHELIA_POSTGRES_PASSWORD'"`
 CREATE USER authelia WITH ENCRYPTED PASSWORD :pw2;
-CREATE DATABASE authelia;
-GRANT ALL PRIVILEGES ON DATABASE authelia TO authelia;
+CREATE DATABASE authelia OWNER authelia;
 
 --- Set up Gatus DB for first time ---
 \set pw3 `echo "'$GATUS_POSTGRES_PASSWORD'"`
 CREATE USER gatus WITH ENCRYPTED PASSWORD :pw3;
-CREATE DATABASE gatus;
-GRANT ALL PRIVILEGES ON DATABASE gatus TO gatus;
+CREATE DATABASE gatus OWNER gatus;
 
 --- Set up Grafana DB for first time ---
 \set pw4 `echo "'$GRAFANA_POSTGRES_PASSWORD'"`
 CREATE USER grafana WITH ENCRYPTED PASSWORD :pw4;
-CREATE DATABASE grafana;
-GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;
+CREATE DATABASE grafana OWNER grafana;
 
 --- Set up Home Assistant DB for first time ---
 -- For now HA uses sqlite
 -- \set pw5 `echo "'$HASS_POSTGRES_PASSWORD'"`
 -- CREATE USER hass WITH ENCRYPTED PASSWORD :pw5;
--- CREATE DATABASE hass 
+-- CREATE DATABASE hass
+--   OWNER hass
 --   ENCODING 'UTF8'
 --   LC_COLLATE = 'en_US.UTF-8'
 --   LC_CTYPE = 'en_US.UTF-8';
--- GRANT ALL PRIVILEGES ON DATABASE hass TO hass;
 
 --- Set up Guacamole DB for first time ---
 \set pw6 `echo "'$GUAC_POSTGRES_PASSWORD'"`
 CREATE USER guacamole WITH ENCRYPTED PASSWORD :pw6;
-CREATE DATABASE guacamole;
-GRANT ALL PRIVILEGES ON DATABASE guacamole TO guacamole;
+CREATE DATABASE guacamole OWNER guacamole;
 
 --- Set up Vaultwarden DB for first time ---
 \set pw7 `echo "'$VAULTWARDEN_POSTGRES_PASSWORD'"`
 CREATE USER vaultwarden WITH ENCRYPTED PASSWORD :pw7;
-CREATE DATABASE vaultwarden;
-GRANT ALL PRIVILEGES ON DATABASE vaultwarden TO vaultwarden;
--- From Postgres 15 the GRANT no longer allows creating tables in public; the owner can
-ALTER DATABASE vaultwarden OWNER TO vaultwarden;
+CREATE DATABASE vaultwarden OWNER vaultwarden;

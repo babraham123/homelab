@@ -138,7 +138,7 @@ sudo su
 cd /root/homelab-rendered
 src/nodes/secsvcs/install_svcs.sh postgres
 src/nodes/secsvcs/install_svcs.sh authelia
-sed -n '/Vaultwarden DB/,/OWNER TO vaultwarden/p' /var/opt/db/pg_init.sql \
+sed -n '/Vaultwarden DB/,/CREATE DATABASE vaultwarden/p' /var/opt/db/pg_init.sql \
   | podman exec -i postgres psql -U postgres -v ON_ERROR_STOP=1
 src/nodes/secsvcs/install_svcs.sh vaultwarden
 src/nodes/secsvcs/install_svcs.sh traefik
@@ -200,6 +200,14 @@ systemctl --type=service
 ## Upgrade Postgres
 [Why upgrade](https://why-upgrade.depesz.com/)
 
+- Before leaving 14: databases created before `pg_init.sql` set `OWNER` belong to `postgres`, and
+  from 15 their app could no longer create tables in `public`. Hand them over first, so the dump
+  carries the owners
+```bash
+for db in lldap authelia gatus grafana guacamole; do
+  podman exec postgres psql -U postgres -c "ALTER DATABASE $db OWNER TO $db"
+done
+```
 - Backup the DB instance
 ```bash
 sudo su
