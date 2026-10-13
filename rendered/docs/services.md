@@ -51,6 +51,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .21 | storyteller | storyteller:web-v2 | Read-along book library, OPDS | books.janedoe.com |
 | .22 | calliope | built from babraham123/TTS-Narrated-Ebook-Creator | GPU batch job: EPUB → read-along EPUB | n/a |
 | .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
+| .24 | bookmark_handoff | built from `src/services/bookmark_handoff/` | linkding `toread` → Readeck, Readeck `listen` → Calliope inbox (timer) | n/a |
 
 - `nginx` serves `/var/opt/nginx/www` by subdomain (`www/`, `wifi/` (redirects to the AP's admin
   page), shared `error/`; `src/services/nginx/nginx.conf.j2`)
@@ -98,8 +99,6 @@ timers; see the [reading guide](guides/reading.md).
 | vpnsvcs | crowdsec-firewall-bouncer | Drops CrowdSec's banned IPs in nftables ([Security](security.md#the-edge-haproxy)) |
 | vpnsvcs | fail2ban | SSH brute-force bans ([Security](security.md#vps-hardening)) |
 | vpnsvcs | deadman (timer) | Watches the alerting path from outside ([Observability](#observability)) |
-| websvcs | linkding_handoff (timer) | linkding bookmarks tagged `toread` → Readeck |
-| websvcs | readeck_narrate (timer) | Readeck articles labelled `listen` → Calliope inbox |
 | websvcs | calliope (path + timer) | Starts the Calliope job while its inbox has EPUBs |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 

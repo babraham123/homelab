@@ -1,0 +1,36 @@
+# /etc/containers/systemd/bookmark_handoff.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# A oneshot job, not a server: bookmark_handoff.timer runs it every 15 minutes. It
+# reaches linkding and Readeck on their container IPs, under their public host names.
+
+[Unit]
+Description="Homelab: Hands linkding toread bookmarks to Readeck and Readeck listen articles to Calliope"
+Wants=network-online.target
+After=network-online.target linkding.service readeck.service
+RequiresMountsFor=/srv/media
+
+[Container]
+Image=localhost/bookmark_handoff:latest
+ContainerName=bookmark_handoff
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+
+Network=net.network
+IP=10.11.0.24
+
+Environment=TZ=America/Los_Angeles
+Environment=LINKDING_URL=http://10.11.0.17:9090
+Environment=LINKDING_HOST=archive.janedoe.com:9090
+Environment=READECK_URL=http://10.11.0.18:8000
+Environment=READECK_HOST=read.janedoe.com:8000
+Secret=linkding_api_token,type=env,target=LINKDING_API_TOKEN
+Secret=readeck_api_token,type=env,target=READECK_API_TOKEN
+
+Volume=/var/opt/bookmark_handoff:/state
+Volume=/srv/media/books:/books
+
+[Service]
+Type=oneshot
+TimeoutStartSec=600

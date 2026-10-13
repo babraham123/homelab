@@ -94,7 +94,7 @@ flowchart TB
         inventory["src/nodes/*/inventory.yml:<br/>dispatcher entries, subdomains,<br/>Gatus endpoints"]
         allvars["all_vars.yml<br/>private temp dir, deleted after the render"]
         render["render_src.sh: jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
-        validate["check_rendered.sh: yamllint, jq on all JSON,<br/>duplicate container-IP check,<br/>inventory.yml vs scripts / routes.yml / quadlet Image= / OliveTin"]
+        validate["check_rendered.py: yamllint, every JSON parses,<br/>duplicate container-IP check,<br/>inventory.yml vs scripts / routes.yml / quadlet Image= / OliveTin"]
         upload["upload_src.sh per node: scp its src/ paths<br/>(tools/node_dirs.sh) as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
     end
 
@@ -152,11 +152,12 @@ real values, so keep it out of shared paths such as a fixed `/tmp/homelab-render
 `.git`, `planning` and `notes` are never copied into it. The directory must be named
 `homelab-rendered`, since `upload_src.sh` moves it into place by that name.
 
-Rendering ends with `tools/check_rendered.sh`, which reports every failure as `error: FILE: MESSAGE`.
-It lints YAML (`yamllint`), JSON (`jq`) and markdown (`.markdownlint-cli2.yaml`: only rules for
-markdown that renders wrong, broken heading links and the 100-column line limit), rejects duplicate
-container `IP=`s, and checks the node inventory, through the lists `src/nodes.jinja` derives from
-it, against the files it describes:
+Rendering ends with `tools/check_rendered.py`, which reports every failure as `error: FILE: MESSAGE`.
+It is a uv script (dependencies inline, run by `uv run`); the inventory facts it checks come from a
+jinjanate render of `src/nodes.jinja`. It lints YAML (`yamllint`), JSON and markdown
+(`.markdownlint-cli2.yaml`: only rules for markdown that renders wrong, broken heading links and the
+100-column line limit), rejects duplicate container `IP=`s, and checks the node inventory, through
+the lists `src/nodes.jinja` derives from it, against the files it describes:
 
 - every repo script a dispatcher case runs exists and has the case it is called with (services,
   `debian_services`, `commands[].script` and the paths in `commands[].run`);
@@ -213,7 +214,7 @@ tests/run.sh --fast   # skips the full render, about 3 s
 repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plain bash, no extra
 tools.
 
-- `check_rendered_test.sh`: `tools/check_rendered.sh` on `tests/fixtures/tree`, a minimal rendered
+- `check_rendered_test.sh`: `tools/check_rendered.py` on `tests/fixtures/tree`, a minimal rendered
   tree in the repo's layout (`src/nodes/<node>/inventory.yml` and all) that passes; each test breaks
   one invariant and expects that invariant's error alone.
 - `nodes_jinja_test.sh`: the dispatcher cases, sudoers grants, OliveTin buttons, subdomains, uptime

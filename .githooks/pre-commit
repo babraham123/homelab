@@ -1,6 +1,6 @@
 #!/bin/bash
 # Renders the staged tree against vars.template.yml, which runs every render-time check
-# (see tools/check_rendered.sh), lints planning/'s markdown, runs the fixture tests in
+# (see tools/check_rendered.py), lints planning/'s markdown, runs the fixture tests in
 # tests/, then shellchecks the rendered scripts so *.sh.j2 files are checked without their
 # Jinja. If everything passes, the render replaces rendered/ and is staged with the commit.
 # Activate with: git config core.hooksPath .githooks
@@ -8,7 +8,7 @@
 
 set -uo pipefail
 
-for tool in jinjanate fd yq yamllint jq shellcheck markdownlint-cli2; do
+for tool in jinjanate uv fd yq yamllint jq shellcheck markdownlint-cli2; do
   command -v "$tool" > /dev/null || { echo "pre-commit: ${tool} not installed" >&2; exit 1; }
 done
 

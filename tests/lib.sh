@@ -40,11 +40,11 @@ edit() {
   mv "${file}.new" "$file"
 }
 
-# Runs tools/check_rendered.sh on the fixture tree, rendered with tests/fixtures/site.yml
+# Runs tools/check_rendered.py on the fixture tree, rendered with tests/fixtures/site.yml
 # and the tree's own inventory files
 check_tree() {
   { cat tests/fixtures/site.yml; node_inventory "${tmp}/tree/src/nodes"; } > "${tmp}/all_vars.yml"
-  tools/check_rendered.sh "${tmp}/tree" "${tmp}/all_vars.yml" < /dev/null 2>&1
+  tools/check_rendered.py "${tmp}/tree" "${tmp}/all_vars.yml" < /dev/null 2>&1
 }
 
 # Asserts check_tree fails with exactly the errors on stdin

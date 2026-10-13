@@ -4,7 +4,7 @@
 # exists). Prints nothing for other nodes, the router and gaming VM, which upload_src.sh
 # handles on their own. A debian node is one whose install_dispatcher is
 # base/debian/commands.sh's (src/nodes.jinja's debian_nodes).
-# upload_src.sh ships only these; check_rendered.sh checks they cover every src/ path
+# upload_src.sh ships only these; check_rendered.py checks they cover every src/ path
 # the node's files use.
 # Run from the root of the repo or a rendered copy.
 # Usage:

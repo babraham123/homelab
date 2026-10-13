@@ -52,7 +52,7 @@ wget -O .vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.
 - Install tools
 
 ```bash
-brew install fd yq yamllint jq shellcheck markdownlint-cli2
+brew install fd yq yamllint jq shellcheck markdownlint-cli2 uv
 pipx install jinjanator
 pipx inject jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
 curl -fsSL https://claude.ai/install.sh | bash

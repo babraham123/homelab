@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # The passing case against the real repo: a full render of vars.template.yml, which runs
-# tools/check_rendered.sh on the real inventory, scripts and routes.
+# tools/check_rendered.py on the real inventory, scripts and routes.
 # shellcheck source=tests/lib.sh
 source tests/lib.sh
 

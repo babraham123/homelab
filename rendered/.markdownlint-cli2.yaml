@@ -1,4 +1,4 @@
-# markdownlint-cli2 config, read by tools/check_rendered.sh (rendered docs), the pre-commit
+# markdownlint-cli2 config, read by tools/check_rendered.py (rendered docs), the pre-commit
 # hook (planning/) and the VS Code markdownlint extension.
 # Ref: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
 # Every rule is on, with lines up to 100 columns; the options below are the exceptions.

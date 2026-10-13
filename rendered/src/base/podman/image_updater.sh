@@ -105,6 +105,7 @@ case $node in
       "readeck readeck localhost/readeck/readeck:latest upstream codeberg.org/readeck/readeck:latest"
       "storyteller storyteller localhost/storyteller-platform/storyteller:web-v2 upstream registry.gitlab.com/storyteller-platform/storyteller:web-v2"
       "calliope calliope localhost/calliope:latest build calliope"
+      "bookmark_handoff bookmark_handoff localhost/bookmark_handoff:latest build bookmark_handoff"
     )
     # Container subnets are local to each node, so ntfy is reached through Traefik.
     ntfy_url="https://push.janedoe.com/alert"
@@ -321,7 +322,7 @@ check_upstream() {
 # Usage: check_build SERVICE CONTAINER IMAGE NAME; one image built here, ending like
 # check_upstream. src/services/SERVICE/build.sh takes `versions` (print every input it
 # builds from: commits, base image digests) and `build TAG` (build localhost/NAME:TAG from
-# them). tools/check_rendered.sh requires one for every built image, so nothing built here
+# them). tools/check_rendered.py requires one for every built image, so nothing built here
 # skips the scan gate.
 check_build() {
   local service=$1 container=$2 image=$3 name=$4 archive="${staging}/$2.tar" versions

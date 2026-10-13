@@ -34,7 +34,7 @@ excludes+=(--exclude=etc/opt/wyoming/src
 # Readeck's config.toml holds the secret key its API tokens are signed with.
 stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd \
   /etc/snapraid.conf /etc/fstab "$(realpath /var/opt/nginx/www)" \
-  /var/opt/linkding /var/opt/readeck /var/opt/storyteller
+  /var/opt/linkding /var/opt/readeck /var/opt/storyteller /var/opt/bookmark_handoff
 # Isso comments, SQLite under a running process; a live copy is acceptable.
 stage_volume issodb
 

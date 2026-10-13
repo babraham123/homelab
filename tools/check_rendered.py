@@ -1,0 +1,366 @@
+#!/usr/bin/env -S uv run --quiet --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["pyyaml>=6,<7"]
+# ///
+# Checks a rendered copy of the repo: YAML, JSON, markdown and container IPs, then the
+# node inventory (src/nodes/<node>/inventory.yml, ADR 0006) against the scripts, routes,
+# quadlets and OliveTin buttons it describes. Called by render_src.sh; tests/ runs it
+# against fixture trees. A uv script: `uv run` installs its dependencies, listed above.
+# Usage:
+#   tools/check_rendered.py /dir/with/rendered/copy /path/to/all_vars.yml
+# all_vars.yml is the data file the copy was rendered with: vars.yml plus `nodes:`.
+# Reports every failure as "error: FILE: MESSAGE" and exits 1 if there was any.
+
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from collections import Counter
+from pathlib import Path
+
+import yaml
+
+TOOLS = Path(__file__).resolve().parent
+
+# Traefik's fallback route: it serves hosts that have no DNS or SNI entry, so it may
+# route more hosts than the inventory lists.
+DEFAULT_ROUTE_NODE = "websvcs"
+
+# Every inventory fact the checks use, derived by src/nodes.jinja (the same derivation
+# the dispatchers, sudoers and OliveTin use). Rendered by jinjanate, like the repo.
+FACTS_TEMPLATE = """\
+{% import 'src/nodes.jinja' as inv with context -%}
+{"site": {{ site.url | tojson }}, "nodes": {
+{%- for node, spec in nodes.items() %}
+  {{ node | tojson }}: {
+    "services": {{ spec.get('services', {}) | list | tojson }},
+    "debian_services": {{ spec.get('debian_services', []) | tojson }},
+    "cases": {{ inv.dispatch[node] | tojson }},
+    "subdomains": {{ inv.subdomains[node] | tojson }},
+    "images": {{ inv.images[node] | tojson }}
+  }{{ "," if not loop.last }}
+{%- endfor %}
+}}
+"""
+
+failed = False
+
+
+def fail(file, message):
+  global failed
+  print(f"error: {file}: {message}", file=sys.stderr)
+  failed = True
+
+
+def warn(message):
+  print(f"warning: {message}", file=sys.stderr)
+
+
+def inventory(node):
+  return f"src/nodes/{node}/inventory.yml"
+
+
+def text_lines(path):
+  """A file's lines, or none for a binary file (grep -I)."""
+  data = Path(path).read_bytes()
+  return [] if b"\0" in data else data.decode(errors="replace").splitlines()
+
+
+def tree_lines(path):
+  """Every line of every text file under path."""
+  path = Path(path)
+  if not path.exists():
+    return []
+  files = sorted(p for p in path.rglob("*") if p.is_file()) if path.is_dir() else [path]
+  return [line for f in files for line in text_lines(f)]
+
+
+def cases(path):
+  """Case labels of a script's `case` blocks."""
+  return {m[1] for line in text_lines(path) if (m := re.match(r"^\s+([A-Za-z0-9_-]+)\).*$", line))}
+
+
+def case_block(path, label):
+  """The lines of a script's `label)` case, up to its `;;`."""
+  block, inside = [], False
+  for line in text_lines(path):
+    if not inside:
+      inside = line.split()[:1] == [f"{label})"]
+    elif ";;" in line:
+      break
+    else:
+      block.append(line)
+  return block
+
+
+def derive_facts(all_vars):
+  with tempfile.TemporaryDirectory() as work:
+    template = Path(work, "facts.j2")
+    template.write_text(FACTS_TEMPLATE)
+    out = subprocess.run(["jinjanate", "--quiet", str(template), all_vars],
+                         stdout=subprocess.PIPE, text=True)
+  if out.returncode:
+    print("error: src/nodes.jinja: can't derive the inventory facts (jinjanate error above)",
+          file=sys.stderr)
+    sys.exit(1)
+  return json.loads(out.stdout)
+
+
+def check_yaml():
+  out = subprocess.run(["yamllint", "-f", "parsable", "-c", "lint.yaml", "."],
+                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout
+  for line in out.splitlines():
+    line = line.removeprefix("./")
+    if not line:
+      continue
+    file = line.split(": ", 1)[0]
+    if " [error] " in line:
+      fail(file, line.split(": [error] ", 1)[1])
+    elif " [warning] " in line:
+      warn(f"{file}: {line.split(': [warning] ', 1)[1]}")
+    else:
+      fail("lint.yaml", f"yamllint: {line}")
+
+
+def check_json():
+  for path in sorted(Path(".").rglob("*.json")):
+    text = path.read_text(errors="replace")
+    if not text.strip():
+      continue
+    try:
+      json.loads(text)
+    except ValueError:
+      fail(path, "invalid JSON")
+
+
+# Rules in .markdownlint-cli2.yaml. Findings come on stderr as "FILE:LINE[:COL] error RULE
+# DESCRIPTION"; stdout is only a banner.
+def check_markdown():
+  out = subprocess.run(["markdownlint-cli2", "**/*.md"], stdout=subprocess.DEVNULL,
+                       stderr=subprocess.PIPE, text=True).stderr
+  for line in filter(None, out.splitlines()):
+    fail(line.split(" ", 1)[0], line.split(" error ", 1)[-1])
+
+
+def check_container_ips():
+  files_by_ip = {}
+  for path in sorted(Path(".").rglob("*.container")):
+    for line in text_lines(path):
+      if line.startswith("IP="):
+        files_by_ip.setdefault(line, []).append(str(path))
+  for ip, files in sorted(files_by_ip.items()):
+    if len(files) > 1:
+      fail(" ".join(sorted(set(files))), f"{ip} is set in more than one quadlet")
+
+
+# The image updater pulls upstream refs as written and loads them as localhost/<path>,
+# which only works with an explicit registry host and namespace.
+def check_upstream_refs(nodes):
+  for node, spec in nodes.items():
+    for i in spec["images"]:
+      upstream = i.get("upstream")
+      if upstream and not re.match(r"^[^/]+\.[^/]+/[^/]+/[^/]+", upstream):
+        fail(inventory(node),
+             f"services.{i['service']}: upstream {upstream} needs a registry host and namespace")
+
+
+# The image updater loads images under these names, so a quadlet whose Image= differs
+# would never be updated.
+def check_quadlet_images(nodes):
+  for node, spec in nodes.items():
+    script = f"src/nodes/{node}/install_svcs.sh"
+    if not os.path.isfile(script):
+      continue  # check_dispatch_scripts reports it
+    for i in spec["images"]:
+      svc, container, image = i["service"], i["container"], i["image"]
+      where = f"({inventory(node)} services.{svc})"
+      pattern = rf"[A-Za-z0-9_./-]+/{re.escape(container)}\.container"
+      quadlet = next((m[0] for line in case_block(script, svc) if (m := re.search(pattern, line))), None)
+      if not quadlet:
+        fail(script, f"the {svc} case copies no {container}.container {where}")
+        continue
+      # A *.container.j2.j2 source is still *.container.j2 until install time
+      file = f"src/{quadlet}"
+      if not os.path.isfile(file):
+        file += ".j2"
+      actual = "\n".join(line.removeprefix("Image=") for line in
+                         (text_lines(file) if os.path.isfile(file) else []) if line.startswith("Image="))
+      if actual != image:
+        fail(file, f"Image={actual}, expected {image} {where}")
+
+
+# The image updater builds a built image only through its service's build.sh, so one
+# without would never pass the scan gate.
+def check_build_scripts(nodes):
+  for node, spec in nodes.items():
+    for i in spec["images"]:
+      svc = i["service"]
+      if not i.get("upstream") and not os.path.isfile(f"src/services/{svc}/build.sh"):
+        fail(inventory(node),
+             f"services.{svc}: built image {i['image']} has no src/services/{svc}/build.sh")
+
+
+def script_file(script):
+  """The tree path of a script a dispatcher line runs, or None if it isn't one of the repo's."""
+  if script.startswith("/root/homelab-rendered/src/"):
+    return "src/" + script.removeprefix("/root/homelab-rendered/src/")
+  # upload_src.sh ships only src/nodes/router to the router, as /root/router-src
+  if script.startswith("/root/router-src/"):
+    return "src/nodes/router/" + script.removeprefix("/root/router-src/")
+  return None
+
+
+# Every repo script a dispatcher runs must exist and, when it is passed a name, have
+# that case. This covers services, debian_services, commands[].script and the paths in
+# commands[].run.
+def check_dispatch_scripts(nodes):
+  runs = sorted({(node, line.strip()) for node, spec in nodes.items()
+                 for case in spec["cases"] for line in case["run"]})
+  for node, line in runs:
+    script, _, arg = line.removeprefix("sudo ").partition(" ")
+    file = script_file(script)
+    if file is None:
+      continue
+    if not os.path.isfile(file):
+      fail(file, f"missing, but the {node} dispatcher runs it")
+    elif arg and arg not in cases(file):
+      fail(file, f"no {arg} case, but the {node} dispatcher runs it")
+
+
+# The reverse of check_dispatch_scripts for install_svcs.sh: a case the inventory
+# doesn't list would have no dispatcher case, sudo grant or OliveTin button.
+def check_install_cases(nodes):
+  for node, spec in nodes.items():
+    file = f"src/nodes/{node}/install_svcs.sh"
+    if not os.path.isfile(file):
+      continue
+    for svc in sorted(cases(file) - set(spec["services"])):
+      fail(file, f"the {svc} case isn't in {inventory(node)} services")
+
+
+def check_unique_subdomains(nodes):
+  counts = Counter(s for spec in nodes.values() for s in spec["subdomains"])
+  for subdomain in sorted(s for s, n in counts.items() if n > 1):
+    owners = sorted({inventory(node) for node, spec in nodes.items() if subdomain in spec["subdomains"]})
+    fail(" ".join(owners), f"subdomain {subdomain} is listed more than once")
+
+
+# The subdomain lists drive DNS and SNI routing and the uptime URLs, so each must be
+# routed by its node's Traefik, and every host Traefik routes must be listed, except
+# on the default route.
+def check_routes(site, nodes):
+  for node, spec in nodes.items():
+    routes = f"src/nodes/{node}/traefik/routes.yml"
+    if not os.path.isfile(routes):
+      continue
+    routers = ((yaml.safe_load(Path(routes).read_text()) or {}).get("http") or {}).get("routers") or {}
+    hosts = {h for r in routers.values() for h in re.findall(r"Host\(`([^`]+)`\)", str(r.get("rule", "")))}
+    routed = {h.removesuffix(f".{site}") for h in hosts if h.endswith(f".{site}")}
+    listed = set(spec["subdomains"])
+    for subdomain in sorted(listed - routed):
+      fail(routes, f"no Host() rule for {subdomain}, listed in {inventory(node)} services")
+    if node == DEFAULT_ROUTE_NODE:
+      continue
+    for subdomain in sorted(routed - listed):
+      fail(inventory(node), f"no service has subdomain {subdomain}, which {routes} routes")
+
+
+def shells(value):
+  """Every `shell` value of every mapping in a parsed YAML document."""
+  if isinstance(value, dict):
+    if "shell" in value:
+      yield str(value["shell"])
+    for v in value.values():
+      yield from shells(v)
+  elif isinstance(value, list):
+    for v in value:
+      yield from shells(v)
+
+
+# Every ungated dispatcher case gets an OliveTin button; every `ssh autoadmin@NODE CASE`
+# OliveTin runs, chained or not, names a real case that OliveTin's own key may run.
+def check_olive_tin(nodes):
+  config = "src/services/olive_tin/config.yaml"
+  if not os.path.isfile(config):
+    fail(config, "missing")
+    return
+  cases_of = {(node, c["name"]): c for node, spec in nodes.items() for c in spec["cases"]}
+  buttons = {key for key, c in cases_of.items() if not c["pve1_file_transfer"]}
+  referenced = {(m[1], m[2]) for shell in shells(yaml.safe_load(Path(config).read_text()))
+                for line in shell.splitlines()
+                for m in re.finditer(r"ssh autoadmin@([^ ]+) ([^ &;|]+)", line)}
+  for node, name in sorted(buttons - referenced):
+    fail(config, f"no button runs {node} dispatcher case {name}")
+  for node, name in sorted(referenced - buttons):
+    if (node, name) in cases_of:
+      fail(config, f"runs ssh autoadmin@{node} {name}, a pve1 file transfer only pve1 may run")
+    else:
+      fail(config, f"runs ssh autoadmin@{node} {name}, which isn't a {node} dispatcher case")
+
+
+ANCHORED = r"(homelab-rendered/src/|\$\{?rendered\}?/|\.\./)"
+
+
+def src_refs(lines, prefix):
+  """The nodes/ and services/ paths in lines that follow the prefix regex, outside comments."""
+  pattern = re.compile(prefix + r"(?P<ref>(?:nodes|services)/[A-Za-z0-9_.-]+)")
+  return {m["ref"] for line in lines if not re.match(r"^\s*#", line)
+          for m in pattern.finditer(line)}
+
+
+# upload_src.sh ships a debian node all of base/ but only the node and service dirs
+# node_dirs.sh lists, in the same tree shape, so every nodes/ and services/ path it uses
+# must be among them. That is every absolute (/root/homelab-rendered/src/...,
+# ${rendered}/...) or ../ path in its node and service dirs, plus the src/-relative paths
+# in its node dir, dispatcher lines and debian_services cases. base/ is skipped: its
+# scripts serve every node and name other nodes' dirs only in what those nodes run,
+# like svcs_lib.sh's traefik install.
+def check_upload_dirs(nodes):
+  for node, spec in nodes.items():
+    out = subprocess.run([TOOLS / "node_dirs.sh", node], stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, text=True)
+    if out.returncode:
+      fail(inventory(node), out.stdout.strip().removeprefix(f"error: {inventory(node)}: "))
+      continue
+    paths = out.stdout.split()
+    if not paths:
+      continue
+    shipped = [line for path in paths if path != "base" for line in tree_lines(f"src/{path}")]
+    own = (tree_lines(f"src/nodes/{node}")
+           + [line for c in spec["cases"] for line in c["run"]]
+           + [line for svc in spec["debian_services"]
+              for line in case_block("src/base/debian/install_svcs.sh", svc)])
+    refs = src_refs(shipped, ANCHORED) | src_refs(own, rf"({ANCHORED}|^|[^A-Za-z0-9_./-])")
+    for ref in sorted(refs):
+      # Other paths that happen to match, like a container's /data/services/
+      if os.path.exists(f"src/{ref}") and ref not in paths:
+        fail(inventory(node),
+             f"uses src/{ref}, which upload_src.sh doesn't ship to it; add it to a service's dirs")
+
+
+def main():
+  tree, all_vars = sys.argv[1], os.path.abspath(sys.argv[2])
+  os.chdir(tree)
+  facts = derive_facts(all_vars)
+  nodes = facts["nodes"]
+  check_yaml()
+  check_json()
+  check_markdown()
+  check_container_ips()
+  check_upstream_refs(nodes)
+  check_quadlet_images(nodes)
+  check_build_scripts(nodes)
+  check_dispatch_scripts(nodes)
+  check_install_cases(nodes)
+  check_unique_subdomains(nodes)
+  check_routes(facts["site"], nodes)
+  check_olive_tin(nodes)
+  check_upload_dirs(nodes)
+  sys.exit(1 if failed else 0)
+
+
+if __name__ == "__main__":
+  main()

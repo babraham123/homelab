@@ -21,13 +21,6 @@ install_sqlite3() {
   command -v sqlite3 > /dev/null || apt-get install -y sqlite3
 }
 
-# Usage: install_timer DIR NAME; NAME.service is a oneshot that NAME.timer starts
-install_timer() {
-  install -D -m 644 -t /etc/systemd/system "$1/$2.service" "$1/$2.timer"
-  systemctl daemon-reload
-  systemctl enable --now "$2.timer"
-}
-
 require_media() {
   # Unmounted, mkdir would put the library on the root disk.
   mountpoint -q /srv/media || die "/srv/media is not mounted"
@@ -106,9 +99,6 @@ case $1 in
     mkdir -p /var/opt/readeck /srv/media/archive/readeck
     install_quadlet services/readeck/readeck.container
     reload_restart readeck
-    ;;
-  linkding_handoff)
-    install_timer services/readeck linkding_handoff
     ;;
   # Not in use: uncomment and add to src/nodes/websvcs/inventory.yml to install again
 #   finance_exporter)
@@ -213,8 +203,14 @@ case $1 in
     systemctl daemon-reload
     systemctl enable --now calliope.path calliope.timer
     ;;
-  readeck_narrate)
-    install_timer services/readeck readeck_narrate
+  bookmark_handoff)
+    require_media
+    mkdir -p /var/opt/bookmark_handoff
+    install_quadlet services/bookmark_handoff/bookmark_handoff.container
+    install -D -m 644 -t /etc/systemd/system services/bookmark_handoff/bookmark_handoff.timer
+    # bookmark_handoff.service is a oneshot; the timer starts it.
+    systemctl daemon-reload
+    systemctl enable --now bookmark_handoff.timer
     ;;
   *)
     die "unknown service: $1"

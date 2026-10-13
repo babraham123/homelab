@@ -67,7 +67,7 @@ cd "$project_dir"
 $fdfind . --extension sh --exec chmod +x "{}"
 $fdfind . --extension pl --exec chmod +x "{}"
 
-tools/check_rendered.sh . "$all_vars"
+tools/check_rendered.py . "$all_vars"
 
 find . -name .DS_Store -delete
 echo "Rendered the repo into ${project_dir}"

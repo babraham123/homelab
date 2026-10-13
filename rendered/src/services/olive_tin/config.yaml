@@ -853,14 +853,6 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: websvcs Install Linkding Handoff
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_linkding_handoff
-              id: websvcs_install_linkding_handoff
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
               title: websvcs Install Storyteller
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_storyteller
@@ -877,10 +869,10 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: websvcs Install Readeck Narrate
+              title: websvcs Install Bookmark Handoff
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_readeck_narrate
-              id: websvcs_install_readeck_narrate
+              shell: ssh autoadmin@websvcs install_bookmark_handoff
+              id: websvcs_install_bookmark_handoff
               maxConcurrent: 1
               timeout: 60
 

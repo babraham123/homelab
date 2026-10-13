@@ -21,11 +21,10 @@ services:
              upstream: docker.io/sissbruecker/linkding:latest-plus}
   readeck: {subdomain: read, uptime: readeck, uptime_path: /api/info,
             upstream: codeberg.org/readeck/readeck:latest}
-  linkding_handoff: {}
   storyteller: {subdomain: books, uptime: storyteller, uptime_path: /api/health,
                 upstream: registry.gitlab.com/storyteller-platform/storyteller:web-v2}
   calliope: {build: calliope}
-  readeck_narrate: {}
+  bookmark_handoff: {build: bookmark_handoff}
 install_all_svcs: true
 commands:
   - {name: install_keys, script: nodes/websvcs/commands.sh, pve1_file_transfer: true}

@@ -34,7 +34,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 - **node inventory** — `src/nodes/<node>/inventory.yml`, one per node: per node, the dispatcher
   entries (services in install order, other commands) and each service's subdomain, Gatus endpoint
   and image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI subdomain
-  lists, uptime endpoints and image update order from it; the render (`tools/check_rendered.sh`)
+  lists, uptime endpoints and image update order from it; the render (`tools/check_rendered.py`)
   checks it against the scripts its dispatcher cases run, `routes.yml`, the quadlets' `Image=` and
   the OliveTin buttons.
 - **image updater** — `src/base/podman/image_updater.sh`, on every node that runs quadlets: each

@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# tools/check_rendered.sh against tests/fixtures/tree: the fixture passes, and breaking
+# tools/check_rendered.py against tests/fixtures/tree: the fixture passes, and breaking
 # each invariant fails with that invariant's error alone.
 # shellcheck source=tests/lib.sh
 source tests/lib.sh

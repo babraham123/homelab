@@ -10,7 +10,7 @@ Amended: the inventory is split by node, `src/nodes/<node>/inventory.yml`, next 
 node's files; `render_src.sh` gathers them under `nodes:` in node-name order. The key reference is
 in `src/nodes.jinja`.
 
-Amended: the cross-checks live in `tools/check_rendered.sh` and also cover the scripts named in
+Amended: the cross-checks live in `tools/check_rendered.py` and also cover the scripts named in
 `commands[].run`, websvcs subdomains (each must be routed; only unlisted routes are allowed there)
 and the OliveTin buttons (one per dispatcher case, none for a missing case).
 

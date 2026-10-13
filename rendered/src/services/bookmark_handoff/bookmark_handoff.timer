@@ -1,13 +1,13 @@
-# /etc/systemd/system/readeck_narrate.timer
+# /etc/systemd/system/bookmark_handoff.timer
 
 [Unit]
-Description="Homelab: Runs readeck_narrate.service every 15 minutes"
+Description="Homelab: Runs bookmark_handoff.service every 15 minutes"
 
 [Timer]
 # pve2 is off most of the time; Persistent runs a missed job at the next boot.
 Persistent=true
 OnCalendar=*:0/15
-Unit=readeck_narrate.service
+Unit=bookmark_handoff.service
 
 [Install]
 WantedBy=timers.target
