@@ -22,7 +22,7 @@ diskutil eject /dev/disk2
 - Connect to network directly for installs, plug eth0 into existing router,
   [src](https://www.cyberciti.biz/faq/setting-up-an-network-interfaces-file/)
   - `sudo nano /etc/network/interfaces`
-```
+```text
 auto enp2s0
 iface enp2s0 inet dhcp
 ```
@@ -30,7 +30,7 @@ iface enp2s0 inet dhcp
 - Test connection: `ping 1.1.1.1`
 - Add proxmox repo, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
   - `sudo nano /etc/apt/sources.list.d/pve-enterprise.list`
-```
+```text
 #deb https://enterprise.proxmox.com/debian/pve trixie pve-enterprise
 deb http://download.proxmox.com/debian/pve trixie pve-no-subscription
 ```
@@ -63,12 +63,12 @@ systemctl start lightdm
   - BIOS >> Advanced >> CPU Configuration >> VMX >> Enabled
   - `efibootmgr -v` # is grub or systemd
   - `nano /etc/default/grub`
-```
+```sh
 GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"
 ```
   - `update-grub && reboot`
   - `nano /etc/modules`
-```
+```text
 vfio
 vfio_iommu_type1
 vfio_pci
@@ -344,7 +344,7 @@ Watch for new devices:
 - Go to System >> Package Manager
 - Install the ARPwatch package
 - Go to Service >> ARPwatch
-- Add {{ site.email }} to "Notifications recipient"
+- Add `{{ site.email }}` to "Notifications recipient"
 - Set "Enable Arpwatch"
 
 Service Watchdog:
@@ -387,23 +387,23 @@ I found the USB passthru to be a little flaky, after which I would have to resta
 ## References
 
 ### Networking
-- https://docs.netgate.com/pfsense/en/latest/recipes/virtualize-proxmox-ve.html#basic-proxmox-ve-networking
-- https://forum.proxmox.com/threads/proxmox-isp-modem-without-a-router.105338/
-- https://forum.proxmox.com/threads/proxmox-management-interface-and-pfsense.120231/
-- https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking#
-- https://pve.proxmox.com/wiki/Network_Configuration
-- https://pve.proxmox.com/pve-docs/chapter-sysadmin.html#_choosing_a_network_configuration
+- <https://docs.netgate.com/pfsense/en/latest/recipes/virtualize-proxmox-ve.html#basic-proxmox-ve-networking>
+- <https://forum.proxmox.com/threads/proxmox-isp-modem-without-a-router.105338/>
+- <https://forum.proxmox.com/threads/proxmox-management-interface-and-pfsense.120231/>
+- <https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking#>
+- <https://pve.proxmox.com/wiki/Network_Configuration>
+- <https://pve.proxmox.com/pve-docs/chapter-sysadmin.html#_choosing_a_network_configuration>
 
 ### VM sizing
-- https://docs.netgate.com/pfsense/en/latest/hardware/size.html
-- https://www.intel.com/content/www/us/en/products/sku/212328/intel-celeron-processor-n5105-4m-cache-up-to-2-90-ghz/specifications.html
-- https://www.reddit.com/r/Proxmox/comments/u3imdm/how_bad_is_the_overcommitting_of_cpu_and_memory/
-- https://www.aliexpress.us/item/3256804315368607.html?spm=a2g0o.order_detail.order_detail_item.3.3a7cf19cWI0ORL&gatewayAdapt=glo2usa&_randl_shipto=US
+- <https://docs.netgate.com/pfsense/en/latest/hardware/size.html>
+- <https://www.intel.com/content/www/us/en/products/sku/212328/intel-celeron-processor-n5105-4m-cache-up-to-2-90-ghz/specifications.html>
+- <https://www.reddit.com/r/Proxmox/comments/u3imdm/how_bad_is_the_overcommitting_of_cpu_and_memory/>
+- <https://www.aliexpress.us/item/3256804315368607.html?spm=a2g0o.order_detail.order_detail_item.3.3a7cf19cWI0ORL&gatewayAdapt=glo2usa&_randl_shipto=US>
 
 ### Other
-- https://www.servethehome.com/new-fanless-4x-2-5gbe-intel-n5105-i226-v-firewall-tested/
-- https://pve.proxmox.com/wiki/Pci_passthrough
-- https://pve.proxmox.com/wiki/SPICE
+- <https://www.servethehome.com/new-fanless-4x-2-5gbe-intel-n5105-i226-v-firewall-tested/>
+- <https://pve.proxmox.com/wiki/Pci_passthrough>
+- <https://pve.proxmox.com/wiki/SPICE>
 
 ### Ad Block (optional)
 I found DNS based blocking to be too limiting / finicky. Instead I now use browser extensions. In

@@ -282,65 +282,65 @@ offline." The spec's single-player rule matches. UEVR has no anti-cheat bypass. 
 
 - **UEVR:**
   - README (getting started, rendering modes, to-dos):
-    https://github.com/praydog/UEVR/blob/master/README.md
-  - Releases (1.05, 2024-11-16): https://github.com/praydog/UEVR/releases/tag/1.05
-  - Nightlies: https://github.com/praydog/UEVR-nightly/releases
+    <https://github.com/praydog/UEVR/blob/master/README.md>
+  - Releases (1.05, 2024-11-16): <https://github.com/praydog/UEVR/releases/tag/1.05>
+  - Nightlies: <https://github.com/praydog/UEVR-nightly/releases>
   - Release build (frontend from `praydog/uevr-frontend`, nightly zip contents):
-    https://github.com/praydog/UEVR/blob/master/.github/workflows/dev-release.yml
-  - UE 5.5/5.6 commits: https://github.com/praydog/UEVR/commit/7e215b4,
-    https://github.com/praydog/UEVR/commit/e3f053c, https://github.com/praydog/UEVR/commit/158232a
+    <https://github.com/praydog/UEVR/blob/master/.github/workflows/dev-release.yml>
+  - UE 5.5/5.6 commits: <https://github.com/praydog/UEVR/commit/7e215b4>,
+    <https://github.com/praydog/UEVR/commit/e3f053c>, <https://github.com/praydog/UEVR/commit/158232a>
   - Runtime choice in the backend (`initialize_openvr`, `initialize_openxr`, XInput emulation):
-    https://github.com/praydog/UEVR/blob/master/src/mods/VR.cpp
-  - Config keys: https://github.com/praydog/UEVR/blob/master/src/mods/VR.hpp,
-    https://github.com/praydog/UEVR/blob/master/src/mods/FrameworkConfig.hpp
-  - FOCUSED gate on input: https://github.com/praydog/UEVR/blob/master/src/mods/vr/runtimes/OpenXR.cpp
-  - Profile directory (`get_persistent_dir`): https://github.com/praydog/UEVR/blob/master/src/Framework.cpp
-  - XInput hook: https://github.com/praydog/UEVR/blob/master/src/hooks/XInputHook.cpp
-  - Issues: https://github.com/praydog/UEVR/issues/122, https://github.com/praydog/UEVR/issues/409
+    <https://github.com/praydog/UEVR/blob/master/src/mods/VR.cpp>
+  - Config keys: <https://github.com/praydog/UEVR/blob/master/src/mods/VR.hpp>,
+    <https://github.com/praydog/UEVR/blob/master/src/mods/FrameworkConfig.hpp>
+  - FOCUSED gate on input: <https://github.com/praydog/UEVR/blob/master/src/mods/vr/runtimes/OpenXR.cpp>
+  - Profile directory (`get_persistent_dir`): <https://github.com/praydog/UEVR/blob/master/src/Framework.cpp>
+  - XInput hook: <https://github.com/praydog/UEVR/blob/master/src/hooks/XInputHook.cpp>
+  - Issues: <https://github.com/praydog/UEVR/issues/122>, <https://github.com/praydog/UEVR/issues/409>
 - **UEVR frontend:**
   - `--attach`, auto-inject, settings, export/import:
-    https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/MainWindow.xaml.cs
+    <https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/MainWindow.xaml.cs>
   - Saved settings and defaults:
-    https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/MainWindowSettings.cs
-  - LoadLibrary injection: https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/Injector.cs
-  - Zip import/export: https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/GameConfig.cs
-  - .NET 6 target: https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/UEVR.csproj
+    <https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/MainWindowSettings.cs>
+  - LoadLibrary injection: <https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/Injector.cs>
+  - Zip import/export: <https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/GameConfig.cs>
+  - .NET 6 target: <https://github.com/praydog/UEVR-Frontend/blob/main/UEVR/UEVR.csproj>
   - Commits "Add --attach= command line arg for third party UEVR usage" and "Shutdown if attached
-    game closes": https://github.com/praydog/UEVR-Frontend/commit/0b18b49,
-    https://github.com/praydog/UEVR-Frontend/commit/86c0d72
+    game closes": <https://github.com/praydog/UEVR-Frontend/commit/0b18b49>,
+    <https://github.com/praydog/UEVR-Frontend/commit/86c0d72>
 - **UEVR docs:**
-  - Introduction (anti-cheat, troubleshooting, Rai Pal): https://praydog.github.io/uevr-docs/
+  - Introduction (anti-cheat, troubleshooting, Rai Pal): <https://praydog.github.io/uevr-docs/>
   - Detailed overview (OpenVR vs OpenXR, configurations, depth buffer):
-    https://praydog.github.io/uevr-docs/usage/overview.html
-  - Controller bindings: https://praydog.github.io/uevr-docs/usage/vr_controller_bindings.html
-  - Website (UE 4.8–5.6, tested headsets): https://uevr.io
+    <https://praydog.github.io/uevr-docs/usage/overview.html>
+  - Controller bindings: <https://praydog.github.io/uevr-docs/usage/vr_controller_bindings.html>
+  - Website (UE 4.8–5.6, tested headsets): <https://uevr.io>
 - **Khronos:**
   - OpenXR loader, active runtime and `XR_RUNTIME_JSON`:
-    https://registry.khronos.org/OpenXR/specs/1.1/loader.html#active-runtime-information
-  - Session states: https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrSessionState.html
+    <https://registry.khronos.org/OpenXR/specs/1.1/loader.html#active-runtime-information>
+  - Session states: <https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrSessionState.html>
 - **Meta:** setting Link as the active OpenXR runtime:
-  https://developers.meta.com/horizon/documentation/unreal/unreal-link/
+  <https://developers.meta.com/horizon/documentation/unreal/unreal-link/>
 - **Playnite:**
   - Scripting overview (events, order, variables, synchronous, PowerShell 5.1):
-    https://api.playnite.link/docs/manual/features/scriptingSupport/scriptingSupportOverview.html
+    <https://api.playnite.link/docs/manual/features/scriptingSupport/scriptingSupportOverview.html>
   - Script execution and variables (`Controllers_Started`, `ExecuteScriptAction`):
-    https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/GamesEditor.cs
+    <https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/GamesEditor.cs>
   - Runspace (bypass, `Stop`, current thread):
-    https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/Scripting/PowerShell/PowerShell.cs
+    <https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/Scripting/PowerShell/PowerShell.cs>
   - Labels ("Execute after a game is started", "Execute global script"):
-    https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/Localization/LocSource.xaml
+    <https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/Localization/LocSource.xaml>
   - `Game` model (`Tags`, `InstallDirectory`, `UseGlobalGameStartedScript`):
-    https://github.com/JosefNemec/Playnite/blob/master/source/PlayniteSDK/Models/Game.cs
+    <https://github.com/JosefNemec/Playnite/blob/master/source/PlayniteSDK/Models/Game.cs>
   - Steam start detection (`StartedProcessId`):
-    https://github.com/JosefNemec/PlayniteExtensions/blob/master/source/Libraries/SteamLibrary/SteamGameController.cs
-  - Extension events: https://api.playnite.link/docs/tutorials/extensions/events.html
+    <https://github.com/JosefNemec/PlayniteExtensions/blob/master/source/Libraries/SteamLibrary/SteamGameController.cs>
+  - Extension events: <https://api.playnite.link/docs/tutorials/extensions/events.html>
 - **Third party (community, not UEVR's own):**
-  - Rai Pal: https://github.com/Raicuparta/rai-pal; its UEVR definition:
-    https://github.com/Raicuparta/rai-pal-db/blob/main/scripts/mod-db/uevr/uevr-base.ts
-  - Chihuahua: https://github.com/keton/chihuahua
-  - UEVR Easy Injector: https://github.com/oduis/UEVRDeluxe (delay:
-    https://github.com/oduis/UEVRDeluxe/blob/main/UEVRDeluxe/Code/AppUserSettings.cs)
-  - Custom UEVR Injector: https://github.com/mirudo2/Custom-UEVR-Injector
+  - Rai Pal: <https://github.com/Raicuparta/rai-pal>; its UEVR definition:
+    <https://github.com/Raicuparta/rai-pal-db/blob/main/scripts/mod-db/uevr/uevr-base.ts>
+  - Chihuahua: <https://github.com/keton/chihuahua>
+  - UEVR Easy Injector: <https://github.com/oduis/UEVRDeluxe> (delay:
+    <https://github.com/oduis/UEVRDeluxe/blob/main/UEVRDeluxe/Code/AppUserSettings.cs>)
+  - Custom UEVR Injector: <https://github.com/mirudo2/Custom-UEVR-Injector>
 - **Unverified:**
   - Where the frontend's `user.config` lives, and whether an upgrade resets the OpenXR choice.
   - That the frontend stays running after the game exits (read from source, not observed).

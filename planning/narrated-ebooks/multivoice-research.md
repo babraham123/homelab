@@ -116,7 +116,7 @@ RTX 3060 Ti) and to narrate articles in a single voice.
 
 ### Data flow in `pipeline.run`
 
-```
+```text
 _prepare_book    -> chapters -> sentences, each with segments [(text, quote_id|None)]; blocks with quote spans
 attribute()      -> speakers.json: sieve, roster, windows, re-pass (cached; skipped when mode is single or dialogue)
 assign_voices()  -> quote_id -> voice name -> voice path
@@ -247,7 +247,7 @@ assembly         -> sentence wav = its segment clips joined; chapter = sentences
 
 **Server:**
 
-```
+```bash
 llama-server -m Qwen3-8B-Q4_K_M.gguf --host 127.0.0.1 --port <random>
   -ngl 99 -c 12288 -np 1 -fa on -ctk q8_0 -ctv q8_0 --jinja
   --temp 0 --repeat-penalty 1.0 --presence-penalty 0
@@ -278,7 +278,7 @@ KV cache as a prefix (~2k of ~10k tokens, ~20% of prompt work, est.). The passag
 everything static. Inline markers follow Michel et al.'s published prompts, which keep context that
 a separate list of quotes loses.
 
-```
+```text
 SYSTEM:
 You identify who speaks each marked quotation in a novel excerpt.
 Characters (canonical name: aliases; gender):
@@ -444,7 +444,7 @@ Degrade, don't fail, unless `--strict-voices` is set: multi → dialogue → sin
 
 - **Containerfile:** add a build stage `FROM nvidia/cuda:12.4.1-devel-ubuntu22.04`. Build a **pinned
   llama.cpp release tag** with:
-  ```
+  ```text
   -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=61 -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
   ```
   Copy `llama-server` and `libggml*.so`/`libllama.so` into the runtime image. The runtime base
@@ -523,61 +523,61 @@ Degrade, don't fail, unless `--strict-voices` is set: multi → dialogue → sin
   - `docs/architecture.md` (pve2 hardware) and `docs/services.md` (wyoming
     whisper not in use)
 - **Chatterbox Turbo conditionals:**
-  https://github.com/resemble-ai/chatterbox/blob/master/src/chatterbox/tts_turbo.py
+  <https://github.com/resemble-ai/chatterbox/blob/master/src/chatterbox/tts_turbo.py>
 - **Michel, Epure, Hennequin, Cerisara**, "Evaluating LLMs for Quotation Attribution in Literary
-  Texts: A Case Study of LLaMa3", NAACL 2025: https://arxiv.org/abs/2406.11380 (results and
-  Appendix A chunking: https://arxiv.org/html/2406.11380v3; prompts:
-  https://github.com/deezer/llms_quotation_attribution/tree/main/prompts)
+  Texts: A Case Study of LLaMa3", NAACL 2025: <https://arxiv.org/abs/2406.11380> (results and
+  Appendix A chunking: <https://arxiv.org/html/2406.11380v3>; prompts:
+  <https://github.com/deezer/llms_quotation_attribution/tree/main/prompts>)
 - **Michel, Attali, Epure**, "Fast and Accurate Quotation Attribution in Literary Texts", Aug 2026:
-  https://arxiv.org/abs/2608.02359; code (ModernBookNLP, no license):
-  https://github.com/gasmichel/ModernBookNLP_QA
-- **PDNC:** https://arxiv.org/abs/2204.05836; data (CC-BY 4.0, quote types, `character_info.csv`):
-  https://github.com/Priya22/project-dialogism-novel-corpus; BookNLP vs BookNLP+ on PDNC:
-  https://arxiv.org/html/2307.03734v1
-- **Qwen3:** model card https://huggingface.co/Qwen/Qwen3-8B; GGUFs
-  https://huggingface.co/Qwen/Qwen3-8B-GGUF and https://huggingface.co/unsloth/Qwen3-8B-GGUF;
+  <https://arxiv.org/abs/2608.02359>; code (ModernBookNLP, no license):
+  <https://github.com/gasmichel/ModernBookNLP_QA>
+- **PDNC:** <https://arxiv.org/abs/2204.05836>; data (CC-BY 4.0, quote types, `character_info.csv`):
+  <https://github.com/Priya22/project-dialogism-novel-corpus>; BookNLP vs BookNLP+ on PDNC:
+  <https://arxiv.org/html/2307.03734v1>
+- **Qwen3:** model card <https://huggingface.co/Qwen/Qwen3-8B>; GGUFs
+  <https://huggingface.co/Qwen/Qwen3-8B-GGUF> and <https://huggingface.co/unsloth/Qwen3-8B-GGUF>;
   technical report with RULER by context and thinking mode (Table 23):
-  https://arxiv.org/html/2505.09388; Qwen3.5-9B https://huggingface.co/Qwen/Qwen3.5-9B
+  <https://arxiv.org/html/2505.09388>; Qwen3.5-9B <https://huggingface.co/Qwen/Qwen3.5-9B>
 - **Format constraints vs accuracy** ("Let Me Speak Freely"; constraints hurt reasoning, can help
-  classification): https://aclanthology.org/2024.emnlp-industry.91/
-- **Character embeddings for quote attribution:** https://arxiv.org/abs/2406.11368
-- **BookNLP:** https://github.com/booknlp/booknlp
-- **Muzny et al. 2017**, two-stage sieve: https://aclanthology.org/E17-1044/
-- **Chinese:** SIG https://arxiv.org/pdf/2312.14590; CSI
-  https://aclanthology.org/2022.naacl-main.165
-- **German direct speech:** https://dh-abstracts.library.virginia.edu/works/11925
+  classification): <https://aclanthology.org/2024.emnlp-industry.91/>
+- **Character embeddings for quote attribution:** <https://arxiv.org/abs/2406.11368>
+- **BookNLP:** <https://github.com/booknlp/booknlp>
+- **Muzny et al. 2017**, two-stage sieve: <https://aclanthology.org/E17-1044/>
+- **Chinese:** SIG <https://arxiv.org/pdf/2312.14590>; CSI
+  <https://aclanthology.org/2022.naacl-main.165>
+- **German direct speech:** <https://dh-abstracts.library.virginia.edu/works/11925>
 - **BookNLP-fr / multilingual BookNLP:**
-  https://odhn.ens.psl.eu/en/article/booknlp-french-part-multilingual-booknlp-project
+  <https://odhn.ens.psl.eu/en/article/booknlp-french-part-multilingual-booknlp-project>
 - **llama.cpp:**
   - Default CUDA architectures (61-virtual only for CUDA <13):
-    https://github.com/ggml-org/llama.cpp/blob/master/ggml/src/ggml-cuda/CMakeLists.txt
+    <https://github.com/ggml-org/llama.cpp/blob/master/ggml/src/ggml-cuda/CMakeLists.txt>
   - Official CUDA image (12.8.1):
-    https://github.com/ggml-org/llama.cpp/blob/master/.devops/cuda.Dockerfile
+    <https://github.com/ggml-org/llama.cpp/blob/master/.devops/cuda.Dockerfile>
   - JSON schema and grammar limits (`required`, dropped features):
-    https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md
+    <https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md>
   - Server parameters (`chat_template_kwargs`, `cache_prompt`, `n_probs`):
-    https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md; logprobs taken before
+    <https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md>; logprobs taken before
     the grammar (`need_pre_sample_logits`):
-    https://github.com/ggml-org/llama.cpp/blob/master/tools/server/server-context.cpp and
-    https://github.com/ggml-org/llama.cpp/blob/master/common/sampling.cpp
+    <https://github.com/ggml-org/llama.cpp/blob/master/tools/server/server-context.cpp> and
+    <https://github.com/ggml-org/llama.cpp/blob/master/common/sampling.cpp>
   - P4 benchmark (pp512 529 t/s, tg128 33 t/s, Llama-2-7B Q4_0):
-    https://github.com/ggml-org/llama.cpp/discussions/15013
-  - P40 (sm_61) reports: https://github.com/ggml-org/llama.cpp/discussions/25978
-  - Hybrid-model prompt-cache reprocessing: https://github.com/ggml-org/llama.cpp/issues/24587
-- **CUDA 13 drops Pascal:** https://docs.nvidia.com/cuda/cuda-features-archive/index.html
-- **Ollama GPU support (compute capability 6.1):** https://docs.ollama.com/gpu
+    <https://github.com/ggml-org/llama.cpp/discussions/15013>
+  - P40 (sm_61) reports: <https://github.com/ggml-org/llama.cpp/discussions/25978>
+  - Hybrid-model prompt-cache reprocessing: <https://github.com/ggml-org/llama.cpp/issues/24587>
+- **CUDA 13 drops Pascal:** <https://docs.nvidia.com/cuda/cuda-features-archive/index.html>
+- **Ollama GPU support (compute capability 6.1):** <https://docs.ollama.com/gpu>
 - **PyTorch dropping Pascal after CUDA 12.x wheels end:**
-  https://dev-discuss.pytorch.org/t/notice-cuda-12-6-wheels-will-no-longer-be-published-from-pytorch-2-15-drops-maxwell-pascal-volta/3432
+  <https://dev-discuss.pytorch.org/t/notice-cuda-12-6-wheels-will-no-longer-be-published-from-pytorch-2-15-drops-maxwell-pascal-volta/3432>
 - **Multi-voice projects:**
-  - https://github.com/prakharsr/audiobook-creator
-  - https://github.com/Finrandojin/alexandria-audiobook
-  - https://github.com/DrewThomasson/VoxNovel
-  - https://github.com/lukaszliniewicz/Pandrator
-  - https://github.com/DrewThomasson/ebook2audiobook
-  - https://github.com/aedocw/epub2tts
+  - <https://github.com/prakharsr/audiobook-creator>
+  - <https://github.com/Finrandojin/alexandria-audiobook>
+  - <https://github.com/DrewThomasson/VoxNovel>
+  - <https://github.com/lukaszliniewicz/Pandrator>
+  - <https://github.com/DrewThomasson/ebook2audiobook>
+  - <https://github.com/aedocw/epub2tts>
 - **Unverified:**
   - Qwen3-8B tok/s on the P4 (scaled from the Llama-2-7B measurement).
   - The confidence threshold, the centred-window gain and the BookNLP roster seed (no measurement).
   - Gemma language counts (vendor figures from memory).
   - Ollama v0.32 CUDA 12 runner details (secondary source:
-    https://localaimaster.com/blog/pascal-gpus-after-cuda-13).
+    <https://localaimaster.com/blog/pascal-gpus-after-cuda-13>).

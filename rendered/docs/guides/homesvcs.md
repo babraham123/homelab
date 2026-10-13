@@ -8,7 +8,7 @@ I use the SMLight SLZB-06M adapter, it's reasonably priced and very feature rich
 
 - [Configuration and guide](https://smlight.tech/manual/slzb-06/guide/configuration/)
 - Flash firmware OTA
-  - Go to http://slzb-06m.local >> Settings and Tools >> Firmware update
+  - Go to <http://slzb-06m.local> >> Settings and Tools >> Firmware update
   - Flash the SLZB OS and the Zigbee Coordinator images
 - [Flash over USB](https://smlight.tech/flasher/#home) if you get locked out
 
@@ -91,7 +91,7 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.21.0/24 to any p
 - Connect to InfluxDB
   - Go to Settings >> Devices & Services >> Add Integration
   - Search InfluxDB and add
-  - version = 2.x/3, url = https://metrics.janedoe.com:443/api/v2/write, verify SSL,
+  - version = 2.x/3, url = <https://metrics.janedoe.com:443/api/v2/write>, verify SSL,
     organization = hass, bucket = hass
   - To get the token, run
     `/root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_creds_hash`

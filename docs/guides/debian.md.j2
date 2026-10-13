@@ -26,8 +26,8 @@ ssh manualadmin@HOSTNAME
 sudo su
 ```
 - Fix deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
-	- `nano /etc/apt/sources.list`
-	- add `contrib non-free non-free-firmware` to all Debian sources
+  - `nano /etc/apt/sources.list`
+  - add `contrib non-free non-free-firmware` to all Debian sources
 - Install basics
 ```bash
 apt update
@@ -47,11 +47,11 @@ ufw enable
 - Set timezone
   - `timedatectl set-timezone {{ personal.timezone }}`
 - Change hostname
-	- `hostnamectl set-hostname SUBDOMAIN`
-	- `vim /etc/hosts`, add `127.0.1.1    SUBDOMAIN.{{ site.url }}    SUBDOMAIN`
+  - `hostnamectl set-hostname SUBDOMAIN`
+  - `vim /etc/hosts`, add `127.0.1.1    SUBDOMAIN.{{ site.url }}    SUBDOMAIN`
 - Lock down SSH
-	- `vim /etc/ssh/sshd_config`
-```
+  - `vim /etc/ssh/sshd_config`
+```text
 PermitRootLogin no
 ```
 - Generate SSH key
@@ -84,7 +84,7 @@ wget -O .vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.
 echo 'export EDITOR="vim"' >> ~/.zshrc
 ```
 - `vim ~/.zshrc`
-```
+```zsh
 ...
 ZSH_THEME="powerlevel10k/powerlevel10k"
 ...
@@ -96,7 +96,7 @@ plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
   - `sudo vim /root/.zshrc`
 
 - Logout and log back in. Configure oh-my-zsh
-	- Answers: `yyyy211n1311111y1y`
+  - Answers: `yyyy211n1311111y1y`
 
 ## Homelab Repo
 - Install the homelab source code

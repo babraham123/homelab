@@ -76,7 +76,7 @@ car data:
 
 Disk is estimated at about 1 B/sample, the docs' average: "sample size requires less or
 around **1 byte** after compression"
-(https://docs.victoriametrics.com/guides/understand-your-setup-size/).
+(<https://docs.victoriametrics.com/guides/understand-your-setup-size/>).
 
 | Option | Feeds | Resolution in LT | Disk (allowlist excl. car) | Covers secsvcs-scraped + Telegraf series | Verdict |
 |---|---|---|---|---|---|
@@ -97,14 +97,14 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
 
 - **Per-URL relabel is matched by position.** "the first `-remoteWrite.urlRelabelConfig`
   will be applied to the first `-remoteWrite.url`, and so on"
-  (https://docs.victoriametrics.com/victoriametrics/vmagent/#splitting-data-streams-among-multiple-systems).
+  (<https://docs.victoriametrics.com/victoriametrics/vmagent/#splitting-data-streams-among-multiple-systems>).
   - An empty value means no relabeling for that URL.
   - URLs past the last config get none.
   - More configs than URLs is a startup error ("mustn't exceed the number of
-    -remoteWrite.url args", https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/app/vmagent/remotewrite/relabel.go).
+    -remoteWrite.url args", <https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/app/vmagent/remotewrite/relabel.go>).
 - **Per-URL array flags have a trap.** If you pass one value, it applies to every URL:
   `GetOptionalArg` returns `x[0]` for every index
-  (https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/lib/flagutil/array.go).
+  (<https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/lib/flagutil/array.go>).
   - This covers `-remoteWrite.streamAggr.config` and `-remoteWrite.maxDiskUsagePerURL`.
   - `urlRelabelConfig` is the exception.
 - **Pipeline order:**
@@ -115,19 +115,19 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
   5. per-URL `streamAggr.config`;
   6. per-URL queue.
 
-  Source: https://docs.victoriametrics.com/victoriametrics/vmagent/#life-of-a-sample
+  Source: <https://docs.victoriametrics.com/victoriametrics/vmagent/#life-of-a-sample>
 - **Keep by name.** `action: keep_metrics` with `regex: 'a|b'` "Keeps metrics whose
   names match the `regex`". Regexes are anchored: they "must match the whole label name
   from start to end". VM's `if:` series selector also accepts `{fstype!="tmpfs"}`-style
-  filters (https://docs.victoriametrics.com/victoriametrics/relabeling/).
+  filters (<https://docs.victoriametrics.com/victoriametrics/relabeling/>).
 - **Each URL gets its own queue.** "Each remote write URL corresponds to a folder similar
   to `1_B9EB7BE220B91E9D`" (flag position + URL hash). `-remoteWrite.maxDiskUsagePerURL`
   is per URL, and the oldest data is dropped past it. With the default disk queue, a down
   URL doesn't block the others
-  (https://docs.victoriametrics.com/victoriametrics/vmagent/#on-disk-persistence).
+  (<https://docs.victoriametrics.com/victoriametrics/vmagent/#on-disk-persistence>).
   Reordering URLs orphans a queue.
 - **Import endpoints**
-  (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/):
+  (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/>):
   - `/api/v1/import`: JSON lines, `"timestamps"` in ms.
   - `/api/v1/import/csv?format=1:time:unix_s,2:metric:speed,3:label:trip`; time types are
     `unix_s|unix_ms|unix_ns|rfc3339|custom:<layout>`.
@@ -136,29 +136,29 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
 - **Old timestamps.** Samples older than now − `-retentionPeriod`, or older than
   `-maxBackfillAge` if set, are silently dropped and counted in
   `vm_rows_ignored_total{reason="small_timestamp"}`
-  (https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/lib/storage/storage.go,
-  https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/app/vmstorage/main.go).
+  (<https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/lib/storage/storage.go>,
+  <https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/app/vmstorage/main.go>).
   - Hard floor: 1970-01-02.
   - Future limit: now + 2 d (`-futureRetention`).
   - Backfill caveat: use `-search.disableCache`, or call `/internal/resetRollupResultCache`
     after the import. Single-node "automatically resets response cache when samples with
     timestamps older than `now - search.cacheTimestampOffset` are ingested"
-    (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#backfilling).
+    (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#backfilling>).
   - copyparty/03's 14-day `too_old` limit therefore becomes 10 years once car data goes
     to the long-term instance.
 - **Federation.**
   - "the last point on the interval `[now - max_lookback ... now]` is scraped for each
     time series", with a default of `5m`
-    (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#federation).
+    (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#federation>).
   - `-search.maxFederateSeries` defaults to 1,000,000.
   - Scrape side: `metrics_path: /federate`, `honor_labels: true` and `params: {'match[]': ...}`
-    (https://prometheus.io/docs/prometheus/latest/federation/).
+    (<https://prometheus.io/docs/prometheus/latest/federation/>).
   - VictoriaMetrics defaults `honor_timestamps` to false
-    (https://docs.victoriametrics.com/victoriametrics/sd_configs/), so set it to true or
+    (<https://docs.victoriametrics.com/victoriametrics/sd_configs/>), so set it to true or
     every sample is re-stamped with scrape time.
   - Lookback in the long-term instance adapts to 5 m samples: `-search.maxLookback` "is
     dynamically detected from interval between time series datapoints"
-    (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#list-of-command-line-flags).
+    (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#list-of-command-line-flags>).
   - **Gap:** federation sees only the latest point at each scrape. After an outage longer
     than 5 m, data that vmagent's buffer backfills into the main instance never reaches
     the long-term instance. That's acceptable for trend series.
@@ -166,15 +166,15 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
 **2. Downsampling and stream aggregation**
 
 - **Still Enterprise-only** as of v1.153.0 (released 2026-09-28,
-  https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/victoriametrics/changelog/CHANGELOG.md).
+  <https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/victoriametrics/changelog/CHANGELOG.md>).
   - "VictoriaMetrics Enterprise supports multi-level downsampling via
     `-downsampling.period=offset:interval`"
-    (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#downsampling).
+    (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#downsampling>).
   - The Enterprise feature list includes "Downsampling" and "Multiple retentions"
-    (https://docs.victoriametrics.com/victoriametrics/enterprise/).
+    (<https://docs.victoriametrics.com/victoriametrics/enterprise/>).
 - **Stream aggregation** works in the community edition, but it's a poor fit here
-  (https://docs.victoriametrics.com/victoriametrics/stream-aggregation/configuration/,
-  https://docs.victoriametrics.com/victoriametrics/stream-aggregation/):
+  (<https://docs.victoriametrics.com/victoriametrics/stream-aggregation/configuration/>,
+  <https://docs.victoriametrics.com/victoriametrics/stream-aggregation/>):
   - **Output names change** to `<metric>:<interval>[_by_..][_without_..]_<output>`, e.g.
     `finance_open_price:1h_last`. `keep_metric_names` allows only a single output, and it
     can't be combined with `keepInput`.
@@ -201,9 +201,9 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
   - ingest rate: `sum(rate(vm_rows_added_to_storage_total[1d]))`.
 - **Formula:** `Bytes Per Sample * Ingestion rate * Replication Factor *
   (Retention Period in Seconds +1 Retention Cycle) * 1.25`
-  (https://docs.victoriametrics.com/guides/understand-your-setup-size/).
+  (<https://docs.victoriametrics.com/guides/understand-your-setup-size/>).
   - Keep "At least 20% of free storage space"
-    (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#capacity-planning).
+    (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#capacity-planning>).
   - `--storage.minFreeDiskSpaceBytes="8GiB"` stops ingestion before the disk is full
     (`src/victoriametrics/victoriametrics.container.j2`).
 - **No disk sizes in the repo.** Neither the secsvcs disk size nor the active series count
@@ -217,17 +217,17 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
 - **`-retentionPeriod` units** are `h, d, w, M, y`; "If the time unit is not specified, a
   month (31 days) is assumed". "The minimum retention period is 24h or 1d", and there is
   no maximum ("e.g. `-retentionPeriod=100y`"). Disk peaks at retention + 1 month
-  (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#retention).
+  (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#retention>).
 - **`-retentionFilter` is Enterprise-only.** "Community version of VictoriaMetrics
   supports only a single retention"
-  (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#retention-filters).
+  (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#retention-filters>).
 - **Grafana.** Add a second entry of the type the repo already uses
   (`victoriametrics-metrics-datasource`, `src/grafana/datasources.yml.j2`). The plugin's
   own example provisions two of that type
-  (https://github.com/VictoriaMetrics/victoriametrics-datasource). Only one datasource
-  may have `isDefault` (https://grafana.com/docs/grafana/latest/administration/provisioning/#data-sources).
+  (<https://github.com/VictoriaMetrics/victoriametrics-datasource>). Only one datasource
+  may have `isDefault` (<https://grafana.com/docs/grafana/latest/administration/provisioning/#data-sources>).
 - **vmalert.** No change. `-datasource.url` is a single string
-  (https://docs.victoriametrics.com/victoriametrics/vmalert/#flags), and every alert
+  (<https://docs.victoriametrics.com/victoriametrics/vmalert/#flags>), and every alert
   (e.g. `BackupStale`) works on 14-day data. Alerting on long-term data would need a
   second vmalert; that's an inference, as the docs don't say.
 
@@ -286,7 +286,7 @@ scrape_configs:
 ```
 
 node_exporter's `defFSTypesExcluded` doesn't list tmpfs
-(https://github.com/prometheus/node_exporter/blob/master/collector/filesystem_linux.go).
+(<https://github.com/prometheus/node_exporter/blob/master/collector/filesystem_linux.go>).
 
 The quadlet is a copy of `src/victoriametrics/victoriametrics.container.j2` with these
 changes:
@@ -297,7 +297,7 @@ changes:
 - `--dedup.minScrapeInterval=1ms`. This makes copyparty/03 re-imports, and federation
   re-reads of unchanged samples, idempotent: "If multiple raw samples have the same
   timestamp ... the sample with the biggest value is kept"
-  (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#deduplication).
+  (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#deduplication>).
 - `--memory.allowedBytes="128MiB"`.
 - No `--vmalert.proxyURL`.
 
@@ -320,7 +320,7 @@ skips on purpose. secsvcs's VM image already reaches PBS (`src/pve1/backup.sh.j2
 snapshot mode, images keep last 1, weekly 2, monthly 2 per `docs/services.md`), and the
 storage survives an unclean stop: "storage never contains partially created parts, even
 if hardware power off occurs"
-(https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#storage).
+(<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#storage>).
 Image restores are all-or-nothing and age out within 2 months, though, so add a logical
 dump:
 
@@ -333,12 +333,12 @@ dump:
 
      (the `victoriametrics/vmbackup` image, with `vmltdata` and a scratch dir mounted). It
      creates and deletes the snapshot itself
-     (https://docs.victoriametrics.com/victoriametrics/vmbackup/).
+     (<https://docs.victoriametrics.com/victoriametrics/vmbackup/>).
   2. `tar` the result into one file:
      `$(dump_dir victoriametrics-lt)/vmlt-<ts>.tar`.
 - **Why vmbackup:** the docs say "Do not copy subdirectories inside
   `<-storageDataPath>/snapshot` with `cp`, `rsync`"
-  (https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#how-to-work-with-snapshots).
+  (<https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#how-to-work-with-snapshots>).
 - **Why one file:** the orchestrator's `pull()` handles dumps as single files
   (`-rm ${src}/dumps/*/*`, keep-newest by `find -maxdepth 1 -type f`,
   `src/pve1/backup_orchestrator.sh.j2`).

@@ -19,7 +19,7 @@ creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-do
 
 Single-context repo (most repos):
 
-```
+```text
 /
 ├── CONTEXT.md
 ├── docs/adr/
@@ -30,7 +30,7 @@ Single-context repo (most repos):
 
 Multi-context repo (presence of `CONTEXT-MAP.md` at the root):
 
-```
+```text
 /
 ├── CONTEXT-MAP.md
 ├── docs/adr/                          ← system-wide decisions

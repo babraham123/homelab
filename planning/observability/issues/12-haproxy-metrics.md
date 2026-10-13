@@ -12,7 +12,7 @@ HAProxy half. The VPS vmagent that scrapes it is observability/08.
 ## Change
 
 1. **Exporter.** Add to `src/services/haproxy/haproxy.cfg.j2`:
-   ```
+   ```text
    frontend prometheus
        mode http
        bind 127.0.0.1:8405

@@ -1,7 +1,7 @@
 # 05. Test OliveTin OIDC group claims and drop the allow-everyone workaround
 
 Status: ready-for-human Type: task Repo: homelab Source: upstream OliveTin/OliveTin#1103
-(https://github.com/OliveTin/OliveTin/issues/1103)
+(<https://github.com/OliveTin/OliveTin/issues/1103>)
 
 ## Problem
 

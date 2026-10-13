@@ -40,7 +40,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 |-----|---------|-------|---------|-----|
 | .6 | traefik | traefik | Node ingress, TLS termination | webproxy.janedoe.com |
 | .7 | vmagent | vmagent | Local metrics scraper | n/a |
-| .8 | nginx | nginx | Static site + error pages | www.janedoe.com, apex |
+| .8 | nginx | nginx | Static site + error pages | `www.janedoe.com`, apex |
 | .9 | homepage | homepage | Service dashboard | dash.janedoe.com |
 | .10 | isso | isso | Blog comments | comment.janedoe.com |
 | .15 | guacd | guacd | Guacamole protocol daemon | n/a |

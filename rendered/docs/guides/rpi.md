@@ -33,7 +33,7 @@ vim /Volumes/bootfs/wpa_supplicant.conf
     - `vim /Volumes/bootfs/cmdline.txt`
     - Append `brcmfmac.feature_disable=0x82000`
 - Kernel configs
-	- `vim /Volumes/bootfs/config.txt`
+  - `vim /Volumes/bootfs/config.txt`
 - Eject SD card and plug into Pi
 - Power on Pi (LED [status codes](https://pimylifeup.com/raspberry-pi-red-green-lights))
 

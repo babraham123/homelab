@@ -61,7 +61,7 @@ away from home.** `docs/guides/reading.md` says so. No follow-up task is needed.
    - `/api/v2/books`, `/books/{id}`, `/books/{id}/files?format=…`, `/books/{id}/cover`
    - `/books/{id}/positions`, `/books/{id}/status`, `/statuses`
    - `/user`, `/token/app`, `/device/token`
-   
+
    So Authelia can never sit in front of `/api/`. The apps support no custom headers or
    mTLS.
 3. **Away from home:**

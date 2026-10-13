@@ -20,7 +20,7 @@ brew install zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 ```
 - `vim ~/.zshrc`
-```
+```zsh
 ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
 ```

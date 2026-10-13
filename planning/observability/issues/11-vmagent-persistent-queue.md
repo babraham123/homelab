@@ -25,7 +25,7 @@ the file queue, so an outage costs disk, not RAM.
 In the shared template, for every node that runs vmagent (homesvcs, websvcs, and the VPS in
 observability/08):
 
-```
+```text
      --remoteWrite.tmpDataPath="/vmagentdata" \
      --remoteWrite.maxDiskUsagePerURL="1GiB" \
 ```

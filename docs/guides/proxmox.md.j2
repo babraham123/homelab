@@ -2,7 +2,7 @@
 
 ## Hardware & Network
 - Setup dedicated LAN in pfSense
-  - Open admin console: https://{{ router.ip }}/
+  - Open admin console: <https://{{ router.ip }}/>
   - Configure new interface (PVE#), record gateway details
   - Setup DHCP in `[100,200]` range, add static IP based on MAC
   - Copy firewall rules from LAN
@@ -10,14 +10,14 @@
   drive](https://www.lewan.com/blog/2012/02/10/making-a-bootable-usb-stick-on-an-apple-mac-os-x-from-an-iso)
   with proxmox [iso](https://www.proxmox.com/en/downloads/category/iso-images-pve) and install
   - F2 during startup to select USB boot
-- Test connection: https://{{ pve2.ip }}:8006/
+- Test connection: <https://{{ pve2.ip }}:8006/>
 
 ## PVE setup
 - Shell in with root, password
 - Update deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
   - `nano /etc/apt/sources.list`, add `contrib non-free non-free-firmware` to all 3 sources
   - `nano /etc/apt/sources.list.d/pve-enterprise.list`
-```
+```text
 # deb https://enterprise.proxmox.com/debian/pve trixie pve-enterprise
 deb http://download.proxmox.com/debian/pve trixie pve-no-subscription
 ```
@@ -42,8 +42,8 @@ lsblk
 
 ### Intel NIC
 - Fix crashes
-	- `sudo vim /etc/network/interfaces`
-```
+  - `sudo vim /etc/network/interfaces`
+```text
 iface eno1 inet manual
 	post-up ethtool -K eno1 tso off gso off
 ```
@@ -56,7 +56,7 @@ efibootmgr -v
 sudo vim /etc/default/grub
 ```
 
-```
+```sh
 GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt initcall_blacklist=sysfb_init"
 ```
 ```bash
@@ -64,14 +64,14 @@ sudo update-grub
 ```
 - Update modules
   - `sudo vim /etc/modules`
-```
+```text
 vfio
 vfio_iommu_type1
 vfio_pci
 vfio_virqfd
 ```
   - `sudo vim /etc/modprobe.d/pve-blocklist.conf`
-```
+```text
 # GPU passthru
 blacklist nvidiafb
 blacklist nvidia
@@ -106,7 +106,7 @@ Same as GPU, just add the following steps
 ([ref](https://3os.org/infrastructure/proxmox/gpu-passthrough/igpu-passthrough-to-vm/#linux-virtual-machine-igpu-passthrough-configuration)):
 - Add another driver to the blocklist
   - `sudo vim /etc/modprobe.d/pve-blocklist.conf`
-```
+```text
 # iGPU passthru
 blacklist i915
 ```
@@ -126,7 +126,7 @@ lspci -nnv | grep VGA
 ### Coral TPU
 Same as GPU, just add the following steps
 - Block more modules `sudo vim /etc/modprobe.d/pve-blocklist.conf`
-```
+```text
 # Coral TPU passthru
 blacklist gasket
 blacklist apex
@@ -195,7 +195,7 @@ Only installed on PVE2. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
 
 - Update deb repository
   - `vim /etc/apt/sources.list.d/pbs-enterprise.list`
-```
+```text
 # NOT recommended for production use
 deb http://download.proxmox.com/debian/pbs trixie pbs-no-subscription
 ```
@@ -205,7 +205,7 @@ apt update
 apt install -y proxmox-backup-server proxmox-backup
 ufw allow in from any to any port 8007 proto tcp
 ```
-- Connect to console: https://{{ pve2.ip }}:8007/
+- Connect to console: <https://{{ pve2.ip }}:8007/>
 - Further [setup](https://www.youtube.com/watch?v=33ubleU4OFc),
   [setup2](https://www.youtube.com/watch?v=Px5eHcUKbbQ)
   - Storage >> Directory >> Create: Directory

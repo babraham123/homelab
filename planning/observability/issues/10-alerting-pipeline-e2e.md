@@ -7,7 +7,7 @@ Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026
 Nothing proves an alert reaches the phone. The path has five hops and two email side channels, and
 some config looks wrong on reading:
 
-```
+```text
 vmalert --notifier.url--> alertmanager (alert.SITE:9093, basic auth)
   ├─ email_configs --> smtp-relay.gmail.com --> <email>+alert@
   └─ webhook --> ntfy-alertmanager (:2588, basic auth)

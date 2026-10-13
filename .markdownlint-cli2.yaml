@@ -1,14 +1,18 @@
-# markdownlint-cli2 config, read by tools/validate_rendered.sh (rendered docs), the pre-commit
+# markdownlint-cli2 config, read by tools/check_rendered.sh (rendered docs), the pre-commit
 # hook (planning/) and the VS Code markdownlint extension.
 # Ref: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
-# Only rules that catch markdown that renders wrong, broken links, or lines over 100 columns
-# are on; the rest are formatting style.
+# Only rules that catch markdown that renders wrong, broken links, lines over 100 columns, or
+# invisible whitespace and unlabeled code are on; the rest are formatting style.
 ---
 config:
   default: false
   MD001: true  # heading levels skip
   MD005: true  # sibling list items at different indents
+  MD009: true  # trailing spaces
+  MD010:  # hard tabs; code blocks keep theirs, since patches and Makefiles need them
+    code_blocks: false
   MD011: true  # reversed link syntax
+  MD012: true  # multiple blank lines in a row
   MD013:
     line_length: 100
     code_blocks: false
@@ -18,9 +22,11 @@ config:
   MD020: true
   MD021: true
   MD023: true  # indented heading
+  MD034: true  # bare URL, not a link
   MD037: true  # spaces inside emphasis markers
   MD038: true  # spaces inside code spans
   MD039: true  # spaces inside link text
+  MD040: true  # code fence without a language
   MD042: true  # empty link
   MD047: true  # missing final newline
   MD051: true  # link to a heading that doesn't exist

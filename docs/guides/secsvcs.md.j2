@@ -64,7 +64,7 @@ journalctl -eu authelia
   - Add regular users (note for future: add_more_users). Leave them out of
     `lldap_password_manager`: it can reset other users' passwords
     - {{ tailscale_admin }}
-    - {% for user in users %}{{ user }}, {% endfor %}
+    - {{ users | join(', ') }}
   - Create the `authelia_gen_access`, `headscale_access`, `command_general` and
     `vaultwarden_access` groups, add users to them
   - Create the `telemetry` group (VictoriaMetrics, VictoriaLogs, Alertmanager and ntfy UIs), add
@@ -73,7 +73,7 @@ journalctl -eu authelia
   - Restore the authelia middleware by reinstalling the traefik config
     `/root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik`
 
-- Confirm that authelia is working, open https://auth.{{ site.url }}
+- Confirm that authelia is working, open <https://auth.{{ site.url }}>
 
 ## CrowdSec
 - Engine and Local API (LAPI): reads Traefik's and Authelia's logs from VictoriaLogs, bans by IP,
@@ -164,7 +164,7 @@ curl -s -o /dev/null -w '%{http_code}\n' 'https://www.{{ site.url }}/?q=<script>
   names starting `anomaly score`). After a few weeks, add exclusions for what it flags wrongly and
   move it in-band (auth/03)
 ## Vaultwarden
-- Public at https://vault.{{ site.url }}: login is SSO-only through Authelia two-factor, gated on
+- Public at <https://vault.{{ site.url }}>: login is SSO-only through Authelia two-factor, gated on
   the `vaultwarden_access` LLDAP group; the master password still decrypts the vault
 - Prerequisites:
   - `vaultwarden_*` in `/root/secrets/secsvcs.yaml` on pve1 (recipes in the template), then `sudo
@@ -232,7 +232,7 @@ ls /run/systemd/generator/
   - `journalctl -e`
 
 - List services and status
-```
+```bash
 systemctl list-unit-files
 systemctl --type=service
 ```

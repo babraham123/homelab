@@ -4,7 +4,7 @@ Status: ready-for-human Type: task Repo: homelab Source: user item 53 Blocked by
 
 ## Target layout
 
-```
+```text
 src/
   base/        debian/ podman/ macos/ certificates/ node_exporter/
   nodes/       pve1/ pve2/ router/ vpnsvcs/ secsvcs/ homesvcs/ websvcs/ devtop/ gaming/

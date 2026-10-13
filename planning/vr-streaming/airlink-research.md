@@ -223,70 +223,70 @@ Research for 01 and 04, 2026-10-12. Primary sources first. Community reports are
 ## Sources
 
 - **Meta help:**
-  - Set up Link and Air Link: https://www.meta.com/help/quest/509273027107091/
-  - Air Link Wi-Fi troubleshooting: https://www.meta.com/help/quest/2094726341404944/
+  - Set up Link and Air Link: <https://www.meta.com/help/quest/509273027107091/>
+  - Air Link Wi-Fi troubleshooting: <https://www.meta.com/help/quest/2094726341404944/>
   - Link troubleshooting (same network, firewall, ODT reset):
-    https://www.meta.com/help/quest/975178886590868/
+    <https://www.meta.com/help/quest/975178886590868/>
   - Getting started with the Meta Horizon Link app:
-    https://www.meta.com/help/quest/1517439565442928/
-  - Windows PC requirements: https://www.meta.com/help/quest/444256562873335/
+    <https://www.meta.com/help/quest/1517439565442928/>
+  - Windows PC requirements: <https://www.meta.com/help/quest/444256562873335/>
   - D-Link VR Air Bridge (PC on Ethernet, shared-network congestion):
-    https://www.meta.com/help/quest/2093693094163790/
-  - DFS channels and Air Link: https://www.meta.com/help/quest/1164734251102834/
-  - Air Link announcement (2021): https://www.meta.com/blog/introducing-oculus-air-link-a-wireless-way-to-play-pc-vr-games-on-oculus-quest-2-plus-infinite-office-updates-support-for-120-hz-on-quest-2-and-more/
-  - Release notes (v28–v34): https://www.meta.com/en-gb/help/quest/3608590089449049/
+    <https://www.meta.com/help/quest/2093693094163790/>
+  - DFS channels and Air Link: <https://www.meta.com/help/quest/1164734251102834/>
+  - Air Link announcement (2021): <https://www.meta.com/blog/introducing-oculus-air-link-a-wireless-way-to-play-pc-vr-games-on-oculus-quest-2-plus-infinite-office-updates-support-for-120-hz-on-quest-2-and-more/>
+  - Release notes (v28–v34): <https://www.meta.com/en-gb/help/quest/3608590089449049/>
 - **Meta developer docs:**
-  - Oculus Debug Tool: https://developers.meta.com/horizon/documentation/native/pc/dg-debug-tool/
-  - Performance HUD: https://developers.meta.com/horizon/documentation/native/pc/dg-hud/
+  - Oculus Debug Tool: <https://developers.meta.com/horizon/documentation/native/pc/dg-debug-tool/>
+  - Performance HUD: <https://developers.meta.com/horizon/documentation/native/pc/dg-hud/>
   - Link for Unity (diagnostics path):
-    https://developers.meta.com/horizon/documentation/unity/unity-link
+    <https://developers.meta.com/horizon/documentation/unity/unity-link>
   - Air Link Framerate Insurance:
-    https://developers.meta.com/horizon/blog/air-link-framerate-insurance-afi/
+    <https://developers.meta.com/horizon/blog/air-link-framerate-insurance-afi/>
   - How Link works (H.264, HUD over Link):
-    https://developers.meta.com/vr/blog/how-does-oculus-link-work-the-architecture-pipeline-and-aadt-explained/
+    <https://developers.meta.com/vr/blog/how-does-oculus-link-work-the-architecture-pipeline-and-aadt-explained/>
   - Device comparison (Quest 3 / 3S Wi-Fi 6E):
-    https://developers.meta.com/vr/resources/compare-devices/
+    <https://developers.meta.com/vr/resources/compare-devices/>
 - **NVIDIA:**
-  - GeForce passthrough (R465+): https://nvidia.custhelp.com/app/answers/detail/a_id/5173
-  - NVENC/NVDEC matrix: https://developer.nvidia.com/video-encode-decode-support-matrix
-- **Proxmox:** PCI passthrough wiki: https://pve.proxmox.com/wiki/PCI_Passthrough
+  - GeForce passthrough (R465+): <https://nvidia.custhelp.com/app/answers/detail/a_id/5173>
+  - NVENC/NVDEC matrix: <https://developer.nvidia.com/video-encode-decode-support-matrix>
+- **Proxmox:** PCI passthrough wiki: <https://pve.proxmox.com/wiki/PCI_Passthrough>
 - **Microsoft:**
-  - tscon: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/tscon
-  - RDP sessions: https://learn.microsoft.com/en-us/windows/win32/termserv/terminal-services-sessions
+  - tscon: <https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/tscon>
+  - RDP sessions: <https://learn.microsoft.com/en-us/windows/win32/termserv/terminal-services-sessions>
   - Console session ID:
-    https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-wtsgetactiveconsolesessionid
-  - Task logon types: https://learn.microsoft.com/en-us/windows/win32/taskschd/principal-logontype
+    <https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-wtsgetactiveconsolesessionid>
+  - Task logon types: <https://learn.microsoft.com/en-us/windows/win32/taskschd/principal-logontype>
   - New-ScheduledTaskPrincipal:
-    https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal
-- **Sunshine:** RDP disconnect and tscon: https://github.com/LizardByte/Sunshine/issues/964
+    <https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal>
+- **Sunshine:** RDP disconnect and tscon: <https://github.com/LizardByte/Sunshine/issues/964>
 - **pfSense:**
-  - mdns-bridge: https://github.com/dennypage/mdns-bridge
-  - CoDel limiters recipe: https://docs.netgate.com/pfsense/en/latest/recipes/codel-limiters.html
+  - mdns-bridge: <https://github.com/dennypage/mdns-bridge>
+  - CoDel limiters recipe: <https://docs.netgate.com/pfsense/en/latest/recipes/codel-limiters.html>
 - **TP-Link:** EAP660 HD specs:
-  https://www.omadanetworks.com/us/business-networking/omada-wifi-ceiling-mount/eap660-hd/
+  <https://www.omadanetworks.com/us/business-networking/omada-wifi-ceiling-mount/eap660-hd/>
 - **Virtual Desktop:**
-  - FAQ: https://www.vrdesktop.net/
-  - VDXR: https://www.uploadvr.com/virtual-desktops-vdxr-runtime/,
-    https://www.khronos.org/news/permalink/virtual-desktops-new-openxr-runtime-bypasses-steamvr-to-boost-performance
+  - FAQ: <https://www.vrdesktop.net/>
+  - VDXR: <https://www.uploadvr.com/virtual-desktops-vdxr-runtime/>,
+    <https://www.khronos.org/news/permalink/virtual-desktops-new-openxr-runtime-bypasses-steamvr-to-boost-performance>
 - **Community:**
   - Proxmox forum, Air Link in a VM:
-    https://forum.proxmox.com/threads/proxmox-for-vr-development.109991/
+    <https://forum.proxmox.com/threads/proxmox-for-vr-development.109991/>
   - Unraid forum, Link in a VM:
-    https://forums.unraid.net/topic/90618-oculus-quest-w-oculus-link-on-win-10-vm/
+    <https://forums.unraid.net/topic/90618-oculus-quest-w-oculus-link-on-win-10-vm/>
   - Steam forum, OVR launcher "no active interactive user session":
-    https://steamcommunity.com/discussions/forum/11/1500126447393854379/
+    <https://steamcommunity.com/discussions/forum/11/1500126447393854379/>
   - Meta forum, Air Link pairing fixed by Private profile; OVRServer missing from firewall:
-    https://communityforums.atmeta.com/t5/Get-Help/My-PC-isn-t-showing-up-in-Air-Link/td-p/978145
+    <https://communityforums.atmeta.com/t5/Get-Help/My-PC-isn-t-showing-up-in-Air-Link/td-p/978145>
   - Meta forum, Air Link bitrate and ODT (not readable here):
-    https://communityforums.atmeta.com/discussions/PairingConnection/latest-update-ignores-airlink-bitrate-setting-completely/1365759
+    <https://communityforums.atmeta.com/discussions/PairingConnection/latest-update-ignores-airlink-bitrate-setting-completely/1365759>
   - UniFi Air Link blog (multicast, single IP):
-    https://techbloggingfool.com/2021/05/02/oculus-air-link-setup-on-unify-networks/
-  - Air Link default bitrate 100 Mbps: https://vrpupu.com/en/2026/01/air-link-complete-guide/
+    <https://techbloggingfool.com/2021/05/02/oculus-air-link-setup-on-unify-networks/>
+  - Air Link default bitrate 100 Mbps: <https://vrpupu.com/en/2026/01/air-link-complete-guide/>
   - ODT CLI script files:
-    https://forums.flightsimulator.com/t/oculus-quest-2-settings-rtx3070-oc/360654/14
-  - tscon to console: https://docs.loginvsi.com/knowledge-base/KB/using-tscon-to-move-a-session-from-rdp-to-the-cons
+    <https://forums.flightsimulator.com/t/oculus-quest-2-settings-rtx3070-oc/360654/14>
+  - tscon to console: <https://docs.loginvsi.com/knowledge-base/KB/using-tscon-to-move-a-session-from-rdp-to-the-cons>
   - Headless GPUs and dummy plugs:
-    https://www.xda-developers.com/this-hdmi-dummy-plug-solved-my-headless-server-gpu-problems/
+    <https://www.xda-developers.com/this-hdmi-dummy-plug-solved-my-headless-server-gpu-problems/>
 - **Unverified:**
   - Air Link discovery protocol and ports.
   - Whether Link needs an attached display.

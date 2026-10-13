@@ -152,7 +152,7 @@ sops /root/secrets/pve1.yaml
 apt install -y msmtp msmtp-mta
 vim /etc/apparmor.d/usr.bin.msmtp +82
 ```
-```
+```text
 /usr/bin/hostname PUx,
 /root/homelab-rendered/src/nodes/pve1/msmtp_password.sh PUx,
 ```

@@ -250,7 +250,7 @@ index 3b11772df..12b0e508d 100644
   tailscaled has no `TS_DEBUG_NETSTACK_SUBNETS`, and the PVE1 states show the router's
   `192.168.7.1` as the source with no `tailscale0` state.
 - 2026-10-12: posted the results on the PR
-  (https://github.com/pfsense/FreeBSD-ports/pull/1462#issuecomment-6124857832), with a version
+  (<https://github.com/pfsense/FreeBSD-ports/pull/1462#issuecomment-6124857832>), with a version
   gate for the flag, the `logger -t` fix, the restart miss, the missing exit-node pass rule in the
   help text, and #1437. Step 7's `NoSNAT` check can't pass on < 1.104; everything else passed.
   Until a fixed PR ships, 04 step 2 keeps the manual `tailscaled_env` entry.

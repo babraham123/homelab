@@ -137,7 +137,7 @@ src/nodes/vpnsvcs/install_svcs.sh haproxy
 
 - Add a DNS CAA record,
   [ref](https://really-simple-ssl.com/instructions/edit-dns-caa-records-to-allow-lets-encrypt-ssl-certificates/)
-```
+```text
 @ issue      letsencrypt.org
 * issue      letsencrypt.org
 @ issuewild  ;
@@ -161,7 +161,7 @@ src/nodes/vpnsvcs/install_firewall.sh
 # Add permanent iptables rules
 vim /etc/ufw/before.rules
 ```
-```
+```text
 # clamp Tailscale MSS, insert before the *filter
 *mangle
 :FORWARD ACCEPT [0:0]
@@ -191,7 +191,7 @@ getent hosts metrics.{{ site.url }}   # should print {{ secsvcs.ip }}
 
 ### Optimize search results
 
-- Log into the `Google Search Console` under {{ site.email }} or another gmail account
+- Log into the `Google Search Console` under `{{ site.email }}` or another gmail account
 - Start verification, enter {{ site.url }}
 - In your DNS provider, add a TXT record with the provided string (use host = @)
 - View the insights report
@@ -371,7 +371,7 @@ chmod 600 /etc/opt/secrets/*
 apt install -y jq curl msmtp
 vim /etc/apparmor.d/usr.bin.msmtp +82
 ```
-```
+```text
 /usr/bin/hostname PUx,
 /root/homelab-rendered/src/nodes/vpnsvcs/msmtp_password.sh PUx,
 ```

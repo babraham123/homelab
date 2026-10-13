@@ -7,7 +7,7 @@ Status: resolved Type: research Repo: homelab Source: review finding 21
 **A. HAProxy built-in exporter, scraped over the tailnet (recommended now).** HAProxy ≥ 2.0 ships a
 Prometheus exporter; no extra process. In `src/services/haproxy/haproxy.cfg.j2`:
 
-```
+```text
 frontend prometheus
     mode http
     bind {{ vpn.tailscale_ip }}:8405
@@ -119,7 +119,7 @@ Why not A first:
 
 `src/services/haproxy/haproxy.cfg.j2`:
 
-```
+```text
 frontend prometheus
     mode http
     bind 127.0.0.1:8405
@@ -169,7 +169,7 @@ the template. Second-pass tags need `{% raw %}` wrapping, as the `IP=` line has 
   - `--remoteWrite.maxDiskUsagePerURL=1GiB`
 - **The VPS branch renders to:**
 
-```
+```ini
 Network=host        # host netns: reaches loopback targets and 100.100.100.100; no netavark bridge, no nftables rules
 Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      --httpListenAddr="127.0.0.1:8429" \
@@ -297,19 +297,19 @@ Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
 ### Sources
 
 - HAProxy exporter:
-  https://www.haproxy.com/documentation/haproxy-configuration-tutorials/alerts-and-monitoring/prometheus/
-  , https://github.com/haproxy/haproxy/blob/master/addons/promex/README ; metric names:
-  https://github.com/haproxy/haproxy/blob/v3.0.0/addons/promex/service-prometheus.c ; silent-drop
-  counters: https://github.com/haproxy/haproxy/blob/v3.0.0/src/tcp_act.c ; `check`:
-  https://docs.haproxy.org/3.0/configuration.html#5.2-check
+  <https://www.haproxy.com/documentation/haproxy-configuration-tutorials/alerts-and-monitoring/prometheus/>
+  , <https://github.com/haproxy/haproxy/blob/master/addons/promex/README> ; metric names:
+  <https://github.com/haproxy/haproxy/blob/v3.0.0/addons/promex/service-prometheus.c> ; silent-drop
+  counters: <https://github.com/haproxy/haproxy/blob/v3.0.0/src/tcp_act.c> ; `check`:
+  <https://docs.haproxy.org/3.0/configuration.html#5.2-check>
 - Debian HAProxy 3.0.11 in trixie with `USE_PROMEX=1`:
-  https://sources.debian.org/src/services/haproxy/ ,
-  https://salsa.debian.org/haproxy-team/haproxy/-/blob/master/debian/rules
+  <https://sources.debian.org/src/services/haproxy/> ,
+  <https://salsa.debian.org/haproxy-team/haproxy/-/blob/master/debian/rules>
 - vmagent buffering, `tmpDataPath`, `maxDiskUsagePerURL`, `remoteWrite.label`:
-  https://docs.victoriametrics.com/victoriametrics/vmagent/ ; default path:
-  https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/app/vmagent/remotewrite/remotewrite.go
-- Tailscale site-to-site (Linux only, no SNAT): https://tailscale.com/kb/1214/site-to-site ; client
-  metrics: https://tailscale.com/kb/1482/client-metrics ; ufw and `tailscale0`:
-  https://tailscale.com/kb/1077/secure-server-ubuntu
-- Headscale ACLs: https://headscale.net/stable/ref/acls/
-- node_exporter in a container: https://github.com/prometheus/node_exporter#docker
+  <https://docs.victoriametrics.com/victoriametrics/vmagent/> ; default path:
+  <https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/app/vmagent/remotewrite/remotewrite.go>
+- Tailscale site-to-site (Linux only, no SNAT): <https://tailscale.com/kb/1214/site-to-site> ; client
+  metrics: <https://tailscale.com/kb/1482/client-metrics> ; ufw and `tailscale0`:
+  <https://tailscale.com/kb/1077/secure-server-ubuntu>
+- Headscale ACLs: <https://headscale.net/stable/ref/acls/>
+- node_exporter in a container: <https://github.com/prometheus/node_exporter#docker>

@@ -1,7 +1,7 @@
 # 04. Auto-upload Car Scanner Pro recordings from the phone with Termux
 
 Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-09-26
-(https://wiki.termux.com/wiki/Intents_and_Hooks); research 2026-10-12 Blocked by: 01
+(<https://wiki.termux.com/wiki/Intents_and_Hooks>); research 2026-10-12 Blocked by: 01
 
 ## Problem
 

@@ -4,7 +4,7 @@ Status: resolved Type: task Repo: homesite Source: review finding 43
 
 In `setup.md`, replace
 
-```
+```bash
 open assets/www/index.html
 ```
 

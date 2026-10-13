@@ -527,7 +527,7 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/H
 
 CAA records restrict which CAs may issue for the domain. At the registrar:
 
-```
+```text
 issue      letsencrypt.org
 issuewild  letsencrypt.org
 iodef      mailto:jdoe@gmail.com

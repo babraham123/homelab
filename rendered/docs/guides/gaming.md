@@ -54,7 +54,7 @@ Set-Service -Name SunshineService -StartupType Manual
 - Stand up the [Raspberry Pi](./rpi.md) client for the TV
 - Enable HEVC, HDR
   - `vim /Volumes/bootfs/config.txt`
-```
+```ini
 # may be outdated
 dtoverlay=rpivid-v4l2
 

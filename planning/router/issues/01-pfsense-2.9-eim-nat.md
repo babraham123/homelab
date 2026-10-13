@@ -1,7 +1,7 @@
 # 01. Upgrade to pfSense CE 2.9.0; replace NAT-PMP / static-port NAT with EIM outbound NAT
 
 Status: resolved Type: task Repo: homelab Source: maintainer request 2026-09-26;
-tailscale/tailscale#18035 (https://github.com/tailscale/tailscale/issues/18035)
+tailscale/tailscale#18035 (<https://github.com/tailscale/tailscale/issues/18035>)
 
 ## Problem
 
@@ -84,5 +84,5 @@ destinations without static port NAT, so none of the workarounds should be neede
   - Verified: `tailscale netcheck` from the trusted WiFi VLAN shows `MappingVariesByDestIP: false`
     and empty `PortMapping`. devtop reaches its peers `direct`, and two LAN nodes pinging the VPS
     at the same time get separate external ports. That rules out the collision reported on the
-    Netgate forum (https://forum.netgate.com/post/1230518).
+    Netgate forum (<https://forum.netgate.com/post/1230518>).
   - Follow-up: delete the router VM's `qm snapshot` after a few days of normal operation.

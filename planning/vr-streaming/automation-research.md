@@ -254,65 +254,65 @@ From `source/Playnite/App/CmdLineOptions.cs` and `PlayniteApplication.cs`, and t
 
 - **Task Scheduler (Microsoft Learn):**
   - Security contexts (who can run tasks, passwords):
-    https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks
+    <https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks>
   - Logon types:
-    https://learn.microsoft.com/en-us/windows/win32/api/taskschd/ne-taskschd-task_logon_type
+    <https://learn.microsoft.com/en-us/windows/win32/api/taskschd/ne-taskschd-task_logon_type>
   - Actions run sequentially, 32 max:
-    https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions
+    <https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions>
   - `MultipleInstancesPolicy` default:
-    https://learn.microsoft.com/en-us/windows/win32/taskschd/taskschedulerschema-multipleinstancespolicy-settingstype-element
+    <https://learn.microsoft.com/en-us/windows/win32/taskschd/taskschedulerschema-multipleinstancespolicy-settingstype-element>
   - `ExecutionTimeLimit` (`PT0S`):
-    https://learn.microsoft.com/en-us/windows/win32/taskschd/taskschedulerschema-executiontimelimit-settingstype-element
+    <https://learn.microsoft.com/en-us/windows/win32/taskschd/taskschedulerschema-executiontimelimit-settingstype-element>
   - Cmdlets:
-    https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal,
-    https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/register-scheduledtask,
-    https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/start-scheduledtask,
-    https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset
+    <https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal>,
+    <https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/register-scheduledtask>,
+    <https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/start-scheduledtask>,
+    <https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset>
   - `-Command` exit codes:
-    https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+    <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe>
   - Session namespaces for named objects:
-    https://learn.microsoft.com/en-us/windows/win32/termserv/kernel-object-namespaces
+    <https://learn.microsoft.com/en-us/windows/win32/termserv/kernel-object-namespaces>
   - (community) Action ordering and failure:
-    https://learn.microsoft.com/en-us/answers/questions/1634383/batch-job2-automatically-runs-upon-the-completion
+    <https://learn.microsoft.com/en-us/answers/questions/1634383/batch-job2-automatically-runs-upon-the-completion>
 - **Meta Horizon Link (all community):**
-  - Oculus Killer process list and order: https://github.com/sulliops/OculusKiller
-  - Library and runtime services on Manual: https://github.com/MattJaccino/ovrtoggle
+  - Oculus Killer process list and order: <https://github.com/sulliops/OculusKiller>
+  - Library and runtime services on Manual: <https://github.com/MattJaccino/ovrtoggle>
   - Client exe name and install path:
-    https://communityforums.atmeta.com/discussions/OtherTroubleshooting/oculus-link-not-working---oculusclient-exe-not-found-error/1362447,
-    https://communityforums.atmeta.com/discussions/OtherTroubleshooting/meta-quest-link--installation-not-installing-files-and-drivers-correctly-/1355957
+    <https://communityforums.atmeta.com/discussions/OtherTroubleshooting/oculus-link-not-working---oculusclient-exe-not-found-error/1362447>,
+    <https://communityforums.atmeta.com/discussions/OtherTroubleshooting/meta-quest-link--installation-not-installing-files-and-drivers-correctly-/1355957>
   - Manual startup reset by repair or updates:
-    https://communityforums.atmeta.com/discussions/OtherTroubleshooting/how-to-stop-oculus-from-running-on-launch/1375805
+    <https://communityforums.atmeta.com/discussions/OtherTroubleshooting/how-to-stop-oculus-from-running-on-launch/1375805>
   - Delayed start and `OVRLibraryService`:
-    https://communityforums.atmeta.com/discussions/PairingConnection/pc-link-broken-with-update-v81/1348553
+    <https://communityforums.atmeta.com/discussions/PairingConnection/pc-link-broken-with-update-v81/1348553>
   - "Can't reach the Oculus Runtime Service":
-    https://www.tomsguide.com/us/oculus-rift-expired-certificate-not-working,news-26733.html
+    <https://www.tomsguide.com/us/oculus-rift-expired-certificate-not-working,news-26733.html>
   - The forum pages returned 403 to direct fetches, so their wording comes from search excerpts.
 - **Sunshine** (LizardByte/Sunshine, `master`, 2026-10-12):
-  - Service wrapper: https://github.com/LizardByte/Sunshine/blob/master/tools/sunshinesvc.cpp
-  - App lifecycle: https://github.com/LizardByte/Sunshine/blob/master/src/process.cpp
+  - Service wrapper: <https://github.com/LizardByte/Sunshine/blob/master/tools/sunshinesvc.cpp>
+  - App lifecycle: <https://github.com/LizardByte/Sunshine/blob/master/src/process.cpp>
   - User-token launch and WM_CLOSE:
-    https://github.com/LizardByte/Sunshine/blob/master/src/platform/windows/misc.cpp
-  - Disconnect and `/cancel`: https://github.com/LizardByte/Sunshine/blob/master/src/stream.cpp,
-    https://github.com/LizardByte/Sunshine/blob/master/src/nvhttp.cpp
+    <https://github.com/LizardByte/Sunshine/blob/master/src/platform/windows/misc.cpp>
+  - Disconnect and `/cancel`: <https://github.com/LizardByte/Sunshine/blob/master/src/stream.cpp>,
+    <https://github.com/LizardByte/Sunshine/blob/master/src/nvhttp.cpp>
   - App field descriptions:
-    https://github.com/LizardByte/Sunshine/blob/master/src_assets/common/assets/web/public/assets/locale/en.json
-  - Docs: https://docs.lizardbyte.dev/projects/sunshine/latest/md_docs_2app__examples.html
+    <https://github.com/LizardByte/Sunshine/blob/master/src_assets/common/assets/web/public/assets/locale/en.json>
+  - Docs: <https://docs.lizardbyte.dev/projects/sunshine/latest/md_docs_2app__examples.html>
 - **Playnite:**
-  - Manual: https://api.playnite.link/docs/manual/advanced/cmdlineArguments.html
+  - Manual: <https://api.playnite.link/docs/manual/advanced/cmdlineArguments.html>
   - Options:
-    https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/App/CmdLineOptions.cs
+    <https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/App/CmdLineOptions.cs>
   - Instance and pipe handling:
-    https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/App/PlayniteApplication.cs
+    <https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/App/PlayniteApplication.cs>
   - Tray defaults:
-    https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/Settings/PlayniteSettings.cs
+    <https://github.com/JosefNemec/Playnite/blob/master/source/Playnite/Settings/PlayniteSettings.cs>
 - **OliveTin:**
-  - Inline actions: https://docs.olivetin.app/dashboards/inline-actions.html
-  - Concurrency and groups: https://docs.olivetin.app/action_customization/concurrency.html
-  - Timeouts: https://docs.olivetin.app/action_customization/timeouts.html
+  - Inline actions: <https://docs.olivetin.app/dashboards/inline-actions.html>
+  - Concurrency and groups: <https://docs.olivetin.app/action_customization/concurrency.html>
+  - Timeouts: <https://docs.olivetin.app/action_customization/timeouts.html>
   - Config structs at the latest release:
-    https://github.com/OliveTin/OliveTin/blob/3000.20.0/service/internal/config/config.go
+    <https://github.com/OliveTin/OliveTin/blob/3000.20.0/service/internal/config/config.go>
   - Group limits:
-    https://github.com/OliveTin/OliveTin/blob/3000.20.0/service/internal/executor/group_concurrency.go
+    <https://github.com/OliveTin/OliveTin/blob/3000.20.0/service/internal/executor/group_concurrency.go>
 - **Unverified on the VM:**
   - The Last Run Result when admin isn't logged on.
   - Whether an action whose exe is missing stops later actions.

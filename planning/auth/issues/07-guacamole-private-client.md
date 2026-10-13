@@ -2,7 +2,7 @@
 
 Status: ready-for-agent Type: task Blocked by: upstream apache/guacamole-client#1219 shipping in a
 Guacamole release (expected 1.7.0) Repo: homelab Source: maintainer request 2026-09-27; upstream
-GUACAMOLE-2258 (https://github.com/apache/guacamole-client/pull/1219)
+GUACAMOLE-2258 (<https://github.com/apache/guacamole-client/pull/1219>)
 
 ## Problem
 

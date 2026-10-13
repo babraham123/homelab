@@ -18,7 +18,7 @@ Podman secrets are mapped to env vars in `src/services/homepage/homepage.contain
 
 All three break on env-var substitution. Homepage only substitutes placeholders named
 `{{HOMEPAGE_VAR_*}}` or `{{HOMEPAGE_FILE_*}}`
-(https://gethomepage.dev/installation/docker/#using-environment-secrets). The configs use
+(<https://gethomepage.dev/installation/docker/#using-environment-secrets>). The configs use
 `{{HOME_ICAL_URL}}`, `{{HOME_LATITUDE}}`, `{{DASH_PVE1_TOKEN}}` etc., so the literal placeholder
 text is probably reaching the upstream APIs. That would explain all three failing together. Confirm
 this before looking at other causes.

@@ -117,7 +117,7 @@ powershell -ExecutionPolicy Bypass -File "C:\Homelab\gaming-src\InstallAutomatio
 exit
 ```
 - Generate the SSH certs
-```
+```bash
 ssh manualadmin@pve1
 sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ```
