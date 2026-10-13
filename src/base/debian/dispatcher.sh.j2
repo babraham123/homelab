@@ -19,21 +19,18 @@ unauthorized() {
   exit 1
 }
 
-# Usage: require_key_id ID...; the certificate this session logged in with must carry one
-# of these key IDs (ssh_cert_gen.sh's -I). sshd writes the credential that authenticated
-# the session to $SSH_USER_AUTH (ExposeAuthInfo in autoadmin_sshd.conf), the whole
-# certificate for a certificate login.
-require_key_id() {
-  local tmp id want
+# Guards the pve1_file_transfer commands: the certificate this session logged in with
+# must be pve1's (key ID "pve1", ssh_cert_gen.sh's -I). sshd writes the credential that
+# authenticated the session to $SSH_USER_AUTH (ExposeAuthInfo in autoadmin_sshd.conf),
+# the whole certificate for a certificate login.
+require_pve1() {
+  local tmp id
   tmp=$(mktemp)
   grep -m1 '^publickey [^ ]*-cert-v01@openssh\.com ' "${SSH_USER_AUTH:-/dev/null}" | \
     cut -d' ' -f2- > "$tmp" || true
   id=$(ssh-keygen -L -f "$tmp" 2> /dev/null | sed -n 's/^ *Key ID: "\(.*\)"$/\1/p' || true)
   rm -f "$tmp"
-  for want in "$@"; do
-    [[ $id == "$want" ]] && return 0
-  done
-  unauthorized "key ID '${id}' may not run '${SSH_ORIGINAL_COMMAND:-}'"
+  [[ $id == pve1 ]] || unauthorized "key ID '${id}' may not run '${SSH_ORIGINAL_COMMAND:-}'"
 }
 
 case "$(hostname)" in

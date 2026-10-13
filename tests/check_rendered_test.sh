@@ -173,12 +173,12 @@ error: src/services/olive_tin/config.yaml: no button runs secsvcs dispatcher cas
 EOF
 }
 
-# backup has key_ids in the fixture: no button, and a button for it is an error
+# backup is a pve1_file_transfer in the fixture: no button, and a button for it is an error
 test_olive_tin_gated_case() {
   fixture_tree
   edit src/services/olive_tin/config.yaml 's/^  - shell: ssh autoadmin@secsvcs shutdown$/&\n  - shell: ssh autoadmin@secsvcs backup/'
   expect_errors <<'EOF'
-error: src/services/olive_tin/config.yaml: runs ssh autoadmin@secsvcs backup, which only key IDs pve1 may run
+error: src/services/olive_tin/config.yaml: runs ssh autoadmin@secsvcs backup, a pve1 file transfer only pve1 may run
 EOF
 }
 

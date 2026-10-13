@@ -196,11 +196,11 @@ sharply different powers:
   manifest and unpacked by `receive_files` (`src/base/lib.sh`) into a private temp dir that must
   hold exactly the named regular files.
 - Commands that move secrets or trust anchors (`backup`, `copy_acme_certs`, `install_ssh_ca`,
-  `install_ca`, `install_certs`, `install_keys`, …) have `key_ids: [pve1]` in the inventory. sshd
-  exposes the certificate a session logged in with (`ExposeAuthInfo`, `autoadmin_sshd.conf`), and
-  the dispatcher's `require_key_id` rejects every key ID but those listed. OliveTin's key (ID
-  `olive_tin`) can only run the open, parameterless commands, and OliveTin gets no button for the
-  gated ones.
+  `install_ca`, `install_certs`, `install_keys`, …) are `pve1_file_transfer: true` in the
+  inventory: they move files between the node and pve1, and pve1 is the only peer. sshd exposes the
+  certificate a session logged in with (`ExposeAuthInfo`, `autoadmin_sshd.conf`), and the
+  dispatcher's `require_pve1` rejects every key ID but `pve1`. OliveTin's key (ID `olive_tin`) can
+  only run the open, parameterless commands, and OliveTin gets no button for the file transfers.
 - `/home/autoadmin` is root-owned and sshd has `PermitUserRC no`, so nothing can plant a `.bashrc`
   or `.ssh/rc` that bash or sshd would run around the forced command. autoadmin is not in the `sudo`
   group: the dispatcher's sudoers file is its only sudo.

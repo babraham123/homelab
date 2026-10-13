@@ -20,7 +20,7 @@ services:
   plain: {}
 install_all_svcs: true
 commands:
-  - {name: install_keys, script: nodes/alpha/commands.sh, key_ids: [pve1, local]}
+  - {name: install_keys, script: nodes/alpha/commands.sh, pve1_file_transfer: true}
   - {name: build_map, script: nodes/alpha/commands.sh, sudo: false}
   - name: check_gpu
     run:

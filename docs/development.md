@@ -158,8 +158,8 @@ it, against the files it describes:
   routed host is listed, except on websvcs, the default route;
 - `upstream` refs name a registry host and namespace, and the quadlet each service's case copies has
   `Image=localhost/` + the ref without its host, or `Image=localhost/<build>:latest`;
-- the OliveTin config has a button for every dispatcher case without `key_ids`, none for a gated
-  one, and every `ssh autoadmin@NODE CASE` it runs names a real case;
+- the OliveTin config has a button for every dispatcher case except the `pve1_file_transfer` ones,
+  none for those, and every `ssh autoadmin@NODE CASE` it runs names a real case;
 - every node and service dir a node uses is among those `tools/node_dirs.sh` ships it: absolute
   and `../` paths in its node and service dirs, and `src/`-relative ones in its node dir,
   dispatcher lines and `debian_services` cases.

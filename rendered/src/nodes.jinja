@@ -36,12 +36,13 @@
 
     This file derives lists from it, keyed by node. Not a .j2, so it is only imported:
       {% import 'src/nodes.jinja' as inv with context %}
-    dispatch[node]:   dispatcher cases, [{name, run: [line, ...], key_ids}], in case order;
-                      key_ids lists the SSH certificate key IDs a command answers to
-                      (commands[].key_ids in the inventory), empty for any autoadmin key
+    dispatch[node]:   dispatcher cases, [{name, run: [line, ...], pve1_file_transfer}], in
+                      case order; pve1_file_transfer (commands[].pve1_file_transfer in the
+                      inventory) marks a command that moves files to or from pve1 and
+                      answers only pve1's certificate
     cases(node):      those cases as dispatcher.sh `case` text
     commands[node]:   case names
-    buttons[node]:    case names OliveTin gets a button for: those without key_ids
+    buttons[node]:    case names OliveTin gets a button for: the non-pve1_file_transfer ones
     nodes_with[case]: nodes whose dispatcher has that case, in node-name order; how
                       scripts find e.g. the backup, install_ssh_ca or copy_acme_certs nodes
     debian_nodes:     nodes whose install_dispatcher is src/base/debian/commands.sh's, so
@@ -71,22 +72,23 @@
   {%- set services = spec.get('services', {}) -%}
   {%- set entries = [] -%}
   {%- for svc in spec.get('debian_services', []) -%}
-    {%- do entries.append({'name': 'install_' ~ svc, 'key_ids': [],
+    {%- do entries.append({'name': 'install_' ~ svc, 'pve1_file_transfer': false,
         'run': ['sudo ' ~ path(node, 'base/debian/install_svcs.sh') ~ ' ' ~ svc]}) -%}
   {%- endfor -%}
   {%- set install_all = [] -%}
   {%- for svc in services -%}
     {%- do install_all.append('sudo ' ~ path(node, 'nodes/' ~ node ~ '/install_svcs.sh') ~ ' ' ~ svc) -%}
-    {%- do entries.append({'name': 'install_' ~ svc, 'run': [install_all[-1]], 'key_ids': []}) -%}
+    {%- do entries.append({'name': 'install_' ~ svc, 'run': [install_all[-1]], 'pve1_file_transfer': false}) -%}
   {%- endfor -%}
   {%- if spec.get('install_all_svcs', false) -%}
-    {%- do entries.append({'name': 'install_all_svcs', 'run': install_all, 'key_ids': []}) -%}
+    {%- do entries.append({'name': 'install_all_svcs', 'run': install_all, 'pve1_file_transfer': false}) -%}
   {%- endif -%}
   {%- for cmd in spec.get('commands', []) -%}
     {%- if cmd.run is defined -%}
-      {%- do entries.append({'name': cmd.name, 'run': cmd.run, 'key_ids': cmd.get('key_ids', [])}) -%}
+      {%- do entries.append({'name': cmd.name, 'run': cmd.run,
+          'pve1_file_transfer': cmd.get('pve1_file_transfer', false)}) -%}
     {%- else -%}
-      {%- do entries.append({'name': cmd.name, 'key_ids': cmd.get('key_ids', []),
+      {%- do entries.append({'name': cmd.name, 'pve1_file_transfer': cmd.get('pve1_file_transfer', false),
           'run': [('sudo ' if cmd.get('sudo', true) else '') ~ path(node, cmd.script) ~ ' ' ~ cmd.name]}) -%}
     {%- endif -%}
     {%- if cmd.name == 'install_dispatcher' and cmd.get('script') == 'base/debian/commands.sh' -%}
@@ -94,11 +96,11 @@
     {%- endif -%}
   {%- endfor -%}
   {%- for trigger in spec.get('triggers', []) -%}
-    {%- do entries.append({'name': trigger, 'run': [], 'key_ids': []}) -%}
+    {%- do entries.append({'name': trigger, 'run': [], 'pve1_file_transfer': false}) -%}
   {%- endfor -%}
   {%- do dispatch.update({node: entries}) -%}
   {%- do commands.update({node: entries | map(attribute='name') | list}) -%}
-  {%- do buttons.update({node: entries | rejectattr('key_ids') | map(attribute='name') | list}) -%}
+  {%- do buttons.update({node: entries | rejectattr('pve1_file_transfer') | map(attribute='name') | list}) -%}
   {#- nodes_with inverts dispatch: case name → the nodes that have it. A node's case
       list is the inventory's record of what it runs (a backup.sh, an SSH CA, ACME
       certs), so scripts that act on "every node that does X" read the list here
@@ -147,8 +149,8 @@
   {%- set lines = [] -%}
   {%- for entry in dispatch[node] -%}
     {%- do lines.append('  ' ~ entry.name ~ ')') -%}
-    {%- if entry.key_ids -%}
-      {%- do lines.append('    require_key_id ' ~ entry.key_ids | join(' ')) -%}
+    {%- if entry.pve1_file_transfer -%}
+      {%- do lines.append('    require_pve1') -%}
     {%- endif -%}
     {%- for line in entry.run -%}
       {%- do lines.append('    ' ~ line) -%}

@@ -54,9 +54,10 @@ Decision:
   `install_*` commands take their files on stdin, bundled by `src/base/debian/send_files.sh` and
   unpacked by `receive_files` into a private temp dir that must hold exactly the named regular files,
   each matching the manifest.
-- Commands that move secrets or trust anchors carry `key_ids: [pve1]` in the inventory. sshd exposes
-  the certificate a session logged in with (`ExposeAuthInfo`); the dispatcher reads its key ID and
-  rejects any other. OliveTin's key (ID `olive_tin`) is back to parameterless triggers, and gets no
-  button for gated commands. pve1 already holds every secret, so its key gains nothing new.
+- Commands that move secrets or trust anchors are `pve1_file_transfer: true` in the inventory: pve1
+  is the other end of every such transfer. sshd exposes the certificate a session logged in with
+  (`ExposeAuthInfo`); the dispatcher reads its key ID and rejects any but `pve1`. OliveTin's key (ID
+  `olive_tin`) is back to parameterless triggers, and gets no button for the file transfers. pve1
+  already holds every secret, so its key gains nothing new.
 - `/home/autoadmin` is root-owned and `PermitUserRC no`: nothing writes there, so nothing can
   plant a startup file. autoadmin is not in the `sudo` group.

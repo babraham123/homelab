@@ -17,18 +17,15 @@ unauthorized() {
   exit 1
 }
 
-# Usage: require_key_id ID...; the certificate this session logged in with must carry one
-# of these key IDs. See src/base/debian/dispatcher.sh; sshd_extra sets ExposeAuthInfo.
-require_key_id() {
+# Guards the pve1_file_transfer commands: the certificate this session logged in with
+# must be pve1's. See src/base/debian/dispatcher.sh; sshd_extra sets ExposeAuthInfo.
+require_pve1() {
   tmp=$(mktemp)
   grep -m1 '^publickey [^ ]*-cert-v01@openssh\.com ' "${SSH_USER_AUTH:-/dev/null}" | \
     cut -d' ' -f2- > "$tmp" || true
   id=$(ssh-keygen -L -f "$tmp" 2> /dev/null | sed -n 's/^ *Key ID: "\(.*\)"$/\1/p') || true
   rm -f "$tmp"
-  for want in "$@"; do
-    [ "$id" = "$want" ] && return 0
-  done
-  unauthorized "key ID '${id}' may not run '${SSH_ORIGINAL_COMMAND:-}'"
+  [ "$id" = pve1 ] || unauthorized "key ID '${id}' may not run '${SSH_ORIGINAL_COMMAND:-}'"
 }
 
 case "${SSH_ORIGINAL_COMMAND:-}" in

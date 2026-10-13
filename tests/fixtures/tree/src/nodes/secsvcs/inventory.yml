@@ -9,6 +9,6 @@ services:
 install_all_svcs: true
 commands:
   - {name: install_certs, script: nodes/secsvcs/commands.sh}
-  - {name: install_dispatcher, script: base/debian/commands.sh, key_ids: [pve1]}
-  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh], key_ids: [pve1]}
+  - {name: install_dispatcher, script: base/debian/commands.sh, pve1_file_transfer: true}
+  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh], pve1_file_transfer: true}
   - {name: shutdown, run: [sudo /usr/sbin/shutdown -h now]}

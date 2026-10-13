@@ -18,21 +18,18 @@ unauthorized() {
   exit 1
 }
 
-# Usage: require_key_id ID...; the certificate this session logged in with must carry one
-# of these key IDs (ssh_cert_gen.sh's -I). sshd writes the credential that authenticated
-# the session to $SSH_USER_AUTH (ExposeAuthInfo in autoadmin_sshd.conf), the whole
-# certificate for a certificate login.
-require_key_id() {
-  local tmp id want
+# Guards the pve1_file_transfer commands: the certificate this session logged in with
+# must be pve1's (key ID "pve1", ssh_cert_gen.sh's -I). sshd writes the credential that
+# authenticated the session to $SSH_USER_AUTH (ExposeAuthInfo in autoadmin_sshd.conf),
+# the whole certificate for a certificate login.
+require_pve1() {
+  local tmp id
   tmp=$(mktemp)
   grep -m1 '^publickey [^ ]*-cert-v01@openssh\.com ' "${SSH_USER_AUTH:-/dev/null}" | \
     cut -d' ' -f2- > "$tmp" || true
   id=$(ssh-keygen -L -f "$tmp" 2> /dev/null | sed -n 's/^ *Key ID: "\(.*\)"$/\1/p' || true)
   rm -f "$tmp"
-  for want in "$@"; do
-    [[ $id == "$want" ]] && return 0
-  done
-  unauthorized "key ID '${id}' may not run '${SSH_ORIGINAL_COMMAND:-}'"
+  [[ $id == pve1 ]] || unauthorized "key ID '${id}' may not run '${SSH_ORIGINAL_COMMAND:-}'"
 }
 
 case "$(hostname)" in
@@ -46,7 +43,7 @@ case "$(hostname)" in
         nvidia-smi
         ;;
       install_ssh_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       host_key)
@@ -56,7 +53,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       *)
@@ -102,19 +99,19 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh fluentbit
         ;;
       install_keys)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/homesvcs/commands.sh install_keys
         ;;
       install_certs)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/homesvcs/commands.sh install_certs
         ;;
       backup)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh
         ;;
       install_ssh_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       host_key)
@@ -124,11 +121,11 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       copy_acme_certs)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
         ;;
       *)
@@ -151,7 +148,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/pve1/commands.sh archive_repo
         ;;
       install_ssh_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       host_key)
@@ -161,7 +158,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       *)
@@ -175,7 +172,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh vm_watchdog
         ;;
       install_certs_and_keys)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/pve2/commands.sh install_certs_and_keys
         ;;
       start_gaming_vm)
@@ -188,7 +185,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/pve2/commands.sh install_hookscript
         ;;
       backup)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/pve2/backup.sh
         ;;
       prune)
@@ -198,7 +195,7 @@ case "$(hostname)" in
         sudo /usr/sbin/shutdown -h now
         ;;
       install_ssh_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       host_key)
@@ -208,7 +205,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       *)
@@ -294,15 +291,15 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
         ;;
       install_keys)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_keys
         ;;
       install_certs)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_certs
         ;;
       install_ssh_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       host_key)
@@ -312,19 +309,19 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_olive_tin_cert)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/commands.sh install_olive_tin_cert
         ;;
       install_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       copy_acme_certs)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
         ;;
       backup)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh
         ;;
       *)
@@ -368,11 +365,11 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh geoip_generator
         ;;
       backup)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/backup.sh
         ;;
       install_ssh_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       host_key)
@@ -382,7 +379,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       *)
@@ -467,19 +464,19 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck_narrate
         ;;
       install_keys)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/websvcs/commands.sh install_keys
         ;;
       install_certs)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/websvcs/commands.sh install_certs
         ;;
       backup)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/nodes/websvcs/backup.sh
         ;;
       install_ssh_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
         ;;
       host_key)
@@ -489,11 +486,11 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
         ;;
       install_ca)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
       copy_acme_certs)
-        require_key_id pve1
+        require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
         ;;
       *)

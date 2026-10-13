@@ -33,7 +33,7 @@ trap 'rm -rf "$work"' EXIT
 #   service NODE SVC                        services, install order
 #   case NODE NAME                          dispatcher cases
 #   button NODE NAME                        cases OliveTin gets a button for
-#   gated NODE NAME ID...                   cases only these certificate key IDs may run
+#   pve1_file_transfer NODE NAME            cases only pve1's certificate may run
 #   run NODE LINE...                        a line a dispatcher case runs
 #   subdomain NODE SUBDOMAIN
 #   image NODE SVC CONTAINER IMAGE UPSTREAM upstream is - for built images
@@ -46,8 +46,8 @@ service {{ node }} {{ svc }}
 {% endfor -%}
 {% for entry in inv.dispatch[node] -%}
 case {{ node }} {{ entry.name }}
-{% if entry.key_ids -%}
-gated {{ node }} {{ entry.name }} {{ entry.key_ids | join(' ') }}
+{% if entry.pve1_file_transfer -%}
+pve1_file_transfer {{ node }} {{ entry.name }}
 {% else -%}
 button {{ node }} {{ entry.name }}
 {% endif -%}
@@ -216,7 +216,7 @@ check_routes() {
 # Every ungated dispatcher case gets an OliveTin button; every `ssh autoadmin@NODE CASE`
 # OliveTin runs, chained or not, names a real case that OliveTin's own key may run.
 check_olive_tin() {
-  local config=src/services/olive_tin/config.yaml buttons referenced node name ids
+  local config=src/services/olive_tin/config.yaml buttons referenced node name
   if [ ! -f "$config" ]; then
     fail "$config" "missing"
     return
@@ -228,8 +228,8 @@ check_olive_tin() {
     fail "$config" "no button runs ${node} dispatcher case ${name}"
   done < <(comm -23 <(lines "$buttons") <(lines "$referenced"))
   while read -r node name; do
-    if ids=$(facts gated | grep "^${node} ${name} " | cut -d' ' -f3-) && [ -n "$ids" ]; then
-      fail "$config" "runs ssh autoadmin@${node} ${name}, which only key IDs ${ids} may run"
+    if facts pve1_file_transfer | grep -qxF "${node} ${name}"; then
+      fail "$config" "runs ssh autoadmin@${node} ${name}, a pve1 file transfer only pve1 may run"
     elif ! facts case | grep -qxF "${node} ${name}"; then
       fail "$config" "runs ssh autoadmin@${node} ${name}, which isn't a ${node} dispatcher case"
     fi

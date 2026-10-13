@@ -193,3 +193,7 @@ Tested off-box: the key-ID check against a locally signed certificate, the stage
 truncated, tampered, dump trimming) and `send_files.sh`/`receive_files` (rename, wrong set, extra,
 tampered, symlink). Human: deploy with `install_dispatcher` on every node first, then the one-time
 home step, then run a `collect_stage.sh` and `acme_transfer.sh` to confirm on the live nodes.
+
+2026-10-12: the gate is a flag, `pve1_file_transfer: true`, not a `key_ids` list: every gated
+command moves files to or from pve1 and nothing else ever needed another ID. The dispatcher's
+`require_pve1` takes no arguments.

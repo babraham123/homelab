@@ -58,9 +58,10 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   the sudo grants can't diverge. Commands carry data on stdin (`install_*`, via `send_files.sh`
   and `receive_files`) or stdout (`backup`, `copy_acme_certs`, `host_key`); the dispatcher's own
   output goes to stderr.
-- **key_ids** — an inventory command's list of SSH certificate key IDs allowed to run it (`pve1`
-  for anything that moves secrets or trust anchors). The dispatcher checks the login certificate
-  through sshd's `ExposeAuthInfo`; OliveTin's key (`olive_tin`) gets no button for gated commands.
+- **pve1_file_transfer** — an inventory command flag: the command moves files between the node
+  and pve1 (the backup stage, certificates, keys), so only pve1's SSH certificate (key ID `pve1`)
+  may run it. The dispatcher's `require_pve1` checks the login certificate through sshd's
+  `ExposeAuthInfo`; OliveTin's key (`olive_tin`) gets no button for these commands.
 - **commands.sh** — a node's grab-bag of root actions triggered remotely via the dispatcher (cert
   installs, waking pve2, gaming VM start/stop, the repo archive).
 

@@ -44,7 +44,7 @@ EOF
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
     ;;
   install_keys)
-    require_key_id pve1 local
+    require_pve1
     sudo /root/homelab-rendered/src/nodes/alpha/commands.sh install_keys
     ;;
   build_map)
@@ -101,7 +101,7 @@ EOF
 EOF
 }
 
-# Buttons follow case order and skip gated cases (install_keys has key_ids)
+# Buttons follow case order and skip pve1_file_transfer cases (install_keys)
 test_olive_tin_buttons() {
   out=$(render_inventory "$inventory" <<'EOF'
 {% for node in nodes -%}
