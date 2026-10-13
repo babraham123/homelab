@@ -4,7 +4,7 @@
 # only name the uptime URLs.
 debian_services: [mdns_repeater, node_exporter, nvidia_gpu_exporter, image_updater]
 services:
-  traefik: {subdomain: webproxy, uptime: traefik websvcs, uptime_tier: 1,
+  traefik: {subdomain: webproxy, admin: true, uptime: traefik websvcs, uptime_tier: 1,
             upstream: docker.io/library/traefik:v3.7}
   vmagent: {upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
   nginx: {subdomain: www, upstream: docker.io/library/nginx:stable}

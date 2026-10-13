@@ -69,9 +69,15 @@ policies, not from the mesh.
 ## Identity: LLDAP + Authelia
 
 - **LLDAP** stores users and groups; Authelia reads it over LDAPS (internal CA cert).
-- **Authelia** is the SSO portal and OIDC provider, backed by Postgres. Access rules escalate from
-  one-factor to two-factor by group; TOTP and WebAuthn/passkeys are enabled, with zxcvbn password
-  policy.
+- **Authelia** is the SSO portal and OIDC provider, backed by Postgres. Members of
+  `authelia_gen_access` get in with one factor from the LAN and the tailnet, and need two from the
+  internet; TOTP and WebAuthn/passkeys are enabled, with zxcvbn password policy.
+- **Admin tools need two factors from every network.** The services marked `admin: true` in the node
+  inventory (the Traefik dashboards, LLDAP, vmalert, Alertmanager and OliveTin) get their own
+  two-factor rule ahead of the LAN/tailnet downgrade, so a password alone never reaches them. The
+  split is deliberate: Authelia decides the factor, the app decides the role (OliveTin's ACLs, LLDAP's
+  admin group, the `telemetry` group below). Proxmox, PBS and pfSense have their own logins and
+  aren't behind Authelia.
 
 Two integration models:
 
@@ -84,7 +90,7 @@ Two integration models:
    on the `Remote-Groups` header from Authelia. Everyone else gets a 403 page. Their non-browser API
    routes skip Authelia and rely on the app's own auth.
 2. **OIDC** (apps with native SSO support): Authelia is the issuer for eight clients: Headscale
-   (two-factor), Grafana, Home Assistant, Guacamole, Gatus, OliveTin, Readeck and Storyteller.
+   and OliveTin (two-factor), Grafana, Home Assistant, Guacamole, Gatus, Readeck and Storyteller.
    OIDC gives the app group-based role mapping, not just a yes/no at the proxy.
 
 ```mermaid

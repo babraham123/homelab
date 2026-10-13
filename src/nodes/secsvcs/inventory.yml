@@ -3,20 +3,20 @@
 debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
   postgres: {upstream: docker.io/library/postgres:14-alpine}
-  lldap: {subdomain: ldap, upstream: docker.io/lldap/lldap:stable}
+  lldap: {subdomain: ldap, admin: true, upstream: docker.io/lldap/lldap:stable}
   authelia: {subdomain: auth, uptime: authelia, uptime_path: /api/health, uptime_tier: 1,
              uptime_conditions: ['[BODY].status == OK'],
              upstream: docker.io/authelia/authelia:4.39}
-  traefik: {subdomain: secproxy, uptime: traefik secsvcs, uptime_tier: 1,
+  traefik: {subdomain: secproxy, admin: true, uptime: traefik secsvcs, uptime_tier: 1,
             upstream: docker.io/library/traefik:v3.7, update_last: true}
   victoriametrics: {subdomain: metrics, uptime: victoriametrics,
                     upstream: docker.io/victoriametrics/victoria-metrics:latest, update_last: true}
   victorialogs: {subdomain: logs, uptime: victorialogs,
                  upstream: docker.io/victoriametrics/victoria-logs:latest}
   gatus: {subdomain: uptime, upstream: docker.io/twinproduction/gatus:latest}
-  vmalert: {subdomain: vmalert, uptime: vmalert,
+  vmalert: {subdomain: vmalert, admin: true, uptime: vmalert,
             upstream: docker.io/victoriametrics/vmalert:latest, update_last: true}
-  alertmanager: {subdomain: alert, uptime: alertmanager,
+  alertmanager: {subdomain: alert, admin: true, uptime: alertmanager,
                  upstream: docker.io/prom/alertmanager:latest, update_last: true}
   ntfy-alertmanager: {subdomain: ntfy-alertmanager, dirs: [services/alertmanager],
                       upstream: docker.io/xenrox/ntfy-alertmanager:latest, update_last: true}
@@ -26,7 +26,7 @@ services:
             upstream: docker.io/grafana/grafana-oss:latest}
   vaultwarden: {subdomain: vault, uptime: vaultwarden, uptime_path: /alive, uptime_tier: 1,
                 upstream: docker.io/vaultwarden/server:latest}
-  olive_tin: {subdomain: command, uptime: olive_tin,
+  olive_tin: {subdomain: command, admin: true, uptime: olive_tin,
               upstream: docker.io/jamesread/olivetin:latest-3k}
   # No subdomain: its LAPI is a published port, never in HAProxy's SNI list
   crowdsec: {upstream: docker.io/crowdsecurity/crowdsec:latest}

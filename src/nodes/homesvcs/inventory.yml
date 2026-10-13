@@ -2,7 +2,7 @@
 # yamllint disable rule:document-start rule:document-end
 debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
-  traefik: {subdomain: homeproxy, uptime: traefik homesvcs, uptime_tier: 1,
+  traefik: {subdomain: homeproxy, admin: true, uptime: traefik homesvcs, uptime_tier: 1,
             upstream: docker.io/library/traefik:v3.7}
   vmagent: {upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
   mosquitto: {upstream: docker.io/library/eclipse-mosquitto:latest}

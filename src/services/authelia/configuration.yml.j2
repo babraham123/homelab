@@ -807,6 +807,16 @@ access_control:
       subject: 'oauth2:client:{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
       policy: 'one_factor'
 
+    # Admin tools (`admin: true` in the node inventory) need a second factor from every
+    # network. Authelia only sets the factor; the app decides who may use the tool.
+    - domain:
+{%- for sub in inv.admin_subdomains %}
+        - '{{ sub }}.{{ site.url }}'
+{%- endfor %}
+      subject:
+        - 'group:authelia_gen_access'
+      policy: 'two_factor'
+
     - domain: '*.{{ site.url }}'
       networks:
         - 'internal'
@@ -2133,7 +2143,8 @@ identity_providers:
 
         ## The policy to require for this client; one_factor or two_factor. Can also be the key names for the
         ## authorization policies section.
-        authorization_policy: 'gen_access'
+        # An admin tool, like command.SITE in access_control: OliveTin runs root commands
+        authorization_policy: 'two_factor'
 
         ## The consent mode controls how consent is obtained.
         # consent_mode: implicit

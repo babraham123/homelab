@@ -126,6 +126,7 @@ test_subdomains_and_uptime() {
 {% for node in nodes -%}
 {{ ([node ~ ':'] + inv.subdomains[node]) | join(' ') }}
 {% endfor -%}
+admin: {{ inv.admin_subdomains | join(' ') }}
 {% for u in inv.uptime -%}
 {{ u.name }} | {{ u.host }} | {{ u.url }} | {{ u.tier }} | {{ u.conditions }}
 {% endfor -%}
@@ -135,6 +136,7 @@ EOF
 alpha: app z
 gaming:
 router:
+admin: z
 zeta | z.example.com | https://z.example.com | 2 | []
 app health | app.example.com | https://app.example.com/health | 1 | ['[BODY].status == OK']
 EOF

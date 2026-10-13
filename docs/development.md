@@ -239,7 +239,8 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
    `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health check isn't
    `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions) and
    its image (`upstream: <full ref>` or `build: <name>`; `update_last: true` for the notification
-   path on secsvcs). This adds the dispatcher case, sudoers grant, OliveTin button, DNS/SNI
+   path on secsvcs), and `admin: true` for an admin tool that needs two factors from every network.
+   This adds the dispatcher case, sudoers grant, OliveTin button, DNS/SNI
    routing, uptime check and the image's place in the nightly update
 1. Update Authelia config if OIDC auth is available (`src/services/authelia/`)
 1. Add Homepage dashboard entry (`src/services/homepage/`)

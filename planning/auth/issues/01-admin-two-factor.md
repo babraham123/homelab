@@ -1,6 +1,6 @@
 # 01. Require two_factor for admin subdomains from every network
 
-Status: ready-for-agent Type: task Repo: homelab Source: review findings 11, 12
+Status: resolved Type: task Repo: homelab Source: review findings 11, 12
 
 ## Problem
 
@@ -42,3 +42,14 @@ nobody reaches those tools on a password alone.
 
 - 2026-09-26 maintainer: dropped the `authelia_admin_access` group; two_factor for the admin set is
   enough.
+- 2026-10-12 agent: implemented, not yet applied to secsvcs. Changed from the plan:
+  - The admin set is `admin: true` on the services in the node inventory, not
+    `authelia.admin_subdomains` in `vars.yml`: `vars.yml` holds personal values and is gitignored,
+    while subdomains already live in the inventory. `src/nodes.jinja` derives
+    `admin_subdomains` (tested in `tests/nodes_jinja_test.sh`).
+  - Flagged: `secproxy`, `homeproxy`, `webproxy`, `ldap`, `vmalert`, `alert`, `command`. Left out
+    `pve1`, `pve2`, `pbs2` and `router` (Unbound points them straight at the hosts; nothing routes
+    them through Traefik or Authelia, so a rule would do nothing) and `ntfy-alertmanager` (its
+    router has no Authelia middleware; ntfy-alertmanager has its own basic auth).
+  - Check after applying: on the LAN, `command.SITE` and `secproxy.SITE` ask for the second factor;
+    `home.SITE` doesn't.
