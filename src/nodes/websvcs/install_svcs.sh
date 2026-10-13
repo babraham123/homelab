@@ -200,11 +200,6 @@ case $1 in
     require_media
     mkdir -p /etc/opt/calliope/voices /srv/media/books/narrate/{inbox,work,failed} \
       /srv/media/books/readalouds/{books,articles}
-    rm -rf /etc/opt/calliope/src
-    mkdir -p /etc/opt/calliope/src
-    wget "https://github.com/babraham123/TTS-Narrated-Ebook-Creator/archive/refs/heads/main.tar.gz" -O - | \
-      tar -xz -C /etc/opt/calliope/src --strip-components=1
-    podman build -t calliope /etc/opt/calliope/src
     install -D -m 644 -t /etc/opt/calliope services/calliope/calliope_batch.py
     install_quadlet services/calliope/calliope.container services/calliope/calliope_cache.volume
     install -D -m 644 -t /etc/systemd/system services/calliope/calliope.path \

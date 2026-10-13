@@ -26,12 +26,13 @@ noticed when a service broke.
 - The scan gate blocks on fixable HIGH or CRITICAL findings only (`--ignore-unfixed`); the old image
   keeps running. Two overrides, both needing a person: a `.trivyignore` entry in git with an `exp:`
   date and a reason, or `accept` run through sudo by manualadmin on the node, which passes one exact
-  digest. Neither is reachable through autoadmin, the dispatcher or OliveTin.
+  digest, or one exact set of `build.sh` inputs for a built image. Neither is reachable through
+  autoadmin, the dispatcher or OliveTin.
 - Installing a service goes through the same gate: `install_svcs.sh` loads the service's images
   before copying its quadlets, and a block stops the install.
-- Built images are rebuilt when the release versions their `build.sh` reports change, to
-  `:candidate`, scanned from a `podman save` archive, then swapped in like a pulled image. Images
-  without a `build.sh` are rebuilt by hand.
+- Built images are rebuilt when the inputs their `build.sh` reports change (commits, base image
+  digests), to `:candidate`, scanned from a `podman save` archive, then swapped in like a pulled
+  image. The render requires a `build.sh` for every built image, so none skips the gate.
 - The script reports itself: ntfy priorities by outcome, and textfile metrics with an
   `ImageUpdaterStale` age alert (age, not `absent()`, so a powered-off websvcs stays quiet). The
   alerting path itself is watched by the VPS dead-man (`deadman.sh`), so no second heartbeat.

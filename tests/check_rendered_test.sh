@@ -62,8 +62,18 @@ EOF
 test_built_image_quadlet() {
   fixture_tree
   edit src/nodes/secsvcs/inventory.yml 's|upstream: docker.io/library/nginx:stable|build: web|'
+  touch "${tmp}/tree/src/services/web/build.sh"
   expect_errors <<'EOF'
 error: src/services/web/web.container: Image=localhost/library/nginx:stable, expected localhost/web:latest (src/nodes/secsvcs/inventory.yml services.web)
+EOF
+}
+
+test_built_image_without_build_script() {
+  fixture_tree
+  edit src/nodes/secsvcs/inventory.yml 's|upstream: docker.io/library/nginx:stable|build: web|'
+  edit src/services/web/web.container 's|^Image=.*|Image=localhost/web:latest|'
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/inventory.yml: services.web: built image localhost/web:latest has no src/services/web/build.sh
 EOF
 }
 

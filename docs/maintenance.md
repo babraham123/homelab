@@ -113,7 +113,7 @@ image, and the old one keeps running. Design: [ADR 0008](adr/0008-scanned-image-
 |---|---|
 | Update blocked by the scan, daily | 3; 5 after 7 days, with the `accept` command |
 | Update failed, rolled back to the previous image | 4 |
-| Updater broken, or the Trivy DB refresh failed | 5 |
+| Updater broken, a registry still failing after two retries, or the Trivy DB refresh failed | 5 |
 
 `ImageUpdaterStale` fires after 36 h without a clean run.
 
@@ -135,10 +135,13 @@ sudo systemctl start image_updater
     ```
   - that digest only: on the node, as manualadmin (never through the dispatcher or OliveTin),
     `sudo /root/homelab-rendered/src/base/podman/image_updater.sh accept CONTAINER`. It rescans,
-    prints the findings, records the digest and notifies; the next run loads it.
-- Built images: a service with a `src/services/<service>/build.sh` (`versions`, `build TAG`) is
-  rebuilt when its release versions change. One without, like `geoip_generator`, is rebuilt by
-  installing it again.
+    prints the findings, records the digest and notifies; the next run loads it. For a built image
+    it builds and scans instead, and records the `build.sh` inputs, so the next run's build of the
+    same inputs passes.
+- Built images: every one has a `src/services/<service>/build.sh` (`versions`, `build TAG`), and
+  is rebuilt through the scan gate when any input it reports changes, like `geoip_generator`'s base
+  image digests, haproxy-mapper commit and own files. The render fails for a `build:` image
+  without one.
 - Roll back by hand: `podman tag localhost/NAME:rollback localhost/NAME:TAG`, then
   `systemctl restart CONTAINER`. The updater doesn't retry that digest; it moves on when upstream
   does.

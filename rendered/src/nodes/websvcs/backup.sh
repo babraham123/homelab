@@ -26,7 +26,6 @@ dump_sqlite storyteller /var/opt/storyteller/storyteller.db
 
 excludes+=(--exclude=etc/opt/wyoming/src
   --exclude=etc/opt/finance_exporter/src
-  --exclude=etc/opt/calliope/src
   --exclude='var/opt/linkding/db.sqlite3*'
   --exclude='var/opt/readeck/data/db.sqlite3*'
   --exclude='var/opt/storyteller/storyteller.db*'

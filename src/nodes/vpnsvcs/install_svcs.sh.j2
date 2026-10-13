@@ -97,10 +97,8 @@ case $1 in
     reload_restart crowdsec-firewall-bouncer
     ;;
   geoip_generator)
-    podman build -t geoip_generator -f services/haproxy/geoip_generator.Containerfile services/haproxy
-    podman image prune -f
-    install_quadlet services/haproxy/geoip_generator.container
-    install -D -m 644 -t /etc/systemd/system services/haproxy/geoip_generator.timer
+    install_quadlet services/geoip_generator/geoip_generator.container
+    install -D -m 644 -t /etc/systemd/system services/geoip_generator/geoip_generator.timer
     systemctl daemon-reload
     systemctl enable geoip_generator.timer
     systemctl restart geoip_generator.timer

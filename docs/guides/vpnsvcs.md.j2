@@ -311,7 +311,8 @@ podman exec vmagent wget -qO- 100.100.100.100/metrics | head -3   # tailscaled t
 
 ## Geoblock by country
 - `geoip_generator`: a quadlet built on the VPS (haproxy-mapper and the script), run weekly by its
-  timer; HAProxy reloads after each run
+  timer; HAProxy reloads after each run. The image updater builds and scans it, at install and
+  nightly when its inputs change (`src/services/geoip_generator/build.sh`)
 - Needs the Podman setup from [Telemetry agents](#telemetry-agents)
 - Add `maxmind_license_key` to `/root/secrets/vpnsvcs.yaml` on pve1 (copy it from `pve1.yaml`), then
   `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`

@@ -230,9 +230,9 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
 1. Add Traefik route config for the VM
 1. Create service container and config files in `src/services/<service>/`. The quadlet takes
    `Image=localhost/` + the upstream ref without its registry host (`localhost/library/nginx:stable`)
-   or, for an image built on the node, `localhost/<name>:latest`, and `AutoUpdate=local`. Optional:
-   `.trivyignore` for CVEs accepted until an `exp:` date, each with a `#` reason; `build.sh` for a
-   built image the updater should rebuild (`versions`, `build TAG`)
+   or, for an image built on the node, `localhost/<name>:latest`, and `AutoUpdate=local`. A built
+   image needs a `build.sh` (`versions`, `build TAG`, sourcing `src/base/podman/build_lib.sh`).
+   Optional: `.trivyignore` for CVEs accepted until an `exp:` date, each with a `#` reason
 1. If cross-VM TLS is needed, add cert/key gen to `src/nodes/pve1/certificates/` and update `commands.sh`
 1. Add a case for it to `install_svcs.sh`, ending with `reload_restart <unit>`
 1. Add it under `services` in `src/nodes/<node>/inventory.yml`, in install order, with its

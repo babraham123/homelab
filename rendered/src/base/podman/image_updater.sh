@@ -13,7 +13,8 @@
 #   sudo src/base/podman/image_updater.sh accept CONTAINER  # as manualadmin, never the dispatcher
 # Overrides for a blocked image, both needing a person: src/services/<service>/.trivyignore
 # (`CVE-… exp:YYYY-MM-DD`, with a `#` line giving the reason) covers every digest until it
-# expires; `accept` rescans, prints the findings and passes that exact digest.
+# expires; `accept` rescans, prints the findings and passes that exact digest, or for a
+# built image that exact set of build.sh inputs.
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
@@ -186,17 +187,23 @@ result() {
 # Usage: attempt FUNCTION ARGS...; sets outcome to the result FUNCTION ended with, or
 # broken if it failed. The subshell turns errexit back on, which bash ignores inside
 # anything called from a condition, and keeps one image's failure from ending the run.
+# An error (a registry or release lookup that failed, before anything changed) is tried
+# again twice, a minute apart, so a blip doesn't cost the night.
 attempt() {
-  local rc
-  : > "${tmp}/result"
-  set +e
-  ( set -e; "$@" )
-  rc=$?
-  set -e
-  outcome=broken
-  if (( rc == 0 )) && [[ -s ${tmp}/result ]]; then
-    outcome=$(cat "${tmp}/result")
-  fi
+  local rc try
+  for try in 1 2 3; do
+    : > "${tmp}/result"
+    set +e
+    ( set -e; "$@" )
+    rc=$?
+    set -e
+    outcome=broken
+    if (( rc == 0 )) && [[ -s ${tmp}/result ]]; then
+      outcome=$(cat "${tmp}/result")
+    fi
+    [[ $outcome == error ]] && (( try < 3 )) || return 0
+    sleep 60
+  done
 }
 
 # Usage: blocked CONTAINER DIGEST REPORT; the scan gate stopped DIGEST, the old image
@@ -308,31 +315,44 @@ check_upstream() {
 }
 
 # Usage: check_build SERVICE CONTAINER IMAGE NAME; one image built here, ending like
-# check_upstream. src/services/SERVICE/build.sh takes `versions` (print the upstream release
-# versions it builds from) and `build TAG` (build localhost/NAME:TAG from them); an image
-# without one, or without releases to follow, is only built by hand.
+# check_upstream. src/services/SERVICE/build.sh takes `versions` (print every input it
+# builds from: commits, base image digests) and `build TAG` (build localhost/NAME:TAG from
+# them). tools/check_rendered.sh requires one for every built image, so nothing built here
+# skips the scan gate.
 check_build() {
-  local service=$1 container=$2 image=$3 name=$4 script="${rendered}/services/$1/build.sh"
-  local candidate="localhost/$4:candidate" archive="${staging}/$2.tar" versions id
-  [[ -x $script ]] || result unchanged "built by hand"
-  versions=$("$script" versions | tr -s ' \n' ',') ||
-    result error "can't resolve ${name}'s release versions; trying again tomorrow"
-  versions=${versions%,}
+  local service=$1 container=$2 image=$3 name=$4 archive="${staging}/$2.tar" versions
+  versions=$(build_versions "$service") ||
+    result error "can't resolve ${name}'s build inputs; trying again tomorrow"
   if [[ $(last_digest "$container") == "$versions" ]] && podman image exists "$image"; then
     result unchanged "unchanged at ${versions}"
   fi
   log "${container}: building ${versions}"
-  "$script" build candidate
-  # Scanned from a file, so Trivy doesn't need the podman socket. Untagged before the
-  # gate, so a blocked build is only a dangling image the next prune removes.
-  podman save -o "$archive" "$candidate"
-  id=$(podman image inspect "$candidate" | jq -r '.[0].Id')
-  podman untag "$candidate"
+  build_candidate "$service" "$name" "$archive"
   gate "$service" "$container" "$versions" "$archive"
   [[ $mode != dry-run ]] || result pass "would tag ${versions} as ${image}"
   keep_rollback "$image"
-  podman tag "$id" "$image"
+  podman tag "$built_id" "$image"
   roll_out "$container" "$image" "$versions"
+}
+
+# Usage: build_versions SERVICE; prints build.sh's inputs as one key, the one `accept`
+# records for a built image
+build_versions() {
+  local script="${rendered}/services/$1/build.sh" versions
+  [[ -x $script ]] || die "$1: no executable ${script}"
+  versions=$("$script" versions | tr -s ' \n' ',') || return
+  echo "${versions%,}"
+}
+
+# Usage: build_candidate SERVICE NAME ARCHIVE; builds localhost/NAME:candidate into ARCHIVE
+# and sets built_id to its image ID. Scanned from a file, so Trivy doesn't need the podman
+# socket. Untagged before the gate, so a blocked build is only a dangling image the next
+# prune removes.
+build_candidate() {
+  "${rendered}/services/$1/build.sh" build candidate
+  podman save -o "$3" "localhost/$2:candidate"
+  built_id=$(podman image inspect "localhost/$2:candidate" | jq -r '.[0].Id')
+  podman untag "localhost/$2:candidate"
 }
 
 # Every run waits for boot, inside the script: a timer firing during boot would
@@ -364,7 +384,7 @@ write_metrics() {
   (( ! ok )) || last=$(date +%s)
   mkdir -p "$(dirname "$metrics")"
   {
-    echo "# HELP ${name} Unix time of the last image_updater run with no broken image."
+    echo "# HELP ${name} Unix time of the last image_updater run with no broken or erroring image."
     echo "# TYPE ${name} gauge"
     [[ -z $last ]] || echo "${name} ${last}"
     echo "# HELP image_updater_images Images in the last image_updater run, by result."
@@ -412,11 +432,13 @@ update_all() {
     (( ++count[checked] ))
     attempt "check_${kind}" "$service" "$container" "$image" "$ref"
     case $outcome in
-      updated | blocked | failed | error) (( ++count[$outcome] )) ;;
-      broken)
-        (( ++count[broken] ))
+      updated | blocked | failed) (( ++count[$outcome] )) ;;
+      # An error that outlasted its retries is broken too: expired registry credentials
+      # would otherwise stop every update without the stale alert ever firing.
+      error | broken)
+        (( ++count[$outcome] ))
         broken+=("$container")
-        warn "${container}: pipeline broken"
+        warn "${container}: pipeline ${outcome}"
         ;;
     esac
   done
@@ -455,7 +477,7 @@ install_images() {
 
 # Usage: accept CONTAINER; passes the current upstream digest through the scan gate
 accept() {
-  local service container image kind ref entry found="" digest dir report rc=0
+  local service container image kind ref entry found="" key input report rc=0
   [[ ${SUDO_USER:-} == manualadmin ]] || die "accept is for manualadmin, through sudo"
   for entry in "${images[@]}"; do
     read -r service container image kind ref <<< "$entry"
@@ -465,23 +487,33 @@ accept() {
     fi
   done
   [[ -n $found ]] || die "no image for container $1 on ${node}"
-  [[ $kind == upstream ]] || die "$1 is built here; accept takes pulled images"
   registry_auth
   trivy_refresh || die "Trivy DB refresh failed"
-  digest=$(skopeo inspect --no-tags "${auth[@]}" "docker://${ref}" | jq -r .Digest)
-  dir="${staging}/${container}"
   report="${tmp}/${container}.json"
-  rm -rf "$dir"
-  skopeo copy --quiet "${auth[@]}" "docker://${ref%:*}@${digest}" "oci:${dir}"
-  scan "$service" "$dir" "$report" || rc=$?
+  case $kind in
+    upstream)
+      key=$(skopeo inspect --no-tags "${auth[@]}" "docker://${ref}" | jq -r .Digest)
+      input="${staging}/${container}"
+      rm -rf "$input"
+      skopeo copy --quiet "${auth[@]}" "docker://${ref%:*}@${key}" "oci:${input}"
+      ;;
+    build)
+      # The next run builds again, so what this passes is the inputs, not this image.
+      key=$(build_versions "$service") || die "can't resolve ${ref}'s build inputs"
+      input="${staging}/${container}.tar"
+      log "${container}: building ${key}"
+      build_candidate "$service" "$ref" "$input"
+      ;;
+  esac
+  scan "$service" "$input" "$report" || rc=$?
   case $rc in
-    0) log "${container}: ${digest} has no fixable HIGH/CRITICAL findings" ;;
+    0) log "${container}: ${key} has no fixable HIGH/CRITICAL findings" ;;
     3) findings "$report" ;;
     *) die "trivy failed (exit ${rc})" ;;
   esac
-  echo "$digest" >> "${accepted}/${container}"
-  log "${container}: accepted ${digest}; the next run loads it"
-  notify 3 "${container} accepted" "manualadmin accepted ${digest} past the scan gate."
+  echo "$key" >> "${accepted}/${container}"
+  log "${container}: accepted ${key}; the next run loads it"
+  notify 3 "${container} accepted" "manualadmin accepted ${key} past the scan gate."
 }
 
 require_root

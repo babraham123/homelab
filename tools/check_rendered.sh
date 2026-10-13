@@ -141,6 +141,16 @@ check_quadlet_images() {
   done < <(facts image)
 }
 
+# The image updater builds a built image only through its service's build.sh, so one
+# without would never pass the scan gate.
+check_build_scripts() {
+  local node svc container image upstream
+  while read -r node svc container image upstream; do
+    [[ "$upstream" == - && ! -f "src/services/${svc}/build.sh" ]] || continue
+    fail "$(inventory "$node")" "services.${svc}: built image ${image} has no src/services/${svc}/build.sh"
+  done < <(facts image)
+}
+
 # Every repo script a dispatcher runs must exist and, when it is passed a name, have
 # that case. This covers services, debian_services, commands[].script and the paths in
 # commands[].run.
@@ -285,6 +295,7 @@ check_markdown
 check_container_ips
 check_upstream_refs
 check_quadlet_images
+check_build_scripts
 check_dispatch_scripts
 check_install_cases
 check_unique_subdomains
