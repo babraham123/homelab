@@ -112,9 +112,10 @@ sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ## Backups
 
 - Runs itself every Saturday 02:00 from pve1; the ntfy `alert` topic gets a summary and
-  `BackupStale` fires after 8 quiet days. Run it by hand with
-  `sudo systemctl start backup_orchestrator` on pve1 (blocks for the run;
-  `journalctl -u backup_orchestrator -f`).
+  `BackupStale` fires after 15 quiet days, so one week can be skipped.
+- OliveTin's pve1 buttons: **Backup Now** starts a run (`journalctl -u backup_orchestrator -f` on
+  pve1); **Skip Next Backup** makes the next scheduled run do nothing. Undo a skip with
+  `sudo rm /var/lib/backup_orchestrator/skip_next` on pve1.
 - Once a year: the [restore test](guides/restore.md#annual-restore-test). Last done: never.
 - Media array on pve2: `snapraid status` on websvcs; a failed disk follows [pve2
   storage](guides/pve2_storage.md#day-to-day).

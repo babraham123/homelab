@@ -24,6 +24,9 @@
 #                                    # unless it ended OK
 # and from pve1's backup_orchestrator, after src/base/lib.sh:
 #   stage_collect NODE DEST      # runs NODE's backup.sh and brings its stage into DEST
+# and $image_retention, the VM image retention in vzdump's --prune-backups syntax:
+# pve2's prune.sh applies it to PBS's image namespaces, and the orchestrator to the
+# router's copy on pve1's local storage.
 # BACKUP_STAGE overrides the stage root on this machine, e.g. a temp dir to try a run.
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
@@ -33,6 +36,8 @@ files="${stage}/files"
 dumps="${stage}/dumps"
 excludes=(--exclude='*.tmp' --exclude=lost+found)
 ssh_opts=(-o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=60)
+# shellcheck disable=SC2034 # read by the scripts that source this
+image_retention=keep-last=1,keep-weekly=2,keep-monthly=2
 
 # Keeps stdout as fd 3 for stage_send and sends everything else to stderr, so what the
 # script and its tools print can't corrupt the stream.

@@ -6,6 +6,8 @@ services:
   backup_orchestrator: {}
 commands:
   - {name: archive_repo, script: nodes/pve1/commands.sh}
+  - {name: backup_now, script: nodes/pve1/commands.sh}
+  - {name: skip_next_backup, script: nodes/pve1/commands.sh}
   - {name: install_ssh_ca, script: base/debian/commands.sh, pve1_file_transfer: true}
   - {name: host_key, run: [cat /etc/ssh/ssh_host_ed25519_key.pub]}
   - {name: install_dispatcher, script: base/debian/commands.sh}

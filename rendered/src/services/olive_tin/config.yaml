@@ -305,6 +305,22 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: pve1 Backup Now
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 backup_now
+              id: pve1_backup_now
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve1 Skip Next Backup
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 skip_next_backup
+              id: pve1_skip_next_backup
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: pve1 Host Key
               icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
               shell: ssh autoadmin@pve1 host_key

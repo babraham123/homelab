@@ -6,8 +6,10 @@
 # does one node outside the weekly run), sends /root/backups to PBS as host backups,
 # has pve2 prune and garbage-collect PBS, records per-step success metrics, then powers
 # pve2 back off if it was off to begin with. Posts a one-line ntfy summary at the end.
+# --skip-next makes the next timer-started run do nothing but clear the skip; a run
+# started by hand (pve1's backup_now) still runs.
 # Usage:
-#   src/nodes/pve1/backup_orchestrator.sh
+#   src/nodes/pve1/backup_orchestrator.sh [--skip-next]
 # Adding a node: give it a backup.sh and a `backup` dispatcher command, which puts it
 # in NODES. Adding another step: write a step_<name> function and list it in
 # LOCAL_STEPS if it doesn't need pve2, else PBS_STEPS.
@@ -22,6 +24,7 @@ source "${rendered}/base/debian/backup_lib.sh"
 storage=pbs2
 backups=/root/backups
 metrics=/var/lib/node_exporter/textfile_collector/homelab_backup.prom
+skip_flag=/var/lib/backup_orchestrator/skip_next
 # backup_lib's ssh_opts, so these calls and the stage transport behave alike.
 ssh=(ssh "${ssh_opts[@]}")
 keyfile=/root/secrets/pbs_client.key
@@ -39,13 +42,13 @@ PBS_STEPS+=(upload prune)
 STEPS=("${LOCAL_STEPS[@]}" "${PBS_STEPS[@]}")
 
 # The router is the network: with it broken, pve2 can't be woken and PBS can't be
-# reached, so its newest image is also kept where pve1 restores it alone. One copy;
-# vzdump prunes the older one once the new one is written.
+# reached, so its images are also kept where pve1 restores them alone, with PBS's
+# image retention; vzdump prunes once the new one is written.
 step_router_local() {
   local vmid
   vmid=$(qm list | awk '$2 == "router" { print $1 }')
   [[ -n $vmid ]] || die "no router VM"
-  vzdump_to local --vmid "$vmid" --compress zstd --prune-backups keep-last=1
+  vzdump_to local --vmid "$vmid" --compress zstd --prune-backups "$image_retention"
 }
 
 step_wake_pve2() {
@@ -157,6 +160,20 @@ notify() {
     -d "$2" "https://push.{{ site.url }}/alert" \
     || warn "ntfy post failed"
 }
+
+if [[ ${1:-} == --skip-next ]]; then
+  install -d -m 700 "$(dirname "$skip_flag")"
+  touch "$skip_flag"
+  echo "Skipping the run due $(systemctl show -P NextElapseUSecRealtime backup_orchestrator.timer)"
+  exit 0
+fi
+# systemd sets TRIGGER_UNIT only when the timer started the service. Skipping writes
+# no metrics, so BackupStale's threshold leaves room for one skipped week.
+if [[ -f $skip_flag && ${TRIGGER_UNIT:-} == backup_orchestrator.timer ]]; then
+  rm -f "$skip_flag"
+  notify "Backups skipped" "skip_next_backup was set; the next run is next week" 2
+  exit 0
+fi
 
 started=$(date +%s)
 pve2_was_on=0

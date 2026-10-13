@@ -15,11 +15,11 @@ vm_running() { qm status "$1" | grep -qw running; }
 backup_vm() { vzdump_to pbs2 --vmid "$1"; }
 
 stage_init
-# /etc/proxmox-backup is PBS itself: datastore and namespace definitions, users,
-# tokens and ACLs, prune/GC jobs. It is the one thing PBS can't restore from PBS.
-stage_paths /etc/pve /etc/proxmox-backup /etc/network/interfaces /etc/resolv.conf \
-  /etc/hosts /etc/hostname /etc/ssh /etc/opt /etc/systemd/system /etc/fstab \
-  /root/.ssh /var/lib/vz/snippets /usr/local/bin
+# All of /etc, so no host config is missed. It includes /etc/pve (pmxcfs: storage,
+# VM configs, users) and /etc/proxmox-backup, PBS itself: datastore and namespace
+# definitions, users, tokens and ACLs, prune/GC jobs, the one thing PBS can't restore
+# from PBS.
+stage_paths /etc /root/.ssh /var/lib/vz/snippets /usr/local/bin
 stage_send
 
 websvcs=$("${rendered}/nodes/pve2/get_vm_id.sh" websvcs)

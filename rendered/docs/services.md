@@ -243,7 +243,7 @@ flowchart LR
   by websvcs. Not backed up; parity is its protection ([pve2 storage guide](guides/pve2_storage.md))
 - **pfSense**: the Auto Config Backup package
 - **Weekly run**, Saturday 02:00, `backup_orchestrator.service` on pve1. First it dumps the router
-  VM to pve1's `local` storage (`/var/lib/vz/dump`, newest copy only), so the router restores
+  VM to pve1's `local` storage (`/var/lib/vz/dump`, image retention), so the router restores
   without pve2 or PBS, both of which need it. Then it wakes pve2 (PBS) and:
   1. `backup.sh` on every node (homesvcs, secsvcs, vpnsvcs, websvcs, then pve1 and pve2) through the
      SSH dispatcher as `backup` (pve1's runs directly), rebuilding `/var/opt/backups/`:
@@ -266,12 +266,13 @@ flowchart LR
      - once both succeed the dumps are deleted from pve1; they live only in PBS
   4. `prune.sh` on pve2 (dispatcher `prune`): the PBS prune jobs, then garbage collection. Last, so
      this run's snapshots count, and while PBS is up
-  5. A `homelab_backup_last_success_timestamp_seconds{job}` metric per step, `BackupStale` after 8
+  5. A `homelab_backup_last_success_timestamp_seconds{job}` metric per step, `BackupStale` after 15
      days (`src/services/vmalert/configs/backups.yml`), an ntfy summary, and pve2 off again if it
      was off
 - **Retention**, PBS prune jobs per namespace, set in `src/nodes/pve2/prune.sh`:
-  - images (`pve1`, `pve2`, including `host/vpnsvcs`): last 1, weekly 2, monthly 2
+  - images (`pve1`, `pve2`, including `host/vpnsvcs`, and the router's copy on pve1's `local`):
+    last 1, weekly 2, monthly 2 (`image_retention` in `src/base/debian/backup_lib.sh`)
   - `files`: last 1, weekly 3, monthly 6
-- PVE and PBS configs (`/etc/pve`, `/etc/proxmox-backup`) are in the hosts' stages, so PBS's own
-  config is kept outside PBS
+- pve1 and pve2 stage all of `/etc`, PVE and PBS configs (`/etc/pve`, `/etc/proxmox-backup`)
+  included, so PBS's own config is kept outside PBS
 - Restores of a file, a VM or a host: [restore guide](guides/restore.md)

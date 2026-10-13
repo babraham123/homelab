@@ -21,6 +21,15 @@ case $1 in
     find "$dir" -maxdepth 1 -name 'homelab-*.tar.gz' | sort | head -n -3 | xargs -r rm -f --
     ls -lh "$archive"
     ;;
+  backup_now)
+    # --no-block: a run takes over an hour, past OliveTin's timeout. A run already in
+    # progress is left to finish.
+    systemctl start --no-block backup_orchestrator.service
+    echo "backup_orchestrator started; the ntfy alert topic gets the summary"
+    ;;
+  skip_next_backup)
+    "${rendered}/nodes/pve1/backup_orchestrator.sh" --skip-next
+    ;;
   *)
     die "unknown command: $1"
     ;;

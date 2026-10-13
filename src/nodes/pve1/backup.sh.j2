@@ -15,11 +15,10 @@ source "${rendered}/base/debian/backup_lib.sh"
 
 # Root owned: the pull is local, so nothing here needs to be readable by autoadmin.
 stage_init
-# /etc/pve is the pmxcfs mount: storage.cfg and the PBS credentials under priv/,
-# VM configs, users. Reading it is fine; it just doesn't take chmod.
-stage_paths /etc/pve /etc/network/interfaces /etc/resolv.conf /etc/hosts /etc/hostname \
-  /etc/ssh /etc/msmtprc /etc/aliases /etc/opt /etc/systemd/system \
-  /root/secrets /root/ca /root/ssh /root/acme /root/.ssh \
+# All of /etc, so no host config is missed. It includes /etc/pve, the pmxcfs mount:
+# storage.cfg and the PBS credentials under priv/, VM configs, users. Reading it is
+# fine; it just doesn't take chmod.
+stage_paths /etc /root/secrets /root/ca /root/ssh /root/acme /root/.ssh \
   /var/lib/vz/snippets /usr/local/bin
 stage_send
 

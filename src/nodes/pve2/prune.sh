@@ -10,6 +10,9 @@
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
+# shellcheck source=src/base/debian/backup_lib.sh
+source "${rendered}/base/debian/backup_lib.sh"
+
 store=backup1
 
 # PBS tasks (prune, GC) return a UPID and run on.
@@ -24,22 +27,23 @@ pbs_task() {
     die "PBS task ${upid} ended with $(jq -r .status <<< "$task")"
 }
 
-# Usage: prune_job NAME NAMESPACE KEEP_OPTS...
+# Usage: prune_job NAME NAMESPACE RETENTION. RETENTION is vzdump's keep-last=1,... syntax,
+# so the image retention is shared with the router's local copy.
 prune_job() {
-  local job=$1 ns=$2
-  shift 2
+  local job=$1 ns=$2 keep opts=()
+  for keep in ${3//,/ }; do opts+=("--${keep%%=*}" "${keep#*=}"); done
   if proxmox-backup-manager prune-job show "$job" &> /dev/null; then
-    proxmox-backup-manager prune-job update "$job" "$@"
+    proxmox-backup-manager prune-job update "$job" "${opts[@]}"
   else
     proxmox-backup-manager prune-job create "$job" --store "$store" --ns "$ns" --max-depth 0 \
-      --schedule daily "$@"
+      --schedule daily "${opts[@]}"
   fi
   pbs_task "$(proxmox-backup-manager prune-job run "$job" --output-format json | jq -r .)"
 }
 
 # Images (pve1, pve2 namespaces; vpnsvcs' host backup sits with pve1's images) are
 # kept short; the files collection longer.
-prune_job images-pve1 pve1 --keep-last 1 --keep-weekly 2 --keep-monthly 2
-prune_job images-pve2 pve2 --keep-last 1 --keep-weekly 2 --keep-monthly 2
-prune_job files files --keep-last 1 --keep-weekly 3 --keep-monthly 6
+prune_job images-pve1 pve1 "$image_retention"
+prune_job images-pve2 pve2 "$image_retention"
+prune_job files files keep-last=1,keep-weekly=3,keep-monthly=6
 pbs_task "$(proxmox-backup-manager garbage-collection start "$store" --output-format json | jq -r .)"

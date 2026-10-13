@@ -151,6 +151,12 @@ case "$(hostname)" in
       archive_repo)
         sudo /root/homelab-rendered/src/nodes/pve1/commands.sh archive_repo
         ;;
+      backup_now)
+        sudo /root/homelab-rendered/src/nodes/pve1/commands.sh backup_now
+        ;;
+      skip_next_backup)
+        sudo /root/homelab-rendered/src/nodes/pve1/commands.sh skip_next_backup
+        ;;
       install_ssh_ca)
         require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
