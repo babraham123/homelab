@@ -482,6 +482,98 @@
         },
         "overrides": []
       }
+    },
+    {
+      "id": 9,
+      "title": "Deployed commits",
+      "description": "The commit each node's /root/homelab-rendered was rendered from (tools/render_src.sh, published by record_deploy.sh at upload). dirty counts uncommitted files. Informational: nothing alerts on drift.",
+      "type": "table",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
+          "expr": "homelab_deployed_info",
+          "legendFormat": "__auto",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "${ds}"
+          },
+          "expr": "homelab_deployed_timestamp_seconds * 1000",
+          "legendFormat": "__auto",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "sortBy": [
+          {
+            "displayName": "host",
+            "desc": false
+          }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rendered_at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value #A": true,
+              "__name__": true,
+              "instance": true,
+              "job": true
+            },
+            "indexByName": {
+              "host": 0,
+              "sha": 1,
+              "dirty": 2,
+              "Value #B": 3
+            },
+            "renameByName": {
+              "Value #B": "rendered_at"
+            }
+          }
+        }
+      ]
     }
   ],
   "refresh": "1m",

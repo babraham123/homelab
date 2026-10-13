@@ -126,7 +126,10 @@ Only validated output ever ships, and secrets only materialize inside the node a
 the rendered tree on disk still has secret placeholders in its `*.j2` files. `deploy_src.sh` runs
 render + upload for every node in one command, and archives the repo plus `vars.yml` to pve1
 (`archive_repo`). It always skips the gaming VM and prints the upload command to run once it's
-started.
+started. A render from a git checkout writes `DEPLOYED` (commit, uncommitted file count, render
+time) at the tree's root; after each upload the node publishes it as `homelab_deployed_info` and
+`homelab_deployed_timestamp_seconds`, shown per node in the "Deployed commits" table on the Homelab
+alerts dashboard. Nothing alerts on drift.
 
 ## Deploy changes
 

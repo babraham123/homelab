@@ -38,6 +38,7 @@ trap 'rm -rf "$stage"' EXIT
 mkdir -p "${stage}/homelab-rendered/src"
 # shellcheck disable=SC2086 # one path per word
 tar -C "${project_dir}/src" -cf - $paths | tar -C "${stage}/homelab-rendered/src" -xf -
+[ ! -f "${project_dir}/DEPLOYED" ] || cp "${project_dir}/DEPLOYED" "${stage}/homelab-rendered/"
 
 # vpnsvcs's SSH port comes from ~/.ssh/config (src/base/debian/ssh_config)
 scp -qr -o LogLevel=QUIET "${stage}/homelab-rendered" "manualadmin@${host}.${url}:/home/manualadmin"
@@ -46,4 +47,5 @@ ssh -t "manualadmin@${host}.${url}" '
 sudo chown -R root:root homelab-rendered
 sudo rm -rf /root/homelab-rendered
 sudo mv homelab-rendered /root/homelab-rendered
+sudo /root/homelab-rendered/src/base/debian/record_deploy.sh
 '

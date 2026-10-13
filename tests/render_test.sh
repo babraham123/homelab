@@ -11,4 +11,6 @@ test_template_render_passes_checks() {
   cp vars.template.yml "${tmp}/repo/vars.yml"
   out=$(cd "${tmp}/repo" && tools/render_src.sh "${tmp}/homelab-rendered" 2>&1) || flunk "$out"
   [ ! -e "${tmp}/homelab-rendered/tests" ] || flunk "tests/ was rendered"
+  # The copy has no .git, like the pre-commit hook's export: no commit to record
+  [ ! -e "${tmp}/homelab-rendered/DEPLOYED" ] || flunk "DEPLOYED written without a checkout"
 }

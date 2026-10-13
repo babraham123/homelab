@@ -29,6 +29,16 @@ rsync -a --delete \
   --exclude vars.yml --exclude all_vars.yml --exclude .DS_Store \
   ./ "$project_dir/"
 
+# The commit each node reports after upload (src/base/debian/record_deploy.sh). Only a
+# checkout has one; the pre-commit hook renders an export of the index, without .git.
+if [ -e .git ]; then
+  {
+    echo "sha=$(git rev-parse HEAD)"
+    echo "dirty=$(git status --porcelain | wc -l | tr -d ' ')"
+    echo "rendered_at=$(date +%s)"
+  } > "${project_dir}/DEPLOYED"
+fi
+
 # Assemble jinja2 config file. jinjanate takes one data file, so the node inventory
 # (src/nodes/<node>/inventory.yml, gathered under `nodes:` in node-name order) is
 # appended to vars.yml rather than passed alongside it. It holds everything in
