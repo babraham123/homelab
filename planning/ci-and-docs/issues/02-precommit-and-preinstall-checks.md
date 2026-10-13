@@ -1,6 +1,6 @@
 # 02. Render-consistency checks in the hook; service-specific validation before install on the node
 
-Status: ready-for-agent Type: task Repo: homelab Source: review finding 33 Blocked by: 01, 08,
+Status: resolved Type: task Repo: homelab Source: review finding 33 Blocked by: 01, 08,
 script-fixes/01, restructure/01
 
 ## Change
@@ -58,3 +58,8 @@ too.
   `ExecStartPre` in `alertmanager.container` on the rendered file. Same for ntfy-alertmanager (no
   `--check` flag: a dry start). The two URL regressions this would have caught were the missing
   container ports on the webhook and the topic.
+- 2026-10-12: resolved. Local: `render_src.sh` in the hook rejects an `install_svcs.sh` case with
+  no `nodes.yml` entry. On the node: only HAProxy has an offline check that runs before install;
+  `install_svcs.sh haproxy` runs `haproxy -c` and dies before touching `/etc/haproxy`. Traefik has
+  no static validator, so the Traefik acceptance item is dropped. The Authelia, vmalert and
+  Alertmanager checks are manual, documented in `docs/debugging.md` "Validate a service config".
