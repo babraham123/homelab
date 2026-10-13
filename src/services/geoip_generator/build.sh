@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds localhost/geoip_generator for src/base/podman/image_updater.sh, which scans the
+# Builds localhost/geoip_generator for src/base/podman/image_updater.py, which scans the
 # result before it replaces the running image. Its inputs are the two base images, by
 # digest, haproxy-mapper's main branch, by commit, and this directory's own files, so a
 # deploy that changes geoip_generator.py rebuilds it too.

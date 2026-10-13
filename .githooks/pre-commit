@@ -1,8 +1,9 @@
 #!/bin/bash
 # Renders the staged tree against vars.template.yml, which runs every render-time check
 # (see tools/check_rendered.py), lints planning/'s markdown, runs the fixture tests in
-# tests/, then shellchecks the rendered scripts so *.sh.j2 files are checked without their
-# Jinja. If everything passes, the render replaces rendered/ and is staged with the commit.
+# tests/, then shellchecks the rendered scripts and ruff-checks the rendered Python, so *.j2
+# files are checked without their Jinja. If everything passes, the render replaces rendered/
+# and is staged with the commit.
 # Activate with: git config core.hooksPath .githooks
 # Skip once with: git commit --no-verify
 
@@ -42,6 +43,10 @@ shellcheck -x --severity=warning tests/*.sh || status=1
 if [ -d "${tmp}/rendered" ]; then cd "${tmp}/rendered" || exit 1; fi
 fd . --type f --extension sh --exec-batch \
   shellcheck -x --source-path=SCRIPTDIR --severity=warning .githooks/pre-commit || status=1
+# Rendered Python, so *.py.j2 files are checked without their Jinja: syntax errors,
+# undefined names, unused imports and variables.
+fd . --type f --extension py --exec-batch \
+  uvx --quiet ruff@0.17.0 check --quiet --no-cache --select E9,F || status=1
 
 if [ "$status" -ne 0 ]; then
   echo "pre-commit: checks failed (paths are relative to the repo root)" >&2

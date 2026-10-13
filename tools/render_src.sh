@@ -66,6 +66,7 @@ cd "$project_dir"
 # Make executable
 $fdfind . --extension sh --exec chmod +x "{}"
 $fdfind . --extension pl --exec chmod +x "{}"
+$fdfind . --extension py --exec chmod +x "{}"
 
 tools/check_rendered.py . "$all_vars"
 

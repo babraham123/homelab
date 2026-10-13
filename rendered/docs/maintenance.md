@@ -138,7 +138,7 @@ image, and the old one keeps running. Design: [ADR 0008](adr/0008-scanned-image-
 ssh manualadmin@NODE
 sudo journalctl -u image_updater
 # What would change, with scan results; loads and restarts nothing
-sudo /root/homelab-rendered/src/base/podman/image_updater.sh --dry-run
+sudo /root/homelab-rendered/src/base/podman/image_updater.py --dry-run
 # A run now
 sudo systemctl start image_updater
 ```
@@ -153,7 +153,7 @@ sudo systemctl start image_updater
     ```
 
   - that digest only: on the node, as manualadmin (never through the dispatcher or OliveTin),
-    `sudo /root/homelab-rendered/src/base/podman/image_updater.sh accept CONTAINER`. It rescans,
+    `sudo /root/homelab-rendered/src/base/podman/image_updater.py accept CONTAINER`. It rescans,
     prints the findings, records the digest and notifies; the next run loads it. For a built image
     it builds and scans instead, and records the `build.sh` inputs, so the next run's build of the
     same inputs passes.

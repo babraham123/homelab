@@ -36,7 +36,7 @@
     executable, since `install` defaults to 755; a directory tree, like Traefik's `plugins-local/`,
     is removed and copied again with `cp -r`), then ends with `reload_restart <unit>` if it installs
     a unit. Runs from `/root/homelab-rendered/src`, so its paths start with `base/`, `nodes/` or
-    `services/`. Before the case, `src/base/podman/image_updater.sh install SERVICE` loads the
+    `services/`. Before the case, `src/base/podman/image_updater.py install SERVICE` loads the
     service's images and passes them through the scan gate, or stops the install
   - `inventory.yml`: the node's part of the node inventory (keys documented in `src/nodes.jinja`)
   - `commands.sh` - Other tasks that run as root and are triggered remotely

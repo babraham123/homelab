@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds localhost/calliope for src/base/podman/image_updater.sh, which scans the result
+# Builds localhost/calliope for src/base/podman/image_updater.py, which scans the result
 # before it replaces the running image. Its inputs are TTS-Narrated-Ebook-Creator's main
 # branch, by commit, and the images its Containerfile builds from (FROM, COPY --from), by
 # digest. calliope_batch.py is mounted at run time, so it isn't one.

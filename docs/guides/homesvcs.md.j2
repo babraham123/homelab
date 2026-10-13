@@ -35,7 +35,7 @@ systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
 # Every image unchanged: the installs just loaded them
-src/base/podman/image_updater.sh --dry-run
+src/base/podman/image_updater.py --dry-run
 ```
 
 - On initial install, disable HA OIDC

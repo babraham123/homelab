@@ -53,7 +53,7 @@ systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
 # Expect every image unchanged
-src/base/podman/image_updater.sh --dry-run
+src/base/podman/image_updater.py --dry-run
 ```
 
 ## GPU metrics

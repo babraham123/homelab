@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds localhost/bookmark_handoff for src/base/podman/image_updater.sh, which scans the
+# Builds localhost/bookmark_handoff for src/base/podman/image_updater.py, which scans the
 # result before it replaces the running image. Its inputs are the base image, by digest,
 # and this directory's own files, so a deploy that changes the script or a pinned
 # library rebuilds it too.

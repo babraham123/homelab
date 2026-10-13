@@ -17,7 +17,7 @@ noticed when a service broke.
   `update_last:`), and the render fails if a quadlet's `Image=` doesn't match it. Nothing in a
   quadlet can pull, so an unscanned image can't reach a container.
 - Each node that runs quadlets (vpnsvcs, homesvcs, websvcs, secsvcs) runs
-  `src/base/podman/image_updater.sh` on its own timer, 30 minutes apart, the notification path on
+  `src/base/podman/image_updater.py` on its own timer, 30 minutes apart, the notification path on
   secsvcs last. For each image in update order (install order, `update_last` entries at the end):
   compare the upstream digest with the one handled last (remote against remote), download it by
   digest, scan it with Trivy, tag the current image `:rollback`, load the new one, and run

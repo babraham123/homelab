@@ -188,7 +188,7 @@ du -sh "$(podman volume inspect --format '{{ .Mountpoint }}' systemd-vmdata)"
 /root/homelab-rendered/src/nodes/pve1/lookup_docker_tag.sh homeassistant/home-assistant stable
 
 # What the image updater would load, with scan results
-/root/homelab-rendered/src/base/podman/image_updater.sh --dry-run
+/root/homelab-rendered/src/base/podman/image_updater.py --dry-run
 # The digest each container's image was last updated to, and how it went
 head /var/lib/image_updater/state/*
 podman images --filter reference='localhost/*'
