@@ -76,3 +76,9 @@ reload_restart() {
   systemctl restart "$1"
   systemctl status "$1" --no-pager
 }
+# Prints the services described "Homelab: …", one per line without .service. --all keeps
+# the inactive ones, like a timer's oneshot between runs.
+homelab_services() {
+  systemctl list-units --all --type=service --plain --no-legend |
+    awk '/Homelab: / { sub(/\.service$/, "", $1); print $1 }' | sort -u
+}

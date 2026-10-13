@@ -16,11 +16,7 @@ if [ ! -f "$file.j2" ]; then
   die "file template $file.j2 does not exist"
 fi
 
-SVCS=$(echo "homelab_services:"; \
-  systemctl list-units --type=service | \
-  grep "Homelab: " | \
-  sed -r 's/^.\s*([a-zA-Z0-9_-]+)\.service.*$/  - \1/' | \
-  sort | uniq)
+SVCS=$(echo "homelab_services:"; homelab_services | sed 's/^/  - /')
 
 echo "$SVCS" | jinjanate --quiet --format=yaml -o "$file" "$file.j2"
 

@@ -7,11 +7,7 @@
 source /usr/local/lib/homelab/lib.sh
 
 # Filter for custom services
-SVC_LIST=$(systemctl list-units --type=service | \
-  grep "Homelab: " | \
-  sed -r 's/^.\s*([a-zA-Z0-9_-]+)\.service.*$/\1/' | \
-  tr '\n' '|' | \
-  head -c -1)
+SVC_LIST=$(homelab_services | paste -sd '|' -)
 
 # Ref: https://github.com/prometheus/node_exporter?tab=readme-ov-file#collectors
 /usr/local/bin/node_exporter \
