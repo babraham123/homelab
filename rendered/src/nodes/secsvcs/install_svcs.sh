@@ -18,6 +18,7 @@ case $1 in
   postgres)
     mkdir -p /etc/opt/db/certificates
     install -D -m 644 -t /var/opt/db services/postgres/pg_init.sql
+    install -D -m 644 -t /etc/opt/db services/postgres/pg_hba.conf
     install_quadlet services/postgres/postgres.container services/postgres/postgresdb.volume
     reload_restart postgres
     ;;
@@ -93,6 +94,7 @@ case $1 in
     reload_restart grafana
     ;;
   vaultwarden)
+    mkdir -p /etc/opt/vaultwarden/certificates
     install_quadlet services/vaultwarden/vaultwarden.container services/vaultwarden/vaultwardendata.volume
     reload_restart vaultwarden
     ;;

@@ -46,9 +46,9 @@ if (( self_signed_age_s > 31536000 )); then
   sleep 10
 fi
 
-# 2 months
-if (( acme_age_s > 5184000 )); then
-  subject='Reminder: renew your acme certificates'
-  body='<h1>Renew your ACME certs!</h1>\n<p>Use this command on the PVE1 host:</p>\n<code>sudo /root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh</code>'
+# 3 weeks: the weekly backup run installs them, and one week can be skipped
+if (( acme_age_s > 1814400 )); then
+  subject='Reminder: install your acme certificates'
+  body='<h1>The backup run has not installed the ACME certs in 3 weeks!</h1>\n<p>See <code>journalctl -u backup_orchestrator</code>, or use this command on the PVE1 host:</p>\n<code>sudo /root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh</code>'
   echo -e "To: $recipient\nFrom: $from\nSubject: $subject\n$mime\n\n$body" | msmtp -t
 fi

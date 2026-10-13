@@ -92,6 +92,7 @@ timers; see the [reading guide](guides/reading.md).
 | websvcs, devtop, gaming | nvidia_gpu_exporter | GPU metrics (temperature) for the cards pve2 passes through |
 | pve1, pve2 | vm_watchdog | VM health watchdog |
 | pve1 | cert_notifier (timer) | Email warnings before cert expiry (msmtp) |
+| pve1 | ct_watch (timer) | Daily ctlogs.dev check for certs the homelab didn't request ([Security](security.md#tls-and-trust-hierarchy)) |
 | pve1 | backup_orchestrator (timer) | Weekly backup run ([Storage and backups](#storage-and-backups)) |
 | websvcs | snapraid sync/scrub (timers), smartmontools | Media array parity and disk health |
 | vpnsvcs | haproxy | Public ingress ([Networking](networking.md#ingress-the-three-tier-chain)) |
@@ -263,9 +264,10 @@ flowchart LR
      - the rest of `/root/backups` as `host/pve1` in namespace `files`, including `repo/` (the repo
        and `vars.yml`, written by every `tools/deploy_src.sh`)
      - once both succeed the dumps are deleted from pve1; they live only in PBS
-  4. `prune.sh` on pve2 (dispatcher `prune`): the PBS prune jobs, then garbage collection. Last, so
-     this run's snapshots count, and while PBS is up
-  5. A `homelab_backup_last_success_timestamp_seconds{job}` metric per step, `BackupStale` after 15
+  4. `prune.sh` on pve2 (dispatcher `prune`): the PBS prune jobs, then garbage collection. After
+     the upload, so this run's snapshots count, and while PBS is up
+  5. `acme_transfer.sh`: Traefik's renewed certs onto pve1, pve2, PBS and pfSense, while pve2 is up
+  6. A `homelab_backup_last_success_timestamp_seconds{job}` metric per step, `BackupStale` after 15
      days (`src/services/vmalert/configs/backups.yml`), an ntfy summary, and pve2 off again if it
      was off
 - **Retention**, PBS prune jobs per namespace, set in `src/nodes/pve2/prune.sh`:

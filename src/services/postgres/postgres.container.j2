@@ -28,7 +28,8 @@ Exec=-c "ssl=on" \
      -c "ssl_key_file=/certificates/pgdb.key" \
      -c "ssl_ca_file=/certificates/ca.chain.crt" \
      -c "ssl_min_protocol_version=TLSv1.2" \
-     -c "ssl_ciphers=HIGH:+3DES:!aNULL"
+     -c "ssl_ciphers=HIGH:+3DES:!aNULL" \
+     -c "hba_file=/etc/postgresql/pg_hba.conf"
 
 Environment=PGTZ={{ personal.timezone }}
 Environment=POSTGRES_HOST_AUTH_METHOD=scram-sha-256
@@ -47,6 +48,7 @@ Volume=postgresdb.volume:/var/lib/postgresql/data
 # https://hub.docker.com/_/postgres#:~:text=and%20POSTGRES_DB.-,Initialization%20scripts,-If%20you%20would
 Volume=/var/opt/db/pg_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 Volume=/etc/opt/db/certificates:/certificates:ro
+Volume=/etc/opt/db/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
 # Expects uid and gid to be 70
 
 [Service]

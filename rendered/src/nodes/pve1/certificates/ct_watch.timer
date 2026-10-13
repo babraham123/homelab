@@ -1,0 +1,15 @@
+# /etc/systemd/system/ct_watch.timer
+
+[Unit]
+Description="Homelab: Runs ct_watch.service every day"
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+# Run if machine was off
+Persistent=true
+OnCalendar=*-*-* 06:30:00
+Unit=ct_watch.service
+
+[Install]
+WantedBy=timers.target

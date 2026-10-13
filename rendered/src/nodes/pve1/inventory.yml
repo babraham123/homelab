@@ -3,6 +3,7 @@
 debian_services: [vm_watchdog]
 services:
   cert_notifier: {}
+  ct_watch: {}
   backup_orchestrator: {}
 commands:
   - {name: archive_repo, script: nodes/pve1/commands.sh}

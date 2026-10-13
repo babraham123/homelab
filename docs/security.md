@@ -190,17 +190,24 @@ flowchart TB
 - **Internal TLS**: service-to-service connections (Authelia↔LLDAP, Authelia↔Traefik mutual TLS,
   Postgres, MQTT) use certs from the private two-tier CA. Certs and keys are distributed to
   `/etc/opt/<svc>/certificates/` by `commands.sh install_certs` / `install_keys`.
+- **Postgres takes TLS only**: `src/services/postgres/pg_hba.conf` has `hostssl` rules and no `host`
+  ones, so a client that skips TLS is refused before sending its password; every client verifies
+  the server cert (`verify-full`, or Authelia's `tls` block).
 - **SSH host certs** eliminate trust-on-first-use: clients trust the CA once and every node's host
   key verifies automatically. A separate script handles the Windows gaming VM.
 - **Public TLS**: Traefik on each service VM (secsvcs, homesvcs, websvcs) answers ACME challenges;
-  `acme_transfer.sh` on pve1 pulls their `acme.json` files, dumps the certs and installs them on
-  pve1, pve2, pbs2 and pfSense.
+  `acme_transfer.sh` on pve1, a step of the weekly backup run, pulls their `acme.json` files, dumps
+  the certs and installs them on pve1, pve2, pbs2 and pfSense.
 - **Expiry monitoring**: the `cert_notifier` timer on pve1 emails weeks in advance. Gatus fails an
   endpoint whose ACME cert has under 14 days left (every HTTPS check) and checks the LDAPS cert at
   30 days; Postgres and Mosquitto are not reachable as plain TLS endpoints and stay with
   `cert_notifier`. vmalert turns Gatus's expiry metric into `CertExpiringSoon` (14 days) and
   `CertExpiringCritical` (3 days) pushes. Rotation cadence lives in
   [Maintenance](maintenance.md#refresh-certificates).
+- **Certificate Transparency**: the daily `ct_watch` timer on pve1
+  (`src/nodes/pve1/certificates/ct_watch.py`) lists the unexpired certs ctlogs.dev has indexed for
+  the domain and pushes an ntfy alert, once per cert, for any not from Let's Encrypt or naming a
+  host the repo doesn't serve. A new host outside the node inventories goes in its `EXPECTED` set.
 
 ## Host access: the SSH dispatcher
 

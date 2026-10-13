@@ -83,6 +83,10 @@ Environment=EXTENDED_LOGGING=true
 # Plain warn drops the "logged in successfully. IP" lines
 Environment=LOG_LEVEL=warn,vaultwarden::api::identity=info
 
+# libpq reads these beside DATABASE_URL, whose host must be pgdb.{{ site.url }} to match the cert
+# https://www.postgresql.org/docs/14/libpq-envars.html
+Environment=PGSSLMODE=verify-full
+Environment=PGSSLROOTCERT=/certificates/ca.chain.pem
 # Never Environment=: the admin token's PHC string is full of $, which systemd expands
 Secret=vaultwarden_db_url,type=env,target=DATABASE_URL
 Secret=vaultwarden_oidc_id,type=env,target=SSO_CLIENT_ID
@@ -91,6 +95,7 @@ Secret=vaultwarden_admin_token_hash,type=env,target=ADMIN_TOKEN
 
 # Attachments, sends, config.json and rsa_key*; the vault itself is in Postgres
 Volume=vaultwardendata.volume:/data
+Volume=/etc/opt/vaultwarden/certificates:/certificates:ro
 
 [Service]
 Restart=on-failure

@@ -145,6 +145,9 @@ case "$(hostname)" in
       install_cert_notifier)
         sudo /root/homelab-rendered/src/nodes/pve1/install_svcs.sh cert_notifier
         ;;
+      install_ct_watch)
+        sudo /root/homelab-rendered/src/nodes/pve1/install_svcs.sh ct_watch
+        ;;
       install_backup_orchestrator)
         sudo /root/homelab-rendered/src/nodes/pve1/install_svcs.sh backup_orchestrator
         ;;

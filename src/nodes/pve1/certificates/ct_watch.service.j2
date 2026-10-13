@@ -1,0 +1,16 @@
+# /etc/systemd/system/ct_watch.service
+
+[Unit]
+Description="Homelab: Alerts on certificates for the domain that this homelab didn't request"
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+
+Environment=TZ={{ personal.timezone }}
+
+ExecStart=/root/homelab-rendered/src/nodes/pve1/certificates/ct_watch.py
+
+# Bounds the API retries, about 15 minutes per page
+TimeoutStartSec=1h

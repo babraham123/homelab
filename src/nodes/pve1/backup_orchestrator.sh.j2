@@ -4,8 +4,9 @@
 # there), runs backup.sh on every node and receives the stage each streams back into
 # /root/backups/<node>/ (backup_lib's stage_collect; src/nodes/pve1/collect_stage.sh
 # does one node outside the weekly run), sends /root/backups to PBS as host backups,
-# has pve2 prune and garbage-collect PBS, records per-step success metrics, then powers
-# pve2 back off if it was off to begin with. Posts a one-line ntfy summary at the end.
+# has pve2 prune and garbage-collect PBS, installs the renewed ACME certs on the hosts
+# (acme_transfer.sh), records per-step success metrics, then powers pve2 back off if it
+# was off to begin with. Posts a one-line ntfy summary at the end.
 # --skip-next makes the next timer-started run do nothing but clear the skip; a run
 # started by hand (pve1's backup_now) still runs.
 # Usage:
@@ -31,14 +32,15 @@ keyfile=/root/secrets/pbs_client.key
 
 # In step order. The VMs first, so their dumps are on the VM disks before the hosts'
 # backup.sh images them; pve1 runs its own backup.sh, so it has no `backup` command.
-# prune comes after upload so this week's snapshots count.
+# prune comes after upload so this week's snapshots count; acme_transfer comes last, as
+# it reloads PBS's proxy and resets pve1's PBS fingerprint.
 NODES=({{ inv.nodes_with.backup | reject('in', ['pve1', 'pve2']) | join(' ') }} pve1 pve2)
 # Run before wake_pve2, and whether or not it succeeds.
 LOCAL_STEPS=(router_local)
 # wake_pve2 and sleep_pve2 bracket these.
 PBS_STEPS=()
 for node in "${NODES[@]}"; do PBS_STEPS+=("backup_${node}"); done
-PBS_STEPS+=(upload prune)
+PBS_STEPS+=(upload prune acme_transfer)
 STEPS=("${LOCAL_STEPS[@]}" "${PBS_STEPS[@]}")
 
 # The router is the network: with it broken, pve2 can't be woken and PBS can't be
@@ -82,6 +84,12 @@ step_upload() {
 # Retention and GC run on pve2, where proxmox-backup-manager is.
 step_prune() {
   "${ssh[@]}" autoadmin@pve2 prune
+}
+
+# Traefik renews 30 days before expiry, so weekly keeps the hosts well inside a cert's
+# life; it needs pve2 up, which this run provides.
+step_acme_transfer() {
+  "${rendered}/nodes/pve1/certificates/acme_transfer.sh"
 }
 
 step_sleep_pve2() {

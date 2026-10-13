@@ -27,13 +27,15 @@ import subprocess
 import sys
 import tempfile
 import time
-import urllib.request
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
 rendered = Path("/root/homelab-rendered/src")
-node = socket.gethostname().split(".")[0]
+sys.path.insert(0, str(rendered / "base"))
+import ntfy  # noqa: E402
+
+node =socket.gethostname().split(".")[0]
 script = rendered / "base/podman/image_updater.py"
 var = Path("/var/lib/image_updater")
 # state/<container>: "<remote digest> <outcome>" of the digest handled last;
@@ -117,18 +119,9 @@ def secret(name):
 
 
 def notify(priority, title, message):
-  """ntfy may still be starting after a pve1 reboot, so this retries for 4 minutes."""
-  request = urllib.request.Request(cfg["ntfy_url"], data=message.encode(), headers={
-      "Authorization": f"Bearer {secret('ntfy_alert_token')}",
-      "X-Title": f"{node}: {title}", "X-Priority": str(priority), "X-Tags": "package"})
-  for attempt in range(9):
-    try:
-      urllib.request.urlopen(request, timeout=15).close()
-      return
-    except OSError:
-      if attempt < 8:
-        time.sleep(30)
-  warn(f"ntfy post failed: {title}")
+  if not ntfy.notify(cfg["ntfy_url"], secret("ntfy_alert_token"), priority, f"{node}: {title}",
+                     message, "package"):
+    warn(f"ntfy post failed: {title}")
 
 
 # Docker Hub's anonymous pull limit is per IP, shared by every VM behind the router.

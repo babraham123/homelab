@@ -21,6 +21,7 @@ case $1 in
     mkdir -p /etc/opt/grafana/certificates
     mkdir -p /etc/opt/crowdsec/certificates
     mkdir -p /etc/opt/crowdsec_appsec/certificates
+    mkdir -p /etc/opt/vaultwarden/certificates
 
     mv auth.janedoe.com.cert.pem /etc/opt/authelia/certificates/auth.cert.pem
     mv ldap.janedoe.com.cert.pem /etc/opt/lldap/certificates/ldap.cert.pem
@@ -48,6 +49,7 @@ case $1 in
     cp ca-chain.cert.pem /etc/opt/grafana/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/crowdsec/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/crowdsec_appsec/certificates/ca.chain.pem
+    cp ca-chain.cert.pem /etc/opt/vaultwarden/certificates/ca.chain.pem
     ;;
   install_keys)
     receive_files auth.janedoe.com.key.pem ldap.janedoe.com.key.pem secproxy.janedoe.com.key.pem \

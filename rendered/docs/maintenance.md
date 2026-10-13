@@ -87,11 +87,11 @@ sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs
 
 You should receive email notifications several weeks in advance of certificate expiration.
 
-- Once every 2 months
+- ACME certs: the weekly backup run installs them; cert_notifier emails after 3 weeks without.
+  By hand:
 
 ```bash
 ssh manualadmin@pve1
-# Copy over the ACME generated certs 
 sudo /root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh
 ```
 

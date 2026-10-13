@@ -289,6 +289,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: pve1 Install Ct Watch
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 install_ct_watch
+              id: pve1_install_ct_watch
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: pve1 Install Backup Orchestrator
               icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
               shell: ssh autoadmin@pve1 install_backup_orchestrator

@@ -20,6 +20,15 @@ case $1 in
     systemctl restart cert_notifier.timer
     exit 0
     ;;
+  ct_watch)
+    # Runs in place, so a deploy updates it with base/ntfy.py and the expected hosts.
+    install -D -m 644 -t /etc/systemd/system nodes/pve1/certificates/ct_watch.{service,timer}
+
+    systemctl daemon-reload
+    systemctl enable ct_watch.timer
+    systemctl restart ct_watch.timer
+    exit 0
+    ;;
   backup_orchestrator)
     # The client uploads /root/backups to PBS as a host backup.
     apt-get install -y proxmox-backup-client
