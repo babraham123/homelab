@@ -805,7 +805,7 @@ Type the password once and pipe it into `sudo -S`. `read -s` keeps it off the sc
 a builtin, so it never shows up in `ps`:
 
 ```bash
-read -rs -p "sudo password for HOST: " PW; echo
+read -rs -p "manualadmin's sudo password on HOST: " PW; echo
 printf '%s\n' "$PW" | ssh manualadmin@HOST 'sudo --prompt="" -S whoami'
 unset PW
 ```

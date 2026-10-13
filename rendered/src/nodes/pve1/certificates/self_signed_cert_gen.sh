@@ -19,13 +19,15 @@ cd /root/ca/intermediate
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
 echo -n 'Enter intermediate CA passphrase: '
 read -r -s CA_PASS
+# env:, not pass:, keeps the passphrase out of argv, which `ps` shows to every user
+export CA_PASS
 
 openssl req -config openssl.cnf \
   -key private/wildcard.janedoe.com.key.pem \
   -subj "${subj}/OU=svcs/CN=*.janedoe.com" \
   -addext 'subjectAltName = DNS:*.janedoe.com,DNS:janedoe.com' \
   -new -sha256 -out csr/wildcard.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/wildcard.janedoe.com.csr.pem \
   -out certs/wildcard.janedoe.com.cert.pem
@@ -36,7 +38,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=ldap.janedoe.com" \
   -addext 'subjectAltName = DNS:ldap.janedoe.com' \
   -new -sha256 -out csr/ldap.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/ldap.janedoe.com.csr.pem \
   -out certs/ldap.janedoe.com.cert.pem
@@ -47,7 +49,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=auth.janedoe.com" \
   -addext 'subjectAltName = DNS:auth.janedoe.com' \
   -new -sha256 -out csr/auth.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/auth.janedoe.com.csr.pem \
   -out certs/auth.janedoe.com.cert.pem
@@ -58,7 +60,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=pgdb.janedoe.com" \
   -addext 'subjectAltName = DNS:pgdb.janedoe.com' \
   -new -sha256 -out csr/pgdb.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/pgdb.janedoe.com.csr.pem \
   -out certs/pgdb.janedoe.com.cert.pem
@@ -69,13 +71,13 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=secproxy.janedoe.com" \
   -addext 'subjectAltName = DNS:secproxy.janedoe.com' \
   -new -sha256 -out csr/secproxy.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/secproxy.janedoe.com.csr.pem \
   -out certs/secproxy.janedoe.com.cert.pem
 chmod 444 certs/secproxy.janedoe.com.cert.pem
 
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/secproxy.janedoe.com.csr.pem \
   -out certs/secproxy.janedoe.com.client_cert.pem
@@ -88,7 +90,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=crowdsec.janedoe.com" \
   -addext 'subjectAltName = DNS:crowdsec.janedoe.com' \
   -new -sha256 -out csr/crowdsec.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/crowdsec.janedoe.com.csr.pem \
   -out certs/crowdsec.janedoe.com.cert.pem
@@ -100,7 +102,7 @@ openssl req -config openssl.cnf \
   -key private/appsec-secsvcs.janedoe.com.key.pem \
   -subj "${subj}/OU=agent-ou/CN=appsec-secsvcs" \
   -new -sha256 -out csr/appsec-secsvcs.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/appsec-secsvcs.janedoe.com.csr.pem \
   -out certs/appsec-secsvcs.janedoe.com.client_cert.pem
@@ -109,7 +111,7 @@ openssl req -config openssl.cnf \
   -key private/appsec-homesvcs.janedoe.com.key.pem \
   -subj "${subj}/OU=agent-ou/CN=appsec-homesvcs" \
   -new -sha256 -out csr/appsec-homesvcs.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/appsec-homesvcs.janedoe.com.csr.pem \
   -out certs/appsec-homesvcs.janedoe.com.client_cert.pem
@@ -118,7 +120,7 @@ openssl req -config openssl.cnf \
   -key private/appsec-websvcs.janedoe.com.key.pem \
   -subj "${subj}/OU=agent-ou/CN=appsec-websvcs" \
   -new -sha256 -out csr/appsec-websvcs.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/appsec-websvcs.janedoe.com.csr.pem \
   -out certs/appsec-websvcs.janedoe.com.client_cert.pem
@@ -129,13 +131,13 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=websvcs/CN=webproxy.janedoe.com" \
   -addext 'subjectAltName = DNS:webproxy.janedoe.com' \
   -new -sha256 -out csr/webproxy.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/webproxy.janedoe.com.csr.pem \
   -out certs/webproxy.janedoe.com.cert.pem
 chmod 444 certs/webproxy.janedoe.com.cert.pem
 
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/webproxy.janedoe.com.csr.pem \
   -out certs/webproxy.janedoe.com.client_cert.pem
@@ -146,13 +148,13 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=homesvcs/CN=homeproxy.janedoe.com" \
   -addext 'subjectAltName = DNS:homeproxy.janedoe.com' \
   -new -sha256 -out csr/homeproxy.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/homeproxy.janedoe.com.csr.pem \
   -out certs/homeproxy.janedoe.com.cert.pem
 chmod 444 certs/homeproxy.janedoe.com.cert.pem
 
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/homeproxy.janedoe.com.csr.pem \
   -out certs/homeproxy.janedoe.com.client_cert.pem
@@ -163,7 +165,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=homesvcs/CN=mqtt.janedoe.com" \
   -addext 'subjectAltName = DNS:mqtt.janedoe.com' \
   -new -sha256 -out csr/mqtt.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/mqtt.janedoe.com.csr.pem \
   -out certs/mqtt.janedoe.com.cert.pem
@@ -174,7 +176,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=homesvcs/CN=zigbee.janedoe.com" \
   -addext 'subjectAltName = DNS:zigbee.janedoe.com' \
   -new -sha256 -out csr/zigbee.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/zigbee.janedoe.com.csr.pem \
   -out certs/zigbee.janedoe.com.client_cert.pem
@@ -185,11 +187,13 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=homesvcs/CN=home.janedoe.com" \
   -addext 'subjectAltName = DNS:home.janedoe.com' \
   -new -sha256 -out csr/home.janedoe.com.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/home.janedoe.com.csr.pem \
   -out certs/home.janedoe.com.client_cert.pem
 chmod 444 certs/home.janedoe.com.client_cert.pem
+
+unset CA_PASS
 
 # Each node's files go on its install command's stdin
 "$send" \

@@ -264,8 +264,8 @@ chmod 600 "/root/secrets/${host}.yaml"
 # Re-encrypts to the new key + host key and redistributes; save and quit the editor
 /root/homelab-rendered/src/nodes/pve1/secret_update.sh "$host"
 ```
-- `secret_update.sh` needs each host's sudo password; they're in the maintainer's offline copy
-  (`auth/08`), not SOPS
+- `secret_update.sh` needs `manualadmin`'s sudo password on each host; they're in the maintainer's
+  offline copy (`auth/08`), not SOPS
 - If the host's SSH is broken, decrypt through the guest agent on its Proxmox host (pve1: secsvcs,
   homesvcs; pve2: websvcs), copy to pve1's `/dev/shm`, and continue from `sops -e`:
 ```bash
@@ -340,8 +340,9 @@ step 9:
 1. SSH CA (run `ssh_cert_gen.sh` once, not once per section):
    - New `ca_ssh_key` and `ca_ssh_host_key`: the first two `ssh-keygen` blocks of [CA
      certs](./pve1.md#ca-certs); skip its root key and `ssh_cert_gen.sh`
-   - Step 10 as written; with a new CA, `ssh_cert_gen.sh` asks for each host's password, as on the
-     original install
+   - Step 10 as written, but before its `ssh_cert_gen.sh` run the bootstrap block of [CA
+     certs](./pve1.md#ca-certs): the hosts trust only the old CA, and `install_ssh_ca` refuses a
+     password login
    - The gaming VM's cert is from the old CA: also run the `start_pve2` / `start_gaming_vm` /
      `ssh_cert_gen_windows.sh` block from [Only the SSH CA is lost](#only-the-ssh-ca-is-lost), and
      replace the `@cert-authority` line on clients

@@ -45,8 +45,26 @@ chmod 400 ca_ssh_host_key
 # No passphrase: pve1's scripts SSH to the other hosts with it unprompted.
 ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N ""
 
-# Wait until all of the VMs have been created. On the first run it will
-# ask you for the root password of various hosts.
+```
+- Wait until all of the VMs have been created, then bootstrap trust in the CA. `ssh_cert_gen.sh`
+  runs every host's `install_ssh_ca` through the dispatcher, which accepts only a certificate login
+  with key ID `pve1`: root needs a certificate, and each host needs the CA's public key, before the
+  script can install anything. Asks for `manualadmin`'s password on each host. Same block for a new
+  CA ([Nothing escrowed](./pve1_recovery.md#nothing-escrowed)): hosts trust both CAs until the
+  script replaces the file
+```bash
+cd /root/ssh
+ssh-keygen -s ca_ssh_key -I pve1 -n manualadmin,autoadmin -V +395d /root/.ssh/id_ed25519.pub
+# vpnsvcs's SSH port; install_ssh_ca installs the same file later
+install -m 644 /root/homelab-rendered/src/base/debian/ssh_config /etc/ssh/ssh_config.d/homelab.conf
+tee -a /etc/ssh/ca_ssh_key.pub < ca_ssh_key.pub > /dev/null
+for host in devtop homesvcs pve2 secsvcs vpnsvcs websvcs; do
+  scp ca_ssh_key.pub "manualadmin@${host}:"
+  ssh -t "manualadmin@${host}" 'sudo tee -a /etc/ssh/ca_ssh_key.pub < ca_ssh_key.pub > /dev/null && rm ca_ssh_key.pub'
+done
+```
+- Sign and distribute everything
+```bash
 /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 # The cert for the gaming VM will be generated later
 ```

@@ -19,13 +19,15 @@ cd /root/ca/intermediate
 # Ref: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html#:~:text=fc%20%2De%20%2D.-,read,-%5B%20%2DrszpqAclneE%20%5D%20%5B
 echo -n 'Enter intermediate CA passphrase: '
 read -r -s CA_PASS
+# env:, not pass:, keeps the passphrase out of argv, which `ps` shows to every user
+export CA_PASS
 
 openssl req -config openssl.cnf \
   -key private/wildcard.{{ site.url }}.key.pem \
   -subj "${subj}/OU=svcs/CN=*.{{ site.url }}" \
   -addext 'subjectAltName = DNS:*.{{ site.url }},DNS:{{ site.url }}' \
   -new -sha256 -out csr/wildcard.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/wildcard.{{ site.url }}.csr.pem \
   -out certs/wildcard.{{ site.url }}.cert.pem
@@ -36,7 +38,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=ldap.{{ site.url }}" \
   -addext 'subjectAltName = DNS:ldap.{{ site.url }}' \
   -new -sha256 -out csr/ldap.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/ldap.{{ site.url }}.csr.pem \
   -out certs/ldap.{{ site.url }}.cert.pem
@@ -47,7 +49,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=auth.{{ site.url }}" \
   -addext 'subjectAltName = DNS:auth.{{ site.url }}' \
   -new -sha256 -out csr/auth.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/auth.{{ site.url }}.csr.pem \
   -out certs/auth.{{ site.url }}.cert.pem
@@ -58,7 +60,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=pgdb.{{ site.url }}" \
   -addext 'subjectAltName = DNS:pgdb.{{ site.url }}' \
   -new -sha256 -out csr/pgdb.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/pgdb.{{ site.url }}.csr.pem \
   -out certs/pgdb.{{ site.url }}.cert.pem
@@ -69,13 +71,13 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=secproxy.{{ site.url }}" \
   -addext 'subjectAltName = DNS:secproxy.{{ site.url }}' \
   -new -sha256 -out csr/secproxy.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/secproxy.{{ site.url }}.csr.pem \
   -out certs/secproxy.{{ site.url }}.cert.pem
 chmod 444 certs/secproxy.{{ site.url }}.cert.pem
 
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/secproxy.{{ site.url }}.csr.pem \
   -out certs/secproxy.{{ site.url }}.client_cert.pem
@@ -88,7 +90,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=secsvcs/CN=crowdsec.{{ site.url }}" \
   -addext 'subjectAltName = DNS:crowdsec.{{ site.url }}' \
   -new -sha256 -out csr/crowdsec.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/crowdsec.{{ site.url }}.csr.pem \
   -out certs/crowdsec.{{ site.url }}.cert.pem
@@ -101,7 +103,7 @@ openssl req -config openssl.cnf \
   -key private/appsec-{{ node }}.{{ site.url }}.key.pem \
   -subj "${subj}/OU=agent-ou/CN=appsec-{{ node }}" \
   -new -sha256 -out csr/appsec-{{ node }}.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/appsec-{{ node }}.{{ site.url }}.csr.pem \
   -out certs/appsec-{{ node }}.{{ site.url }}.client_cert.pem
@@ -112,13 +114,13 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=websvcs/CN=webproxy.{{ site.url }}" \
   -addext 'subjectAltName = DNS:webproxy.{{ site.url }}' \
   -new -sha256 -out csr/webproxy.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/webproxy.{{ site.url }}.csr.pem \
   -out certs/webproxy.{{ site.url }}.cert.pem
 chmod 444 certs/webproxy.{{ site.url }}.cert.pem
 
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/webproxy.{{ site.url }}.csr.pem \
   -out certs/webproxy.{{ site.url }}.client_cert.pem
@@ -129,13 +131,13 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=homesvcs/CN=homeproxy.{{ site.url }}" \
   -addext 'subjectAltName = DNS:homeproxy.{{ site.url }}' \
   -new -sha256 -out csr/homeproxy.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/homeproxy.{{ site.url }}.csr.pem \
   -out certs/homeproxy.{{ site.url }}.cert.pem
 chmod 444 certs/homeproxy.{{ site.url }}.cert.pem
 
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/homeproxy.{{ site.url }}.csr.pem \
   -out certs/homeproxy.{{ site.url }}.client_cert.pem
@@ -146,7 +148,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=homesvcs/CN=mqtt.{{ site.url }}" \
   -addext 'subjectAltName = DNS:mqtt.{{ site.url }}' \
   -new -sha256 -out csr/mqtt.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions server_cert -days 395 -notext -md sha256 \
   -in csr/mqtt.{{ site.url }}.csr.pem \
   -out certs/mqtt.{{ site.url }}.cert.pem
@@ -157,7 +159,7 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=homesvcs/CN=zigbee.{{ site.url }}" \
   -addext 'subjectAltName = DNS:zigbee.{{ site.url }}' \
   -new -sha256 -out csr/zigbee.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/zigbee.{{ site.url }}.csr.pem \
   -out certs/zigbee.{{ site.url }}.client_cert.pem
@@ -168,11 +170,13 @@ openssl req -config openssl.cnf \
   -subj "${subj}/OU=homesvcs/CN=home.{{ site.url }}" \
   -addext 'subjectAltName = DNS:home.{{ site.url }}' \
   -new -sha256 -out csr/home.{{ site.url }}.csr.pem
-openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+openssl ca -config openssl.cnf -passin env:CA_PASS \
   -extensions usr_cert -days 395 -notext -md sha256 \
   -in csr/home.{{ site.url }}.csr.pem \
   -out certs/home.{{ site.url }}.client_cert.pem
 chmod 444 certs/home.{{ site.url }}.client_cert.pem
+
+unset CA_PASS
 
 # Each node's files go on its install command's stdin
 "$send" \

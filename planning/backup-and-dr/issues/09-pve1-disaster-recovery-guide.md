@@ -45,7 +45,7 @@ Add `docs/guides/pve1_recovery.md`:
 - 2026-09-27: Added `docs/guides/pve1_recovery.md.j2` (renders to `pve1_recovery.md`), linked from
   `security.md#secrets` and `maintenance.md`; its inventory is now the canonical list for 04.
   Corrected vs. the table above: `acme.json` and the OliveTin key live on the VMs (PBS-covered),
-  `/root/acme` and `/root/.ssh` are regenerable. TODOs for the maintainer: PBS user + encryption key
-  of pve1's `pbs2` storage; where the CA/SSH CA passphrases and ACB device key/password are kept;
-  how root's `/root/.ssh/id_ed25519` was created; Linux name of the NIC cabled to pve2;
-  `<host>_root_pswd` keys missing from `src/nodes/pve1/secrets_template.yaml`.
+  `/root/acme` and `/root/.ssh` are regenerable.
+- 2026-10-13: The maintainer TODOs from the first comment are all resolved: the PBS user and key in
+  backup-and-dr/11, the passphrase and ACB placement in auth/08, root's key and the NIC name in the
+  guide. `<host>_root_pswd` keys are not to be added to SOPS (auth/08).

@@ -42,7 +42,7 @@ tar -C "${project_dir}/src" -cf - $paths | tar -C "${stage}/homelab-rendered/src
 
 # vpnsvcs's SSH port comes from ~/.ssh/config (src/base/debian/ssh_config)
 scp -qr -o LogLevel=QUIET "${stage}/homelab-rendered" "manualadmin@${host}.${url}:/home/manualadmin"
-echo "${host} root password:"
+echo "manualadmin's sudo password on ${host}:"
 ssh -t "manualadmin@${host}.${url}" '
 sudo chown -R root:root homelab-rendered
 sudo rm -rf /root/homelab-rendered

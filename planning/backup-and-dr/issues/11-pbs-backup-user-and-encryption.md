@@ -1,6 +1,6 @@
 # 11. Back up to PBS as a backup-only user, and decide on client-side encryption
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer answer to backup-and-dr/09 open
+Status: ready-for-agent Type: task Repo: homelab Source: maintainer answer to backup-and-dr/09 open
 question 1 (2026-09-27)
 
 ## Problem
@@ -25,6 +25,9 @@ It's also unknown whether the storage uses a client-side encryption key.
    `/root/secrets/pve1.yaml` (`src/nodes/pve1/secrets_template.yaml`).
 3. **Document** the setup in `docs/guides/proxmox.md.j2` and step 3 of
    `docs/guides/pve1_recovery.md.j2`, replacing `USER@REALM`.
+4. **pve2 too.** Its `pbs2` storage logs in as `root@pam`, so pve2's root password sits in
+   `/etc/pve/priv/storage/pbs2.pw`. Give it its own token, `pve2@pbs!backup` with `DatastoreBackup`
+   on `/datastore/backup1/pve2`, and update the pve2 block of `docs/guides/proxmox.md.j2`.
 
 ## Research: is client-side encryption needed?
 
@@ -68,7 +71,7 @@ rejected: the datastore sits on the same box as most of the VMs.
 `/datastore/backup1/pve1` and `/datastore/backup1/files` (the new namespace for the host backups;
 retention is per namespace). The secret is `pbs2_backup_token` in `/root/secrets/pve1.yaml`
 (`src/nodes/pve1/secrets_template.yaml`); the orchestrator reads it with sops for `PBS_PASSWORD`.
-pve2's storage stays `root@pam`: PBS is local to it.
+pve2's storage stayed `root@pam`; superseded by Change 4 (2026-10-13).
 
 Code side done: `secrets_template.yaml`, the orchestrator's `step_upload`,
 `docs/guides/proxmox.md#backups` and `pve1_recovery.md` step 3. Human side (the apply guide,
@@ -76,3 +79,11 @@ Code side done: `secrets_template.yaml`, the orchestrator's `step_upload`,
 key on pve1, enter the token in `pve1.yaml`, `pvesm set pbs2` on both hosts, then the acceptance
 checks: `pvesm status`, a scratch restore, and `proxmox-backup-client snapshot forget` refused as
 the token.
+
+- 2026-10-13, from auth/08: the Answer keeps pve2's `pbs2` storage on `root@pam`, which means pve2's
+  Linux root password sits in `/etc/pve/priv/storage/pbs2.pw` (`docs/guides/proxmox.md.j2`,
+  Backups). That is the same exposure the Problem describes for pve1, and it stops pve2's root
+  password from being rotated or locked without breaking backups. auth/08 recommends a second token,
+  `pve2@pbs!backup` with `DatastoreBackup` on `/datastore/backup1/pve2`, stored in
+  `/etc/pve/priv/storage/` like pve1's, and applied with the same `pvesm set pbs2` step. PBS being
+  local to pve2 doesn't change the argument: the password is still on disk.

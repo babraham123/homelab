@@ -24,7 +24,7 @@ chmod 600 "/root/secrets/${host}.yaml"
 chmod 400 "/root/secrets/${host}.yaml.age"
 scp "/root/secrets/${host}.yaml.age" "${addr}:/home/manualadmin/secrets.yaml.age"
 
-echo "${host} root password:"
+echo "manualadmin's sudo password on ${host}:"
 ssh -t "$addr" '
 sudo mkdir -p /etc/opt/secrets
 sudo mv /home/manualadmin/secrets.yaml.age /etc/opt/secrets/secrets.yaml.age
