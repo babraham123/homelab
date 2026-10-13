@@ -257,15 +257,18 @@ ufw allow in from any to any port 8007 proto tcp
 
 - Namespaces under Root: `pve1` and `pve2` for the VM images (and `host/vpnsvcs`), `files` for the
   host backups. Content tab >> Add Namespace. Retention is per namespace, set by pve2's `prune.sh`.
-- Backup identity for pve1: a user and a token that can write and read backups in the `pve1` and
-  `files` namespaces but never delete them. The secret is shown once; it goes into
-  `/root/secrets/pve1.yaml` as `pbs2_backup_token` on pve1.
+- Backup identities: one user and token per PVE host, able to write and read backups in their own
+  namespaces but never delete them. pve1's secret is shown once; it goes into
+  `/root/secrets/pve1.yaml` as `pbs2_backup_token` on pve1. pve2's goes straight into its storage
+  entry (below) and isn't kept anywhere else: PBS is local, so a lost one is regenerated here.
 
 ```bash
 proxmox-backup-manager user create pve1@pbs
 proxmox-backup-manager user generate-token pve1@pbs backup
 proxmox-backup-manager acl update /datastore/backup1/pve1 DatastoreBackup --auth-id 'pve1@pbs!backup'
 proxmox-backup-manager acl update /datastore/backup1/files DatastoreBackup --auth-id 'pve1@pbs!backup'
+proxmox-backup-manager user create pve2@pbs
+proxmox-backup-manager acl update /datastore/backup1/pve2 DatastoreBackup --auth-id 'pve2@pbs!backup'
 ```
 
 - Client encryption key, on pve1. Everything pve1 sends is encrypted with it; the key file is in the
@@ -287,11 +290,12 @@ proxmox-backup-manager cert info | grep Fingerprint
 pvesm add pbs pbs2 --server pbs2.{{ site.url }} --datastore backup1 --namespace pve1 \
   --username 'pve1@pbs!backup' --password "$(sops -d /root/secrets/pve1.yaml | yq .pbs2_backup_token)" \
   --fingerprint 'FINGERPRINT' --encryption-key /root/secrets/pbs_client.key --content backup
-# pve2: PBS is local; root@pam, namespace pve2. Same key, copied from pve1 to the same
-# path, so every image in the datastore is ciphertext.
+# pve2: its own token, made and consumed in one go; namespace pve2. Same key, copied from
+# pve1 to the same path, so every image in the datastore is ciphertext.
 pvesm add pbs pbs2 --server pbs2.{{ site.url }} --datastore backup1 --namespace pve2 \
-  --username root@pam --password ROOT_PASSWORD --fingerprint 'FINGERPRINT' \
-  --encryption-key /root/secrets/pbs_client.key --content backup
+  --username 'pve2@pbs!backup' \
+  --password "$(proxmox-backup-manager user generate-token pve2@pbs backup --output-format json | jq -r .value)" \
+  --fingerprint 'FINGERPRINT' --encryption-key /root/secrets/pbs_client.key --content backup
 pvesm status
 ```
 

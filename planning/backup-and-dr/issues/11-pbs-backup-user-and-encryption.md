@@ -1,6 +1,6 @@
 # 11. Back up to PBS as a backup-only user, and decide on client-side encryption
 
-Status: ready-for-agent Type: task Repo: homelab Source: maintainer answer to backup-and-dr/09 open
+Status: ready-for-human Type: task Repo: homelab Source: maintainer answer to backup-and-dr/09 open
 question 1 (2026-09-27)
 
 ## Problem
@@ -71,14 +71,16 @@ rejected: the datastore sits on the same box as most of the VMs.
 `/datastore/backup1/pve1` and `/datastore/backup1/files` (the new namespace for the host backups;
 retention is per namespace). The secret is `pbs2_backup_token` in `/root/secrets/pve1.yaml`
 (`src/nodes/pve1/secrets_template.yaml`); the orchestrator reads it with sops for `PBS_PASSWORD`.
-pve2's storage stayed `root@pam`; superseded by Change 4 (2026-10-13).
+pve2 has its own `pve2@pbs!backup`, `DatastoreBackup` on `/datastore/backup1/pve2`; the secret
+lives only in pve2's storage entry (`/etc/pve/priv/storage/pbs2.pw`), since PBS is local and a lost
+token is regenerated there. Neither host's storage entry holds `root@pam`'s password.
 
 Code side done: `secrets_template.yaml`, the orchestrator's `step_upload`,
 `docs/guides/proxmox.md#backups` and `pve1_recovery.md` step 3. Human side (the apply guide,
 `notes/apply-since-5a50097.md`): create the `files` namespace, the user, token and ACLs on PBS, the
-key on pve1, enter the token in `pve1.yaml`, `pvesm set pbs2` on both hosts, then the acceptance
-checks: `pvesm status`, a scratch restore, and `proxmox-backup-client snapshot forget` refused as
-the token.
+key on pve1, enter the token in `pve1.yaml`, pve2's user, token and ACL, `pvesm set pbs2` on both
+hosts, then the acceptance checks: `pvesm status`, a scratch restore, and `proxmox-backup-client
+snapshot forget` refused as the token.
 
 - 2026-10-13, from auth/08: the Answer keeps pve2's `pbs2` storage on `root@pam`, which means pve2's
   Linux root password sits in `/etc/pve/priv/storage/pbs2.pw` (`docs/guides/proxmox.md.j2`,

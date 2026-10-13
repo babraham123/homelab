@@ -18,7 +18,7 @@ export SOPS_AGE_KEY_FILE="/root/secrets/age.txt"
 
 # Record secrets, see template for commands
 sops "/root/secrets/${host}.yaml"
-# SOPS doesn't support SSH keys, must convert before exporting
+# The host copy is plain age, to pve1's key and the host's SSH key: hosts have age, not sops
 sops -d "/root/secrets/${host}.yaml" | sudo age -e -R /root/secrets/age.pub -R "/root/secrets/${host}_id_ed25519.pub" -o "/root/secrets/${host}.yaml.age"
 chmod 600 "/root/secrets/${host}.yaml"
 chmod 400 "/root/secrets/${host}.yaml.age"
