@@ -7,6 +7,8 @@ from OliveTin like the Sunshine mode is today:
 - **UEVR mode** plays flat Unreal Engine games in VR with [UEVR](https://github.com/praydog/UEVR)
   injected.
 
+A third, **direct mode** (07, 2026-10-13), plays on the TV over the GPU's HDMI, with no streaming.
+
 Oculus games already work, but only by hand: `docs/guides/gaming.md` says to RDP in, run
 `OVRServer_x64.exe` as admin and start the app.
 
@@ -24,9 +26,10 @@ The VM runs one mode at a time, because they all stream from the same GPU and NV
 | flat | `StartSunshine` | SunshineService | Moonlight (Apple TV, Mac) |
 | VR | `StartVR` | OVRService + the Meta Horizon Link app | Quest, Air Link |
 | UEVR | `StartUEVR` | VR mode, plus Playnite in the Link desktop view; Playnite starts the UEVR injector per game | Quest, Air Link |
+| direct | `StartDirect` | Playnite's fullscreen app on the console session, no streaming | TV over HDMI, Bluetooth controllers |
 
 Starting one mode stops the others. UEVR mode is VR mode with more on top, so it shares VR mode's
-start steps and its `StopVR`. `StopSunshine` / `StopVR` stop only their own modes;
+start steps and its `StopVR`. `StopSunshine` / `StopVR` / `StopDirect` stop only their own modes;
 `stop_gaming_vm` on pve2 still ends everything.
 
 ## Decisions
@@ -76,3 +79,4 @@ start steps and its `StopVR`. `StopSunshine` / `StopVR` stop only their own mode
 | [04](issues/04-network-path.md) | Measure and tune the WiFi → pfSense → pve2 stream path | `needs-info` | task | 01 |
 | [05](issues/05-uevr-over-air-link.md) | Prove a UEVR game over Air Link, injected without a keyboard | `needs-info` | prototype | 01 |
 | [06](issues/06-uevr-mode.md) | UEVR mode: `StartUEVR` trigger, Playnite injection, OliveTin button | `needs-info` | task | 02, 03, 05 |
+| [07](issues/07-direct-mode.md) | Direct mode: Playnite fullscreen on the TV over HDMI | `ready-for-human` | task | 02, 03 |
