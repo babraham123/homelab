@@ -39,6 +39,8 @@ Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      --usePromCompatibleNaming \
      --loggerLevel="WARN" \
      --loggerTimezone="{{ personal.timezone }}"
+     # Influx pushes (PVE, PBS, pfSense, HA) go to VictoriaMetrics's HTTP /write and
+     # /api/v2/write on secsvcs, not to vmagent
      # --influxListenAddr=":8089" \
      # --graphiteListenAddr=":2003" \
      # --opentsdbListenAddr=":4242" \

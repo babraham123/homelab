@@ -29,3 +29,9 @@ auth/02, backup-and-dr/01, backup-and-dr/09, image-updater/07
 - 2026-10-04: the podman guide "Backups — TODO" and the proxmox guide "PVE / PBS backups — TODO" are
   done by the backup restructure (`backup.sh` per node, host configs staged,
   `docs/guides/restore.md`). The "Add a new user" item remains.
+- 2026-10-12: done. maintenance.md has the yearly upgrade and new-user procedures; the image-bump
+  step points at the image updater's Container images section, and the telemetry group from
+  auth/02 is in the group table. The new-user steps also cover the `users` list in `vars.yml`
+  (Headscale ACL), `headscale_access`/`command_general`, and Guacamole, which needs connections
+  granted by hand. The Influx comment went on both victoriametrics and vmagent: pushes go to
+  VictoriaMetrics's HTTP `/write` and `/api/v2/write`, not `/write` alone.

@@ -16,10 +16,55 @@ Once a year
   - Go to AP's admin console (https://wifi.SITE_URL) >> System >> Firmware Update
   - Make sure to apply every incremental update
 
-TODO: router, all VMs, pinned docker images
+- Fresh backups first: `sudo systemctl start backup_orchestrator` on pve1
+- pfSense: snapshot the router VM in PVE, then the [router guide](guides/router.md#updates)
+- Debian nodes: unattended-upgrades only applies security updates, so pull everything else. Go in
+  dependency order, secsvcs last since every other node authenticates and logs through it:
+  vpnsvcs, homesvcs, devtop, websvcs (`ssh autoadmin@router start_pve2` first), secsvcs
+```bash
+ssh manualadmin@NODE
+sudo apt update
+sudo apt full-upgrade
+# Reboot if this prints anything
+cat /var/run/reboot-required
+sudo reboot
+# Every homelab unit is back
+systemctl list-units --state=failed
+```
+- Headscale is a GitHub release, not an apt package: `sudo
+  /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale` installs the latest
+- PVE and PBS point releases: pve2 (PBS is local) then pve1, per the [Proxmox
+  guide](guides/proxmox.md#minor-version), which also has the major-version path
+- Container images update themselves nightly; see [Container images](#container-images)
 
 ## Add a new user
-TODO: code edits, lldap for new user
+- In `vars.yml`, append the username to `users`: the Headscale ACL puts them in `group:family` and
+  lets them reach their own devices. Anyone outside the family stays out of `users` and gets
+  `tailscale_extra_acls` rules instead. Deploy, then reload the ACL:
+```bash
+tools/deploy_src.sh
+ssh manualadmin@vpnsvcs
+sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
+```
+- In LLDAP (https://ldap.SITE_URL), create the user with the same username, so Headscale's
+  `user@` matches, and add them to groups:
+
+| Group | Grants |
+|---|---|
+| `authelia_gen_access` | Every Authelia-protected subdomain; Readeck user |
+| `headscale_access` | VPN sign-in |
+| `command_general` | OliveTin's general commands |
+| `telemetry` | VictoriaMetrics, VictoriaLogs, Alertmanager and ntfy UIs |
+| `grafana_admin`, `hass_admin`, `command_admin`, `guacamole_admin`, `readeck_admin`, `storyteller_admin` | Admin in that app; admins only |
+
+- Their first sign-in, at https://auth.SITE_URL: register a TOTP app or a security key. Away from
+  home and the VPN every subdomain requires it.
+- Apps that create their account at first sign-in, so have the user sign in to each once:
+  - Grafana: Viewer, or Admin with `grafana_admin`
+  - Home Assistant: a person is created; admin with `hass_admin`
+  - Headscale: `tailscale up --login-server https://vpn.SITE_URL:443 --accept-routes`
+  - Guacamole: signs in with no connections. Then grant them under Settings >> Users >> USER
+  - Storyteller: permissions are set at first sign-in, so set the groups before it
 
 ## Update secrets
 ```bash

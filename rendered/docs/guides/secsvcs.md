@@ -59,8 +59,8 @@ journalctl -eu authelia
     `middlewares: [secure-headers@file]` `vim /etc/opt/traefik/config/dynamic/routes.yml`
   - Navigate to `ldap.janedoe.com` and login User = admin, get the password below
     `/root/homelab-rendered/src/base/podman/get_secret.sh lldap_admin_password`
-  - Add regular users, add them to the `lldap_password_manager` group, (note for future:
-    add_more_users)
+  - Add regular users (note for future: add_more_users). Leave them out of
+    `lldap_password_manager`: it can reset other users' passwords
     - jane
     - jane, jayden, jasper, 
   - Create the `authelia_gen_access`, `headscale_access` and `command_general` groups, add users to

@@ -42,6 +42,8 @@ Exec=--storageDataPath="/storage" \
      --loggerLevel="WARN" \
      --loggerTimezone="America/Los_Angeles" \
      --vmui.defaultTimezone="America/Los_Angeles"
+     # Influx line protocol already arrives over HTTP on the main port (PVE, PBS, pfSense and HA
+     # push to /write or /api/v2/write); this flag only adds a raw TCP/UDP listener nothing uses
      # --influxListenAddr=":8089" \
      # --graphiteListenAddr=":2003" \
      # --opentsdbListenAddr=":4242" \
