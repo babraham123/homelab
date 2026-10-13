@@ -1,6 +1,7 @@
 # Proxmox setup
 
 ## Hardware & Network
+
 - Setup dedicated LAN in pfSense
   - Open admin console: <https://{{ router.ip }}/>
   - Configure new interface (PVE#), record gateway details
@@ -13,21 +14,27 @@
 - Test connection: <https://{{ pve2.ip }}:8006/>
 
 ## PVE setup
+
 - Shell in with root, password
 - Update deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
   - `nano /etc/apt/sources.list`, add `contrib non-free non-free-firmware` to all 3 sources
   - `nano /etc/apt/sources.list.d/pve-enterprise.list`
+
 ```text
 # deb https://enterprise.proxmox.com/debian/pve trixie pve-enterprise
 deb http://download.proxmox.com/debian/pve trixie pve-no-subscription
 ```
+
 - Basic [Debian Linux setup](./debian.md)
 - Install special tools
+
 ```bash
 sudo wget https://enterprise.proxmox.com/debian/proxmox-release-trixie.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-trixie.gpg
 sudo apt install -y libguestfs-tools intel-microcode
 ```
+
 - Collect system stats to help with VM selection
+
 ```bash
 # Show which CPUs are P (performance) vs E (efficiency)
 lscpu --all --extended
@@ -38,18 +45,23 @@ lsblk
 ```
 
 ## PCI passthrough
+
 [src](https://pve.proxmox.com/wiki/PCI_Passthrough)
 
 ### Intel NIC
+
 - Fix crashes
   - `sudo vim /etc/network/interfaces`
+
 ```text
 iface eno1 inet manual
 	post-up ethtool -K eno1 tso off gso off
 ```
 
 ### GPU
+
 - Update grub
+
 ```bash
 # Check if grub or systemd-boot
 efibootmgr -v
@@ -59,32 +71,39 @@ sudo vim /etc/default/grub
 ```sh
 GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt initcall_blacklist=sysfb_init"
 ```
+
 ```bash
 sudo update-grub
 ```
+
 - Update modules
   - `sudo vim /etc/modules`
-```text
-vfio
-vfio_iommu_type1
-vfio_pci
-vfio_virqfd
-```
-  - `sudo vim /etc/modprobe.d/pve-blocklist.conf`
-```text
-# GPU passthru
-blacklist nvidiafb
-blacklist nvidia
-blacklist radeon
-blacklist nouveau
 
-blacklist snd_hda_intel
-blacklist snd_hda_codec_hdmi
-```
+    ```text
+    vfio
+    vfio_iommu_type1
+    vfio_pci
+    vfio_virqfd
+    ```
+
+  - `sudo vim /etc/modprobe.d/pve-blocklist.conf`
+
+    ```text
+    # GPU passthru
+    blacklist nvidiafb
+    blacklist nvidia
+    blacklist radeon
+    blacklist nouveau
+
+    blacklist snd_hda_intel
+    blacklist snd_hda_codec_hdmi
+    ```
+
 - Update BIOS settings
   - Under CPU, confirm that VT-d and VT-x/VMX are enabled
   - Under Graphics, make the iGPU the Primary Display
 - Confirm its works and find PCI id
+
 ```bash
 sudo reboot
 # Confirm that IOMMU is enabled
@@ -97,23 +116,29 @@ find /sys/kernel/iommu_groups/ -type l | sort
 lspci -nnv | grep VGA
 lspci -s 01:00 && lspci -s 01:00 -n
 ```
+
 - In the PVE UI, Go to VM >> Hardware >> Add PCI device
   - Check Raw Device, All Functions, ROM-Bar, PCI-Express. Also Primary GPU if using for display.
 - Reboot the VM
 
 ### iGPU
+
 Same as GPU, just add the following steps
 ([ref](https://3os.org/infrastructure/proxmox/gpu-passthrough/igpu-passthrough-to-vm/#linux-virtual-machine-igpu-passthrough-configuration)):
+
 - Add another driver to the blocklist
   - `sudo vim /etc/modprobe.d/pve-blocklist.conf`
+
 ```text
 # iGPU passthru
 blacklist i915
 ```
+
 ```bash
 sudo reboot
 lspci -nnv | grep VGA
 ```
+
 - Confirm that the iGPU has a dedicated IOMMU group
   - `/root/homelab-rendered/src/base/debian/iommu_groups.sh`
 - Change the Display type for all VMs
@@ -124,18 +149,23 @@ lspci -nnv | grep VGA
   - Now to turn off the VM, press Shutdown and then Stop
 
 ### Coral TPU
+
 Same as GPU, just add the following steps
+
 - Block more modules `sudo vim /etc/modprobe.d/pve-blocklist.conf`
+
 ```text
 # Coral TPU passthru
 blacklist gasket
 blacklist apex
 options vfio-pci ids=1ac1:089a
 ```
+
 ```bash
 sudo reboot
 lspci -nnv | grep TPU
 ```
+
 - In VM setup, uncheck "Pre-Enroll keys" in BIOS
 - If doesn't work, consider `pcie_aspm=off`
   [ref1](https://github.com/blakeblackshear/frigate/issues/1020),
@@ -145,7 +175,9 @@ lspci -nnv | grep TPU
 ## USB Passthrough
 
 Pass thru physical port, [docs](https://pve.proxmox.com/wiki/USB_Physical_Port_Mapping)
+
 - Get the port details
+
 ```bash
 sudo su
 # Get dev number from device description
@@ -153,20 +185,25 @@ lsusb
 # Get bus and port number
 lsusb -t
 ```
+
 - In the PVE UI, Go to VM >> Hardware >> Add USB device
 - Reboot the VM
 
 ## VM management
+
 [Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
 
 - Watchdog to prevent stuck VM
+
 ```bash
 sudo su
 /root/homelab-rendered/src/base/debian/install_svcs.sh vm_watchdog
 ```
 
 ## Networking
+
 - Remove unnecessary services (not using HA mode), [src](https://free-pmx.org/guides/ha-disable/)
+
 ```bash
 systemctl stop pve-ha-crm pve-ha-lrm corosync
 systemctl stop watchdog-mux
@@ -181,6 +218,7 @@ EOF
 
 - Firewall setup, [PVE
   ports](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#_ports_used_by_proxmox_ve)
+
 ```bash
 ufw default allow routed
 ufw allow in from any to any port 22,8006,3128 proto tcp
@@ -191,20 +229,25 @@ ufw enable
 ```
 
 ## Backups
+
 Only installed on PVE2. [Ref](https://pve.proxmox.com/wiki/Backup_and_Restore)
 
 - Update deb repository
   - `vim /etc/apt/sources.list.d/pbs-enterprise.list`
+
 ```text
 # NOT recommended for production use
 deb http://download.proxmox.com/debian/pbs trixie pbs-no-subscription
 ```
+
 - Install PBS, [ref](https://pbs.proxmox.com/docs/installation.html)
+
 ```bash
 apt update
 apt install -y proxmox-backup-server proxmox-backup
 ufw allow in from any to any port 8007 proto tcp
 ```
+
 - Connect to console: <https://{{ pve2.ip }}:8007/>
 - Further [setup](https://www.youtube.com/watch?v=33ubleU4OFc),
   [setup2](https://www.youtube.com/watch?v=Px5eHcUKbbQ)
@@ -217,21 +260,26 @@ ufw allow in from any to any port 8007 proto tcp
 - Backup identity for pve1: a user and a token that can write and read backups in the `pve1` and
   `files` namespaces but never delete them. The secret is shown once; it goes into
   `/root/secrets/pve1.yaml` as `pbs2_backup_token` on pve1.
+
 ```bash
 proxmox-backup-manager user create pve1@pbs
 proxmox-backup-manager user generate-token pve1@pbs backup
 proxmox-backup-manager acl update /datastore/backup1/pve1 DatastoreBackup --auth-id 'pve1@pbs!backup'
 proxmox-backup-manager acl update /datastore/backup1/files DatastoreBackup --auth-id 'pve1@pbs!backup'
 ```
+
 - Client encryption key, on pve1. Everything pve1 sends is encrypted with it; the key file is in the
   escrow set and nothing restores without it.
+
 ```bash
 proxmox-backup-client key create --kdf none /root/secrets/pbs_client.key
 chmod 400 /root/secrets/pbs_client.key
 ```
+
 - PVE storage on both hosts, [ref](https://pbs.proxmox.com/docs/pve-integration.html). The PBS cert
   fingerprint is pinned; `acme_transfer.sh` (pve1) and `install_certs_and_keys` (pve2) re-pin it
   after each cert change.
+
 ```bash
 # pve2: the fingerprint
 proxmox-backup-manager cert info | grep Fingerprint
@@ -246,6 +294,7 @@ pvesm add pbs pbs2 --server pbs2.{{ site.url }} --datastore backup1 --namespace 
   --encryption-key /root/secrets/pbs_client.key --content backup
 pvesm status
 ```
+
 - No backup jobs in the PVE UI (Datacenter >> Backup must be empty on both hosts) and no prune or GC
   job made in the PBS UI: the schedule is `src/nodes/pve1/backup_orchestrator.timer` (Saturday
   02:00), and its last step runs pve2's `prune.sh`, which creates or updates the prune jobs
@@ -256,7 +305,9 @@ pvesm status
   guide](./restore.md).
 
 ## Monitoring
+
 - Install Node Exporter
+
 ```bash
 adduser node_exporter --system
 groupadd node_exporter
@@ -266,6 +317,7 @@ src/base/debian/install_svcs.sh node_exporter
 ```
 
 - Allow access from metrics container in order to scrape node_exporter
+
 ```bash
 # Use {{ secsvcs.ip }} on pve1, {{ websvcs.ip }} on pve2
 ufw allow in from {{ secsvcs.ip }} to any port 9100 proto tcp
@@ -277,6 +329,7 @@ ufw allow in from {{ secsvcs.ip }} to any port 9100 proto tcp
   - path = /, user = api_ro@pam, role = PVEAuditor, propagate = check
   - For PBS, Permissions -> Access Control, PVEAuditor -> Audit. Generate a user password, stored as
     `pbs2_api_password`:
+
 ```bash
 ssh manualadmin@pve1
 sudo su
@@ -285,12 +338,15 @@ sops /root/secrets/pve1.yaml
 
 Perform these steps after pve1, secsvcs and victoriametrics is configured (do this for pve1, pve2
 and pbs2). [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
+
 - Get the metrics admin password and hash credentials
+
 ```bash
 ssh manualadmin@secsvcs
 password=$(sudo /root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_password)
 echo -n "admin:$password" | base64
 ```
+
 - Go to Datacenter >> Metric Server >> Add >> InfluxDB
 - For PBS, go to Configuration >> Metric Server >> Add >> InfluxDB (HTTP)
 - Set:
@@ -304,9 +360,12 @@ echo -n "admin:$password" | base64
 ## Upgrade
 
 ### Minor version
+
 Consider pinning the kernel version
+
 - [PVE 9.2
   guide](https://pve.proxmox.com/wiki/Downloads#Update_a_running_Proxmox_Virtual_Environment_9_to_latest_9.2)
+
 ```bash
 sudo su
 apt update
@@ -317,9 +376,11 @@ systemctl status proxmox-backup-proxy.service proxmox-backup.service
 ```
 
 ### From PVE 7 to 8 (bullseye to bookworm)
+
 - Make sure the VM backups are up to date
 - [PVE guide](https://pve.proxmox.com/wiki/Upgrade_from_7_to_8)
 - [PBS guide](https://pbs.proxmox.com/wiki/index.php/Upgrade_from_2_to_3#In-place_Upgrade)
+
 ```bash
 sudo su
 screen
@@ -343,9 +404,11 @@ apt upgrade
 ```
 
 ### From PVE 8 to 9 (bookworm to trixie)
+
 - Make sure the VM backups are up to date
 - [PVE guide](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9)
 - [PBS guide](https://pbs.proxmox.com/wiki/Upgrade_from_3_to_4)
+
 ```bash
 sudo su
 screen

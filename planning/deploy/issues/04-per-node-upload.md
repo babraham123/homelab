@@ -31,8 +31,8 @@ whole network map on the least-trusted VM.
 
 - 2026-09-27: restructure/01's `src/nodes.yml` lists each node's services, but a service name isn't
   always its directory (vmagent → victoriametrics/, guacd → guacamole/, piper/whisper/openwakeword →
-  wyoming/, ntfy-alertmanager → alertmanager/, traefik → traefik/ + <node>/traefik/, fluentbit also
-  uses <node>/). Add the dirs as a per-service attribute rather than parsing `cp` lines.
+  wyoming/, ntfy-alertmanager → alertmanager/, traefik → traefik/ + `<node>/traefik/`, fluentbit also
+  uses `<node>/`). Add the dirs as a per-service attribute rather than parsing `cp` lines.
 - 2026-10-12: Done.
   - Every debian node gets all of `src/base/` (kept out of the inventory to avoid per-node
     lists), its `src/nodes/<node>/`, and per-service `dirs` (`src/`-relative), defaulting to

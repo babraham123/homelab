@@ -138,7 +138,7 @@ automatic `/tmp`, `/run`, `/var/tmp`, `/dev/shm`. Client = what a `HealthCmd` ca
 layer listing.
 
 | Node | Container | Image:tag (resolved) | Drop/AddCapability | ReadOnly | Tmpfs | UserNS=auto | HealthCmd | Client in image |
-|---|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | secsvcs | postgres | `postgres:14-alpine` (14.24, alpine 3.24) | applied: all; add CHOWN DAC_OVERRIDE SETUID SETGID (entrypoint chown + gosu) | applied | none (socket dir is in `/run`) | applied (volume owned 70:70) | `pg_isready` | pg_isready, busybox |
 | secsvcs | lldap | `lldap:stable` (v0.6.3-alpine) | applied: all; add CHOWN SETUID SETGID (entrypoint chown + gosu) | blocked by entrypoint chowning `/app` while `UID=0` | n/a | applied | `lldap healthcheck` (image's own) | lldap binary, curl, busybox |
 | secsvcs | authelia | `authelia:4.39` (4.39.28) | applied: all, none added once `Exec=authelia` skips the su-exec branch | applied, needs `server.disable_healthcheck: true` (startup writes `/app/.healthcheck.env`) | none | applied | wget `/api/health` (https), as the image's `healthcheck.sh` | GNU wget, busybox |
@@ -462,9 +462,11 @@ volume. The only listener is 8883 with `require_certificate true`, so `mosquitto
 certificate the container doesn't have. Options: (a) TCP liveness with busybox `nc -z` (`-z` support
 in this busybox unverified); (b) issue a `healthcheck` client cert in
 `src/nodes/homesvcs/commands.sh.j2` like zigbee2mqtt's, then
+
 ```bash
 mosquitto_sub -h mqtt.{{ site.url }} -p 8883 --cafile … --cert … --key … -t '$$SYS/broker/uptime' -C 1 -W 5
 ```
+
 Recommended: (a) now, (b) if a hung-but-listening broker is ever seen.
 
 ```ini
@@ -819,6 +821,7 @@ list → linux/amd64 manifest → config blob and layers, fetched 2026-10-10. Lo
 finance_exporter, wyoming) from their repos' default branch, as `install_svcs.sh` builds them.
 
 Podman:
+
 - [podman-systemd.unit(5) v5.8.2][psu]
 - Options at v5.8.2: [health-cmd][opt-healthcmd], [health-on-failure][opt-hof],
   [health-start-period][opt-hsp], [read-only][opt-ro], [read-only-tmpfs][opt-rotmpfs],
@@ -826,6 +829,7 @@ Podman:
 - [containers.conf(5)][containers-conf]
 
 Images:
+
 - Traefik: [entrypoint][traefik-entry], [plugins.go v3.7.14][traefik-plugins], [healthcheck.go
   v3.7.14][traefik-hc], [ping docs][traefik-ping]
 - Postgres: [docker-entrypoint.sh][pg-entry]
@@ -858,6 +862,7 @@ Images:
 - wyoming-addons: [piper][wy-piper], [whisper][wy-whisper], [openwakeword][wy-oww]
 
 Observability:
+
 - [prometheus-podman-exporter v2.0.0 README][ppe-readme], [collector/container.go][ppe-container]
 - [node_exporter systemd collector][ne-systemd]
 

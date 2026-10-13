@@ -13,6 +13,7 @@ into homesite. Optionally add `mkdocs-redirects` entries in homesite for the old
 public.
 
 ## Comments
+
 - 2026-10-10: Renamed. The only links were in `docs/installation.md` and `CONTEXT.md`; no homesite
   blog post links into these guides. Re-rendered into `homesite/src/www/docs/homelab`. No redirects:
   homesite has no `mkdocs-redirects`.

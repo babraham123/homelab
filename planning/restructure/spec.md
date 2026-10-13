@@ -6,7 +6,7 @@ library, and renames.
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-minimal-services-inventory.md) | Minimal per-node inventory that replaces parse_routes/parse_uptime_urls/parse_dispatcher/gen_dispatch_cmds | `resolved` | prototype |
 | [02](issues/02-src-layout.md) | Restructure src/ into nodes/, services/, base/ and update every path | `ready-for-human` | task |
 | [03](issues/03-shared-bash-lib.md) | Shared bash library sourced by all scripts | `ready-for-agent` | task |

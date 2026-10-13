@@ -1,4 +1,5 @@
 # Web Services setup
+
 Guide to setup websvcs on PVE2. Just service installation.
 
 - Setup [Podman](./podman.md)
@@ -7,16 +8,20 @@ Guide to setup websvcs on PVE2. Just service installation.
 
 - Create the tables from Guacamole's init script.
   [Ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
+
 ```bash
 ssh manualadmin@secsvcs
 sudo /root/homelab-rendered/src/nodes/secsvcs/init_guacamole_db.sh
 exit
 ```
+
 - Remember to handle any subsequent upgrades
 
 ## Setup containers
+
 - Install and start containers. Each install loads its images through the [image
   updater](./podman.md#image-updater) first, which stops on a blocked image
+
 ```bash
 cd /root/homelab-rendered
 # Traefik needs crowdsec_bouncer_websvcs in its secrets, and the WAF its client certificate
@@ -55,8 +60,10 @@ src/base/podman/image_updater.sh --dry-run
 ```
 
 ## GPU metrics
+
 - With the Tesla P4's drivers installed ([GPU guide](./gpu.md)), install the exporter and let vmagent
   scrape it
+
 ```bash
 cd /root/homelab-rendered
 src/base/debian/install_svcs.sh nvidia_gpu_exporter
@@ -72,23 +79,27 @@ group once, then delete `guacadmin`. [Ref](https://guacamole.apache.org/doc/gug/
 
 - In LLDAP, create the `guacamole_admin` group and add yourself to it
 - Temporarily show the password login form next to SSO
+
 ```bash
 sudo su
 sed -i 's/^Environment=EXTENSION_PRIORITY=openid$/Environment=EXTENSION_PRIORITY=*, openid/' /etc/containers/systemd/guacamole.container
 systemctl daemon-reload
 systemctl restart guacamole
 ```
+
 - At `https://remote.{{ site.url }}`, log in as `guacadmin` / `guacadmin`
 - Go to Settings >> Groups >> New Group
   - Group name = `guacamole_admin` (must match the LLDAP group exactly)
   - Permissions: check Administer system and all the Create boxes
   - Save
 - Restore SSO-only login from the rendered quadlet
+
 ```bash
 cd /root/homelab-rendered
 src/nodes/websvcs/install_svcs.sh guacamole
 exit
 ```
+
 - Log in through Authelia and confirm that Settings >> Connections >> New Connection appears
 - Go to Settings >> Users, delete `guacadmin`
 
@@ -103,6 +114,7 @@ linkding, Readeck, Storyteller and Calliope; using them is in the [reading guide
 - Generate the `readeck_oidc_*` and `storyteller_oidc_*` secrets for secsvcs, copy the ids
   and plain secrets into websvcs's file, add `storyteller_secret_key`, and reinstall
   Authelia
+
 ```bash
 ssh manualadmin@pve1
 sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs
@@ -110,6 +122,7 @@ sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs
 # on secsvcs
 sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
 ```
+
 - linkding: open `https://archive.{{ site.url }}`, which signs you in as your Authelia user.
   Under Settings >> Integrations, create a REST API token and save it as
   `linkding_api_token`. Under Settings >> General, check that automatic HTML snapshots are
@@ -131,6 +144,7 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
   `calliope`, then `readeck_narrate`.
 
 ## Hardware acceleration
+
 This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other models), an Intel iGPU
 (video transcoding) and a Coral TPU (Frigate object detection).
 
@@ -142,6 +156,7 @@ This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other mode
 
 - Install the Nvidia container toolkit and CDI,
   [ref](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+
 ```bash
 sudo su
 /root/homelab-rendered/src/base/podman/install_nvidia_toolkit.sh

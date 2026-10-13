@@ -28,10 +28,12 @@ router and the VPS node lets the default expiry apply to personal devices only. 
    - update `tests` (`src` for a tagged node is `tag:vpnsvcs`, not a user). Keep `cousin` user-owned
      unless it becomes infrastructure too.
 2. Create tagged, reusable pre-auth keys:
+
    ```bash
    headscale preauthkeys create --reusable --expiration 100y --tags tag:router
    headscale preauthkeys create --reusable --expiration 100y --tags tag:vpnsvcs
    ```
+
 3. Re-register: pfSense Tailscale package page, replace the auth key, restart Tailscale; on the VPS,
    `tailscale up --login-server ... --auth-key ... --force-reauth` with the same flags as
    `docs/guides/vpnsvcs.md.j2`. Confirm `headscale nodes list` shows the tags and `Expiration` stays

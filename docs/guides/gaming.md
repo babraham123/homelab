@@ -1,9 +1,12 @@
 # Gaming setup
+
 Guide to stream games from the windows VM to my living room TV. First stand up the [Windows
 VM](./vm_windows.md)
 
 ## GPU metrics
+
 - Export GPU metrics, scraped by websvcs' vmagent. As administrator in PowerShell:
+
 ```PowerShell
 winget install --scope machine utkuozdemir.nvidia_gpu_exporter
 nvidia_gpu_exporter install
@@ -15,6 +18,7 @@ Start-Service nvidia_gpu_exporter
 ## Streaming
 
 ### Windows streaming server and game platforms
+
 - Install [ViGEmBus](https://github.com/ViGEm/ViGEmBus)
 - Install [Playnite](https://playnite.link/)
 - Install [ChangeScreenResolution.exe](https://tools.taubenkorb.at/change-screen-resolution/)
@@ -23,6 +27,7 @@ Start-Service nvidia_gpu_exporter
   - Add Playnite as a cmd:
     `"C:\Users\admin\AppData\Local\Playnite\Playnite.FullscreenApp.exe" --hidesplashscreen`
   - Run PowerShell cmds:
+
 ```PowerShell
 cd "C:\Program Files\Sunshine\scripts"
 ./add-firewall-rule.bat
@@ -30,6 +35,7 @@ cd "C:\Program Files\Sunshine\scripts"
 # Don't start on boot
 Set-Service -Name SunshineService -StartupType Manual
 ```
+
 - Install [Moonlight](https://github.com/moonlight-stream/moonlight-qt/releases) on Mac, Raspberry
   Pi
 - Install Oculus App
@@ -44,6 +50,7 @@ Set-Service -Name SunshineService -StartupType Manual
 - Install Dolphin, import into Playnite
 
 ### Apple TV client
+
 - Install Moonlight from the App Store
 - Tweak the
   [settings](https://www.reddit.com/r/appletv/comments/nklgcl/any_apple_tv_4k_2021_owners_that_have_tried/)
@@ -51,9 +58,11 @@ Set-Service -Name SunshineService -StartupType Manual
 - Pair xbox controller via bluetooth
 
 ### Raspberry Pi client (not used, prefer Apple TV)
+
 - Stand up the [Raspberry Pi](./rpi.md) client for the TV
 - Enable HEVC, HDR
   - `vim /Volumes/bootfs/config.txt`
+
 ```ini
 # may be outdated
 dtoverlay=rpivid-v4l2
@@ -63,14 +72,18 @@ dtoverlay=vc4-fkms-v3d
 
 gpu_mem=128
 ```
+
 - Install Moonlight QT ([notes](https://github.com/moonlight-stream/moonlight-qt/issues/967))
+
 ```bash
 curl -1sLf 'https://dl.cloudsmith.io/public/moonlight-game-streaming/moonlight-qt/setup.deb.sh' | distro=raspbian codename=buster sudo -E bash
 sudo apt install -y moonlight-qt vim less iproute2 git netcat
 sudo apt update
 sudo apt upgrade
 ```
+
 - Install the service, rendered from `src/services/moonlight/moonlight.service.j2`
+
 ```bash
 # From your local machine
 out=$(mktemp -d)/homelab-rendered
@@ -81,12 +94,14 @@ sudo install -m 644 moonlight.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable moonlight.service
 ```
+
 - In the Moonlight GUI, set resolution to 1080p, refresh rate to 60Hz
 
 - Buy Xbox S/X controllers (model
   [1914](https://boilingsteam.com/xbox-one-controller-a-perfected-xbox-360-gamepad/)) and
   [dongle](https://www.microsoft.com/en-us/d/xbox-wireless-adapter-for-windows/91dqrb97l130)
 - Install [xone](https://github.com/dlundqvist/xone) driver
+
 ```bash
 # Plugin in dongle
 git clone https://github.com/dlundqvist/xone
@@ -94,9 +109,11 @@ cd xone
 sudo ./install.sh --release
 sudo xow-get-firmware.sh --skip-disclaimer
 ```
+
 - Power on controllers,
   [pair](https://support.xbox.com/en-US/help/hardware-network/controller/connect-xbox-wireless-controller-to-pc)
   - Put dongle into pairing mode
+
 ```bash
 echo 1 | sudo tee /sys/bus/usb/drivers/xone-dongle/*/pairing
 ```

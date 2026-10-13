@@ -6,6 +6,7 @@ Status: needs-info Type: task Repo: homelab Source: maintainer request 2026-10-1
 ## Change
 
 In the Gaming fieldset of `src/services/olive_tin/config.yaml.j2`:
+
 - rename "Start Gaming Server" to "Start Gaming (TV)";
 - add "Start Gaming (VR)":
   `ssh autoadmin@router start_pve2 && ssh autoadmin@pve2 start_gaming_vm && ssh autoadmin@gaming

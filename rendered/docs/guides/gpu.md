@@ -4,6 +4,7 @@
 
 - In the VM hardware settings, set the Display to none and add the PCI device. Reboot
 - Install drivers
+
 ```bash
 sudo su
 # driver and tools
@@ -13,7 +14,9 @@ apt install intel-opencl-icd
 # Or install manually if unavailable: https://github.com/intel/compute-runtime/releases
 reboot
 ```
+
 - Verify after PCI passthrough
+
 ```bash
 ls /dev/dri | grep render
 sudo lspci -nnv | grep VGA
@@ -29,13 +32,16 @@ vainfo
   - Drivers: Currently 580 for the 3060Ti and Tesla P4
 - Install drivers,
   [ref](https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html#debian-installation)
+
 ```bash
 sudo su
 # Add debian12 as a second argument if the legacy drivers are not available
 /root/homelab-rendered/src/base/debian/install_nvidia.sh 580
 reboot
 ```
+
 - Verify after PCI passthrough
+
 ```bash
 ls /dev/nvidia*
 sudo systemctl status nvidia-persistenced
@@ -44,7 +50,9 @@ sudo lspci -nnv | grep -i nvidia
 nvidia-smi
 nvtop
 ```
+
 - Remove an old driver version
+
 ```bash
 apt purge 'nvidia-*'
 apt purge 'libnvidia-*'
@@ -56,12 +64,15 @@ apt autoremove --purge
 - In the VM hardware settings, add the PCI device and reboot
 - Install the driver and TPU runtime,
   [ref](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime)
+
 ```bash
 sudo su
 /root/homelab-rendered/src/base/debian/install_coral.sh
 reboot
 ```
+
 - If gasket fails to install
+
 ```bash
 # Check for missing kernel support
 vim /var/lib/dkms/gasket/1.0/build/make.log
@@ -69,7 +80,9 @@ vim /var/lib/dkms/gasket/1.0/build/make.log
 /root/homelab-rendered/src/base/debian/build_gasket.sh
 reboot
 ```
+
 - Verify after PCI passthrough
+
 ```bash
 lspci -nn | grep 089a
 ls /dev/apex_0

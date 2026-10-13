@@ -7,7 +7,7 @@ everything but 09 (long-term retention) is in the tree; 10's test plan waits for
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-node-and-service-alerts.md) | Add vmalert rules for hosts, disks, systemd units, backups and auth | `resolved` (`homelab.yml`, alerts dashboard) | task |
 | [02](issues/02-traefik-access-logs.md) | Enable Traefik access logs and ship them to VictoriaLogs | `resolved` | task |
 | [03](issues/03-traefik-metrics-and-dashboard.md) | Expose Traefik Prometheus metrics, scrape them, add a dashboard | `resolved` | task |

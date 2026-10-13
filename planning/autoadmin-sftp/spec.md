@@ -7,5 +7,5 @@ install commands. Close it without breaking backups and cert distribution.
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-sftp-passthrough.md) | The dispatcher's sftp passthrough gives autoadmin keys file access | `resolved` | research |

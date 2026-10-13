@@ -13,6 +13,7 @@ cast each main character in a matching voice and keep it across a series. Articl
 voice (06).
 
 Maintainer decisions (2026-10-11):
+
 - Everything runs on the Tesla P4 in websvcs. The RTX 3060 Ti is not used: it has the same 8 GB, so
   it would only be faster, and it would hold the GPU the gaming VM needs for a whole book.
 - Speaker attribution only for the `books` collection.

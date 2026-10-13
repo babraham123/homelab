@@ -9,7 +9,7 @@ Not a full data model. Only the facts the four `parse_*`/`gen_*` scripts reverse
 files, expressed once, so those scripts can be deleted:
 
 | Script | Variable it produces | Replace with |
-|---|---|---|
+| --- | --- | --- |
 | `parse_routes.sh <node>` | `<node>_subdomains` | list of subdomains per node |
 | `parse_uptime_urls.sh` | `uptime_internal_urls` | derived from the same list + per-service health path |
 | `parse_dispatcher.sh <node>` | `<node>_commands`, `<node>_sudo_cmds` | services list + static commands list |

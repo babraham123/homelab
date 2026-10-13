@@ -52,7 +52,7 @@ One-off runbook for restructure/08. Produced by restructure/06. `SITE` is `site.
 ## Phase 1: repo, one commit (agent)
 
 | Where | Change |
-|---|---|
+| --- | --- |
 | `vars.template.yml:41` | `vpn:` → `vpnsvcs:` |
 | `{{ vpn.ip }}` → `{{ vpnsvcs.ip }}` | `src/traefik/static.yml.j2:45,48,55,58`; `test/traefik_static_test.yml.j2:23,26,33,36`; `src/headscale/headscale.yaml.j2:114`; `src/headscale/headscale_private.yaml.j2:112`; `src/go2rtc/config.yaml.j2:41` (comment); the guide (`:11,16,27,106`; `:16,27` also drop the stray `vpn.` prefix before the IP) |
 | `git mv src/vpn src/vpnsvcs` | Inside: `dispatcher.sh.j2`: `inv.cases('vpnsvcs')`, usage comment. `sudoers.j2`: `inv.sudo_cmds.vpnsvcs`. `install_svcs.sh.j2:4` usage. `backup_full.sh`: `:3` guide path, `:5` usage, `:23` and `:66` archive prefix `vpnsvcs-full-` |

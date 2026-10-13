@@ -59,7 +59,7 @@ depend on this path.
 Run each step and record the result under `## Answer`.
 
 | # | Test | How | Expect |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | Alertmanager → ntfy, isolated | `amtool alert add PipelineTest severity=warning instance=test --alertmanager.url=https://alert.SITE` (basic auth), or POST `/api/v2/alerts` | ntfy notification priority 3, tag `warning`; email to `+alert@` and `+alert2@` |
 | 2 | Full path from vmalert | temporary `src/services/vmalert/configs/pipeline_test.yml`: `alert: PipelineTest, expr: vector(1), labels: {severity: critical}` | ntfy priority 5, `rotating_light`, within `group_wait` (30 s) + eval interval |
 | 3 | Severity map | repeat 1 for `error`, `info` | priorities 4 and 1 |

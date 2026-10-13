@@ -7,6 +7,7 @@ Status: ready-for-human Type: task Repo: homelab Source: maintainer request
 
 Public traffic goes internet → HAProxy on the VPS (TCP, SNI passthrough) → tailnet → Traefik on the
 node. If Traefik sees the VPS's tailnet address instead of the client's, three things fail:
+
 - **Authelia regulation** bans the VPS, which locks everyone out, instead of banning the attacker;
 - **Vaultwarden's login and admin rate limits** key on one shared IP;
 - **logs** (Traefik access logs, observability/02; app logs) can't attribute requests.
@@ -14,6 +15,7 @@ node. If Traefik sees the VPS's tailnet address instead of the client's, three t
 ## Current state (from the repo)
 
 The plumbing exists:
+
 - HAProxy sends `send-proxy-v2` on every node backend
   (`src/services/haproxy/haproxy.cfg.j2:144-164`);
 - Traefik's `web` and `websecure` entrypoints accept PROXY protocol and `X-Forwarded-*` from
@@ -50,6 +52,7 @@ the router can also assert a client IP.
 The no-SNAT routing this ticket relies on is a System Patches change on the router (router/04). A
 pfSense-pkg-Tailscale update overwrites it without warning, and Traefik then logs every public client
 as the gateway `.1`. Monthly, and after every pfSense or Tailscale package update:
+
 1. `gh pr view 1462 -R pfsense/FreeBSD-ports --json state,mergedAt`, and the installed
    pfSense-pkg-Tailscale version (System → Package Manager → Installed Packages).
 2. System → Patches lists the patch as applied. If not, re-apply it and restart Tailscale twice

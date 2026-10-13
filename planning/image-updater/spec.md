@@ -10,7 +10,7 @@ awaiting confirmation). Section names below refer to that file. Supersedes suppl
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-pre-implementation-checks.md) | Run the six pre-implementation checks | `ready-for-human` | research |
 | [02](issues/02-render-pipeline.md) | `parse_images.sh`, render wiring and the `Image=`/label check | `resolved` | task |
 | [03](issues/03-updater-script.md) | Updater script, `accept`, `--dry-run`, units, Trivy/skopeo install | `resolved` | task |

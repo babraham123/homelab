@@ -111,7 +111,7 @@ Research for 05 and 06, 2026-10-12. Source read at UEVR `master` 4ee5c6b (= nigh
 Behaviour (`Update_InjectStatus`, run every second by a `DispatcherTimer`):
 
 - It strips `.exe` and calls `Process.GetProcessesByName` (case-insensitive). The button reads
-  "Waiting for <exe>...".
+  `Waiting for <exe>...`.
 - **Injectable** (`IsInjectableProcess`) means: 64-bit; a non-empty `MainWindowTitle`; not in the
   built-in filter list; and has loaded `d3d11.dll` or `d3d12.dll`. The UE bootstrap exe never
   matches.
@@ -133,7 +133,7 @@ Behaviour (`Update_InjectStatus`, run every second by a `DispatcherTimer`):
 ### Third-party tools
 
 | Tool | How it injects | Scriptable | Status | Verdict |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Rai Pal | Runs `UEVRInjector.exe --attach={{GameExecutableName}}` (rai-pal-db mod definition) | Its own GUI launcher | Active (v0.23.0, 2026-10-06) | Same mechanism as calling `--attach` directly; adds a second library app |
 | Chihuahua (keton) | Spawns the game itself, waits `--delay` s (default 10), then injects; `--runtime OpenVR\|OpenXR`, `--uevr-build Nightly\|Release`; exits with the game | Yes, console CLI | Last push 2024-06-23 | Launch-based, not attach-based: it would bypass Playnite's Steam launch; stale |
 | UEVR Easy Injector (UEVR Deluxe, oduis) | Own frontend, no classic UEVR install; `/launch:<id>` launches a game from its own scanned library; 3 s default pre-injection delay; switches the OpenXR runtime itself; online profile database | Only by its own game IDs | Active (2026-10-11) | A second launcher and library next to Playnite; non-commercial licence |
@@ -197,7 +197,7 @@ Behaviour (`Update_InjectStatus`, run every second by a `DispatcherTimer`):
 ## Rendering: Native Stereo vs Synchronized Sequential
 
 | Mode | How | Cost | Artifacts | Use |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Native Stereo (default) | UE's own stereo pipeline, both eyes in one frame | Lowest; docs: "performs the best (usually)" | Can crash or glitch in some games; TAA, DLSS and FSR2 intact | First choice |
 | Synchronized Sequential | Two full frames per engine tick, world paused between them; "Skip Draw" (default) or "Skip Tick" | Docs: "gives worse performance than Native Stereo" (roughly a second full render per tick, est.) | TAA and temporal ghosting; turn motion blur off | Fallback when Native Stereo glitches |
 | AFR | Eyes on alternate frames, world advances between them | Cheapest | Eye desync, "usually nausea" | Don't use |

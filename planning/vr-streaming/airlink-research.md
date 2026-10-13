@@ -58,7 +58,7 @@ Research for 01 and 04, 2026-10-12. Primary sources first. Community reports are
 ## Meta Horizon Link on Windows
 
 | Item | Finding | Source |
-|---|---|---|
+| --- | --- | --- |
 | App name | "Meta Horizon Link" app (formerly Oculus app, then Meta Quest Link) | Meta help 509273027107091, 1517439565442928 |
 | Tools path | `C:\Program Files\Meta Horizon\Support\oculus-diagnostics\` (ODT, log gatherer) | Meta dev docs (ODT, Unity Link) |
 | Legacy path | `C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe` | gaming guide; third-party (unverified for new installs) |
@@ -146,7 +146,7 @@ Research for 01 and 04, 2026-10-12. Primary sources first. Community reports are
 - **Restart:** Link settings take effect after `OVRServer` restarts (menu: Restart Oculus Service).
 
 | ODT setting | Values |
-|---|---|
+| --- | --- |
 | Encode Bitrate (Mbps) | 1–2000; "high values can cause instability" |
 | Encode Dynamic Bitrate | Default / Disabled / Enabled (adapts up to the target) |
 | Dynamic Bitrate Max, Dynamic Bitrate Offset (Mbps) | integers; the offset overrides the max |

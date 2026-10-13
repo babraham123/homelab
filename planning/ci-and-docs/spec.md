@@ -5,7 +5,7 @@ No CI exists; several runbook TODOs are open; some docs and configs are stale.
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-authelia-config-4.39.md) | Bring configuration.yml.j2 up to the Authelia 4.39 template | `resolved` | task |
 | [02](issues/02-precommit-and-preinstall-checks.md) | Render-consistency checks in the hook; service-specific validation before install on the node | `resolved` | task |
 | [03](issues/03-doc-drift-check.md) | CI check for homelab docs vs homesite copy | `wontfix` | task |

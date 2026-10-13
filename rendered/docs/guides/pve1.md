@@ -1,4 +1,5 @@
 # PVE1 setup specific for hosting secsvcs
+
 Initial setup for the primary VM host, PVE1. Handles the self signed CA and other certificates,
 secrets management, notifications and VM management services.
 
@@ -7,7 +8,9 @@ secrets management, notifications and VM management services.
 - PVE1 is where some maintenance actions occur, like refreshing TLS certs.
 
 ## Configs
+
 - Install tools
+
 ```bash
 sudo su
 /root/homelab-rendered/src/base/debian/install_render_tools.sh
@@ -16,19 +19,23 @@ sudo su
 ## SSH Certificates
 
 ### CA certs
+
 [Ref](https://free-pmx.org/guides/ssh-certs/)
+
 - Generate the CA keys. They should be kept as secure as possible.
+
 ```bash
 # Include a passphrase for the user CA, remember it
 /root/homelab-rendered/src/nodes/pve1/certificates/init_ssh_ca.sh
-
 ```
+
 - Wait until all of the VMs have been created, then bootstrap trust in the CA. `ssh_cert_gen.sh`
   runs every host's `install_ssh_ca` through the dispatcher, which accepts only a certificate login
   with key ID `pve1`: root needs a certificate, and each host needs the CA's public key, before the
   script can install anything. Asks for `manualadmin`'s password on each host. Same block for a new
   CA ([Nothing escrowed](./pve1_recovery.md#nothing-escrowed)): hosts trust both CAs until the
   script replaces the file
+
 ```bash
 cd /root/ssh
 ssh-keygen -s ca_ssh_key -I pve1 -n manualadmin,autoadmin -V +395d /root/.ssh/id_ed25519.pub
@@ -40,14 +47,18 @@ for host in devtop homesvcs pve2 secsvcs vpnsvcs websvcs; do
   ssh -t "manualadmin@${host}" 'sudo tee -a /etc/ssh/ca_ssh_key.pub < ca_ssh_key.pub > /dev/null && rm ca_ssh_key.pub'
 done
 ```
+
 - Sign and distribute everything
+
 ```bash
 /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 # The cert for the gaming VM will be generated later
 ```
 
 ## Secrets
+
 - Generate the AGE keys
+
 ```bash
 /root/homelab-rendered/src/nodes/pve1/init_secrets.sh
 source ~/.zshrc
@@ -55,12 +66,14 @@ cd /root/secrets
 ```
 
 - Generate the SOPS pve1 secrets file
+
 ```bash
 # Fill in all of the secrets you can based on `src/nodes/pve1/secrets_template.yaml`
 sops /root/secrets/pve1.yaml
 ```
 
 - Generate the SOPS/AGE secsvcs secrets file
+
 ```bash
 scp manualadmin@secsvcs:/home/manualadmin/.ssh/id_ed25519.pub secsvcs_id_ed25519.pub
 chmod 400 secsvcs_id_ed25519.pub
@@ -69,6 +82,7 @@ chmod 400 secsvcs_id_ed25519.pub
 ```
 
 - Generate the SOPS/AGE websvcs secrets file
+
 ```bash
 scp manualadmin@websvcs:/home/manualadmin/.ssh/id_ed25519.pub websvcs_id_ed25519.pub
 chmod 400 websvcs_id_ed25519.pub
@@ -77,6 +91,7 @@ chmod 400 websvcs_id_ed25519.pub
 ```
 
 - Generate the SOPS/AGE homesvcs secrets file
+
 ```bash
 scp manualadmin@homesvcs:/home/manualadmin/.ssh/id_ed25519.pub homesvcs_id_ed25519.pub
 chmod 400 homesvcs_id_ed25519.pub
@@ -85,12 +100,16 @@ chmod 400 homesvcs_id_ed25519.pub
 ```
 
 ## Self-Signed Certificates
+
 Use self-signed certs for server to server traffic. Use Let's Encrypt certs for user facing sites.
 
 ### CA infra
+
 [Ref](https://jamielinux.com/docs/openssl-certificate-authority/index.html)
+
 - Setup CA infrastructure for self signed certs. The root CA key should be kept as secure as
   possible.
+
 ```bash
 # Include a passphrase for each CA key, remember them
 /root/homelab-rendered/src/nodes/pve1/certificates/init_ca.sh
@@ -98,6 +117,7 @@ Use self-signed certs for server to server traffic. Use Let's Encrypt certs for 
 ```
 
 - Example cert, normally done via gen script
+
 ```bash
 cd /root/ca
 openssl genrsa -out intermediate/private/www.example.com.key.pem 2048
@@ -115,7 +135,9 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/w
 ```
 
 ### Manage certs
+
 - Create domain specific keys and certs
+
 ```bash
 # Wait until the services in secsvcs, websvcs and homesvcs are setup but not yet started
 /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_key_gen.sh
@@ -125,7 +147,9 @@ openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/w
 ## ACME Certificates
 
 ### Transfer certs from Traefik
+
 - Copy job
+
 ```bash
 mkdir /root/acme
 cd /root/acme
@@ -137,26 +161,33 @@ mv traefik-certs-dumper /usr/local/bin/traefik-certs-dumper
 ```
 
 ## Notifications
+
 - Create a custom Gmail account
 - Enable 2 Step verification
 - Generate app passwords for lldap, authelia and msmtp,
   [Ref](https://support.google.com/accounts/answer/185833?hl=en)
+
 ```bash
 # Update sops files
 /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs
 sops /root/secrets/pve1.yaml
 ```
+
 - Setup notifications
+
 ```bash
 # Enable AppArmor
 apt install -y msmtp msmtp-mta
 vim /etc/apparmor.d/usr.bin.msmtp +82
 ```
+
 ```text
 /usr/bin/hostname PUx,
 /root/homelab-rendered/src/nodes/pve1/msmtp_password.sh PUx,
 ```
+
 - Install the notifier
+
 ```bash
 apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
 cd /root/homelab-rendered
@@ -165,8 +196,10 @@ src/nodes/pve1/install_svcs.sh cert_notifier
 ```
 
 ## Backups
+
 - Install the weekly backup. First add the `pbs2` storage and the client key from the [Proxmox
   guide](./proxmox.md#backups).
+
 ```bash
 cd /root/homelab-rendered
 src/nodes/pve1/install_svcs.sh backup_orchestrator

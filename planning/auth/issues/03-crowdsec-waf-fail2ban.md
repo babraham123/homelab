@@ -9,6 +9,7 @@ The public edge only has static rules. HAProxy (`src/services/haproxy/haproxy.cf
 per source with 30 s stick tables, geo-blocks, and drops scanner paths on `:80`. It runs `:443` in
 TCP mode, so it never sees a request: nothing on the public HTTPS path filters HTTP. Nothing learns
 from what the services see:
+
 - Authelia's `regulation` bans by **user** (`modes: ['user']`), so credential stuffing across many
   usernames from one IP is never banned;
 - a scanner that Traefik answers with 404s, or a Vaultwarden brute force (vaultwarden/01), can't be
@@ -22,7 +23,7 @@ One CrowdSec Local API (LAPI) on secsvcs decides; the VPS enforces at its firewa
 runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet and secsvcs.
 
 | Layer | Where | Does |
-|---|---|---|
+| --- | --- | --- |
 | HAProxy stick tables, geo-block | VPS | Flood control and countries, unchanged |
 | CrowdSec firewall bouncer (nftables) | VPS, host package | Drops banned IPs before HAProxy; pulls decisions from the LAPI |
 | fail2ban `sshd`, `recidive` | VPS, host | Bans SSH brute force locally; works with the tailnet or secsvcs down |
@@ -65,6 +66,7 @@ runs the WAF. fail2ban stays as the VPS's SSH guard, independent of the tailnet 
 ## Change
 
 **Part A: decisions and the VPS** (not blocked)
+
 1. `crowdsec` service on secsvcs: engine + LAPI, VictoriaLogs acquisitions, collections, allowlist,
    LAPI TLS port; `install_svcs.sh` case and inventory entry.
 2. VPS: a `crowdsec_firewall_bouncer` case (package, LAPI URL and key, nftables mode,

@@ -109,7 +109,7 @@ backup jobs. Grey dashed boxes are hardware that is bought or planned but not ye
 Fanless "router box" mini PC from AliExpress; low idle power (~15–20 W) since it runs 24/7.
 
 | Component | Spec |
-|-----------|------|
+| ----------- | ------ |
 | CPU | Intel Celeron N5105 (4 cores) |
 | RAM | 32 GB DDR4 (2×16 GB) |
 | Storage | 500 GB WD NVMe SSD |
@@ -126,7 +126,7 @@ Custom build in a Phanteks P300A case; ~30 W idle, ~300 W max. Powered on when n
 development, GPU workloads) and off otherwise.
 
 | Component | Spec |
-|-----------|------|
+| ----------- | ------ |
 | Motherboard | Kontron K3843-B (µATX, Intel B660) |
 | CPU | Intel Core i5-13500 (6 P-cores + 8 E-cores) |
 | RAM | 32 GB DDR5-4800 (2×16 GB) |
@@ -149,7 +149,7 @@ as on the VMs.
 ### Network gear and peripherals
 
 | Device | Status | Notes |
-|--------|--------|-------|
+| -------- | -------- | ------- |
 | TP-Link EAP660 HD WiFi 6 AP | deployed | wall-mounted, tagged VLANs for trusted/IoT/guest SSIDs |
 | SMLight SLZB-06 Zigbee adapter | deployed | used by Zigbee2MQTT on `homesvcs` |
 | HDDs (WD 3.5") + Blu-ray drive | bought, not yet installed | HDDs: websvcs media array on pve2, snapraid + mergerfs ([backup-and-dr/13](../planning/backup-and-dr/issues/13-pve2-media-array.md)) |
@@ -160,7 +160,7 @@ as on the VMs.
 ## Nodes
 
 | Hostname | Purpose | Host machine |
-|----------|---------|--------------|
+| ---------- | --------- | -------------- |
 | pve1 | Proxmox hypervisor (mini PC), always on | self |
 | pve2 | Proxmox hypervisor (tower), intermittent, has accelerators | self |
 | vpnsvcs | VPN coordinator and public endpoint (Headscale, HAProxy) | Linode |

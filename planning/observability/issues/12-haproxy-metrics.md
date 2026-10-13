@@ -12,6 +12,7 @@ HAProxy half. The VPS vmagent that scrapes it is observability/08.
 ## Change
 
 1. **Exporter.** Add to `src/services/haproxy/haproxy.cfg.j2`:
+
    ```text
    frontend prometheus
        mode http
@@ -20,6 +21,7 @@ HAProxy half. The VPS vmagent that scrapes it is observability/08.
        http-request deny
        no log
    ```
+
    First confirm the build has it: `haproxy -vv | grep -i prometheus` (Debian trixie's 3.0.x is
    built with `USE_PROMEX=1`).
 2. **Scrape job.** Add `haproxy` to `src/nodes/vpnsvcs/prometheus.yml.j2` (created by 08): target
@@ -30,9 +32,11 @@ HAProxy half. The VPS vmagent that scrapes it is observability/08.
 4. **Alerts** in `src/services/vmalert/configs/vps.yml` (created by 08):
    - `HaproxyDown`: `up{job="haproxy"} == 0` for 2m;
    - `HaproxyBackendConnectErrors`:
+
      ```promql
      sum by (proxy) (rate(haproxy_backend_connection_errors_total{proxy=~".*svcs_https?_proxy"}[5m])) > 0
      ```
+
      for 5m. Confirm the metric name against the live `/metrics` output first.
 5. **Dashboard.** Import Grafana.com 12693 as `src/services/grafana/dashboards/haproxy.json` and fix
    its datasource.

@@ -51,6 +51,7 @@ an OIDC client on websvcs.
 ## Comments
 
 2026-10-11, implemented in the repo; acceptance needs a deploy to websvcs.
+
 - Checked against Readeck 0.23.4. The provider is set with env vars
   (`READECK_AUTH_OIDC_PROVIDERS_AUTHELIA_*`), and the callback is `/login/oidc`.
   Provisioning is on, and the groups map `readeck_admin=admin

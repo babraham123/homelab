@@ -11,6 +11,7 @@ headless snapshot as the fallback.
 - A timer hands off any linkding bookmark tagged `toread` to Readeck.
 
 Maintainer decisions (2026-10-11):
+
 - linkding's `latest-plus` image, so bookmarks saved without SingleFile (from Pinkt,
   the Android client) still get a server-side snapshot. Chromium runs only during a
   snapshot.
@@ -28,7 +29,7 @@ while pve2 is up. Accepted.
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-linkding-singlefile.md) | Run linkding on websvcs with SingleFile uploads | `ready-for-human` | task |
 | [02](issues/02-readeck.md) | Run Readeck on websvcs with Authelia OIDC | `ready-for-human` | task |
 | [03](issues/03-toread-handoff.md) | Hand off `toread` bookmarks from linkding to Readeck | `ready-for-human` | task |

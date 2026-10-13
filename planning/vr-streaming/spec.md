@@ -2,6 +2,7 @@
 
 Two more modes for the gaming VM, both streamed to a Meta Quest headset over Air Link and started
 from OliveTin like the Sunshine mode is today:
+
 - **VR mode** plays Oculus (Rift store) PC games.
 - **UEVR mode** plays flat Unreal Engine games in VR with [UEVR](https://github.com/praydog/UEVR)
   injected.
@@ -19,7 +20,7 @@ Maintainer requests 2026-10-12. Research: [airlink-research.md](airlink-research
 The VM runs one mode at a time, because they all stream from the same GPU and NVENC:
 
 | Mode | Trigger | Runs | Client |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | flat | `StartSunshine` | SunshineService | Moonlight (Apple TV, Mac) |
 | VR | `StartVR` | OVRService + the Meta Horizon Link app | Quest, Air Link |
 | UEVR | `StartUEVR` | VR mode, plus Playnite in the Link desktop view; Playnite starts the UEVR injector per game | Quest, Air Link |
@@ -68,7 +69,7 @@ start steps and its `StopVR`. `StopSunshine` / `StopVR` stop only their own mode
 ## Issues
 
 | # | Title | Status | Type | Blocked by |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | [01](issues/01-air-link-in-the-vm.md) | Prove Air Link works in the VM with no RDP session | `ready-for-human` | prototype | |
 | [02](issues/02-vr-mode-triggers.md) | `StartVR` / `StopVR` triggers on the gaming VM | `needs-info` | task | 01 |
 | [03](issues/03-olivetin-vr-button.md) | OliveTin "Start VR" button | `needs-info` | task | 02 |

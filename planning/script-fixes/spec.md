@@ -6,7 +6,7 @@ Concrete bugs found in `tools/` and `src/`. Each is small and independent; shell
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-dispatcher-regex-hyphen.md) | Allow hyphens in the dispatcher/sudoers generators; regenerate secsvcs dispatcher | `resolved` | task |
 | [02](issues/02-mv-comments.md) | Comment the intentional mv of rendered files in install_svcs.sh | `wontfix` (superseded: no `mv` left) | task |
 | [03](issues/03-return-to-exit.md) | Replace top-level `return` with `exit 1` in upload scripts | `resolved` | task |

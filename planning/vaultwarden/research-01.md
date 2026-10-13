@@ -7,6 +7,7 @@ commit `8216c0f`, Authelia `v4.39.28`, Podman `v5.4.2` (Debian trixie's package)
 ## Verdict
 
 The ticket is mostly sound, but an agent following it as written would hit six problems:
+
 - **Non-root `/data` breaks first start.** The image's `/data` is root-owned and Podman copies that
   ownership onto a new named volume, so `User=1000` can't write it.
 - **`secure-headers@file` replaces Vaultwarden's own CSP and `X-Frame-Options`.** That includes
@@ -31,7 +32,7 @@ AUTHELIA = `https://github.com/authelia/authelia/blob/v4.39.28/docs/content`.
 ## Claim check
 
 | Ticket claim | Verified? | Correct value / note | Source |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Assessed against `.env.template` of 1.37.3 | Outdated | Latest is **1.37.4** (2026-10-05). It fixes 7 security advisories, including two-factor auth and org revocation. `:latest` pulls it. | <https://github.com/dani-garcia/vaultwarden/releases/tag/1.37.4> |
 | SSO is in the stable image | Yes | The `sso` config block ships in the release build. | VW/src/config.rs#L816-L851 |
 | `SSO_ENABLED` / `SSO_ONLY` = `true`/`true` | Yes | Both default to `false`. `SSO_ONLY` rejects `grant_type=password` ("SSO sign-in is required"). | VW/src/config.rs#L818-L820, VW/src/api/identity.rs#L68 |
@@ -95,6 +96,7 @@ AUTHELIA = `https://github.com/authelia/authelia/blob/v4.39.28/docs/content`.
    that sets only HSTS.
 3. **Group gate.** Add a custom policy and set `authorization_policy: 'vaultwarden'` on the
    client:
+
    ```yaml
    authorization_policies:
      vaultwarden:
@@ -103,6 +105,7 @@ AUTHELIA = `https://github.com/authelia/authelia/blob/v4.39.28/docs/content`.
          - policy: 'two_factor'
            subject: 'group:vaultwarden_access'
    ```
+
    A `deny` match returns `access_denied` with no consent prompt
    (AUTHELIA/configuration/identity-providers/openid-connect/provider.md, authorization_policies).
 4. **Authelia client fields.** Copy them from the official guide (commit `d8a1429`):

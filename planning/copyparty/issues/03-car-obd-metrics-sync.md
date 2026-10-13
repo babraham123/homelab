@@ -37,7 +37,7 @@ of the same recording. It is .NET `BinaryWriter` output, little-endian; strings 
 length-prefixed UTF-8.
 
 | Part | Layout |
-|---|---|
+| --- | --- |
 | Header | string `"CARSCANNERRECORD"`, int32 version (`2`), strings VIN, car name, car profile, adapter (`BT vLinker MC-Android [MAC]`), int64 .NET `DateTime` ticks of recording start (Kind=Unspecified, i.e. phone-local time) |
 | Sensor def | uint32 `0x00D56190`, int32 sensor id, string name, string short name, int32 unit enum |
 | Sample | uint32 `0x01274350`, float64 seconds since start, int32 sensor id, float64 value |
@@ -53,6 +53,7 @@ length-prefixed UTF-8.
 ## Retention (decided)
 
 `retention.metric_days` is 14 and VictoriaMetrics rejects samples older than that, so:
+
 - car series are visible for two weeks;
 - a trip uploaded more than 14 days late is not imported. Log it as `result="too_old"` and leave the
   file in place, not in `failed/`.

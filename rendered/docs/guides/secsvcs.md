@@ -1,11 +1,14 @@
 # Secure Services setup
+
 Guide to setup secsvcs on PVE1. Includes service installation and network configuration.
 
 - Setup [Podman](./podman.md)
 
 ## Setup containers
+
 - Install and start services. Each install loads its images through the [image
   updater](./podman.md#image-updater) first, which stops on a blocked image
+
 ```bash
 sudo su
 cd /root/homelab-rendered
@@ -37,7 +40,9 @@ src/base/podman/image_updater.sh --dry-run
 ```
 
 ## Networking
+
 - Enable LAN access to postgres, lldap, authelia and ntfy smtp
+
 ```bash
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
@@ -50,6 +55,7 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.2.20 to any port
 ```
 
 - Confirm that the logs for traefik, authelia and lldap look good
+
 ```bash
 # Check service status, logs
 systemctl status authelia
@@ -76,6 +82,7 @@ journalctl -eu authelia
 - Confirm that authelia is working, open <https://auth.janedoe.com>
 
 ## CrowdSec
+
 - Engine and Local API (LAPI): reads Traefik's and Authelia's logs from VictoriaLogs, bans by IP,
   pulls the community blocklist and shares this site's alerts with crowdsec.net; the VPS's firewall
   bouncer enforces ([ADR 0009](../adr/0009-crowdsec-lapi-on-secsvcs.md), [VPS
@@ -87,6 +94,7 @@ journalctl -eu authelia
     /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
 - Admit the VPS and the other Traefiks to the LAPI's published port. The router routes tailnet
   traffic without SNAT (router/04), so the VPS arrives from its tailnet IP
+
 ```bash
 sudo su
 cd /root/homelab-rendered
@@ -97,7 +105,9 @@ for src in 100.64.0.2 192.168.4.21 192.168.2.20; do
   ufw route allow in on $NET_IFACE out on $POD_IFACE from $src to any port 8455 proto tcp
 done
 ```
+
 - Install and check
+
 ```bash
 src/nodes/secsvcs/install_svcs.sh crowdsec
 podman exec crowdsec cscli lapi status
@@ -106,64 +116,81 @@ podman exec crowdsec cscli metrics show acquisition parsers   # traefik and auth
 # Fluent Bit picks up the new "Homelab:" unit's journal
 src/nodes/secsvcs/install_svcs.sh fluentbit
 ```
+
 - The online API credentials are in `/etc/opt/crowdsec/config/online_api_credentials.yaml`, kept
   across container rebuilds and in the backup; deleting the file and the `online_client` block in
   `config.yaml` registers a new identity on the next start
 - Day to day
+
 ```bash
 podman exec crowdsec cscli decisions list             # local bans; add -a for the blocklist
 podman exec crowdsec cscli alerts list
 podman exec crowdsec cscli decisions delete --ip IP   # unban
 ```
+
 - Test from an outside IP (a phone off Wi-Fi). A burst of 404s is banned by
   `crowdsecurity/http-probing`: it shows in `cscli decisions list`, in `nft list ruleset` on the VPS,
   and `:443` times out
+
 ```bash
 for i in $(seq 40); do curl -s -o /dev/null https://www.janedoe.com/nope$i; done
 ```
+
 - Six failed logins from outside for different usernames at `auth.janedoe.com` trip
   `LePresidente/authelia-bf_user-enum`
 - The LAN, tailnet and VPS addresses never appear in `cscli decisions list`
 - Grafana: "CrowdSec" dashboard; alerts in `src/services/vmalert/configs/crowdsec.yml`
 
 ### Traefik WAF
+
 Every Traefik sends requests to its node's AppSec container
 ([Security](../security.md#the-edge-haproxy)). In this order, since Traefik can't start without its
 key, and a key the LAPI doesn't know blocks every request with a 403:
+
 1. On pve1: `crowdsec_bouncer_secsvcs`, `crowdsec_bouncer_homesvcs` and `crowdsec_bouncer_websvcs`
    in `/root/secrets/secsvcs.yaml`, each copied to that node's secrets file; the AppSec keys and
    client certificates (`appsec-<node>`) come from `self_signed_key_gen.sh` and
    `self_signed_cert_gen.sh`
-```bash
-for node in secsvcs homesvcs websvcs; do
-  sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh $node
-done
-```
+
+   ```bash
+   for node in secsvcs homesvcs websvcs; do
+     sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh $node
+   done
+   ```
+
 2. On secsvcs: the LAPI registers the new bouncer keys at start, then the WAF and Traefik
-```bash
-src/nodes/secsvcs/install_svcs.sh crowdsec
-podman exec crowdsec cscli bouncers list    # vpnsvcs, and traefik_<node> for all three
-src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
-src/nodes/secsvcs/install_svcs.sh traefik
-```
+
+   ```bash
+   src/nodes/secsvcs/install_svcs.sh crowdsec
+   podman exec crowdsec cscli bouncers list    # vpnsvcs, and traefik_<node> for all three
+   src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
+   src/nodes/secsvcs/install_svcs.sh traefik
+   ```
+
 3. On homesvcs and websvcs: `install_svcs.sh crowdsec_appsec`, then `install_svcs.sh traefik`
 4. Check, on secsvcs
-```bash
-podman exec crowdsec cscli machines list   # appsec-<node>@<IP>, validated, for all three
-podman exec crowdsec cscli bouncers list   # each traefik_<node> seen after the first request
-podman exec crowdsec_appsec cscli metrics show appsec   # requests processed
-journalctl -u traefik | grep -i crowdsec   # no plugin errors
-```
+
+   ```bash
+   podman exec crowdsec cscli machines list   # appsec-<node>@<IP>, validated, for all three
+   podman exec crowdsec cscli bouncers list   # each traefik_<node> seen after the first request
+   podman exec crowdsec_appsec cscli metrics show appsec   # requests processed
+   journalctl -u traefik | grep -i crowdsec   # no plugin errors
+   ```
+
 - Test from an outside IP: a script tag gets a 403 from the WAF and an alert in `cscli alerts list`
   (a second, different rule from the same IP within a minute bans it). From the LAN the same
   request is blocked and alerted with the LAN IP, never banned
+
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' 'https://www.janedoe.com/?q=<script>alert(1)</script>'
 ```
+
 - The Core Rule Set runs out-of-band: its matches are alerts only (`cscli alerts list`, scenario
   names starting `anomaly score`). After a few weeks, add exclusions for what it flags wrongly and
   move it in-band (auth/03)
+
 ## Vaultwarden
+
 - Public at <https://vault.janedoe.com>: login is SSO-only through Authelia two-factor, gated on
   the `vaultwarden_access` LLDAP group; the master password still decrypts the vault
 - Prerequisites:
@@ -173,6 +200,7 @@ curl -s -o /dev/null -w '%{http_code}\n' 'https://www.janedoe.com/?q=<script>ale
   - Your LLDAP email must equal `jdoe@gmail.com` (`ORG_CREATION_USERS`)
   - Reinstall Authelia (new OIDC client) and Postgres (new secret). `initdb.d` only runs on an empty
     cluster, so on the existing one create the database by hand once
+
 ```bash
 sudo su
 cd /root/homelab-rendered
@@ -184,6 +212,7 @@ src/nodes/secsvcs/install_svcs.sh vaultwarden
 src/nodes/secsvcs/install_svcs.sh traefik
 curl -fsS https://vault.janedoe.com/alive
 ```
+
 - First login: a client's "Use single sign-on" / "Enterprise single sign-on", any organization
   identifier (Vaultwarden ignores it), Authelia two-factor and its consent screen (shown every time:
   the client gets refresh tokens), then set the master password (12+ characters)
@@ -209,6 +238,7 @@ curl -fsS https://vault.janedoe.com/alive
   - Existing users and tokens with the same name/value (e.g. created via the CLI) are adopted on
     restart. Any entry not tagged `server config` below is a leftover and should be removed.
 - Lock down the databases and confirm the users are marked `server config`
+
 ```bash
 chmod 600 /var/opt/ntfy/*.db*
 chmod 600 /var/lib/containers/storage/volumes/systemd-ntfydb/_data/*.db*
@@ -217,10 +247,12 @@ podman exec ntfy ntfy token list
 ```
 
 ## Debugging (optional)
+
 - Find container image name
   - `podman search traefik --limit 10`
 
 - Check unit generation
+
 ```bash
 /usr/lib/systemd/system-generators/podman-system-generator -v --dryrun
 
@@ -232,23 +264,28 @@ ls /run/systemd/generator/
   - `journalctl -e`
 
 - List services and status
+
 ```bash
 systemctl list-unit-files
 systemctl --type=service
 ```
 
 ## Upgrade Postgres
+
 [Why upgrade](https://why-upgrade.depesz.com/)
 
 - Before leaving 14: databases created before `pg_init.sql` set `OWNER` belong to `postgres`, and
   from 15 their app could no longer create tables in `public`. Hand them over first, so the dump
   carries the owners
+
 ```bash
 for db in lldap authelia gatus grafana guacamole; do
   podman exec postgres psql -U postgres -c "ALTER DATABASE $db OWNER TO $db"
 done
 ```
+
 - Backup the DB instance
+
 ```bash
 sudo su
 cd /root/backups
@@ -261,7 +298,9 @@ podman exec -it --user 70 "$container" pg_dumpall -U postgres --clean --if-exist
 gzip *.sql
 systemctl stop postgres
 ```
+
 - Upgrade and restore from backup
+
 ```bash
 cd /root/backups
 /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh postgres
@@ -272,10 +311,12 @@ systemctl start ALL_OTHER_SERVICES
 ```
 
 ## Backup Victoriametrics
+
 [Ref](https://docs.victoriametrics.com/vmbackup/)
 
 - Backup
   - TODO: fix the 401 returned by VM
+
 ```bash
 sudo su
 mkdir /root/backups/metrics
@@ -287,6 +328,7 @@ podman run --replace -it --name=vmbackup \
 ```
 
 - Restore
+
 ```bash
 systemctl stop victoriametrics
 podman run --replace -it --name=vmrestore \

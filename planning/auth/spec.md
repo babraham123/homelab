@@ -7,7 +7,7 @@ key-seed coupling.
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-admin-two-factor.md) | Require two_factor for admin subdomains from every network | `resolved` | task |
 | [02](issues/02-telemetry-group-gating.md) | Gate VictoriaMetrics/VictoriaLogs/Alertmanager/ntfy UIs on a telemetry LDAP group | `ready-for-human` | task |
 | [03](issues/03-crowdsec-waf-fail2ban.md) | Edge defense: CrowdSec bans at the VPS, CrowdSec WAF in Traefik, fail2ban for SSH | `ready-for-human` | task |

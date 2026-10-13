@@ -175,7 +175,7 @@ kill.
    settings, not in the ODT. Watch pve1's Proxmox UI > the pfSense VM > Summary for CPU.
 
    | Run | Bitrate | Codec | App frames dropped | Compositor frames dropped | pfSense CPU | Feel |
-   |---|---|---|---|---|---|---|
+   | --- | --- | --- | --- | --- | --- | --- |
    | 1 | default | Default | | | | |
    | 2 | 200 Mbps | Default | | | | |
    | 3 | best so far | H.264 | | | | |

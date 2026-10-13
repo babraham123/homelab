@@ -82,7 +82,7 @@ Why not A first:
 ### Options
 
 | | A. Pull over tailnet | **B. Local vmagent, loopback, push** | B′. B as host binaries | Public `:8405` + ACL | `haproxy_exporter` |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | New listener | `100.x:8405` | none off loopback | none off loopback | public IP | extra process |
 | Auth / ACL | tailnet (allow-all today) + ufw + HAProxy `src` ACL | not needed (loopback) | same as B | edge ACL or basic auth | n/a |
 | Traffic direction | home → VPS: new, and needs pfSense no-SNAT | VPS → secsvcs:443, already allowed | same as B | internet → VPS | n/a |
@@ -225,7 +225,7 @@ Buffer overflow is already covered by `PersistentQueueIsDroppingData` in
 ### Failure modes (B)
 
 | Event | Effect |
-|---|---|
+| --- | --- |
 | Tailnet or secsvcs down | vmagent keeps scraping and buffers up to 1 GiB (days, at a few hundred series), then backfills. `VpsMetricsAbsent` fires meanwhile; Gatus also sees public ingress down. |
 | HAProxy down | `HaproxyDown` fires. Node and Headscale metrics keep flowing. |
 | VPS down | No data arrives. `VpsMetricsAbsent` fires. |

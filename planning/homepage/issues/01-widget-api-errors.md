@@ -7,7 +7,7 @@ Status: ready-for-human Type: research Repo: homelab Source: maintainer request 
 Three widgets on the homepage dashboard show API errors:
 
 | Widget | Config | Secrets it uses |
-|---|---|---|
+| --- | --- | --- |
 | Proxmox | `src/services/homepage/proxmox.yaml.j2` (the per-service `proxmox` widgets in `services.yaml.j2` are commented out) | `DASH_PVE1_TOKEN` ← `dash_pve1_api_token` |
 | Google Calendar (iCal) | `services.yaml.j2` → `Calendar` → `Home events` | `HOME_ICAL_URL` ← `home_ical_url` |
 | Weather (Open-Meteo) | `src/services/homepage/widgets.yaml.j2` → `openmeteo` | `HOME_LATITUDE`, `HOME_LONGITUDE` ← `home_latitude`, `home_longitude` |
@@ -49,7 +49,7 @@ Source pinned to homepage `v2.5.0` (current `latest`; the quadlet runs
 `v2.4.0`). The relevant files are identical in both
 tags apart from the PBS `since` change noted below.
 
-**Substitution (confirmed by source)**
+### Substitution (confirmed by source)
 
 - Only `{{HOMEPAGE_VAR_X}}` (value) and `{{HOMEPAGE_FILE_X}}` (file contents) are replaced, as a
   raw-text `replaceAll` before YAML parsing
@@ -76,15 +76,15 @@ tags apart from the PBS `since` change noted below.
   names match `src/nodes/websvcs/secrets_template.yaml`.
 - Secret values arrive without a trailing newline (`get_secret_by_id.sh` runs `head -c -1`).
 
-**Per widget**
+### Per widget
 
 | Widget | Root cause | Status | Fix | In repo? |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Weather (Open-Meteo) | Unsubstituted `{{HOME_LATITUDE}}` became an object, so the query sent `latitude=[object Object]`. Open-Meteo returned `{"error":true}` and the widget showed an error ([openmeteo.jsx#L18-L22](https://github.com/gethomepage/homepage/blob/v2.5.0/src/components/widgets/openmeteo/openmeteo.jsx#L18-L22), [api/widgets/openmeteo.js#L3-L9](https://github.com/gethomepage/homepage/blob/v2.5.0/src/pages/api/widgets/openmeteo.js#L3-L9)). The fetch is server-side, so container egress to `api.open-meteo.com` is still needed. `cachedRequest` caches failures for `cache` minutes ([http.js#L85-L109](https://github.com/gethomepage/homepage/blob/v2.5.0/src/utils/proxy/http.js#L85-L109)). | Mechanism confirmed by source; fix needs live check | `HOMEPAGE_VAR_HOME_LATITUDE/LONGITUDE` | Yes (afe41e3) |
 | Calendar (iCal) | Same: `url` became an object, so `integration.url.includes(...)` threw and returned 500 ([calendar/proxy.js#L14-L26](https://github.com/gethomepage/homepage/blob/v2.5.0/src/widgets/calendar/proxy.js#L14-L26)). The fetch is server-side and the URL is removed from the client payload ([service-helpers.js#L667-L678](https://github.com/gethomepage/homepage/blob/v2.5.0/src/utils/config/service-helpers.js#L667-L678)). Remaining error modes: empty secret → 403 "No integration URL specified"; secret address reset → upstream 404 is passed through; a feed with zero events also shows as an error ("ical: 'Home': No events found", [ical.jsx#L67-L70](https://github.com/gethomepage/homepage/blob/v2.5.0/src/widgets/calendar/integrations/ical.jsx#L67-L70), [#L161-L162](https://github.com/gethomepage/homepage/blob/v2.5.0/src/widgets/calendar/integrations/ical.jsx#L161-L162)). Config shape matches the [docs](https://gethomepage.dev/widgets/services/calendar/). | Mechanism confirmed by source; fix needs live check | `HOMEPAGE_VAR_HOME_ICAL_URL` | Yes |
 | Proxmox 1 / 2, PBS | Removed 2026-10-12 (service widgets, `dash_*` secrets, `proxmox.yaml`, guide section). Research notes in case they return: PVE and PBS both intersect token ACLs with the user's ([PVE](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_tokens), [PBS](https://pbs.proxmox.com/docs/user-management.html#api-token-permissions)), so the user also needs `PVEAuditor` / `Audit`; the old guide granted it to the token only. PBS tokens are created in the PBS UI. | n/a | Removed | Yes |
 
-**Other repo findings (not edited)**
+### Other repo findings (not edited)
 
 - Open-Meteo `latitude`/`longitude` are not private options, so they reach every browser
   ([widget-helpers.js#L34-L43](https://github.com/gethomepage/homepage/blob/v2.5.0/src/utils/config/widget-helpers.js#L34-L43)).
@@ -92,7 +92,7 @@ tags apart from the PBS `since` change noted below.
 - The image tracks upstream `:latest`, so the running version is whatever the image updater last
   loaded. Consider pinning a tag.
 
-**Live validation still required (websvcs)**
+### Live validation still required (websvcs)
 
 ```bash
 # 1. Config drift and image version

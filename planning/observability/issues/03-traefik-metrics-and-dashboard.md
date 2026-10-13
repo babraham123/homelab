@@ -5,6 +5,7 @@ Status: resolved Type: task Repo: homelab Source: review finding 20
 ## Change
 
 - `src/services/traefik/static.yml.j2`:
+
   ```yaml
   entryPoints:
     metrics:
@@ -16,6 +17,7 @@ Status: resolved Type: task Repo: homelab Source: review finding 20
       addRoutersLabels: true
       addServicesLabels: true
   ```
+
 - Scrape from each node's collector, which is on the same `net.network` as Traefik:
   `src/nodes/secsvcs/prometheus.yml.j2`, `src/nodes/homesvcs/prometheus.yml.j2`,
   `src/nodes/websvcs/prometheus.yml.j2` → `targets: ['{{ <node>.container_subnet }}.6:8082']` with

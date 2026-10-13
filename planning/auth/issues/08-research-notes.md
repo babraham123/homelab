@@ -8,7 +8,7 @@ UNVERIFIED marks a claim I couldn't confirm in a primary source.
 Versions that matter:
 
 | Component | Version |
-|---|---|
+| --- | --- |
 | Debian 13 trixie: VMs and both Proxmox hosts (`docs/guides/proxmox.md.j2:21-22`) | OpenSSH 10.0p1 [D1]; `age` 1.2.1 [D2] |
 | Proxmox | VE 9.x; PBS 4.x on pve2's host OS (`docs/guides/proxmox.md.j2:200-205`) |
 | SOPS | installed from GitHub latest (`docs/guides/pve1.md.j2:60-61`); 3.13.3 today [S1] |
@@ -23,7 +23,7 @@ The ticket's list is incomplete. The repo also prompts for, or depends on, the s
 below.
 
 | Secret | Where the repo uses it | Used how often |
-|---|---|---|
+| --- | --- | --- |
 | `ca.key.pem` passphrase (root X.509 CA) | `docs/guides/pve1.md.j2:124-125` | Once per intermediate: `default_days 3650` (`openssl.root.cnf.j2:34`). No root CRL is generated anywhere (`gencrl` appears nowhere in `src/` or `docs/`) |
 | `intermediate.key.pem` passphrase | `self_signed_cert_gen.sh.j2:20-21`, read once, then passed as `-passin "pass:$CA_PASS"` (`:28` and each later `openssl ca`) | Yearly (`docs/maintenance.md`, "Once a year") |
 | `ca_ssh_key` passphrase (SSH user CA) | `docs/guides/pve1.md.j2:34-35`; `ssh_cert_gen.sh.j2:71,76,85` | Yearly, three signatures |
@@ -96,7 +96,7 @@ the ACB secrets and the sudo passwords.
 ### Options
 
 | | Availability when the homelab is down | Blast radius if the store leaks | Fit with backup-and-dr/04 escrow | Day-to-day friction | Cost |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **a. Vaultwarden on secsvcs** | Logged-in, *locked* clients unlock offline, read-only [B1] [B2] [B3]. A logged-out client can't log in. New devices need Authelia (`SSO_ONLY`). Worst case: the escrowed export | Ciphertext under the master password (600k PBKDF2 / Argon2id) [B4]; server compromise alone doesn't decrypt. Lives on the same host it helps recover | Good: 04 already escrows a password-protected export and the admin token (`04-key-escrow-plan.md:44-46`). Decrypting the export needs some Bitwarden server (a laptop Vaultwarden works, INFERENCE) [B5] [V2] | Lowest: browser/phone autofill, already deployed | $0 |
 | **b. Hosted Bitwarden** | Best: cloud, plus the same offline cache [B1] | Same zero-knowledge model [B4]; adds a third-party target | Same export path; emergency access needs Premium [B6] | Same clients as (a), so the same friction | $0 free; $19.80/yr Premium [B7] |
 | **c. 1Password** | Cloud plus offline apps [P1]; SSO-unlock accounts have no general offline access [P2] | 2SKD: Secret Key + password, so a server breach can't be guessed offline [P3] | Emergency Kit is paper by design [P4]; 1PUX export is **unencrypted** [P5] and would need `age -p` | Low | ~$36-48/yr individual [P6] |
@@ -135,7 +135,7 @@ the ACB secrets and the sudo passwords.
 ### sudo through the SSH agent (`pam_ssh_agent_auth`, `pam_rssh`): no
 
 | | `pam_ssh_agent_auth` | `pam_rssh` |
-|---|---|---|
+| --- | --- | --- |
 | Debian | Packaged as `libpam-ssh-agent-auth`: bookworm 0.10.3-4, trixie 0.10.3-11 [PA1]. Orphaned (QA Group), dropped from testing twice [PA2] | Not packaged [PR1]. Upstream builds RPMs only; v1.2.1, 2026-06 [PR2] |
 | Upstream | Dormant: last commit 2021-02, last tag 0.10.4 (2019) [PA3] | Active [PR2] |
 | OpenSSH certificates / CA | **No.** Issue #31 open since 2021. `-cert-v01` key types break the key parser (PR #49) [PA4] | **No.** Issue #29 "SSH CA Authorization" open [PR3] |
@@ -175,7 +175,7 @@ the ACB secrets and the sudo passwords.
 ### Locking root and manualadmin passwords
 
 | Host | Lock? | Why it's safe / what breaks | Break glass |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Debian VMs (secsvcs, homesvcs, websvcs, devtop) | **Yes**: `passwd -l root`, `passwd -l manualadmin` | `passwd -l` doesn't disable key logins [L1]. sshd checks for locked accounts only when `UsePAM no` [L2], and Debian ships `UsePAM yes` [L3] | From the Proxmox host: `qm guest exec` (`docs/debugging.md` "Run commands via the guest agent"); or `qm terminal`/noVNC with `SYSTEMD_SULOGIN_FORCE=1` [L4] or `init=/bin/bash` on the kernel line. `sulogin --force` gives a root shell when root is locked [L5] |
 | New Debian installs | Leave root's password empty in the installer: root is disabled and the first user gets sudo [L6]. Set a throwaway manualadmin password, then lock it once the CA is installed | | as above |
 | vpnsvcs (Linode) | Yes, as the VMs | | Linode's LISH console / rescue mode (UNVERIFIED here). Its access is the Linode account, so that account's password and 2FA join the store |
@@ -197,7 +197,7 @@ the ACB secrets and the sudo passwords.
 ### CA passphrases: replace with hardware keys?
 
 | CA key | Hardware option | Verdict |
-|---|---|---|
+| --- | --- | --- |
 | `ca_ssh_key` (user CA) | **FIDO `ed25519-sk` CA keys, one per YubiKey** | **Do it.** <ul><li>`ssh-keygen -s` signs with an sk key: it asks for touch per certificate, and for the PIN if `verify-required` is set [SS4]</li><li>sshd's default `CASignatureAlgorithms` includes `sk-ssh-ed25519@openssh.com`, on Debian 12 and current [SS5]</li><li>sk keys can't be backed up [SS3]. Instead, make one CA key on each of two YubiKeys and list both public keys in `ca_ssh_key.pub`; `TrustedUserCAKeys` takes one key per line [SS5]</li><li>Losing one YubiKey costs nothing; remove its line</li><li>Signing happens on pve1 with the YubiKey plugged in (Debian's openssh-client depends on libfido2 [D1]). Avoid agent-held CA signing on 10.1, fixed in 10.2 [SS6]; trixie's 10.0 is unaffected</li></ul> |
 | `ca_ssh_host_key` (host CA, no passphrase today) | Same as the user CA: two sk keys, two `@cert-authority` lines | Optional. It signs ~10 host certs a year; the yearly run gains one touch per host |
 | PIV alternative for SSH | `ssh-keygen -D libykcs11.so -s ca.pub` [SS7]. Ed25519 over PKCS#11 needs OpenSSH 10.1+ [SS8], and 10.1/10.2 had PKCS#11 PIN bugs [SS9]. So on trixie's 10.0 it must be ECDSA P-256/384 | Not chosen: FIDO is simpler and needs no import ceremony |
@@ -207,7 +207,7 @@ the ACB secrets and the sudo passwords.
 ## 4. Q3: which secrets stay offline-only
 
 | Secret | Why offline-only |
-|---|---|
+| --- | --- |
 | **Root CA key `ca.key.pem` and its passphrase** | <ul><li>Used once a decade (`openssl.root.cnf.j2:34`), with no root CRL to refresh</li><li>NIST SP 800-57 Pt 1 Rev 5 §5.5.2: root compromise forces every relying party to install a new trust anchor, so "elaborate precautions … may be justified"; §9.5.4 ranks a root-signing key among the most expensive to recover [N1]</li><li>CA/B Forum's network security requirements put Root CA Systems on a separate, air-gapped network [N2]. smallstep: after signing the intermediate "You no longer need your root_ca.key" [N3]</li><li>Today the key sits on pve1 and in every PBS host backup (`pve1_recovery.md.j2:35`). Move it to the escrow sticks only. Keep the passphrase on paper, stored apart from the sticks; CA/B BR §6.2 calls for "physical security, encryption, or a combination" [N4]</li></ul> |
 | **Escrow bundle passphrase** (`age -p`, 04 item 5) and the escrow age identity's passphrase | They protect the copy used when everything else is gone. They can't live in Vaultwarden, which is itself in the bundle |
 | **Vaultwarden master password** | It decrypts the store; the store can't hold its own key. Memorize it, and keep a paper copy with the escrow passphrase, as 1Password's Emergency Kit model does [P4] |
@@ -240,7 +240,7 @@ Rationale:
 ## 6. Per-secret placement
 
 | Secret | Store | Who / what can read it | How it's recovered |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Root CA key + passphrase | Escrow sticks (key); paper, apart from the sticks (passphrase). **Removed from pve1 and PBS** | Maintainer with both | Both sticks lost: [Only the private CA is lost](../../../docs/guides/pve1_recovery.md.j2) |
 | Intermediate CA passphrase | Vaultwarden; escrow (export) | Maintainer; pve1 root while signing | Reset by re-keying the intermediate with the root |
 | SSH user CA | Two YubiKeys (sk); handle files and `.pub` on pve1 | Whoever holds a YubiKey plus its PIN | One lost: drop its line. Both lost: the "Only the SSH CA is lost" path |
@@ -320,156 +320,156 @@ Rationale:
 
 Repo references are inline. External:
 
-- [A1] age-plugin-yubikey README: https://github.com/str4d/age-plugin-yubikey/blob/main/README.md
+- [A1] age-plugin-yubikey README: <https://github.com/str4d/age-plugin-yubikey/blob/main/README.md>
 - [A2] age README, multiple recipients and plugins:
-  - https://github.com/FiloSottile/age/blob/main/README.md
-  - https://github.com/FiloSottile/age/blob/main/doc/age.1.ronn
-- [A3] age spec, scrypt stanza must be alone: https://github.com/C2SP/C2SP/blob/main/age.md
+  - <https://github.com/FiloSottile/age/blob/main/README.md>
+  - <https://github.com/FiloSottile/age/blob/main/doc/age.1.ronn>
+- [A3] age spec, scrypt stanza must be alone: <https://github.com/C2SP/C2SP/blob/main/age.md>
 - [A4] age README, passphrase-encrypted identity files:
-  - https://github.com/FiloSottile/age/blob/main/README.md
-- [A5] age v1.3.0 release (`age1tag`): https://github.com/FiloSottile/age/releases/tag/v1.3.0
-- [B1] Bitwarden, using Bitwarden offline: https://bitwarden.com/help/using-bitwarden-offline/
-- [B2] Bitwarden, log in vs unlock: https://bitwarden.com/help/understand-log-in-vs-unlock/
+  - <https://github.com/FiloSottile/age/blob/main/README.md>
+- [A5] age v1.3.0 release (`age1tag`): <https://github.com/FiloSottile/age/releases/tag/v1.3.0>
+- [B1] Bitwarden, using Bitwarden offline: <https://bitwarden.com/help/using-bitwarden-offline/>
+- [B2] Bitwarden, log in vs unlock: <https://bitwarden.com/help/understand-log-in-vs-unlock/>
 - [B3] Bitwarden, vault timeout (lock keeps data, log out removes it):
-  - https://bitwarden.com/help/vault-timeout/
-- [B4] Bitwarden security whitepaper: https://bitwarden.com/help/bitwarden-security-white-paper/
+  - <https://bitwarden.com/help/vault-timeout/>
+- [B4] Bitwarden security whitepaper: <https://bitwarden.com/help/bitwarden-security-white-paper/>
 - [B5] Bitwarden export and encrypted export:
-  - https://bitwarden.com/help/export-your-data/
-  - https://bitwarden.com/help/encrypted-export/
-  - https://bitwarden.com/help/cli/
-- [B6] Bitwarden emergency access: https://bitwarden.com/help/emergency-access/
-- [B7] Bitwarden pricing: https://bitwarden.com/pricing/
+  - <https://bitwarden.com/help/export-your-data/>
+  - <https://bitwarden.com/help/encrypted-export/>
+  - <https://bitwarden.com/help/cli/>
+- [B6] Bitwarden emergency access: <https://bitwarden.com/help/emergency-access/>
+- [B7] Bitwarden pricing: <https://bitwarden.com/pricing/>
 - [B8] Bitwarden blog, offline access (2022):
-  - https://bitwarden.com/blog/configuring-bitwarden-clients-for-offline-access/
+  - <https://bitwarden.com/blog/configuring-bitwarden-clients-for-offline-access/>
 - [D1] Debian openssh-server/-client (trixie 10.0p1, bookworm 9.2p1, libfido2 dependency):
-  - https://packages.debian.org/trixie/openssh-server
-  - https://packages.debian.org/bookworm/openssh-server
-  - https://packages.debian.org/trixie/openssh-client
-- [D2] Debian trixie age 1.2.1: https://packages.debian.org/trixie/age
-- [D3] Debian trixie pkcs11-provider: https://packages.debian.org/trixie/pkcs11-provider
+  - <https://packages.debian.org/trixie/openssh-server>
+  - <https://packages.debian.org/bookworm/openssh-server>
+  - <https://packages.debian.org/trixie/openssh-client>
+- [D2] Debian trixie age 1.2.1: <https://packages.debian.org/trixie/age>
+- [D3] Debian trixie pkcs11-provider: <https://packages.debian.org/trixie/pkcs11-provider>
 - [K1] KeePassXC docs, KDBX4 and Argon2:
-  - https://keepassxc.org/docs/KeePassXC_UserGuide#_database_settings
-- [K2] KeePassXC FAQ, YubiKey challenge-response: https://keepassxc.org/docs/
+  - <https://keepassxc.org/docs/KeePassXC_UserGuide#_database_settings>
+- [K2] KeePassXC FAQ, YubiKey challenge-response: <https://keepassxc.org/docs/>
 - [K3] KeePassXC user guide, creating a YubiKey backup:
-  - https://keepassxc.org/docs/KeePassXC_UserGuide#_creating_a_yubikey_backup
-- [K4] KeePassXC FIDO2 hmac-secret request: https://github.com/keepassxreboot/keepassxc/issues/3560
+  - <https://keepassxc.org/docs/KeePassXC_UserGuide#_creating_a_yubikey_backup>
+- [K4] KeePassXC FIDO2 hmac-secret request: <https://github.com/keepassxreboot/keepassxc/issues/3560>
 - [K5] keepassxc-cli man page:
-  - https://github.com/keepassxreboot/keepassxc/blob/develop/docs/man/keepassxc-cli.1.adoc
-- [L1] passwd(1), trixie: https://manpages.debian.org/trixie/passwd/passwd.1.en.html
+  - <https://github.com/keepassxreboot/keepassxc/blob/develop/docs/man/keepassxc-cli.1.adoc>
+- [L1] passwd(1), trixie: <https://manpages.debian.org/trixie/passwd/passwd.1.en.html>
 - [L2] OpenSSH lock check only without PAM:
-  - https://github.com/openssh/openssh-portable/blob/master/auth.c
+  - <https://github.com/openssh/openssh-portable/blob/master/auth.c>
 - [L3] Debian sshd_config(5), README.Debian (UsePAM yes):
-  - https://manpages.debian.org/trixie/openssh-server/sshd_config.5.en.html
-  - https://sources.debian.org/src/openssh/trixie/debian/README.Debian/
+  - <https://manpages.debian.org/trixie/openssh-server/sshd_config.5.en.html>
+  - <https://sources.debian.org/src/openssh/trixie/debian/README.Debian/>
 - [L4] systemd `SYSTEMD_SULOGIN_FORCE`:
-  - https://github.com/systemd/systemd/blob/main/docs/ENVIRONMENT.md
-- [L5] sulogin(8): https://manpages.debian.org/trixie/util-linux/sulogin.8.en.html
+  - <https://github.com/systemd/systemd/blob/main/docs/ENVIRONMENT.md>
+- [L5] sulogin(8): <https://manpages.debian.org/trixie/util-linux/sulogin.8.en.html>
 - [L6] Debian 13 installation guide, root password:
-  - https://www.debian.org/releases/trixie/amd64/ch06s03.en.html
+  - <https://www.debian.org/releases/trixie/amd64/ch06s03.en.html>
 - [M1] Yubico, macOS bundled OpenSSH lacks libfido2:
-  - https://developers.yubico.com/SSH/Securing_SSH_with_FIDO2.html
-- [M2] Homebrew openssh: https://formulae.brew.sh/api/formula/openssh.json
+  - <https://developers.yubico.com/SSH/Securing_SSH_with_FIDO2.html>
+- [M2] Homebrew openssh: <https://formulae.brew.sh/api/formula/openssh.json>
 - [N1] NIST SP 800-57 Pt 1 Rev 5 (§5.5.2, §9.5.4, Table 7):
-  - https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf
+  - <https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf>
 - [N2] CA/B Forum Network and Certificate System Security Requirements §1.2.1, §2.2.4:
-  - https://github.com/cabforum/netsec/blob/main/docs/NSR.md
+  - <https://github.com/cabforum/netsec/blob/main/docs/NSR.md>
 - [N3] smallstep, cryptographic protection:
-  - https://smallstep.com/docs/step-ca/cryptographic-protection/
-  - https://smallstep.com/blog/build-a-tiny-ca-with-raspberry-pi-yubikey/
+  - <https://smallstep.com/docs/step-ca/cryptographic-protection/>
+  - <https://smallstep.com/blog/build-a-tiny-ca-with-raspberry-pi-yubikey/>
 - [N4] CA/B Forum Baseline Requirements §6.1.7, §6.2:
-  - https://github.com/cabforum/servercert/blob/main/docs/BR.md
-- [O1] OpenSSL passphrase options: https://docs.openssl.org/3.0/man1/openssl-passphrase-options/
-- [O2] openssl-ca(1), 3.0: https://docs.openssl.org/3.0/man1/openssl-ca/
+  - <https://github.com/cabforum/servercert/blob/main/docs/BR.md>
+- [O1] OpenSSL passphrase options: <https://docs.openssl.org/3.0/man1/openssl-passphrase-options/>
+- [O2] openssl-ca(1), 3.0: <https://docs.openssl.org/3.0/man1/openssl-ca/>
 - [O3] pkcs11-provider HOWTO:
-  - https://github.com/latchset/pkcs11-provider
-  - https://raw.githubusercontent.com/latchset/pkcs11-provider/main/HOWTO.md
-- [P1] 1Password membership, offline: https://support.1password.com/explore/membership/
-- [P2] 1Password, Unlock with SSO security: https://support.1password.com/sso-security/
+  - <https://github.com/latchset/pkcs11-provider>
+  - <https://raw.githubusercontent.com/latchset/pkcs11-provider/main/HOWTO.md>
+- [P1] 1Password membership, offline: <https://support.1password.com/explore/membership/>
+- [P2] 1Password, Unlock with SSO security: <https://support.1password.com/sso-security/>
 - [P3] 1Password security design, Secret Key / 2SKD:
-  - https://agilebits.github.io/security-design/apsk.html
-- [P4] 1Password Emergency Kit: https://support.1password.com/emergency-kit/
-- [P5] 1Password export (1PUX unencrypted): https://support.1password.com/export/
-- [P6] 1Password pricing: https://1password.com/pricing/password-manager
+  - <https://agilebits.github.io/security-design/apsk.html>
+- [P4] 1Password Emergency Kit: <https://support.1password.com/emergency-kit/>
+- [P5] 1Password export (1PUX unencrypted): <https://support.1password.com/export/>
+- [P6] 1Password pricing: <https://1password.com/pricing/password-manager>
 - [PA1] Debian package search, pam-ssh-agent-auth:
-  - https://packages.debian.org/search?keywords=pam-ssh-agent-auth&searchon=names&suite=all&section=all
-- [PA2] Debian tracker, pam-ssh-agent-auth: https://tracker.debian.org/pkg/pam-ssh-agent-auth
+  - <https://packages.debian.org/search?keywords=pam-ssh-agent-auth&searchon=names&suite=all&section=all>
+- [PA2] Debian tracker, pam-ssh-agent-auth: <https://tracker.debian.org/pkg/pam-ssh-agent-auth>
 - [PA3] Upstream commits and tags:
-  - https://api.github.com/repos/jbeverly/pam_ssh_agent_auth/commits?per_page=3
-  - https://api.github.com/repos/jbeverly/pam_ssh_agent_auth/tags
+  - <https://api.github.com/repos/jbeverly/pam_ssh_agent_auth/commits?per_page=3>
+  - <https://api.github.com/repos/jbeverly/pam_ssh_agent_auth/tags>
 - [PA4] Cert support issue and PR:
-  - https://github.com/jbeverly/pam_ssh_agent_auth/issues/31
-  - https://github.com/jbeverly/pam_ssh_agent_auth/pull/49
+  - <https://github.com/jbeverly/pam_ssh_agent_auth/issues/31>
+  - <https://github.com/jbeverly/pam_ssh_agent_auth/pull/49>
 - [PA5] sk keys and destination constraints:
-  - https://github.com/jbeverly/pam_ssh_agent_auth/issues/23
-  - https://github.com/jbeverly/pam_ssh_agent_auth/issues/44
+  - <https://github.com/jbeverly/pam_ssh_agent_auth/issues/23>
+  - <https://github.com/jbeverly/pam_ssh_agent_auth/issues/44>
 - [PA6] pam_ssh_agent_auth(8), trixie:
-  - https://manpages.debian.org/trixie/libpam-ssh-agent-auth/pam_ssh_agent_auth.8.en.html
-- [PB1] PBS user management: https://pbs.proxmox.com/docs/user-management.html
-- [PF1] pfSense users: https://docs.netgate.com/pfsense/en/latest/usermanager/users.html
+  - <https://manpages.debian.org/trixie/libpam-ssh-agent-auth/pam_ssh_agent_auth.8.en.html>
+- [PB1] PBS user management: <https://pbs.proxmox.com/docs/user-management.html>
+- [PF1] pfSense users: <https://docs.netgate.com/pfsense/en/latest/usermanager/users.html>
 - [PF2] pfSense user manager source (Disabled flag):
-  - https://github.com/pfsense/pfsense/blob/master/src/usr/local/www/system_usermanager.php
+  - <https://github.com/pfsense/pfsense/blob/master/src/usr/local/www/system_usermanager.php>
 - [PF3] pfSense authentication settings:
-  - https://docs.netgate.com/pfsense/en/latest/usermanager/settings.html
+  - <https://docs.netgate.com/pfsense/en/latest/usermanager/settings.html>
 - [PF4] pfSense advanced admin access (SSH key only):
-  - https://docs.netgate.com/pfsense/en/latest/config/advanced-admin.html
+  - <https://docs.netgate.com/pfsense/en/latest/config/advanced-admin.html>
 - [PF5] pfSense console menu, locked out:
-  - https://docs.netgate.com/pfsense/en/latest/config/console-menu.html
-  - https://docs.netgate.com/pfsense/en/latest/troubleshooting/locked-out.html
+  - <https://docs.netgate.com/pfsense/en/latest/config/console-menu.html>
+  - <https://docs.netgate.com/pfsense/en/latest/troubleshooting/locked-out.html>
 - [PF6] pfSense ACB configuration and restore:
-  - https://docs.netgate.com/pfsense/en/latest/backup/acb-config.html
-  - https://docs.netgate.com/pfsense/en/latest/backup/acb-restore.html
+  - <https://docs.netgate.com/pfsense/en/latest/backup/acb-config.html>
+  - <https://docs.netgate.com/pfsense/en/latest/backup/acb-restore.html>
 - [PR1] Debian package search, rssh:
-  - https://packages.debian.org/search?keywords=rssh&searchon=names&suite=all&section=all
-- [PR2] pam_rssh releases: https://api.github.com/repos/z4yx/pam_rssh/releases
-- [PR3] pam_rssh CA issue: https://github.com/z4yx/pam_rssh/issues/29
-- [PR4] pam_rssh README: https://github.com/z4yx/pam_rssh
+  - <https://packages.debian.org/search?keywords=rssh&searchon=names&suite=all&section=all>
+- [PR2] pam_rssh releases: <https://api.github.com/repos/z4yx/pam_rssh/releases>
+- [PR3] pam_rssh CA issue: <https://github.com/z4yx/pam_rssh/issues/29>
+- [PR4] pam_rssh README: <https://github.com/z4yx/pam_rssh>
 - [PX1] PVE PAM realm source:
-  - https://git.proxmox.com/?p=pve-access-control.git;a=blob_plain;f=src/PVE/Auth/PAM.pm;hb=HEAD
+  - <https://git.proxmox.com/?p=pve-access-control.git;a=blob_plain;f=src/PVE/Auth/PAM.pm;hb=HEAD>
 - [PX2] qemu-server root-only checks:
-  - https://git.proxmox.com/?p=qemu-server.git;a=blob_plain;f=src/PVE/API2/Qemu.pm;hb=HEAD
+  - <https://git.proxmox.com/?p=qemu-server.git;a=blob_plain;f=src/PVE/API2/Qemu.pm;hb=HEAD>
 - [PX3] PVE CLI runs as root@pam:
-  - https://git.proxmox.com/?p=pve-common.git;a=blob_plain;f=src/PVE/RESTEnvironment.pm;hb=HEAD
+  - <https://git.proxmox.com/?p=pve-common.git;a=blob_plain;f=src/PVE/RESTEnvironment.pm;hb=HEAD>
 - [PX4] PVE admin guide (cluster join, node SSH):
-  - https://pve.proxmox.com/pve-docs/pve-admin-guide.html
+  - <https://pve.proxmox.com/pve-docs/pve-admin-guide.html>
 - [PX5] PVE user management (realms, root@pam, TFA):
-  - https://pve.proxmox.com/pve-docs/chapter-pveum.html
+  - <https://pve.proxmox.com/pve-docs/chapter-pveum.html>
 - [S1] SOPS changelog (3.10.0: age plugins, SSH, passphrase identities, `SOPS_AGE_KEY_CMD`):
-  - https://github.com/getsops/sops/blob/main/CHANGELOG.md
+  - <https://github.com/getsops/sops/blob/main/CHANGELOG.md>
 - [S2] SOPS age keysource:
-  - https://github.com/getsops/sops/blob/main/age/keysource.go
-  - https://getsops.io/docs/usage/identities/age/
+  - <https://github.com/getsops/sops/blob/main/age/keysource.go>
+  - <https://getsops.io/docs/usage/identities/age/>
 - [SS1] ssh(1), agent forwarding warning:
-  - https://manpages.debian.org/trixie/openssh-client/ssh.1.en.html
+  - <https://manpages.debian.org/trixie/openssh-client/ssh.1.en.html>
 - [SS2] ssh-keygen(1), `verify-required`; OpenSSH 8.4/9.1 notes:
-  - https://man.openbsd.org/ssh-keygen.1
-  - https://www.openssh.org/txt/release-8.4
-  - https://www.openssh.org/txt/release-9.1
-- [SS3] ssh-keygen(1), FIDO keys can't be exported: https://man.openbsd.org/ssh-keygen.1
+  - <https://man.openbsd.org/ssh-keygen.1>
+  - <https://www.openssh.org/txt/release-8.4>
+  - <https://www.openssh.org/txt/release-9.1>
+- [SS3] ssh-keygen(1), FIDO keys can't be exported: <https://man.openbsd.org/ssh-keygen.1>
 - [SS4] ssh-keygen.c `do_ca_sign` (PIN and touch for sk CA keys):
-  - https://raw.githubusercontent.com/openssh/openssh-portable/master/ssh-keygen.c
+  - <https://raw.githubusercontent.com/openssh/openssh-portable/master/ssh-keygen.c>
 - [SS5] sshd_config(5), `CASignatureAlgorithms`, `TrustedUserCAKeys`:
-  - https://man.openbsd.org/sshd_config.5
-  - https://manpages.debian.org/bookworm/openssh-server/sshd_config.5.en.html
-- [SS6] OpenSSH 10.2 release notes (agent CA signing fix): https://www.openssh.org/txt/release-10.2
+  - <https://man.openbsd.org/sshd_config.5>
+  - <https://manpages.debian.org/bookworm/openssh-server/sshd_config.5.en.html>
+- [SS6] OpenSSH 10.2 release notes (agent CA signing fix): <https://www.openssh.org/txt/release-10.2>
 - [SS7] Yubico, PIV for SSH through PKCS#11:
-  - https://developers.yubico.com/PIV/Guides/SSH_with_PIV_and_PKCS11.html
-- [SS8] OpenSSH 10.1 release notes (Ed25519 PKCS#11): https://www.openssh.org/txt/release-10.1
-- [SS9] OpenSSH 10.3 release notes (PKCS#11 PIN fix): https://www.openssh.org/txt/release-10.3
-- [SU1] sudoers(5): https://www.sudo.ws/docs/man/sudoers.man/
+  - <https://developers.yubico.com/PIV/Guides/SSH_with_PIV_and_PKCS11.html>
+- [SS8] OpenSSH 10.1 release notes (Ed25519 PKCS#11): <https://www.openssh.org/txt/release-10.1>
+- [SS9] OpenSSH 10.3 release notes (PKCS#11 PIN fix): <https://www.openssh.org/txt/release-10.3>
+- [SU1] sudoers(5): <https://www.sudo.ws/docs/man/sudoers.man/>
 - [V1] Vaultwarden README, .env.template, 1.37.4:
-  - https://github.com/dani-garcia/vaultwarden/blob/main/README.md
-  - https://github.com/dani-garcia/vaultwarden/blob/main/.env.template
+  - <https://github.com/dani-garcia/vaultwarden/blob/main/README.md>
+  - <https://github.com/dani-garcia/vaultwarden/blob/main/.env.template>
 - [V2] Vaultwarden wiki, backing up your vault:
-  - https://github.com/dani-garcia/vaultwarden/wiki/Backing-up-your-vault
+  - <https://github.com/dani-garcia/vaultwarden/wiki/Backing-up-your-vault>
 - [W1] Microsoft, OpenSSH server configuration:
-  - https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh-server-configuration
+  - <https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh-server-configuration>
 - [Y1] Yubico, ykman OTP chalresp; challenge-response secrets not extractable:
-  - https://docs.yubico.com/software/yubikey/tools/ykman/OTP_Commands.html
-  - https://docs.yubico.com/yesdk/users-manual/application-otp/challenge-response.html
+  - <https://docs.yubico.com/software/yubikey/tools/ykman/OTP_Commands.html>
+  - <https://docs.yubico.com/yesdk/users-manual/application-otp/challenge-response.html>
 - [Y2] Yubico, FIDO2 SSH (ed25519-sk needs 5.2.3+):
-  - https://developers.yubico.com/SSH/Securing_SSH_with_FIDO2.html
-- [Y3] ykman PIV commands: https://docs.yubico.com/software/yubikey/tools/ykman/PIV_Commands.html
+  - <https://developers.yubico.com/SSH/Securing_SSH_with_FIDO2.html>
+- [Y3] ykman PIV commands: <https://docs.yubico.com/software/yubikey/tools/ykman/PIV_Commands.html>
 - [Y4] Yubico, PIV attestation (none for imported keys):
-  - https://docs.yubico.com/yesdk/users-manual/application-piv/attestation.html
+  - <https://docs.yubico.com/yesdk/users-manual/application-piv/attestation.html>
 - [Y5] YubiKey firmware 5.7 (RSA-3072/4096, Ed25519 in PIV):
-  - https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-firmware-5.7.html
+  - <https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-firmware-5.7.html>

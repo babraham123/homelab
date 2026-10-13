@@ -19,6 +19,7 @@ in [research-01.md](../research-01.md).
 Assessed against the Vaultwarden wiki (Hardening Guide, Fail2Ban Setup, Enabling SSO, Disable
 invitations) and the `.env.template` of 1.37.4. **Sufficient for public exposure**, with the
 controls below. Reasons:
+
 - **The vault is end-to-end encrypted.** Clients encrypt with a key derived from the master password
   (`PASSWORD_ITERATIONS` 600k), so a full server compromise yields ciphertext. The residual risk is
   an offline guess at a weak master password, which `SSO_MASTER_PASSWORD_POLICY` narrows.
@@ -63,7 +64,7 @@ updates (image-updater), non-root read-only container, `/admin` behind Authelia,
 - **Environment (hardening):**
 
   | Setting | Value | Why |
-  |---|---|---|
+  | --- | --- | --- |
   | `DOMAIN` | `https://vault.{{ site.url }}` | SSO callback, links |
   | `DATABASE_URL` | secret `vaultwarden_db_url`, `postgresql://vaultwarden:…@<host>/vaultwarden`, host as in `lldap_db_url` | covered by `pg_dumpall` |
   | `SIGNUPS_ALLOWED` | `false` | no password registration |

@@ -69,6 +69,7 @@ data.
 
 Allowlisted volume is estimated from the repo's exporters at about 150 series excluding
 car data:
+
 - `finance_*`: 3 tickers × 13 enabled metrics (`vars.template.yml`,
   `src/finance_exporter/config.yaml.j2`).
 - Filesystem series: about 40 non-tmpfs mounts × 2 metrics across 5–6 node_exporters.
@@ -79,7 +80,7 @@ around **1 byte** after compression"
 (<https://docs.victoriametrics.com/guides/understand-your-setup-size/>).
 
 | Option | Feeds | Resolution in LT | Disk (allowlist excl. car) | Covers secsvcs-scraped + Telegraf series | Verdict |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **1a. LT instance, federation from main VM (5 m)** | 1 scrape job in the LT instance's own config | 5 m, last value | 150 × 288/day ≈ 16 MB/yr, **≈ 160 MB / 10 y** | yes | **do** |
 | 1b. LT instance, 2nd `-remoteWrite.url` + `urlRelabelConfig` | every vmagent | raw 10 s | 150 × 8640/day ≈ 0.5 GB/yr (upper bound; flat gauges compress far below 1 B) | no (needs a vmagent on secsvcs) | no |
 | 1c. 1b + per-URL stream aggregation, `interval: 1h` | every vmagent | 1 h | ≈ 1.3 MB/yr | no | no: renames series, drops partial hours, more config |
@@ -93,7 +94,7 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
 
 ### Findings by question
 
-**1. Second instance, vmagent and imports**
+#### 1. Second instance, vmagent and imports
 
 - **Per-URL relabel is matched by position.** "the first `-remoteWrite.urlRelabelConfig`
   will be applied to the first `-remoteWrite.url`, and so on"
@@ -163,7 +164,7 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
     than 5 m, data that vmagent's buffer backfills into the main instance never reaches
     the long-term instance. That's acceptable for trend series.
 
-**2. Downsampling and stream aggregation**
+#### 2. Downsampling and stream aggregation
 
 - **Still Enterprise-only** as of v1.153.0 (released 2026-09-28,
   <https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/victoriametrics/changelog/CHANGELOG.md>).
@@ -191,7 +192,7 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
     single-value trap above).
   - Federation at 5 m gives last-value downsampling without any of these issues.
 
-**3. Sizing a global retention raise**
+#### 3. Sizing a global retention raise
 
 - **Measure live** (vmui on `metrics.SITE`):
   - `sum(vm_data_size_bytes)`;
@@ -212,7 +213,7 @@ than 1 B. Replace the assumption once copyparty/02's sample lands.
   (`src/victorialogs/victorialogs.container.j2`). Check on secsvcs with
   `df -h /var/lib/containers/storage/volumes`, and on pve1 with `lvs`.
 
-**4. Granularity, Grafana, vmalert**
+#### 4. Granularity, Grafana, vmalert
 
 - **`-retentionPeriod` units** are `h, d, w, M, y`; "If the time unit is not specified, a
   month (31 days) is assumed". "The minimum retention period is 24h or 1d", and there is
@@ -255,6 +256,7 @@ This renders to:
 `finance_.+|node_filesystem_(size|avail)_bytes|homelab_backup_last_success_timestamp_seconds|homelab_snapraid_last_success_timestamp_seconds|homelab_smart_healthy|car_ingest_.+`.
 
 Where the names come from:
+
 - `homelab_backup_last_success_timestamp_seconds`: `src/pve1/backup_orchestrator.sh.j2`.
 - `homelab_snapraid_last_success_timestamp_seconds` and `homelab_smart_healthy`:
   `src/snapraid/snapraid_run.sh.j2`, `src/vmalert/configs/backups.yml`.
@@ -290,6 +292,7 @@ node_exporter's `defFSTypesExcluded` doesn't list tmpfs
 
 The quadlet is a copy of `src/victoriametrics/victoriametrics.container.j2` with these
 changes:
+
 - `HostName=metrics-lt.SITE`, `IP=…10.10.0.16`. `.16` is the next free address; `.20` is
   fluent-bit.
 - Volume `vmltdata`.
@@ -302,6 +305,7 @@ changes:
 - No `--vmalert.proxyURL`.
 
 Wiring:
+
 - **Inventory:** `src/nodes.yml` entry under secsvcs (subdomain `metrics-lt`, uptime check).
 - **Ingress:** a Traefik route copied from `metrics.SITE` in
   `src/secsvcs/traefik/routes.yml.j2`, so `car_ingest` on websvcs can reach it.
@@ -354,6 +358,7 @@ dump:
 ### Car backfill
 
 Yes. Once the long-term instance lands:
+
 - **Target:** point copyparty/03's import at `metrics-lt.SITE` only.
 - **Backfill:** run `car_ingest.sh` once with an empty or alternate state file. The
   sha256 state would otherwise skip every file.

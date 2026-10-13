@@ -5,6 +5,7 @@
 Most of the config files are templatized to remove personal details. So first, render the source
 locally and then start following the guides. Without an argument the render goes to a private temp
 dir, whose path it prints.
+
 ```bash
 tools/render_src.sh
 ```

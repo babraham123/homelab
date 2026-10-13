@@ -31,6 +31,7 @@ observability/08):
 ```
 
 About 1 GiB:
+
 - **Scale:** 10 s scrapes of a few thousand series are on the order of tens of MB per day of outage,
   so 1 GiB is weeks. The number is an estimate; confirm it with
   `vmagent_remotewrite_pending_data_bytes` during the acceptance test and adjust.

@@ -48,6 +48,7 @@ Consequences:
 ## Deliverable
 
 Resolve under `## Answer`:
+
 - a recommendation;
 - an options table;
 - per-secret placement: secret → store → who and what can read it → how it's recovered;
@@ -87,7 +88,7 @@ break-glass file stay in the offline escrow bundle. Most passwords are removed r
 ### Options
 
 | Store | Available when homelab is down | Blast radius on leak | Fit with 04 escrow | Friction |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Vaultwarden (secsvcs) | Locked clients unlock offline read-only; logged-out clients can't log in; worst case the escrowed export | Ciphertext under master password; lives on a host it helps recover | Export + admin token already escrowed | Lowest, already deployed |
 | Hosted Bitwarden | Best | Same model, plus third-party target | Same export | Same clients |
 | 1Password | Cloud + offline apps | Secret Key + password | 1PUX export is plaintext; Emergency Kit is paper | Low, ~$36-48/yr |
@@ -97,7 +98,7 @@ break-glass file stay in the offline escrow bundle. Most passwords are removed r
 ### Per-secret placement
 
 | Secret | Store | Readable by | Recovery |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Root CA key + passphrase | Escrow sticks (key); paper (passphrase). Removed from pve1/PBS | Maintainer with both | "Only the private CA is lost" path |
 | Intermediate CA passphrase | Vaultwarden; escrow export | Maintainer; pve1 root while signing | Re-key with root |
 | SSH user CA | Two YubiKeys (sk); `.pub` on pve1 | YubiKey holder + PIN | Drop a lost key's line |

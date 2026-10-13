@@ -61,6 +61,7 @@ folder and later get a read-along EPUB, without logging in to the VM.
 ## Comments
 
 2026-10-11, implemented in the repo; acceptance needs 01's fork on GitHub and a deploy.
+
 - The wrapper is `src/services/calliope/calliope_batch.py`, in Python rather than shell. It
   runs inside the image (the quadlet mounts it from the rendered tree and sets it as the
   entrypoint), so it reads the per-book JSON and posts to ntfy without adding jq or curl

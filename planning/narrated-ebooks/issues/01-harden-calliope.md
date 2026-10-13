@@ -61,6 +61,7 @@ from. Keep upstream's layout so fixes can go back as PRs.
 
 2026-10-11: implemented in 12 commits, fast-forwarded onto the fork's `main`
 (`89954aa`).
+
 - **CLI:** `calliope IN.epub OUT.epub --voice WAV --lang xx [--model turbo|multilingual]
   [--work-dir DIR]`, plus QA flags (`--max-retries`, `--max-silence`,
   `--whisper-check`, `--wer-threshold`).

@@ -1,38 +1,20 @@
 # markdownlint-cli2 config, read by tools/check_rendered.sh (rendered docs), the pre-commit
 # hook (planning/) and the VS Code markdownlint extension.
 # Ref: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
-# Only rules that catch markdown that renders wrong, broken links, lines over 100 columns, or
-# invisible whitespace and unlabeled code are on; the rest are formatting style.
+# Every rule is on, with lines up to 100 columns; the options below are the exceptions.
 ---
 config:
-  default: false
-  MD001: true  # heading levels skip
-  MD005: true  # sibling list items at different indents
-  MD009: true  # trailing spaces
+  default: true
   MD010:  # hard tabs; code blocks keep theirs, since patches and Makefiles need them
     code_blocks: false
-  MD011: true  # reversed link syntax
-  MD012: true  # multiple blank lines in a row
   MD013:
     line_length: 100
     code_blocks: false
     tables: false
-  MD018: true  # no space after the heading hashes
-  MD019: true
-  MD020: true
-  MD021: true
-  MD023: true  # indented heading
-  MD034: true  # bare URL, not a link
-  MD037: true  # spaces inside emphasis markers
-  MD038: true  # spaces inside code spans
-  MD039: true  # spaces inside link text
-  MD040: true  # code fence without a language
-  MD042: true  # empty link
-  MD047: true  # missing final newline
-  MD051: true  # link to a heading that doesn't exist
-  MD052: true  # undefined reference link
-  MD056: true  # table row with the wrong number of cells
-  MD058: true  # table not surrounded by blank lines
+  MD024:  # duplicate headings: only among siblings, e.g. "Networking" under two nodes is fine
+    siblings_only: true
+  MD033:  # inline HTML: lists inside table cells only
+    allowed_elements: [ul, li]
 ignores:
   - "**/plugins-local/**"  # vendored upstream source
 ...

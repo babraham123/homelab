@@ -14,7 +14,7 @@ in PCI address order) PCI-passed through to it. The Proxmox host itself has no p
 sits on the virtual bridge `vmbr0`, with the pfSense VM as its gateway.
 
 | pfSense interface | Physical port | Network | Subnet |
-|-------------------|---------------|---------|--------|
+| ------------------- | --------------- | --------- | -------- |
 | WAN | igc0 | ISP uplink | (DHCP from ISP) |
 | LAN | igc1 | WiFi AP trunk (VLAN parent) | 192.168.1.0/24 |
 | pve2 | igc2 | pve2 uplink | 192.168.2.0/24 |
@@ -66,7 +66,7 @@ Each VM gets a static IP in its host's subnet from a pfSense DHCP static mapping
 VM runs its own Podman bridge network for containers (`net.network` quadlet):
 
 | Node | VM IP | Container subnet |
-|------|-------|------------------|
+| ------ | ------- | ------------------ |
 | secsvcs | 192.168.4.20 | 10.10.0.0/24 |
 | websvcs | 192.168.2.20 | 10.11.0.0/24 |
 | homesvcs | 192.168.4.21 | 10.12.0.0/24 |
@@ -82,7 +82,7 @@ VLAN is its own pfSense interface and /24, with the VLAN ID as the third octet, 
 scope.
 
 | VLAN | Name | Subnet | SSID | Status |
-|------|------|--------|------|--------|
+| ------ | ------ | -------- | ------ | -------- |
 | 10 | WiFiTrusted | 192.168.10.0/24 | cool-house / cool-house5 | active |
 | 11 | WiFiIoT | 192.168.11.0/24 | machines (2.4 GHz) | active |
 | 12 | WiFiGuest | 192.168.12.0/24 | welcome (5 GHz) | active |
@@ -181,7 +181,7 @@ CrowdSec's bans (it reads Traefik's and Authelia's logs), app rate limits and th
 key on the client IP, so each hop passes it on and trusts it only from the hop before:
 
 | Hop | Carries the client IP as | Trusted from |
-|---|---|---|
+| --- | --- | --- |
 | HAProxy → Traefik | PROXY protocol v2 (`send-proxy-v2` on every node backend) | Traefik `proxyProtocol.trustedIPs` |
 | Traefik entrypoint | `X-Forwarded-*` sent by the client; from any other source Traefik drops them | Traefik `forwardedHeaders.trustedIPs` |
 | Traefik → app | `X-Forwarded-For` and `X-Real-Ip`, with the client IP Traefik resolved | the app's trusted-proxy setting |
@@ -195,6 +195,7 @@ update overwrites the System Patches change), HAProxy's connections arrive from 
 `.1`, which isn't trusted: Traefik ignores the PROXY header and logs every public client as `.1`.
 
 Per app:
+
 - **Authelia** has no trusted-proxy setting: it takes the first `X-Forwarded-For` entry from any
   peer. The boundary is who can reach :9091: Traefik on secsvcs over the podman network, and the
   websvcs and homesvcs VMs (secsvcs `ufw`). Authelia's mTLS client certificates (off for now) would

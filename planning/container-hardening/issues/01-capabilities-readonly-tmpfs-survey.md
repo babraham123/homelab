@@ -8,7 +8,7 @@ Rootless is out (maintainer decision; it would replace the static-IP bridge mode
 rootful. Evaluate **four** directives for **each** of the 31 quadlets:
 
 | Directive | What it buys | How to find the right value |
-|---|---|---|
+| --- | --- | --- |
 | `DropCapability=ALL` + minimal `AddCapability=` | shrinks what root-in-container can do | `podman inspect --format '{{.EffectiveCaps}}'`, then start with `ALL` dropped and add back one at a time until healthy |
 | `ReadOnly=true` | image layers immutable at runtime | start read-only, read the first write failure, add a `Volume`/`Tmpfs` for that path, repeat |
 | `Tmpfs=/tmp`, `/run`, app-specific (`/var/cache/nginx`, …) | the writable scratch `ReadOnly` needs, without a persistent volume | from the `ReadOnly` failures |

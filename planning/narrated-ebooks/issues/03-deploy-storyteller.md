@@ -76,6 +76,7 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
 ## Comments
 
 2026-10-11, implemented in the repo; acceptance needs a deploy to websvcs.
+
 - Checked against `web-v2.14.23`.
   - The image tag is `web-v2`, which follows stable 2.x only; it is the CPU build. The
     CUDA builds are 11.8, 12.9 and 13.1.

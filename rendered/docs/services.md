@@ -15,7 +15,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 ## secsvcs: identity, certificates, observability (pve1, 10.10.0.0/24)
 
 | IP | Service | Image | Purpose | URL |
-|-----|---------|-------|---------|-----|
+| ----- | --------- | ------- | --------- | ----- |
 | .3 | postgres | postgres | Authelia, Guacamole and Vaultwarden storage | pgdb (internal DNS only) |
 | .4 | lldap | lldap | User/group directory | ldap.janedoe.com |
 | .5 | authelia | authelia | SSO portal, OIDC provider | auth.janedoe.com |
@@ -37,7 +37,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 ## websvcs: user-facing web apps (pve2, 10.11.0.0/24)
 
 | IP | Service | Image | Purpose | URL |
-|-----|---------|-------|---------|-----|
+| ----- | --------- | ------- | --------- | ----- |
 | .6 | traefik | traefik | Node ingress, TLS termination | webproxy.janedoe.com |
 | .7 | vmagent | vmagent | Local metrics scraper | n/a |
 | .8 | nginx | nginx | Static site + error pages | `www.janedoe.com`, apex |
@@ -65,7 +65,7 @@ timers; see the [reading guide](guides/reading.md).
 ## homesvcs: home automation (pve1, 10.12.0.0/24)
 
 | IP | Service | Image | Purpose | URL |
-|-----|---------|-------|---------|-----|
+| ----- | --------- | ------- | --------- | ----- |
 | .6 | traefik | traefik | Node ingress, TLS termination | homeproxy.janedoe.com |
 | .7 | vmagent | vmagent | Local metrics scraper | n/a |
 | .8 | mosquitto | eclipse-mosquitto | MQTT broker | mqtt (internal DNS only) |
@@ -77,7 +77,7 @@ timers; see the [reading guide](guides/reading.md).
 ## vpnsvcs: public edge (Linode, 10.13.0.0/24)
 
 | IP | Service | Image | Purpose | URL |
-|-----|---------|-------|---------|-----|
+| ----- | --------- | ------- | --------- | ----- |
 | .7 | vmagent | vmagent | Local metrics scraper | n/a |
 | .20 | fluentbit | fluent-bit | Journal → VictoriaLogs forwarder | n/a |
 | .30 | geoip_generator | built from `src/services/geoip_generator/` | Weekly GeoIP maps for HAProxy (timer) | n/a |
@@ -85,7 +85,7 @@ timers; see the [reading guide](guides/reading.md).
 ## Host-level services (not containerized)
 
 | Host | Service | Purpose |
-|------|---------|---------|
+| ------ | --------- | --------- |
 | container VMs | mdns_repeater | Bridge mDNS between VM NIC and Podman network |
 | container VMs, vpnsvcs, pve1, pve2 | node_exporter | Host metrics |
 | websvcs, devtop, gaming | nvidia_gpu_exporter | GPU metrics (temperature) for the cards pve2 passes through |
@@ -104,6 +104,7 @@ timers; see the [reading guide](guides/reading.md).
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
 pve1, pve2, pbs2 and the router serve their own web UIs as pve1/pve2/pbs2/router.janedoe.com:
+
 - websvcs Traefik's ACME routes (`src/nodes/websvcs/traefik/acme_routes.yml.j2`) only obtain the
   certs; requests to them get a 403
 - `acme_transfer.sh` (`src/nodes/pve1/certificates/`) installs the certs on each host

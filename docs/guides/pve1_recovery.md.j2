@@ -1,4 +1,5 @@
 # pve1 disaster recovery
+
 What pve1 must keep off-box, and how to recover when its SSD dies or a trust root (AGE key, private
 CA, SSH CA, `vars.yml`) is lost.
 
@@ -13,7 +14,9 @@ CA, SSH CA, `vars.yml`) is lost.
   exist yet
 
 ## What must exist off-box
+
 The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "Covered by":
+
 - **PBS VM backup**: inside a VM disk that PBS backs up
 - **PBS host backup**: staged by pve1's `backup.sh` into `/root/backups/pve1/` and uploaded with the
   rest of `/root/backups`; needs the client key and a token to restore
@@ -25,7 +28,7 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
 ### On pve1
 
 | Path on pve1 | What | Covered by | If lost |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `/root/secrets/age.txt`, `age.pub` | AGE identity; every SOPS file and every host's `secrets.yaml.age` is encrypted to it | Escrow, PBS host backup | [Only the AGE key is lost](#only-the-age-key-is-lost) |
 | `/root/secrets/pbs_client.key` | PBS client encryption key; everything in PBS is ciphertext under it | Escrow; pve2's `pbs2` storage holds the same key (`/etc/pve/priv/storage/pbs2.enc`). The copy in PBS is encrypted with itself | Nothing in PBS restores. Rebuild everything from the guides |
 | `/root/secrets/pve1.yaml` | pve1's secrets: `msmtp_password`, `pbs2_api_password`, `pbs2_backup_token`, MaxMind keys | Escrow, PBS host backup | Re-enter from `src/nodes/pve1/secrets_template.yaml`; a new PBS token per the [Proxmox guide](./proxmox.md#backups) |
@@ -52,7 +55,7 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
 ### Elsewhere
 
 | Where | What | Covered by | If lost |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `vars.yml` on the workstation | every personal value the render needs | Repo backup (every deploy), Escrow | [Only vars.yml is lost](#only-varsyml-is-lost) |
 | `/etc/opt/traefik/certificates/acme.json` on secsvcs, homesvcs, websvcs | Let's Encrypt account key + certs | PBS VM backup | Traefik re-issues on start (rate limits apply) |
 | `/etc/opt/olive_tin/ssh/` on secsvcs | OliveTin's `autoadmin` key + cert | PBS VM backup | `ssh_cert_gen.sh` |
@@ -62,12 +65,14 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
 | PBS datastore `backup1` on pve2 | every VM and host backup | nothing (single copy); *planned*: offsite (`backup-and-dr/03`) | rebuild VMs from the guides; pve1's `/root/backups` holds the last files |
 
 ## Rebuild pve1 from bare metal
+
 - Assumes a new SSD, pve2 and its datastore intact, and `vars.yml`
 - All four NICs belong to the router VM: no LAN, DHCP, DNS or Wake-on-LAN until it's back. Work from
   pve1's console until step 5
 - More on VM restores: [restore guide](./restore.md#a-vm)
 
 ### 1. Install Proxmox with a temporary link to pve2
+
 - Install Proxmox as in the [router guide](./router.md#install-proxmox); the user and desktop steps
   can wait
 - Hostname `pve1.{{ site.url }}`. The node name must be `pve1`: restored VM configs land under
@@ -83,16 +88,19 @@ The canonical list: `backup-and-dr/04` escrows it, the weekly run backs it up. "
   / NIC passthrough"); the router VM can't start without them
 
 ### 2. Power on pve2 by hand
+
 - Press pve2's power button (`start_pve2` needs the router)
 - pve2 comes up on its static `{{ pve2.ip }}`, PBS on `:8007`
 
 ### 3. Reconnect the PBS storage
+
 - Needs the client key and a PBS token:
   - Key: `pbs_client.key` from escrow, or pve2's copy, `/etc/pve/priv/storage/pbs2.enc`; put it at
     `/root/secrets/pbs_client.key` (`install -D -m 400`)
   - Token: `pbs2_backup_token` from escrow (in `pve1.yaml`), or a new one made on pve2 ([Proxmox
     guide](./proxmox.md#backups))
 - The fingerprint is needed until step 12 installs the Let's Encrypt cert
+
 ```bash
 # On pve2's console
 proxmox-backup-manager cert info | grep Fingerprint
@@ -105,28 +113,35 @@ pvesm list pbs2
 ```
 
 ### 4. Restore the VMs
+
 - Restore the router, secsvcs and homesvcs while the temporary link is up; don't start them
+
 ```bash
 pvesm list pbs2    # newest backup per VMID; check the dates
 qmrestore pbs2:backup/vm/VMID/TIMESTAMP VMID --storage local-lvm
 ```
+
 - Each backup carries its VM config: NIC passthrough (`hostpci0`–`hostpci3`), MACs, startup order
 - Router backup missing or broken: [Router without a VM backup](#router-without-a-vm-backup)
 
 ### 5. Switch pve1 to its normal network and start the router
+
 - `vmbr0` has no bridge ports; pfSense is the gateway
 - The rendered tree isn't on pve1 yet: write `/etc/network/interfaces` and `/etc/resolv.conf` by
   hand from `src/nodes/pve1/interfaces.j2` and `src/nodes/pve1/resolv.conf.j2`
   - `vmbr0` static `{{ pve1.ip }}/24`, gateway `{{ pve1.subnet }}.1`, `bridge-ports none`
   - `search {{ site.url }}`, `nameserver {{ pve1.subnet }}.1`
+
 ```bash
 ifreload -a
 qm start ROUTER_VMID
 ping {{ pve2.ip }}
 ```
+
 - From a LAN client, open `https://{{ router.ip }}/`
 
 ### 6. Start the remaining VMs
+
 ```bash
 # pve1
 qm start SECSVCS_VMID
@@ -135,20 +150,24 @@ qm start HOMESVCS_VMID
 qm start WEBSVCS_VMID
 qm start DEVTOP_VMID
 ```
+
 - Same MACs, so pfSense's static leases hand back the same IPs
 - Their state is whatever the backup held; they don't need the pve1 host to run
 - Smoke test: log in at `https://auth.{{ site.url }}`
 
 ### 7. Base host setup
+
 - Proxmox repos and the `manualadmin` user: [router guide](./router.md#install-proxmox)
 - [Debian setup](./debian.md) up to, not including, "Homelab Repo"
 
 ### 8. Re-render and upload
+
 ```bash
 # From the workstation, repo root. Drop the old host keys or ssh refuses the new one
 ssh-keygen -R pve1; ssh-keygen -R pve1.{{ site.url }}; ssh-keygen -R {{ pve1.ip }}
 tools/deploy_src.sh
 ```
+
 - Expect a first-connection prompt: the new host key isn't CA-signed until step 10
 - `deploy_src.sh` doesn't stop on a failed host; check for `pve1 upload failed`
 - Then on pve1:
@@ -158,18 +177,23 @@ tools/deploy_src.sh
     skip `age-keygen`
 
 ### 9. Restore the trust roots
+
 - From PBS: install the client and pull `/root` out of the newest host backup ([restore
   guide](./restore.md#from-pbs))
+
 ```bash
 /root/homelab-rendered/src/nodes/pve1/install_svcs.sh backup_orchestrator
 proxmox-backup-client restore host/pve1/TIMESTAMP backups.pxar /tmp/restore --ns files \
   --keyfile /root/secrets/pbs_client.key --pattern 'pve1/*'
 ```
+
   Then copy `pve1/files/root/{secrets,ca,ssh,acme,.ssh}` into place.
+
 - Or from escrow (format *planned* in `backup-and-dr/04`, `docs/guides/escrow.md`), at the paths in
   [On pve1](#on-pve1)
 - Neither: [Nothing escrowed](#nothing-escrowed)
 - Permissions, as in the [pve1 guide](./pve1.md):
+
 ```bash
 chmod 700 /root/secrets /root/ca/private /root/ca/intermediate/private /root/ssh/public
 chmod 400 /root/secrets/age.* /root/secrets/*.yaml.age /root/secrets/*_id_ed25519.pub
@@ -179,6 +203,7 @@ chmod 400 /root/ssh/ca_ssh_key /root/ssh/ca_ssh_host_key
 ```
 
 ### 10. SSH: root key and host certs
+
 ```bash
 sudo su
 # root's client key, no passphrase: pve1's scripts use it unattended. Asks for the ca_ssh_key passphrase
@@ -189,15 +214,19 @@ echo "@cert-authority *.{{ site.url }} $(cat /root/ssh/ca_ssh_host_key.pub)" > /
 # Signs pve1's new host key and refreshes the rest; needs pve2, vpnsvcs, websvcs, devtop and router up
 /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 ```
+
 - `ssh_cert_gen_windows.sh` isn't needed: the gaming VM's host cert and the CA are unchanged
 
 ### 11. Host services
+
 - CA chain in pve1's own trust store (what `upload_ca_chain.sh` does for pve1 in
   [CA infra](./pve1.md#ca-infra)):
+
 ```bash
 cd /root/ca
 /root/homelab-rendered/src/base/debian/send_files.sh intermediate/certs/ca-chain.cert.pem | ssh autoadmin@pve1 install_ca
 ```
+
 - [pve1 guide, ACME Certificates](./pve1.md#acme-certificates): `traefik-certs-dumper`,
   `mkdir -p /root/acme`
 - [pve1 guide, Notifications](./pve1.md#notifications): msmtp, the AppArmor edit, `cert_notifier`;
@@ -206,14 +235,17 @@ cd /root/ca
   Monitoring (node_exporter and its ufw rule, `api_ro` user, metric server)
 
 ### 12. Certificates
+
 ```bash
 /root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh
 ```
+
 - Refills `/root/acme`, installs pve1's `pveproxy` cert, pushes certs to pve2, pbs2 and the router,
   re-pins the `pbs2` fingerprint
 - Self-signed service certs live on the VMs; no re-issue
 
 ### 13. Backups and verification
+
 - `/root/homelab-rendered/src/nodes/pve1/install_svcs.sh backup_orchestrator` if step 9 didn't, then
   one run: `systemctl start backup_orchestrator`
 - Check:
@@ -224,6 +256,7 @@ cd /root/ca
 - Power pve2 back down: `ssh autoadmin@pve2 shutdown`
 
 ### Router without a VM backup
+
 - Recreate the VM ([debugging, Recreate the VM](../debugging.md#recreate-the-vm)) and install
   pfSense ([router guide](./router.md#install-pfsense))
 - Restore `config.xml` under Diagnostics >> Backup & Restore, from Auto Config Backup (needs the ACB
@@ -237,10 +270,12 @@ cd /root/ca
 ## Partial loss
 
 ### Only the AGE key is lost
+
 - From escrow or the PBS host backup: restore `age.txt`/`age.pub` and stop
 - Otherwise the SOPS files on pve1 are unreadable, but each host's `secrets.yaml.age` is also
   encrypted to the host's key. Rebuild from those
 - New key:
+
 ```bash
 ssh manualadmin@pve1
 sudo su
@@ -252,7 +287,9 @@ chmod 400 age.*
 export SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)
 export SOPS_AGE_KEY_FILE=/root/secrets/age.txt
 ```
+
 - For each host (websvcs needs pve2 on); plaintext stays in RAM (`/dev/shm`):
+
 ```bash
 host=secsvcs
 umask 077
@@ -265,15 +302,18 @@ chmod 600 "/root/secrets/${host}.yaml"
 # Re-encrypts to the new key + host key and redistributes; save and quit the editor
 /root/homelab-rendered/src/nodes/pve1/secret_update.sh "$host"
 ```
+
 - `secret_update.sh` needs `manualadmin`'s sudo password on each host; they're in the maintainer's
   offline copy (`auth/08`), not SOPS
 - If the host's SSH is broken, decrypt through the guest agent on its Proxmox host (pve1: secsvcs,
   homesvcs; pve2: websvcs), copy to pve1's `/dev/shm`, and continue from `sops -e`:
+
 ```bash
 umask 077
 qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age \
   | jq -r '."out-data"' > /dev/shm/HOST.yaml
 ```
+
 - `pve1.yaml` has no host copy. Recreate it with `sops /root/secrets/pve1.yaml` from
   `src/nodes/pve1/secrets_template.yaml`:
   - a new Gmail app password ([Notifications](./pve1.md#notifications))
@@ -283,6 +323,7 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
 - `rm -rf /root/secrets/lost` once every host is done
 
 ### Only the private CA is lost
+
 - Not urgent: service certs and the chain live on the VMs and work until they expire (395 days);
   only issuing is blocked
 - Rebuild before the next [yearly renewal](../maintenance.md#refresh-certificates), in one sitting:
@@ -292,36 +333,43 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
   `src/nodes/pve1/certificates/openssl.{root,intermediate}.cnf`, and `upload_ca_chain.sh` installs
   the chain on every host
 - Re-issue and redistribute every service key and cert:
+
 ```bash
 /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_key_gen.sh
 /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_cert_gen.sh
 ```
+
 - Restart the secure services on secsvcs, homesvcs and websvcs, as the script asks
 - Browser TLS is Let's Encrypt; if you added the private CA to a device's trust store by hand,
   replace it there too
 
 ### Only the SSH CA is lost
+
 - Not urgent: hosts and clients trust the old CA, so existing certs work until they expire (395
   days); only signing is blocked
 - New CA keys ([CA certs](./pve1.md#ca-certs)), with a new passphrase for `ca_ssh_key`
 - Re-sign and redistribute everything, then the gaming VM
   ([Maintenance](../maintenance.md#refresh-certificates)):
+
 ```bash
 /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
 ssh autoadmin@router start_pve2
 ssh autoadmin@pve2 start_gaming_vm
 /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ```
+
 - Expect host-key prompts: pve1 trusts the new host CA before the script reaches every host
 - Replace the `@cert-authority` line in `~/.ssh/known_hosts` on the workstation and other clients
   with the one the script prints
 
 ### Only vars.yml is lost
+
 - Take it from the newest `/root/backups/repo/homelab-*.tar.gz` on pve1 (`vars.yml` is in the
   archive root), the PBS host backup, or escrow
 - None of those: reconstruct it by diffing a render of the template against a host's
   `/root/homelab-rendered`, rendered with the real values at the last deploy. A host holds only
   its own `src/` paths, so diff several (pve1 and each container VM) to cover every value
+
 ```bash
 # On the workstation, repo root, ideally at the last deployed commit
 cp vars.template.yml vars.yml
@@ -333,12 +381,15 @@ ssh manualadmin@pve1 'rm /tmp/homelab-rendered.tgz'
 tar -C "$work" -xzf "$work/homelab-rendered.tgz"
 diff -r "$work/homelab-template" "$work/homelab-rendered"
 ```
+
 - Edit `vars.yml` and repeat until the `diff` is empty, then `rm -rf "$work"`. A value no template
   uses can't be recovered, but nothing needs it
 
 ### Nothing escrowed
+
 Neither escrow nor the PBS host backup can supply the trust roots. Do steps 1–8, then in place of
 step 9:
+
 1. SSH CA (run `ssh_cert_gen.sh` once, not once per section):
    - New `ca_ssh_key` and `ca_ssh_host_key`: the first two `ssh-keygen` blocks of [CA
      certs](./pve1.md#ca-certs); skip its root key and `ssh_cert_gen.sh`

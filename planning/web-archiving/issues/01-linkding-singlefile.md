@@ -88,6 +88,7 @@ Follow "Add a new service" in `docs/development.md`, with `src/services/isso/` a
 ## Comments
 
 2026-10-11, implemented in the repo; acceptance needs a deploy to websvcs.
+
 - Checked against linkding v1.47.0. The plus image runs Chromium with `--no-sandbox`,
   so the quadlet adds no capabilities. It sets `--shm-size=512m`, since Chromium
   renders through `/dev/shm` and Podman's default is 64 MB. Whether that's needed is

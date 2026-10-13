@@ -29,6 +29,7 @@
 ### Service Structure
 
 `src/` has three groups, plus `nodes.jinja`:
+
 - `src/nodes/<node>/`, one per node. May contain:
   - `install_svcs.sh`: one `case` per service that installs configs to `/etc/opt/<service>/` and
     container files to `/etc/containers/systemd/` with `install -D` (`-m 644` for anything not
@@ -134,15 +135,18 @@ alerts dashboard. Nothing alerts on drift.
 ## Deploy changes
 
 Render and deploy to all nodes:
+
 ```bash
 tools/deploy_src.sh
 ```
 
 Render templates locally:
+
 ```bash
 out=$(mktemp -d)/homelab-rendered
 tools/render_src.sh "$out"
 ```
+
 Without an argument `render_src.sh` picks a private temp dir itself and prints it. The output holds
 real values, so keep it out of shared paths such as a fixed `/tmp/homelab-rendered`; `vars.yml`,
 `.git`, `planning` and `notes` are never copied into it. The directory must be named
@@ -171,9 +175,11 @@ Each check is one function in the script; add an invariant as a new function plu
 (see [Tests](#tests)).
 
 Upload rendered files to a specific server:
+
 ```bash
 tools/upload_src.sh <hostname> "$out"
 ```
+
 A debian node gets only `src/base/`, its `src/nodes/<node>/` and its services' `dirs` (default:
 `src/services/<service>/` if it exists), in the same tree shape: no `docs/`, `tools/` or other
 nodes' files. The router and gaming VM get only their node dir.
@@ -188,9 +194,11 @@ then runs `shellcheck -x --severity=warning` over `tests/*.sh` and the rendered 
 nodes get, with example values. `rendered/` is generated: edit the templates, never the copy. It is
 left out of the deploy render and marked `linguist-generated` so GitHub collapses it in diffs. The
 hook takes about 12 s. Activate it once per clone:
+
 ```bash
 git config core.hooksPath .githooks
 ```
+
 Skip it for one commit with `git commit --no-verify`; `rendered/` is then stale until the next
 commit that runs the hook.
 
@@ -220,6 +228,7 @@ tools.
 
 - Determine which VM the service is supposed to run on
 - Install / update the relevant service:
+
 ```bash
 ssh manualadmin@secsvcs
 sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE

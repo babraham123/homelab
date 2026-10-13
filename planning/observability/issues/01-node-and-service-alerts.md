@@ -12,6 +12,7 @@ New file `src/services/vmalert/configs/homelab.yml` (`install_svcs.sh vmalert` a
 `configs/*.yml`). Rules, all with `severity` labels that Alertmanager already routes:
 
 **Hosts (node_exporter, all VMs + pve1/pve2):**
+
 - `NodeDown`: `up{job=~"node_exporter.*"} == 0` for 5m
 - `DiskAlmostFull`: `node_filesystem_avail_bytes / node_filesystem_size_bytes < 0.10` (exclude
   tmpfs/overlay)
@@ -29,6 +30,7 @@ New file `src/services/vmalert/configs/homelab.yml` (`install_svcs.sh vmalert` a
 - `ClockSkew`: `abs(node_timex_offset_seconds) > 0.5`
 
 **Backups (from the orchestrator's textfile metric, backup-and-dr/01):**
+
 - `BackupStale`: `time() - homelab_backup_last_success_timestamp_seconds > 8*86400`
 - `BackupNeverRan`: `absent(homelab_backup_last_success_timestamp_seconds)`
 

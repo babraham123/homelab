@@ -11,7 +11,7 @@ should describe the router you'll keep. Optionally run test 3 once before 01 for
 ## Known suspects (from the repo)
 
 | Suspect | Why |
-|---|---|
+| --- | --- |
 | **pfSense on a Celeron N5105 routes every inter-subnet flow** | pve1 VMs ↔ pve2, LAN ↔ anything, WiFi ↔ servers. pf + packages on 4 small cores may not reach 2.5 GbE line rate |
 | **pve2's uplink** | `eno1`, probably the board's onboard Intel I219 (1 GbE), with `tso off gso off` from the crash workaround in `docs/guides/proxmox.md.j2:41`, which shifts segmentation to the CPU. Everything pve2 serves, including every pve1 → pbs2 backup, is capped by it |
 | **pve1 VMs reach pfSense over virtio on `vmbr0`** | vhost threads share the N5105 with the router VM |
@@ -23,17 +23,19 @@ should describe the router you'll keep. Optionally run test 3 once before 01 for
 
 Install `iperf3` on the Debian nodes, pve1, pve2, the VPS and a laptop. On pfSense use the `iperf`
 package. For each pair run:
+
 - `iperf3 -c <peer> -t 20` and `-R` (both directions);
 - `-P 4` (parallel);
 - WiFi and tailnet only: `-u -b <rate>` for loss and jitter.
 
 During each run, capture:
+
 - CPU: pfSense `top -aSH`, PVE host `mpstat -P ALL 1` (watch `vhost-*` and `ksoftirqd`), VPS `top`;
 - link state: `ifconfig igcN | grep media` on pfSense, `ethtool eno1` on pve2;
 - path MTU: `ping -M do -s <size>` (Linux) / `ping -D -s` (FreeBSD).
 
 | # | Path | Hops exercised |
-|---|---|---|
+| --- | --- | --- |
 | 1 | secsvcs ↔ homesvcs | vmbr0 only (virtio baseline, no router) |
 | 2 | secsvcs ↔ pfSense | vmbr0 → router VM |
 | 3 | secsvcs ↔ websvcs, and pve1 ↔ pbs2 | routed via pfSense `igc2` to pve2. **The backup path.** Also note throughput from a real vzdump task log |

@@ -52,6 +52,7 @@ directory the sync (03) can read.
 - A user without access to `/car` can't list it.
 
 ## Comments
+
 - 2026-10-12: no longer blocked by auth/06. The router routes tailnet traffic without SNAT through
   a System Patches change (router/04), so Traefik gets the real client IP; auth/06 stays open to
   watch for pfsense/FreeBSD-ports#1462 shipping.

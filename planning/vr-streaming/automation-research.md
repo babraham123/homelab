@@ -126,7 +126,7 @@ run then queues (`queueSize` defaults to 5) instead of overlapping.
 ## Scheduled tasks
 
 | Question | Answer | Source |
-|---|---|---|
+| --- | --- | --- |
 | Can SYSTEM start a task whose principal is `admin`? | Yes: "Members of the Administrators group or the SYSTEM account can read, update, delete, and run any tasks." | MS: security contexts |
 | Password needed for `-LogonType Interactive`? | No. A password is needed only for `TASK_LOGON_PASSWORD`, or for S4U as another user. | MS: security contexts, TASK_LOGON_TYPE |
 | Which session, visible window? | `TASK_LOGON_INTERACTIVE_TOKEN`: "User must already be logged on. The task will be run only in an existing interactive session." It runs on admin's desktop, as "Run only when user is logged on" does in the UI. | MS: TASK_LOGON_TYPE |
@@ -165,7 +165,7 @@ action arrays:
 No Meta document covers process or service names. Everything below is (community) unless marked.
 
 | Item | Name | Note |
-|---|---|---|
+| --- | --- | --- |
 | Service | `OVRService` ("Oculus VR Runtime Service") | Binary `OVRServiceLauncher.exe`; killing it needs admin |
 | Runtime | `OVRServer_x64.exe`, `OVRRedir.exe` | Under `Support\oculus-runtime\`, started by the service |
 | Link app | `OculusClient.exe` (older) or `Client.exe` (v83 era) | Under `Support\oculus-client\`, in `C:\Program Files\Oculus` or `C:\Program Files\Meta Horizon` |
@@ -218,7 +218,7 @@ From the Sunshine source (`tools/sunshinesvc.cpp`, `src/process.cpp`,
 From `source/Playnite/App/CmdLineOptions.cs` and `PlayniteApplication.cs`, and the manual:
 
 | Option | Effect |
-|---|---|
+| --- | --- |
 | `--hidesplashscreen` | No splash screen |
 | `--startdesktop` | Start in desktop mode; switches a running fullscreen instance to desktop |
 | `--startfullscreen` | The reverse |

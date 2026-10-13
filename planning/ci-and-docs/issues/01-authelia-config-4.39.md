@@ -13,9 +13,11 @@ annotated template kept)
 - Apply those customisations onto the 4.39 template; resolve renamed/deprecated keys from the 4.39
   release notes. Update the `# v4.38.10` header.
 - Validate before deploy:
+
   ```bash
   podman run --rm -v $PWD/rendered:/config authelia/authelia:4.39 authelia config validate --config /config/configuration.yml
   ```
+
   (also becomes a pre-install check in ci-and-docs/02).
 - Write the procedure into `docs/maintenance.md` so the next minor bump is mechanical.
 

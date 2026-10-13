@@ -9,6 +9,7 @@ needs no forced alignment. It is research code (15 stars, last pushed 2026-05-13
 so it is forked and hardened before it runs unattended.
 
 Maintainer decisions (2026-10-11):
+
 - Calliope, not Storyteller alignment of a synthetic audiobook: the timings are exact
   and it saves hours of alignment per book.
 - Runs on websvcs, on the Tesla P4 it shares with whisper. Jobs are batch, one book
@@ -24,6 +25,7 @@ Maintainer decisions (2026-10-11):
   it belongs to the gaming VM. Research: [multivoice-research.md](multivoice-research.md).
 
 Constraints:
+
 - The P4 (Pascal, sm_61) only runs PyTorch builds for CUDA 12.6 or older; Chatterbox
   pins `torch==2.6.0` on Python 3.10–3.13.
 - websvcs is on pve2, which is on demand, so a job must survive the VM stopping
@@ -32,7 +34,7 @@ Constraints:
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-harden-calliope.md) | Fork and harden Calliope | `ready-for-human` | task |
 | [02](issues/02-deploy-calliope-websvcs.md) | Run Calliope on websvcs as a GPU batch job | `ready-for-human` | task |
 | [03](issues/03-deploy-storyteller.md) | Run Storyteller on websvcs as the read-along library | `ready-for-human` | task |

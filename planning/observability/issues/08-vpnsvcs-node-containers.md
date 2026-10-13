@@ -11,7 +11,7 @@ too.
 Resource cost was checked and is small on a 1 vCPU / 1 GB Nanode:
 
 | | Host packages | Podman quadlets |
-|---|---|---|
+| --- | --- | --- |
 | Idle RAM | node_exporter ~15 MB, fluent-bit ~20 MB | same, plus ~5–10 MB per container (conmon; netavark/aardvark are per network) ≈ +30 MB |
 | Idle CPU | ~0 | ~0; no daemon |
 | Disk | ~50 MB | Podman + netavark + crun ~150 MB, images ~200–250 MB ≈ 400 MB of 25 GB |

@@ -327,7 +327,7 @@ cat /etc/resolv.conf
 pfSense templatizes its "DNS Resolver" settings into Unbound configs:
 
 | File | Contents |
-|------|----------|
+| ------ | ---------- |
 | `/var/unbound/unbound.conf` | Main config |
 | `/var/unbound/host_entries.conf` | Host overrides |
 | `/var/unbound/domainoverrides.conf` | Domain overrides |
@@ -462,7 +462,7 @@ yq 'explode(.)' /etc/opt/traefik/config/dynamic/FILE.yml
 ```
 
 | Error | Likely cause |
-|-------|--------------|
+| ------- | -------------- |
 | `no trusted IPs provided` | Proxy protocol enabled on an entrypoint without `trustedIPs` |
 | `unable to find certificate for domains` | ACME failed; falls back to the default self-signed cert |
 | `the service "X@docker" does not exist` | Router references a provider that isn't enabled; use `X@file` |
@@ -545,7 +545,7 @@ journalctl -eu authelia
 ```
 
 | Error | Check |
-|-------|-------|
+| ------- | ------- |
 | `LDAP Result Code 200 "Network Error"` | LLDAP up? DNS and TLS to `ldap.janedoe.com:6360` from the Authelia container |
 | `LDAP Result Code 49 "Invalid Credentials"` | `lldap_admin_password` secret matches LLDAP's admin |
 | `535 5.7.8 Username and Password not accepted` | SMTP password (app password) |
@@ -652,7 +652,7 @@ systemctl start postgres
 ## Observability
 
 | Endpoint | What |
-|----------|------|
+| ---------- | ------ |
 | `metrics.janedoe.com/targets` | secsvcs scrape targets and their errors |
 | `vmagent:8429/targets` | Scrape targets on homesvcs, websvcs, vpnsvcs (from `systemd-net` on that node) |
 | `metrics.janedoe.com/vmui` | Ad hoc metric queries |
@@ -763,7 +763,7 @@ sed -e '1d' -e '$d' config-router-TIMESTAMP.xml | base64 -d | \
 Key Proxmox settings if the router VM has to be rebuilt:
 
 | Setting | Value |
-|---------|-------|
+| --------- | ------- |
 | OS type | Linux 6.x |
 | Firmware / machine | SeaBIOS, i440fx |
 | CPU | 2 cores, type `host` |

@@ -11,7 +11,7 @@ Commit as a column in [`container_hardening.md`](../container_hardening.md).
 Known starting points:
 
 | Container | Health check | Client in image? |
-|---|---|---|
+| --- | --- | --- |
 | traefik | `traefik healthcheck --ping` (requires `ping:` in static config) | yes (binary) |
 | postgres | `pg_isready -U postgres` | yes |
 | authelia | `/app/healthcheck.sh` (ships in image) | yes |

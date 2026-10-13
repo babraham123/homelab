@@ -7,7 +7,7 @@ the system. Most pfSense configuration is click-configured and recorded in
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-pfsense-2.9-eim-nat.md) | Upgrade to pfSense CE 2.9.0; replace NAT-PMP / static-port NAT with EIM outbound NAT | `resolved` | task |
 | [02](issues/02-network-throughput-survey.md) | Measure network throughput on every path and find the bottlenecks | `ready-for-human` | research |
 | [03](issues/03-headscale-acl-matrix.md) | Re-enable the group-based Headscale ACL matrix | `ready-for-human` | task |

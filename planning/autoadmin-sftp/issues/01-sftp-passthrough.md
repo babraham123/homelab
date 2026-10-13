@@ -33,7 +33,7 @@ one):
 ## Legitimate uses to keep working
 
 | Caller | Node | Needs |
-|---|---|---|
+| --- | --- | --- |
 | `backup_orchestrator.sh.j2` (automated, pve1) | 5 nodes | read and delete `/var/opt/backups` |
 | `acme_transfer.sh.j2` | sec/home/websvcs; pve2, router | read `~/acme.json`; write `*.pem`/`*.key` |
 | `ssh_cert_gen.sh.j2` | every node | read host pubkey; write CA, host cert, known_hosts; OliveTin key to secsvcs |
@@ -73,7 +73,7 @@ the stdout/stdin design works on every node, and `ExposeAuthInfo` is the right g
 ### Exposures on the current tree
 
 | Claim | Verdict | Current tree |
-|---|---|---|
+| --- | --- | --- |
 | Secrets read | **confirmed** | `stage_finish` chowns the stage to autoadmin on every node but pve1 (`stage_init root`). `stage_fetch` deletes only `dumps/*/*`; `files/` sits on the node until the next run. It holds `/etc/opt` (every secrets file), `/etc/ssh` (host private keys), the volumes, and on pve2 and vpnsvcs `/root/.ssh`, so root's private key on both. `copy_acme_certs` leaves `~/acme.json` (ACME account and TLS keys) behind forever. |
 | Trust-anchor swap | **confirmed** | `install_ssh_ca`, `install_ca`, `install_keys`, `install_certs`, `install_olive_tin_cert`, pve2's `install_certs_and_keys` and the router's `install_certs` all `mv` whatever is in `/home/autoadmin`, as root, by name. `install_ssh_ca` makes an uploaded file `TrustedUserCAKeys`, which signs `manualadmin` certs too. |
 | Root on vpnsvcs | **refuted** | geoip_generator is a quadlet built from the rendered tree. No install case reads a binary from `/home/autoadmin`; the only consumers of that directory are the cert commands above. |

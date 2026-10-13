@@ -2,6 +2,7 @@
 
 Self-hosted Bitwarden-compatible password manager on secsvcs (pve1). This is what the `vault` stubs
 refer to:
+
 - `src/nodes/secsvcs/install_svcs.sh` `vault)` case (`echo "TODO: Implement vault"`);
 - the `vault: {}` entry in `src/nodes/secsvcs/inventory.yml`, which generates the dispatcher's
   `install_vault` and its `install_all_svcs` entry;
@@ -17,5 +18,5 @@ stub").
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-install-vaultwarden.md) | Install Vaultwarden on secsvcs (replaces the `vault` stub), publicly reachable | `ready-for-human` (code in; deploy and run acceptance) | task |

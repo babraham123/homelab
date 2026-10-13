@@ -49,6 +49,7 @@ nothing breaks).
    unroutable 100.x source. IPv4 only: the WAN has no IPv6. Harmless while SNAT is on.
 7. **Uncheck the box**, Save. The package rewrites both rcconf files and restarts
    `pfsense_tailscaled`. Verify from the shell:
+
    ```sh
    grep snat /usr/local/etc/rc.conf.d/pfsense_tailscaled
    grep env /usr/local/etc/rc.conf.d/tailscaled
@@ -56,6 +57,7 @@ nothing breaks).
    tailscale debug prefs | grep NoSNAT          # "NoSNAT": true
    grep 'Bringing up' /var/log/system.log | tail -1   # ... --snat-subnet-routes=false
    ```
+
 8. **Verify the data path** from a phone on mobile data via the tailnet:
    - open a LAN service; Diagnostics → States filtered on `100.` shows the phone's 100.x address on
      both sides of the state, and the service's own log shows it as the client;

@@ -7,6 +7,7 @@ tailscale/tailscale#18035 (<https://github.com/tailscale/tailscale/issues/18035>
 
 pfSense ≤ 2.8 is a symmetric NAT for UDP, so Tailscale direct connections need one of these
 workarounds:
+
 - a static-port outbound NAT rule;
 - UPnP/NAT-PMP;
 - `randomizeClientPort`, when more than one node sits behind the same NAT.

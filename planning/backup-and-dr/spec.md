@@ -14,7 +14,7 @@ reasoning are recorded in the tickets' answers and in `docs/services.md#storage-
 ## Issues
 
 | # | Title | Status | Type |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [01](issues/01-backup-orchestrator-on-pve1.md) | Backup orchestrator on pve1 that wakes pve2 | `resolved` | task |
 | [02](issues/02-backup-schedule-in-code.md) | Own the backup schedule from the repo, not the PVE UI | `resolved` | task |
 | [03](issues/03-offsite-datastore-copy.md) | Copy the PBS datastore offsite after each run | `ready-for-human` | task |

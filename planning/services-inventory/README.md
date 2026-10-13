@@ -10,7 +10,7 @@ clean tree. If adopted, `services.yml` moves to `src/nodes/<node>/services.yml`,
 ## Files
 
 | File | What it is |
-|---|---|
+| --- | --- |
 | `services.yml` | The inventory for **secsvcs**, complete: 15 services, 41 secrets |
 | `services.schema.json` | JSON Schema (draft 2020-12) — the contract |
 | `validate.py` | Schema + 7 cross-checks, and renders outputs |

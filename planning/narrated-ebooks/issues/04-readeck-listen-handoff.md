@@ -52,6 +52,7 @@ Flow: Readeck label `listen` → Readeck EPUB export → Calliope inbox →
 
 2026-10-11, implemented in the repo as `src/services/readeck/readeck_narrate.sh.j2` with its
 own `readeck_narrate` case and timer; acceptance needs a deploy.
+
 - To avoid queueing an article twice, the script relabels without downloading when
   `<slug>` is already in the inbox, `readalouds/articles` or `failed`. That covers a
   run where the download worked but the relabel failed.

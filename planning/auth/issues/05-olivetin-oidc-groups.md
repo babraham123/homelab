@@ -27,7 +27,7 @@ reporter confirms it works in a release.
 3. Deploy, `install_olive_tin`, then test with two LLDAP users:
 
    | User's groups | Expected on `/user` | Expected actions |
-   |---|---|---|
+   | --- | --- | --- |
    | `command_admin` (+ `authelia_gen_access`) | Matched ACLs: `admins` | all, with logs |
    | `command_general` only (+ `authelia_gen_access`) | Matched ACLs: `general` | the two gaming buttons, no logs |
    | neither | none | none |

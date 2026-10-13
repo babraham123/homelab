@@ -53,7 +53,7 @@ RTX 3060 Ti) and to narrate articles in a single voice.
 ## Comparison
 
 | Approach | Accuracy (PDNC, English) | Non-English | P4 fit / time per novel | License / maturity | Verdict |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Rule-based sieve (Muzny 2017) | F 87.5 on 3 novels; precision 90.4 at recall 65.1 in high-precision mode; collapses on implicit quotes | Rules per language; none published for da/no/sv etc. | CPU, seconds | Easy to write | Use for **quote detection** and to lock **explicit** quotes (speech verb next to a name); the LLM does the rest |
 | BookNLP (original, big/small) | 0.40 on PDNC (0.28 on implicit); B3 89.9/86.4 on its own data | English only | ~2–5 min on GPU or CPU | MIT; dormant since 2024; old transformers | Reject |
 | BookNLP+ (retrained on PDNC) | 78.5 / 79.2 | English only | Minutes | Research code | Reject |
@@ -83,11 +83,13 @@ RTX 3060 Ti) and to narrate articles in a single voice.
 
 - **Voice library manifest:** `/etc/opt/calliope/voices/voices.json`, next to the WAVs, mapping each
   name to its gender, age, languages and role:
+
   ```json
   {"default": {"gender": "m", "age": "adult", "langs": ["en"]},
    "f1": {"gender": "f", "age": "adult"}, "f_old": {"gender": "f", "age": "elderly"},
    "m_minor": {"gender": "m", "role": "minor"}, "f_minor": {"gender": "f", "role": "minor"}}
   ```
+
   - Aim for 4–6 voices per gender across age bands.
   - Use `langs` per voice: Chatterbox Multilingual speaking German in a voice cloned from English
     has an accent.
@@ -132,7 +134,7 @@ assembly         -> sentence wav = its segment clips joined; chapter = sentences
 - Pair styles per language:
 
   | Languages | Styles |
-  |---|---|
+  | --- | --- |
   | en | “” ‘’ "" |
   | de | „“ »« ‚‘ |
   | fr, it | « » (narrow no-break spaces) |
@@ -155,10 +157,12 @@ assembly         -> sentence wav = its segment clips joined; chapter = sentences
 
 - Find each sentence's span in `full_text_clean` (punkt returns substrings, located sequentially)
   and intersect it with the quote spans. Each segment dict gains:
+
   ```python
   {"id": "f000123", "text": <clean whole sentence>, "block": 57,
    "segments": [{"text": clean_text_for_tts(piece), "quote": "c03.b57.q0"}, {"text": "she said.", "quote": None}]}
   ```
+
   - `“Run,” she said.` gives `[("Run,", q), ("she said.", None)]`.
   - A quote crossing a sentence boundary keeps one `quote_id` across sentences.
 - Drop segments that are empty or punctuation-only after cleaning. `clean_text_for_tts` turns `—`
@@ -227,11 +231,13 @@ assembly         -> sentence wav = its segment clips joined; chapter = sentences
   `prompt_version`, the roster and the window text. pve2 stopping mid-pass loses at most one window.
   This matches the clip cache's write-JSON-last convention.
 - **`<work>/speakers.json`** is written atomically once complete and is human-editable:
+
   ```json
   {"version": 1, "book_sha": "...", "attributor": "llama.cpp b<tag>:Qwen3-8B-Q4_K_M@<sha>:prompt-v1", "lang": "en",
    "characters": {"c1": {"name": "Elizabeth Bennet", "aliases": ["Lizzy", "Eliza"], "gender": "f", "age": "adult", "quotes": 412}},
    "quotes": {"c03.b57.q0": {"speaker": "c1", "text": "Run,", "source": "llm", "p": 0.93}}}
   ```
+
   - `text` is a short excerpt for review; `source` is `sieve`, `llm`, `repass` or `edit`, and `p`
     the renormalised probability, so a reviewer can sort by doubt.
   - On load, quote IDs that are unknown or missing fall back to the unknown-speaker voice instead of
@@ -300,7 +306,7 @@ Label: Q105, Q106, …, Q131
 **Memory** (Qwen3-8B: 36 layers, 8 KV heads, head dim 128, so 144 KiB per token at f16):
 
 | Context | KV f16 | KV q8_0 |
-|---|---|---|
+| --- | --- | --- |
 | 8k | 1.13 GiB | 0.60 GiB |
 | 12k | 1.69 GiB | 0.90 GiB |
 | 16k | 2.25 GiB | 1.20 GiB |
@@ -316,7 +322,7 @@ generation (llama.cpp #15013). Scaled to Qwen3-8B Q4_K_M: ~300–380 and ~18–2
 Prejudice (~160k tokens, 1,270 quotes: 637 implicit, 327 explicit, 306 anaphoric):
 
 | Phase | Work | Time (est.) |
-|---|---|---|
+| --- | --- | --- |
 | Roster | ~40 chunks | ~10 min |
 | Attribution | ~330k prompt tokens, ~10k output | ~16 + 9 min |
 | Re-pass | ~10% of quotes, thinking on | 20–40 min |
@@ -344,9 +350,11 @@ at pin time; A/B `unsloth/Qwen3-8B-GGUF` revision `a6adef1` (`UD-Q4_K_XL`).
 ### 5. Cache keys: `cache.py`, `pipeline.py`
 
 - `Sentence` gains `clips: [Clip(text, voice_name, voice_sha, key)]`. The key is unchanged:
+
   ```python
   clip_key(book_sha, clip.text, mid, lang, clip.voice_sha, settings)
   ```
+
 - **Single-voice mode produces one clip with the whole sentence text and the narrator voice:
   identical keys to today**. Existing work dirs stay valid, so no `CACHE_VERSION` bump.
 - Editing `speakers.json` or the cast only re-keys the segments whose voice changed. Narration
@@ -370,7 +378,7 @@ at pin time; A/B `unsloth/Qwen3-8B-GGUF` revision `a6adef1` (`UD-Q4_K_XL`).
 **CLI flags:**
 
 | Flag | Meaning |
-|---|---|
+| --- | --- |
 | `--voices DIR` | Library with `voices.json`; `--voice` stays the narrator |
 | `--voice-mode single\|dialogue\|multi` | Default `single` |
 | `--dialogue-voice NAME` | Voice for all quoted speech in dialogue mode |
@@ -444,9 +452,11 @@ Degrade, don't fail, unless `--strict-voices` is set: multi → dialogue → sin
 
 - **Containerfile:** add a build stage `FROM nvidia/cuda:12.4.1-devel-ubuntu22.04`. Build a **pinned
   llama.cpp release tag** with:
+
   ```text
   -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=61 -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
   ```
+
   Copy `llama-server` and `libggml*.so`/`libllama.so` into the runtime image. The runtime base
   already has cuBLAS.
   - Image growth is ~50–150 MB (est., single architecture).
@@ -470,7 +480,7 @@ Degrade, don't fail, unless `--strict-voices` is set: multi → dialogue → sin
 **Effort** (est., focused dev-days):
 
 | Work | Days |
-|---|---|
+| --- | --- |
 | `quotes.py` (10 languages) + segmentation + multi-voice backend + clip-level cache and assembly + dialogue mode + tests | 4–5 |
 | LLM attributor (server lifecycle, sieve, roster and attribution prompts, windows, confidence and re-pass, cache, schema, fallback, stub-server tests) | 6–8 |
 | Voice manifest, assignment, series cast, sidecar and `calliope_batch.py` wiring, report | 2–3 |

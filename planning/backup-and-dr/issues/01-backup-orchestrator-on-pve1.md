@@ -72,8 +72,8 @@ the timer.
 - **Sleep.** `ssh autoadmin@pve2 shutdown` only if pve2 was off when the run started, then waits up
   to 300s for it to stop answering ping; a host that stays up fails the `sleep_pve2` step.
 - **Notify.** One ntfy post to `push.<site>/alert` with `ntfy_alert_token` (read from
-  `/root/secrets/secsvcs.yaml` on pve1): priority 2 "Backups OK: <steps> (N min)" or priority 4
-  "Backups failed: failed: <steps>; ok: <steps>". Exit is non-zero on any failure, so the unit shows
+  `/root/secrets/secsvcs.yaml` on pve1): priority 2 `Backups OK: <steps> (N min)` or priority 4
+  `Backups failed: failed: <steps>; ok: <steps>`. Exit is non-zero on any failure, so the unit shows
   failed for node_exporter's systemd collector too.
 - **vm_watchdog.** It exits within ~15s of SIGTERM and only resets a guest after 60s of failed agent
   pings, so it wasn't really racing the shutdown. `After=pve-guests.service` now makes that ordering
@@ -89,6 +89,7 @@ kept, exit 1); pve2 never wakes (only `start_pve2` runs, exit 1, failure posted)
 (no shutdown). Not run on the real hosts.
 
 Human:
+
 1. Deploy, then `install_dispatcher` on pve2 (for `run_backups`), `install_vm_watchdog` on pve1 and
    pve2, and `install_backup_orchestrator` on pve1.
 2. Delete the UI backup jobs on both hosts (Datacenter >> Backup) now, not in 02: pve1's also fires

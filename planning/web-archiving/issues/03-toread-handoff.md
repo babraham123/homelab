@@ -50,6 +50,7 @@ Readeck without being saved a second time.
 ## Comments
 
 2026-10-11, implemented in the repo; acceptance needs a deploy to websvcs.
+
 - `src/services/readeck/linkding_handoff.sh.j2` and its `.service`/`.timer` are installed by
   their own `linkding_handoff` case. The shared helper is `src/services/readeck/handoff_lib.sh`.
 - The script reaches the apps with `curl --resolve <subdomain>:<port>:<container IP>`,
