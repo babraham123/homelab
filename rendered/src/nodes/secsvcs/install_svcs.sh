@@ -38,6 +38,11 @@ case $1 in
     install_quadlet nodes/secsvcs/traefik/traefik.container
     reload_restart traefik
     ;;
+  crowdsec_appsec)
+    install_appsec_config secsvcs
+    install_quadlet services/crowdsec/crowdsec_appsec.container services/crowdsec/appsecdata.volume
+    reload_restart crowdsec_appsec
+    ;;
   victoriametrics)
     install -D -m 644 -t /etc/opt/victoriametrics nodes/secsvcs/prometheus.yml
     install_quadlet services/victoriametrics/victoriametrics.container services/victoriametrics/vmdata.volume

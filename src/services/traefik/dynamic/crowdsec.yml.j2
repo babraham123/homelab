@@ -1,0 +1,53 @@
+# /etc/opt/traefik/config/dynamic/crowdsec.yml
+# Ref:
+#   https://github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin#variables
+#   https://docs.crowdsec.net/docs/next/appsec/intro
+# yamllint disable rule:document-start rule:document-end
+# The websecure entrypoint runs this ahead of every router (static.yml). It drops IPs the
+# LAPI on secsvcs has banned, then hands each request to the node's own AppSec container
+# (the WAF), which sees headers and bodies, passwords included, so it stays on this VM.
+# Every failure passes traffic: a secsvcs reboot or a dead AppSec never takes a site down.
+http:
+  middlewares:
+    crowdsec:
+      plugin:
+        crowdsec:
+          enabled: true
+          logLevel: INFO
+          # Pulls the decision list every minute and checks requests against it locally
+          crowdsecMode: stream
+          updateIntervalSeconds: 60
+          # Keep serving on the last list while the LAPI is unreachable, also at startup
+          updateMaxFailure: -1
+          streamStartupBlock: false
+          crowdsecLapiScheme: https
+          crowdsecLapiHost: crowdsec.{{ site.url }}:8080
+          crowdsecLapiTlsCertificateAuthorityFile: /certificates/ca.chain.crt
+          # This node's bouncer key (a Podman secret); AppSec checks it with the LAPI too
+          crowdsecLapiKeyFile: /run/secrets/crowdsec_bouncer_key
+          crowdsecAppsecEnabled: true
+          crowdsecAppsecScheme: http
+          crowdsecAppsecHost: appsec.{{ site.url }}:7422
+          crowdsecAppsecFailureBlock: false
+          crowdsecAppsecUnreachableBlock: false
+          # HTTP/2 uploads without a Content-Length can't be buffered for AppSec; pass them
+          crowdsecAppsecUnreadableBodyBlock: false
+          # The rules match on the start of a body; uploads past this go through unread
+          crowdsecAppsecBodyLimit: 1048576
+          # Traefik already put the real client in RemoteAddr (PROXY protocol from
+          # HAProxy) and dropped any X-Forwarded-For an untrusted client sent, so no
+          # forwarded header is trusted here
+          forwardedHeadersTrustedIps: []
+          # The homelab's own machines, never checked: metrics and log pushes (vmagent,
+          # Fluent Bit, PVE, PBS, pfSense, Home Assistant) would otherwise send every
+          # body through the WAF. People's devices on the LAN are still checked, and
+          # the LAPI's allowlist keeps them from being banned.
+          clientTrustedIps:
+            - {{ router.ip }}
+            - {{ pve1.ip }}
+            - {{ pve2.ip }}
+            - {{ vpnsvcs.tailnet_ip }}
+{%- for node in [secsvcs, homesvcs, websvcs] %}
+            - {{ node.ip }}
+            - {{ node.container_subnet }}.0/24
+{%- endfor %}

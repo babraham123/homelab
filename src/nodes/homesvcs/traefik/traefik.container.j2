@@ -25,6 +25,8 @@ PublishPort=443:443
 Exec="--configFile=/config/static/traefik.yml"
 
 Environment=TZ={{ personal.timezone }}
+# The crowdsec middleware's LAPI key, at /run/secrets/crowdsec_bouncer_key
+Secret=crowdsec_bouncer_homesvcs,type=mount,target=crowdsec_bouncer_key
 Volume=/etc/opt/traefik/config:/config
 Volume=/etc/opt/traefik/certificates:/certificates
 Volume=/etc/opt/traefik/plugins-local:/plugins-local:ro

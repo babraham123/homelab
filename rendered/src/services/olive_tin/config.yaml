@@ -197,6 +197,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: homesvcs Install Crowdsec Appsec
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_crowdsec_appsec
+              id: homesvcs_install_crowdsec_appsec
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: homesvcs Install Vmagent
               icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
               shell: ssh autoadmin@homesvcs install_vmagent
@@ -549,6 +557,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: secsvcs Install Crowdsec Appsec
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_crowdsec_appsec
+              id: secsvcs_install_crowdsec_appsec
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: secsvcs Install Fluentbit
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_fluentbit
@@ -729,6 +745,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_traefik
               id: websvcs_install_traefik
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Crowdsec Appsec
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_crowdsec_appsec
+              id: websvcs_install_crowdsec_appsec
               maxConcurrent: 1
               timeout: 60
 

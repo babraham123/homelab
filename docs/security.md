@@ -42,6 +42,25 @@ HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy
   allowlisted (`src/services/crowdsec/allowlist.yaml.j2`). It fails open: with the LAPI down the
   bouncer keeps its last set and every site stays up; `CrowdsecDown` and `CrowdsecBouncerStale`
   report it.
+- **Bans and a WAF at each Traefik.** Every `websecure` request first passes the `crowdsec`
+  middleware (the vendored `crowdsec-bouncer-traefik-plugin`, set on the entrypoint in
+  `src/services/traefik/static.yml.j2`, configured in `dynamic/crowdsec.yml.j2`). It drops IPs the
+  LAPI has banned, from a list it pulls every minute with the node's own bouncer key, so LAN and
+  tailnet clients are covered too, not just traffic through the VPS. Then it hands the request,
+  headers and body, to the node's own CrowdSec AppSec container, which never leaves the VM:
+  - in-band, blocking with a 403: CrowdSec's virtual patches for known CVEs and its generic rules
+    (`crowdsecurity/appsec-virtual-patching`, `appsec-generic-rules`); two different rules hit by
+    one IP within a minute ban it;
+  - out-of-band, detect only: the OWASP Core Rule Set (`crowdsecurity/crs`), whose matches are
+    alerts without a ban until its false positives are known (auth/03);
+  - the homelab's own machines (the VMs, PVE, PBS, pfSense, the VPS's tailnet IP, the container
+    subnets) skip both checks, so metric and log pushes don't pass through the WAF; people's LAN
+    devices don't, and the allowlist keeps them from being banned.
+
+  AppSec is a CrowdSec agent that logs in to the LAPI with a client certificate from the private
+  CA, so its blocks become alerts and bans there. It fails open too: an unreachable LAPI or AppSec,
+  an AppSec error or an unbufferable body passes the request; `CrowdsecTraefikBouncerStale` and
+  `CrowdsecAppsecDown` report it.
 
 Because HAProxy never terminates TLS (see [ADR 0002](adr/0002-haproxy-sni-passthrough.md)), a
 compromise of the VPS exposes traffic metadata but not plaintext.

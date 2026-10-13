@@ -19,6 +19,12 @@ scrape_configs:
       - targets: ['log-collector.janedoe.com:2020']
     metrics_path: /api/v1/metrics/prometheus
     relabel_configs: *host
+  - job_name: 'crowdsec_appsec'
+    # The node's WAF: requests inspected and blocked
+    static_configs:
+      - targets: ['appsec.janedoe.com:6060']
+    metrics_path: /metrics
+    relabel_configs: *host
   - job_name: 'traefik'
     static_configs:
       - targets: ['10.12.0.6:8082']

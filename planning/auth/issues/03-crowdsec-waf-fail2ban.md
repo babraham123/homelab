@@ -1,6 +1,6 @@
 # 03. Edge defense: CrowdSec bans at the VPS, CrowdSec WAF in Traefik, fail2ban for SSH
 
-Status: ready-for-agent Type: task Repo: homelab Source: review finding 14; maintainer request
+Status: ready-for-human Type: task Repo: homelab Source: review finding 14; maintainer request
 2026-10-11 (replaces the HAProxy TODO block)
 
 ## Problem
@@ -114,3 +114,25 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
     rewrites them itself, and the dir is already persistent and backed up.
   - Untested: the `pack_json` tail query, the `.yaml.local` bouncer override and the read-only,
     no-capability container are source-derived. Check them with the guides' steps on first apply.
+- 2026-10-12 agent: Part B step 5 implemented, not yet applied to the nodes; step 6 (CRS in-band)
+  waits for the tuning window, so this is back to the maintainer.
+  - Plugin `maxlerebourg/crowdsec-bouncer-traefik-plugin` v1.7.1 vendored without tests or docs;
+    the `crowdsec` middleware (`src/services/traefik/dynamic/crowdsec.yml.j2`) is on the
+    `websecure` entrypoint rather than on each router, so new routers can't miss it.
+  - `crowdsec_appsec` (`src/services/crowdsec/crowdsec_appsec.container.j2.j2`, `.23`) on secsvcs,
+    homesvcs and websvcs. Agents log in with client certificates (`appsec-<node>`, `OU=agent-ou`)
+    from pve1's cert scripts: the LAPI image pre-registers only one password agent, and certs need
+    no `cscli machines add` per node. Bouncer keys are `crowdsec_bouncer_<node>`, registered on
+    the LAPI as `traefik_<node>`.
+  - CRS is out-of-band and detect only by installing `crowdsecurity/crs` (config and rules)
+    without the `appsec-crs` collection, whose `crowdsec-appsec-outofband` scenario would ban.
+  - Fail-open details from the plugin source: `updateMaxFailure: -1` and
+    `streamStartupBlock: false` (else an unreachable LAPI blocks everything),
+    `crowdsecAppsecUnreadableBodyBlock: false` (HTTP/2 uploads without a length), and the AppSec
+    unit waits for the LAPI's `/health` before starting, since AppSec answers 401 to a key it
+    can't check, which the plugin turns into a 403 for every request.
+  - The homelab's machines (VM, PVE, pfSense and VPS tailnet IPs, container subnets) are
+    `clientTrustedIps`, so metric and log pushes skip the WAF; LAN devices are still inspected.
+  - Untested, check on first apply (secsvcs guide, "Traefik bouncer and WAF"): the plugin loading
+    from `plugins-local`, LAPI client-cert login, the XSS 403, and `cscli alerts list` naming the
+    CRS matches.

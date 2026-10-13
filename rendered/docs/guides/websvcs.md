@@ -26,7 +26,10 @@ exit
   updater](./podman.md#image-updater) first, which stops on a blocked image
 ```bash
 cd /root/homelab-rendered
+# Traefik needs crowdsec_bouncer_websvcs in its secrets, and the WAF its client certificate
+# (secsvcs guide: Traefik bouncer and WAF)
 src/nodes/websvcs/install_svcs.sh traefik
+src/nodes/websvcs/install_svcs.sh crowdsec_appsec
 src/nodes/websvcs/install_svcs.sh vmagent
 src/nodes/websvcs/install_svcs.sh nginx
 src/nodes/websvcs/install_svcs.sh homepage

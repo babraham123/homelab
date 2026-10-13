@@ -45,9 +45,16 @@ Environment=LOCAL_API_URL=https://crowdsec.{{ site.url }}:8080
 Environment=LEVEL_WARN=true
 # Read by acquis.d/victorialogs.yaml
 Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
-# Registers bouncer `vpnsvcs` with this key on first start; a changed key needs
-# `cscli bouncers delete vpnsvcs` and a restart
+# Registers each bouncer (`vpnsvcs`, the VPS's firewall; `traefik_<node>`, each Traefik's
+# plugin) with its key on first start; a changed key needs `cscli bouncers delete NAME`
+# and a restart
 Secret=crowdsec_bouncer_vpnsvcs,type=env,target=BOUNCER_KEY_vpnsvcs
+{%- for node in ['secsvcs', 'homesvcs', 'websvcs'] %}
+Secret=crowdsec_bouncer_{{ node }},type=env,target=BOUNCER_KEY_traefik_{{ node }}
+{%- endfor %}
+# The AppSec agents log in with client certificates (OU=agent-ou, the image's default
+# agents_allowed_ou) signed by the private CA, which the LAPI checks against CACERT_FILE;
+# the LAPI creates each machine on its first login
 
 # Config, hub and the online API credentials; populated on first start
 Volume=/etc/opt/crowdsec/config:/etc/crowdsec

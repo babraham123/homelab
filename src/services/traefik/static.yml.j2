@@ -43,6 +43,9 @@ experimental:
   localPlugins:
     rewriteHeaders:
       moduleName: "github.com/babraham123/traefik-plugin-rewrite-headers"
+    # Upstream v1.7.1, copied without tests or docs
+    crowdsec:
+      moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
 entryPoints:
   # Scraped by the node's collector over the podman network; never published.
   metrics:
@@ -67,6 +70,9 @@ entryPoints:
     address: ":443/tcp"
     http:
       aliasHeadersStrategy: delete
+      # Ahead of every router's own middlewares: CrowdSec bans and the WAF (dynamic/crowdsec.yml)
+      middlewares:
+        - crowdsec@file
     proxyProtocol:
       insecure: false
       trustedIPs: [{{ vpnsvcs.tailnet_ip }}]

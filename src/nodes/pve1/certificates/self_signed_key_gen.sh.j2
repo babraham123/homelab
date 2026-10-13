@@ -46,21 +46,29 @@ chmod 400 private/home.{{ site.url }}.key.pem
 openssl genrsa -out private/crowdsec.{{ site.url }}.key.pem 2048
 chmod 400 private/crowdsec.{{ site.url }}.key.pem
 
+{% for node in ['secsvcs', 'homesvcs', 'websvcs'] -%}
+openssl genrsa -out private/appsec-{{ node }}.{{ site.url }}.key.pem 2048
+chmod 400 private/appsec-{{ node }}.{{ site.url }}.key.pem
+{% endfor %}
 # Each node's files go on its install command's stdin
 "$send" \
   private/ldap.{{ site.url }}.key.pem \
   private/auth.{{ site.url }}.key.pem \
   private/pgdb.{{ site.url }}.key.pem \
   private/secproxy.{{ site.url }}.key.pem \
-  private/crowdsec.{{ site.url }}.key.pem |
+  private/crowdsec.{{ site.url }}.key.pem \
+  private/appsec-secsvcs.{{ site.url }}.key.pem |
   ssh autoadmin@secsvcs install_keys
-"$send" private/webproxy.{{ site.url }}.key.pem | \
+"$send" \
+  private/webproxy.{{ site.url }}.key.pem \
+  private/appsec-websvcs.{{ site.url }}.key.pem |
   ssh autoadmin@websvcs install_keys
 "$send" \
   private/homeproxy.{{ site.url }}.key.pem \
   private/mqtt.{{ site.url }}.key.pem \
   private/zigbee.{{ site.url }}.key.pem \
-  private/home.{{ site.url }}.key.pem |
+  private/home.{{ site.url }}.key.pem \
+  private/appsec-homesvcs.{{ site.url }}.key.pem |
   ssh autoadmin@homesvcs install_keys
 
 date -u > /root/ca/date_self_signed_keys.txt

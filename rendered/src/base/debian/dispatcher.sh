@@ -75,6 +75,9 @@ case "$(hostname)" in
       install_traefik)
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh traefik
         ;;
+      install_crowdsec_appsec)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
+        ;;
       install_vmagent)
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh vmagent
         ;;
@@ -92,6 +95,7 @@ case "$(hostname)" in
         ;;
       install_all_svcs)
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh vmagent
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh mosquitto
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
@@ -269,6 +273,9 @@ case "$(hostname)" in
       install_crowdsec)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
         ;;
+      install_crowdsec_appsec)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
+        ;;
       install_fluentbit)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
         ;;
@@ -288,6 +295,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vaultwarden
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
         ;;
       install_keys)
@@ -404,6 +412,9 @@ case "$(hostname)" in
       install_traefik)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik
         ;;
+      install_crowdsec_appsec)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh crowdsec_appsec
+        ;;
       install_vmagent)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh vmagent
         ;;
@@ -448,6 +459,7 @@ case "$(hostname)" in
         ;;
       install_all_svcs)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh crowdsec_appsec
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh vmagent
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh nginx
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh homepage

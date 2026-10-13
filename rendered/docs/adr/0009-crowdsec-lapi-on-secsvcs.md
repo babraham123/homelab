@@ -32,6 +32,10 @@ auth/03 has the full design.
 - **fail2ban stays** for SSH on the VPS: local, so it still bans with the tailnet or secsvcs down.
 - **WAF (CrowdSec AppSec) runs per node** next to each Traefik, once real client IPs reach Traefik
   (auth/06): the plugin forwards headers and bodies, passwords included, so they never leave the VM.
+  The plugin sits on the `websecure` entrypoint, so no router can miss it, and also enforces the
+  LAPI's bans for LAN and tailnet clients. Each AppSec container is an agent that logs in to the
+  LAPI with a client certificate from the private CA (`OU=agent-ou`), so no agent password needs
+  registering by hand; each Traefik has its own bouncer key.
 
 ## Considered
 
@@ -46,6 +50,8 @@ auth/03 has the full design.
 ## Consequences
 
 - secsvcs is in the ban path: while it is down, bans stop being added (the existing ones stay).
+  An AppSec container only starts once the LAPI answers, because AppSec rejects a bouncer key it
+  can't check, and the plugin blocks on a rejection; while it waits the WAF is off.
 - The acquisitions depend on the fields `journald.lua` keeps for Traefik; dropping one breaks the
   parser, which `CrowdsecNotParsing` catches.
 - A ban keyed on the wrong address is only as safe as the allowlist: while the router SNATs tailnet

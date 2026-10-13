@@ -40,6 +40,7 @@ case $node in
   homesvcs)
     images=(
       "traefik traefik localhost/library/traefik:v3.7 upstream docker.io/library/traefik:v3.7"
+      "crowdsec_appsec crowdsec_appsec localhost/crowdsecurity/crowdsec:latest upstream docker.io/crowdsecurity/crowdsec:latest"
       "vmagent vmagent localhost/victoriametrics/vmagent:latest upstream docker.io/victoriametrics/vmagent:latest"
       "mosquitto mosquitto localhost/library/eclipse-mosquitto:latest upstream docker.io/library/eclipse-mosquitto:latest"
       "zigbee2mqtt zigbee2mqtt localhost/koenkk/zigbee2mqtt:latest upstream ghcr.io/koenkk/zigbee2mqtt:latest"
@@ -62,6 +63,7 @@ case $node in
       "vaultwarden vaultwarden localhost/vaultwarden/server:latest upstream docker.io/vaultwarden/server:latest"
       "olive_tin olive_tin localhost/jamesread/olivetin:latest-3k upstream docker.io/jamesread/olivetin:latest-3k"
       "crowdsec crowdsec localhost/crowdsecurity/crowdsec:latest upstream docker.io/crowdsecurity/crowdsec:latest"
+      "crowdsec_appsec crowdsec_appsec localhost/crowdsecurity/crowdsec:latest upstream docker.io/crowdsecurity/crowdsec:latest"
       "fluentbit fluentbit localhost/fluent/fluent-bit:3.2 upstream docker.io/fluent/fluent-bit:3.2"
       "traefik traefik localhost/library/traefik:v3.7 upstream docker.io/library/traefik:v3.7"
       "victoriametrics victoriametrics localhost/victoriametrics/victoria-metrics:latest upstream docker.io/victoriametrics/victoria-metrics:latest"
@@ -91,6 +93,7 @@ case $node in
   websvcs)
     images=(
       "traefik traefik localhost/library/traefik:v3.7 upstream docker.io/library/traefik:v3.7"
+      "crowdsec_appsec crowdsec_appsec localhost/crowdsecurity/crowdsec:latest upstream docker.io/crowdsecurity/crowdsec:latest"
       "vmagent vmagent localhost/victoriametrics/vmagent:latest upstream docker.io/victoriametrics/vmagent:latest"
       "nginx nginx localhost/library/nginx:stable upstream docker.io/library/nginx:stable"
       "homepage homepage localhost/gethomepage/homepage:latest upstream ghcr.io/gethomepage/homepage:latest"

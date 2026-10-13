@@ -12,7 +12,7 @@ case $1 in
     receive_files auth.janedoe.com.cert.pem ldap.janedoe.com.cert.pem pgdb.janedoe.com.cert.pem \
       secproxy.janedoe.com.cert.pem secproxy.janedoe.com.client_cert.pem \
       webproxy.janedoe.com.client_cert.pem homeproxy.janedoe.com.client_cert.pem \
-      crowdsec.janedoe.com.cert.pem ca-chain.cert.pem
+      crowdsec.janedoe.com.cert.pem appsec-secsvcs.janedoe.com.client_cert.pem ca-chain.cert.pem
     mkdir -p /etc/opt/authelia/certificates
     mkdir -p /etc/opt/lldap/certificates
     mkdir -p /etc/opt/traefik/certificates
@@ -20,6 +20,7 @@ case $1 in
     mkdir -p /etc/opt/gatus/certificates
     mkdir -p /etc/opt/grafana/certificates
     mkdir -p /etc/opt/crowdsec/certificates
+    mkdir -p /etc/opt/crowdsec_appsec/certificates
 
     mv auth.janedoe.com.cert.pem /etc/opt/authelia/certificates/auth.cert.pem
     mv ldap.janedoe.com.cert.pem /etc/opt/lldap/certificates/ldap.cert.pem
@@ -37,6 +38,7 @@ case $1 in
     mv homeproxy.janedoe.com.client_cert.pem /etc/opt/authelia/certificates/homeproxy.client.pem
 
     mv crowdsec.janedoe.com.cert.pem /etc/opt/crowdsec/certificates/crowdsec.cert.pem
+    mv appsec-secsvcs.janedoe.com.client_cert.pem /etc/opt/crowdsec_appsec/certificates/appsec.cert.pem
     
     cp ca-chain.cert.pem /etc/opt/traefik/certificates/ca.chain.crt
     cp ca-chain.cert.pem /etc/opt/authelia/certificates/ca.chain.pem
@@ -45,15 +47,17 @@ case $1 in
     cp ca-chain.cert.pem /etc/opt/gatus/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/grafana/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/crowdsec/certificates/ca.chain.pem
+    cp ca-chain.cert.pem /etc/opt/crowdsec_appsec/certificates/ca.chain.pem
     ;;
   install_keys)
     receive_files auth.janedoe.com.key.pem ldap.janedoe.com.key.pem secproxy.janedoe.com.key.pem \
-      pgdb.janedoe.com.key.pem crowdsec.janedoe.com.key.pem
+      pgdb.janedoe.com.key.pem crowdsec.janedoe.com.key.pem appsec-secsvcs.janedoe.com.key.pem
     mkdir -p /etc/opt/authelia/certificates
     mkdir -p /etc/opt/lldap/certificates
     mkdir -p /etc/opt/traefik/certificates
     mkdir -p /etc/opt/db/certificates
     mkdir -p /etc/opt/crowdsec/certificates
+    mkdir -p /etc/opt/crowdsec_appsec/certificates
 
     mv auth.janedoe.com.key.pem /etc/opt/authelia/certificates/auth.key
     mv ldap.janedoe.com.key.pem /etc/opt/lldap/certificates/ldap.key.pem
@@ -64,6 +68,7 @@ case $1 in
     chown 70:70 /etc/opt/db/certificates/pgdb.key
 
     mv crowdsec.janedoe.com.key.pem /etc/opt/crowdsec/certificates/crowdsec.key.pem
+    mv appsec-secsvcs.janedoe.com.key.pem /etc/opt/crowdsec_appsec/certificates/appsec.key.pem
     # https://github.com/docker-library/postgres/blob/master/14/alpine3.19/Dockerfile
     ;;
   install_olive_tin_cert)

@@ -12,7 +12,7 @@ case $1 in
     receive_files auth.{{ site.url }}.cert.pem ldap.{{ site.url }}.cert.pem pgdb.{{ site.url }}.cert.pem \
       secproxy.{{ site.url }}.cert.pem secproxy.{{ site.url }}.client_cert.pem \
       webproxy.{{ site.url }}.client_cert.pem homeproxy.{{ site.url }}.client_cert.pem \
-      crowdsec.{{ site.url }}.cert.pem ca-chain.cert.pem
+      crowdsec.{{ site.url }}.cert.pem appsec-secsvcs.{{ site.url }}.client_cert.pem ca-chain.cert.pem
     mkdir -p /etc/opt/authelia/certificates
     mkdir -p /etc/opt/lldap/certificates
     mkdir -p /etc/opt/traefik/certificates
@@ -20,6 +20,7 @@ case $1 in
     mkdir -p /etc/opt/gatus/certificates
     mkdir -p /etc/opt/grafana/certificates
     mkdir -p /etc/opt/crowdsec/certificates
+    mkdir -p /etc/opt/crowdsec_appsec/certificates
 
     mv auth.{{ site.url }}.cert.pem /etc/opt/authelia/certificates/auth.cert.pem
     mv ldap.{{ site.url }}.cert.pem /etc/opt/lldap/certificates/ldap.cert.pem
@@ -37,6 +38,7 @@ case $1 in
     mv homeproxy.{{ site.url }}.client_cert.pem /etc/opt/authelia/certificates/homeproxy.client.pem
 
     mv crowdsec.{{ site.url }}.cert.pem /etc/opt/crowdsec/certificates/crowdsec.cert.pem
+    mv appsec-secsvcs.{{ site.url }}.client_cert.pem /etc/opt/crowdsec_appsec/certificates/appsec.cert.pem
     
     cp ca-chain.cert.pem /etc/opt/traefik/certificates/ca.chain.crt
     cp ca-chain.cert.pem /etc/opt/authelia/certificates/ca.chain.pem
@@ -45,15 +47,17 @@ case $1 in
     cp ca-chain.cert.pem /etc/opt/gatus/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/grafana/certificates/ca.chain.pem
     cp ca-chain.cert.pem /etc/opt/crowdsec/certificates/ca.chain.pem
+    cp ca-chain.cert.pem /etc/opt/crowdsec_appsec/certificates/ca.chain.pem
     ;;
   install_keys)
     receive_files auth.{{ site.url }}.key.pem ldap.{{ site.url }}.key.pem secproxy.{{ site.url }}.key.pem \
-      pgdb.{{ site.url }}.key.pem crowdsec.{{ site.url }}.key.pem
+      pgdb.{{ site.url }}.key.pem crowdsec.{{ site.url }}.key.pem appsec-secsvcs.{{ site.url }}.key.pem
     mkdir -p /etc/opt/authelia/certificates
     mkdir -p /etc/opt/lldap/certificates
     mkdir -p /etc/opt/traefik/certificates
     mkdir -p /etc/opt/db/certificates
     mkdir -p /etc/opt/crowdsec/certificates
+    mkdir -p /etc/opt/crowdsec_appsec/certificates
 
     mv auth.{{ site.url }}.key.pem /etc/opt/authelia/certificates/auth.key
     mv ldap.{{ site.url }}.key.pem /etc/opt/lldap/certificates/ldap.key.pem
@@ -64,6 +68,7 @@ case $1 in
     chown 70:70 /etc/opt/db/certificates/pgdb.key
 
     mv crowdsec.{{ site.url }}.key.pem /etc/opt/crowdsec/certificates/crowdsec.key.pem
+    mv appsec-secsvcs.{{ site.url }}.key.pem /etc/opt/crowdsec_appsec/certificates/appsec.key.pem
     # https://github.com/docker-library/postgres/blob/master/14/alpine3.19/Dockerfile
     ;;
   install_olive_tin_cert)

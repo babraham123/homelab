@@ -32,6 +32,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .16 | crowdsec | crowdsec | IP bans from the logs, LAPI for the VPS's bouncer ([Security](security.md#the-edge-haproxy)) | crowdsec (internal DNS only), port 8080 |
 | .17 | vaultwarden | vaultwarden/server | Password manager, public, SSO-only via Authelia | vault.janedoe.com |
 | .20 | fluentbit | fluent-bit | Journal → VictoriaLogs forwarder | n/a |
+| .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
 
 ## websvcs: user-facing web apps (pve2, 10.11.0.0/24)
 
@@ -49,6 +50,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .20 | fluentbit | fluent-bit | journald → VictoriaLogs forwarder | n/a |
 | .21 | storyteller | storyteller:web-v2 | Read-along book library, OPDS | books.janedoe.com |
 | .22 | calliope | built from babraham123/TTS-Narrated-Ebook-Creator | GPU batch job: EPUB → read-along EPUB | n/a |
+| .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
 
 - `nginx` serves `/var/opt/nginx/www` by subdomain (`www/`, `wifi/` (redirects to the AP's admin
   page), shared `error/`; `src/services/nginx/nginx.conf.j2`)
@@ -70,6 +72,7 @@ timers; see the [reading guide](guides/reading.md).
 | .9 | zigbee2mqtt | zigbee2mqtt | Zigbee ↔ MQTT bridge | zigbee.janedoe.com |
 | .11 | home_assistant | home-assistant | Home automation hub | home.janedoe.com |
 | .20 | fluentbit | fluent-bit:3.2 | Journal → VictoriaLogs forwarder | n/a |
+| .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
 
 ## vpnsvcs: public edge (Linode, 10.13.0.0/24)
 
@@ -180,8 +183,9 @@ flowchart LR
     vmagent in), tailscaled and node_exporter
   - `VpsMetricsAbsent` fires on silence, since a pushing host can't raise `up == 0`; `HaproxyDown`
     and `HaproxyBackendConnectErrors` cover the edge; "HAProxy" dashboard
-- **CrowdSec**: the engine's and LAPI's metrics (`:6060`) scraped on secsvcs, the VPS's firewall
-  bouncer (`:60601` on the bridge gateway) by the VPS's vmagent; "CrowdSec" dashboard
+- **CrowdSec**: the engine's and LAPI's metrics (`:6060`) scraped on secsvcs, each node's AppSec
+  (`appsec:6060`) by that node's scraper, the VPS's firewall bouncer (`:60601` on the bridge
+  gateway) by the VPS's vmagent; "CrowdSec" dashboard
 - **Scrape targets**: by hand in each node's `src/nodes/<node>/prometheus.yml.j2`, each relabelled
   with `host` = the bare node name (`secsvcs`), the same value as the journal's `hostname` field in
   VictoriaLogs, so one dashboard variable filters both
@@ -201,8 +205,9 @@ flowchart LR
     `CertExpiringSoon` (14 days), `CertExpiringCritical` (3 days)
   - `backups.yml`: `BackupStale`, `BackupNeverRan`, `SnapraidStale`, `DiskUnhealthy`
   - `vps.yml`: `VpsMetricsAbsent`, `HaproxyDown`, `HaproxyBackendConnectErrors`
-  - `crowdsec.yml`: `CrowdsecDown`, `CrowdsecBouncerStale` (no pull in 10 minutes),
-    `CrowdsecNotParsing` (no Traefik line parsed in an hour)
+  - `crowdsec.yml`: `CrowdsecDown`, `CrowdsecBouncerStale` and `CrowdsecTraefikBouncerStale` (no
+    pull in 10 minutes), `CrowdsecAppsecDown` (a node's WAF), `CrowdsecNotParsing` (no Traefik line
+    parsed in an hour)
   - `pipeline.yml`: `Watchdog`
   - `health.yml`, `vmagent.yml`, `vmalert.yml`, `vmsingle.yml`, `fluentbit.yml`: the pipeline's own
     components, upstream rule sets

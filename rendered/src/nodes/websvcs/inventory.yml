@@ -6,6 +6,7 @@ debian_services: [mdns_repeater, node_exporter, nvidia_gpu_exporter, image_updat
 services:
   traefik: {subdomain: webproxy, admin: true, uptime: traefik websvcs, uptime_tier: 1,
             upstream: docker.io/library/traefik:v3.7}
+  crowdsec_appsec: {upstream: docker.io/crowdsecurity/crowdsec:latest, dirs: [services/crowdsec]}
   vmagent: {upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
   nginx: {subdomain: www, upstream: docker.io/library/nginx:stable}
   homepage: {subdomain: dash, uptime: homepage, uptime_tier: 1,

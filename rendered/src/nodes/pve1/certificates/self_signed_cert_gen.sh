@@ -94,6 +94,36 @@ openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
   -out certs/crowdsec.janedoe.com.cert.pem
 chmod 444 certs/crowdsec.janedoe.com.cert.pem
 
+# Each node's CrowdSec AppSec logs in to the LAPI with a client certificate: the LAPI
+# accepts OU=agent-ou as an agent and names the machine after the CN
+openssl req -config openssl.cnf \
+  -key private/appsec-secsvcs.janedoe.com.key.pem \
+  -subj "${subj}/OU=agent-ou/CN=appsec-secsvcs" \
+  -new -sha256 -out csr/appsec-secsvcs.janedoe.com.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions usr_cert -days 395 -notext -md sha256 \
+  -in csr/appsec-secsvcs.janedoe.com.csr.pem \
+  -out certs/appsec-secsvcs.janedoe.com.client_cert.pem
+chmod 444 certs/appsec-secsvcs.janedoe.com.client_cert.pem
+openssl req -config openssl.cnf \
+  -key private/appsec-homesvcs.janedoe.com.key.pem \
+  -subj "${subj}/OU=agent-ou/CN=appsec-homesvcs" \
+  -new -sha256 -out csr/appsec-homesvcs.janedoe.com.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions usr_cert -days 395 -notext -md sha256 \
+  -in csr/appsec-homesvcs.janedoe.com.csr.pem \
+  -out certs/appsec-homesvcs.janedoe.com.client_cert.pem
+chmod 444 certs/appsec-homesvcs.janedoe.com.client_cert.pem
+openssl req -config openssl.cnf \
+  -key private/appsec-websvcs.janedoe.com.key.pem \
+  -subj "${subj}/OU=agent-ou/CN=appsec-websvcs" \
+  -new -sha256 -out csr/appsec-websvcs.janedoe.com.csr.pem
+openssl ca -config openssl.cnf -passin "pass:$CA_PASS" \
+  -extensions usr_cert -days 395 -notext -md sha256 \
+  -in csr/appsec-websvcs.janedoe.com.csr.pem \
+  -out certs/appsec-websvcs.janedoe.com.client_cert.pem
+chmod 444 certs/appsec-websvcs.janedoe.com.client_cert.pem
+
 openssl req -config openssl.cnf \
   -key private/webproxy.janedoe.com.key.pem \
   -subj "${subj}/OU=websvcs/CN=webproxy.janedoe.com" \
@@ -171,11 +201,13 @@ chmod 444 certs/home.janedoe.com.client_cert.pem
   certs/webproxy.janedoe.com.client_cert.pem \
   certs/homeproxy.janedoe.com.client_cert.pem \
   certs/crowdsec.janedoe.com.cert.pem \
+  certs/appsec-secsvcs.janedoe.com.client_cert.pem \
   certs/ca-chain.cert.pem |
   ssh autoadmin@secsvcs install_certs
 "$send" \
   certs/webproxy.janedoe.com.cert.pem \
   certs/webproxy.janedoe.com.client_cert.pem \
+  certs/appsec-websvcs.janedoe.com.client_cert.pem \
   certs/ca-chain.cert.pem |
   ssh autoadmin@websvcs install_certs
 "$send" \
@@ -184,6 +216,7 @@ chmod 444 certs/home.janedoe.com.client_cert.pem
   certs/mqtt.janedoe.com.cert.pem \
   certs/zigbee.janedoe.com.client_cert.pem \
   certs/home.janedoe.com.client_cert.pem \
+  certs/appsec-homesvcs.janedoe.com.client_cert.pem \
   certs/ca-chain.cert.pem |
   ssh autoadmin@homesvcs install_certs
 

@@ -26,6 +26,7 @@ src/nodes/secsvcs/install_svcs.sh vaultwarden
 src/nodes/secsvcs/install_svcs.sh olive_tin
 # needs the prerequisites in CrowdSec below
 src/nodes/secsvcs/install_svcs.sh crowdsec
+src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
 src/nodes/secsvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter
@@ -84,15 +85,17 @@ journalctl -eu authelia
     `self_signed_cert_gen.sh` (they install every node's, so restart the secure services after)
   - `crowdsec_bouncer_vpnsvcs` in `/root/secrets/secsvcs.yaml` on pve1, then `sudo
     /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
-- Admit the VPS to the LAPI's published port. The router routes tailnet traffic without SNAT
-  (router/04), so the VPS arrives from its tailnet IP
+- Admit the VPS and the other Traefiks to the LAPI's published port. The router routes tailnet
+  traffic without SNAT (router/04), so the VPS arrives from its tailnet IP
 ```bash
 sudo su
 cd /root/homelab-rendered
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
-ufw allow in from {{ vpnsvcs.tailnet_ip }} to any port 8080 proto tcp
-ufw route allow in on $NET_IFACE out on $POD_IFACE from {{ vpnsvcs.tailnet_ip }} to any port 8080 proto tcp
+for src in {{ vpnsvcs.tailnet_ip }} {{ homesvcs.ip }} {{ websvcs.ip }}; do
+  ufw allow in from $src to any port 8080 proto tcp
+  ufw route allow in on $NET_IFACE out on $POD_IFACE from $src to any port 8080 proto tcp
+done
 ```
 - Install and check
 ```bash
@@ -123,6 +126,43 @@ for i in $(seq 40); do curl -s -o /dev/null https://www.{{ site.url }}/nope$i; d
 - The LAN, tailnet and VPS addresses never appear in `cscli decisions list`
 - Grafana: "CrowdSec" dashboard; alerts in `src/services/vmalert/configs/crowdsec.yml`
 
+### Traefik bouncer and WAF
+Every Traefik checks requests against the LAPI's bans and sends them to its node's AppSec
+container ([Security](../security.md#the-edge-haproxy)). In this order, since Traefik can't start
+without its key, and a key the LAPI doesn't know blocks every request with a 403:
+1. On pve1: `crowdsec_bouncer_secsvcs`, `crowdsec_bouncer_homesvcs` and `crowdsec_bouncer_websvcs`
+   in `/root/secrets/secsvcs.yaml`, each copied to that node's secrets file; the AppSec keys and
+   client certificates (`appsec-<node>`) come from `self_signed_key_gen.sh` and
+   `self_signed_cert_gen.sh`
+```bash
+for node in secsvcs homesvcs websvcs; do
+  sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh $node
+done
+```
+2. On secsvcs: the LAPI registers the new bouncer keys at start, then the WAF and Traefik
+```bash
+src/nodes/secsvcs/install_svcs.sh crowdsec
+podman exec crowdsec cscli bouncers list    # vpnsvcs and traefik_<node> for all three
+src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
+src/nodes/secsvcs/install_svcs.sh traefik
+```
+3. On homesvcs and websvcs: `install_svcs.sh crowdsec_appsec`, then `install_svcs.sh traefik`
+4. Check, on secsvcs
+```bash
+podman exec crowdsec cscli machines list   # appsec-<node>@<IP>, validated, for all three
+podman exec crowdsec cscli bouncers list   # each traefik_<node> with a recent last pull
+podman exec crowdsec_appsec cscli metrics show appsec   # requests processed
+journalctl -u traefik | grep -i crowdsec   # no plugin errors
+```
+- Test from an outside IP: a script tag gets a 403 from the WAF and an alert in `cscli alerts list`
+  (a second, different rule from the same IP within a minute bans it). From the LAN the same
+  request is blocked and alerted with the LAN IP, never banned
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' 'https://www.{{ site.url }}/?q=<script>alert(1)</script>'
+```
+- The Core Rule Set runs out-of-band: its matches are alerts only (`cscli alerts list`, scenario
+  names starting `anomaly score`). After a few weeks, add exclusions for what it flags wrongly and
+  move it in-band (auth/03)
 ## Vaultwarden
 - Public at https://vault.{{ site.url }}: login is SSO-only through Authelia two-factor, gated on
   the `vaultwarden_access` LLDAP group; the master password still decrypts the vault

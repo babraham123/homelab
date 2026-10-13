@@ -45,6 +45,11 @@ case $1 in
     install_quadlet nodes/websvcs/traefik/traefik.container
     reload_restart traefik
     ;;
+  crowdsec_appsec)
+    install_appsec_config websvcs
+    install_quadlet services/crowdsec/crowdsec_appsec.container services/crowdsec/appsecdata.volume
+    reload_restart crowdsec_appsec
+    ;;
   vmagent)
     install -D -m 644 -t /etc/opt/vmagent nodes/websvcs/prometheus.yml
     base/podman/render_host.sh websvcs services/victoriametrics/vmagent.container

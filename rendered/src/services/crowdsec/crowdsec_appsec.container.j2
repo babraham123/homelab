@@ -1,0 +1,69 @@
+# /etc/containers/systemd/crowdsec_appsec.container.j2
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://docs.crowdsec.net/docs/next/appsec/intro
+# https://github.com/crowdsecurity/crowdsec/blob/master/build/docker/README.md
+# The WAF next to this node's Traefik, whose crowdsec middleware sends it every request,
+# bodies included (docs/adr/0009-crowdsec-lapi-on-secsvcs.md). An agent of the LAPI on
+# secsvcs with only the appsec acquisition: its blocks become alerts and bans there.
+
+[Unit]
+Description="Homelab: CrowdSec AppSec, the WAF for this node's Traefik"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=localhost/crowdsecurity/crowdsec:latest
+ContainerName=crowdsec_appsec
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+# Logs in to the LAPI with the client certificate
+HealthCmd=cscli lapi status
+HealthInterval=30s
+HealthRetries=3
+HealthStartPeriod=120s
+HealthOnFailure=kill
+
+# AppSec, port = 7422 (acquis.d/appsec.yaml); Prometheus metrics, port = 6060
+Network=net.network
+HostName=appsec.janedoe.com
+IP={{ subnet }}.23
+
+Environment=TZ=America/Los_Angeles
+Environment=DISABLE_LOCAL_API=true
+Environment=LOCAL_API_URL=https://crowdsec.janedoe.com:8080
+Environment=USE_TLS=true
+Environment=CACERT_FILE=/certificates/ca.chain.pem
+Environment=CLIENT_CERT_FILE=/certificates/appsec.cert.pem
+Environment=CLIENT_KEY_FILE=/certificates/appsec.key.pem
+# In-band (blocks): virtual patches for known CVEs and the generic rules. CRS runs
+# out-of-band, detect only: its matches are alerts without a ban, since its scenario
+# (crowdsecurity/appsec-crs's crowdsec-appsec-outofband) isn't installed. Move it in-band,
+# with exclusions, once its alerts show the false positives (auth/03).
+Environment="COLLECTIONS=crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+Environment=APPSEC_CONFIGS=crowdsecurity/crs
+Environment=APPSEC_RULES=crowdsecurity/crs
+Environment=LEVEL_WARN=true
+
+# Config and hub; populated on first start
+Volume=/etc/opt/crowdsec_appsec/config:/etc/crowdsec
+Volume=/etc/opt/crowdsec_appsec/certificates:/certificates:ro
+# The hub's data files; the image refuses to start without a volume here
+Volume=appsecdata.volume:/var/lib/crowdsec/data
+
+[Service]
+# AppSec checks Traefik's key with the LAPI; with the LAPI unreachable and the key not yet
+# cached it rejects it, and Traefik then blocks every request. Starting only once the
+# LAPI answers leaves AppSec unreachable instead, which Traefik passes.
+ExecStartPre=/usr/bin/curl -sf --max-time 5 -o /dev/null \
+  --cacert /etc/opt/crowdsec_appsec/certificates/ca.chain.pem https://crowdsec.janedoe.com:8080/health
+Restart=on-failure
+# Keeps retrying while secsvcs is down, under the start limit
+RestartSec=30s
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
