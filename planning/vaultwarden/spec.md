@@ -18,4 +18,4 @@ stub").
 
 | # | Title | Status | Type |
 |---|---|---|---|
-| [01](issues/01-install-vaultwarden.md) | Install Vaultwarden on secsvcs (replaces the `vault` stub), publicly reachable | `ready-for-agent` | task |
+| [01](issues/01-install-vaultwarden.md) | Install Vaultwarden on secsvcs (replaces the `vault` stub), publicly reachable | `ready-for-human` (code in; deploy and run acceptance) | task |

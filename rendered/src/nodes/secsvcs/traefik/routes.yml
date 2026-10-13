@@ -156,18 +156,30 @@ http:
       rule: Host(`ntfy-alertmanager.janedoe.com`)
       service: ntfy-alertmanager@file
       middlewares: []
-    # vault:
-    #   <<: *service
-    #   rule: Host(`vault.janedoe.com`)
-    #   service: vault@file
-    # # The websocket URL carries ?access_token=<JWT>, and Traefik can't redact a query
-    # # parameter, so keep these requests out of the access log (and the journal) entirely.
-    # vault-notifications:
-    #   <<: *service
-    #   rule: Host(`vault.janedoe.com`) && PathPrefix(`/notifications/`)
-    #   service: vault@file
-    #   observability:
-    #     accessLogs: false
+    # Clients call the API directly, so no Authelia. No secure-headers either: it would replace
+    # Vaultwarden's own CSP and X-Frame-Options, and add them to the connector pages the
+    # extension frames for WebAuthn and Duo.
+    vaultwarden:
+      <<: *service
+      rule: Host(`vault.janedoe.com`)
+      service: vaultwarden@file
+      middlewares: []
+    # The websocket URL carries ?access_token=<JWT>, and Traefik can't redact a query
+    # parameter, so keep these requests out of the access log (and the journal) entirely.
+    vaultwarden-notifications:
+      <<: *service
+      rule: Host(`vault.janedoe.com`) && PathPrefix(`/notifications/`)
+      service: vaultwarden@file
+      middlewares: []
+      observability:
+        accessLogs: false
+    # Authelia, then Vaultwarden's admin token
+    vaultwarden-admin:
+      <<: *service
+      rule: Host(`vault.janedoe.com`) && PathPrefix(`/admin`)
+      service: vaultwarden@file
+      middlewares:
+        - authelia@file
     olive_tin:
       <<: *service
       rule: Host(`command.janedoe.com`)
@@ -214,10 +226,10 @@ http:
       loadBalancer:
         servers:
           - url: http://ntfy-alertmanager.janedoe.com:2588/
-    # vault:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://vault.janedoe.com:80/
+    vaultwarden:
+      loadBalancer:
+        servers:
+          - url: http://vault.janedoe.com:8080/
     olive_tin:
       loadBalancer:
         servers:

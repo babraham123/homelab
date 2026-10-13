@@ -41,3 +41,11 @@ GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;
 CREATE USER guacamole WITH ENCRYPTED PASSWORD :pw6;
 CREATE DATABASE guacamole;
 GRANT ALL PRIVILEGES ON DATABASE guacamole TO guacamole;
+
+--- Set up Vaultwarden DB for first time ---
+\set pw7 `echo "'$VAULTWARDEN_POSTGRES_PASSWORD'"`
+CREATE USER vaultwarden WITH ENCRYPTED PASSWORD :pw7;
+CREATE DATABASE vaultwarden;
+GRANT ALL PRIVILEGES ON DATABASE vaultwarden TO vaultwarden;
+-- From Postgres 15 the GRANT no longer allows creating tables in public; the owner can
+ALTER DATABASE vaultwarden OWNER TO vaultwarden;

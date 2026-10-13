@@ -1,0 +1,100 @@
+# /etc/containers/systemd/vaultwarden.container
+# Ref:
+# https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/dani-garcia/vaultwarden/blob/main/.env.template
+# https://github.com/dani-garcia/vaultwarden/wiki/Hardening-Guide
+# https://github.com/dani-garcia/vaultwarden/wiki/Enabling-SSO-support-using-OpenId-Connect
+# Settings checked against 1.37.4: planning/vaultwarden/research-01.md
+
+[Unit]
+Description="Homelab: Bitwarden-compatible password manager"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=postgres.service
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=localhost/vaultwarden/server:latest
+ContainerName=vaultwarden
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+# Follows ROCKET_PORT
+HealthCmd=/healthcheck.sh
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
+HealthStartPeriod=2m
+
+Network=net.network
+HostName=vault.{{ site.url }}
+IP={{ secsvcs.container_subnet }}.17
+# SSO discovery, token and userinfo calls go through Traefik
+AddHost=auth.{{ site.url }}:{{ secsvcs.container_subnet }}.6
+
+# The image listens on 80 and grants no capability to bind it as non-root
+User=1000
+Group=1000
+Environment=ROCKET_PORT=8080
+
+Environment=TZ={{ personal.timezone }}
+Environment=DOMAIN=https://vault.{{ site.url }}
+
+# Accounts are created only by an SSO login, which the vaultwarden_access group gates in Authelia
+Environment=SIGNUPS_ALLOWED=false
+Environment=SSO_SIGNUPS_ALLOWED=true
+Environment=INVITATIONS_ALLOWED=false
+Environment=PASSWORD_HINTS_ALLOWED=false
+# The maintainer, as Authelia sends it: their LLDAP email must match
+Environment=ORG_CREATION_USERS={{ site.email }}
+
+# Login only through Authelia; the master password still decrypts the vault
+Environment=SSO_ENABLED=true
+Environment=SSO_ONLY=true
+# Must equal Authelia's issuer exactly, no trailing /
+Environment=SSO_AUTHORITY=https://auth.{{ site.url }}
+# Authelia issues refresh tokens only with offline_access
+Environment="SSO_SCOPES=openid profile email offline_access"
+Environment=SSO_PKCE=true
+# Every account starts as an SSO signup, so none ever needs associating by email
+Environment=SSO_SIGNUPS_MATCH_EMAIL=false
+Environment=SSO_ALLOW_UNKNOWN_EMAIL_VERIFICATION=false
+# Enforced when the master password is set at SSO enrollment
+Environment='SSO_MASTER_PASSWORD_POLICY={"minComplexity":3,"minLength":12}'
+# The session lives as long as Authelia's refresh token, so leaving vaultwarden_access ends it
+Environment=SSO_AUTH_ONLY_NOT_SESSION=false
+
+# Traefik is the only proxy; the rightmost untrusted entry is the client
+Environment=IP_HEADER=X-Forwarded-For
+Environment=IP_HEADER_TRUSTED_PROXIES={{ secsvcs.container_subnet }}.6
+# The defaults, here so they're visible
+Environment=LOGIN_RATELIMIT_SECONDS=60
+Environment=LOGIN_RATELIMIT_MAX_BURST=10
+Environment=ADMIN_RATELIMIT_SECONDS=300
+Environment=ADMIN_RATELIMIT_MAX_BURST=3
+# The icon fetcher can't probe the LAN; the SSO client is exempt
+Environment=HTTP_REQUEST_BLOCK_NON_GLOBAL_IPS=true
+# No relay through Bitwarden's push service: phones sync on open or pull-to-refresh
+Environment=PUSH_ENABLED=false
+
+Environment=EXTENDED_LOGGING=true
+# Plain warn drops the "logged in successfully. IP" lines
+Environment=LOG_LEVEL=warn,vaultwarden::api::identity=info
+
+# Never Environment=: the admin token's PHC string is full of $, which systemd expands
+Secret=vaultwarden_db_url,type=env,target=DATABASE_URL
+Secret=vaultwarden_oidc_id,type=env,target=SSO_CLIENT_ID
+Secret=vaultwarden_oidc_secret,type=env,target=SSO_CLIENT_SECRET
+Secret=vaultwarden_admin_token_hash,type=env,target=ADMIN_TOKEN
+
+# Attachments, sends, config.json and rsa_key*; the vault itself is in Postgres
+Volume=vaultwardendata.volume:/data
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

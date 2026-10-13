@@ -14,9 +14,9 @@ source "${rendered}/base/debian/backup_lib.sh"
 
 stage_init
 
-# Postgres: Authelia, LLDAP, Gatus, Grafana and Guacamole state. Connect via the container
-# hostname, not the socket or loopback, so pg_hba's scram-sha-256 rule applies instead
-# of the image's trust rules.
+# Postgres: Authelia, LLDAP, Gatus, Grafana, Guacamole and Vaultwarden state. Connect via
+# the container hostname, not the socket or loopback, so pg_hba's scram-sha-256 rule
+# applies instead of the image's trust rules.
 dir=$(dump_dir postgres)
 dump="${dir}/pg_dumpall-$(date +%Y-%m-%dT%H%M%S).sql.zst"
 PGPASSWORD="$("${rendered}/base/podman/get_secret.sh" postgres_password)"
@@ -35,5 +35,7 @@ stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd
 # and both are easy to rebuild, so no stop/dump hook for them.
 stage_volume grafanadata
 stage_volume ntfydb
+# Vaultwarden's attachments, sends, config.json and rsa_key*, which existing sessions need
+stage_volume vaultwardendata
 
 stage_send

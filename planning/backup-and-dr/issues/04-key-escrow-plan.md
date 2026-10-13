@@ -41,3 +41,6 @@ Write `docs/guides/escrow.md` and implement it:
   `pbs2_backup_token` value from `pve1.yaml` (the identity that can read the backups).
   `docs/guides/pve1_recovery.md` and `docs/guides/restore.md` describe the restore that depends on
   them. Unblocked: 09 is resolved.
+- 2026-10-12 (vaultwarden/01): the escrow set gains Vaultwarden's plaintext admin token (SOPS holds
+  only its hash) and a periodic password-protected Bitwarden JSON export, so the passwords needed to
+  rebuild the homelab don't live only in the homelab.

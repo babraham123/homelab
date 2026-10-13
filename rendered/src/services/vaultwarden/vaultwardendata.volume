@@ -1,0 +1,9 @@
+# /etc/containers/systemd/vaultwardendata.volume
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#volume-units-volume
+
+[Volume]
+# The image's /data is root-owned, and Podman copies that onto a new volume unless these are set
+User=1000
+Group=1000
+# default: Driver=local
+# /var/lib/containers/storage/volumes

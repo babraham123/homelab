@@ -87,10 +87,9 @@ case $1 in
     install_quadlet services/grafana/grafana.container services/grafana/grafanadata.volume
     reload_restart grafana
     ;;
-  vault)
-    echo "TODO: Implement vault"
-    # install_quadlet vault/vault.container
-    # reload_restart vault
+  vaultwarden)
+    install_quadlet services/vaultwarden/vaultwarden.container services/vaultwarden/vaultwardendata.volume
+    reload_restart vaultwarden
     ;;
   olive_tin)
     # ssh keys should already be in place

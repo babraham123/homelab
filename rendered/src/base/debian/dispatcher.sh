@@ -260,8 +260,8 @@ case "$(hostname)" in
       install_grafana)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana
         ;;
-      install_vault)
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vault
+      install_vaultwarden)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vaultwarden
         ;;
       install_olive_tin)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
@@ -285,7 +285,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vault
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vaultwarden
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit

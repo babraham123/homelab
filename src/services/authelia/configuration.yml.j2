@@ -1422,6 +1422,12 @@ identity_providers:
         rules:
           - policy: 'one_factor'
             subject: 'group:authelia_gen_access'
+      # The built-in two_factor admits every user
+      vaultwarden:
+        default_policy: 'deny'
+        rules:
+          - policy: 'two_factor'
+            subject: 'group:vaultwarden_access'
 
     ## The lifespans configure the expiration for these token types in the duration common syntax. In addition to this
     ## syntax the lifespans can be customized per-client.
@@ -1432,6 +1438,13 @@ identity_providers:
       authorize_code: '1 minute'
       id_token: '1 hour'
       refresh_token: '90 minutes'
+      custom:
+        # Vaultwarden's session lasts as long as its refresh token
+        vaultwarden:
+          access_token: '1 hour'
+          authorize_code: '1 minute'
+          id_token: '1 hour'
+          refresh_token: '30 days'
 
     ## Cross-Origin Resource Sharing (CORS) settings.
     cors:
@@ -2172,5 +2185,33 @@ identity_providers:
         require_pkce: true
         pkce_challenge_method: 'S256'
         token_endpoint_auth_method: 'client_secret_basic'
+
+      -
+        # Ref: https://www.authelia.com/integration/openid-connect/clients/vaultwarden/
+        # Not the guide's vaultwarden claim or SSO_ROLES_*: they belong to the OIDCWarden fork.
+        # The client gets refresh tokens, so Authelia asks for consent at every login.
+        client_id: '{% raw %}{{ mustEnv "VAULTWARDEN_OIDC_ID" }}{% endraw %}'
+        client_name: 'Vaultwarden'
+        client_secret: '{% raw %}{{ mustEnv "VAULTWARDEN_OIDC_HASH" }}{% endraw %}'
+        public: false
+        redirect_uris:
+          - 'https://vault.{{ site.url }}/identity/connect/oidc-signin'
+        scopes:
+          - 'openid'
+          - 'email'
+          - 'profile'
+          - 'offline_access'
+        grant_types:
+          - 'authorization_code'
+          - 'refresh_token'
+        response_types:
+          - 'code'
+        authorization_policy: 'vaultwarden'
+        lifespan: 'vaultwarden'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        # Vaultwarden uses Basic whenever the provider offers it
+        token_endpoint_auth_method: 'client_secret_basic'
+        userinfo_signed_response_alg: 'none'
 
 ...

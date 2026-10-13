@@ -119,6 +119,10 @@ endpoints:
     <<: *tier1
     url: "https://graph.janedoe.com"
 
+  - name: vaultwarden
+    <<: *tier1
+    url: "https://vault.janedoe.com/alive"
+
   - name: olive_tin
     <<: *internal
     url: "https://command.janedoe.com"

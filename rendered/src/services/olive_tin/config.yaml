@@ -525,10 +525,10 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: secsvcs Install Vault
+              title: secsvcs Install Vaultwarden
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
-              shell: ssh autoadmin@secsvcs install_vault
-              id: secsvcs_install_vault
+              shell: ssh autoadmin@secsvcs install_vaultwarden
+              id: secsvcs_install_vaultwarden
               maxConcurrent: 1
               timeout: 60
 

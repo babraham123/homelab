@@ -59,6 +59,7 @@ case $node in
       "victorialogs victorialogs localhost/victoriametrics/victoria-logs:latest upstream docker.io/victoriametrics/victoria-logs:latest"
       "gatus gatus localhost/twinproduction/gatus:latest upstream docker.io/twinproduction/gatus:latest"
       "grafana grafana localhost/grafana/grafana-oss:latest upstream docker.io/grafana/grafana-oss:latest"
+      "vaultwarden vaultwarden localhost/vaultwarden/server:latest upstream docker.io/vaultwarden/server:latest"
       "olive_tin olive_tin localhost/jamesread/olivetin:latest-3k upstream docker.io/jamesread/olivetin:latest-3k"
       "crowdsec crowdsec localhost/crowdsecurity/crowdsec:latest upstream docker.io/crowdsecurity/crowdsec:latest"
       "fluentbit fluentbit localhost/fluent/fluent-bit:3.2 upstream docker.io/fluent/fluent-bit:3.2"

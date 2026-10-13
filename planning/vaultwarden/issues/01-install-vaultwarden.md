@@ -1,6 +1,6 @@
 # 01. Install Vaultwarden on secsvcs (replaces the vault stub), publicly reachable
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26 ("the vault TODO sprinkled in a few places"; public if the
@@ -49,7 +49,7 @@ updates (image-updater), non-root read-only container, `/admin` behind Authelia,
 - **Quadlet** `src/services/vaultwarden/vaultwarden.container.j2`, laid out like `grafana`'s:
   - `Image=localhost/vaultwarden/server:latest`, `AutoUpdate=local`;
   - `ContainerName=vaultwarden`, `HostName=vault.{{ site.url }}`,
-    `IP={{ secsvcs.container_subnet }}.16` (next free);
+    `IP={{ secsvcs.container_subnet }}.17` (next free; crowdsec has `.16`);
   - `AddHost=auth.{{ site.url }}:{{ secsvcs.container_subnet }}.6`, so Vaultwarden reaches
     Authelia's discovery, token and userinfo endpoints through Traefik, as Grafana and OliveTin do;
   - `NoNewPrivileges=true`, `DropCapability=all`, `ReadOnly=true`;
@@ -219,3 +219,11 @@ Not adopted from the guide: hiding under a secret subdir. With `SSO_ONLY` and Au
 - 2026-10-12: no longer blocked by auth/06. The router routes tailnet traffic without SNAT through
   a System Patches change (router/04), so Traefik gets the real client IP; auth/06 stays open to
   watch for pfsense/FreeBSD-ports#1462 shipping.
+- 2026-10-12: implemented: `src/services/vaultwarden/`, the inventory entry, the routers, the
+  Authelia policy, lifespan and client, the Postgres block and secret, the secrets template, the
+  backup stage, the Homepage entry, and a Vaultwarden section in the secsvcs guide (prerequisites,
+  creating the database by hand, `/admin` read-only, the escrow export). The IP is `.17` because
+  crowdsec already has `.16`. The log-based alert is observability/13; the escrow items are a
+  comment on backup-and-dr/04. Left for the maintainer: fill the `vaultwarden_*` secrets, create
+  the `vaultwarden_access` group, deploy per the guide, and run the acceptance list once auth/06
+  has verified the client IP.

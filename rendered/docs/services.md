@@ -16,7 +16,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 
 | IP | Service | Image | Purpose | URL |
 |-----|---------|-------|---------|-----|
-| .3 | postgres | postgres | Authelia + Guacamole storage | pgdb (internal DNS only) |
+| .3 | postgres | postgres | Authelia, Guacamole and Vaultwarden storage | pgdb (internal DNS only) |
 | .4 | lldap | lldap | User/group directory | ldap.janedoe.com |
 | .5 | authelia | authelia | SSO portal, OIDC provider | auth.janedoe.com |
 | .6 | traefik | traefik | Node ingress, TLS termination | secproxy.janedoe.com |
@@ -29,10 +29,9 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .13 | ntfy | ntfy | Push notification server | push.janedoe.com |
 | .14 | ntfy-alertmanager | ntfy-alertmanager | Alertmanager → ntfy bridge | ntfy-alertmanager.janedoe.com |
 | .15 | olive_tin | olivetin | Web buttons for admin actions (via SSH dispatcher) | command.janedoe.com |
+| .16 | crowdsec | crowdsec | IP bans from the logs, LAPI for the VPS's bouncer ([Security](security.md#the-edge-haproxy)) | crowdsec (internal DNS only), port 8080 |
+| .17 | vaultwarden | vaultwarden/server | Password manager, public, SSO-only via Authelia | vault.janedoe.com |
 | .20 | fluentbit | fluent-bit | Journal → VictoriaLogs forwarder | n/a |
-
-`vault` has an install stub but is not implemented; Vaultwarden replaces it
-([plan](../planning/vaultwarden/spec.md)).
 
 ## websvcs: user-facing web apps (pve2, 10.11.0.0/24)
 
@@ -70,7 +69,6 @@ timers; see the [reading guide](guides/reading.md).
 | .8 | mosquitto | eclipse-mosquitto | MQTT broker | mqtt (internal DNS only) |
 | .9 | zigbee2mqtt | zigbee2mqtt | Zigbee ↔ MQTT bridge | zigbee.janedoe.com |
 | .11 | home_assistant | home-assistant | Home automation hub | home.janedoe.com |
-| .16 | crowdsec | crowdsec | IP bans from the logs, LAPI for the VPS's bouncer ([Security](security.md#the-edge-haproxy)) | crowdsec (internal DNS only), port 8080 |
 | .20 | fluentbit | fluent-bit:3.2 | Journal → VictoriaLogs forwarder | n/a |
 
 ## vpnsvcs: public edge (Linode, 10.13.0.0/24)
@@ -233,7 +231,8 @@ flowchart LR
 ## Storage and backups
 
 - **Container state**: named Podman volumes (`postgresdb`, `grafanadata`, `vmdata`, `vldata`,
-  `ntfydb`, `hassdb`, `hassconfig`, `mqttdata`, `z2mdb`, …), `/etc/opt` and `/var/opt`
+  `ntfydb`, `vaultwardendata`, `hassdb`, `hassconfig`, `mqttdata`, `z2mdb`, …), `/etc/opt` and
+  `/var/opt`
 - **VM disks**: LVM-thin on each host's NVMe, ext4 guests; no ZFS or RAID, backups over redundancy
 - **Media array** on pve2: four HDDs on a passed-through SATA card, snapraid parity, mergerfs, owned
   by websvcs. Not backed up; parity is its protection ([pve2 storage guide](guides/pve2_storage.md))

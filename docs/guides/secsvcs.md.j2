@@ -21,7 +21,8 @@ src/nodes/secsvcs/install_svcs.sh vmalert
 src/nodes/secsvcs/install_svcs.sh grafana
 src/nodes/secsvcs/install_svcs.sh ntfy
 src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
-# src/nodes/secsvcs/install_svcs.sh vault
+# needs the prerequisites in Vaultwarden below
+src/nodes/secsvcs/install_svcs.sh vaultwarden
 src/nodes/secsvcs/install_svcs.sh olive_tin
 # needs the prerequisites in CrowdSec below
 src/nodes/secsvcs/install_svcs.sh crowdsec
@@ -63,8 +64,8 @@ journalctl -eu authelia
     `lldap_password_manager`: it can reset other users' passwords
     - {{ tailscale_admin }}
     - {% for user in users %}{{ user }}, {% endfor %}
-  - Create the `authelia_gen_access`, `headscale_access` and `command_general` groups, add users to
-    them
+  - Create the `authelia_gen_access`, `headscale_access`, `command_general` and
+    `vaultwarden_access` groups, add users to them
   - Create the `telemetry` group (VictoriaMetrics, VictoriaLogs, Alertmanager and ntfy UIs), add
     your user to it
   - Create the `grafana_admin`, `hass_admin` and `command_admin` groups, add your user to it
@@ -121,6 +122,45 @@ for i in $(seq 40); do curl -s -o /dev/null https://www.{{ site.url }}/nope$i; d
   `LePresidente/authelia-bf_user-enum`
 - The LAN, tailnet and VPS addresses never appear in `cscli decisions list`
 - Grafana: "CrowdSec" dashboard; alerts in `src/services/vmalert/configs/crowdsec.yml`
+
+## Vaultwarden
+- Public at https://vault.{{ site.url }}: login is SSO-only through Authelia two-factor, gated on
+  the `vaultwarden_access` LLDAP group; the master password still decrypts the vault
+- Prerequisites:
+  - `vaultwarden_*` in `/root/secrets/secsvcs.yaml` on pve1 (recipes in the template), then `sudo
+    /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`. Keep the plaintext admin token
+    with the escrow bundle; SOPS holds only its hash
+  - Your LLDAP email must equal `{{ site.email }}` (`ORG_CREATION_USERS`)
+  - Reinstall Authelia (new OIDC client) and Postgres (new secret). `initdb.d` only runs on an empty
+    cluster, so on the existing one create the database by hand once
+```bash
+sudo su
+cd /root/homelab-rendered
+src/nodes/secsvcs/install_svcs.sh postgres
+src/nodes/secsvcs/install_svcs.sh authelia
+sed -n '/Vaultwarden DB/,/OWNER TO vaultwarden/p' /var/opt/db/pg_init.sql \
+  | podman exec -i postgres psql -U postgres -v ON_ERROR_STOP=1
+src/nodes/secsvcs/install_svcs.sh vaultwarden
+src/nodes/secsvcs/install_svcs.sh traefik
+curl -fsS https://vault.{{ site.url }}/alive
+```
+- First login: a client's "Use single sign-on" / "Enterprise single sign-on", any organization
+  identifier (Vaultwarden ignores it), Authelia two-factor and its consent screen (shown every time:
+  the client gets refresh tokens), then set the master password (12+ characters)
+- `INVITATIONS_ALLOWED=false`: a user signs in once before an organization owner can add them
+- `/admin` is behind Authelia, then the admin token. Treat it as read-only: saving settings there
+  writes `/data/config.json`, which silently overrides the quadlet's environment. Change settings in
+  `src/services/vaultwarden/vaultwarden.container.j2`
+- Linux desktop app: Chrome or Firefox needs a `bitwarden://` protocol handler to hand back the SSO
+  redirect
+- No push relay (`PUSH_ENABLED=false`): phones sync when opened or on pull-to-refresh
+- No SMTP: no invite or email-change mails, which SSO-only doesn't need
+- While Authelia is down, new devices can't log in; logged-in clients keep their offline copy
+- Failed logins are Authelia's (the `auth` alerts and CrowdSec). Vaultwarden's own:
+  `journalctl -u vaultwarden | grep "Invalid admin token"`
+- Keep a password-protected JSON export (a client's Tools >> Export vault, `.json (Password
+  protected)`) in the escrow bundle, so the passwords needed to rebuild the homelab don't live only
+  in the homelab
 
 ## Ntfy
 
