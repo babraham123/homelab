@@ -53,3 +53,6 @@ nobody reaches those tools on a password alone.
     router has no Authelia middleware; ntfy-alertmanager has its own basic auth).
   - Check after applying: on the LAN, `command.SITE` and `secproxy.SITE` ask for the second factor;
     `home.SITE` doesn't.
+- 2026-10-12: maintainer decision: `vault` is flagged too. Only Traefik's `/admin` router runs
+  Authelia's forward-auth there, so the rule covers the admin page; app logins go through the
+  `vaultwarden` OIDC policy.

@@ -24,8 +24,8 @@ services:
          upstream: docker.io/binwiederhier/ntfy:latest, update_last: true}
   grafana: {subdomain: graph, uptime: grafana, uptime_tier: 1,
             upstream: docker.io/grafana/grafana-oss:latest}
-  vaultwarden: {subdomain: vault, uptime: vaultwarden, uptime_path: /alive, uptime_tier: 1,
-                upstream: docker.io/vaultwarden/server:latest}
+  vaultwarden: {subdomain: vault, admin: true, uptime: vaultwarden, uptime_path: /alive,
+                uptime_tier: 1, upstream: docker.io/vaultwarden/server:latest}
   olive_tin: {subdomain: command, admin: true, uptime: olive_tin,
               upstream: docker.io/jamesread/olivetin:latest-3k}
   # No subdomain: its LAPI is a published port, never in HAProxy's SNI list

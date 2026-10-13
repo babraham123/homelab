@@ -814,6 +814,7 @@ access_control:
         - 'homeproxy.janedoe.com'
         - 'ldap.janedoe.com'
         - 'secproxy.janedoe.com'
+        - 'vault.janedoe.com'
         - 'vmalert.janedoe.com'
         - 'webproxy.janedoe.com'
       subject:

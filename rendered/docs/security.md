@@ -93,11 +93,12 @@ policies, not from the mesh.
   `authelia_gen_access` get in with one factor from the LAN and the tailnet, and need two from the
   internet; TOTP and WebAuthn/passkeys are enabled, with zxcvbn password policy.
 - **Admin tools need two factors from every network.** The services marked `admin: true` in the node
-  inventory (the Traefik dashboards, LLDAP, vmalert, Alertmanager and OliveTin) get their own
-  two-factor rule ahead of the LAN/tailnet downgrade, so a password alone never reaches them. The
-  split is deliberate: Authelia decides the factor, the app decides the role (OliveTin's ACLs, LLDAP's
-  admin group, the `telemetry` group below). Proxmox, PBS and pfSense have their own logins and
-  aren't behind Authelia.
+  inventory (the Traefik dashboards, LLDAP, vmalert, Alertmanager, OliveTin and Vaultwarden's
+  `/admin`, its one path behind Authelia's proxy check) get their own two-factor rule ahead of the
+  LAN/tailnet downgrade, so a password alone never reaches them. The split is deliberate: Authelia
+  decides the factor, the app decides the role (OliveTin's ACLs, LLDAP's admin group, the
+  `telemetry` group below). Proxmox, PBS and pfSense have their own logins and aren't behind
+  Authelia.
 
 Two integration models:
 
