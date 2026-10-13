@@ -61,8 +61,7 @@ case $1 in
       secsvcs) slot=21:30 ;;
       *) die "no image_updater slot for $(hostname)" ;;
     esac
-    # python3 runs image_updater.py
-    apt install -y python3 skopeo wget gnupg
+    apt install -y skopeo wget gnupg
     wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | \
       gpg --dearmor --yes -o /usr/share/keyrings/trivy.gpg
     echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
