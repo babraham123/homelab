@@ -70,7 +70,7 @@ entryPoints:
     address: ":443/tcp"
     http:
       aliasHeadersStrategy: delete
-      # Ahead of every router's own middlewares: CrowdSec bans and the WAF (dynamic/crowdsec.yml)
+      # Ahead of every router's own middlewares: the CrowdSec WAF (dynamic/crowdsec.yml)
       middlewares:
         - crowdsec@file
     proxyProtocol:

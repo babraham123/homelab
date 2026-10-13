@@ -43,6 +43,8 @@ src/nodes/vpnsvcs/install_svcs.sh fail2ban
 fail2ban-client status sshd
 fail2ban-client status recidive
 fail2ban-client -d | grep "'sshd'.*port"
+# recidive reads bans from the journal (src/nodes/vpnsvcs/fail2ban.local)
+fail2ban-client get logtarget
 ```
 
 ### VPN setup

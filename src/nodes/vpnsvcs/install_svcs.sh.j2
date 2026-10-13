@@ -65,7 +65,7 @@ case $1 in
     ;;
   fail2ban)
     apt install -y fail2ban python3-systemd
-    install -D -m 644 -t /etc/fail2ban nodes/vpnsvcs/jail.local
+    install -D -m 644 -t /etc/fail2ban nodes/vpnsvcs/fail2ban.local nodes/vpnsvcs/jail.local
     base/debian/add_homelab_tag.sh /usr/lib/systemd/system/fail2ban.service
     systemctl enable fail2ban
     reload_restart fail2ban

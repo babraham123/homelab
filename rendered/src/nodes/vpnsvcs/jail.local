@@ -7,7 +7,6 @@
 [DEFAULT]
 # Debian 12 has no log files, just journalctl
 backend = systemd
-logtarget = SYSTEMD-JOURNAL
 
 [sshd]
 enabled = true
@@ -15,6 +14,6 @@ enabled = true
 port = 2202
 
 # Bans an address on every port for a week once it has been banned 5 times in a day;
-# its filter reads fail2ban's own journal
+# its filter reads fail2ban's own journal (fail2ban.local)
 [recidive]
 enabled = true

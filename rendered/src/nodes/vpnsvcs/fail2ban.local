@@ -1,0 +1,7 @@
+# /etc/fail2ban/fail2ban.local
+# Ref: https://github.com/fail2ban/fail2ban/blob/master/config/fail2ban.conf
+# Daemon settings, which fail2ban never reads from jail.local. recidive (jail.local) reads
+# fail2ban's own bans from the journal, so they must be logged there, not to the default file.
+
+[Definition]
+logtarget = SYSTEMD-JOURNAL
