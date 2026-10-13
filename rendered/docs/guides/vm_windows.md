@@ -88,8 +88,7 @@ icacls "C:\Homelab" /grant "admin:(OI)(CI)(F)"
 
 ## Automation
 
-Create a mechanism to programmatic execute commands remotely. These commands are specific to the
-gaming VM but they can be generalized.
+Run commands on the gaming VM remotely.
 
 - Start the gaming VM
 - Install the homelab source code

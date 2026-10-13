@@ -31,17 +31,14 @@ sudo su
 /root/homelab-rendered/src/nodes/pve1/certificates/init_ssh_ca.sh
 ```
 
-- Wait until all of the VMs have been created, then bootstrap trust in the CA. `ssh_cert_gen.sh`
-  runs every host's `install_ssh_ca` through the dispatcher, which accepts only a certificate login
-  with key ID `pve1`: root needs a certificate, and each host needs the CA's public key, before the
-  script can install anything. Asks for `manualadmin`'s password on each host. Same block for a new
-  CA ([Nothing escrowed](./pve1_recovery.md#nothing-escrowed)): hosts trust both CAs until the
-  script replaces the file
+- Once all VMs exist, bootstrap trust in the CA: sign root's key as `pve1` and add the CA key to
+  every host. Asks for `manualadmin`'s password on each host. Also used for a new CA
+  ([Nothing escrowed](./pve1_recovery.md#nothing-escrowed))
 
 ```bash
 cd /root/ssh
 ssh-keygen -s ca_ssh_key -I pve1 -n manualadmin,autoadmin -V +395d /root/.ssh/id_ed25519.pub
-# vpnsvcs's SSH port; install_ssh_ca installs the same file later
+# vpnsvcs's SSH port
 install -m 644 /root/homelab-rendered/src/base/debian/ssh_config /etc/ssh/ssh_config.d/homelab.conf
 tee -a /etc/ssh/ca_ssh_key.pub < ca_ssh_key.pub > /dev/null
 for host in {{ inv.nodes_with.install_ssh_ca | reject('eq', 'pve1') | join(' ') }}; do
@@ -199,8 +196,8 @@ src/nodes/pve1/install_svcs.sh cert_notifier
 
 ## Backups
 
-- Install the weekly backup. First add the `pbs2` storage and the client key from the [Proxmox
-  guide](./proxmox.md#backups).
+- Add the `pbs2` storage and client key ([Proxmox guide](./proxmox.md#backups))
+- Install the weekly backup
 
 ```bash
 cd /root/homelab-rendered

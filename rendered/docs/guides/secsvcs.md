@@ -6,8 +6,8 @@ Guide to setup secsvcs on PVE1. Includes service installation and network config
 
 ## Setup containers
 
-- Install and start services. Each install loads its images through the [image
-  updater](./podman.md#image-updater) first, which stops on a blocked image
+- Install and start services. Each install loads its images through the
+  [image updater](./podman.md#image-updater)
 
 ```bash
 sudo su
@@ -35,7 +35,7 @@ src/nodes/secsvcs/install_svcs.sh fluentbit
 systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
-# Every image unchanged: the installs just loaded them
+# Expect every image unchanged
 src/base/podman/image_updater.sh --dry-run
 ```
 
@@ -49,7 +49,7 @@ NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
 
 ufw allow in from 192.168.4.21 to any port 5432,6360,9091,465 proto tcp
 ufw allow in from 192.168.2.20 to any port 5432,6360,9091,465 proto tcp
-# Published ports are DNATed to the containers, so these route rules are what admit the traffic
+# Published ports are DNATed, so the route rules admit the traffic
 ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.4.21 to any port 5432,6360,9091,465 proto tcp
 ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.2.20 to any port 5432,6360,9091,465 proto tcp
 ```
@@ -63,37 +63,32 @@ journalctl -eu authelia
 ```
 
 - Setup LLDAP
-  - In the traefik dynamic config, give the lldap router its own middlewares without authelia:
-    `middlewares: [secure-headers@file]` `vim /etc/opt/traefik/config/dynamic/routes.yml`
+  - Remove authelia from the lldap router: `middlewares: [secure-headers@file]`
+    - `vim /etc/opt/traefik/config/dynamic/routes.yml`
   - Navigate to `ldap.janedoe.com` and login User = admin, get the password below
     `/root/homelab-rendered/src/base/podman/get_secret.sh lldap_admin_password`
-  - Add regular users (note for future: add_more_users). Leave them out of
-    `lldap_password_manager`: it can reset other users' passwords
+  - Add regular users, not in `lldap_password_manager` (it can reset others' passwords)
     - jane
     - jane, jayden, jasper
   - Create the `authelia_gen_access`, `headscale_access`, `command_general` and
     `vaultwarden_access` groups, add users to them
-  - Create the `telemetry` group (VictoriaMetrics, VictoriaLogs, Alertmanager and ntfy UIs), add
-    your user to it
+  - Create the `telemetry` group (metrics, logs, alert and ntfy UIs), add your user to it
   - Create the `grafana_admin`, `hass_admin` and `command_admin` groups, add your user to it
-  - Restore the authelia middleware by reinstalling the traefik config
+  - Restore the authelia middleware
     `/root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik`
 
 - Confirm that authelia is working, open <https://auth.janedoe.com>
 
 ## CrowdSec
 
-- Engine and Local API (LAPI): reads Traefik's and Authelia's logs from VictoriaLogs, bans by IP,
-  pulls the community blocklist and shares this site's alerts with crowdsec.net; the VPS's firewall
-  bouncer enforces ([ADR 0009](../adr/0009-crowdsec-lapi-on-secsvcs.md), [VPS
-  guide](./vpnsvcs.md#crowdsec-bouncer))
-- Prerequisites:
-  - The `crowdsec.janedoe.com` key and certificate: pve1's `self_signed_key_gen.sh` and
-    `self_signed_cert_gen.sh` (they install every node's, so restart the secure services after)
-  - `crowdsec_bouncer_vpnsvcs` in `/root/secrets/secsvcs.yaml` on pve1, then `sudo
-    /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
-- Admit the VPS and the other Traefiks to the LAPI's published port. The router routes tailnet
-  traffic without SNAT (router/04), so the VPS arrives from its tailnet IP
+[ADR 0009](../adr/0009-crowdsec-lapi-on-secsvcs.md), [VPS bouncer](./vpnsvcs.md#crowdsec-bouncer)
+
+- Prerequisites, on pve1:
+  - Run `self_signed_key_gen.sh` and `self_signed_cert_gen.sh` for the `crowdsec.janedoe.com`
+    key and cert, then restart the secure services
+  - Add `crowdsec_bouncer_vpnsvcs` to `/root/secrets/secsvcs.yaml`, then
+    `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
+- Admit the VPS (from its tailnet IP) and the other Traefiks to the LAPI port
 
 ```bash
 sudo su
@@ -111,15 +106,13 @@ done
 ```bash
 src/nodes/secsvcs/install_svcs.sh crowdsec
 podman exec crowdsec cscli lapi status
-podman exec crowdsec cscli capi status          # registered, community blocklist pulled
+podman exec crowdsec cscli capi status          # registered, blocklist pulled
 podman exec crowdsec cscli metrics show acquisition parsers   # traefik and authelia lines parsed
-# Fluent Bit picks up the new "Homelab:" unit's journal
-src/nodes/secsvcs/install_svcs.sh fluentbit
+src/nodes/secsvcs/install_svcs.sh fluentbit     # ship the new unit's journal
 ```
 
-- The online API credentials are in `/etc/opt/crowdsec/config/online_api_credentials.yaml`, kept
-  across container rebuilds and in the backup; deleting the file and the `online_client` block in
-  `config.yaml` registers a new identity on the next start
+- New online API identity: delete `/etc/opt/crowdsec/config/online_api_credentials.yaml` and the
+  `online_client` block in `config.yaml`, then restart
 - Day to day
 
 ```bash
@@ -128,29 +121,25 @@ podman exec crowdsec cscli alerts list
 podman exec crowdsec cscli decisions delete --ip IP   # unban
 ```
 
-- Test from an outside IP (a phone off Wi-Fi). A burst of 404s is banned by
-  `crowdsecurity/http-probing`: it shows in `cscli decisions list`, in `nft list ruleset` on the VPS,
-  and `:443` times out
+- Test from an outside IP (a phone off Wi-Fi): expect a ban in `cscli decisions list` and
+  `nft list ruleset` on the VPS, and `:443` timing out
 
 ```bash
 for i in $(seq 40); do curl -s -o /dev/null https://www.janedoe.com/nope$i; done
 ```
 
-- Six failed logins from outside for different usernames at `auth.janedoe.com` trip
-  `LePresidente/authelia-bf_user-enum`
-- The LAN, tailnet and VPS addresses never appear in `cscli decisions list`
-- Grafana: "CrowdSec" dashboard; alerts in `src/services/vmalert/configs/crowdsec.yml`
+- Test `auth.janedoe.com`: six failed logins from outside with different usernames, expect a ban
+- Check that LAN, tailnet and VPS addresses never appear in `cscli decisions list`
+- Monitor: Grafana "CrowdSec" dashboard, alerts in `src/services/vmalert/configs/crowdsec.yml`
 
 ### Traefik WAF
 
-Every Traefik sends requests to its node's AppSec container
-([Security](../security.md#the-edge-haproxy)). In this order, since Traefik can't start without its
-key, and a key the LAPI doesn't know blocks every request with a 403:
+[Security](../security.md#the-edge-haproxy). Follow this order: an unknown key gets a 403 on every
+request.
 
-1. On pve1: `crowdsec_bouncer_secsvcs`, `crowdsec_bouncer_homesvcs` and `crowdsec_bouncer_websvcs`
-   in `/root/secrets/secsvcs.yaml`, each copied to that node's secrets file; the AppSec keys and
-   client certificates (`appsec-<node>`) come from `self_signed_key_gen.sh` and
-   `self_signed_cert_gen.sh`
+1. On pve1: add `crowdsec_bouncer_secsvcs`, `crowdsec_bouncer_homesvcs` and
+   `crowdsec_bouncer_websvcs` to `/root/secrets/secsvcs.yaml` and each node's secrets file. Run
+   `self_signed_key_gen.sh` and `self_signed_cert_gen.sh` for the `appsec-<node>` certs
 
    ```bash
    for node in secsvcs homesvcs websvcs; do
@@ -158,7 +147,7 @@ key, and a key the LAPI doesn't know blocks every request with a 403:
    done
    ```
 
-2. On secsvcs: the LAPI registers the new bouncer keys at start, then the WAF and Traefik
+2. On secsvcs
 
    ```bash
    src/nodes/secsvcs/install_svcs.sh crowdsec
@@ -177,29 +166,26 @@ key, and a key the LAPI doesn't know blocks every request with a 403:
    journalctl -u traefik | grep -i crowdsec   # no plugin errors
    ```
 
-- Test from an outside IP: a script tag gets a 403 from the WAF and an alert in `cscli alerts list`
-  (a second, different rule from the same IP within a minute bans it). From the LAN the same
-  request is blocked and alerted with the LAN IP, never banned
+- Test from an outside IP: expect a 403 and an alert in `cscli alerts list`. From the LAN: blocked,
+  never banned
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' 'https://www.janedoe.com/?q=<script>alert(1)</script>'
 ```
 
-- The Core Rule Set runs out-of-band: its matches are alerts only (`cscli alerts list`, scenario
-  names starting `anomaly score`). After a few weeks, add exclusions for what it flags wrongly and
-  move it in-band (auth/03)
+- The Core Rule Set only alerts (scenarios `anomaly score*`). Add exclusions for false positives,
+  then move it in-band
 
 ## Vaultwarden
 
-- Public at <https://vault.janedoe.com>: login is SSO-only through Authelia two-factor, gated on
-  the `vaultwarden_access` LLDAP group; the master password still decrypts the vault
+<https://vault.janedoe.com>: SSO-only, gated on the `vaultwarden_access` LLDAP group
+
 - Prerequisites:
-  - `vaultwarden_*` in `/root/secrets/secsvcs.yaml` on pve1 (recipes in the template), then `sudo
-    /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`. Keep the plaintext admin token
-    with the escrow bundle; SOPS holds only its hash
-  - Your LLDAP email must equal `jdoe@gmail.com` (`ORG_CREATION_USERS`)
-  - Reinstall Authelia (new OIDC client) and Postgres (new secret). `initdb.d` only runs on an empty
-    cluster, so on the existing one create the database by hand once
+  - On pve1, add `vaultwarden_*` to `/root/secrets/secsvcs.yaml` (recipes in the template), then
+    `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
+  - Keep the plaintext admin token in the escrow bundle; SOPS holds only its hash
+  - Set your LLDAP email to `jdoe@gmail.com` (`ORG_CREATION_USERS`)
+- Install. On an existing Postgres cluster, create the database by hand once
 
 ```bash
 sudo su
@@ -213,31 +199,22 @@ src/nodes/secsvcs/install_svcs.sh traefik
 curl -fsS https://vault.janedoe.com/alive
 ```
 
-- First login: a client's "Use single sign-on" / "Enterprise single sign-on", any organization
-  identifier (Vaultwarden ignores it), Authelia two-factor and its consent screen (shown every time:
-  the client gets refresh tokens), then set the master password (12+ characters)
-- `INVITATIONS_ALLOWED=false`: a user signs in once before an organization owner can add them
-- `/admin` is behind Authelia, then the admin token. Treat it as read-only: saving settings there
-  writes `/data/config.json`, which silently overrides the quadlet's environment. Change settings in
-  `src/services/vaultwarden/vaultwarden.container.j2`
-- Linux desktop app: Chrome or Firefox needs a `bitwarden://` protocol handler to hand back the SSO
-  redirect
-- No push relay (`PUSH_ENABLED=false`): phones sync when opened or on pull-to-refresh
-- No SMTP: no invite or email-change mails, which SSO-only doesn't need
-- While Authelia is down, new devices can't log in; logged-in clients keep their offline copy
-- Failed logins are Authelia's (the `auth` alerts and CrowdSec). Vaultwarden's own:
-  `journalctl -u vaultwarden | grep "Invalid admin token"`
-- Keep a password-protected JSON export (a client's Tools >> Export vault, `.json (Password
-  protected)`) in the escrow bundle, so the passwords needed to rebuild the homelab don't live only
-  in the homelab
+- First login: "Use single sign-on" (any organization identifier), Authelia two-factor and consent,
+  then set the master password (12+ characters)
+- Add a user to an organization only after they've signed in once
+- Treat `/admin` as read-only: change settings in `src/services/vaultwarden/vaultwarden.container.j2`,
+  since saving in `/admin` writes `/data/config.json`, which overrides it
+- Linux desktop app: needs a `bitwarden://` protocol handler in the browser
+- Phones sync when opened or on pull-to-refresh (no push relay)
+- Failed admin logins: `journalctl -u vaultwarden | grep "Invalid admin token"`
+- Keep a password-protected JSON export (Tools >> Export vault, `.json (Password protected)`) in the
+  escrow bundle
 
 ## Ntfy
 
-- Users, access control and tokens are provisioned from the config file (`auth-users`,
-  `auth-access`, `auth-tokens`), [ref](https://docs.ntfy.sh/config/#users-via-the-config)
-  - Existing users and tokens with the same name/value (e.g. created via the CLI) are adopted on
-    restart. Any entry not tagged `server config` below is a leftover and should be removed.
-- Lock down the databases and confirm the users are marked `server config`
+- Users, access and tokens come from the config file,
+  [ref](https://docs.ntfy.sh/config/#users-via-the-config)
+- Lock down the databases. Remove any user or token not marked `server config`
 
 ```bash
 chmod 600 /var/opt/ntfy/*.db*
@@ -274,9 +251,7 @@ systemctl --type=service
 
 [Why upgrade](https://why-upgrade.depesz.com/)
 
-- Before leaving 14: databases created before `pg_init.sql` set `OWNER` belong to `postgres`, and
-  from 15 their app could no longer create tables in `public`. Hand them over first, so the dump
-  carries the owners
+- From 14: hand each database to its app's role first, so the dump carries the owners
 
 ```bash
 for db in lldap authelia gatus grafana guacamole; do

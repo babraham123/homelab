@@ -302,9 +302,7 @@ TODO: configure wired VLANs when I get a proper switch
 
 ### Tailscale outbound NAT
 
-pfSense rewrites each UDP flow's source port per destination (symmetric NAT), which defeats
-Tailscale's hole punching. An endpoint-independent mapping (EIM) rule keeps one external port per
-client across all destinations, so peers connect directly without opening inbound ports.
+Endpoint-independent mapping (EIM) lets Tailscale peers connect directly.
 
 - Go to Firewall >> Aliases >> IP >> Add
   - Name = TS_NETS, Type = Network(s)
@@ -315,12 +313,10 @@ client across all destinations, so peers connect directly without opening inboun
     - Interface = WAN, Address Family = IPv4, Protocol = UDP
     - Source = Network or Alias, TS_NETS
     - Translation Address = WAN address, Port blank
-    - Static Port unchecked (EIM has no effect with it, and the two together crashed pre-release
-      builds)
+    - Static Port unchecked (EIM has no effect with it)
     - Endpoint-independent Mapping checked
   - Save, Apply Changes
-- Go to Services >> UPnP IGD & PMP. Leave it disabled: NAT-PMP would let any LAN device open WAN
-  ports, and EIM makes it unnecessary
+- Go to Services >> UPnP IGD & PMP, leave it disabled
 - Verify from a LAN client: `tailscale netcheck` shows `MappingVariesByDestIP: false` and an empty
   `PortMapping`
 

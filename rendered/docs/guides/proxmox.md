@@ -253,14 +253,11 @@ ufw allow in from any to any port 8007 proto tcp
   [setup2](https://www.youtube.com/watch?v=Px5eHcUKbbQ)
   - Storage >> Directory >> Create: Directory
   - Datastore >> backup1
-    - Prune & GC tab: leave empty, both come from `prune.sh` (below)
-
-- Namespaces under Root: `pve1` and `pve2` for the VM images (and `host/vpnsvcs`), `files` for the
-  host backups. Content tab >> Add Namespace. Retention is per namespace, set by pve2's `prune.sh`.
-- Backup identities: one user and token per PVE host, able to write and read backups in their own
-  namespaces but never delete them. pve1's secret is shown once; it goes into
-  `/root/secrets/pve1.yaml` as `pbs2_backup_token` on pve1. pve2's goes straight into its storage
-  entry (below) and isn't kept anywhere else: PBS is local, so a lost one is regenerated here.
+    - Prune & GC tab: leave empty, `prune.sh` sets both
+    - Content tab >> Add Namespace under Root: `pve1`, `pve2`, `files`
+- Create a backup token per PVE host: write and read its own namespaces, no delete
+  - pve1: store the secret (shown once) as `pbs2_backup_token` in `/root/secrets/pve1.yaml`
+  - pve2: the token goes straight into its storage entry (below); regenerate it here if lost
 
 ```bash
 proxmox-backup-manager user create pve1@pbs
@@ -271,17 +268,14 @@ proxmox-backup-manager user create pve2@pbs
 proxmox-backup-manager acl update /datastore/backup1/pve2 DatastoreBackup --auth-id 'pve2@pbs!backup'
 ```
 
-- Client encryption key, on pve1. Everything pve1 sends is encrypted with it; the key file is in the
-  escrow set and nothing restores without it.
+- On pve1, create the client encryption key. Escrow it: nothing restores without it
 
 ```bash
 proxmox-backup-client key create --kdf none /root/secrets/pbs_client.key
 chmod 400 /root/secrets/pbs_client.key
 ```
 
-- PVE storage on both hosts, [ref](https://pbs.proxmox.com/docs/pve-integration.html). The PBS cert
-  fingerprint is pinned; `acme_transfer.sh` (pve1) and `install_certs_and_keys` (pve2) re-pin it
-  after each cert change.
+- Add the PVE storage on both hosts, [ref](https://pbs.proxmox.com/docs/pve-integration.html)
 
 ```bash
 # pve2: the fingerprint
@@ -290,8 +284,7 @@ proxmox-backup-manager cert info | grep Fingerprint
 pvesm add pbs pbs2 --server pbs2.janedoe.com --datastore backup1 --namespace pve1 \
   --username 'pve1@pbs!backup' --password "$(sops -d /root/secrets/pve1.yaml | yq .pbs2_backup_token)" \
   --fingerprint 'FINGERPRINT' --encryption-key /root/secrets/pbs_client.key --content backup
-# pve2: its own token, made and consumed in one go; namespace pve2. Same key, copied from
-# pve1 to the same path, so every image in the datastore is ciphertext.
+# pve2: its own token, namespace pve2, the same key copied from pve1
 pvesm add pbs pbs2 --server pbs2.janedoe.com --datastore backup1 --namespace pve2 \
   --username 'pve2@pbs!backup' \
   --password "$(proxmox-backup-manager user generate-token pve2@pbs backup --output-format json | jq -r .value)" \
@@ -299,14 +292,10 @@ pvesm add pbs pbs2 --server pbs2.janedoe.com --datastore backup1 --namespace pve
 pvesm status
 ```
 
-- No backup jobs in the PVE UI (Datacenter >> Backup must be empty on both hosts) and no prune or GC
-  job made in the PBS UI: the schedule is `src/nodes/pve1/backup_orchestrator.timer` (Saturday
-  02:00), and its last step runs pve2's `prune.sh`, which creates or updates the prune jobs
-  `images-pve1`, `images-pve2` and `files` ([retention](../services.md#storage-and-backups)), runs
-  them, then garbage collection.
-- The host configs (`/etc/pve`, `/etc/proxmox-backup`) are staged by each host's `backup.sh` and end
-  up in pve1's `/root/backups/`, so PBS's own config is kept outside PBS. Restores: [the restore
-  guide](./restore.md).
+- Leave Datacenter >> Backup empty on both hosts, and add no prune or GC jobs in PBS.
+  `backup_orchestrator.timer` on pve1 schedules everything
+  ([retention](../services.md#storage-and-backups))
+- Restores: [restore guide](./restore.md)
 
 ## Monitoring
 
@@ -331,7 +320,7 @@ ufw allow in from 192.168.4.20 to any port 9100 proto tcp
   - Go to Datacenter >> Permissions >> Users >> Add, name = api_ro
   - Go to Permissions >> Add >> User Permission
   - path = /, user = api_ro@pam, role = PVEAuditor, propagate = check
-  - For PBS, Permissions -> Access Control, PVEAuditor -> Audit. Generate a user password, stored as
+  - For PBS, Permissions -> Access Control, PVEAuditor -> Audit. Store its password as
     `pbs2_api_password`:
 
 ```bash
@@ -340,8 +329,8 @@ sudo su
 sops /root/secrets/pve1.yaml
 ```
 
-Perform these steps after pve1, secsvcs and victoriametrics is configured (do this for pve1, pve2
-and pbs2). [Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
+After pve1, secsvcs and victoriametrics are set up, for pve1, pve2 and pbs2.
+[Ref](https://pve.proxmox.com/wiki/External_Metric_Server)
 
 - Get the metrics admin password and hash credentials
 

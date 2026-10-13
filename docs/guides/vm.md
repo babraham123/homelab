@@ -1,7 +1,7 @@
 # General Proxmox VM setup
 
 Guide to create and manage a VM. Includes optimal Proxmox settings, network configuration and backup
-setup. Docs: [config files](https://pve.proxmox.com/wiki/Proxmox_Cluster_File_System_(pmxcfs)),
+setup. Docs: [config files](https://pve.proxmox.com/wiki/Proxmox_Cluster_File_System_(pmxcfs))
 
 ## VM creation
 
@@ -47,5 +47,6 @@ Maintenance:
 
 ## Backups
 
-- No PVE backup jobs: the weekly run images every VM, see
-  [Services](../services.md#storage-and-backups). Restores: [the restore guide](./restore.md).
+- Don't add PVE backup jobs; the weekly run images every VM
+  ([Services](../services.md#storage-and-backups))
+- Restores: [restore guide](./restore.md)

@@ -6,8 +6,7 @@ Guide to setup websvcs on PVE2. Just service installation.
 
 ## Initialize Guacamole DB
 
-- Create the tables from Guacamole's init script.
-  [Ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
+- Create the tables, [ref](https://guacamole.apache.org/doc/gug/postgresql-auth.html)
 
 ```bash
 ssh manualadmin@secsvcs
@@ -19,13 +18,12 @@ exit
 
 ## Setup containers
 
-- Install and start containers. Each install loads its images through the [image
-  updater](./podman.md#image-updater) first, which stops on a blocked image
+- Install and start containers. Each install loads its images through the
+  [image updater](./podman.md#image-updater)
 
 ```bash
 cd /root/homelab-rendered
-# Traefik needs crowdsec_bouncer_websvcs in its secrets, and the WAF its client certificate
-# (secsvcs guide: Traefik WAF)
+# Needs the bouncer key and WAF cert: secsvcs guide, Traefik WAF
 src/nodes/websvcs/install_svcs.sh traefik
 src/nodes/websvcs/install_svcs.sh crowdsec_appsec
 src/nodes/websvcs/install_svcs.sh vmagent
@@ -34,7 +32,7 @@ src/nodes/websvcs/install_svcs.sh homepage
 src/nodes/websvcs/install_svcs.sh isso
 src/nodes/websvcs/install_svcs.sh guacd
 src/nodes/websvcs/install_svcs.sh guacamole
-# Once the media array is mounted (pve2_storage.md): the web archive and books live on it
+# Once the media array is mounted (pve2_storage.md)
 src/nodes/websvcs/install_svcs.sh linkding
 src/nodes/websvcs/install_svcs.sh readeck
 src/nodes/websvcs/install_svcs.sh storyteller
@@ -55,14 +53,13 @@ src/nodes/websvcs/install_svcs.sh fluentbit
 systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
-# Every image unchanged: the installs just loaded them
+# Expect every image unchanged
 src/base/podman/image_updater.sh --dry-run
 ```
 
 ## GPU metrics
 
-- With the Tesla P4's drivers installed ([GPU guide](./gpu.md)), install the exporter and let vmagent
-  scrape it
+- Install the [GPU drivers](./gpu.md), then the exporter
 
 ```bash
 cd /root/homelab-rendered
@@ -73,9 +70,8 @@ curl -s localhost:9835/metrics | grep nvidia_smi_temperature_gpu
 
 ## Bootstrap the Guacamole admin
 
-The OpenID extension only proves who a user is. Their permissions come from Postgres, and
-`initdb.sql` grants permissions only to the default `guacadmin` user. Map an LLDAP group to an admin
-group once, then delete `guacadmin`. [Ref](https://guacamole.apache.org/doc/gug/administration.html)
+Map an LLDAP group to a Guacamole admin group, then delete `guacadmin`.
+[Ref](https://guacamole.apache.org/doc/gug/administration.html)
 
 - In LLDAP, create the `guacamole_admin` group and add yourself to it
 - Temporarily show the password login form next to SSO
@@ -105,15 +101,12 @@ exit
 
 ## Bootstrap the reading apps
 
-linkding, Readeck, Storyteller and Calliope; using them is in the [reading guide](./reading.md).
+Usage: [reading guide](./reading.md)
 
-- In LLDAP, create the `readeck_admin` and `storyteller_admin` groups and add yourself to
-  both before signing in to either app. Readeck resets a user's group from LLDAP at every
-  sign-in, so without `readeck_admin` its admin becomes a plain user. Storyteller sets
-  permissions only at a user's first sign-in; later group changes need Users >> edit.
-- Generate the `readeck_oidc_*` and `storyteller_oidc_*` secrets for secsvcs, copy the ids
-  and plain secrets into websvcs's file, add `storyteller_secret_key`, and reinstall
-  Authelia
+- In LLDAP, create the `readeck_admin` and `storyteller_admin` groups and add yourself to both,
+  before signing in to either app
+- Generate the `readeck_oidc_*` and `storyteller_oidc_*` secrets for secsvcs, copy the ids and plain
+  secrets into websvcs's file, add `storyteller_secret_key`, and reinstall Authelia
 
 ```bash
 ssh manualadmin@pve1
@@ -123,30 +116,27 @@ sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs
 sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
 ```
 
-- linkding: open `https://archive.janedoe.com`, which signs you in as your Authelia user.
-  Under Settings >> Integrations, create a REST API token and save it as
-  `linkding_api_token`. Under Settings >> General, check that automatic HTML snapshots are
-  on.
-- Readeck: sign in at `https://read.janedoe.com` with Authelia. Under Profile >> API
-  tokens, create a token with `bookmarks:read` and `bookmarks:write` and save it as
-  `readeck_api_token`. Then install `linkding_handoff`.
-- Storyteller: the first visit to `https://books.janedoe.com` asks for a local admin.
-  Create one with a long password and keep it in the password manager: OPDS readers sign
-  in with a local account, since they can't use Authelia. Then sign out and in again with
-  Authelia, and as that user:
+- linkding: open `https://archive.janedoe.com`
+  - Settings >> Integrations: create a REST API token, save it as `linkding_api_token`
+  - Settings >> General: check that automatic HTML snapshots are on
+- Readeck: sign in at `https://read.janedoe.com`
+  - Profile >> API tokens: create a token with `bookmarks:read` and `bookmarks:write`, save it as
+    `readeck_api_token`
+  - Install `linkding_handoff`
+- Storyteller: open `https://books.janedoe.com`
+  - Create the local admin with a long password, keep it in the password manager (OPDS readers use
+    it)
+  - Sign out, sign in with Authelia
   - Collections >> New: `Articles`
-  - Settings >> Import: add a watch rule for `/library/books`, and one for
-    `/library/articles` assigned to the Articles collection. Import mode `reference` (the
-    default) leaves the files where Calliope put them. These can't live in
-    `config.json`, which can't assign collections.
-- Calliope: put a clean, roughly 15 s reference recording at
-  `/etc/opt/calliope/voices/default.wav`, and others next to it as `<name>.wav`. Install
-  `calliope`, then `readeck_narrate`.
+  - Settings >> Import: add a watch rule for `/library/books`, and one for `/library/articles`
+    assigned to Articles. Import mode `reference`
+- Calliope: put a ~15 s reference recording at `/etc/opt/calliope/voices/default.wav`, others as
+  `<name>.wav` next to it
+  - Install `calliope`, then `readeck_narrate`
 
 ## Hardware acceleration
 
-This assumes there's a dedicated Nvidia GPU of some kind (Whisper and other models), an Intel iGPU
-(video transcoding) and a Coral TPU (Frigate object detection).
+Nvidia GPU (Whisper and other models), Intel iGPU (transcoding), Coral TPU (Frigate).
 
 - Disable secure boot, [vid](https://www.youtube.com/watch?v=js_Xoa0f8zM)
 

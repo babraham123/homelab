@@ -137,27 +137,16 @@ tools/upload_src.sh SUBDOMAIN "$out"
 ssh manualadmin@SUBDOMAIN
 sudo su
 adduser autoadmin
-# Its sudo rights are the dispatcher's sudoers file alone, no sudo group. Nothing writes to
-# its home: root owns it so a stray write can't plant .bashrc, .ssh/rc or authorized_keys,
-# which sshd and bash would run or read around the forced command.
+# No sudo group; root owns the home so nothing can plant .bashrc or .ssh files
 chown root:root /home/autoadmin
 chmod 755 /home/autoadmin
 # Install configs
 /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
 ```
 
-- On a node set up before 2026-10 (home still owned by autoadmin, user in `sudo`):
-
-```bash
-chown root:root /home/autoadmin && chmod 755 /home/autoadmin
-rm -rf /home/autoadmin/.ssh /home/autoadmin/.bashrc /home/autoadmin/.profile
-deluser autoadmin sudo
-```
-
 ## Backups
 
-- Setup a destination for manual dumps. The weekly backup stages in `/var/opt/backups` itself, see
-  [Services](../services.md#storage-and-backups).
+- Setup a destination for manual dumps (weekly backups stage in `/var/opt/backups`)
 
 ```bash
 mkdir /root/backups

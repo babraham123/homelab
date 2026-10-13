@@ -1,33 +1,24 @@
 # pve2 storage: the media array
 
-Four HDDs on a PCIe SATA card passed through whole to websvcs, snapraid for parity, mergerfs for one
-mount point.
+Four HDDs on a PCIe SATA card passed through to websvcs; snapraid parity, mergerfs pool at
+`/srv/media`.
 
-- The HDDs hold media only: not backed up, parity is their protection
-- PBS stays on the SATA SSD on the onboard controller; games stay on the gaming VM's NVMe until a
-  second SSD arrives (`backup-and-dr/14`)
-- Everything here is run by hand once. The repo carries only what must match the disks afterwards:
-  - `websvcs.media.disks` in `vars.yml`
-  - from it `src/services/snapraid/snapraid.conf.j2`, `media.fstab.j2` and the snapraid timers,
-    installed by `install_snapraid`
-- The pool is always `/srv/media`
+- Media only, not backed up
+- Disks are declared in `vars.yml` (`websvcs.media.disks`); `install_snapraid` installs the config,
+  fstab fragment and timers
 
 ## Hardware prerequisites
 
-- A PCIe SATA controller with at least four ports (ASM1166 class)
-  - It sits beside the RTX 3060 Ti and the Tesla P4: check the free slot is x1 or better and the
-    card is **alone in its IOMMU group** (step 2)
-  - The Kontron K3843-B's four onboard ports share one controller with the PBS SSD and the Blu-ray
-    drive, so the onboard controller can't be passed through
-- Mounting for four 3.5" drives and six SATA power connectors from the RM550x (its bundle has eight)
-- Power: four HDDs add ~25 W running, ~90 W during spin-up. Cap the GPU (`nvidia-smi -pl 180` in the
-  gaming VM) or the CPU's PL2 in the BIOS to keep transients off the 550 W ceiling
-- Remove the old, unused HDD first: `lsblk` on the host, confirm no mount, no `/etc/fstab` entry and
-  no PVE storage (`pvesm status`), then pull it
+- PCIe SATA controller, 4+ ports (ASM1166 class), alone in its IOMMU group (step 2)
+  - The onboard controller also serves the PBS SSD and Blu-ray drive, so it can't be passed through
+- Mounts for four 3.5" drives, six SATA power connectors from the RM550x
+- Power: HDDs add ~25 W running, ~90 W at spin-up. Cap the GPU (`nvidia-smi -pl 180` in the gaming
+  VM) or the CPU's PL2
+- Remove the old HDD: check `lsblk`, `/etc/fstab` and `pvesm status` for any use, then pull it
 
 ## 1. Install the disks
 
-- With pve2 off: card in the slot, the four HDDs on the card, SSD and Blu-ray on the onboard ports
+- With pve2 off: card in a free x1+ slot, HDDs on the card, SSD and Blu-ray on the onboard ports
 - Boot and note the disks
 
 ```bash
@@ -37,14 +28,13 @@ ls -l /dev/disk/by-id/ | grep -v part
 
 ## 2. Pass the controller through
 
-- The card's PCI address and IOMMU group; the group must hold only the card
+- Find the card's PCI address; its IOMMU group must hold only the card
 
 ```bash
 /root/homelab-rendered/src/base/debian/iommu_groups.sh | grep -i -B1 -A1 sata
 ```
 
-- IOMMU and vfio are already on for the GPU ([Proxmox guide, GPU](./proxmox.md#gpu)). Bind the card
-  to vfio at boot so the host never claims the disks
+- Bind it to vfio at boot (IOMMU is on from the [Proxmox guide](./proxmox.md#gpu))
 
 ```bash
 lspci -nn -s ADDRESS         # the [vendor:device] id
@@ -52,8 +42,7 @@ echo 'options vfio-pci ids=VENDOR:DEVICE' > /etc/modprobe.d/sata-passthrough.con
 update-initramfs -u -k all && reboot
 ```
 
-- After the reboot, `lspci -k -s ADDRESS` shows `Kernel driver in use: vfio-pci` and the HDDs are
-  gone from `lsblk`
+- Check: `lspci -k -s ADDRESS` shows `vfio-pci`, and the HDDs are gone from `lsblk`
 - Attach the card to websvcs
 
 ```bash
@@ -61,13 +50,7 @@ qm set $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs) --hostpci1 
 qm stop $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs) && qm start $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs)
 ```
 
-- Passthrough pins the VM's memory and blocks live migration and `qm snapshot`; vzdump snapshot-mode
-  backups are unaffected
-
 ## 3. Partition and format, inside websvcs
-
-- The disks show their real `ata-*` ids and SMART works
-- One ext4 partition per disk, labelled by role; `-m 0` since nothing on them runs as root
 
 ```bash
 ls -l /dev/disk/by-id/ata-*  | grep -v part
@@ -80,15 +63,15 @@ done
 
 ## 4. Declare the disks and install
 
-- In `vars.yml`, `websvcs.media.disks`: one entry per disk with its `ata-*` id and mount point; the
-  one under `/mnt/parity` is parity
+- In `vars.yml`, `websvcs.media.disks`: each disk's `ata-*` id and mount point; `/mnt/parity` is
+  parity
 
 ```bash
 tools/deploy_src.sh
 ssh autoadmin@websvcs install_snapraid
 ```
 
-- On websvcs, append the rendered fstab fragment and mount
+- On websvcs, mount
 
 ```bash
 mkdir -p /mnt/disk1 /mnt/disk2 /mnt/disk3 /mnt/parity /srv/media
@@ -100,35 +83,26 @@ df -h /mnt/disk* /mnt/parity /srv/media
 ## 5. First sync
 
 ```bash
-snapraid sync          # builds parity from scratch; hours for full disks, seconds when empty
+snapraid sync          # hours for full disks, seconds when empty
 snapraid status
 systemctl list-timers 'snapraid-*'
 ```
 
-- `snapraid-sync.timer` syncs daily, `snapraid-scrub.timer` scrubs weekly, both through
-  `snapraid_run.sh`
-- A sync is refused when more than 200 files disappeared since the last one (`threshold` in
-  `snapraid_run.sh`)
-- `homelab_snapraid_last_success_timestamp_seconds` and `homelab_smart_healthy` reach
-  VictoriaMetrics via node_exporter; `src/services/vmalert/configs/backups.yml` alerts on both
+- Timers: daily sync, weekly scrub, via `snapraid_run.sh`; a sync stops if 200+ files disappeared
+- Alerts: `src/services/vmalert/configs/backups.yml`
 
 ## Day to day
 
-- Media goes under `/srv/media`; mergerfs puts new files on the disk with the most free space.
-  Services read the pool, never `/mnt/disk*`
-  - `archive/linkding`, `archive/readeck`: page snapshots and archived articles
-  - `books/narrate`, `books/readalouds`: Calliope's inbox, work and output; `books/storyteller`:
-    Storyteller's processed books and uploads
-  - Databases stay on the VM disk under `/var/opt`: SQLite over mergerfs is unsafe
-- **A disk failed** ([manual](https://www.snapraid.it/manual#recover)):
+- Services use `/srv/media`, never `/mnt/disk*`; databases stay under `/var/opt`
+  - `archive/linkding`, `archive/readeck`
+  - `books/narrate`, `books/readalouds`, `books/storyteller`
+- A disk failed ([manual](https://www.snapraid.it/manual#recover)):
   1. Replace it and format as in step 3, same label and mount point
-  2. Update its id in `vars.yml`, `tools/deploy_src.sh`, then
-     `ssh autoadmin@websvcs install_snapraid` to reinstall `/etc/snapraid.conf`
-  3. On websvcs, replace the disk's line in `/etc/fstab` with the new one from
+  2. Update its id in `vars.yml`, `tools/deploy_src.sh`, `ssh autoadmin@websvcs install_snapraid`
+  3. On websvcs, replace its `/etc/fstab` line from
      `/root/homelab-rendered/src/services/snapraid/media.fstab`, then
      `systemctl daemon-reload && mount -a`
   4. On websvcs: `snapraid fix -d dN` for a data disk; `snapraid sync -F` then `snapraid fix` for
-     the parity disk
-- **Mass delete on purpose** (over the threshold): `snapraid sync --force-empty`, or raise the
-  threshold and run `snapraid_run.sh sync`
-- SMART details: `smartctl -a /dev/disk/by-id/ata-...` on websvcs; `smartd` logs to the journal
+     parity
+- Intentional mass delete: `snapraid sync --force-empty`
+- SMART: `smartctl -a /dev/disk/by-id/ata-...` on websvcs; `smartd` logs to the journal

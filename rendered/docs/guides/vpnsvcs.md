@@ -39,18 +39,16 @@ ufw allow 41641
 ufw enable
 ```
 
-- Block brute force attempts: fail2ban's `sshd` jail on 2202 and `recidive`
-  (`src/nodes/vpnsvcs/jail.local`)
+- Block brute force attempts with fail2ban (`src/nodes/vpnsvcs/jail.local`)
 
 ```bash
 cd /root/homelab-rendered
 src/nodes/vpnsvcs/install_svcs.sh fail2ban
 
-# Verify that the jails are enabled and configured correctly
+# Verify the jails
 fail2ban-client status sshd
 fail2ban-client status recidive
 fail2ban-client -d | grep "'sshd'.*port"
-# recidive reads bans from the journal (src/nodes/vpnsvcs/fail2ban.local)
 fail2ban-client get logtarget
 ```
 
@@ -96,18 +94,12 @@ headscale nodes approve-routes --identifier NODE_ID --routes 192.168.5.0/24
 headscale nodes approve-routes --identifier NODE_ID --routes 192.168.7.0/24
 ```
 
-- At this point you can connect via "machine" users. Skip farther down if you don't want public
-  access.
+- Machine users can connect now; skip [Add public endpoint](#add-public-endpoint) for a private VPN
 
 ## Add public endpoint
 
-Summary: Create a public user and a tailscale client on the vpn server. HAProxy forwards the `vpn`
-subdomain to Headscale on ports 8080, 8443. authelia, lldap, etc traffic is sent to the secsvcs VM,
-and home assistant traffic to the homesvcs VM. All other traffic is sent to the websvcs VM also via
-traefik. Similar to Tailscale Funnel, and fulfills a similar role as a DMZ. This also enables OIDC
-access.
-
-Notes: [site-to-site](https://tailscale.com/kb/1214/site-to-site/),
+HAProxy sends `vpn` to Headscale and every other subdomain over the tailnet to its VM's Traefik.
+Refs: [site-to-site](https://tailscale.com/kb/1214/site-to-site/),
 [ACLs](https://tailscale.com/kb/1018/acls/#debugging-acls),
 [troubleshooting](https://tailscale.com/kb/1023/troubleshooting/#unable-to-make-a-tcp-connection-between-two-nodes)
 
@@ -200,9 +192,7 @@ ufw enable
 ufw status verbose
 ```
 
-- Point the telemetry names at secsvcs over the tailnet. Publicly they resolve to the VPS itself, so
-  without this the VPS's metrics and logs would loop through HAProxy's public frontend. The ufw rule
-  above already allows the traffic.
+- Resolve the telemetry and CrowdSec names to secsvcs over the tailnet, not the VPS's public IP
 
 ```bash
 cat >> /etc/hosts <<'EOF'
@@ -253,52 +243,45 @@ sudo tailscale up --login-server https://vpn.janedoe.com:443 --accept-routes --a
 
 ## ACL policy
 
-- `src/services/headscale/headscale_acl.hujson.j2` → `/etc/headscale/acl.hujson`, installed by
-  `install_svcs.sh headscale`
-- Membership comes from `vars.yml` (`users`, `tailscale_admin`, `tailscale_extra_acls`)
-- Every user must exist in `headscale users list` under that exact name (the `@` is only in the
-  policy)
+- Policy: `src/services/headscale/headscale_acl.hujson.j2`, members from `vars.yml` (`users`,
+  `tailscale_admin`, `tailscale_extra_acls`)
+- Create each user in Headscale under the same name, without the `@`
 - Reload after a change
 
 ```bash
 # after tools/upload_src.sh vpnsvcs ...
 cd /root/homelab-rendered/src
 cp services/headscale/headscale_acl.hujson /etc/headscale/acl.hujson
-# resolves users against the DB and runs the policy's tests; without the flag it only parses
+# Runs the policy's tests against the DB
 headscale policy check --file /etc/headscale/acl.hujson --bypass-grpc-and-access-database-directly
 systemctl reload headscale        # a failing policy is rejected
 journalctl -eu headscale --no-pager | tail -20
 ```
 
-- Spot-check from a node: `tailscale debug netmap | jq '.PacketFilter'` shows its rules;
-  `nc -zv HOST PORT` from an allowed and a denied source
+- Spot-check from a node: `tailscale debug netmap | jq '.PacketFilter'`, `nc -zv HOST PORT`
 
 ## Guest users
 
-- `guest1` (`group:guests`): HTTP/HTTPS to the service VMs and Moonlight from the gaming VM; no exit
-  node, LAN, admin GUIs or Sunshine web UI. Authelia still gates each app.
-- One short-lived key per visit
+- `guest1` (`group:guests`) reaches the web apps and Moonlight only
+- Create a short-lived key per visit
 
 ```bash
 headscale users create guest1
 headscale --user USER_ID preauthkeys create --expiration 1h
 ```
 
-- On the guest's device, log in as under Machine users, **without** `--accept-routes` unless they
-  need a LAN address
-- Moonlight: the guest adds the gaming VM by its LAN IP (needs `--accept-routes`); approve the
-  pairing PIN in the Sunshine web UI
+- On the guest's device, log in as under [Machine users](#machine-users-optional), without
+  `--accept-routes` unless they use Moonlight
+- Moonlight: add the gaming VM by its LAN IP, then approve the PIN in the Sunshine web UI
 - Revoke: `headscale nodes list --user USER_ID`, then `headscale nodes delete -i NODE_ID`
 
 ## Telemetry agents
 
-- Set up like the VMs ([ADR 0007](../adr/0007-vps-metrics-pushed.md)):
-  - Fluent Bit and vmagent on the VPS's own bridge, nothing published
-  - node_exporter, HAProxy, Headscale and tailscaled on the host; HAProxy's and Headscale's metrics
-    on the gateway, `10.13.0.1`
-- Needs the `/etc/hosts` block from [Add public endpoint](#add-public-endpoint)
-- Follow the [Podman guide](./podman.md): Install Podman, Networking (create the network only),
-  Secrets, Monitoring and Image updater
+[ADR 0007](../adr/0007-vps-metrics-pushed.md)
+
+- Do the `/etc/hosts` step in [Add public endpoint](#add-public-endpoint)
+- Follow the [Podman guide](./podman.md): Install Podman, Networking, Secrets, Monitoring and Image
+  updater
 - Open the gateway to vmagent and the containers' path to secsvcs
 
 ```bash
@@ -315,8 +298,8 @@ cp src/services/headscale/headscale_private.yaml /etc/headscale/config.yaml
 systemctl restart headscale
 ```
 
-- On pve1: `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs` (fill in the
-  two passwords and `ntfy_alert_token` from secsvcs.yaml, and the Docker Hub token)
+- On pve1: `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`
+  - Copy the two passwords and `ntfy_alert_token` from `secsvcs.yaml`; add the Docker Hub token
 - Install and check
 
 ```bash
@@ -327,21 +310,17 @@ podman exec vmagent wget -qO- 10.13.0.1:8405/metrics | head -3
 podman exec vmagent wget -qO- 100.100.100.100/metrics | head -3   # tailscaled through tailscale0
 ```
 
-- From outside, `nmap -Pn -p- 12.34.56.78` shows no new ports
-- In VictoriaMetrics, `up{host="vpnsvcs.janedoe.com"}` is 1 for haproxy, headscale, tailscaled,
-  vmagent, fluentbit and node_exporter
-- `logs.janedoe.com` shows the VPS's journal
-- If tailscaled stays down, bind its metrics elsewhere or drop its job from
-  `src/nodes/vpnsvcs/prometheus.yml.j2`
+- Verify
+  - From outside, `nmap -Pn -p- 12.34.56.78` shows no new ports
+  - In VictoriaMetrics, `up{host="vpnsvcs.janedoe.com"}` is 1 for every job
+  - `logs.janedoe.com` shows the VPS's journal
 
 ## Geoblock by country
 
-- `geoip_generator`: a quadlet built on the VPS (haproxy-mapper and the script), run weekly by its
-  timer; HAProxy reloads after each run. The image updater builds and scans it, at install and
-  nightly when its inputs change (`src/services/geoip_generator/build.sh`)
-- Needs the Podman setup from [Telemetry agents](#telemetry-agents)
-- Add `maxmind_license_key` to `/root/secrets/vpnsvcs.yaml` on pve1 (copy it from `pve1.yaml`), then
-  `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`
+- `geoip_generator` rebuilds HAProxy's country maps weekly
+- Do [Telemetry agents](#telemetry-agents) first
+- On pve1, copy `maxmind_license_key` from `pve1.yaml` into `vpnsvcs.yaml`
+  - `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`
 
 ```bash
 sudo su
@@ -357,13 +336,12 @@ ls /etc/haproxy/countries | wc -l  # about 250 maps
 
 ## CrowdSec bouncer
 
-- Drops the IPs CrowdSec's LAPI on secsvcs has banned, in nftables ahead of ufw and HAProxy
-  ([Security](../security.md#the-edge-haproxy), [ADR 0009](../adr/0009-crowdsec-lapi-on-secsvcs.md))
-- Needs the LAPI ([secsvcs guide](./secsvcs.md#crowdsec)), the `/etc/hosts` block from [Add public
-  endpoint](#add-public-endpoint), the CA chain (`install_ca`, from pve1's cert scripts) and the
-  Podman bridge from [Telemetry agents](#telemetry-agents)
-- The Headscale ACL lets `public@` reach `secsvcs:8455`: reload it as in [ACL policy](#acl-policy)
-- The bouncer's LAPI key, root-only
+[Security](../security.md#the-edge-haproxy), [ADR 0009](../adr/0009-crowdsec-lapi-on-secsvcs.md)
+
+- Do first: [secsvcs CrowdSec](./secsvcs.md#crowdsec), the `/etc/hosts` step in [Add public
+  endpoint](#add-public-endpoint), `install_ca` and [Telemetry agents](#telemetry-agents)
+- Reload the Headscale ACL as in [ACL policy](#acl-policy)
+- Store the bouncer's LAPI key
 
 ```bash
 sudo su
@@ -372,7 +350,7 @@ vim /etc/opt/secrets/crowdsec_bouncer_key
 chmod 600 /etc/opt/secrets/*
 ```
 
-- Open the LAPI over the tailnet and the bouncer's metrics to vmagent, then install
+- Open the firewall and install
 
 ```bash
 cd /root/homelab-rendered
@@ -384,27 +362,27 @@ nft list tables                       # crowdsec and crowdsec6
 journalctl -u crowdsec-firewall-bouncer --no-pager | tail   # no TLS or 403 errors
 ```
 
-- On secsvcs, `podman exec crowdsec cscli bouncers list` shows `vpnsvcs` with a last pull seconds ago
-- Test a ban with a documentation address, from secsvcs:
+- On secsvcs, `podman exec crowdsec cscli bouncers list` shows a recent pull from `vpnsvcs`
+- Test a ban from secsvcs
 
-```bash
-sudo podman exec crowdsec cscli decisions add --ip 203.0.113.7 --duration 5m --reason test
-```
+  ```bash
+  sudo podman exec crowdsec cscli decisions add --ip 203.0.113.7 --duration 5m --reason test
+  ```
 
-  then on the VPS `nft list ruleset | grep 203.0.113.7` within 10 s, and gone after
-  `cscli decisions delete --ip 203.0.113.7`
+  - On the VPS, `nft list ruleset | grep 203.0.113.7` within 10 s
+  - `cscli decisions delete --ip 203.0.113.7` removes it
 
-- A changed key: update both secrets, then on secsvcs `podman exec crowdsec cscli bouncers delete
-  vpnsvcs` and `systemctl restart crowdsec`, and rerun the install here
+- Rotate the key
+  - Update both secrets
+  - On secsvcs: `podman exec crowdsec cscli bouncers delete vpnsvcs`, `systemctl restart crowdsec`
+  - Rerun the install here
 
 ## Dead-man switch
 
-- `deadman.timer` checks every 5 minutes, over the tailnet, that Alertmanager still holds the
-  `Watchdog` alert and that ntfy is healthy ([Services](../services.md#observability))
-- Three failures in a row: an email and a push through public ntfy.sh, so a dead secsvcs is still
-  reported
-- Needs the `/etc/hosts` block from [Add public endpoint](#add-public-endpoint)
-- Secrets, root-only
+- Alerts by email and ntfy.sh when secsvcs's alerting is down
+  ([Services](../services.md#observability))
+- Do the `/etc/hosts` step in [Add public endpoint](#add-public-endpoint) first
+- Store the secrets
 
 ```bash
 sudo su
@@ -417,7 +395,7 @@ LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32 | tee /etc/opt/secrets/de
 chmod 600 /etc/opt/secrets/*
 ```
 
-- Email: msmtp as on [pve1](./pve1.md#notifications)
+- Set up msmtp as on [pve1](./pve1.md#notifications)
 
 ```bash
 apt install -y jq curl msmtp
@@ -439,25 +417,20 @@ echo test | msmtp -a default jdoe@gmail.com
 
 ```bash
 /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh deadman
-journalctl -u deadman --no-pager | tail       # silent when the path is healthy
+journalctl -u deadman --no-pager | tail       # silent when healthy
 ```
 
 - State: `/var/lib/deadman/` (`failures` counter, `firing` flag)
 
 ## Backup and restore
 
-- `backup`, run weekly by pve1's orchestrator through the dispatcher (pve1's certificate only),
-  stages into `/var/opt/backups/`, streams it to pve1 and deletes it:
-  - `dumps/`: the Headscale DB, snapshotted with `sqlite3 .backup`
-  - `files/`: `/var/lib/headscale` (noise and DERP keys), `/etc/headscale`, `/var/lib/tailscale`,
-    `/etc/haproxy`, `/etc/ssh`, `/etc/ufw`, `/etc/opt`, `/etc/systemd/system`, `/etc/letsencrypt`,
-    `/root/.ssh`
-- pve1 keeps it in `/root/backups/vpnsvcs/`, then to PBS as `host/vpnsvcs` with the image
-  retention; the DB snapshot lives in PBS only
-- No OS archive: rebuild from this guide, then put the files back
+- pve1's orchestrator runs `backup` weekly; PBS keeps it as `host/vpnsvcs`
+  - `dumps/`: the Headscale DB
+  - `files/`: `/var/lib/headscale`, `/etc/headscale`, `/var/lib/tailscale`, `/etc/haproxy`,
+    `/etc/ssh`, `/etc/ufw`, `/etc/opt`, `/etc/systemd/system`, `/etc/letsencrypt`, `/root/.ssh`
 - One file, e.g. the Headscale DB: [restore guide](./restore.md#application-restores)
 - The whole VPS onto a new Linode:
-  1. Same Debian release; follow this guide up to, not including, [VPN setup](#vpn-setup)
+  1. Same Debian release; follow this guide up to [VPN setup](#vpn-setup)
   2. From pve1, put the files back
 
      ```bash
@@ -465,10 +438,10 @@ journalctl -u deadman --no-pager | tail       # silent when the path is healthy
      ssh -t manualadmin@NEW_IP 'sudo cp -a vpnsvcs/files/. / && sudo rm -rf vpnsvcs'
      ```
 
-  3. Continue the guide; `install_svcs.sh headscale` keeps the restored `/var/lib/headscale`
-  4. Restore the DB snapshot from PBS (`host/vpnsvcs`, `dumps/headscale/db-*.sqlite`) as in the
-     restore guide, then `systemctl restart headscale haproxy tailscaled`
-  5. Point the public DNS at the new IP; `headscale nodes list` shows every node
+  3. Continue the guide
+  4. Restore `dumps/headscale/db-*.sqlite` from PBS `host/vpnsvcs`, then
+     `systemctl restart headscale haproxy tailscaled`
+  5. Point the public DNS at the new IP; check `headscale nodes list`
 
 ## Upgrade
 

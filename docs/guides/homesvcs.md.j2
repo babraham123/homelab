@@ -16,14 +16,12 @@ I use the SMLight SLZB-06M adapter, it's reasonably priced and very feature rich
 
 ## Setup containers
 
-- Install and start services. Each install loads its images through the [image
-  updater](./podman.md#image-updater) first, which stops on a blocked image
+- Install and start services. Needs the [image updater](./podman.md#image-updater)
 
 ```bash
 sudo su
 cd /root/homelab-rendered
-# Traefik needs crowdsec_bouncer_homesvcs in its secrets, and the WAF its client certificate
-# (secsvcs guide: Traefik WAF)
+# Needs crowdsec_bouncer_homesvcs and the WAF client cert (secsvcs guide: Traefik WAF)
 src/nodes/homesvcs/install_svcs.sh traefik
 src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
 src/nodes/homesvcs/install_svcs.sh vmagent
@@ -89,8 +87,7 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE from {{ wired.iot.mask }} to 
   - Search MQTT and add
   - Set the broker hostname (mqtt.{{ site.url }}) and port (8883). Press Submit
   - Enable "Use a client certificate", set Broker cert validation to "Auto". Press Submit
-  - From personal computer, copy out the client cert and key installed under
-    `/etc/opt/home_assistant/certs`
+  - From personal computer, copy out the client cert and key
 
     ```bash
     ssh -t manualadmin@homesvcs 'sudo install -m 600 -o manualadmin /etc/opt/home_assistant/certs/client.pem /etc/opt/home_assistant/certs/client.key ~'
@@ -152,6 +149,7 @@ systemctl restart home_assistant
 
 ## Devices
 
-IoT devices sit on their own VLAN, see [Networking](../networking.md#vlans) and [mDNS across
-VLANs](../networking.md#mdns-across-vlans). The Zigbee coordinator and other peripherals are listed
-under [network gear](../architecture.md#network-gear-and-peripherals).
+- IoT VLAN: [Networking](../networking.md#vlans),
+  [mDNS across VLANs](../networking.md#mdns-across-vlans)
+- Zigbee coordinator and peripherals:
+  [network gear](../architecture.md#network-gear-and-peripherals)

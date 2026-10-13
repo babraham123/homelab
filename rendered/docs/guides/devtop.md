@@ -1,7 +1,7 @@
 # Development desktop setup
 
-Guide to create the devtop VM. It's intended as an environment for general software development and
-the execution of AI models. TODO: Add vscode, language scripts, remote desktop, model management
+The devtop VM, for software development and running AI models.
+TODO: Add vscode, language scripts, remote desktop, model management
 
 - First setup [Debian Linux](./debian.md)
 

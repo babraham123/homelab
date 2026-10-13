@@ -29,9 +29,8 @@ apt install -y age jq gnupg2 zstd
 
 - Account for conflicts between the podman network and the firewall,
   [bug](https://stackoverflow.com/questions/70870689/configure-ufw-for-podman-on-port-443)
-- Create the container network. On the VMs this also resets the firewall and lets Traefik's
-  traffic through to its container; vpnsvcs keeps the rules from [its
-  guide](./vpnsvcs.md#add-public-endpoint) and publishes nothing.
+- Create the container network. On the VMs this also resets ufw; vpnsvcs keeps
+  [its rules](./vpnsvcs.md#add-public-endpoint)
 
 ```bash
 /root/homelab-rendered/src/base/podman/install_network.sh
@@ -51,9 +50,6 @@ cp /home/manualadmin/.ssh/id_ed25519* /etc/opt/secrets
 chmod 600 /etc/opt/secrets/*
 cp /root/homelab-rendered/src/base/podman/containers.conf /etc/containers
 ```
-
-The secret helpers (`src/base/podman/*.sh`) run in place from `/root/homelab-rendered`; nothing is
-copied, so a deploy updates them.
 
 ## mDNS
 
@@ -85,12 +81,11 @@ ufw allow in from 10.10.0.7 to any port 9100 proto tcp
 
 ## Image updater
 
-Quadlets only run `localhost/` images. The image updater downloads (or builds) each one, scans it
-with Trivy and loads it, when a service is installed and every night after: see
-[Maintenance](../maintenance.md#container-images).
+Pulls or builds, scans and loads every `localhost/` image, nightly and on install.
+[Maintenance](../maintenance.md#container-images)
 
-- The node's secrets file needs `docker_hub_username`, `docker_hub_token` and `ntfy_alert_token`
-- Install it before any service, since every `install_svcs.sh` case scans its images through it
+- Add `docker_hub_username`, `docker_hub_token` and `ntfy_alert_token` to the node's secrets file
+- Install before any service
 
 ```bash
 cd /root/homelab-rendered
@@ -101,8 +96,8 @@ systemctl list-timers image_updater.timer
 
 ## Backups
 
-The scheduled backup is each node's `backup.sh`, see [Services](../services.md#storage-and-backups).
-What follows is the manual fallback for a volume it doesn't cover.
+Manual fallback for volumes the node's `backup.sh` doesn't cover
+([Services](../services.md#storage-and-backups)).
 
 - Backup container volumes
 

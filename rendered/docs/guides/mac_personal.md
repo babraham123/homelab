@@ -1,7 +1,6 @@
 # Mac Setup
 
-Setup a MacOS based computer to access homelab services, both remotely and locally. Also optimizes
-the Terminal app to access VM hosts and work on homelab code.
+Set up a Mac to use homelab services, reach the VM hosts, and work on homelab code.
 
 ## Dependencies
 
