@@ -21,7 +21,7 @@ auth/03 has the full design.
   `pack_json`.
 - **The VPS enforces.** The firewall bouncer (nftables) on the VPS pulls decisions from the LAPI
   every 10 s and drops banned sources in its own table, ahead of ufw and HAProxy. The LAPI is a
-  published TLS port (`8080`, private CA certificate for `crowdsec.SITE`), reached over the tailnet;
+  published TLS port (`8455`, private CA certificate for `crowdsec.SITE`), reached over the tailnet;
   ufw on secsvcs and the Headscale ACL admit only the VPS. It is never an inventory subdomain, which
   would add it to HAProxy's SNI list.
 - **Community blocklist**: the LAPI registers with crowdsec.net, pulls its blocklist and shares this

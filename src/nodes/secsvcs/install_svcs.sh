@@ -110,6 +110,7 @@ case $1 in
     # The certificate and key come from install_certs/install_keys
     ls /etc/opt/crowdsec/certificates/crowdsec.key.pem
     install -D -m 644 -t /etc/opt/crowdsec/config/acquis.d services/crowdsec/victorialogs.yaml
+    install -D -m 644 -t /etc/opt/crowdsec/config services/crowdsec/config.yaml.local
     install -D -m 644 services/crowdsec/allowlist.yaml /etc/opt/crowdsec/config/parsers/s02-enrich/homelab-allowlist.yaml
     install_quadlet services/crowdsec/crowdsec.container services/crowdsec/crowdsecdb.volume
     reload_restart crowdsec

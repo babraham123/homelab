@@ -93,8 +93,8 @@ cd /root/homelab-rendered
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
 for src in 100.64.0.2 192.168.4.21 192.168.2.20; do
-  ufw allow in from $src to any port 8080 proto tcp
-  ufw route allow in on $NET_IFACE out on $POD_IFACE from $src to any port 8080 proto tcp
+  ufw allow in from $src to any port 8455 proto tcp
+  ufw route allow in on $NET_IFACE out on $POD_IFACE from $src to any port 8455 proto tcp
 done
 ```
 - Install and check

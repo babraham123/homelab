@@ -27,12 +27,12 @@ HealthRetries=3
 HealthStartPeriod=120s
 HealthOnFailure=kill
 
-# LAPI (TLS), port = 8080; Prometheus metrics, port = 6060
+# LAPI (TLS), port = 8455 (config.yaml.local); Prometheus metrics, port = 6060
 Network=net.network
 HostName=crowdsec.{{ site.url }}
 IP={{ secsvcs.container_subnet }}.16
 # hostPort:containerPort; ufw admits the VPS only (docs/guides/secsvcs.md)
-PublishPort=8080:8080
+PublishPort=8455:8455
 
 Environment=TZ={{ personal.timezone }}
 Environment="COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve LePresidente/authelia crowdsecurity/whitelist-good-actors"
@@ -41,7 +41,7 @@ Environment=LAPI_CERT_FILE=/certificates/crowdsec.cert.pem
 Environment=LAPI_KEY_FILE=/certificates/crowdsec.key.pem
 Environment=CACERT_FILE=/certificates/ca.chain.pem
 # The in-container agent reaches the LAPI by the name on its certificate
-Environment=LOCAL_API_URL=https://crowdsec.{{ site.url }}:8080
+Environment=LOCAL_API_URL=https://crowdsec.{{ site.url }}:8455
 Environment=LEVEL_WARN=true
 # Read by acquis.d/victorialogs.yaml
 Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD

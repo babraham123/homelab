@@ -34,7 +34,7 @@ IP={% raw %}{{ subnet }}{% endraw %}.23
 
 Environment=TZ={{ personal.timezone }}
 Environment=DISABLE_LOCAL_API=true
-Environment=LOCAL_API_URL=https://crowdsec.{{ site.url }}:8080
+Environment=LOCAL_API_URL=https://crowdsec.{{ site.url }}:8455
 Environment=USE_TLS=true
 Environment=CACERT_FILE=/certificates/ca.chain.pem
 Environment=CLIENT_CERT_FILE=/certificates/appsec.cert.pem
@@ -59,7 +59,7 @@ Volume=appsecdata.volume:/var/lib/crowdsec/data
 # cached it rejects it, and Traefik then blocks every request. Starting only once the
 # LAPI answers leaves AppSec unreachable instead, which Traefik passes.
 ExecStartPre=/usr/bin/curl -sf --max-time 5 -o /dev/null \
-  --cacert /etc/opt/crowdsec_appsec/certificates/ca.chain.pem https://crowdsec.{{ site.url }}:8080/health
+  --cacert /etc/opt/crowdsec_appsec/certificates/ca.chain.pem https://crowdsec.{{ site.url }}:8455/health
 Restart=on-failure
 # Keeps retrying while secsvcs is down, under the start limit
 RestartSec=30s

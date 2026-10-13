@@ -334,7 +334,7 @@ ls /etc/haproxy/countries | wc -l  # about 250 maps
 - Needs the LAPI ([secsvcs guide](./secsvcs.md#crowdsec)), the `/etc/hosts` block from [Add public
   endpoint](#add-public-endpoint), the CA chain (`install_ca`, from pve1's cert scripts) and the
   Podman bridge from [Telemetry agents](#telemetry-agents)
-- The Headscale ACL lets `public@` reach `secsvcs:8080`: reload it as in [ACL policy](#acl-policy)
+- The Headscale ACL lets `public@` reach `secsvcs:8455`: reload it as in [ACL policy](#acl-policy)
 - The bouncer's LAPI key, root-only
 ```bash
 sudo su
@@ -346,7 +346,7 @@ chmod 600 /etc/opt/secrets/*
 ```bash
 cd /root/homelab-rendered
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-ufw allow out on tailscale0 from any to 192.168.4.20 port 8080 proto tcp
+ufw allow out on tailscale0 from any to 192.168.4.20 port 8455 proto tcp
 ufw allow in on $POD_IFACE from 10.13.0.7 to any port 60601 proto tcp
 src/nodes/vpnsvcs/install_svcs.sh crowdsec_firewall_bouncer
 nft list tables                       # crowdsec and crowdsec6

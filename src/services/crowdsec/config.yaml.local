@@ -1,0 +1,9 @@
+# /etc/opt/crowdsec/config/config.yaml.local
+# Ref: https://docs.crowdsec.net/docs/next/configuration/crowdsec_configuration/#overriding-values
+# Merged over the image's config.yaml. The LAPI listens on 8455, not CrowdSec's default
+# 8080, which many other apps also default to.
+---
+api:
+  server:
+    listen_uri: 0.0.0.0:8455
+...

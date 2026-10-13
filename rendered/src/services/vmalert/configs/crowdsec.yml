@@ -22,7 +22,7 @@ groups:
           severity: error
         annotations:
           summary: "The VPS's firewall bouncer hasn't pulled decisions for 10 minutes"
-          description: "New bans don't reach the VPS. On vpnsvcs: systemctl status crowdsec-firewall-bouncer; the tailnet path to secsvcs:8080 (ufw, Headscale ACL)."
+          description: "New bans don't reach the VPS. On vpnsvcs: systemctl status crowdsec-firewall-bouncer; the tailnet path to secsvcs:8455 (ufw, Headscale ACL)."
       - alert: CrowdsecAppsecDown
         expr: up{job="crowdsec_appsec"} == 0
         for: 5m

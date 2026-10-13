@@ -141,3 +141,6 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
   tailnet are never banned, so a second ban check in Traefik only added failure modes (stream
   settings, `CrowdsecTraefikBouncerStale`, removed). The per-node bouncer keys stay, since AppSec
   checks them with the LAPI. The design table's "Blocks banned IPs" for the plugin no longer holds.
+- 2026-10-12: maintainer decision: the LAPI listens on 8455 instead of 8080
+  (`src/services/crowdsec/config.yaml.local`), to avoid future conflicts; not yet applied anywhere,
+  so no old rules to remove.
