@@ -42,12 +42,13 @@ HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy
   allowlisted (`src/services/crowdsec/allowlist.yaml.j2`). It fails open: with the LAPI down the
   bouncer keeps its last set and every site stays up; `CrowdsecDown` and `CrowdsecBouncerStale`
   report it.
-- **Bans and a WAF at each Traefik.** Every `websecure` request first passes the `crowdsec`
-  middleware (the vendored `crowdsec-bouncer-traefik-plugin`, set on the entrypoint in
-  `src/services/traefik/static.yml.j2`, configured in `dynamic/crowdsec.yml.j2`). It drops IPs the
-  LAPI has banned, from a list it pulls every minute with the node's own bouncer key, so LAN and
-  tailnet clients are covered too, not just traffic through the VPS. Then it hands the request,
-  headers and body, to the node's own CrowdSec AppSec container, which never leaves the VM:
+- **A WAF at each Traefik.** Log-based bans act after the fact and only see what the access log
+  keeps, so a single-request exploit, or one in a header or body, gets through. Every `websecure`
+  request first passes the `crowdsec` middleware (the vendored `crowdsec-bouncer-traefik-plugin` in
+  AppSec-only mode, set on the entrypoint in `src/services/traefik/static.yml.j2`, configured in
+  `dynamic/crowdsec.yml.j2`). It doesn't check bans itself; the VPS already drops banned IPs. It
+  hands the request, headers and body, to the node's own CrowdSec AppSec container, so it never
+  leaves the VM:
   - in-band, blocking with a 403: CrowdSec's virtual patches for known CVEs and its generic rules
     (`crowdsecurity/appsec-virtual-patching`, `appsec-generic-rules`); two different rules hit by
     one IP within a minute ban it;
@@ -58,9 +59,9 @@ HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy
     devices don't, and the allowlist keeps them from being banned.
 
   AppSec is a CrowdSec agent that logs in to the LAPI with a client certificate from the private
-  CA, so its blocks become alerts and bans there. It fails open too: an unreachable LAPI or AppSec,
-  an AppSec error or an unbufferable body passes the request; `CrowdsecTraefikBouncerStale` and
-  `CrowdsecAppsecDown` report it.
+  CA, so its blocks become alerts and bans there, and checks the plugin's per-node bouncer key with
+  the LAPI. It fails open: an unreachable AppSec, an AppSec error or an unbufferable body passes the
+  request, and AppSec only starts once the LAPI answers; `CrowdsecAppsecDown` reports it.
 
 Because HAProxy never terminates TLS (see [ADR 0002](adr/0002-haproxy-sni-passthrough.md)), a
 compromise of the VPS exposes traffic metadata but not plaintext.

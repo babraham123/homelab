@@ -46,7 +46,7 @@ Environment=LEVEL_WARN=true
 # Read by acquis.d/victorialogs.yaml
 Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
 # Registers each bouncer (`vpnsvcs`, the VPS's firewall; `traefik_<node>`, each Traefik's
-# plugin) with its key on first start; a changed key needs `cscli bouncers delete NAME`
+# plugin, whose key the node's AppSec checks here) with its key on first start; a changed key needs `cscli bouncers delete NAME`
 # and a restart
 Secret=crowdsec_bouncer_vpnsvcs,type=env,target=BOUNCER_KEY_vpnsvcs
 {%- for node in ['secsvcs', 'homesvcs', 'websvcs'] %}

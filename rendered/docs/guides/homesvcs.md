@@ -19,7 +19,7 @@ I use the SMLight SLZB-06M adapter, it's reasonably priced and very feature rich
 sudo su
 cd /root/homelab-rendered
 # Traefik needs crowdsec_bouncer_homesvcs in its secrets, and the WAF its client certificate
-# (secsvcs guide: Traefik bouncer and WAF)
+# (secsvcs guide: Traefik WAF)
 src/nodes/homesvcs/install_svcs.sh traefik
 src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
 src/nodes/homesvcs/install_svcs.sh vmagent

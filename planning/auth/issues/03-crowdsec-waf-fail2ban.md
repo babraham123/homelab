@@ -133,6 +133,11 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
     can't check, which the plugin turns into a 403 for every request.
   - The homelab's machines (VM, PVE, pfSense and VPS tailnet IPs, container subnets) are
     `clientTrustedIps`, so metric and log pushes skip the WAF; LAN devices are still inspected.
-  - Untested, check on first apply (secsvcs guide, "Traefik bouncer and WAF"): the plugin loading
+  - Untested, check on first apply (secsvcs guide, "Traefik WAF"): the plugin loading
     from `plugins-local`, LAPI client-cert login, the XSS 403, and `cscli alerts list` naming the
     CRS matches.
+- 2026-10-12: maintainer decision: the Traefik plugin runs in AppSec-only mode
+  (`crowdsecMode: appsec`). Bans stay at the VPS: every public request crosses it, and the LAN and
+  tailnet are never banned, so a second ban check in Traefik only added failure modes (stream
+  settings, `CrowdsecTraefikBouncerStale`, removed). The per-node bouncer keys stay, since AppSec
+  checks them with the LAPI. The design table's "Blocks banned IPs" for the plugin no longer holds.

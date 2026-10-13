@@ -205,9 +205,8 @@ flowchart LR
     `CertExpiringSoon` (14 days), `CertExpiringCritical` (3 days)
   - `backups.yml`: `BackupStale`, `BackupNeverRan`, `SnapraidStale`, `DiskUnhealthy`
   - `vps.yml`: `VpsMetricsAbsent`, `HaproxyDown`, `HaproxyBackendConnectErrors`
-  - `crowdsec.yml`: `CrowdsecDown`, `CrowdsecBouncerStale` and `CrowdsecTraefikBouncerStale` (no
-    pull in 10 minutes), `CrowdsecAppsecDown` (a node's WAF), `CrowdsecNotParsing` (no Traefik line
-    parsed in an hour)
+  - `crowdsec.yml`: `CrowdsecDown`, `CrowdsecBouncerStale` (no pull in 10 minutes),
+    `CrowdsecAppsecDown` (a node's WAF), `CrowdsecNotParsing` (no Traefik line parsed in an hour)
   - `pipeline.yml`: `Watchdog`
   - `health.yml`, `vmagent.yml`, `vmalert.yml`, `vmsingle.yml`, `fluentbit.yml`: the pipeline's own
     components, upstream rule sets

@@ -3,10 +3,12 @@
 #   https://github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin#variables
 #   https://docs.crowdsec.net/docs/next/appsec/intro
 # yamllint disable rule:document-start rule:document-end
-# The websecure entrypoint runs this ahead of every router (static.yml). It drops IPs the
-# LAPI on secsvcs has banned, then hands each request to the node's own AppSec container
-# (the WAF), which sees headers and bodies, passwords included, so it stays on this VM.
-# Every failure passes traffic: a secsvcs reboot or a dead AppSec never takes a site down.
+# The websecure entrypoint runs this ahead of every router (static.yml). It hands each
+# request to the node's own AppSec container (the WAF), which sees headers and bodies,
+# passwords included, so it stays on this VM. IP bans aren't checked here: every public
+# request crosses the VPS, whose firewall bouncer drops banned IPs, and the LAN and
+# tailnet are never banned. Every failure passes traffic: a dead AppSec never takes a
+# site down.
 http:
   middlewares:
     crowdsec:
@@ -14,18 +16,11 @@ http:
         crowdsec:
           enabled: true
           logLevel: INFO
-          # Pulls the decision list every minute and checks requests against it locally
-          crowdsecMode: stream
-          updateIntervalSeconds: 60
-          # Keep serving on the last list while the LAPI is unreachable, also at startup
-          updateMaxFailure: -1
-          streamStartupBlock: false
-          crowdsecLapiScheme: https
-          crowdsecLapiHost: crowdsec.{{ site.url }}:8080
-          crowdsecLapiTlsCertificateAuthorityFile: /certificates/ca.chain.crt
-          # This node's bouncer key (a Podman secret); AppSec checks it with the LAPI too
-          crowdsecLapiKeyFile: /run/secrets/crowdsec_bouncer_key
+          # WAF only: no decision list, and the plugin never calls the LAPI itself
+          crowdsecMode: appsec
           crowdsecAppsecEnabled: true
+          # This node's bouncer key (a Podman secret), which AppSec checks with the LAPI
+          crowdsecAppsecKeyFile: /run/secrets/crowdsec_bouncer_key
           crowdsecAppsecScheme: http
           crowdsecAppsecHost: appsec.{{ site.url }}:7422
           crowdsecAppsecFailureBlock: false

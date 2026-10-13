@@ -126,10 +126,10 @@ for i in $(seq 40); do curl -s -o /dev/null https://www.{{ site.url }}/nope$i; d
 - The LAN, tailnet and VPS addresses never appear in `cscli decisions list`
 - Grafana: "CrowdSec" dashboard; alerts in `src/services/vmalert/configs/crowdsec.yml`
 
-### Traefik bouncer and WAF
-Every Traefik checks requests against the LAPI's bans and sends them to its node's AppSec
-container ([Security](../security.md#the-edge-haproxy)). In this order, since Traefik can't start
-without its key, and a key the LAPI doesn't know blocks every request with a 403:
+### Traefik WAF
+Every Traefik sends requests to its node's AppSec container
+([Security](../security.md#the-edge-haproxy)). In this order, since Traefik can't start without its
+key, and a key the LAPI doesn't know blocks every request with a 403:
 1. On pve1: `crowdsec_bouncer_secsvcs`, `crowdsec_bouncer_homesvcs` and `crowdsec_bouncer_websvcs`
    in `/root/secrets/secsvcs.yaml`, each copied to that node's secrets file; the AppSec keys and
    client certificates (`appsec-<node>`) come from `self_signed_key_gen.sh` and
@@ -142,7 +142,7 @@ done
 2. On secsvcs: the LAPI registers the new bouncer keys at start, then the WAF and Traefik
 ```bash
 src/nodes/secsvcs/install_svcs.sh crowdsec
-podman exec crowdsec cscli bouncers list    # vpnsvcs and traefik_<node> for all three
+podman exec crowdsec cscli bouncers list    # vpnsvcs, and traefik_<node> for all three
 src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
 src/nodes/secsvcs/install_svcs.sh traefik
 ```
@@ -150,7 +150,7 @@ src/nodes/secsvcs/install_svcs.sh traefik
 4. Check, on secsvcs
 ```bash
 podman exec crowdsec cscli machines list   # appsec-<node>@<IP>, validated, for all three
-podman exec crowdsec cscli bouncers list   # each traefik_<node> with a recent last pull
+podman exec crowdsec cscli bouncers list   # each traefik_<node> seen after the first request
 podman exec crowdsec_appsec cscli metrics show appsec   # requests processed
 journalctl -u traefik | grep -i crowdsec   # no plugin errors
 ```

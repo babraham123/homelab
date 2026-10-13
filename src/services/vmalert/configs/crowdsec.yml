@@ -23,17 +23,6 @@ groups:
         annotations:
           summary: "The VPS's firewall bouncer hasn't pulled decisions for 10 minutes"
           description: "New bans don't reach the VPS. On vpnsvcs: systemctl status crowdsec-firewall-bouncer; the tailnet path to secsvcs:8080 (ufw, Headscale ACL)."
-      - alert: CrowdsecTraefikBouncerStale
-        # Each Traefik's plugin pulls every 60s
-        expr: >-
-          (sum by (bouncer) (increase(cs_lapi_bouncer_requests_total{bouncer=~"traefik_.+"}[10m])) < 1)
-          and on() (up{job="crowdsec"} == 1)
-        for: 2m
-        labels:
-          severity: error
-        annotations:
-          summary: "{{ $labels.bouncer }} hasn't pulled decisions for 10 minutes"
-          description: "That Traefik serves banned IPs. journalctl -u traefik shows the plugin's errors: its crowdsec_bouncer_key, or the path to secsvcs:8080 (ufw)."
       - alert: CrowdsecAppsecDown
         expr: up{job="crowdsec_appsec"} == 0
         for: 5m
@@ -41,7 +30,7 @@ groups:
           severity: warning
         annotations:
           summary: "The WAF on {{ $labels.host }} is down"
-          description: "Its Traefik passes requests uninspected; bans still apply. systemctl status crowdsec_appsec on {{ $labels.host }}."
+          description: "Its Traefik passes requests uninspected; the VPS still drops banned IPs. systemctl status crowdsec_appsec on {{ $labels.host }}."
       - alert: CrowdsecNotParsing
         # Gatus alone sends Traefik a request every 2 minutes, so a quiet hour means the
         # VictoriaLogs query or the parser broke, not that nobody visited
