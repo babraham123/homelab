@@ -105,6 +105,43 @@ QUADLET_UNIT_DIRS=/root/podtest \
   /usr/lib/systemd/system-generators/podman-system-generator --dryrun
 ```
 
+### Validate a service config
+
+Only HAProxy's config is checked by `install_svcs.sh` before it's installed. Run the others by hand
+after changing a template; paths are in the rendered tree on the node.
+
+```bash
+cd /root/homelab-rendered/src
+
+# HAProxy (vpnsvcs)
+haproxy -c -f services/haproxy/haproxy.cfg
+
+# Authelia: the quadlet's secrets and env let the template filter run
+cd services/authelia
+podman run --rm $(sed -nE 's/^Secret=/--secret=/p; s/^Environment=/--env=/p' authelia.container) \
+  -v "$PWD":/config:ro -v /etc/opt/authelia/certificates:/certificates:ro \
+  "$(sed -n 's/^Image=//p' authelia.container)" \
+  authelia config validate --config /config/configuration.yml
+cd -
+
+# vmalert rules
+podman run --rm -v "$PWD"/services/vmalert/configs:/etc/alerts:ro \
+  localhost/victoriametrics/vmalert:latest -rule='/etc/alerts/*.yml' -dryRun
+
+# Alertmanager: the unit's ExecStartPre renders secrets into the installed file, so check that
+# one after a restart
+podman run --rm -v /etc/opt/alertmanager:/config:ro --entrypoint amtool \
+  localhost/prom/alertmanager:latest check-config /config/config.yml
+```
+
+Traefik, ntfy-alertmanager and Gatus have no offline check, so restart them and look:
+
+- Traefik: `journalctl -eu traefik` and the dashboard's error list (see
+  [Traefik](#traefik-container-vms)).
+- ntfy-alertmanager: `podman healthcheck run ntfy-alertmanager`.
+- Gatus: its quadlet has no `HealthCmd`; `curl http://gatus:8080/health` from a debug container on
+  `systemd-net` (see [Container networking](#container-networking)).
+
 ### Test env vars and secrets with a throwaway service
 
 `probes/test.container` and `probes/test_service.sh` print how Podman passes environment variables

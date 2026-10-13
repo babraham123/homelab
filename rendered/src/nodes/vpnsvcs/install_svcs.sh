@@ -52,7 +52,7 @@ case $1 in
     apt install -y haproxy
     nonlocal_bind
     base/debian/add_homelab_tag.sh /usr/lib/systemd/system/haproxy.service
-    install -D -m 644 -t /etc/haproxy services/haproxy/haproxy.cfg
+    # The files haproxy.cfg references must exist before it's checked
     curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
     mkdir -p /etc/haproxy/countries
 
@@ -60,6 +60,8 @@ case $1 in
     chmod 644 /etc/haproxy/countries/RU.map
     touch /etc/haproxy/countries/CN.map
     chmod 644 /etc/haproxy/countries/CN.map
+    haproxy -c -f services/haproxy/haproxy.cfg || die "invalid haproxy.cfg, /etc/haproxy/haproxy.cfg left as is"
+    install -D -m 644 -t /etc/haproxy services/haproxy/haproxy.cfg
     systemctl enable haproxy
     reload_restart haproxy
     ;;
