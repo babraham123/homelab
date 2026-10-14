@@ -454,6 +454,9 @@ case "$(hostname)" in
       install_copyparty)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh copyparty
         ;;
+      install_car_ingest)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh car_ingest
+        ;;
       install_linkding)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding
         ;;
@@ -482,6 +485,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh copyparty
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh car_ingest
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh storyteller

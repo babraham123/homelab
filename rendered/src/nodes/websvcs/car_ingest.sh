@@ -1,0 +1,85 @@
+#!/bin/bash
+# Imports Car Scanner recordings (.brc) uploaded to copyparty's /car into VictoriaMetrics,
+# at the samples' original timestamps. Each file is imported once, keyed by sha256 in the
+# state file, so a re-upload adds nothing. Malformed files move to car/failed/; a trip
+# older than VictoriaMetrics' retention stays where it is, recorded as too_old. The .brc
+# files stay in copyparty as the long-term archive. Run by car_ingest.timer.
+# Usage:
+#   src/nodes/websvcs/car_ingest.sh
+
+# shellcheck source=src/base/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+dir=/var/opt/copyparty/data/car
+# TSV: sha256, result, samples, unix time, file name
+state=/var/lib/car_ingest/state
+textfile=/var/lib/node_exporter/textfile_collector
+url="https://metrics.janedoe.com/api/v1/import/prometheus"
+retention_days=14
+
+mkdir -p "$(dirname "$state")" "${dir}/failed"
+touch "$state"
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+# Usage: write_prom FILE LINES...; atomic, node_exporter only reads *.prom
+write_prom() {
+  local file="${textfile}/$1"
+  shift
+  mkdir -p "$textfile"
+  printf '%s\n' "$@" > "${file}.tmp"
+  chmod 644 "${file}.tmp"
+  mv "${file}.tmp" "$file"
+}
+
+# Usage: record SHA256 RESULT SAMPLES FILE
+record() {
+  printf '%s\t%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$(date +%s)" "$4" >> "$state"
+  log "$4: $2 ($3 samples)"
+}
+
+password=$("${rendered}/base/podman/get_secret.sh" victoriametrics_admin_password)
+[[ -n $password && $password != null ]] || die "secret victoriametrics_admin_password is empty"
+oldest_ms=$(( ($(date +%s) - retention_days * 86400) * 1000 ))
+
+# Files modified in the last minute may still be uploading.
+while IFS= read -r -d '' file; do
+  sha=$(sha256sum "$file" | cut -d' ' -f1)
+  grep -q "^${sha}"$'\t' "$state" && continue
+
+  name=$(basename "$file")
+  out="${work}/import.prom"
+  # The trip label is the file stem, Car Scanner's recording start; the header's start
+  # time is phone-local.
+  if ! python3 "${rendered}/nodes/websvcs/car_ingest_brc.py" "$file" "${name%.*}" \
+      "America/Los_Angeles" > "$out"; then
+    mv "$file" "${dir}/failed/"
+    record "$sha" failed 0 "$name"
+    continue
+  fi
+  samples=$(wc -l < "$out")
+
+  # VictoriaMetrics silently drops samples outside its retention.
+  if (( $(awk '{print $NF}' "$out" | sort -n | head -1) < oldest_ms )); then
+    record "$sha" too_old "$samples" "$name"
+    continue
+  fi
+
+  # A failed POST stops the run unrecorded, so the next run retries the file. The
+  # password stays off the command line.
+  curl --silent --show-error --fail-with-body --retry 3 \
+    --config <(printf 'user = "admin:%s"\n' "$password") \
+    --data-binary "@${out}" "$url"
+  record "$sha" ok "$samples" "$name"
+done < <(find "$dir" -maxdepth 1 -type f -iname '*.brc' -mmin +1 -print0)
+
+lines=('# HELP car_ingest_files_total Car Scanner recordings processed, by outcome.'
+  '# TYPE car_ingest_files_total counter')
+for result in ok failed too_old; do
+  lines+=("car_ingest_files_total{result=\"${result}\"} $(awk -F'\t' -v r="$result" '$2 == r' "$state" | wc -l)")
+done
+lines+=('# HELP car_ingest_last_success_timestamp_seconds Unix time of the last car_ingest run that completed.'
+  '# TYPE car_ingest_last_success_timestamp_seconds gauge'
+  "car_ingest_last_success_timestamp_seconds $(date +%s)")
+write_prom car_ingest.prom "${lines[@]}"

@@ -1,0 +1,13 @@
+# /etc/systemd/system/car_ingest.timer
+
+[Unit]
+Description="Homelab: Runs car_ingest.service every 15 minutes"
+
+[Timer]
+# pve2 is off most of the time; Persistent runs a missed job at the next boot.
+Persistent=true
+OnCalendar=*:0/15
+Unit=car_ingest.service
+
+[Install]
+WantedBy=timers.target

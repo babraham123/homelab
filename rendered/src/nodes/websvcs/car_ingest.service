@@ -1,0 +1,11 @@
+# /etc/systemd/system/car_ingest.service
+
+[Unit]
+Description="Homelab: Imports Car Scanner recordings from copyparty into VictoriaMetrics"
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/root/homelab-rendered/src/nodes/websvcs/car_ingest.sh
+TimeoutStartSec=10m

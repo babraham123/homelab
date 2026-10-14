@@ -1,0 +1,534 @@
+{
+  "title": "Car",
+  "uid": "car",
+  "description": "Car Scanner recordings of the Kia EV6, imported by car_ingest on websvcs.",
+  "editable": true,
+  "schemaVersion": 39,
+  "tags": [
+    "car"
+  ],
+  "time": {
+    "from": "now-14d",
+    "to": "now"
+  },
+  "refresh": "",
+  "templating": {
+    "list": [
+      {
+        "name": "trip",
+        "label": "Trip",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-metrics-datasource"
+        },
+        "definition": "label_values(car_bms_battery_power, trip)",
+        "query": {
+          "query": "label_values(car_bms_battery_power, trip)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "sort": 2,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 1,
+      "title": "State of charge",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": 30000
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_state_of_charge_display{trip=~\"$trip\"}",
+          "legendFormat": "display",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_state_of_charge_bms{trip=~\"$trip\"}",
+          "legendFormat": "BMS",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 2,
+      "title": "Battery power",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": 30000
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_battery_power{trip=~\"$trip\"}",
+          "legendFormat": "power",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 3,
+      "title": "Battery current",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "amp",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": 30000
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_battery_current{trip=~\"$trip\"}",
+          "legendFormat": "current",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 4,
+      "title": "Battery voltage",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": 30000
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_battery_dc_voltage{trip=~\"$trip\"}",
+          "legendFormat": "pack",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 5,
+      "title": "Cell voltage",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": 30000
+          },
+          "decimals": 3
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_minimum_cell_voltage{trip=~\"$trip\"}",
+          "legendFormat": "min",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_maximum_cell_voltage{trip=~\"$trip\"}",
+          "legendFormat": "max",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_battery_cell_voltage_deviation{trip=~\"$trip\"}",
+          "legendFormat": "deviation",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 6,
+      "title": "Pack temperatures",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": 30000
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "{__name__=~\"car_bms_battery_pack_b[0-9]+\", trip=~\"$trip\"}",
+          "legendFormat": "{{__name__}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_battery_min_temperature{trip=~\"$trip\"}",
+          "legendFormat": "min",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_battery_max_temperature{trip=~\"$trip\"}",
+          "legendFormat": "max",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_battery_inlet_temperature{trip=~\"$trip\"}",
+          "legendFormat": "inlet",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 7,
+      "title": "Cumulative energy",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": 30000
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_cumulative_energy_charged{trip=~\"$trip\"}",
+          "legendFormat": "charged",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_cumulative_energy_discharged{trip=~\"$trip\"}",
+          "legendFormat": "discharged",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 8,
+      "title": "12 V battery",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": 30000
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_bms_auxillary_battery_voltage{trip=~\"$trip\"}",
+          "legendFormat": "BMS",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "car_obd_module_voltage{trip=~\"$trip\"}",
+          "legendFormat": "OBD module",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 9,
+      "title": "Imported recordings",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 32
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (result) (car_ingest_files_total)",
+          "legendFormat": "{{result}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 10,
+      "title": "Last ingest run",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 32
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max(car_ingest_last_success_timestamp_seconds) * 1000",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    }
+  ]
+}

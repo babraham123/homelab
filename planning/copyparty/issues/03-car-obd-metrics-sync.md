@@ -1,6 +1,6 @@
 # 03. Sync OBD-II trip logs from copyparty into VictoriaMetrics
 
-Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-09-26;
+Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26;
 `notes/TODO.md` "car data upload" Blocked by: 01, 02
 
 ## Problem
@@ -69,3 +69,20 @@ series (car data included) is explored in observability/09.
   and is counted in the metric.
 
 ## Comments
+
+- 2026-10-12: Implemented: `src/nodes/websvcs/car_ingest.{sh.j2,service,timer}`,
+  `car_ingest_brc.py` (the parser, stdlib Python), `install_svcs.sh car_ingest` + inventory,
+  `src/services/grafana/dashboards/car.json`, `tests/car_ingest_test.sh`.
+  - Checked against the 02 sample: 3587 samples, the same count and timestamps as its CSV export
+    (first sample 20:12:09.4 local).
+  - Unit enum 0 is `unit="none"`. Non-finite values are skipped. The .NET `DateTime` Kind bits
+    are masked off the start ticks.
+  - `too_old`: the oldest sample is before now − `retention.metric_days`; the hash is recorded so
+    the file isn't retried every run. A failed POST stops the run unrecorded, so the file is
+    retried.
+  - `car_ingest_files_total` is counted from the state file (TSV: sha256, result, samples, time,
+    name).
+  - Dashboard: the trip selector reads `car_bms_battery_power`'s `trip` label; pack temperatures
+    are `car_bms_battery_pack_b01`…`b16` plus min/max/inlet.
+  Remaining for a human: install `car_ingest` on websvcs and grafana on secsvcs, upload the
+  sample to `/car`, and check the dashboard.

@@ -861,6 +861,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: websvcs Install Car Ingest
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_car_ingest
+              id: websvcs_install_car_ingest
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: websvcs Install Linkding
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_linkding

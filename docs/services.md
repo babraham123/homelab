@@ -102,6 +102,7 @@ timers; see the [reading guide](guides/reading.md).
 | vpnsvcs | fail2ban | SSH brute-force bans ([Security](security.md#vps-hardening)) |
 | vpnsvcs | deadman (timer) | Watches the alerting path from outside ([Observability](#observability)) |
 | websvcs | calliope (path + timer) | Starts the Calliope job while its inbox has EPUBs |
+| websvcs | car_ingest (timer) | Car Scanner `.brc` recordings in copyparty's `/car` → VictoriaMetrics, every 15 min |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
 pve1, pve2, pbs2 and the router serve their own web UIs as pve1/pve2/pbs2/router.janedoe.com:

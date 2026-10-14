@@ -214,6 +214,9 @@ case $1 in
     install_quadlet services/copyparty/copyparty.container
     reload_restart copyparty
     ;;
+  car_ingest)
+    install_timer nodes/websvcs car_ingest
+    ;;
   *)
     die "unknown service: $1"
     ;;
