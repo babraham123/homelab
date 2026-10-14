@@ -25,7 +25,10 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
   2026-10-11)
 - [Narrated ebooks with Calliope](narrated-ebooks/spec.md) — 7 issues (maintainer request, added
   2026-10-11)
-- [VR modes on the gaming VM](vr-streaming/spec.md) — 6 issues (maintainer requests, added
+- [VR modes on the gaming VM](vr-streaming/spec.md) — 7 issues (maintainer requests, added
   2026-10-12)
 - [Reolink camera, Frigate and WebRTC with TURN](camera-webrtc/spec.md) — 7 issues (maintainer
   request, added 2026-10-13)
+- [ESPHome on homesvcs](esphome/spec.md) — 3 issues (maintainer request, added 2026-10-13)
+- [Home Assistant config ownership](hass-config/spec.md) — 1 issue (maintainer request, added
+  2026-10-14)
