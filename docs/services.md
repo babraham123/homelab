@@ -9,8 +9,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
   (`systemctl list-units "*.service"` on the node)
 - Raw list: `grep -rn "^IP=" src --include="*.container.j2*"`
 - Not in use, so not in any `inventory.yml` or the tables below, though their quadlets exist:
-  esphome (homesvcs), go2rtc, finance_exporter and the `wyoming` quadlets piper, whisper and
-  openwakeword (websvcs)
+  esphome (homesvcs), go2rtc and the `wyoming` quadlets piper, whisper and openwakeword (websvcs)
 
 ## secsvcs: identity, certificates, observability (pve1, 10.10.0.0/24)
 
@@ -52,6 +51,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .22 | calliope | built from babraham123/TTS-Narrated-Ebook-Creator | GPU batch job: EPUB → read-along EPUB | n/a |
 | .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
 | .24 | bookmark_handoff | built from `src/services/bookmark_handoff/` | linkding `toread` → Readeck, Readeck `listen` → Calliope inbox (timer) | n/a |
+| .50 | finance_exporter | built from babraham123/finance-exporter | Market prices, FRED rates and Treasury yields for VictoriaMetrics | n/a |
 
 - `nginx` serves `/var/opt/nginx/www` by subdomain (`www/`, `wifi/` (redirects to the AP's admin
   page), shared `error/`; `src/services/nginx/nginx.conf.j2`)

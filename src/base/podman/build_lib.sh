@@ -20,3 +20,45 @@ github_source() {
   mkdir -p "$3"
   curl -fsSL "https://github.com/$1/archive/$2.tar.gz" | tar -xz -C "$3" --strip-components=1
 }
+
+# Usage: github_base_images OWNER/REPO COMMIT FILE; the image refs FILE (a Containerfile)
+# builds from (FROM, COPY --from), skipping stage names
+github_base_images() {
+  curl -fsS "https://raw.githubusercontent.com/$1/$2/$3" |
+    sed -nE 's/^FROM[[:space:]]+(--[^[:space:]]+[[:space:]]+)*([^[:space:]]+).*/\2/p
+      s/^COPY[[:space:]]+.*--from=([^[:space:]]+).*/\1/p' |
+    grep / | sort -u
+}
+
+# Usage: github_build NAME OWNER/REPO FILE versions | build TAG
+# A build.sh for an image built from a GitHub repo's main branch with its Containerfile
+# FILE. Its inputs are the branch, by commit, and the images FILE builds from, by digest.
+github_build() {
+  local name=$1 repo=$2 file=$3 commit images image digest src
+  case ${4:-} in
+    versions)
+      # Assigned before use: a failed lookup in a for list or an echo's arguments wouldn't
+      # stop the script.
+      commit=$(github_commit "$repo")
+      images=$(github_base_images "$repo" "$commit" "$file")
+      echo "${name}@${commit}"
+      for image in $images; do
+        digest=$(image_digest "$image")
+        echo "${image##*/}@${digest}"
+      done
+      ;;
+    build)
+      src=$(mktemp -d)
+      # shellcheck disable=SC2064 # src is local, so expand it now
+      trap "rm -rf '$src'" EXIT
+      commit=$(github_commit "$repo")
+      github_source "$repo" "$commit" "$src"
+      # --pull=always, so the base images are the ones `versions` reported
+      podman build --pull=always -f "${src}/${file}" \
+        -t "localhost/${name}:${5:?usage: build.sh build TAG}" "$src"
+      ;;
+    *)
+      die "usage: build.sh versions | build TAG"
+      ;;
+  esac
+}

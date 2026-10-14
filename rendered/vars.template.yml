@@ -9,10 +9,6 @@ personal:
   currency: "USD"
   units: "imperial" # or metric
   firstDayInWeek: "sunday" # or monday
-  ticker_symbols:
-    - "AAPL"
-    - "GOOGL"
-    - "MSFT"
 
 users:
   - jane
@@ -127,6 +123,21 @@ retention:
   log_days: 14
   metric_days: 14
   hass_days: 14
+
+# finance_exporter's tickers by asset type, each optional; each type gets its standard
+# metrics (src/services/finance_exporter/config.yaml.j2).
+#   Yahoo symbols:  stocks, etfs, mutual_funds, indices (^GSPC), fx (EURUSD=X),
+#                   crypto (BTC-USD), futures (GC=F)
+#   treasuries:     Treasury.gov nominal par yield tenors (3M, 2Y, 10Y, 30Y)
+#   tips:           Treasury.gov real par yield tenors, 5Y to 30Y
+#   rates:          FRED series IDs (DFF, T10Y2Y, MORTGAGE30US); needs the fred_api_key secret
+ticker:
+  stocks: [AAPL, GOOGL, MSFT]
+  etfs: [SPY]
+  mutual_funds: [VTSAX]
+  treasuries: [3M, 2Y, 10Y, 30Y]
+  tips: [10Y]
+  rates: [T10Y2Y, MORTGAGE30US]
 
 
 # tools/render_src.sh appends the node inventory (src/nodes/<node>/inventory.yml, as the

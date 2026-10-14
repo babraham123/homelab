@@ -442,6 +442,9 @@ case "$(hostname)" in
       install_guacd)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
         ;;
+      install_finance_exporter)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh finance_exporter
+        ;;
       install_fluentbit)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
         ;;
@@ -472,6 +475,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh isso
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacamole
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh finance_exporter
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding

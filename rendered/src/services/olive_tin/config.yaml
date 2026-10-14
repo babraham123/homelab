@@ -829,6 +829,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: websvcs Install Finance Exporter
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_finance_exporter
+              id: websvcs_install_finance_exporter
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: websvcs Install Fluentbit
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_fluentbit

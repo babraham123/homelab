@@ -1,31 +1,30 @@
 # /etc/opt/finance_exporter/config.yaml
-# Ref: https://github.com/babraham/finance-exporter/blob/main/README.md
+# Ref: https://github.com/babraham123/finance-exporter/blob/main/README.md
 ---
 port: 8002
 address: 0.0.0.0
 metric_prefix: finance
-min_interval: 15
-# If set, each ticker will load labels from each source
-# before the first run. Slows down startup time but
-# necessary if using multiple sources that do not
-# provide all labels.
-update_cache_on_startup: false
-
-tickers:
-  - 'AAPL'
-  - 'GOOGL'
-  - 'MSFT'
 
 sources:
   - name: yahoo
-    interval: 300
     plugin: yfinance
-
+    interval: 300
+    tickers:
+      - 'AAPL'
+      - 'GOOGL'
+      - 'MSFT'
+      - 'SPY'
+      - 'VTSAX'
     metrics:
-      #current_price:
-      #  item: regularMarketPrice
-      #  type: Gauge
-      #  help: Current Market Price of Asset
+      current_price:
+        item: regularMarketPrice
+        type: Gauge
+        help: Current Market Price of Asset
+      change:
+        item: regularMarketChangePercent
+        type: Gauge
+        help: Change since previous close (ratio)
+        scale: 0.01
       open_price:
         item: regularMarketOpen
         type: Gauge
@@ -50,26 +49,26 @@ sources:
         item: fiftyTwoWeekLow
         type: Gauge
         help: Fifty-Two Week Low
-      target_median_price:
-        item: targetMedianPrice
+      volume:
+        item: regularMarketVolume
         type: Gauge
-        help: Target Price (Median)
-        #volume:
-        #  item: regularMarketVolume
-        #  type: Gauge
-        #  help: Current Market Volume
-        #avg_volume:
-        #  item: averageVolume
-        #  type: Gauge
-        #  help: Average Volume
+        help: Current Market Volume
       avg_10day_volume:
         item: averageDailyVolume10Day
         type: Gauge
         help: Average Daily Volume (10 Day)
+      target_median_price:
+        item: targetMedianPrice
+        type: Gauge
+        help: Target Price (Median)
+      rating:
+        item: recommendationMean
+        type: Gauge
+        help: Analyst Rating (1 strong buy to 5 strong sell)
       held_insiders_percent:
         item: heldPercentInsiders
         type: Gauge
-        help: Percent of Shared Held by Insiders
+        help: Percent of Shares Held by Insiders
       pe_forward:
         item: forwardPE
         type: Gauge
@@ -86,12 +85,104 @@ sources:
         item: beta
         type: Gauge
         help: Beta
-
+      nav:
+        item: navPrice
+        type: Gauge
+        help: Net Asset Value per share
+      total_assets:
+        item: totalAssets
+        type: Gauge
+        help: Fund Total Assets
+      fund_yield:
+        item: yield
+        type: Gauge
+        help: Fund Yield (ratio)
+      ytd_return:
+        item: ytdReturn
+        type: Gauge
+        help: Year-to-Date Return (ratio)
+        scale: 0.01
+      expense_ratio:
+        item: netExpenseRatio
+        type: Gauge
+        help: Net Expense Ratio (ratio)
+        scale: 0.01
+      stock_position:
+        item: stockPosition
+        type: Gauge
+        help: Share of Fund Held in Stocks (ratio)
+      bond_position:
+        item: bondPosition
+        type: Gauge
+        help: Share of Fund Held in Bonds (ratio)
     labels:
-      ticker: symbol
-      type: quoteType
+      asset_class: asset_class
       name: shortName
       exchange: exchange
       recommendation: recommendationKey
       sector: sector
+      category: category
+      fund_family: fundFamily
+  - name: fred
+    plugin: fred
+    interval: 3600
+    api_key: ${FRED_API_KEY}
+    tickers:
+      - 'T10Y2Y'
+      - 'MORTGAGE30US'
+    metrics:
+      fred_value:
+        item: value
+        type: Gauge
+        help: Latest FRED observation (ratio)
+        scale: 0.01
+      fred_observation_time:
+        item: observation_time
+        type: Gauge
+        help: Date of the latest FRED observation (Unix time, midnight UTC)
+    labels:
+      asset_class: asset_class
+      frequency: frequency
+      name: title
+  - name: treasury
+    plugin: treasury
+    interval: 3600
+    curve: nominal
+    tickers:
+      - '3M'
+      - '2Y'
+      - '10Y'
+      - '30Y'
+    metrics:
+      treasury_yield:
+        item: value
+        type: Gauge
+        help: Treasury par yield (ratio)
+        scale: 0.01
+      treasury_observation_time:
+        item: observation_time
+        type: Gauge
+        help: Date of the yield curve (Unix time, midnight UTC)
+    labels:
+      asset_class: asset_class
+      curve: curve
+  - name: treasury_real
+    plugin: treasury
+    interval: 3600
+    curve: real
+    tickers:
+      - '10Y'
+    metrics:
+      treasury_real_yield:
+        item: value
+        type: Gauge
+        help: Treasury real (TIPS) par yield (ratio)
+        scale: 0.01
+      treasury_real_observation_time:
+        item: observation_time
+        type: Gauge
+        help: Date of the real yield curve (Unix time, midnight UTC)
+    labels:
+      asset_class: asset_class
+      curve: curve
 ...

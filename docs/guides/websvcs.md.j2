@@ -46,7 +46,8 @@ src/nodes/websvcs/install_svcs.sh bookmark_handoff
 # src/nodes/websvcs/install_svcs.sh whisper
 # src/nodes/websvcs/install_svcs.sh openwakeword
 
-# src/nodes/websvcs/install_svcs.sh finance_exporter
+# Once fred_api_key is in the secrets file, if ticker.rates lists FRED series
+src/nodes/websvcs/install_svcs.sh finance_exporter
 src/nodes/websvcs/install_svcs.sh fluentbit
 
 systemctl restart node_exporter

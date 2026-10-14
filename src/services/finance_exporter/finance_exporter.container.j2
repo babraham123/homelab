@@ -23,6 +23,10 @@ IP={{ websvcs.container_subnet }}.50
 # port 8002
 
 Environment=TZ={{ personal.timezone }}
+{%- if ticker is defined and ticker.get('rates') %}
+# config.yaml's fred source reads it
+Secret=fred_api_key,type=env,target=FRED_API_KEY
+{%- endif %}
 Volume=/etc/opt/finance_exporter/config.yaml:/usr/src/app/finance-exporter.yaml:ro
 
 [Service]

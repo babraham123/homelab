@@ -1,95 +1,135 @@
+{#- Builds the exporter's sources from vars.yml's `ticker` lists, one optional list per
+    asset type. Each asset type names its source and the standard metrics and labels it
+    gets. Asset types sharing a source are polled together: the exporter needs metric names
+    unique across sources, and the dashboard tells them apart by the asset_class label. A
+    source with no tickers is left out. -#}
+{%- set by_type = ticker if ticker is defined else {} -%}
+{%- set sources = {
+  'yahoo': {'plugin': 'yfinance', 'interval': 300},
+  'fred': {'plugin': 'fred', 'interval': 3600,
+           'settings': {'api_key': '${FRED_API_KEY}'}},
+  'treasury': {'plugin': 'treasury', 'interval': 3600, 'settings': {'curve': 'nominal'}},
+  'treasury_real': {'plugin': 'treasury', 'interval': 3600, 'settings': {'curve': 'real'}},
+} -%}
+{#- name: {item, help, scale}. Listed in output order; all are gauges. -#}
+{%- set metrics = {
+  'current_price': {'item': 'regularMarketPrice', 'help': 'Current Market Price of Asset'},
+  'change': {'item': 'regularMarketChangePercent', 'help': 'Change since previous close (ratio)',
+             'scale': 0.01},
+  'open_price': {'item': 'regularMarketOpen', 'help': 'Day Open Price'},
+  'previous_close': {'item': 'regularMarketPreviousClose', 'help': 'Previous Closing Price'},
+  'day_high': {'item': 'regularMarketDayHigh', 'help': 'Day High Price'},
+  'day_low': {'item': 'regularMarketDayLow', 'help': 'Day Low Price'},
+  '52wk_high': {'item': 'fiftyTwoWeekHigh', 'help': 'Fifty-Two Week High'},
+  '52wk_low': {'item': 'fiftyTwoWeekLow', 'help': 'Fifty-Two Week Low'},
+  'volume': {'item': 'regularMarketVolume', 'help': 'Current Market Volume'},
+  'avg_10day_volume': {'item': 'averageDailyVolume10Day', 'help': 'Average Daily Volume (10 Day)'},
+  'target_median_price': {'item': 'targetMedianPrice', 'help': 'Target Price (Median)'},
+  'rating': {'item': 'recommendationMean',
+             'help': 'Analyst Rating (1 strong buy to 5 strong sell)'},
+  'held_insiders_percent': {'item': 'heldPercentInsiders',
+                            'help': 'Percent of Shares Held by Insiders'},
+  'pe_forward': {'item': 'forwardPE', 'help': 'Forward Price-to-Earnings Ratio'},
+  'pe_trailing': {'item': 'trailingPE', 'help': 'Trailing Price-to-Earnings Ratio'},
+  'shorts': {'item': 'sharesShort', 'help': 'Number of shares short'},
+  'beta': {'item': 'beta', 'help': 'Beta'},
+  'nav': {'item': 'navPrice', 'help': 'Net Asset Value per share'},
+  'total_assets': {'item': 'totalAssets', 'help': 'Fund Total Assets'},
+  'fund_yield': {'item': 'yield', 'help': 'Fund Yield (ratio)'},
+  'ytd_return': {'item': 'ytdReturn', 'help': 'Year-to-Date Return (ratio)', 'scale': 0.01},
+  'expense_ratio': {'item': 'netExpenseRatio', 'help': 'Net Expense Ratio (ratio)',
+                    'scale': 0.01},
+  'stock_position': {'item': 'stockPosition', 'help': 'Share of Fund Held in Stocks (ratio)'},
+  'bond_position': {'item': 'bondPosition', 'help': 'Share of Fund Held in Bonds (ratio)'},
+  'fred_value': {'item': 'value', 'help': 'Latest FRED observation (ratio)', 'scale': 0.01},
+  'fred_observation_time': {'item': 'observation_time',
+                            'help': 'Date of the latest FRED observation (Unix time, midnight UTC)'},
+  'treasury_yield': {'item': 'value', 'help': 'Treasury par yield (ratio)', 'scale': 0.01},
+  'treasury_observation_time': {'item': 'observation_time',
+                                'help': 'Date of the yield curve (Unix time, midnight UTC)'},
+  'treasury_real_yield': {'item': 'value', 'help': 'Treasury real (TIPS) par yield (ratio)',
+                          'scale': 0.01},
+  'treasury_real_observation_time': {'item': 'observation_time',
+                                     'help': 'Date of the real yield curve (Unix time, midnight UTC)'},
+} -%}
+{%- set price = ['current_price', 'change', 'previous_close', '52wk_high', '52wk_low'] -%}
+{%- set intraday = ['open_price', 'day_high', 'day_low'] -%}
+{%- set traded = ['volume', 'avg_10day_volume'] -%}
+{%- set fund = ['total_assets', 'fund_yield', 'ytd_return', 'expense_ratio', 'stock_position',
+                'bond_position'] -%}
+{#- label: quote field. Asset types sharing a source share its labels too. -#}
+{%- set name_labels = {'asset_class': 'asset_class', 'name': 'shortName'} -%}
+{%- set exchange_labels = dict(name_labels, exchange='exchange') -%}
+{%- set fund_labels = {'category': 'category', 'fund_family': 'fundFamily'} -%}
+{%- set curve_labels = {'asset_class': 'asset_class', 'curve': 'curve'} -%}
+{%- set asset_types = {
+  'stocks': {'source': 'yahoo', 'labels': dict(exchange_labels, recommendation='recommendationKey',
+                                           sector='sector'),
+             'metrics': price + intraday + traded + ['target_median_price', 'rating',
+               'held_insiders_percent', 'pe_forward', 'pe_trailing', 'shorts', 'beta']},
+  'etfs': {'source': 'yahoo', 'labels': dict(exchange_labels, **fund_labels),
+           'metrics': price + intraday + traded + ['nav'] + fund},
+  'mutual_funds': {'source': 'yahoo', 'labels': dict(name_labels, **fund_labels),
+                   'metrics': price + fund},
+  'indices': {'source': 'yahoo', 'labels': exchange_labels,
+              'metrics': price + intraday},
+  'fx': {'source': 'yahoo', 'labels': name_labels, 'metrics': price + intraday},
+  'crypto': {'source': 'yahoo', 'labels': name_labels,
+             'metrics': price + intraday + traded},
+  'futures': {'source': 'yahoo', 'labels': exchange_labels,
+              'metrics': price + intraday + traded},
+  'rates': {'source': 'fred', 'labels': {'asset_class': 'asset_class', 'frequency': 'frequency',
+                                     'name': 'title'},
+            'metrics': ['fred_value', 'fred_observation_time']},
+  'treasuries': {'source': 'treasury', 'labels': curve_labels,
+                 'metrics': ['treasury_yield', 'treasury_observation_time']},
+  'tips': {'source': 'treasury_real', 'labels': curve_labels,
+           'metrics': ['treasury_real_yield', 'treasury_real_observation_time']},
+} -%}
+{#- Fails the render on an unknown asset type, which would otherwise be skipped silently -#}
+{%- for type in by_type if asset_types[type] %}{% endfor -%}
 # /etc/opt/finance_exporter/config.yaml
-# Ref: https://github.com/babraham/finance-exporter/blob/main/README.md
+# Ref: https://github.com/babraham123/finance-exporter/blob/main/README.md
 ---
 port: 8002
 address: 0.0.0.0
 metric_prefix: finance
-min_interval: 15
-# If set, each ticker will load labels from each source
-# before the first run. Slows down startup time but
-# necessary if using multiple sources that do not
-# provide all labels.
-update_cache_on_startup: false
-
-tickers:{% for ticker in personal.ticker_symbols %}
-  - '{{ ticker }}'{% endfor %}
 
 sources:
-  - name: yahoo
-    interval: 300
-    plugin: yfinance
-
+{%- for name, source in sources.items() %}
+{%- set tickers = [] %}
+{%- set wanted_metrics = [] %}
+{%- set wanted_labels = {} %}
+{%- for type, spec in asset_types.items() if spec.source == name and by_type.get(type) %}
+{%- do tickers.extend(by_type[type]) %}
+{%- do wanted_metrics.extend(spec.metrics) %}
+{%- do wanted_labels.update(spec.labels) %}
+{%- endfor %}
+{%- if tickers %}
+  - name: {{ name }}
+    plugin: {{ source.plugin }}
+    interval: {{ source.interval }}
+{%- for key, value in source.get('settings', {}).items() %}
+    {{ key }}: {{ value }}
+{%- endfor %}
+    tickers:
+{%- for t in tickers %}
+      - '{{ t }}'
+{%- endfor %}
     metrics:
-      #current_price:
-      #  item: regularMarketPrice
-      #  type: Gauge
-      #  help: Current Market Price of Asset
-      open_price:
-        item: regularMarketOpen
+{%- for metric, m in metrics.items() if metric in wanted_metrics %}
+      {{ metric }}:
+        item: {{ m.item }}
         type: Gauge
-        help: Day Open Price
-      previous_close:
-        item: regularMarketPreviousClose
-        type: Gauge
-        help: Previous Closing Price
-      day_high:
-        item: regularMarketDayHigh
-        type: Gauge
-        help: Day High Price
-      day_low:
-        item: regularMarketDayLow
-        type: Gauge
-        help: Day Low Price
-      52wk_high:
-        item: fiftyTwoWeekHigh
-        type: Gauge
-        help: Fifty-Two Week High
-      52wk_low:
-        item: fiftyTwoWeekLow
-        type: Gauge
-        help: Fifty-Two Week Low
-      target_median_price:
-        item: targetMedianPrice
-        type: Gauge
-        help: Target Price (Median)
-        #volume:
-        #  item: regularMarketVolume
-        #  type: Gauge
-        #  help: Current Market Volume
-        #avg_volume:
-        #  item: averageVolume
-        #  type: Gauge
-        #  help: Average Volume
-      avg_10day_volume:
-        item: averageDailyVolume10Day
-        type: Gauge
-        help: Average Daily Volume (10 Day)
-      held_insiders_percent:
-        item: heldPercentInsiders
-        type: Gauge
-        help: Percent of Shared Held by Insiders
-      pe_forward:
-        item: forwardPE
-        type: Gauge
-        help: Forward Price-to-Earnings Ratio
-      pe_trailing:
-        item: trailingPE
-        type: Gauge
-        help: Trailing Price-to-Earnings Ratio
-      shorts:
-        item: sharesShort
-        type: Gauge
-        help: Number of shares short
-      beta:
-        item: beta
-        type: Gauge
-        help: Beta
-
+        help: {{ m.help }}
+{%- if 'scale' in m %}
+        scale: {{ m.scale }}
+{%- endif %}
+{%- endfor %}
     labels:
-      ticker: symbol
-      type: quoteType
-      name: shortName
-      exchange: exchange
-      recommendation: recommendationKey
-      sector: sector
+{%- for label, field in wanted_labels.items() %}
+      {{ label }}: {{ field }}
+{%- endfor %}
+{%- endif %}
+{%- endfor %}
 ...

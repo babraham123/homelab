@@ -23,6 +23,8 @@ IP=10.11.0.50
 # port 8002
 
 Environment=TZ=America/Los_Angeles
+# config.yaml's fred source reads it
+Secret=fred_api_key,type=env,target=FRED_API_KEY
 Volume=/etc/opt/finance_exporter/config.yaml:/usr/src/app/finance-exporter.yaml:ro
 
 [Service]

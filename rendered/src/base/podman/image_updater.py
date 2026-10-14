@@ -115,6 +115,7 @@ nodes = {
       {"container": "isso", "image": "localhost/isso-comments/isso:release", "service": "isso", "upstream": "ghcr.io/isso-comments/isso:release"},
       {"container": "guacamole", "image": "localhost/guacamole/guacamole:1.6.0", "service": "guacamole", "upstream": "docker.io/guacamole/guacamole:1.6.0"},
       {"container": "guacd", "image": "localhost/guacamole/guacd:1.6.0", "service": "guacd", "upstream": "docker.io/guacamole/guacd:1.6.0"},
+      {"build": "finance_exporter", "container": "finance_exporter", "image": "localhost/finance_exporter:latest", "service": "finance_exporter"},
       {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:3.2", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:3.2"},
       {"container": "linkding", "image": "localhost/sissbruecker/linkding:latest-plus", "service": "linkding", "upstream": "docker.io/sissbruecker/linkding:latest-plus"},
       {"container": "readeck", "image": "localhost/readeck/readeck:latest", "service": "readeck", "upstream": "codeberg.org/readeck/readeck:latest"},

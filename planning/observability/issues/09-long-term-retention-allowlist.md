@@ -67,11 +67,12 @@ data.
 
 ### Options
 
-Allowlisted volume is estimated from the repo's exporters at about 150 series excluding
+Allowlisted volume is estimated from the repo's exporters at about 210 series excluding
 car data:
 
-- `finance_*`: 3 tickers × 13 enabled metrics (`vars.template.yml`,
-  `src/finance_exporter/config.yaml.j2`).
+- `finance_*`: up to 24 metrics per Yahoo ticker and 2 per FRED series or Treasury tenor;
+  about 110 series for 3 stocks, 12 FRED series and 12 tenors (`ticker` in `vars.yml`,
+  `src/services/finance_exporter/config.yaml.j2`).
 - Filesystem series: about 40 non-tmpfs mounts × 2 metrics across 5–6 node_exporters.
 - About 20 `homelab_*` and `car_ingest_*` series.
 
@@ -313,9 +314,6 @@ Wiring:
   the existing `vmsingle.yml` disk alerts cover it.
 - **Grafana:** a `VictoriaMetrics LT` datasource, not default. `car.json` uses it; the
   finance dashboard can switch to it for long ranges.
-- **Prerequisite:** finance data isn't collected today. The `finance_exporter` job is
-  commented out in `src/websvcs/prometheus.yml.j2`, so uncomment it before
-  `finance_.+` matches anything.
 
 ### Backups (backup-and-dr/09 inventory)
 

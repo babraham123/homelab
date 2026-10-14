@@ -101,16 +101,6 @@ case $1 in
     reload_restart readeck
     ;;
   # Not in use: uncomment and add to src/nodes/websvcs/inventory.yml to install again
-#   finance_exporter)
-#     rm -rf /etc/opt/finance_exporter/src
-#     mkdir -p /etc/opt/finance_exporter/src
-#     install -D -m 644 -t /etc/opt/finance_exporter services/finance_exporter/config.yaml
-#     wget "https://github.com/babraham123/finance-exporter/archive/refs/heads/main.tar.gz" -O - | \
-#       tar -xz -C /etc/opt/finance_exporter/src --strip-components=1
-#     podman build -t finance_exporter /etc/opt/finance_exporter/src
-#     install_quadlet services/finance_exporter/finance_exporter.container
-#     reload_restart finance_exporter
-#     ;;
 #   go2rtc)
 #     install -D -m 644 -t /etc/opt/go2rtc services/go2rtc/config.yaml
 #     install_quadlet services/go2rtc/go2rtc.container
@@ -202,6 +192,11 @@ case $1 in
     # calliope.service is a oneshot; the path unit and the timer start it.
     systemctl daemon-reload
     systemctl enable --now calliope.path calliope.timer
+    ;;
+  finance_exporter)
+    install -D -m 644 -t /etc/opt/finance_exporter services/finance_exporter/config.yaml
+    install_quadlet services/finance_exporter/finance_exporter.container
+    reload_restart finance_exporter
     ;;
   bookmark_handoff)
     require_media
