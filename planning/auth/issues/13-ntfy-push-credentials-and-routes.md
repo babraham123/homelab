@@ -1,4 +1,4 @@
-# 10. Research: credentials for ntfy and ntfy-idp-push, and which routes Authelia protects
+# 13. Research: credentials for ntfy and ntfy-idp-push, and which routes Authelia protects
 
 Status: ready-for-agent
 Type: research
@@ -12,16 +12,17 @@ by WebAuthn) will run on secsvcs next to Authelia and ntfy. Before it is deploye
 answer:
 
 1. **How credentials reach ntfy and the shim.** Today ntfy gets `ntfy_*_password` podman secrets
-   rendered into `auth-users` via `render_secrets.sh` (`src/ntfy/ntfy.container.j2`), and Traefik gets
-   `ntfy_admin_password` (`src/secsvcs/traefik/traefik.container.j2:30`). The shim will need: an ntfy
-   **admin token** (user/ACL API, enrollment codes), the Duo integration/secret key pair shared with
-   Authelia's `duo_api` block (`src/authelia/configuration.yml.j2:342`, currently commented out), an
-   OIDC client secret if `auth-mode: oidc` is used, and ACME EAB credentials for a Google Trust
-   Services certificate (Authelia pins Duo's CAs; Let's Encrypt is not in the bundle).
+   rendered into `auth-users` via `render_secrets.sh` (`src/services/ntfy/ntfy.container.j2`), and
+   Traefik gets `ntfy_admin_password` (`src/nodes/secsvcs/traefik/traefik.container.j2:32`). The
+   shim will need: an ntfy **admin token** (user/ACL API, enrollment codes), the Duo
+   integration/secret key pair shared with Authelia's `duo_api` block
+   (`src/services/authelia/configuration.yml.j2:342`, currently commented out), an OIDC client secret
+   if `auth-mode: oidc` is used, and ACME EAB credentials for a Google Trust Services certificate
+   (Authelia pins Duo's CAs; Let's Encrypt is not in the bundle).
 2. **Which routes Authelia must protect.** The `ntfy-ui` router
-   (`src/secsvcs/traefik/routes.yml.j2:87-95`) matches every `Mozilla/*` User-Agent on
+   (`src/nodes/secsvcs/traefik/routes.yml.j2:96-97`) matches every `Mozilla/*` User-Agent on
    `push.SITE`, runs `authelia@file`, then `ntfy-auth@file` injects
-   `Authorization: Basic admin:$NTFY_ADMIN_PASSWORD` (`src/secsvcs/traefik/basic_auth.yml:9-12`).
+   `Authorization: Basic admin:$NTFY_ADMIN_PASSWORD` (`src/nodes/secsvcs/traefik/basic_auth.yml:9-12`).
    Any Authelia-authenticated browser user is therefore ntfy **admin** for every API call the web app
    makes, and the header overwrites the Bearer token the web app would send after signing in. The
    shim's per-user model (ntfy username == Authelia username, `enroll-access` grants, device-scoped
@@ -35,7 +36,7 @@ answer:
 - Secret plumbing for the shim: one `ntfy_idp_push_admin_token` provisioned in ntfy `auth-tokens`
   (admin user `idp-push`), `duo_integration_key` + `duo_secret_key` shared by Authelia (as
   `AUTHELIA_DUO_API_SECRET_KEY`) and the shim, `gts_eab_kid` + `gts_eab_hmac`. Add to
-  `src/secsvcs/secrets_template.yaml` with generation commands, following the `ntfy_alert_token`
+  `src/nodes/secsvcs/secrets_template.yaml` with generation commands, following the `ntfy_alert_token`
   pattern.
 - TLS: the Duo API routes must present a cert chaining to a CA in Duo's pinned bundle. Decide between
   the shim terminating TLS itself on a dedicated hostname/IP (bypassing Traefik's LE resolver) and a
