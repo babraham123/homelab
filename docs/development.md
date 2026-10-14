@@ -220,8 +220,9 @@ repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plai
 - `nodes_jinja_test.sh`: the dispatcher cases, sudoers grants, OliveTin buttons, subdomains, uptime
   endpoints and image update order `src/nodes.jinja` derives from `tests/fixtures/nodes/`, written
   out from ADR 0006.
-- `car_ingest_test.sh`: `src/nodes/websvcs/car_ingest_brc.py` on synthetic Car Scanner `.brc`
-  recordings written to the format in `planning/copyparty/issues/03`.
+- `car_ingest_test.sh`: `src/nodes/websvcs/car_ingest.py.j2` on synthetic Car Scanner `.brc`
+  recordings written to the format in `planning/copyparty/issues/03`: the conversion, and a
+  run's import-once, `failed/`, `too_old` and retry handling.
 - `render_test.sh`: a full render of `vars.template.yml` passes every check (skipped by `--fast`,
   since the pre-commit hook renders anyway).
 

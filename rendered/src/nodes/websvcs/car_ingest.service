@@ -7,5 +7,5 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/root/homelab-rendered/src/nodes/websvcs/car_ingest.sh
+ExecStart=/root/homelab-rendered/src/nodes/websvcs/car_ingest.py
 TimeoutStartSec=10m

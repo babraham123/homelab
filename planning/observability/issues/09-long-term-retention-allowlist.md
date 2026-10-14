@@ -358,7 +358,7 @@ dump:
 Yes. Once the long-term instance lands:
 
 - **Target:** point copyparty/03's import at `metrics-lt.SITE` only.
-- **Backfill:** run `car_ingest.sh` once with an empty or alternate state file. The
+- **Backfill:** run `car_ingest.py` once with an empty or alternate state file. The
   sha256 state would otherwise skip every file.
 - **Re-runs are safe:** `-dedup.minScrapeInterval=1ms` collapses duplicates with the same
   timestamp, and trips older than 10 years show up as

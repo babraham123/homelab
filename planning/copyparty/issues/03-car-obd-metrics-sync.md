@@ -86,3 +86,6 @@ series (car data included) is explored in observability/09.
     are `car_bms_battery_pack_b01`…`b16` plus min/max/inlet.
   Remaining for a human: install `car_ingest` on websvcs and grafana on secsvcs, upload the
   sample to `/car`, and check the dashboard.
+- 2026-10-14: `car_ingest.sh.j2` and `car_ingest_brc.py` are one stdlib script,
+  `src/nodes/websvcs/car_ingest.py.j2`; `car_ingest.py FILE` prints a file's import lines or
+  why it fails. Still 3587 samples from the 02 sample. The tests now cover a whole run.
