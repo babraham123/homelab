@@ -18,3 +18,4 @@ key-seed coupling.
 | [08](issues/08-password-management-research.md) | Research: manage SSH, sudo, CA and recovery passwords better than offline notes | `ready-for-agent` | research |
 | [09](issues/09-headscale-oidc-groups.md) | Drive Headscale ACL groups from LLDAP groups once headscale supports OIDC groups | `needs-info` | task |
 | [10](issues/10-authelia-lldap-client-cert.md) | Give Authelia a real client cert for LLDAP, and make LLDAP verify it (or drop it) | `resolved` | task |
+| [12](issues/12-add-user-command.md) | Add a user with one command from pve1 | `needs-triage` | task |
