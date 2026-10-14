@@ -157,6 +157,10 @@
         icon: sh-storyteller.svg
         href: https://books.janedoe.com/
         description: Read-along books
+    - copyparty:
+        icon: si-files
+        href: https://files.janedoe.com/
+        description: File drop
 #     - Forgejo:
 #         icon: forgejo.svg
 #         href: https://git.janedoe.com/

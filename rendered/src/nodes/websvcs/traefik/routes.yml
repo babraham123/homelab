@@ -49,6 +49,16 @@ http:
       <<: *service
       rule: Host(`books.janedoe.com`)
       service: storyteller@file
+    # Public, since websvcs is HAProxy's catch-all backend: keep authelia@file on every
+    # router for this host, and no Authelia bypass rule for it.
+    copyparty:
+      <<: *service
+      rule: Host(`files.janedoe.com`)
+      service: copyparty@file
+      middlewares:
+        - authelia@file
+        - no-buffering@file
+        - secure-headers@file
     static-files:
       <<: *service
       rule: Host(`www.janedoe.com`) || Host(`wifi.janedoe.com`)
@@ -88,6 +98,10 @@ http:
       loadBalancer:
         servers:
           - url: http://books.janedoe.com:8001/
+    copyparty:
+      loadBalancer:
+        servers:
+          - url: http://files.janedoe.com:3923/
     nginx:
       loadBalancer:
         servers:

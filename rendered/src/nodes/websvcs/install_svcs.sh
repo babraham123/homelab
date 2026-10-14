@@ -207,6 +207,13 @@ case $1 in
     systemctl daemon-reload
     systemctl enable --now bookmark_handoff.timer
     ;;
+  copyparty)
+    mkdir -p /var/opt/copyparty/state /var/opt/copyparty/data/{car,drop}
+    chown -R 1000:1000 /var/opt/copyparty
+    install -D -m 644 -t /etc/opt/copyparty services/copyparty/copyparty.conf
+    install_quadlet services/copyparty/copyparty.container
+    reload_restart copyparty
+    ;;
   *)
     die "unknown service: $1"
     ;;

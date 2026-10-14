@@ -32,6 +32,7 @@ src/nodes/websvcs/install_svcs.sh homepage
 src/nodes/websvcs/install_svcs.sh isso
 src/nodes/websvcs/install_svcs.sh guacd
 src/nodes/websvcs/install_svcs.sh guacamole
+src/nodes/websvcs/install_svcs.sh copyparty
 # Once the media array is mounted (pve2_storage.md)
 src/nodes/websvcs/install_svcs.sh linkding
 src/nodes/websvcs/install_svcs.sh readeck

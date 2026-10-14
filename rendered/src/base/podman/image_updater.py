@@ -117,6 +117,7 @@ nodes = {
       {"container": "guacd", "image": "localhost/guacamole/guacd:1.6.0", "service": "guacd", "upstream": "docker.io/guacamole/guacd:1.6.0"},
       {"build": "finance_exporter", "container": "finance_exporter", "image": "localhost/finance_exporter:latest", "service": "finance_exporter"},
       {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:3.2", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:3.2"},
+      {"container": "copyparty", "image": "localhost/copyparty/ac:latest", "service": "copyparty", "upstream": "docker.io/copyparty/ac:latest"},
       {"container": "linkding", "image": "localhost/sissbruecker/linkding:latest-plus", "service": "linkding", "upstream": "docker.io/sissbruecker/linkding:latest-plus"},
       {"container": "readeck", "image": "localhost/readeck/readeck:latest", "service": "readeck", "upstream": "codeberg.org/readeck/readeck:latest"},
       {"container": "storyteller", "image": "localhost/storyteller-platform/storyteller:web-v2", "service": "storyteller", "upstream": "registry.gitlab.com/storyteller-platform/storyteller:web-v2"},

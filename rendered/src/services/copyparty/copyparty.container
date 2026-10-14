@@ -1,0 +1,42 @@
+# /etc/containers/systemd/copyparty.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+
+[Unit]
+Description="Homelab: File drop behind Authelia"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=localhost/copyparty/ac:latest
+ContainerName=copyparty
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+
+Network=net.network
+HostName=files.janedoe.com
+IP=10.11.0.19
+# port 3923
+
+User=1000
+Group=1000
+
+Environment=TZ=America/Los_Angeles
+# The image points XDG_CONFIG_HOME at /cfg, where copyparty also writes its session and
+# IdP databases; /cfg is read-only here, so they go to /state.
+Environment=XDG_CONFIG_HOME=/state
+
+# Ref: https://github.com/9001/copyparty/tree/hovudstraum/scripts/docker
+Volume=/etc/opt/copyparty:/cfg:ro
+Volume=/var/opt/copyparty/state:/state
+# A host path, not a named volume, so car_ingest on the host can read uploads
+Volume=/var/opt/copyparty/data:/w
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

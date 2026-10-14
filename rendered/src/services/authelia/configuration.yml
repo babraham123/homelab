@@ -2099,6 +2099,7 @@ identity_providers:
           - 'https://books.janedoe.com'
           - 'https://command.janedoe.com'
           - 'https://dash.janedoe.com'
+          - 'https://files.janedoe.com'
           - 'https://graph.janedoe.com'
           - 'https://home.janedoe.com'
           - 'https://homeproxy.janedoe.com'

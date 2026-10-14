@@ -73,7 +73,8 @@ journalctl -eu authelia
   - Create the `authelia_gen_access`, `headscale_access`, `command_general` and
     `vaultwarden_access` groups, add users to them
   - Create the `telemetry` group (metrics, logs, alert and ntfy UIs), add your user to it
-  - Create the `grafana_admin`, `hass_admin` and `command_admin` groups, add your user to it
+  - Create the `grafana_admin`, `hass_admin`, `command_admin` and `files_admin` groups, add your
+    user to them
   - Restore the authelia middleware
     `/root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik`
 

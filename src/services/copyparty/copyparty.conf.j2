@@ -1,0 +1,34 @@
+# /etc/opt/copyparty/copyparty.conf
+# Loaded by the image's initcfg, which already sets `chdir: /w` and includes /cfg/*.conf.
+# Ref:
+#   https://github.com/9001/copyparty#accounts-and-volumes
+#   https://github.com/9001/copyparty/blob/hovudstraum/docs/idp.md
+# Comments need two spaces before the #.
+
+[global]
+  # Identity comes only from Authelia, via Traefik's forward-auth headers. There are no
+  # copyparty accounts, so a request without them is anonymous and sees nothing.
+  idp-h-usr: Remote-User
+  idp-h-grp: Remote-Groups
+  # Only Traefik may set the identity and client-IP headers.
+  xff-src: {{ websvcs.container_subnet }}.6/32
+  # The rightmost X-Forwarded-For entry is the one Traefik appended; anything left of it
+  # came from the client.
+  rproxy: -1
+  # Volume databases and upload snapshots stay out of /w, so car_ingest sees only uploads.
+  hist: /state/hist
+  # Traefik terminates TLS
+  no-crt
+  no-robots
+
+[/car]
+  /w/car
+  accs:
+    rwmd: @files_admin
+
+# Upload-only for any logged-in user; they can't list or download.
+[/drop]
+  /w/drop
+  accs:
+    w: @acct
+    rwmd: @files_admin

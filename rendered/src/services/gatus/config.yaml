@@ -139,6 +139,10 @@ endpoints:
     <<: *internal
     url: "https://remote.janedoe.com"
 
+  - name: copyparty
+    <<: *internal
+    url: "https://files.janedoe.com"
+
   - name: linkding
     <<: *internal
     url: "https://archive.janedoe.com/health"

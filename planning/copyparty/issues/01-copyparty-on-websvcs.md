@@ -1,6 +1,6 @@
 # 01. Run copyparty on websvcs behind Authelia
 
-Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-09-26;
+Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26;
 `notes/TODO.md` "setup copyparty"
 
 ## Problem
@@ -56,3 +56,18 @@ directory the sync (03) can read.
 - 2026-10-12: no longer blocked by auth/06. The router routes tailnet traffic without SNAT through
   a System Patches change (router/04), so Traefik gets the real client IP; auth/06 stays open to
   watch for pfsense/FreeBSD-ports#1462 shipping.
+- 2026-10-12: Implemented: `src/services/copyparty/` (quadlet + config), Traefik router
+  `copyparty` with `authelia@file`, `install_svcs.sh copyparty`, inventory entry (dispatcher,
+  Gatus, image updater), Homepage, `docs/services.md`. Deviations from the plan above:
+  - `rproxy: -1`, not `1`. copyparty's `1` takes the leftmost `X-Forwarded-For` entry, which the
+    client controls; `-1` takes the one Traefik appended. `docs/networking.md` updated.
+  - Access by LLDAP group, matching `grafana_admin` etc.: `/car` is `rwmd` for `files_admin`;
+    `/drop` is upload-only for any logged-in user.
+  - copyparty's session/IdP databases and volume `.hist` go to `/var/opt/copyparty/state`
+    (`XDG_CONFIG_HOME`, `hist`), since `/cfg` is read-only and 03 should see only uploads under
+    `data/car`. The container runs as UID 1000 with `DropCapability=all`.
+  - `backup.sh` also stages `/var/opt/copyparty/data/car`: the recordings are small and the only
+    copy of the trips. The rest of `data/` is in the VM image only.
+  Remaining for a human: create the `files_admin` LLDAP group, deploy (`install_dispatcher`,
+  `install_traefik`, `install_copyparty`, `install_homepage` on websvcs, Gatus on secsvcs), then
+  the acceptance checks.

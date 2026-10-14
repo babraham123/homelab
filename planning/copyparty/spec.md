@@ -22,7 +22,7 @@ Constraint: websvcs is on pve2, which is on demand, so uploads only work while p
 
 | # | Title | Status | Type |
 | --- | --- | --- | --- |
-| [01](issues/01-copyparty-on-websvcs.md) | Run copyparty on websvcs behind Authelia | `ready-for-agent` | task |
+| [01](issues/01-copyparty-on-websvcs.md) | Run copyparty on websvcs behind Authelia | `ready-for-human` | task |
 | [02](issues/02-car-scanner-sample-export.md) | Capture a sample Car Scanner Pro export | `resolved` | task |
 | [03](issues/03-car-obd-metrics-sync.md) | Sync Car Scanner Pro trip logs from copyparty into VictoriaMetrics | `ready-for-agent` | task |
 | [04](issues/04-termux-auto-upload.md) | Auto-upload Car Scanner Pro recordings from the phone with Termux | `ready-for-agent` | task |

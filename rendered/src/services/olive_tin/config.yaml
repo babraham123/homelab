@@ -853,6 +853,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: websvcs Install Copyparty
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_copyparty
+              id: websvcs_install_copyparty
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: websvcs Install Linkding
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_linkding

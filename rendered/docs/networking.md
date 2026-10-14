@@ -202,7 +202,8 @@ Per app:
   narrow it to the three Traefiks.
 - **Vaultwarden**: `IP_HEADER=X-Forwarded-For`, `IP_HEADER_TRUSTED_PROXIES` = Traefik's container
   IP (`.6`). It takes the rightmost untrusted entry, so a forged leading entry is ignored.
-- **copyparty**: `xff-src` = Traefik's container IP (`.6`), `rproxy: 1`.
+- **copyparty**: `xff-src` = Traefik's container IP (`.6`), `rproxy: -1`: the rightmost entry,
+  the one Traefik appended.
 
 From the LAN there is no HAProxy hop: Traefik sees the client's own address.
 

@@ -33,6 +33,7 @@ EXPECTED = {
     "command.janedoe.com",
     "comment.janedoe.com",
     "dash.janedoe.com",
+    "files.janedoe.com",
     "graph.janedoe.com",
     "home.janedoe.com",
     "homeproxy.janedoe.com",

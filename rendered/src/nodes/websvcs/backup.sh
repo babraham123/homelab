@@ -30,10 +30,13 @@ excludes+=(--exclude=etc/opt/wyoming/src
   --exclude='var/opt/storyteller/storyteller.db*'
   --exclude=var/opt/storyteller/cache
   --exclude=var/opt/storyteller/image-cache)
-# Readeck's config.toml holds the secret key its API tokens are signed with.
+# Readeck's config.toml holds the secret key its API tokens are signed with. The car
+# recordings are small and the only copy of the trips; the rest of copyparty's uploads
+# are in the VM image only.
 stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd \
   /etc/snapraid.conf /etc/fstab "$(realpath /var/opt/nginx/www)" \
-  /var/opt/linkding /var/opt/readeck /var/opt/storyteller /var/opt/bookmark_handoff
+  /var/opt/linkding /var/opt/readeck /var/opt/storyteller /var/opt/bookmark_handoff \
+  /var/opt/copyparty/data/car
 # Isso comments, SQLite under a running process; a live copy is acceptable.
 stage_volume issodb
 

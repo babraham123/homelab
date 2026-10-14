@@ -17,6 +17,7 @@ services:
   finance_exporter: {build: finance_exporter}
   fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
   snapraid: {}
+  copyparty: {subdomain: files, uptime: copyparty, upstream: docker.io/copyparty/ac:latest}
   # These need the media array mounted.
   linkding: {subdomain: archive, uptime: linkding, uptime_path: /health,
              upstream: docker.io/sissbruecker/linkding:latest-plus}
