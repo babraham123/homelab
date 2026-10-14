@@ -160,7 +160,7 @@
     - copyparty:
         icon: si-files
         href: https://files.janedoe.com/
-        description: File drop
+        description: File server
 #     - Forgejo:
 #         icon: forgejo.svg
 #         href: https://git.janedoe.com/
