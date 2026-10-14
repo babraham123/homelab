@@ -1,6 +1,6 @@
 # 04. Auto-upload Car Scanner Pro recordings from the phone with Termux
 
-Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-09-26
+Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26
 (<https://wiki.termux.com/wiki/Intents_and_Hooks>); research 2026-10-12 Blocked by: 01
 
 ## Problem
@@ -68,3 +68,19 @@ but it would need a different pipeline from 03.
   to any other service.
 
 ## Comments
+
+- 2026-10-12: Implemented: Authelia rule for `user:car_uploader` (`PUT`/`POST`, `^/car/`,
+  `one_factor`), `w: car_uploader` on copyparty's `/car`,
+  `src/services/copyparty/termux/car_upload.sh.j2`, `docs/guides/car_upload.md.j2`, a note in
+  `docs/security.md`.
+  - The forwarded `Authorization: Basic` header: copyparty tries it as a copyparty password, finds
+    no account (there are none), then takes the IdP header; it only bans on its login form
+    (`get_pwd_cookie`), so it would be harmless. `no-bauth` is set anyway, so it is never read.
+  - One script for both paths: with no argument it lists recordings older than a minute through
+    `rish`, copies each to a temp file (curl gets a Content-Length and a file to retry from) and
+    `PUT`s it; with a path it uploads that file, and `~/bin/termux-file-editor` links to it for the
+    Share → Edit fallback. Uploaded names go to `~/.car_upload/sent` only on success. A failing
+    `rish` posts a notification to restart Shizuku.
+  - Scheduler: `termux-job-scheduler --period-ms 900000 --network unmetered --persisted true`.
+  Remaining for a human: create `car_uploader` in LLDAP, deploy authelia (secsvcs) and copyparty
+  (websvcs), set up the phone per the guide, then the acceptance checks.

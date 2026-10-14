@@ -817,6 +817,15 @@ access_control:
         - 'group:authelia_gen_access'
       policy: 'two_factor'
 
+    # The phone's upload script sends HTTP Basic, so it can only pass one factor. Limit that
+    # credential to writing into copyparty's /car; anything else it requests falls through
+    # to default_policy (docs/guides/car_upload.md).
+    - domain: 'files.{{ site.url }}'
+      subject: 'user:car_uploader'
+      methods: ['PUT', 'POST']
+      resources: ['^/car/']
+      policy: 'one_factor'
+
     - domain: '*.{{ site.url }}'
       networks:
         - 'internal'

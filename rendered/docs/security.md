@@ -139,6 +139,11 @@ sequenceDiagram
 OIDC client secrets are injected at container startup via the secrets pipeline; they never appear in
 rendered configs on disk.
 
+One non-interactive credential passes ForwardAuth: the LLDAP user `car_uploader`, stored on the
+phone and sent as HTTP Basic by a Termux job. Basic is one factor only, so its Authelia rule is
+pinned to `PUT`/`POST` under `files.janedoe.com/car/`, and copyparty gives it write-only access
+there; anything else it requests is denied ([car upload guide](guides/car_upload.md)).
+
 ## TLS and trust hierarchy
 
 Three trust systems, all rooted on pve1:
