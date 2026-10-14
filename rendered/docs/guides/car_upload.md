@@ -12,7 +12,8 @@ dashboard.
 ## Access
 
 - Android 11+ hides `Android/data` from Termux; Shizuku's `rish` reads it as the `shell` user
-- Without root, Shizuku needs a restart over wireless debugging after every reboot
+- Without root, Shizuku needs a restart over wireless debugging after every reboot; turn
+  wireless debugging off again afterwards
 - The script signs in to Authelia as LLDAP user `car_uploader` with HTTP Basic (one factor)
   - Authelia allows it only `PUT`/`POST` under `files.janedoe.com/car/`
   - copyparty gives it write-only `/car`: no listing, downloads, moves or deletes
@@ -26,18 +27,39 @@ dashboard.
   - Add it to no group: `authelia_gen_access` would open every subdomain to it
 - Phone apps
   - F-Droid: Termux and Termux:API (the Play Store builds are outdated)
-  - Shizuku (Play Store or GitHub): pair once in Developer options >> Wireless debugging, then
-    Start via Wireless debugging
-  - Shizuku >> Use Shizuku in terminal apps >> Export files, to `Download/rish`
+  - Play Store only: Shizuku (`moe.shizuku.privileged.api`); no GitHub or third-party builds
+  - Shizuku: pair once in Developer options >> Wireless debugging, then Start via Wireless
+    debugging
+  - Shizuku >> Use Shizuku in terminal apps >> Export files >> Termux >> new folder `bin`:
+    `rish` goes straight into Termux's private home, never shared storage
 - Workstation: render (`tools/render_src.sh /tmp/homelab-rendered`, [mac guide](mac_personal.md))
-  and copy `src/services/copyparty/termux/{car_upload,car_upload_setup}.sh` to the phone's
-  Download folder (`adb push`)
-- Termux: the setup asks for the password; allow Termux in Shizuku's prompt
+  and push the scripts over the same wireless debugging (`adb pair`, `adb connect`).
+  `/data/local/tmp` is readable only by adb and Shizuku's `shell` user.
 
   ```bash
-  termux-setup-storage
-  bash ~/storage/downloads/car_upload_setup.sh
+  cd /tmp/homelab-rendered/src/services/copyparty/termux
+  adb shell mkdir -p /data/local/tmp/car_upload
+  adb push car_upload.sh car_upload_setup.sh /data/local/tmp/car_upload/
   ```
+
+- Termux: allow Termux in Shizuku's prompt; the setup asks for the password
+
+  ```bash
+  sed -i 's/PKG/com.termux/' ~/bin/rish
+  chmod 700 ~/bin/rish
+  # app_process refuses a writable dex
+  chmod 400 ~/bin/rish_shizuku.dex
+  ~/bin/rish -c 'cat /data/local/tmp/car_upload/car_upload_setup.sh' > ~/car_upload_setup.sh
+  bash ~/car_upload_setup.sh
+  ```
+
+- Lock down
+  - Developer options >> Wireless debugging: off. Shizuku keeps running; check with
+    `~/bin/rish -c id`
+  - Shizuku >> Authorized applications: Termux only
+  - Termux: install nothing beyond what the setup installs. Any script in Termux can run `rish`,
+    which is Android's `shell` user (install apps, grant permissions, read every app's data).
+  - Don't run `termux-setup-storage`: nothing here needs shared storage
 
 - Optional: skip recordings already on the phone
 
@@ -55,7 +77,8 @@ dashboard.
   names in `~/.car_upload/sent`
 - Wrong password in `~/.car_upload/netrc`: `401`
 - `curl --netrc-file ~/.car_upload/netrc https://files.janedoe.com/car/` (a `GET`): `403`
-- Notification "rish failed": Shizuku isn't running; start it again
+- Notification "rish failed": Shizuku isn't running; start it again, then turn wireless
+  debugging off
 
 ## Fallback without Shizuku
 
