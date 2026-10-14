@@ -10,6 +10,8 @@
 
 set -euo pipefail
 
+# rish lives in ~/bin, which termux-job-scheduler's PATH lacks
+PATH="${HOME}/bin:${PATH}"
 records=/sdcard/Android/data/com.ovz.carscanner/files/records
 conf=~/.car_upload
 # Names already uploaded, one per line

@@ -1,107 +1,63 @@
 # Car Scanner upload from the phone
 
-Car Scanner saves every recording on its own, as a `.brc` file, when the adapter disconnects or
-recording is switched off. A Termux job uploads new ones to `https://files.{{ site.url }}/car/`
-every 15 minutes on unmetered Wi-Fi, with no taps; `car_ingest` on websvcs then imports them into
-VictoriaMetrics (Grafana's Car dashboard). Uploads only work while pve2 is up; a failed upload is
-retried on the next run.
+A Termux job uploads new Car Scanner recordings (`.brc`) to `https://files.{{ site.url }}/car/`
+every 15 min on unmetered Wi-Fi. `car_ingest` on websvcs imports them into Grafana's Car
+dashboard.
 
-Car Scanner only records the sensors on the open screen: keep a dashboard or list screen with the
-Car dashboard's sensors (SoC, battery power/current/voltage, cell voltages, pack temperatures,
-cumulative energy, 12 V) open while driving.
+- Car Scanner writes a recording when the adapter disconnects or recording stops
+- It records only the open screen's sensors: keep a screen with the Car dashboard's sensors open
+  while driving
+- Uploads need pve2 up; a failed upload retries on the next run
 
-## How it gets through Android and Authelia
+## Access
 
-- **Android 11+** blocks apps, Termux included, from reading `Android/data`, where Car Scanner keeps
-  its recordings. [Shizuku](https://shizuku.rikka.app/) runs a service as the `shell` user, which
-  can, and its `rish` tool gives Termux a shell through it. Without root, Shizuku has to be started
-  again over wireless debugging after every reboot.
-- **Authelia**: a script can't do the portal's second factor, so it signs in as a dedicated LLDAP
-  user, `car_uploader`, with HTTP Basic, which Authelia's forward-auth endpoint accepts as one
-  factor. One access rule allows it: user `car_uploader`, host `files.{{ site.url }}`, `PUT`/`POST`
-  under `/car/`. Anything else that user requests is denied (`default_policy: deny`).
-- **copyparty** gives `car_uploader` `w` on `/car` only: it can't list, download, move or delete.
-- Three wrong passwords in two minutes ban `car_uploader` for five minutes (Authelia regulation,
-  `modes: [user]`); it bans the user, never a shared IP.
+- Android 11+ hides `Android/data` from Termux; Shizuku's `rish` reads it as the `shell` user
+- Without root, Shizuku needs a restart over wireless debugging after every reboot
+- The script signs in to Authelia as LLDAP user `car_uploader` with HTTP Basic (one factor)
+  - Authelia allows it only `PUT`/`POST` under `files.{{ site.url }}/car/`
+  - copyparty gives it write-only `/car`: no listing, downloads, moves or deletes
+  - Three wrong passwords in two minutes ban it for five minutes
+- A leaked password allows uploads into `/car`, nothing more
 
-A leaked password or a stolen phone gives an attacker uploads into `/car`, nothing more.
+## Setup
 
-## 1. Create the user
+- LLDAP (<https://ldap.{{ site.url }}>): create `car_uploader`, password from
+  `openssl rand -base64 32`
+  - Add it to no group: `authelia_gen_access` would open every subdomain to it
+- Phone apps
+  - F-Droid: Termux and Termux:API (the Play Store builds are outdated)
+  - Shizuku (Play Store or GitHub): pair once in Developer options >> Wireless debugging, then
+    Start via Wireless debugging
+  - Shizuku >> Use Shizuku in terminal apps >> Export files, to `Download/rish`
+- Workstation: render (`tools/render_src.sh /tmp/homelab-rendered`, [mac guide](mac_personal.md))
+  and copy `src/services/copyparty/termux/{car_upload,car_upload_setup}.sh` to the phone's
+  Download folder (`adb push`)
+- Termux: the setup asks for the password; allow Termux in Shizuku's prompt
 
-In LLDAP (<https://ldap.{{ site.url }}>) create `car_uploader` with a long random password
-(`openssl rand -base64 32`). Add it to no group: `authelia_gen_access` would open every subdomain
-to it.
+  ```bash
+  termux-setup-storage
+  bash ~/storage/downloads/car_upload_setup.sh
+  ```
 
-## 2. Install the apps
+- Optional: skip recordings already on the phone
 
-- From F-Droid: **Termux** and **Termux:API** (both from the same source; the Play Store builds are
-  outdated).
-- **Shizuku** from the Play Store or GitHub. Start it with wireless debugging (Shizuku → Start via
-  Wireless debugging; pair once in Developer options).
-- In Shizuku → Use Shizuku in terminal apps → Export files, and pick a folder Termux can read, e.g.
-  `Download/rish`.
-- In Termux:
+  ```bash
+  ~/bin/rish -c 'ls /sdcard/Android/data/com.ovz.carscanner/files/records' | grep '\.brc$' \
+    >> ~/.car_upload/sent
+  ```
 
-```bash
-pkg update
-pkg install curl jq termux-api
-termux-setup-storage
-mkdir -p ~/bin ~/.car_upload
-# rish and rish_shizuku.dex from Shizuku's export
-cp ~/storage/downloads/rish/rish ~/storage/downloads/rish/rish_shizuku.dex ~/bin/
-sed -i 's/PKG/com.termux/' ~/bin/rish
-chmod 700 ~/bin/rish
-chmod 400 ~/bin/rish_shizuku.dex
-rish -c id   # uid=2000(shell); allow Termux in Shizuku's prompt
-```
+- Optional, Tasker and Termux:Tasker: run `~/bin/car_upload.sh` when Bluetooth disconnects from
+  the vLinker
 
-## 3. Install the script and the credential
+## Test
 
-Render the repo on the workstation (`tools/render_src.sh /tmp/homelab-rendered`, see the [mac
-guide](mac_personal.md)) and copy `src/services/copyparty/termux/car_upload.sh` to the phone's
-Download folder (`adb push`, or download it through copyparty as a `files_admin` user). Then:
-
-```bash
-install -m 700 ~/storage/downloads/car_upload.sh ~/bin/car_upload.sh
-# Share → Termux → Edit runs termux-file-editor: the manual fallback
-ln -sf car_upload.sh ~/bin/termux-file-editor
-cat > ~/.car_upload/netrc <<'EOF'
-machine files.{{ site.url }} login car_uploader password <the password from step 1>
-EOF
-chmod 600 ~/.car_upload/netrc
-```
-
-Already-uploaded recordings: to skip the backlog, list them as sent first:
-
-```bash
-rish -c 'ls /sdcard/Android/data/com.ovz.carscanner/files/records' | grep '\.brc$' \
-  >> ~/.car_upload/sent
-```
-
-## 4. Schedule it
-
-```bash
-termux-job-scheduler --job-id 1 --script ~/bin/car_upload.sh --period-ms 900000 \
-  --network unmetered --persisted true
-termux-job-scheduler --pending
-```
-
-Optional, with Tasker and Termux:Tasker: run `car_upload.sh` when Bluetooth disconnects from the
-vLinker, which is when Car Scanner writes the recording.
-
-## 5. Test
-
-```bash
-~/bin/car_upload.sh
-```
-
-- New recordings appear in `/var/opt/copyparty/data/car/` on websvcs, and their names in
-  `~/.car_upload/sent`.
-- A wrong password in the netrc gives `401`; `curl --netrc-file ~/.car_upload/netrc
-  https://files.{{ site.url }}/car/` (a `GET`) gives `403`.
-- "rish failed" in the notification means Shizuku isn't running: start it again (step 2).
+- `~/bin/car_upload.sh`: new recordings land in `/var/opt/copyparty/data/car/` on websvcs, their
+  names in `~/.car_upload/sent`
+- Wrong password in `~/.car_upload/netrc`: `401`
+- `curl --netrc-file ~/.car_upload/netrc https://files.{{ site.url }}/car/` (a `GET`): `403`
+- Notification "rish failed": Shizuku isn't running; start it again
 
 ## Fallback without Shizuku
 
-Car Scanner → recordings list → press and hold → Share → BRC → Termux → **Edit**. The same script
-uploads the shared copy and deletes it; on failure the copy stays under `~/downloads`.
+- Car Scanner >> recordings >> press and hold >> Share >> BRC >> Termux >> Edit
+- The same script uploads the shared copy and deletes it; on failure it stays in `~/downloads`
