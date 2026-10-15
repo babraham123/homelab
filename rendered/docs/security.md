@@ -140,9 +140,10 @@ OIDC client secrets are injected at container startup via the secrets pipeline; 
 rendered configs on disk.
 
 One non-interactive credential passes ForwardAuth: the LLDAP user `car_uploader`, stored on the
-phone and sent as HTTP Basic by a Termux job. Basic is one factor only, so its Authelia rule is
-pinned to `PUT`/`POST` under `files.janedoe.com/car/`, and copyparty gives it write-only access
-there; anything else it requests is denied ([car upload guide](guides/car_upload.md)).
+phone and sent as HTTP Basic by the WiCAN sync app
+([copyparty/05](../planning/copyparty/issues/05-car-ingest-wican-jsonl.md)). Basic is one factor
+only, so its Authelia rule is pinned to `PUT`/`POST` under `files.janedoe.com/car/`, and copyparty
+gives it write-only access there; anything else it requests is denied.
 
 ## TLS and trust hierarchy
 

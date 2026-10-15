@@ -1,6 +1,6 @@
 # 04. Auto-upload Car Scanner Pro recordings from the phone with Termux
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26
+Status: wontfix Type: task Repo: homelab Source: maintainer request 2026-09-26
 (<https://wiki.termux.com/wiki/Intents_and_Hooks>); research 2026-10-12 Blocked by: 01
 
 ## Problem
@@ -84,3 +84,7 @@ but it would need a different pipeline from 03.
   - Scheduler: `termux-job-scheduler --period-ms 900000 --network unmetered --persisted true`.
   Remaining for a human: create `car_uploader` in LLDAP, deploy authelia (secsvcs) and copyparty
   (websvcs), set up the phone per the guide, then the acceptance checks.
+- 2026-10-14: wontfix. A WiCAN Pro dongle and its BLE sync app upload JSONL batches to the same
+  `/car/` target instead (05, 06). The Termux job was never deployed, so its scripts and guide
+  are removed; the `car_uploader` user, its Authelia rule and copyparty's `w` grant stay for the
+  app.
