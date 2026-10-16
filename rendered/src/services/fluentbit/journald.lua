@@ -18,7 +18,10 @@ function process_msg(tag, timestamp, record)
   local new_record = {}
   new_record["date"] = math.floor(new_timestamp * 1000)
   new_record["hostname"] = record["hostname"] or ""
-  new_record["service"] = record["container_name"] or record["unit"] or ""
+  -- Host services have no container_name: name them after their unit, like the quadlets.
+  -- The systemd input turns _SYSTEMD_UNIT into systemd_unit (strip_underscores, lowercase).
+  new_record["service"] = record["container_name"]
+    or (record["systemd_unit"] or ""):gsub("%.service$", "")
   new_record["message"] = record["message"] or ""
   new_record["code"] = (record["code_func"] or "") .. " " .. (record["code_file"] or "") .. ":" .. (record["code_line"] or "")
   new_record["priority"] = record["priority"] or ""
