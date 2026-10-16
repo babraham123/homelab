@@ -1,77 +1,87 @@
-# 06. vpnsvcs bandwidth by class and subdomain
+# 06. vpnsvcs bandwidth: totals, DERP estimate, per-subdomain script
 
 Status: ready-for-agent
 Type: task
 Repo: homelab
-Source: maintainer request 2026-10-13
-Blocked by: 04
+Source: maintainer request 2026-10-13; scope cut 2026-10-16
 
 ## Problem
 
-Linode charges outbound transfer against the plan's monthly pool. TURN adds a
-bandwidth-heavy workload to the VPS. Today nobody can see how many bytes the VPS moves,
-or whether they come from:
-
-- the public funnel;
-- DERP;
-- TURN;
-- anything else.
+Linode charges outbound transfer against the plan's monthly pool. Nobody can see how close
+the VPS is to it, or how much of it is DERP relaying versus the public funnel.
 
 ## Change
 
 1. **Interface totals.** node_exporter (pushed by vmagent, ADR 0007) already gives
-   `node_network_{receive,transmit}_bytes_total{device=~"eth0|tailscale0"}`.
-2. **By traffic class.** An `nftables` table `homelab_acct` with named counters on
-   `eth0`, input and output, matched by port:
-   - `https` (tcp 443), `http` (tcp 80);
-   - `derp_stun` (udp 3478);
-   - `wireguard` (udp 41641);
-   - `turn` (udp/tcp 3479 and udp 49160–49200);
-   - `ssh` (tcp 2202);
-   - `other`: a final catch-all counter.
+   `node_network_{receive,transmit}_bytes_total{device=~"eth0|tailscale0"}`. No new
+   collector.
+2. **DERP estimate, derived from those totals:**
 
-   Implementation:
-   - Install from a `bandwidth_counters` case in `src/nodes/vpnsvcs/install_svcs.sh.j2`.
-     Use a separate table so ufw's own rules stay untouched.
-   - A 1-minute systemd timer runs a stdlib-Python script. It turns
-     `nft -j list counters table inet homelab_acct` into
-     `vpnsvcs_bytes_total{class,direction}` in node_exporter's textfile directory
-     (`/var/lib/node_exporter/textfile_collector`).
-   - Compare `nft list ruleset` before and after.
-3. **By subdomain.** HAProxy (`src/services/haproxy/haproxy.cfg.j2`):
-   - **Capture the name.**
-     - `https_all`: `tcp-request content capture req.ssl_sni len 64`.
-     - `http_all`: `http-request capture req.hdr(host) len 64`.
-   - **Log format.** A `log-format` on both frontends that ends in `sni=<capture> up=%U down=%B`.
-     The `%U`/`%B` byte counts arrive when the connection closes, so long-lived
-     WebSocket and DERP connections are counted late. That's acceptable.
-   - **Shipping.** fluent-bit on vpnsvcs ships the journal of units tagged by
-     `base/debian/add_homelab_tag.sh` to VictoriaLogs; tag `haproxy.service` if it isn't.
-   - **Grafana panel.** A VictoriaLogs query like:
+   ```text
+   tailnet = rate(tailscale0 rx) + rate(tailscale0 tx)
+   derp    = clamp_min(rate(eth0 tx) - tailnet, 0)
+   ```
+
+   Why it works:
+   - Every funnel byte crosses `tailscale0` once and leaves `eth0` once: requests go out
+     to home, and responses go out to the client through HAProxy's TLS passthrough.
+     Backups and vmagent/fluent-bit pushes behave the same way.
+   - DERP terminates on Headscale behind HAProxy (`vpn.SITE`) and never touches
+     `tailscale0`.
+
+   `derp` overstates DERP by WireGuard's per-packet overhead (about 5% of `tailscale0`
+   tx), plus SSH, Headscale control and apt, which are small on tx. Accurate enough to
+   tell whether DERP or the funnel is spending the pool.
+3. **HAProxy logs SNI and bytes.** Done (2026-10-16): `https_all` in
+   `src/services/haproxy/haproxy.cfg.j2` logs one tcplog line per connection at close,
+   ending in `up=%U down=%B sni=<name>`. Only `[a-z0-9.-]` SNIs are captured (others log
+   `-`), and the SNI is last, so a client can't inject into the line or shadow the byte
+   fields. :80 isn't logged this way; it carries only redirects and ACME. Deploy with
+   the `haproxy` case, which runs `haproxy -c` first.
+
+   Byte counts arrive when a connection closes, so long-lived DERP and WebSocket
+   connections count in the window they close in. `haproxy.service` is tagged, so
+   fluent-bit ships the lines to VictoriaLogs (`retention.log_days`, 14).
+4. **`tools/vps_bytes_by_subdomain.py`**, a uv script run on the laptop:
+   - `--since` (default `7d`, capped at `retention.log_days`); auth from `VL_AUTH`, as in
+     `docs/debugging.md` "Observability".
+   - One LogsQL query to `https://logs.SITE/select/logsql/query`, with the aggregation
+     done server-side:
 
      ```text
-     _stream:{unit="haproxy.service"} | extract "sni=<sni> up=<up> down=<down>"
-       | stats by (sni) sum(down) as down, sum(up) as up
+     _time:<since> hostname:=vpnsvcs "sni="
+       | extract "up=<up> down=<down> sni=<sni>"
+       | stats by (sni) sum(up) as up, sum(down) as down
      ```
 
-     `vpn.SITE` is Headscale control + DERP.
-4. **Dashboard** `src/services/grafana/dashboards/vpnsvcs_bandwidth.json`:
-   - billable egress, 30-day rolling, against the plan's transfer pool;
-   - stacked rate by class;
-   - top subdomains.
+   - Prints one row per SNI, sorted by `down` (bytes to clients, the billable
+     direction), with `up`, `down`, each row's share of the total, and a total row.
+     `-` is a client that sent no SNI or one with non-hostname characters. `vpn.SITE` is DERP plus
+     Headscale control.
+5. **Dashboard** `src/services/grafana/dashboards/vpnsvcs_bandwidth.json`:
+   - billable egress (`eth0` tx), 30-day rolling, against the plan's transfer pool;
+   - stacked `eth0` tx rate split into `tailnet` and `derp`, from item 2.
 
-   Panel notes should explain the double counting (spec, "Bandwidth on vpnsvcs").
-5. **Alert** in `src/services/vmalert/configs/vps.yml`: `VpsTransferHigh` when
+   Panel notes explain the derivation and its overstatement.
+6. **Alert** in `src/services/vmalert/configs/vps.yml`: `VpsTransferHigh` when
    `increase(node_network_transmit_bytes_total{device="eth0",host="vpnsvcs"}[30d])`
    exceeds 80% of `site.vps_transfer_bytes`. That's a new var: the Linode plan's
    monthly pool.
-6. **Docs:** `docs/services.md` observability section.
+7. **Docs:** `docs/services.md` observability section (the dashboard and the
+   derivation); `docs/maintenance.md` (the script).
 
 ## Acceptance
 
-- The class counters add up to within 2% of node_exporter's `eth0` totals over an hour.
-- Streaming one camera off-VPN for 10 minutes shows up under `turn` and nowhere else.
-- Loading the Frigate UI from mobile data shows `nvr.SITE` bytes in the subdomain panel.
+- The dashboard's 30-day egress matches Linode's transfer page within 5%.
+- Forcing one tailnet client onto DERP and copying 1 GB through it raises `derp` by
+  about 1 GB and leaves `tailnet` flat.
+- Loading a funnel site from mobile data puts its SNI in the script's output. Over the
+  same window, `vpn.SITE`'s `down` is within 15% of the dashboard's `derp` total.
+- `VpsTransferHigh` fires in vmalert with `site.vps_transfer_bytes` temporarily set low.
 - `ss -ltnp` shows no new listeners.
 
 ## Comments
+
+2026-10-16: scope cut. TURN is gone (04, wontfix), so the nftables per-port counters and
+the VictoriaLogs subdomain panel are dropped. The interface totals give the DERP
+estimate, and a laptop script answers the per-subdomain question when needed.

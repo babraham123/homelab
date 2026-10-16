@@ -53,12 +53,15 @@ Frigate's bundled go2rtc replaces it (maintainer decision 2026-10-14).
     - `webrtc.candidates`:
       - `{{ websvcs.ip }}:8555`;
       - `stun:8555`, which makes go2rtc discover its public address for off-VPN peers.
-    - `webrtc.ice_servers`:
-      - `stun:{{ vpnsvcs.ip }}:3479`;
-      - `turn:{{ vpnsvcs.ip }}:3479` with `username: webrtc` and the coturn credential
-        (04).
+    - `webrtc.ice_servers`: `stun:stun.cloudflare.com:3478` only, replacing go2rtc's
+      defaults so one provider sees the home IP's STUN requests. Headscale's STUN on
+      vpnsvcs:3478 can't stand in: it only answers requests carrying Tailscale's
+      SOFTWARE attribute.
 
-      This replaces go2rtc's default Google/Cloudflare STUN.
+      **No `turn:` entry.** There's no TURN server (04, wontfix), and Frigate's
+      `GET /api/config` returns `go2rtc.webrtc.ice_servers` as written to every
+      logged-in Frigate user (Frigate 0.16/0.17, `frigate/api/app.py`), so a TURN
+      credential here would leak.
   - **`cameras`.** Inputs `rtsp://127.0.0.1:8554/<name>` (role `record`) and
     `<name>_sub` (role `detect`), with `preset-rtsp-restream`. Every reader goes
     through go2rtc, so the camera sees one RTSP session.

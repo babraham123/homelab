@@ -4,7 +4,7 @@ Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-13
-Blocked by: 03, 04
+Blocked by: 03
 
 ## Problem
 
@@ -26,17 +26,12 @@ connection to the camera.
   Check whether HA's built-in go2rtc (`default_config`) needs disabling so it doesn't
   open its own camera sessions. Disabling `go2rtc` in HA's config is the documented
   way.
-- **TURN for browsers.** Find out which ICE servers the browser gets on each viewing
-  path, and set them to coturn (`stun:` and `turn:` on `{{ vpnsvcs.ip }}:3479`, user
-  `webrtc`):
-  - **HA frontend / Advanced Camera Card through the Frigate integration.** Check
-    whether the card's go2rtc provider reads HA's `web_rtc: ice_servers` config or has
-    its own `ice_servers` option.
-  - **Frigate's own UI.** Check whether Frigate passes go2rtc's `webrtc.ice_servers` to
-    the browser.
-
-  Record the answers here. If a path can't take a TURN server, it falls back to MSE
-  over HTTPS, which works off-VPN through the normal ingress, at higher latency.
+- **STUN only, no TURN.** There's no TURN server (04, wontfix). Leave
+  `web_rtc: ice_servers` unset so the browser uses HA's default STUN. Off-VPN viewers
+  whose NAT blocks a direct connection turn on the VPN. For reference:
+  - HA returns its ICE servers to every logged-in user
+    (`camera/webrtc/get_client_config`), so never put a credential there.
+  - Frigate's own UI hardcodes `stun:stun.l.google.com:19302` (`WebRTCPlayer.tsx`).
 
 **In the HA UI:**
 
@@ -59,10 +54,10 @@ shows the selected candidate pair:
 | --- | --- |
 | Laptop on trusted WiFi | `host` → `{{ websvcs.ip }}:8555` |
 | Phone on the tailnet (mobile data) | `host` via the subnet route |
-| Phone on mobile data, no VPN | `relay` on `{{ vpnsvcs.ip }}` (or MSE, if the TURN research above says so) |
-| Guest on the tailnet | `relay` unless router/03 opens 8555 to guests |
+| Phone on mobile data, no VPN | `srflx` ↔ `srflx` (home public IP) if the carrier's NAT allows; otherwise the VPN, as above |
+| Guest on the tailnet | `srflx` ↔ `srflx`, like an off-VPN phone, unless router/03 opens 8555 to guests |
 
-- coturn's log shows the off-VPN session; nothing is relayed on the tailnet.
+- An off-VPN WebRTC session doesn't move vpnsvcs's `eth0` transmit rate.
 - Frigate person events appear in HA as entities and notifications.
 - The camera has one RTSP session.
 

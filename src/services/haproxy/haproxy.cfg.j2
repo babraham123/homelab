@@ -64,6 +64,13 @@ frontend https_all
     acl {{ country }} src,map_ip(/etc/haproxy/countries/{{ country }}.map) -m found{% endfor %}
     tcp-request content silent-drop if {{ site.blocked_countries | join(' || ') }}
 
+    # One line per connection at close, with bytes per SNI for bandwidth accounting. Only
+    # hostname characters are captured, so a crafted SNI can't inject into the log line;
+    # anything else logs as "-". The client-controlled field goes last so it can't
+    # shadow up=/down= for a parser.
+    tcp-request content capture req.ssl_sni len 64 if { req.ssl_sni -i -m reg ^[a-z0-9.-]+$ }
+    log-format "%ci:%cp [%t] %ft %b/%s %Tw/%Tc/%Tt %B %ts %ac/%fc/%bc/%sc/%rc %sq/%bq up=%U down=%B sni=%[capture.req.hdr(0)]"
+
     tcp-request content accept if { req.ssl_hello_type 1 }
 
     acl vpn_host req.ssl_sni -i vpn.{{ site.url }}
