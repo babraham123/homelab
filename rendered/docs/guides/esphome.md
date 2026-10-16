@@ -1,7 +1,7 @@
 # ESPHome devices
 
 Guide to onboard a new ESP32 / ESP8266 board. First install the ESPHome dashboard on
-[homesvcs](./homesvcs.md). Design and background: `planning/esphome/spec.md`.
+[homesvcs](./homesvcs.md).
 
 Devices live on WiFiIoT, each at a fixed IP and the name `<name>.iot.home.arpa`. The dashboard
 (`https://iot.janedoe.com`) owns each device's YAML, builds its firmware and pushes updates.

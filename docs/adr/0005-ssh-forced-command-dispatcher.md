@@ -42,8 +42,7 @@ distribution and the backup pull could scp files through `/home/autoadmin`. That
 key, OliveTin's included, read and write access to everything autoadmin owned: the backup stage (host
 keys, secrets files, root's `.ssh` on two nodes), the files the root install commands move into
 place (an uploaded `ca_ssh_key.pub` becomes `TrustedUserCAKeys`), and `~/.bashrc` and `~/.ssh/rc`,
-which bash and sshd run around the forced command, so a shell. `planning/autoadmin-sftp/01` has the
-research.
+which bash and sshd run around the forced command, so a shell.
 
 Decision:
 

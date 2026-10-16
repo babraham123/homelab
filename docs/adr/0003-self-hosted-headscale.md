@@ -22,11 +22,9 @@ coordination URL. DNS is handled by Unbound local zones rather than MagicDNS.
 - New Tailscale client features can lag until Headscale supports them; notably, FreeBSD (pfSense)
   still lacks `--snat-subnet-routes=false` / kernel-mode pf routing, so subnet-routed traffic loses
   real source IPs at the router, so the intended group-based ACL matrix is disabled and the active
-  policy is permissive pending that upstream fix (tracked as an issue; see the issue's Comments for
-  the 2026-08-30 re-investigation, which found the ACL *policy engine* itself is not FreeBSD-gated,
-  so the remaining blocker is narrower than originally believed). Verified 2026-09-26 against
-  Tailscale source: ACLs are enforced before netstack SNATs, so SNAT never blocked the matrix
-  (`planning/router/issues/03-headscale-acl-matrix.md`). No-SNAT kernel routing works on pfSense
-  today via `TS_DEBUG_NETSTACK_SUBNETS=0`; tailscale/tailscale#21060 (v1.104) adds the official flag
-  (`planning/router/issues/04-tailscale-no-snat.md`).
+  policy is permissive pending that upstream fix (a 2026-08-30 re-investigation found the ACL
+  *policy engine* itself is not FreeBSD-gated, so the remaining blocker is narrower than originally
+  believed). Verified 2026-09-26 against Tailscale source: ACLs are enforced before netstack SNATs,
+  so SNAT never blocked the matrix. No-SNAT kernel routing works on pfSense today via
+  `TS_DEBUG_NETSTACK_SUBNETS=0`; tailscale/tailscale#21060 (v1.104) adds the official flag.
 - No Tailscale Funnel or SaaS-side features; public ingress is HAProxy instead.

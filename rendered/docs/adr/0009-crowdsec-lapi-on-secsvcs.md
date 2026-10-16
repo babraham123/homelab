@@ -10,7 +10,6 @@ scanner-path drops on `:80`. HAProxy runs `:443` in TCP mode ([ADR
 nothing learns from what the services see. Authelia's `regulation` bans by user, so credential
 stuffing across many usernames from one IP was never stopped, and a scanner Traefik answers with 404s
 could keep scanning. Only the VPS can drop a source before it reaches the home network.
-auth/03 has the full design.
 
 ## Decision
 
@@ -30,8 +29,8 @@ auth/03 has the full design.
 - **Fail open.** The bouncer keeps its last set while the LAPI is unreachable, so a secsvcs reboot
   never takes the sites down; alerts report a dead LAPI or a stale bouncer.
 - **fail2ban stays** for SSH on the VPS: local, so it still bans with the tailnet or secsvcs down.
-- **WAF (CrowdSec AppSec) runs per node** next to each Traefik, once real client IPs reach Traefik
-  (auth/06): the plugin forwards headers and bodies, passwords included, so they never leave the VM.
+- **WAF (CrowdSec AppSec) runs per node** next to each Traefik, once real client IPs reach Traefik:
+  the plugin forwards headers and bodies, passwords included, so they never leave the VM.
   The plugin sits on the `websecure` entrypoint, so no router can miss it, in AppSec-only mode: it
   doesn't pull the LAPI's bans, which the VPS already enforces for every public request (LAN and
   tailnet clients are never banned). Each AppSec container is an agent that logs in to the
@@ -56,4 +55,4 @@ auth/03 has the full design.
 - The acquisitions depend on the fields `journald.lua` keeps for Traefik; dropping one breaks the
   parser, which `CrowdsecNotParsing` catches.
 - A ban keyed on the wrong address is only as safe as the allowlist: while the router SNATs tailnet
-  traffic (router/04), the VPS's requests to the VMs come from the router, which is allowlisted.
+  traffic, the VPS's requests to the VMs come from the router, which is allowlisted.

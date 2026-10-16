@@ -7,9 +7,8 @@ Status: accepted (2026-10-07, networking revised 2026-10-10)
 The VPS is the only public host and had no metrics: HAProxy's drops, the tailnet path to the service
 VMs, and the VPS's own health were invisible. The obvious alternative, scraping it from secsvcs over
 the tailnet, needs secsvcs to open connections *into* the tailnet through pfSense, which runs
-Tailscale in SNAT mode (router/04 is open), would bind a listener on `tailscale0` that HAProxy's
+Tailscale in SNAT mode, would bind a listener on `tailscale0` that HAProxy's
 start depends on, and would be thrown away once the VPS ran the same agents as the VMs.
-observability/04 has the full comparison.
 
 ## Decision
 
@@ -30,7 +29,7 @@ observability/04 has the full comparison.
   failover and a false DOWN would cut traffic. Unreachable VMs show up as
   `haproxy_backend_connection_errors_total`.
 - A pushing host can't raise `up == 0`, so `VpsMetricsAbsent` alerts on silence, and the dead-man
-  checker on the VPS (observability/10) covers the opposite direction.
+  checker on the VPS covers the opposite direction.
 
 ## Considered
 
@@ -46,4 +45,4 @@ observability/04 has the full comparison.
 - Podman and its CVE stream now live on the edge host, plus a bridge and netavark's rules.
   Mitigations: no published ports, `NoNewPrivileges`, ufw's default deny with per-port allows from
   `<subnet>.7`, and `ss -ltnp` and an external port scan checked at install.
-- About 30 MB of RAM and 400 MB of disk on the 1 GB Nanode (observability/08).
+- About 30 MB of RAM and 400 MB of disk on the 1 GB Nanode.

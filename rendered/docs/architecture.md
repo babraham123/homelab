@@ -152,7 +152,7 @@ as on the VMs.
 | -------- | -------- | ------- |
 | TP-Link EAP660 HD WiFi 6 AP | deployed | wall-mounted, tagged VLANs for trusted/IoT/guest SSIDs |
 | SMLight SLZB-06 Zigbee adapter | deployed | used by Zigbee2MQTT on `homesvcs` |
-| HDDs (WD 3.5") + Blu-ray drive | bought, not yet installed | HDDs: websvcs media array on pve2, snapraid + mergerfs ([backup-and-dr/13](../planning/backup-and-dr/issues/13-pve2-media-array.md)) |
+| HDDs (WD 3.5") + Blu-ray drive | bought, not yet installed | HDDs: websvcs media array on pve2, snapraid + mergerfs |
 | 24-port PoE+ managed switch | planned | unblocks the wired VLANs (20/21) |
 | 4G LTE failover modem | planned | pfSense WAN failover |
 | Rack, patch panel, UPS, PiKVM | planned | |

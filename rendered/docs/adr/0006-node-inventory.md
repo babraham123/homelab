@@ -22,7 +22,7 @@ the Gatus config), `parse_dispatcher.sh` (sudoers grants and OliveTin buttons fr
 and `gen_dispatch_cmds.sh` (dispatcher cases from `install_svcs.sh`, pasted in by hand). Each regex
 was a place for a bug to hide (a hyphenated service name silently dropped out of the allowlist), and
 the image updater would have added a fifth parser for install order. An earlier prototype
-(`planning/services-inventory/`) that generated routes, quadlets and secrets as well was judged too
+that generated routes, quadlets and secrets as well was judged too
 complex.
 
 ## Decision

@@ -12,6 +12,7 @@ Issues and specs for this repo live as markdown files in `planning/`.
   `triage-labels.md` for the role strings)
 - A finished issue is closed with `Status: resolved` (`wontfix` closes one that won't be done)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- Don't reference planning tickets elsewhere in the documentation.
 
 ## When a skill says "publish to the issue tracker"
 

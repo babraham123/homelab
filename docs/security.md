@@ -53,7 +53,7 @@ HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy
     (`crowdsecurity/appsec-virtual-patching`, `appsec-generic-rules`); two different rules hit by
     one IP within a minute ban it;
   - out-of-band, detect only: the OWASP Core Rule Set (`crowdsecurity/crs`), whose matches are
-    alerts without a ban until its false positives are known (auth/03);
+    alerts without a ban until its false positives are known;
   - the homelab's own machines (the VMs, PVE, PBS, pfSense, the VPS's tailnet IP, the container
     subnets) skip both checks, so metric and log pushes don't pass through the WAF; people's LAN
     devices don't, and the allowlist keeps them from being banned.
@@ -79,12 +79,10 @@ direct peer connections come from the endpoint-independent outbound NAT rule ins
 matrix exists in `src/services/headscale/headscale_acl.hujson.j2` but is marked "not currently in
 use" and the active policy is permissive (each enrolled user gets broad access). SNAT does not block
 the matrix: Tailscale enforces ACLs in its OS-independent packet filter (`net/tstun`) on the tailnet
-address, before netstack SNATs the flow, so it works on pfSense today; re-enabling it is
-`planning/router/issues/03-headscale-acl-matrix.md`. SNAT only hides tailnet clients' addresses from
-the LAN side (pfSense VLAN rules, logs, Traefik). Kernel routing without SNAT is available on
-pfSense now via `TS_DEBUG_NETSTACK_SUBNETS=0` (`planning/router/issues/04-tailscale-no-snat.md`).
-Enforced segmentation today comes from pfSense VLAN firewall rules and Authelia's application-layer
-policies, not from the mesh.
+address, before netstack SNATs the flow, so it works on pfSense today. SNAT only hides tailnet
+clients' addresses from the LAN side (pfSense VLAN rules, logs, Traefik). Kernel routing without
+SNAT is available on pfSense now via `TS_DEBUG_NETSTACK_SUBNETS=0`. Enforced segmentation today
+comes from pfSense VLAN firewall rules and Authelia's application-layer policies, not from the mesh.
 
 ## Identity: LLDAP + Authelia
 
@@ -140,8 +138,7 @@ OIDC client secrets are injected at container startup via the secrets pipeline; 
 rendered configs on disk.
 
 One non-interactive credential passes ForwardAuth: the LLDAP user `car_uploader`, stored on the
-phone and sent as HTTP Basic by the WiCAN sync app
-([copyparty/05](../planning/copyparty/issues/05-car-ingest-wican-jsonl.md)). Basic is one factor
+phone and sent as HTTP Basic by the WiCAN sync app. Basic is one factor
 only, so its Authelia rule is pinned to `PUT`/`POST` under `files.janedoe.com/car/`, and copyparty
 gives it write-only access there; anything else it requests is denied.
 
@@ -297,6 +294,3 @@ admin operations happen over localhost, not the public interface.
 - ESP32-class IoT devices talk plaintext on their VLAN; TLS costs too much CPU/RAM there;
   containment relies on VLAN firewall rules.
 - Wired VLAN enforcement waits on a managed switch.
-
-Only the ACLs are tracked as an issue
-([router/03](../planning/router/issues/03-headscale-acl-matrix.md)).

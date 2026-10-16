@@ -43,7 +43,7 @@ noticed when a service broke.
   scan per image instead of one per node, but a registry, its htpasswd, per-node auth files, an
   internal-CA cert and firewall rules to run, and secsvcs on the update path of every node.
 - **`Pull=newer` in quadlets**: still pulls unscanned images, on every restart instead of nightly.
-- **Pinned digests in git**, updated by hand or a bot (supply-chain/01): every update becomes a
+- **Pinned digests in git**, updated by hand or a bot: every update becomes a
   commit and a deploy, which in practice means updates stop.
 - **An `OnFailure=` hook on `podman-auto-update.service`**: it reports failures but scans nothing.
 - **A Gatus heartbeat** as a second dead-man path: Gatus alerts only through vmalert's

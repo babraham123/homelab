@@ -188,7 +188,7 @@ key on the client IP, so each hop passes it on and trusts it only from the hop b
 | Traefik → Authelia (ForwardAuth, `trustForwardHeader`) | `X-Forwarded-For` | any peer that reaches :9091 |
 
 Both Traefik `trustedIPs` lists hold only vpnsvcs's tailnet address (`vpnsvcs.tailnet_ip`).
-pfSense routes tailnet traffic in the kernel without SNAT (router/04), so HAProxy's connections
+pfSense routes tailnet traffic in the kernel without SNAT, so HAProxy's connections
 keep that source address and every other tailnet, LAN or VLAN client arrives from its own address,
 which can't assert a client IP. If pfSense falls back to SNAT (for example after a Tailscale package
 update overwrites the System Patches change), HAProxy's connections arrive from the subnet gateway
