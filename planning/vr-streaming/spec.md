@@ -14,8 +14,9 @@ Oculus games already work, but only by hand: `docs/guides/gaming.md` says to RDP
 
 Maintainer requests 2026-10-12. Research: [airlink-research.md](airlink-research.md) (01, 04),
 [automation-research.md](automation-research.md) (02, 03), [uevr-research.md](uevr-research.md)
-(05, 06). What only the VM and headset can answer is collected in one hands-on session,
-[investigation.md](investigation.md), which resolves 01, 04 and 05.
+(05, 06), [playnite-research.md](playnite-research.md) (08). What only the VM and headset can
+answer is collected in one hands-on session, [investigation.md](investigation.md), which resolves
+01, 04 and 05.
 
 ## Modes
 
@@ -80,3 +81,4 @@ start steps and its `StopVR`. `StopSunshine` / `StopVR` / `StopDirect` stop only
 | [05](issues/05-uevr-over-air-link.md) | Prove a UEVR game over Air Link, injected without a keyboard | `needs-info` | prototype | 01 |
 | [06](issues/06-uevr-mode.md) | UEVR mode: `StartUEVR` trigger, Playnite injection, OliveTin button | `needs-info` | task | 02, 03, 05 |
 | [07](issues/07-direct-mode.md) | Direct mode: Playnite fullscreen on the TV over HDMI | `ready-for-human` | task | 02, 03 |
+| [08](issues/08-playnite-library.md) | Playnite library: EA app games and Dolphin/Eden, controller only | `ready-for-human` | task | |
