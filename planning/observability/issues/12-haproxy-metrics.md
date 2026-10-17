@@ -1,7 +1,10 @@
 # 12. Expose HAProxy's metrics on loopback, scrape them, alert and graph
 
-Status: resolved Type: task Blocked by: 08 Repo: homelab Source: split from observability/04
-(2026-09-27)
+Status: resolved
+Type: task
+Repo: homelab
+Source: split from observability/04 (2026-09-27)
+Blocked by: 08
 
 ## Problem
 

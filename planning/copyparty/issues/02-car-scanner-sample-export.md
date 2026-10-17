@@ -1,6 +1,9 @@
 # 02. Capture a sample Car Scanner Pro export
 
-Status: resolved Type: task Repo: homelab Source: maintainer request 2026-09-26
+Status: resolved
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26
 
 ## Task
 

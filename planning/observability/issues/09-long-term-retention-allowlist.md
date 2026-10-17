@@ -1,7 +1,9 @@
 # 09. Explore long-term retention for an allowlist of series
 
-Status: resolved Type: research Repo: homelab Source: maintainer request 2026-09-26
-(copyparty/03 retention decision)
+Status: resolved
+Type: research
+Repo: homelab
+Source: maintainer request 2026-09-26 (copyparty/03 retention decision)
 
 ## Problem
 

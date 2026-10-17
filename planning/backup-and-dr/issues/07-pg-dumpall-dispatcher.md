@@ -1,6 +1,9 @@
 # 07. pg_dumpall via dispatcher, triggered by the orchestrator
 
-Status: resolved Type: task Repo: homelab Source: review finding 6
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 6
 
 ## Problem
 

@@ -1,7 +1,9 @@
 # 03. Staging: a clone-test-destroy runbook rather than a standing environment
 
-Status: wontfix Type: task Repo: homelab Source: review finding 47 (maintainer asked how helpful it
-would be)
+Status: wontfix
+Type: task
+Repo: homelab
+Source: review finding 47 (maintainer asked how helpful it would be)
 
 ## How helpful would staging actually be? (answer)
 

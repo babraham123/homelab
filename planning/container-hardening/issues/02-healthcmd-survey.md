@@ -1,6 +1,9 @@
 # 02. Survey: which containers support a HealthCmd, and with what
 
-Status: resolved Type: research Repo: homelab Source: review finding 16
+Status: resolved
+Type: research
+Repo: homelab
+Source: review finding 16
 
 ## Task
 

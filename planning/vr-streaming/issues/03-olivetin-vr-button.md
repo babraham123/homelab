@@ -1,7 +1,11 @@
 # 03. OliveTin "Start VR" button
 
-Status: needs-info Type: task Repo: homelab Source: maintainer request 2026-10-12; research in
-[automation-research.md](../automation-research.md#shape-for-03) Blocked by: 02
+Status: needs-info
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-12; research in
+  [automation-research.md](../automation-research.md#shape-for-03)
+Blocked by: 02
 
 ## Change
 

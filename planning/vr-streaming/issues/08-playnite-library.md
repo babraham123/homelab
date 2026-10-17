@@ -1,7 +1,9 @@
 # 08. Playnite library: EA app games and Dolphin/Eden, playable with a controller only
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-10-16; research in
-[playnite-research.md](../playnite-research.md)
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-16; research in [playnite-research.md](../playnite-research.md)
 
 Playnite is the front end in flat, UEVR and direct mode, but two parts of its library don't work
 from the couch:

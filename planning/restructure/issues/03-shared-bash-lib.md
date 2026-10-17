@@ -1,6 +1,10 @@
 # 03. Shared bash library sourced by all scripts
 
-Status: resolved Type: task Repo: homelab Source: user item 54 Blocked by: 02
+Status: resolved
+Type: task
+Repo: homelab
+Source: user item 54
+Blocked by: 02
 
 ## Change
 

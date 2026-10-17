@@ -1,6 +1,9 @@
 # 05. Back up the repo (incl. vars.yml) to pve1 on every deploy
 
-Status: resolved Type: task Repo: homelab Source: review finding 4
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 4
 
 ## Problem
 

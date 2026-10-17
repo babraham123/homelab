@@ -1,5 +1,7 @@
 # Runbook: rename the vpn node to vpnsvcs
 
+Executed 2026-09-28.
+
 One-off runbook for restructure/08. Produced by restructure/06. `SITE` is `site.url`, `VPS_IP` is
 `vpnsvcs.ip`. Run the phases in order; each ends with a check that must pass before the next.
 

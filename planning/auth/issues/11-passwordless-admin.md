@@ -1,14 +1,16 @@
 # 11. Passwordless admin: NOPASSWD sudo behind FIDO keys, locked roots, SSH CA on YubiKeys
 
-Status: ready-for-agent Type: task Repo: homelab Source: auth/08 follow-up tasks 1–8, 10–13
-(2026-10-13)
+Status: ready-for-agent
+Type: task
+Repo: homelab
+Source: auth/08 follow-up tasks 1–8, 10–13 (2026-10-13)
 
 ## Problem
 
 auth/08 decided where every human-held secret lives, and that most of them should stop existing.
 Its Answer lists the follow-ups; tasks 9 (pve2's PBS token, backup-and-dr/11) and 14 (the SOPS
 comment) are done, and task 5 (the `ssh_cert_gen.sh` bootstrap step) is in the pve1 guide. The rest
-are below. Full research and sources: `08-research-notes.md`.
+are below. Full research and sources: `../research-08.md`.
 
 Hardware: two YubiKeys with firmware 5.2.3 or later (FIDO2 `ed25519-sk`). The Mac needs Homebrew
 `openssh`; Apple's build has no FIDO support.
@@ -65,9 +67,9 @@ Hardware: two YubiKeys with firmware 5.2.3 or later (FIDO2 `ed25519-sk`). The Ma
    password). The escrow age identity must be an X25519 identity wrapped with `age -p`, not a
    passphrase recipient (an scrypt stanza can't share a file with other recipients). The CA and
    SSH CA passphrase hand-notes come off the list.
-2. `pve1_recovery.md.j2`: line 42 (passphrases: Vaultwarden + escrow for the intermediate, paper
-   for the root, YubiKeys replace the SSH CA's), line 61 (ACB: Vaultwarden + `breakglass.txt`),
-   lines 267–268 (passwordless sudo). backup-and-dr/09 needs no change.
+2. `pve1_recovery.md.j2`: line 34 (passphrases: Vaultwarden + escrow for the intermediate, paper
+   for the root, YubiKeys replace the SSH CA's), line 53 (ACB: Vaultwarden + `breakglass.txt`),
+   lines 248–253 (passwordless sudo). backup-and-dr/09 needs no change.
 
 ## Acceptance
 

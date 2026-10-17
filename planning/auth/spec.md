@@ -9,13 +9,16 @@ key-seed coupling.
 | # | Title | Status | Type |
 | --- | --- | --- | --- |
 | [01](issues/01-admin-two-factor.md) | Require two_factor for admin subdomains from every network | `resolved` | task |
-| [02](issues/02-telemetry-group-gating.md) | Gate VictoriaMetrics/VictoriaLogs/Alertmanager/ntfy UIs on a telemetry LDAP group | `ready-for-human` | task |
+| [02](issues/02-telemetry-group-gating.md) | Gate VictoriaMetrics/VictoriaLogs/Alertmanager UIs on a telemetry LDAP group | `ready-for-human` | task |
 | [03](issues/03-crowdsec-waf-fail2ban.md) | Edge defense: CrowdSec bans at the VPS, CrowdSec WAF in Traefik, fail2ban for SSH | `ready-for-human` | task |
 | [04](issues/04-lldap-key-seed-rotation.md) | Decouple LLDAP_KEY_SEED from the admin password; document password rotation | `ready-for-human` | research |
 | [05](issues/05-olivetin-oidc-groups.md) | Test OliveTin OIDC group claims and drop the allow-everyone workaround | `ready-for-human` | task |
 | [06](issues/06-real-client-ip.md) | Verify the real client IP reaches Traefik and apps through HAProxy | `ready-for-human` | task |
 | [07](issues/07-guacamole-private-client.md) | Move Guacamole to a private OIDC client with code flow and PKCE | `ready-for-agent` | task |
-| [08](issues/08-password-management-research.md) | Research: manage SSH, sudo, CA and recovery passwords better than offline notes | `ready-for-agent` | research |
-| [09](issues/09-headscale-oidc-groups.md) | Drive Headscale ACL groups from LLDAP groups once headscale supports OIDC groups | `needs-info` | task |
+| [08](issues/08-password-management-research.md) | Research: manage SSH, sudo, CA and recovery passwords better than offline notes | `resolved` | research |
+| [09](issues/09-headscale-oidc-groups.md) | Drive Headscale ACL groups from LLDAP groups once headscale supports OIDC groups | `ready-for-agent` | task |
 | [10](issues/10-authelia-lldap-client-cert.md) | Give Authelia a real client cert for LLDAP, and make LLDAP verify it (or drop it) | `resolved` | task |
+| [11](issues/11-passwordless-admin.md) | Passwordless admin: NOPASSWD sudo behind FIDO keys, locked roots, SSH CA on YubiKeys | `ready-for-agent` | task |
 | [12](issues/12-add-user-command.md) | Add a user with one command from pve1 | `needs-triage` | task |
+| [13](issues/13-ntfy-push-credentials-and-routes.md) | Research: credentials for ntfy and ntfy-idp-push, and which routes Authelia protects | `resolved` | research |
+| [14](issues/14-ntfy-idp-push-install.md) | Install ntfy-idp-push on secsvcs and wire it to ntfy and Authelia | `needs-triage` | task |

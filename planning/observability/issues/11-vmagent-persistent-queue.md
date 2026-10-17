@@ -1,6 +1,9 @@
 # 11. Keep vmagent's remote-write buffer on its volume, and cap it
 
-Status: resolved Type: task Repo: homelab Source: found in observability/04 (2026-09-27)
+Status: resolved
+Type: task
+Repo: homelab
+Source: found in observability/04 (2026-09-27)
 
 ## Problem
 

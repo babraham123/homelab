@@ -1,8 +1,10 @@
 # 03. Re-enable the group-based Headscale ACL matrix
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26;
-tailscale/tailscale#5573 (Brad Fitzpatrick, 2023-07-18: "ACLs are enforced in shared code that's not
-OS-specific")
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26; tailscale/tailscale#5573 (Brad Fitzpatrick, 2023-07-18: "ACLs
+  are enforced in shared code that's not OS-specific")
 
 ## Problem
 
@@ -56,3 +58,9 @@ that ACLs don't work for pfSense subnet routes.
   `tests` cover admin, family, public and guest.
 - 2026-09-27: tagging the router/vpnsvcs nodes and setting `node.expiry` is router/05, blocked on
   this.
+- 2026-10-17: supersedes the `policy.path` part of the first comment: `daa2fc6` set `policy.path`
+  to `/etc/headscale/acl.hujson` in `headscale.yaml.j2`. Steps 1–2 are done in the repo
+  (`89921e9`, `daa2fc6`): the matrix is uncommented and `tests` cover admin, family, public and
+  guest. Steps 3–5 (deploy and manual checks) are in `notes/apply-since-5a50097.md` step 11.4.
+  Step 6 is open: `docs/security.md` "Current state" still calls the matrix unused, and ADR 0003
+  still says pfSense lacks no-SNAT routing.

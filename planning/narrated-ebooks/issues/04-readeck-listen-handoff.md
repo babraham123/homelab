@@ -16,19 +16,20 @@ read-along books in Storyteller, with no manual export.
 Flow: Readeck label `listen` → Readeck EPUB export → Calliope inbox →
 `readalouds/articles/<Title>/` → Storyteller's **Articles** collection.
 
-- `src/services/readeck/readeck_narrate.sh`, run by a systemd `.service` and `.timer` on
-  websvcs every 15 minutes with `Persistent=true`. Build it on the same skeleton as
-  web-archiving/03's `linkding_handoff.sh`: shared token loading, journal logging and
-  the "change the label only after success" rule. Put the shared parts in a sourced
-  helper rather than copying them.
+- The Readeck job in `src/services/bookmark_handoff/bookmark_handoff.py`, which also runs
+  web-archiving/03's linkding handoff, in the `bookmark_handoff` container started by
+  `bookmark_handoff.timer` on websvcs every 15 minutes with `Persistent=true`. It shares that
+  handoff's API wrapper, journal logging and the "change the label only after success" rule.
   - Reach Readeck on its container IP (`.18:8000`), not through Traefik.
+  - Skip the job, logging why, until Calliope's inbox exists.
   - List bookmarks with `GET /api/bookmarks?labels=listen`, following pagination.
   - For each one, download `GET /api/bookmarks/{id}/article.epub` to the Calliope
     inbox as `<slug>.epub`, where `<slug>` is a filesystem-safe title plus the
-    bookmark id. Write the file atomically: write a temp file, then rename it, so
+    bookmark id. Write the file atomically: write a hidden temp file, then rename it, so
     Calliope's path unit never sees a partial EPUB.
-  - Write `<slug>.json` with `{"lang": <bookmark lang, default en>, "collection":
-    "articles"}`.
+  - Write `<slug>.json` with `{"lang": <bookmark lang>, "collection": "articles"}`. The
+    language is normalised with langcodes to a base code (`en-US` → `en`), and falls back to
+    `en` when missing or outside Chatterbox Multilingual's languages.
   - Only after both files are in place, `PATCH /api/bookmarks/{id}` with
     `remove_labels: ["listen"]` and `add_labels: ["narrated"]`. On any failure, leave
     the label so the next run retries.
@@ -46,7 +47,7 @@ Flow: Readeck label `listen` → Readeck EPUB export → Calliope inbox →
 - With Calliope's inbox unwritable, a run logs the failure and leaves the label as
   `listen`.
 - Two runs in a row never queue the same article twice.
-- `shellcheck` passes as part of the render.
+- The render passes, including ruff's check of the rendered Python.
 
 ## Comments
 
@@ -58,3 +59,8 @@ own `readeck_narrate` case and timer; acceptance needs a deploy.
   run where the download worked but the relabel failed.
 - `lang` is Readeck's `lang` reduced to its base code (`en-US` → `en`), defaulting to
   `en`.
+
+2026-10-17: fe7883f replaced `readeck_narrate.sh.j2` and its `.service`/`.timer` with the
+Readeck job in `src/services/bookmark_handoff/bookmark_handoff.py`, one container and timer
+shared with web-archiving/03. The duplicate check above (relabel only when `<slug>` is already
+in the inbox, `readalouds/articles` or `failed`) carried over. Acceptance still needs a deploy.

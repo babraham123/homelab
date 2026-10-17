@@ -1,6 +1,9 @@
 # 14. Second SSD on pve2 for the gaming and devtop data disks
 
-Status: needs-info Type: task Repo: homelab Source: backup restructure grilling 2026-10-04
+Status: needs-info
+Type: task
+Repo: homelab
+Source: backup restructure grilling 2026-10-04
 
 ## Problem
 

@@ -1,7 +1,10 @@
 # 06. Test pfsense/FreeBSD-ports#1462 (Tailscale SNAT knob) on the router
 
-Status: resolved Type: task Repo: homelab Source: maintainer request 2026-10-10;
-pfsense/FreeBSD-ports#1462, pfSense Redmine #13905 Blocked by: none (04 depends on the outcome)
+Status: resolved
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-10; pfsense/FreeBSD-ports#1462, pfSense Redmine #13905
+Blocked by: none (04 depends on the outcome)
 
 ## Problem
 

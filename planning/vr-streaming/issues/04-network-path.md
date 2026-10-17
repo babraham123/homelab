@@ -1,7 +1,10 @@
 # 04. Measure and tune the WiFi → pfSense → pve2 stream path
 
-Status: needs-info Type: task Repo: homelab Source: maintainer request 2026-10-12; research in
-[airlink-research.md](../airlink-research.md) Blocked by: 01
+Status: needs-info
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-12; research in [airlink-research.md](../airlink-research.md)
+Blocked by: 01
 
 ## Problem
 

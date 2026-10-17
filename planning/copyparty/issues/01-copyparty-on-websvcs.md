@@ -1,7 +1,9 @@
 # 01. Run copyparty on websvcs behind Authelia
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26;
-`notes/TODO.md` "setup copyparty"
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26; `notes/TODO.md` "setup copyparty"
 
 ## Problem
 

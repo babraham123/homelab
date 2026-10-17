@@ -7,9 +7,10 @@ Postgres and Home Assistant, copies the datastore offsite, and documents recover
 
 2026-10-04 restructure (grilling session): one weekly run; a hand-written `backup.sh` per node
 stages files and dumps under `/var/opt/backups/`, pve1 pulls every stage into `/root/backups/` and
-uploads it to PBS encrypted with a client key; VM images go through `pvesh` from each host's
-`backup.sh images`; the HDDs become a snapraid + mergerfs media array inside websvcs (13). Shape and
-reasoning are recorded in the tickets' answers and in `docs/services.md#storage-and-backups`.
+uploads it to PBS encrypted with a client key; VM images go to PBS through
+`pvesh create /nodes/<n>/vzdump` at the end of pve1's and pve2's `backup.sh`; the HDDs become a
+snapraid + mergerfs media array inside websvcs (13). Shape and reasoning are recorded in the
+tickets' answers and in `docs/services.md#storage-and-backups`.
 
 ## Issues
 

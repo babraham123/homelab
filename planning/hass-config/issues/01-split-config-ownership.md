@@ -1,7 +1,9 @@
 # 01. Repo-owned base config, UI-owned files, hand-written packages
 
-Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-10-14; design in
-[spec.md](../spec.md)
+Status: ready-for-agent
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-14; design in [spec.md](../spec.md)
 
 ## Change
 

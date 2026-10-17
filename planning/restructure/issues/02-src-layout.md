@@ -1,15 +1,21 @@
 # 02. Restructure src/ into nodes/, services/, base/ and update every path
 
-Status: ready-for-human Type: task Repo: homelab Source: user item 53 Blocked by: 01
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: user item 53
+Blocked by: 01
 
 ## Target layout
 
 ```text
 src/
-  base/        debian/ podman/ macos/ certificates/ node_exporter/
-  nodes/       pve1/ pve2/ router/ vpnsvcs/ secsvcs/ homesvcs/ websvcs/ devtop/ gaming/
+  base/        debian/ (incl. msmtprc.j2) podman/ node_exporter/ vm_watchdog/ lib.sh
+  clients/     macos/
+  nodes/       pve1/ (incl. certificates/) pve2/ router/ vpnsvcs/ secsvcs/ homesvcs/ websvcs/
+               devtop/ gaming/   each with its own inventory.yml
   services/    everything else (authelia/ grafana/ traefik/ ...)
-  nodes.yml
+  nodes.jinja
 ```
 
 Shared Traefik config `src/traefik/` → `src/services/traefik/`; per-node `src/<node>/traefik/` stays
@@ -64,7 +70,7 @@ for `homelab-rendered/src/[a-z]` paths that don't exist.
   3. secsvcs, homesvcs, websvcs, vpnsvcs:
      `sudo cp /root/homelab-rendered/src/base/podman/containers.conf /etc/containers`
   4. `ssh autoadmin@NODE install_all_svcs` on secsvcs, homesvcs, websvcs
-  5. vpnsvcs: `install_deadman`, `install_fluentbit`; `cp .../src/base/certificates/msmtprc /etc`
+  5. vpnsvcs: `install_deadman`, `install_fluentbit`; `cp .../src/base/debian/msmtprc /etc`
   6. pve1: `install_cert_notifier`, `install_backup_orchestrator`; the same `msmtprc` copy
   7. pve2: `install_hookscript`
   8. Router and gaming: nothing; their trees land at `/root/router-src` and `C:/Homelab/gaming-src`
@@ -76,3 +82,9 @@ for `homelab-rendered/src/[a-z]` paths that don't exist.
      ```
 
      prints nothing
+- 2026-10-17: the layout moved on after the move: `src/nodes.yml` became per-node
+  `src/nodes/<node>/inventory.yml` (`0221a7c`), and deploy/04 (`f20c272`) moved the Mac scripts to
+  `src/clients/macos/`, pve1's certificate scripts to `src/nodes/pve1/certificates/`, and `msmtprc`
+  to `src/base/debian/msmtprc.j2`. The target layout and step 5 above reflect that. The cutover is
+  now part of `notes/apply-since-5a50097.md`: steps 1 (deploy), 3 (dispatchers), 4 (pve1/pve2 host
+  services and `msmtprc`) and 11 (vpnsvcs). The hosts are still at `5a50097`, so it hasn't run yet.

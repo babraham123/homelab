@@ -1,21 +1,24 @@
 # 02. Measure network throughput on every path and find the bottlenecks
 
-Status: ready-for-human Type: research Repo: homelab Source: maintainer request 2026-09-26 Blocked
-by: 01
+Status: ready-for-human
+Type: research
+Repo: homelab
+Source: maintainer request 2026-09-26
+Blocked by: 01
 
 ## Why after 01
 
 The pfSense 2.9 upgrade and the NAT change alter the routing and Tailscale paths, and the numbers
-should describe the router you'll keep. Optionally run test 3 once before 01 for a before/after.
+should describe the router you'll keep.
 
 ## Known suspects (from the repo)
 
 | Suspect | Why |
 | --- | --- |
 | **pfSense on a Celeron N5105 routes every inter-subnet flow** | pve1 VMs ↔ pve2, LAN ↔ anything, WiFi ↔ servers. pf + packages on 4 small cores may not reach 2.5 GbE line rate |
-| **pve2's uplink** | `eno1`, probably the board's onboard Intel I219 (1 GbE), with `tso off gso off` from the crash workaround in `docs/guides/proxmox.md.j2:41`, which shifts segmentation to the CPU. Everything pve2 serves, including every pve1 → pbs2 backup, is capped by it |
+| **pve2's uplink** | `eno1`, probably the board's onboard Intel I219 (1 GbE), with `tso off gso off` from the crash workaround in `docs/guides/proxmox.md.j2:58`, which shifts segmentation to the CPU. Everything pve2 serves, including every pve1 → pbs2 backup, is capped by it |
 | **pve1 VMs reach pfSense over virtio on `vmbr0`** | vhost threads share the N5105 with the router VM |
-| **Tailscale** | WireGuard CPU cost on the smallest Linode (1 shared vCPU), DERP relay vs direct, MTU 1280 plus the MSS clamp on the VPS |
+| **Tailscale** | WireGuard CPU cost on the smallest Linode (1 shared vCPU), DERP relay vs direct, MTU 1280 plus the MSS clamp on the VPS. Subnet traffic is kernel-routed on pfSense without SNAT (`TS_DEBUG_NETSTACK_SUBNETS=0`), so it crosses pf on `tailscale0` instead of netstack |
 | **Public ingress** | internet → HAProxy (VPS, 1 vCPU) → tailnet → Traefik TLS → app. VPS egress is the cap |
 | **WiFi** | EAP660 HD, per VLAN |
 
@@ -57,8 +60,8 @@ During each run, capture:
   - pfSense tuning or offload settings;
   - pbs2's datastore disk speed if backups are disk-bound rather than network-bound;
   - a bigger VPS if public ingress matters.
-- Record the backup-path throughput and expected run time for a full vzdump in backup-and-dr/01,
-  which sizes the orchestrator's window.
+- Record the backup-path throughput and expected run time for a full vzdump under `## Answer` in
+  this ticket; it sizes the backup orchestrator's window.
 - Optional: a nightly WAN speed test exporter into VictoriaMetrics, if trends are wanted.
 
 ## Comments

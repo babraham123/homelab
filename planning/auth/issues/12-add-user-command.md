@@ -1,6 +1,10 @@
 # 12. Add a user with one command from pve1
 
-Status: needs-triage Type: task Repo: homelab Source: maintainer request 2026-10-14 Blocked by: 09
+Status: needs-triage
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-14
+Blocked by: 09
 
 ## Problem
 

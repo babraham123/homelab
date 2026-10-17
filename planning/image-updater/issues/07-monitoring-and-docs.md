@@ -1,7 +1,11 @@
 # 07. Dead-man alerts, guides, maintenance, development, ADR 0006
 
-Status: resolved Type: task Repo: homelab Source: notes/image-updater-design.md
-"Notifications and monitoring", "Changes, in rollout order" step 6 Blocked by: 05, observability/01
+Status: resolved
+Type: task
+Repo: homelab
+Source: notes/image-updater-design.md "Notifications and monitoring", "Changes, in rollout order"
+  step 6
+Blocked by: 05, observability/01
 
 ## Change
 

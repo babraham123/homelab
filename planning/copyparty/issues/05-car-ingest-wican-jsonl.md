@@ -1,7 +1,10 @@
 # 05. Ingest WiCAN Pro logger batches (JSONL) in car_ingest
 
-Status: ready-for-agent Type: task Repo: homelab Source: wican1 session 2026-10-14 (WiCAN Pro
-BLE-sync app, a separate GPL-3.0 Android repo) Blocked by: 03
+Status: ready-for-agent
+Type: task
+Repo: homelab
+Source: wican1 session 2026-10-14 (WiCAN Pro BLE-sync app, a separate GPL-3.0 Android repo)
+Blocked by: 03
 
 ## Problem
 
@@ -110,3 +113,5 @@ this ticket's comments.
   next to `ts_quality`, and the `.jsonl.gz` extension is always present.
 - 2026-10-14: `ts_quality` has four values: `device` (the raw stamp kept, most rows) joins
   `journal`, `anchor` and `unknown`; `unknown` rows have `"ts":null`.
+- 2026-10-17: 03's code is in (`src/nodes/websvcs/car_ingest.py.j2`, `tests/car_ingest_test.sh`);
+  only its deploy and live check remain, so this ticket's code can build on it now.

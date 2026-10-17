@@ -1,7 +1,9 @@
 # 01. Pin container images and decide the AutoUpdate policy
 
-Status: wontfix Type: task Repo: homelab Source: review finding 9 — no explicit response received;
-flagged for decision
+Status: wontfix
+Type: task
+Repo: homelab
+Source: review finding 9 — no explicit response received; flagged for decision
 
 ## Problem
 

@@ -1,7 +1,10 @@
 # 04. Route subnets in the kernel on pfSense without SNAT, so LAN hosts see tailnet addresses
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26;
-tailscale/tailscale#5573, #21060, #21070, #18897; pfSense Redmine #13905
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26; tailscale/tailscale#5573, #21060, #21070, #18897; pfSense
+  Redmine #13905
 
 ## Problem
 
@@ -72,3 +75,9 @@ pfSense instead of the tailnet client.
   before 1.104, so with the PR applied `tailscale up` fails on the 1.94.1 / 1.98.5 builds (pfSense
   CE 2.9.0 ships 1.98.5). The env var still works on those builds and is what gives no-SNAT
   routing. Details in router/06.
+- 2026-10-17: no-SNAT routing has been live since 2026-10-12, via the router/06 System Patches
+  change with the SNAT box unchecked (router/06 steps 8–9; `5c591cf` trusts only the VPS's tailnet
+  IP in Traefik). Steps 1–5 are done. Remaining: step 6, since `docs/guides/router.md.j2` has no
+  `tailscaled_env`/System Patches note, no Tailscale-tab pass rule and no outbound NAT rule for
+  `100.64.0.0/10` (`docs/networking.md` and the Traefik `trustedIPs` are done); and step 7, waiting
+  on pfsense/FreeBSD-ports#1462 (open as of 2026-10-16).

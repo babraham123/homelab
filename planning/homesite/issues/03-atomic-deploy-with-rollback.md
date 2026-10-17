@@ -1,6 +1,9 @@
 # 03. Release-directory deploy with a bounded rollback history
 
-Status: ready-for-human Type: task Repo: homesite Source: review finding 41
+Status: ready-for-human
+Type: task
+Repo: homesite
+Source: review finding 41
 
 ## Problem
 

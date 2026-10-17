@@ -1,6 +1,9 @@
 # 01. Investigate the Proxmox, Google Calendar and weather widget API errors
 
-Status: ready-for-human Type: research Repo: homelab Source: maintainer request 2026-09-27
+Status: ready-for-human
+Type: research
+Repo: homelab
+Source: maintainer request 2026-09-27
 
 ## Problem
 

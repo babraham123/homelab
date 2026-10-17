@@ -1,7 +1,9 @@
 # 11. Back up to PBS as a backup-only user, and decide on client-side encryption
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer answer to backup-and-dr/09 open
-question 1 (2026-09-27)
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer answer to backup-and-dr/09 open question 1 (2026-09-27)
 
 ## Problem
 
@@ -56,6 +58,17 @@ Answer under `## Answer` before changing anything:
 
 ## Comments
 
+- 2026-10-13, from auth/08: the Answer keeps pve2's `pbs2` storage on `root@pam`, which means pve2's
+  Linux root password sits in `/etc/pve/priv/storage/pbs2.pw` (`docs/guides/proxmox.md.j2`,
+  Backups). That is the same exposure the Problem describes for pve1, and it stops pve2's root
+  password from being rotated or locked without breaking backups. auth/08 recommends a second token,
+  `pve2@pbs!backup` with `DatastoreBackup` on `/datastore/backup1/pve2`, stored in
+  `/etc/pve/priv/storage/` like pve1's, and applied with the same `pvesm set pbs2` step. PBS being
+  local to pve2 doesn't change the argument: the password is still on disk.
+- 2026-10-17: The 2026-10-13 note is addressed by `9129e68`: the Answer, Change step 4 and
+  `docs/guides/proxmox.md.j2` (Backups) now give pve2 its own `pve2@pbs!backup` token, and neither
+  host's storage entry holds `root@pam`'s password.
+
 ## Answer
 
 **Encryption: yes, one client key, held on pve1.** Decided in the backup restructure (2026-10-04):
@@ -81,11 +94,3 @@ Code side done: `secrets_template.yaml`, the orchestrator's `step_upload`,
 key on pve1, enter the token in `pve1.yaml`, pve2's user, token and ACL, `pvesm set pbs2` on both
 hosts, then the acceptance checks: `pvesm status`, a scratch restore, and `proxmox-backup-client
 snapshot forget` refused as the token.
-
-- 2026-10-13, from auth/08: the Answer keeps pve2's `pbs2` storage on `root@pam`, which means pve2's
-  Linux root password sits in `/etc/pve/priv/storage/pbs2.pw` (`docs/guides/proxmox.md.j2`,
-  Backups). That is the same exposure the Problem describes for pve1, and it stops pve2's root
-  password from being rotated or locked without breaking backups. auth/08 recommends a second token,
-  `pve2@pbs!backup` with `DatastoreBackup` on `/datastore/backup1/pve2`, stored in
-  `/etc/pve/priv/storage/` like pve1's, and applied with the same `pvesm set pbs2` step. PBS being
-  local to pve2 doesn't change the argument: the password is still on disk.

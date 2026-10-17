@@ -1,7 +1,10 @@
 # 03. Onboard the first device: browser flash, fixed name, HA
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-10-13; design in
-[spec.md](../spec.md) Blocked by: 02
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-13; design in [spec.md](../spec.md)
+Blocked by: 02
 
 Proves the whole loop on one real board by following
 [docs/guides/esphome.md.j2](../../../docs/guides/esphome.md.j2), and corrects the guide where it's

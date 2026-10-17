@@ -1,7 +1,11 @@
 # 05. Quadlet labels, localhost/ images, install-time scan; per-VM rollout
 
-Status: ready-for-human Type: task Repo: homelab Source: notes/image-updater-design.md "Image
-references", "Scan gate and overrides", "Changes, in rollout order" step 4 Blocked by: 03, 04
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: notes/image-updater-design.md "Image references", "Scan gate and overrides", "Changes, in
+  rollout order" step 4
+Blocked by: 03, 04
 
 ## Change
 
@@ -39,11 +43,11 @@ Code done 2026-10-11; the rollout below is what's left.
 - vpnsvcs shares the fluentbit and vmagent quadlets, so it runs the updater too (decided
   2026-10-11), in a 20:00 slot.
 - Install-time gate: each node's `install_svcs.sh` runs
-  `base/podman/image_updater.sh install "$1"` before its `case`, so every case loads and scans its
+  `base/podman/image_updater.py install "$1"` before its `case`, so every case loads and scans its
   images before copying quadlets.
 
 Rollout per node, vpnsvcs included (homesvcs → websvcs → secsvcs → vpnsvcs): add the new secrets
-(`secret_update.sh`), deploy, `install_image_updater`, run `image_updater.sh` once, which loads the
+(`secret_update.sh`), deploy, `install_image_updater`, run `image_updater.py` once, which loads the
 images under their new names, then `install_all_svcs` (or each service on vpnsvcs).
 
 ## Comments

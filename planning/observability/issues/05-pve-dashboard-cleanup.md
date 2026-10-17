@@ -1,6 +1,9 @@
 # 05. Remove or feed the empty pve.json dashboard
 
-Status: resolved Type: task Repo: homelab Source: review finding 22
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 22
 
 ## Correction to the finding
 

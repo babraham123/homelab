@@ -1,7 +1,9 @@
 # 08. Pre-commit hook: shellcheck, yamllint, jq, render-and-diff
 
-Status: resolved Type: task Repo: homelab Source: split out of 02 on 2026-09-26 so the lint hook
-doesn't wait on restructure/01
+Status: resolved
+Type: task
+Repo: homelab
+Source: split out of 02 on 2026-09-26 so the lint hook doesn't wait on restructure/01
 
 ## Change
 

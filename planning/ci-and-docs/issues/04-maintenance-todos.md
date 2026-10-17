@@ -1,7 +1,10 @@
 # 04. Flesh out the TODOs in maintenance.md, podman.md and proxmox.md
 
-Status: resolved Type: task Repo: homelab Source: review finding 36 Blocked by: auth/01,
-auth/02, backup-and-dr/01, backup-and-dr/09, image-updater/07
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 36
+Blocked by: auth/01, auth/02, backup-and-dr/01, backup-and-dr/09, image-updater/07
 
 ## Change
 

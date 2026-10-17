@@ -1,6 +1,9 @@
 # 04. Design: get HAProxy metrics from the VPS into VictoriaMetrics
 
-Status: resolved Type: research Repo: homelab Source: review finding 21
+Status: resolved
+Type: research
+Repo: homelab
+Source: review finding 21
 
 ## Options
 

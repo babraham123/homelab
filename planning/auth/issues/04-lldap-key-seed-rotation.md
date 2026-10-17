@@ -1,6 +1,9 @@
 # 04. Decouple LLDAP_KEY_SEED from the admin password; document password rotation
 
-Status: ready-for-human Type: research Repo: homelab Source: review finding 17
+Status: ready-for-human
+Type: research
+Repo: homelab
+Source: review finding 17
 
 ## Problem
 

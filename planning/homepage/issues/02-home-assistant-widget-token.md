@@ -1,6 +1,9 @@
 # 02. Get a Home Assistant long-lived access token for the homepage widget
 
-Status: wontfix Type: task Repo: homelab Source: maintainer request 2026-09-27
+Status: wontfix
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-27
 
 ## Why
 

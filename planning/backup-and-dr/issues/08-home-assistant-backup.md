@@ -1,6 +1,9 @@
 # 08. Home Assistant native backup via dispatcher, triggered by the orchestrator
 
-Status: resolved Type: task Repo: homelab Source: review finding 7 (user items 7 and 9)
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 7 (user items 7 and 9)
 
 ## Problem
 

@@ -1,7 +1,10 @@
 # 02. parse_images.sh, render wiring and the Image=/label check
 
-Status: resolved Type: task Repo: homelab Source: notes/image-updater-design.md "Image list and
-order", "Image references" Blocked by: script-fixes/01
+Status: resolved
+Type: task
+Repo: homelab
+Source: notes/image-updater-design.md "Image list and order", "Image references"
+Blocked by: script-fixes/01
 
 ## Change
 

@@ -1,6 +1,10 @@
 # 08. Install Podman on the VPS and containerise node_exporter, fluent-bit and vmagent
 
-Status: resolved Type: task Repo: homelab Source: user item 50 Blocked by: 04, 11
+Status: resolved
+Type: task
+Repo: homelab
+Source: user item 50
+Blocked by: 04, 11
 
 ## Decision (maintainer, 2026-09-27)
 

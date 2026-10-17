@@ -1,17 +1,21 @@
 # 03. Sync OBD-II trip logs from copyparty into VictoriaMetrics
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26;
-`notes/TODO.md` "car data upload" Blocked by: 01, 02
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26; `notes/TODO.md` "car data upload"
+Blocked by: 01, 02
 
 ## Problem
 
-Car Scanner Pro recordings (`.brc` files uploaded from the phone by 04) have no path into the
-metrics stack.
+Car Scanner Pro recordings (`.brc` files uploaded to copyparty `/car/`) have no path into the
+metrics stack. Uploads are manual: the Termux auto-upload (04) is wontfix, and WiCAN Pro JSONL
+batches are 05's.
 
 ## Change
 
-- `src/nodes/websvcs/car_ingest.sh` + `car_ingest.{service,timer}` (every 15 min while websvcs is
-  up), installed by a `car_ingest` case in `src/nodes/websvcs/install_svcs.sh`:
+- `src/nodes/websvcs/car_ingest.py.j2` (one stdlib Python script) + `car_ingest.{service,timer}`
+  (every 15 min while websvcs is up), installed by a `car_ingest` case in `src/nodes/websvcs/install_svcs.sh`:
   - scan `/var/opt/copyparty/data/car/` for files not recorded in `/var/lib/car_ingest/state` (keyed
     by sha256, so re-uploads are skipped);
   - parse each `.brc` (format below) into `/api/v1/import/prometheus` lines with explicit

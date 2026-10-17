@@ -1,7 +1,11 @@
 # 07. Direct mode: Playnite fullscreen on the TV over HDMI
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-10-13; Playnite
-options in [automation-research.md](../automation-research.md#playnite) Blocked by: 02, 03
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-13; Playnite options in
+  [automation-research.md](../automation-research.md#playnite)
+Blocked by: 02, 03
 
 The 3060 Ti's HDMI goes straight to the TV and controllers pair with the VM over Bluetooth. Nothing
 is streamed: the TV shows the console session, with Playnite's fullscreen app on top.
@@ -70,3 +74,7 @@ is streamed: the TV shows the console session, with Playnite's fullscreen app on
 - `StopDirect` leaves the dummy plug primary, and Moonlight streams it with the TV off.
 
 ## Comments
+
+2026-10-17: the hands-on parts (adapter passthrough, display layouts, pairing) are for a human,
+but the change waits on 02 and 03, both `needs-info`: `Modes.ps1`, the mode task loop and the
+OliveTin button loop it extends don't exist yet.

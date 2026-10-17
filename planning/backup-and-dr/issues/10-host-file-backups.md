@@ -1,7 +1,10 @@
 # 10. Back up the important files on every host, not only the VM images
 
-Status: resolved Type: task Blocked by: 01 Repo: homelab Source: maintainer request 2026-09-27
-(after 09)
+Status: resolved
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-27 (after 09)
+Blocked by: 01
 
 ## Problem
 

@@ -16,7 +16,9 @@ Follow "Add a new service" in `docs/development.md`, with Guacamole as the model
 an OIDC client on websvcs.
 
 - `src/services/readeck/readeck.container.j2`:
-  - `Image=codeberg.org/readeck/readeck:latest`, `ContainerName=readeck`,
+  - `Image=localhost/readeck/readeck:latest`, with
+    `upstream: codeberg.org/readeck/readeck:latest` in the inventory entry so image_updater
+    pulls and scans it. `ContainerName=readeck`,
     `HostName=read.{{ site.url }}`, `IP={{ websvcs.container_subnet }}.18`, port 8000,
     `NoNewPrivileges=true`, `AutoUpdate=local`.
   - Data: `/var/opt/readeck:/readeck` for `config.toml` and the database on the SSD, and

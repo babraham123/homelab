@@ -1,7 +1,10 @@
 # 10. Give Authelia a real client cert for LLDAP, and make LLDAP verify it (or drop it)
 
-Status: resolved Type: task Repo: homelab Source: maintainer request 2026-10-11;
-`docs/security.md` Known gaps ("LLDAP doesn't verify Authelia's client cert either")
+Status: resolved
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-11; `docs/security.md` Known gaps ("LLDAP doesn't verify
+  Authelia's client cert either")
 
 ## Problem
 

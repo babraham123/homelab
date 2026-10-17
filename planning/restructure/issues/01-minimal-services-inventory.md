@@ -1,7 +1,9 @@
 # 01. Minimal per-node inventory that replaces parse_routes/parse_uptime_urls/parse_dispatcher/gen_dispatch_cmds
 
-Status: resolved Type: prototype Repo: homelab Source: user item 57 (previous prototype in
-planning/services-inventory judged too complex)
+Status: resolved
+Type: prototype
+Repo: homelab
+Source: user item 57 (previous prototype in planning/services-inventory judged too complex)
 
 ## Goal
 

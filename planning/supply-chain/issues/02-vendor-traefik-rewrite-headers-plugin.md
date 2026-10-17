@@ -1,6 +1,9 @@
 # 02. Fork and vendor the Traefik rewrite-headers plugin as a local plugin
 
-Status: ready-for-human Type: task Repo: homelab Source: review finding 10
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: review finding 10
 
 ## Problem
 

@@ -1,11 +1,11 @@
 # 13. Research: credentials for ntfy and ntfy-idp-push, and which routes Authelia protects
 
-Status: ready-for-human
+Status: resolved
 Type: research
 Repo: homelab
 Source: maintainer request 2026-10-14; design in ntfy-idp-push v0.2.0 `README.md` and
-`ARCHITECTURE.md` (<https://github.com/babraham123/ntfy-idp-push>)
-Research: [13-research-notes.md](13-research-notes.md)
+  `ARCHITECTURE.md` (<https://github.com/babraham123/ntfy-idp-push>)
+Research: [research-13.md](../research-13.md)
 
 ## Problem
 
@@ -74,9 +74,35 @@ Routes that skip Authelia empty the `Remote-*` headers, so a client can't pose a
 - `curl` from the LAN: `push.SITE/v1/health` answers without a redirect; a request with
   `Sec-Fetch-Mode: navigate` to `push.SITE/` redirects to Authelia.
 
+## Answer
+
+Full reasoning and sources: [research-13.md](../research-13.md) §7. Implemented in 11c348c.
+
+- **Admin header:** gone. Traefik can't map `Remote-User` to a per-user ntfy credential, and ntfy
+  has no header auth, so browsers sign in to ntfy themselves. Authelia gates only `GET`
+  navigations on `push.SITE` (`ntfy-ui`), minus `/file/` and `/account/token/redeem`; every other
+  request goes straight to ntfy (`ntfy-api`), and `ntfy-ws` keeps WebSocket requests out of the
+  access log because the token rides in `?auth=`. ntfy has `enable-login` and `require-login`;
+  its `admin` user stays as a break-glass login. ntfy is no longer behind the `telemetry` group.
+- **Secrets:** `ntfy_idp_push_password`, `ntfy_idp_push_admin_token`, `duo_integration_key` and
+  `duo_secret_key` in `src/nodes/secsvcs/secrets_template.yaml`. Authelia reads both Duo keys from
+  env; the shim mounts its token and secret key as files (`NTFY_IDP_PUSH_<KEY>_FILE`).
+- **TLS:** Traefik terminates TLS on `le-http-production`; the shim serves plain HTTP :8080.
+  Authelia's `duo_api` waits for an Authelia release that skips Duo's CA pinning for non-Duo hosts
+  (authelia#7647). Fallback if that stalls: a GTS resolver with `EC256`.
+- **Rules and headers:** `idp-push.SITE` is split at Traefik by path prefix, not with Authelia
+  `bypass` rules. The token family (`/token/`, `/challenge/`), the Duo API (`/auth/v2/`),
+  `/static/` and `/healthz` skip Authelia and have `Remote-*` emptied; the identity routes go
+  through Authelia at `two_factor` via `admin: true`. The shim trusts the identity header only from
+  Traefik's `.6/32`. `idp-push` is a public subdomain, like `push`.
+
+Deploy steps (fill the new secrets, delete `/var/opt/ntfy/webpush.db` while ntfy is stopped, the
+`curl` checks) travel with auth/14 and the apply notes; the `idp-push.SITE` routers ship with
+auth/14.
+
 ## Comments
 
-- 2026-10-17 agent: research done, in [13-research-notes.md](13-research-notes.md) §7.
+- 2026-10-17 agent: research done, in [research-13.md](../research-13.md) §7.
   - **Admin header:** delete `ntfy-auth` and Traefik's `NTFY_ADMIN_PASSWORD`. Authelia gates only
     `GET` navigations on `push.SITE`, minus `/account/token/redeem` and `/file/`; everything else
     goes straight to ntfy. ntfy gets `enable-login: true` and `require-login: true`; people sign in
@@ -102,3 +128,5 @@ Routes that skip Authelia empty the `Remote-*` headers, so a client can't pose a
   human at deploy: fill the new secrets, delete `/var/opt/ntfy/webpush.db` while ntfy is stopped
   (subscriptions registered as `admin`), and the `curl` checks. Until auth/14 ships, the web app
   signs in as `person` or `admin`.
+- 2026-10-17: resolved; the decisions are in the Answer. The deploy and `curl` checks move to
+  auth/14 and the apply notes.

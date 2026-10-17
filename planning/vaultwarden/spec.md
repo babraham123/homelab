@@ -1,14 +1,16 @@
 # Vaultwarden
 
-Self-hosted Bitwarden-compatible password manager on secsvcs (pve1). This is what the `vault` stubs
-refer to:
+Self-hosted Bitwarden-compatible password manager on secsvcs (pve1), at `vault.SITE`, replacing
+the old `vault` install stub. It lives in:
 
-- `src/nodes/secsvcs/install_svcs.sh` `vault)` case (`echo "TODO: Implement vault"`);
-- the `vault: {}` entry in `src/nodes/secsvcs/inventory.yml`, which generates the dispatcher's
-  `install_vault` and its `install_all_svcs` entry;
-- the commented routers and service in `src/nodes/secsvcs/traefik/routes.yml.j2`;
-- `docs/guides/secsvcs.md.j2`;
-- `docs/services.md` ("`vault` has an install stub but is not implemented").
+- `src/services/vaultwarden/` (quadlet and data volume);
+- the `vaultwarden` entry in `src/nodes/secsvcs/inventory.yml` (dispatcher's
+  `install_vaultwarden`, `install_all_svcs`, HAProxy SNI, Gatus, image updates) and its
+  `install_svcs.sh` case;
+- the `vaultwarden*` routers in `src/nodes/secsvcs/traefik/routes.yml.j2`;
+- the Authelia policy, lifespan and OIDC client in `src/services/authelia/configuration.yml.j2`;
+- the "Vaultwarden" section of `docs/guides/secsvcs.md.j2` and the catalog row in
+  `docs/services.md`.
 
 Maintainer request 2026-09-26. Public exposure approved after checking the Vaultwarden hardening
 guidance; see the assessment in 01 and the source check in

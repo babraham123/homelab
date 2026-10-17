@@ -1,7 +1,9 @@
 # 05. Test OliveTin OIDC group claims and drop the allow-everyone workaround
 
-Status: ready-for-human Type: task Repo: homelab Source: upstream OliveTin/OliveTin#1103
-(<https://github.com/OliveTin/OliveTin/issues/1103>)
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: upstream OliveTin/OliveTin#1103 (<https://github.com/OliveTin/OliveTin/issues/1103>)
 
 ## Problem
 
@@ -17,9 +19,10 @@ reporter confirms it works in a release.
 
 ## Change
 
-1. Confirm the running image is ≥ 3000.20.0 (`Image=docker.io/jamesread/olivetin:latest-3k` with
-   `AutoUpdate=registry`): `podman exec olive_tin OliveTin --version`, or check the footer. Update
-   with `install_olive_tin` if older.
+1. Confirm the running image is ≥ 3000.20.0 (`Image=localhost/jamesread/olivetin:latest-3k`,
+   built by the image updater from the inventory's `upstream`, `AutoUpdate=local`):
+   `podman exec olive_tin OliveTin --version`, or check the footer. Update with
+   `install_olive_tin` if older.
 2. In `src/services/olive_tin/config.yaml.j2`:
    - `defaultPermissions`: `view: false`, `exec: false`, `logs: false`; remove the TODO.
    - `admins` ACL: uncomment `addToEveryAction: true`.
@@ -45,3 +48,7 @@ reporter confirms it works in a release.
 
 - Pairs with auth/01, which moves the OliveTin OIDC client to `two_factor`; this ticket limits what
   each user can do once logged in.
+- 2026-10-17: step 2 is done in b4d0c2e (`defaultPermissions` all false, `addToEveryAction: true`,
+  `acls: [general]` on the gaming buttons), and OliveTin#1103 was closed 2026-09-29 after the
+  `/user` page showed an LDAP group matched to an ACL (step 4). Only the three-user matrix test
+  (step 3) remains.

@@ -1,7 +1,10 @@
 # 04. Move build recipes into build.sh; updater builds on websvcs
 
-Status: resolved Type: task Repo: homelab Source: notes/image-updater-design.md "Built images
-(websvcs only)" Blocked by: 03
+Status: resolved
+Type: task
+Repo: homelab
+Source: notes/image-updater-design.md "Built images (websvcs only)"
+Blocked by: 03
 
 ## Change
 

@@ -1,6 +1,9 @@
 # 01. Allow hyphens in the dispatcher/sudoers generators; regenerate secsvcs dispatcher
 
-Status: resolved Type: task Repo: homelab Source: review finding 25
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 25
 
 ## Problem
 

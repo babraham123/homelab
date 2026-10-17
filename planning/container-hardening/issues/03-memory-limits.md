@@ -1,6 +1,9 @@
 # 03. Memory limits for every container
 
-Status: needs-triage Type: task Repo: homelab Source: container-hardening survey
+Status: needs-triage
+Type: task
+Repo: homelab
+Source: container-hardening survey
 
 ## Scope
 
@@ -11,7 +14,7 @@ already capped: Podman's default `pids_limit` is 2048 per container ([containers
 ## Task
 
 - Size each container from its observed peak plus headroom (about 1.5×, more for bursty ones:
-  esphome compiles, home_assistant, archivebox, grafana rendering). Nothing scrapes per-container
+  esphome compiles, home_assistant, grafana rendering). Nothing scrapes per-container
   memory today; `systemctl show -p MemoryPeak <svc>` after a few weeks of uptime, or
   `podman stats --no-stream` sampled over time, gives the peak.
 - Choose the mechanism and use one everywhere:
@@ -35,3 +38,7 @@ already capped: Podman's default `pids_limit` is 2048 per container ([containers
 
 [cc]: https://github.com/containers/common/blob/main/docs/containers.conf.5.md
 [psu]: https://docs.podman.io/en/v5.8.2/markdown/podman-systemd.unit.5.html
+
+## Comments
+
+- 2026-10-17: archivebox dropped from the bursty list; it was removed from websvcs in `39b5a83`.

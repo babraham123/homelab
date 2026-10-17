@@ -1,6 +1,9 @@
 # 04. deploy_src.sh: collect per-host failures and exit non-zero
 
-Status: wontfix Type: task Repo: homelab Source: review finding 28
+Status: wontfix
+Type: task
+Repo: homelab
+Source: review finding 28
 
 ## Change
 

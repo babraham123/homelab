@@ -1,6 +1,9 @@
 # 07. Check tier-1 services every 2 minutes in Gatus
 
-Status: resolved Type: task Repo: homelab Source: review finding 24
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 24
 
 ## Change
 

@@ -1,6 +1,9 @@
 # 04. Render everything once, upload only what each node needs
 
-Status: resolved Type: task Repo: homelab Source: user item 52 / review structure note
+Status: resolved
+Type: task
+Repo: homelab
+Source: user item 52 / review structure note
 Blocked by: restructure/01, restructure/02
 
 ## Problem

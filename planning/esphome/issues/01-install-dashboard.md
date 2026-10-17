@@ -1,7 +1,9 @@
 # 01. Install the ESPHome dashboard on homesvcs
 
-Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-10-13; design in
-[spec.md](../spec.md)
+Status: ready-for-agent
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-13; design in [spec.md](../spec.md)
 
 ## Change
 

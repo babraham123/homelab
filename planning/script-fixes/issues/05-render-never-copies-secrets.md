@@ -1,7 +1,9 @@
 # 05. render_src.sh: never copy vars.yml or .git into the rendered tree
 
-Status: resolved Type: task Repo: homelab Source: review finding 29 (maintainer: implement the best
-fix)
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 29 (maintainer: implement the best fix)
 
 ## Problem
 

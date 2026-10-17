@@ -1,7 +1,10 @@
 # 06. Disable podman-auto-update.timer, enable the updater timer
 
-Status: ready-for-human Type: task Repo: homelab Source: notes/image-updater-design.md "Changes, in
-rollout order" step 5 Blocked by: 01, 05
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: notes/image-updater-design.md "Changes, in rollout order" step 5
+Blocked by: 01, 05
 
 ## Change
 

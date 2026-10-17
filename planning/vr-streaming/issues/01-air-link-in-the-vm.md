@@ -1,8 +1,10 @@
 # 01. Prove Air Link works in the VM with no RDP session
 
-Status: ready-for-human Type: prototype Repo: homelab Source: maintainer request 2026-10-12;
-research in [airlink-research.md](../airlink-research.md) and
-[automation-research.md](../automation-research.md)
+Status: ready-for-human
+Type: prototype
+Repo: homelab
+Source: maintainer request 2026-10-12; research in [airlink-research.md](../airlink-research.md) and
+  [automation-research.md](../automation-research.md)
 
 ## Question
 

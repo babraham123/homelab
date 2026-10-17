@@ -1,6 +1,10 @@
 # 02. Own the backup schedule from the repo, not the PVE UI
 
-Status: resolved Type: task Repo: homelab Source: review finding 2 Blocked by: 01
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 2
+Blocked by: 01
 
 ## Problem
 

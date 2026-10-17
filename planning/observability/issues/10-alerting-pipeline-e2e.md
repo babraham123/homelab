@@ -1,6 +1,9 @@
 # 10. Validate the alerting pipeline end to end
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-26
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26
 
 ## Problem
 
@@ -56,7 +59,13 @@ depend on this path.
 
 ## Test plan
 
-Run each step and record the result under `## Answer`.
+The plan to run is the two tests in `docs/maintenance.md#alerting-pipeline-test`: 1, the full path
+from vmalert (fire with the phone on mobile data, both emails, resolve); 2, the dead-man switch
+(Alertmanager stopped, then started). Record both under `## Answer`.
+
+**Superseded:** the original 11-test plan below. The severity map, inhibition, silence button and
+single-component outages (3, 4, 6, 8, 9, 11) are no longer tested; 2, 5 and 7 became test 1, and 10
+became test 2.
 
 | # | Test | How | Expect |
 | --- | --- | --- | --- |
@@ -112,7 +121,12 @@ watches from outside.
 
 ## Acceptance
 
-- Tests 1–9 pass. Tests 10 and 11 are caught by the VPS dead-man switch within 15 min.
+- Test 1 of `docs/maintenance.md#alerting-pipeline-test` passes: ntfy priority 5 on the phone off
+  the LAN, emails to `+alert@` and `+alert2@`, then the resolved notification and email.
+- Test 2 passes: with Alertmanager stopped, the VPS `deadman` sends an email and an ntfy.sh push
+  within 15 min, and a recovery notice after it starts.
+- Both results are recorded under `## Answer`, and the "Last done" date in `docs/maintenance.md` is
+  set.
 - The suspected defects are either fixed or confirmed harmless, with the reason.
 
 ## Comments
@@ -132,3 +146,5 @@ watches from outside.
   off-LAN, both emails, resolve) and the dead-man switch (Alertmanager stopped). The severity map,
   inhibition, silence button and single-component outages are no longer tested. Record those two
   under `## Answer`.
+- 2026-10-17: Acceptance rewritten for the two-test plan (it still asked for tests 1–11), and the
+  original table marked superseded.

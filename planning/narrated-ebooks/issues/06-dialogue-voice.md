@@ -46,8 +46,8 @@ In the homelab:
   `/etc/opt/calliope/voices`, checked like `voice`), mapped to the flags. The default comes from the
   collection: `articles` → `single`, `books` → `dialogue` until 07 lands. The ntfy message says when
   a run fell back.
-- `readeck_narrate.sh.j2`: write `voice_mode: "single"` into each article's sidecar, so articles
-  never pay for segmentation or attribution.
+- `src/services/bookmark_handoff/bookmark_handoff.py`: write `voice_mode: "single"` into each
+  article's sidecar, so articles never pay for segmentation or attribution.
 - `docs/guides/reading.md.j2`: the sidecar fields, and a `dialogue.wav` next to `default.wav`.
 
 ## Acceptance

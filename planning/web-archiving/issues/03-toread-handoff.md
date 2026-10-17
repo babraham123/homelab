@@ -13,28 +13,28 @@ Readeck without being saved a second time.
 
 ## Change
 
-- `src/services/readeck/linkding_handoff.sh` (or a name that fits the repo better), run on
-  websvcs by a systemd `.service` and `.timer` pair like
-  `src/haproxy/geoip_generator.*`, every 15 minutes with `Persistent=true`.
-  - Reach both apps on their container IPs (`.17:9090`, `.18:8000`) from the host, not
-    through Traefik, so Authelia isn't in the path.
+- `src/services/bookmark_handoff/bookmark_handoff.py`, run on websvcs in the
+  `bookmark_handoff` container (a oneshot quadlet) by `bookmark_handoff.timer`, every 15
+  minutes with `Persistent=true`. The same script also runs narrated-ebooks/04's Readeck
+  `listen` job.
+  - Reach both apps on their container IPs (`.17:9090`, `.18:8000`) under their public
+    host names, not through Traefik, so Authelia isn't in the path.
   - List linkding bookmarks with `GET /api/bookmarks/?q=%23toread`, following `next`
     until it runs out.
   - For each one, `POST` Readeck's `/api/bookmarks` with `url`, `title` and the other
-    linkding tags as `labels`. Check the field names in Readeck's
-    `docs/api/bookmarks/`.
+    linkding tags as `labels`.
   - Only after Readeck accepts it (2xx), `PATCH` the linkding bookmark so its tags are
     the old tags minus `toread` plus `readeck`. If any call fails, leave that bookmark
     tagged `toread` so the next run retries it. Never retry within a run.
   - Log one line per handoff and per failure to the journal; fluentbit already ships
     it.
-  - Put token loading, logging and the API call wrapper in a sourced helper.
-    narrated-ebooks/04 (`readeck_narrate.sh`) reuses it.
+  - Record each linkding id Readeck accepts in `/var/opt/bookmark_handoff/sent`, so a
+    retry after a failed retag doesn't save it twice.
 - Tokens: `linkding_api_token` and `readeck_api_token` in
-  `src/nodes/websvcs/secrets_template.yaml`. The script reads them the way host-side scripts
-  read secrets under ADR 0004. Don't put them in unit files.
-- Install it from the `readeck` case in `install_svcs.sh`, or give it its own case and
-  `src/nodes/websvcs/inventory.yml` entry if that fits the dispatcher better.
+  `src/nodes/websvcs/secrets_template.yaml`, passed to the container as podman secrets.
+  Don't put them in unit files.
+- Installed by its own `bookmark_handoff` case in `install_svcs.sh`, with a
+  `bookmark_handoff: {build: bookmark_handoff}` entry in `src/nodes/websvcs/inventory.yml`.
 - Document the `toread` tag in the guide next to the SingleFile setup.
 
 ## Acceptance
@@ -45,7 +45,7 @@ Readeck without being saved a second time.
 - With Readeck stopped, a run logs failures and changes nothing in linkding. The next
   run after Readeck is back completes the handoff.
 - Running the script twice in a row creates no duplicates in Readeck.
-- `shellcheck` passes as part of the render.
+- The render passes, including ruff's check of the rendered Python.
 
 ## Comments
 
@@ -58,3 +58,9 @@ Readeck without being saved a second time.
 - Duplicates: Readeck's API has no URL filter to check against. The script records
   each linkding id Readeck accepts in `/var/lib/linkding_handoff/sent`. If retagging
   then fails, the next run only retags the bookmark and doesn't send it again.
+
+2026-10-17: fe7883f replaced the shell scripts (`linkding_handoff.sh.j2`, `handoff_lib.sh`,
+their `.service`/`.timer`) with `src/services/bookmark_handoff/bookmark_handoff.py` in one built
+container, which also runs narrated-ebooks/04. The sent-ids state moved from
+`/var/lib/linkding_handoff/sent` to `/var/opt/bookmark_handoff/sent`, which websvcs's backup
+stages. Acceptance still needs a deploy to websvcs.

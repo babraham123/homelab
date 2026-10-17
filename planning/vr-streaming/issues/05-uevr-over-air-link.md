@@ -1,7 +1,10 @@
 # 05. Prove a UEVR game over Air Link, injected without a keyboard
 
-Status: needs-info Type: prototype Repo: homelab Source: maintainer request 2026-10-12; research
-in [uevr-research.md](../uevr-research.md) Blocked by: 01
+Status: needs-info
+Type: prototype
+Repo: homelab
+Source: maintainer request 2026-10-12; research in [uevr-research.md](../uevr-research.md)
+Blocked by: 01
 
 Starts once 01 has VR mode working by script.
 

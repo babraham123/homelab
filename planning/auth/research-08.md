@@ -1,6 +1,6 @@
 # auth/08 research notes: where human-held secrets live, and which can go away
 
-Research for [08-password-management-research.md](08-password-management-research.md), checked
+Research for [08-password-management-research.md](issues/08-password-management-research.md), checked
 2026-10-12 against the repo at `edfad53`. Every claim about the repo cites a file and line. Every
 other claim cites a URL, collected under [Sources](#8-sources). INFERENCE marks my own reading;
 UNVERIFIED marks a claim I couldn't confirm in a primary source.
@@ -241,7 +241,7 @@ Rationale:
 
 | Secret | Store | Who / what can read it | How it's recovered |
 | --- | --- | --- | --- |
-| Root CA key + passphrase | Escrow sticks (key); paper, apart from the sticks (passphrase). **Removed from pve1 and PBS** | Maintainer with both | Both sticks lost: [Only the private CA is lost](../../../docs/guides/pve1_recovery.md.j2) |
+| Root CA key + passphrase | Escrow sticks (key); paper, apart from the sticks (passphrase). **Removed from pve1 and PBS** | Maintainer with both | Both sticks lost: [Only the private CA is lost](../../docs/guides/pve1_recovery.md.j2) |
 | Intermediate CA passphrase | Vaultwarden; escrow (export) | Maintainer; pve1 root while signing | Reset by re-keying the intermediate with the root |
 | SSH user CA | Two YubiKeys (sk); handle files and `.pub` on pve1 | Whoever holds a YubiKey plus its PIN | One lost: drop its line. Both lost: the "Only the SSH CA is lost" path |
 | SSH host CA | pve1 `/root/ssh` (as today); optionally two sk keys | pve1 root | as today |

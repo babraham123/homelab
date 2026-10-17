@@ -1,6 +1,6 @@
 # auth/13 research notes: ntfy and ntfy-idp-push credentials, TLS, and routes behind Authelia
 
-Research for [13-ntfy-push-credentials-and-routes.md](13-ntfy-push-credentials-and-routes.md),
+Research for [13-ntfy-push-credentials-and-routes.md](issues/13-ntfy-push-credentials-and-routes.md),
 first checked 2026-10-14; repo citations re-checked 2026-10-17 against `60cb3bb`. Every claim
 about the repo cites a file and line.
 Every other claim cites a source ID, collected under [Sources](#12-sources). INFERENCE marks my own

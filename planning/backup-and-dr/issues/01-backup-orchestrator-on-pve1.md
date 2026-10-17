@@ -1,6 +1,10 @@
 # 01. Backup orchestrator on pve1 that wakes pve2
 
-Status: resolved Type: task Repo: homelab Source: review finding 1, 2 Blocked by: 07, 08
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 1, 2
+Blocked by: 07, 08
 
 ## Problem
 

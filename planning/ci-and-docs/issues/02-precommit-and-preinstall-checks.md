@@ -1,7 +1,10 @@
 # 02. Render-consistency checks in the hook; service-specific validation before install on the node
 
-Status: resolved Type: task Repo: homelab Source: review finding 33 Blocked by: 01, 08,
-script-fixes/01, restructure/01
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 33
+Blocked by: 01, 08, script-fixes/01, restructure/01
 
 ## Change
 

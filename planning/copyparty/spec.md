@@ -1,18 +1,20 @@
 # copyparty and car data upload
 
-A file drop on websvcs (copyparty) behind Authelia, and a sync that turns Car Scanner Pro trip logs
-uploaded from the phone into VictoriaMetrics series with a Grafana dashboard.
+A file drop on websvcs (copyparty) behind Authelia, and a sync that turns car OBD logs uploaded
+to it into VictoriaMetrics series with a Grafana dashboard.
 
-Maintainer decisions (2026-09-26):
+Maintainer decisions (2026-09-26, source updated 2026-10-14):
 
-- The source is **Car Scanner Pro** recordings, uploaded from the phone. Since 2026-10-12 (04's
-  research) that means the `.brc` files the app saves on its own, not manual CSV exports.
+- The source is a **WiCAN Pro** OBD dongle. It logs to its SD card, and a BLE sync app on the
+  phone uploads gzipped JSONL batches to copyparty `/car/` as `car_uploader` (05, 06). Car
+  Scanner Pro `.brc` recordings are the legacy source: `car_ingest` still imports them, but
+  nothing uploads them automatically (04, wontfix).
 - copyparty runs on **websvcs**.
 - It may be reachable from the internet, **as long as every request is authenticated by Authelia**.
   Traefik must still see the real client IP.
-- Raw `.brc` recordings are kept in copyparty as the long-term archive; VictoriaMetrics keeps its
-  current 14-day retention for now. Long-term retention for an allowlist of series is explored in
-  observability/09.
+- Raw uploads (JSONL batches and `.brc` recordings) are kept in copyparty as the long-term
+  archive; VictoriaMetrics keeps its current 14-day retention for now. Long-term retention for an
+  allowlist of series is explored in observability/09.
 
 From `notes/TODO.md` "setup copyparty → car data upload".
 

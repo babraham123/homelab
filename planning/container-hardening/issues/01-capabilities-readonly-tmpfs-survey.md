@@ -1,6 +1,9 @@
 # 01. Survey: DropCapability, ReadOnly, Tmpfs and UserNS=auto for every container
 
-Status: resolved Type: research Repo: homelab Source: review finding 15
+Status: resolved
+Type: research
+Repo: homelab
+Source: review finding 15
 
 ## Scope
 

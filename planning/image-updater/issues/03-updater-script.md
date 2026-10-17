@@ -1,7 +1,11 @@
 # 03. Updater script, accept, --dry-run, units, Trivy/skopeo install
 
-Status: resolved Type: task Repo: homelab Source: notes/image-updater-design.md "Per-image
-pipeline", "Scan gate and overrides", "Scheduling", "Notifications and monitoring" Blocked by: 02
+Status: resolved
+Type: task
+Repo: homelab
+Source: notes/image-updater-design.md "Per-image pipeline", "Scan gate and overrides", "Scheduling",
+  "Notifications and monitoring"
+Blocked by: 02
 
 ## Change
 

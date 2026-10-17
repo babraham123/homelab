@@ -1,6 +1,9 @@
 # 13. Media array on pve2: HDDs on a passed-through SATA card, snapraid + mergerfs in websvcs
 
-Status: ready-for-human Type: task Repo: homelab Source: backup restructure grilling 2026-10-04
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: backup restructure grilling 2026-10-04
 
 ## Problem
 

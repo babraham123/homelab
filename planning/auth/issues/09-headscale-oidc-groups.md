@@ -1,9 +1,12 @@
 # 09. Drive Headscale ACL groups from LLDAP groups once headscale supports OIDC groups
 
-Status: needs-info Type: task Repo: homelab Source: maintainer request 2026-09-27, 2026-10-14;
-juanfont/headscale#2366 (open), PR juanfont/headscale#3216 "OIDC groups: persist claim and resolve
-from ACL group: rules" (open, not merged as of 2026-10-14) Blocked by: upstream PR 3216 shipping in
-a headscale release
+Status: ready-for-agent
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-27, 2026-10-14; juanfont/headscale#2366 (open), PR
+  juanfont/headscale#3216 "OIDC groups: persist claim and resolve from ACL group: rules" (open, not
+  merged as of 2026-10-14)
+Blocked by: upstream PR 3216 shipping in a headscale release
 
 ## Problem
 
@@ -81,3 +84,6 @@ or IP. 0.29.5 fixed its filters not updating after a user is added or renamed (#
 - `headscale policy check` passes and the router/03 manual checks still hold.
 
 ## Comments
+
+- 2026-10-17: needs-info → ready-for-agent: the plan is complete and waits only on PR 3216 (still
+  open). headscale v0.29.5, the minimum in step 2, shipped 2026-10-13.

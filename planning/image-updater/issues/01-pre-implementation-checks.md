@@ -1,7 +1,9 @@
 # 01. Run the six pre-implementation checks
 
-Status: ready-for-human Type: research Repo: homelab Source: notes/image-updater-design.md "Checks
-before implementation"
+Status: ready-for-human
+Type: research
+Repo: homelab
+Source: notes/image-updater-design.md "Checks before implementation"
 
 ## Task
 

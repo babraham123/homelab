@@ -4,15 +4,10 @@ Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26 ("the vault TODO sprinkled in a few places"; public if the
-Vaultwarden hardening guidance is sufficient)
+  Vaultwarden hardening guidance is sufficient)
 
 Settings below are checked against Vaultwarden 1.37.4 and Authelia v4.39.28; sources for each are
 in [research-01.md](../research-01.md).
-
-## Why it waits
-
-- **auth/06:** rate limiting and Authelia's ban both key on the client IP. Behind HAProxy they are
-  useless unless the real IP arrives.
 
 ## Exposure decision: public (maintainer decision 2026-09-26)
 
@@ -40,9 +35,10 @@ updates (image-updater), non-root read-only container, `/admin` behind Authelia,
   share one name and nobody confuses it with HashiCorp Vault. Keep the subdomain
   `vault.{{ site.url }}`. Places:
   - `src/nodes/secsvcs/inventory.yml`: replace `vault: {}`, keeping its place after grafana, with
-    `vaultwarden: {subdomain: vault, uptime: vaultwarden, uptime_path: /alive, uptime_tier: 1,
-    upstream: docker.io/vaultwarden/server:latest}`. That drives the dispatcher, sudoers,
-    `install_all_svcs`, HAProxy's SNI list, the Gatus check and image updates;
+    `vaultwarden: {subdomain: vault, admin: true, uptime: vaultwarden, uptime_path: /alive,
+    uptime_tier: 1, upstream: docker.io/vaultwarden/server:latest}`. That drives the dispatcher,
+    sudoers, `install_all_svcs`, HAProxy's SNI list, Authelia's two-factor admin rule, the Gatus
+    check and image updates;
   - `src/nodes/secsvcs/install_svcs.sh` case;
   - `src/nodes/secsvcs/traefik/routes.yml.j2` routers and service;
   - `docs/guides/secsvcs.md.j2`;
@@ -149,9 +145,9 @@ updates (image-updater), non-root read-only container, `/admin` behind Authelia,
     `middlewares: []` and access logs off, because the websocket URL carries `access_token=<JWT>`
     and Traefik can't redact one query parameter. The Lua filter in
     `src/services/fluentbit/journald.lua.j2` redacts only what reaches VictoriaLogs;
-  - `vaultwarden-admin`: `Host(vault.SITE) && PathPrefix(/admin)` with `authelia@file` only. It
-    falls under the `*.SITE` `authelia_gen_access` rules, so until auth/01 lands it is one-factor
-    from the LAN and VPN and two-factor elsewhere, followed by the admin token;
+  - `vaultwarden-admin`: `Host(vault.SITE) && PathPrefix(/admin)` with `authelia@file` only.
+    `vaultwarden` is `admin: true` in the inventory, so Authelia requires two factors from every
+    network, followed by the admin token;
   - service `vaultwarden` at `http://vault.{{ site.url }}:8080/`.
 - **Postgres:**
   - add a `vaultwarden` block to `src/services/postgres/pg_init.sql`, ending with
@@ -228,3 +224,6 @@ Not adopted from the guide: hiding under a secret subdir. With `SSO_ONLY` and Au
   comment on backup-and-dr/04. Left for the maintainer: fill the `vaultwarden_*` secrets, create
   the `vaultwarden_access` group, deploy per the guide, and run the acceptance list once auth/06
   has verified the client IP.
+- 2026-10-17: body brought up to date: dropped the "Why it waits" section (auth/06 no longer
+  blocks this) and the pre-auth/01 note on `/admin`; `vaultwarden` is `admin: true` in the
+  inventory, so `/admin` needs two factors from every network.

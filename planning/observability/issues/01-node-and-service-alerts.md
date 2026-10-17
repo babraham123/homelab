@@ -1,6 +1,10 @@
 # 01. Add vmalert rules for hosts, disks, systemd units, backups and auth
 
-Status: resolved Type: task Repo: homelab Source: review finding 18 Blocked by: backup-and-dr/01
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 18
+Blocked by: backup-and-dr/01
 
 ## Problem
 

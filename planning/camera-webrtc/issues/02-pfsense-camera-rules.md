@@ -25,11 +25,9 @@ Rules in the pfSense GUI. Use an alias `cameras` for the camera IPs.
 3. Pass websvcs (`{{ websvcs.ip }}`) → `cameras` TCP 554.
 4. Pass homesvcs (`{{ homesvcs.ip }}`) → `cameras` TCP 443, 9000 (Reolink integration;
    9000 is the Baichuan port the HA integration prefers).
-5. Pass websvcs → vpnsvcs public IP UDP/TCP 3479 and UDP 49160–49200 (TURN, 04), if
-   websvcs's egress is filtered.
 
 **Toward websvcs:**
-6. Pass trusted VLANs (10, 20, LAN) and the tailnet (traffic arriving SNATed from the
+5. Pass trusted VLANs (10, 20, LAN) and the tailnet (traffic arriving SNATed from the
    router) → `{{ websvcs.ip }}` UDP/TCP 8555.
 
 Record the rules in `docs/networking.md` (VLAN section: "IoT cameras") as the other
@@ -45,3 +43,5 @@ VLAN rules are.
   the tailnet.
 
 ## Comments
+
+- 2026-10-17: dropped the websvcs → vpnsvcs TURN rule; there's no TURN server (04, wontfix).

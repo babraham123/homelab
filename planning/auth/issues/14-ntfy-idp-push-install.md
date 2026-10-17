@@ -1,12 +1,12 @@
 # 14. Install ntfy-idp-push on secsvcs and wire it to ntfy and Authelia
 
 Status: needs-triage
-Type: feature
+Type: task
 Repo: homelab
 Source: maintainer request 2026-10-14; design in ntfy-idp-push v0.2.0 `README.md` and
-`ARCHITECTURE.md` (<https://github.com/babraham123/ntfy-idp-push>)
-Blocked by: 13 (credentials, TLS and route decisions); step 5 also on an Authelia release that skips
-Duo's CA pinning for non-Duo hostnames (authelia#7647)
+  `ARCHITECTURE.md` (<https://github.com/babraham123/ntfy-idp-push>)
+Blocked by: step 5 on an Authelia release that skips Duo's CA pinning for non-Duo hostnames
+  (authelia#7647)
 
 ## Problem
 
@@ -16,7 +16,7 @@ the push over the existing ntfy server, and approves only with a WebAuthn assert
 phone. It also provisions per-person ntfy accounts for the web app, which since auth/13 has no
 injected admin login. It is not deployed: no quadlet, secrets, routes, ntfy account or Authelia config.
 
-Decisions and config sketches: [13-research-notes.md](13-research-notes.md) §7-§10.
+Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
 
 ## Scope
 
@@ -96,3 +96,4 @@ Steps 1-4, 6 and 7 ship before step 5; the shim then serves provisioning and enr
 - 2026-10-17 agent: rewritten for ntfy-idp-push v0.2.0 and auth/13's research: pulled image, HTTP
   only, forward-auth only, `/token/` and `/challenge/` routes, secret files, `backup`, no metrics;
   Authelia's `duo_api` split out behind the upstream pinning change.
+- 2026-10-17: auth/13 resolved, so this no longer waits on it; step 5 still waits on authelia#7647.

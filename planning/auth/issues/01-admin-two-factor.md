@@ -1,6 +1,9 @@
 # 01. Require two_factor for admin subdomains from every network
 
-Status: resolved Type: task Repo: homelab Source: review findings 11, 12
+Status: resolved
+Type: task
+Repo: homelab
+Source: review findings 11, 12
 
 ## Problem
 

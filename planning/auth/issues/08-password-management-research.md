@@ -1,7 +1,9 @@
 # 08. Research: manage SSH, sudo, CA and recovery passwords better than offline notes
 
-Status: resolved Type: research Repo: homelab Source: maintainer request 2026-09-27
-(backup-and-dr/09 open questions 2 and 5)
+Status: resolved
+Type: research
+Repo: homelab
+Source: maintainer request 2026-09-27 (backup-and-dr/09 open questions 2 and 5)
 
 ## Problem
 
@@ -57,7 +59,7 @@ Resolve under `## Answer`:
 
 ## Answer
 
-Full research with sources: [08-research-notes.md](08-research-notes.md). Summary follows.
+Full research with sources: [research-08.md](../research-08.md). Summary follows.
 
 ### Recommendation
 

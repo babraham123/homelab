@@ -1,6 +1,9 @@
 # 03. Expose Traefik Prometheus metrics, scrape them, add a dashboard
 
-Status: resolved Type: task Repo: homelab Source: review finding 20
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 20
 
 ## Change
 

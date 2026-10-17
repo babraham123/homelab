@@ -1,6 +1,9 @@
 # 13. Alert on log lines through a second vmalert backed by VictoriaLogs
 
-Status: needs-triage Type: task Repo: homelab Source: vaultwarden/01 (2026-10-12)
+Status: needs-triage
+Type: task
+Repo: homelab
+Source: vaultwarden/01 (2026-10-12)
 
 ## Problem
 

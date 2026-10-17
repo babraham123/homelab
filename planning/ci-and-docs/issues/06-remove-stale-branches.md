@@ -1,6 +1,9 @@
 # 06. Delete the stale ansible/fixes/fixes0/worktree-ntfy branches on origin
 
-Status: ready-for-human Type: task Repo: homelab Source: review finding 38
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 38
 
 ## Change
 
@@ -18,3 +21,6 @@ git push origin --delete ansible fixes fixes0 worktree-ntfy
 Marked for a human because it is a destructive remote operation.
 
 ## Comments
+
+- 2026-10-17: Resolved. `git ls-remote --heads origin` lists only `main`; ansible, fixes, fixes0
+  and worktree-ntfy are gone from origin.

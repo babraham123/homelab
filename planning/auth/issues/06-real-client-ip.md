@@ -1,7 +1,10 @@
 # 06. Verify the real client IP reaches Traefik and apps through HAProxy
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request
-2026-09-26 (copyparty/01 "keep the client IP check"; needed again by vaultwarden/01)
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26 (copyparty/01 "keep the client IP check"; needed again by
+  vaultwarden/01)
 
 ## Problem
 
@@ -90,4 +93,6 @@ unchecked, repeat check 3, then resolve this ticket and router/04.
   with `procstat`). Both Traefik `trustedIPs` lists are now only `vpnsvcs.tailnet_ip` (new var), the
   secsvcs CrowdSec LAPI rule admits the VPS by its tailnet IP, and `docs/networking.md` matches.
   vaultwarden/01, copyparty/01 and auth/03 part B no longer wait on this ticket; it stays open for
-  the acceptance checks (`notes/apply-since-5a50097.md` step 16) and the recurring check above.
+  the acceptance checks (`notes/apply-since-5a50097.md` step 14) and the recurring check above.
+- 2026-10-17: copyparty is installed (c9ddbbe) and trusts `X-Forwarded-For` only from Traefik:
+  `xff-src: {{ websvcs.container_subnet }}.6/32` in `src/services/copyparty/copyparty.conf.j2`.

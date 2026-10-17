@@ -1,6 +1,10 @@
 # 06. Make the .DS_Store cleanup recursive
 
-Status: resolved Type: task Repo: homelab Source: review finding 30 Blocked by: 05
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 30
+Blocked by: 05
 
 ## Change
 

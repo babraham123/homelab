@@ -1,6 +1,9 @@
 # 02. Pin mkdocs and its plugins
 
-Status: resolved Type: task Repo: homesite Source: review findings 35, 40
+Status: resolved
+Type: task
+Repo: homesite
+Source: review findings 35, 40
 
 ## Change
 
@@ -12,3 +15,7 @@ Status: resolved Type: task Repo: homesite Source: review findings 35, 40
 - Bump deliberately, on purpose, a couple of times a year; no Renovate (maintainer decision).
 
 ## Comments
+
+- 2026-10-17: verified done in the homesite repo (`54c7f6d`, "Pin deps, deploy via release
+  symlinks, add link-check hooks"): `requirements.txt` pins the versions, and `tools/mkdocs.sh` runs
+  `.venv/bin/mkdocs`.

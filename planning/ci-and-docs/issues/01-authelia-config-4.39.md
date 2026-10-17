@@ -1,7 +1,9 @@
 # 01. Bring configuration.yml.j2 up to the Authelia 4.39 template
 
-Status: resolved Type: task Repo: homelab Source: review finding 32 (maintainer wants the full
-annotated template kept)
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 32 (maintainer wants the full annotated template kept)
 
 ## Change
 

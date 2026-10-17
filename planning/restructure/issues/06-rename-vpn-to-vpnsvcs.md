@@ -1,7 +1,10 @@
 # 06. Document every step to rename the vpn node to vpnsvcs
 
-Status: resolved Type: research Repo: homelab Source: user item 48 Blocked by: observability/04,
-backup-and-dr/09
+Status: resolved
+Type: research
+Repo: homelab
+Source: user item 48
+Blocked by: observability/04, backup-and-dr/09
 
 ## Deliverable
 

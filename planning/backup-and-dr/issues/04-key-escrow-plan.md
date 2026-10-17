@@ -1,6 +1,9 @@
 # 04. Escrow plan for the AGE key, CAs and other trust roots
 
-Status: ready-for-human Type: task Repo: homelab Source: review finding 3
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: review finding 3
 
 ## Problem
 
@@ -15,11 +18,15 @@ Write `docs/guides/escrow.md` and implement it:
 1. **Medium:** an encrypted USB stick (LUKS on Linux; note macOS can't open LUKS without extra
    tooling, so also consider a `age -p` (passphrase) encrypted tarball that any machine can open).
    Two sticks, two locations (home + off-site).
-2. **Contents** (the canonical list is issue 09): `/root/secrets/age.txt`, `age.pub`,
-   `/root/secrets/*.yaml` (SOPS), `*_id_ed25519.pub`; `/root/ca/` (root + intermediate keys,
-   serials, CRLs); `/root/ssh/` (SSH CA key); `/root/acme/`;
-   `/etc/opt/traefik/certificates/acme.json`; `vars.yml`; the Windows gaming VM's SSH cert material;
-   pfSense config XML; `/etc/pve` tarball.
+2. **Contents:** the rows marked "Escrow" in `docs/guides/pve1_recovery.md.j2` (the canonical
+   list): `/root/secrets/age.txt`, `age.pub`, `pbs_client.key`, `pve1.yaml` (holds
+   `pbs2_backup_token`) and the per-host SOPS `*.yaml`; the root and intermediate CA keys, certs,
+   `index.txt`, `serial`, `crlnumber` and CRLs, and the service keys under `/root/ca/`; the SSH user
+   and host CA keys under `/root/ssh/`; `vars.yml`. Plus Vaultwarden's plaintext admin token (SOPS
+   holds only its hash) and a password-protected Bitwarden JSON export. Not escrowed, per that
+   guide: `acme.json` lives on secsvcs, homesvcs and websvcs and is covered by their PBS VM backups;
+   `/root/acme/`, host recipient keys and SSH host certs are regenerated; pfSense `config.xml` and
+   `/etc/pve` are covered by PBS backups (and Auto Config Backup).
 3. **Second AGE recipient.** Generate an offline AGE key kept only on the sticks and add its public
    key as a recipient in `secret_update.sh` (`-R /root/secrets/age_escrow.pub`) so a future
    re-encryption of the secret files is possible without pve1.
@@ -44,3 +51,7 @@ Write `docs/guides/escrow.md` and implement it:
 - 2026-10-12 (vaultwarden/01): the escrow set gains Vaultwarden's plaintext admin token (SOPS holds
   only its hash) and a periodic password-protected Bitwarden JSON export, so the passwords needed to
   rebuild the homelab don't live only in the homelab.
+- 2026-10-17: Change item 2 now follows `docs/guides/pve1_recovery.md.j2`'s Escrow rows and folds in
+  the two additions above. Dropped from the list: `acme.json` (on the VMs, covered by PBS),
+  `/root/acme/`, host recipient keys and the gaming VM's SSH cert material (regenerated), pfSense
+  `config.xml` and the `/etc/pve` tarball (PBS backups).

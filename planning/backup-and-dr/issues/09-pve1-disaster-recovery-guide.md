@@ -1,6 +1,9 @@
 # 09. pve1 disaster recovery guide with the complete escrow/backup file list
 
-Status: resolved Type: task Repo: homelab Source: review finding 8
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 8
 
 ## Problem
 

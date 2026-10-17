@@ -9,7 +9,7 @@ library, and renames.
 | --- | --- | --- | --- |
 | [01](issues/01-minimal-services-inventory.md) | Minimal per-node inventory that replaces parse_routes/parse_uptime_urls/parse_dispatcher/gen_dispatch_cmds | `resolved` | prototype |
 | [02](issues/02-src-layout.md) | Restructure src/ into nodes/, services/, base/ and update every path | `ready-for-human` | task |
-| [03](issues/03-shared-bash-lib.md) | Shared bash library sourced by all scripts | `ready-for-agent` | task |
+| [03](issues/03-shared-bash-lib.md) | Shared bash library sourced by all scripts | `resolved` | task |
 | [04](issues/04-rename-guides.md) | Rename guides to match node names | `resolved` | task |
 | [05](issues/05-rename-test-to-probes.md) | Rename test/ to probes/ | `resolved` | task |
 | [06](issues/06-rename-vpn-to-vpnsvcs.md) | Document every step to rename the vpn node to vpnsvcs | `resolved` | research |

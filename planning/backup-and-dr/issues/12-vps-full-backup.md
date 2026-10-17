@@ -1,6 +1,9 @@
 # 12. Full backup of the VPS via dispatcher
 
-Status: resolved Type: task Repo: homelab Source: maintainer request 2026-09-27
+Status: resolved
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-27
 
 ## Problem
 

@@ -1,7 +1,9 @@
 # 03. Replace top-level `return` with `exit 1` in upload scripts
 
-Status: resolved Type: task Repo: homelab Source: review finding 27 (maintainer asked to check
-whether set -e makes it intentional)
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 27 (maintainer asked to check whether set -e makes it intentional)
 
 ## Investigation result
 

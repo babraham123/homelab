@@ -1,11 +1,15 @@
-# 02. Gate VictoriaMetrics/VictoriaLogs/Alertmanager/ntfy UIs on a telemetry LDAP group
+# 02. Gate VictoriaMetrics/VictoriaLogs/Alertmanager UIs on a telemetry LDAP group
 
-Status: ready-for-human Type: task Repo: homelab Source: review finding 13
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: review finding 13
 
 ## Problem
 
 `src/nodes/secsvcs/traefik/basic_auth.yml` injects `admin:$X_ADMIN_PASSWORD` for anyone who clears
-Authelia, so every authenticated user is admin on those four tools.
+Authelia, so every authenticated user is admin on VictoriaMetrics, VictoriaLogs and Alertmanager.
+ntfy is out of scope: its web app signs in to ntfy itself (auth/13).
 
 ## Mechanism: Traefik multi-layer routing (confirmed)
 
@@ -28,7 +32,7 @@ rule. Confirm on your version.
 ## Change
 
 - LLDAP group `telemetry` (human step); add yourself.
-- `src/nodes/secsvcs/traefik/routes.yml.j2`, for each of `metrics`, `logs`, `alert`, `push`
+- `src/nodes/secsvcs/traefik/routes.yml.j2`, for each of `metrics`, `logs`, `alert`
   (replacing today's `-ui` router; keep the `-api`/`-hass-api` routers untouched):
 
   ```yaml
@@ -82,3 +86,5 @@ rule. Confirm on your version.
   and the model is in `docs/security.md#identity-lldap--authelia`. Remaining for a human: create
   the LLDAP `telemetry` group, add yourself, redeploy secsvcs Traefik, then run the three
   acceptance checks live.
+- 2026-10-17: ntfy dropped from scope: 11c348c (auth/13) took `push.SITE` off `telemetry_ui`, and
+  the ntfy web app now signs in to ntfy itself.

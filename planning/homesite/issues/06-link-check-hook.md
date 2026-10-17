@@ -1,6 +1,9 @@
 # 06. Link checking as a commit hook
 
-Status: resolved Type: task Repo: homesite Source: review finding 44
+Status: resolved
+Type: task
+Repo: homesite
+Source: review finding 44
 
 ## Change
 
@@ -15,3 +18,6 @@ Status: resolved Type: task Repo: homesite Source: review finding 44
 Document in `README.md`/`setup.md`.
 
 ## Comments
+
+- 2026-10-17: verified done in the homesite repo (`54c7f6d`): `.githooks/pre-commit` runs the
+  strict build and `lychee --offline` on it; the external-link pass is in `.githooks/pre-push`.

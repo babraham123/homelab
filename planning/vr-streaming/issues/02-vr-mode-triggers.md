@@ -1,7 +1,11 @@
 # 02. StartVR / StopVR triggers on the gaming VM
 
-Status: needs-info Type: task Repo: homelab Source: maintainer request 2026-10-12; research in
-[automation-research.md](../automation-research.md) Blocked by: 01
+Status: needs-info
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-12; research in
+  [automation-research.md](../automation-research.md)
+Blocked by: 01
 
 Waiting on 01's answer: the client path, and whether the service alone starts the runtime. The
 shape below assumes Air Link works headless with the Link app running.

@@ -1,7 +1,10 @@
 # 06. OIDC client and bearer-token uploads for the WiCAN sync app
 
-Status: needs-triage Type: task Repo: homelab Source: wican1 session 2026-10-14 Blocked by: the
-app's OIDC milestone (its repo's `planning/`)
+Status: needs-triage
+Type: task
+Repo: homelab
+Source: wican1 session 2026-10-14
+Blocked by: the app's OIDC milestone (its repo's `planning/`)
 
 ## Problem
 

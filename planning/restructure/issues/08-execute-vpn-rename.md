@@ -1,6 +1,9 @@
 # 08. Rename the vpn node to vpnsvcs
 
-Status: resolved Type: task Repo: homelab Source: maintainer request 2026-09-26 (user item 48)
+Status: resolved
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26 (user item 48)
 Blocked by: 06
 
 ## Change

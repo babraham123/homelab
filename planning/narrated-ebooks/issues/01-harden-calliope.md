@@ -59,8 +59,7 @@ from. Keep upstream's layout so fixes can go back as PRs.
 
 ## Comments
 
-2026-10-11: implemented in 12 commits, fast-forwarded onto the fork's `main`
-(`89954aa`).
+2026-10-11: implemented in 12 commits on the fork's `main` (`9c9e61b`..`2030c50`).
 
 - **CLI:** `calliope IN.epub OUT.epub --voice WAV --lang xx [--model turbo|multilingual]
   [--work-dir DIR]`, plus QA flags (`--max-retries`, `--max-silence`,
@@ -94,3 +93,9 @@ from. Keep upstream's layout so fixes can go back as PRs.
   - Any GPU or P4 run, so the real-time factors are still missing.
   - Upstream PRs. Most commits depend on the first, which restructures the code into
     a package.
+
+2026-10-17: the fork's `main` was rewritten since, so the original tip `89954aa` is no longer on
+it; the same 12 commits end at `2030c50`. Two commits followed: `1cdfbaa` speaks percent,
+degree, currency, `&` and `#` instead of dropping them, and `ab79415` (HEAD) spells out numbers
+with num2words in all ten languages. Still not done: the image build, any P4 run and its
+real-time factors, and upstream PRs (none open on hugohammer/TTS-Narrated-Ebook-Creator).

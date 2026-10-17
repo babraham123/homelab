@@ -1,6 +1,10 @@
 # 06. Restore instructions for VMs on pve1 and pve2, and an annual test
 
-Status: ready-for-human Type: task Repo: homelab Source: review finding 5 Blocked by: 04
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: review finding 5
+Blocked by: 03
 
 ## Problem
 
@@ -33,3 +37,7 @@ Add `docs/guides/restore.md`:
   (`proxmox-backup-client restore --pattern`), VM restore in place and to a scratch VMID, pve1 and
   pve2 host restores, and the annual test. Open: the acceptance test itself (one scratch-VMID
   restore, date recorded in `docs/maintenance.md`), and the offsite section waits on 03.
+- 2026-10-17: Blocked by 03 instead of 04. The only unwritten section is the restore from the
+  offsite copy, which needs 03's remote. The scratch-VMID test doesn't wait on escrow (04): it needs
+  only `/root/secrets/pbs_client.key` and the `pbs2_backup_token`, both already on pve1, and can be
+  run now.

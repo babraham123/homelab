@@ -1,8 +1,11 @@
 # 07. Move Guacamole to a private OIDC client with code flow and PKCE
 
-Status: ready-for-agent Type: task Blocked by: upstream apache/guacamole-client#1219 shipping in a
-Guacamole release (expected 1.7.0) Repo: homelab Source: maintainer request 2026-09-27; upstream
-GUACAMOLE-2258 (<https://github.com/apache/guacamole-client/pull/1219>)
+Status: ready-for-agent
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-27; upstream GUACAMOLE-2258
+  (<https://github.com/apache/guacamole-client/pull/1219>)
+Blocked by: upstream apache/guacamole-client#1219 shipping in a Guacamole release (expected 1.7.0)
 
 ## Problem
 
@@ -53,7 +56,10 @@ change before merge.
      to userinfo by default. Without this policy, `preferred_username` and `groups` drop out of the
      ID token and group permissions stop mapping.
 3. **Guacamole** (`src/services/guacamole/guacamole.container.j2`):
-   - bump `Image=` to the release that includes the PR
+   - bump `upstream:` for both `guacamole` and `guacd` in `src/nodes/websvcs/inventory.yml` to the
+     release that includes the PR, and the matching `Image=localhost/guacamole/...:<version>` tags
+     in `guacamole.container.j2` and `guacd.container.j2`; the image updater builds them from
+     `upstream`
    - `Secret=guacamole_oidc_secret,type=env,target=OPENID_CLIENT_SECRET`
    - `OPENID_RESPONSE_TYPE=code`, `OPENID_PKCE_REQUIRED=true`
    - prefer

@@ -1,6 +1,9 @@
 # 04. Rename guides to match node names
 
-Status: resolved Type: task Repo: homelab Source: user item 55
+Status: resolved
+Type: task
+Repo: homelab
+Source: user item 55
 
 ## Change
 

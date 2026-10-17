@@ -1,7 +1,10 @@
 # 01. Upgrade to pfSense CE 2.9.0; replace NAT-PMP / static-port NAT with EIM outbound NAT
 
-Status: resolved Type: task Repo: homelab Source: maintainer request 2026-09-26;
-tailscale/tailscale#18035 (<https://github.com/tailscale/tailscale/issues/18035>)
+Status: resolved
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-26; tailscale/tailscale#18035
+  (<https://github.com/tailscale/tailscale/issues/18035>)
 
 ## Problem
 

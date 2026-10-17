@@ -1,7 +1,10 @@
 # 06. UEVR mode: StartUEVR trigger, Playnite injection, OliveTin button
 
-Status: needs-info Type: task Repo: homelab Source: maintainer request 2026-10-12; research in
-[uevr-research.md](../uevr-research.md) and [automation-research.md](../automation-research.md)
+Status: needs-info
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-12; research in [uevr-research.md](../uevr-research.md) and
+  [automation-research.md](../automation-research.md)
 Blocked by: 02, 03, 05
 
 Waiting on 05's answer, mainly the injection delay and whether controllers need the Link desktop

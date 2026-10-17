@@ -1,6 +1,9 @@
 # 07. get_secret_by_id.sh: pass SECRET_ID via jq --arg
 
-Status: resolved Type: task Repo: homelab Source: review finding 31
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 31
 
 ## Change
 

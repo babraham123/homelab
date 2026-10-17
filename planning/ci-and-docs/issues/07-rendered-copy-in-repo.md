@@ -1,6 +1,10 @@
 # 07. Commit a rendered copy of the repo (example values) for humans and agents
 
-Status: resolved Type: prototype Repo: homelab Source: user item 49 Blocked by: 02
+Status: resolved
+Type: prototype
+Repo: homelab
+Source: user item 49
+Blocked by: 02
 
 ## Assessment
 

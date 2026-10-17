@@ -1,7 +1,9 @@
 # 03. Edge defense: CrowdSec bans at the VPS, CrowdSec WAF in Traefik, fail2ban for SSH
 
-Status: ready-for-human Type: task Repo: homelab Source: review finding 14; maintainer request
-2026-10-11 (replaces the HAProxy TODO block)
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: review finding 14; maintainer request 2026-10-11 (replaces the HAProxy TODO block)
 
 ## Problem
 

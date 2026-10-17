@@ -1,6 +1,9 @@
 # 01. The dispatcher's sftp passthrough gives autoadmin keys file access
 
-Status: resolved Type: research Repo: homelab Source: architecture review 2026-10-10
+Status: resolved
+Type: research
+Repo: homelab
+Source: architecture review 2026-10-10
 
 ## Problem
 

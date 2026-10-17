@@ -1,6 +1,10 @@
 # 03. Copy the PBS datastore offsite after each run
 
-Status: ready-for-human Type: task Repo: homelab Source: review finding 1 Blocked by: 01
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: review finding 1
+Blocked by: 01
 
 ## Problem
 
@@ -9,18 +13,23 @@ pve2's VMs and every backup of pve1.
 
 ## Change
 
-Pick one, then implement as the orchestrator's final step:
+PBS-native: a PBS 4 S3-compatible datastore (B2 or similar) as a push sync target for `backup1`.
+Every chunk is already encrypted with pve1's client key, so the remote holds only ciphertext without
+a second tool.
 
-- **restic** (as requested): `restic -r <remote> backup /path/to/backup1` from pve2 (new
-  `commands.sh offsite_copy` behind the dispatcher), repo password from the SOPS/AGE pipeline,
-  target = B2/S3/rsync.net/a friend's box. PBS chunks are already deduped, so restic dedup adds
-  little, but it gives encryption-at-rest offsite and a second, independent tool for restore.
-- **PBS-native alternative worth a look:** PBS 4 (trixie, which you're on) has an S3-compatible
-  object-store datastore backend and sync jobs can *push* to it. Less tooling, restore stays inside
-  PBS. Check whether it left tech preview before choosing.
-
-Either way: prune policy on the remote, a monthly `restic check --read-data-subset` (or PBS verify
-job), and the run's success timestamp fed into the same textfile metric as issue 01.
+- **Where it runs:** a new step in `src/nodes/pve1/backup_orchestrator.sh.j2`, `step_offsite`, that
+  calls a new pve2 dispatcher command the same way `step_prune` calls `prune`
+  (`ssh autoadmin@pve2 offsite`). List it in `PBS_STEPS` after `upload` and `prune`, so the push
+  carries this week's VM images, pve1's `files` and `pve1/vpnsvcs` host backups, and none of the
+  snapshots prune just removed; and before `acme_transfer`, which reloads PBS's proxy.
+- **pve2 stays up:** `sleep_pve2` runs only after every PBS step, so the push must finish inside the
+  step (the pve2 script waits on the sync task's UPID, like `prune.sh`'s `pbs_task`).
+- **Metric and summary:** being a step, it gets
+  `homelab_backup_last_success_timestamp_seconds{job="offsite"}` and a place in the ntfy summary
+  with no further wiring.
+- **Remote retention and checks:** mirror local retention (sync with remove-vanished, or a prune job
+  per namespace on the S3 datastore), and a monthly PBS verify job on the remote.
+- Before choosing the provider, check whether PBS's S3 backend has left tech preview.
 
 ## Acceptance
 
@@ -45,3 +54,9 @@ Human decision needed on the remote provider and monthly cost before an agent ca
   job runs as a step at the end of pve2's `backup.sh images`, before the orchestrator powers pve2
   off, and gets a `homelab_backup_last_success_timestamp_seconds` series through the `images_pve2`
   step. Still ready-for-human: provider, bucket, budget.
+
+- 2026-10-17: The placements in both comments above are superseded. The orchestrator's steps are now
+  `router_local`, `backup_<node>`, `upload`, `prune`, `acme_transfer`; pve2's `backup.sh` has no
+  `images` subcommand and there is no `vzdump_pve2` or `images_pve2` step. A sync at the end of
+  pve2's `backup.sh` would also run before pve1's `upload`, missing the `files` namespace and the
+  vpnsvcs host backup. Change now places the push as its own PBS step after `upload` and `prune`.

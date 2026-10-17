@@ -1,6 +1,9 @@
 # 05. Remove the install_vault stub
 
-Status: wontfix Type: task Repo: homelab Source: review finding 37
+Status: wontfix
+Type: task
+Repo: homelab
+Source: review finding 37
 
 Maintainer decision: ignore for now. `install_vault` remains wired through
 `src/nodes/secsvcs/{install_svcs.sh,dispatcher.sh}` as a no-op stub.

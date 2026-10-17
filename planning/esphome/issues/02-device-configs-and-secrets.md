@@ -1,7 +1,10 @@
 # 02. Shared device config, secrets.yaml, and backups of the config volume
 
-Status: ready-for-agent Type: task Repo: homelab Source: maintainer request 2026-10-13; design in
-[spec.md](../spec.md) Blocked by: 01
+Status: ready-for-agent
+Type: task
+Repo: homelab
+Source: maintainer request 2026-10-13; design in [spec.md](../spec.md)
+Blocked by: 01
 
 The dashboard owns device files. The repo owns only the shared package and `secrets.yaml`.
 Onboarding follows [docs/guides/esphome.md.j2](../../../docs/guides/esphome.md.j2).
@@ -17,7 +20,7 @@ Onboarding follows [docs/guides/esphome.md.j2](../../../docs/guides/esphome.md.j
     password: !secret wifi_password
     # The IoT SSID is hidden
     fast_connect: true
-    # pfSense registers static mappings here; see planning/esphome/spec.md
+    # pfSense registers DHCP static mappings under this domain
     domain: .iot.home.arpa
   logger:
   ```

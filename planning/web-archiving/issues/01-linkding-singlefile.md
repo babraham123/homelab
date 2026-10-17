@@ -15,7 +15,9 @@ including pages behind a login.
 Follow "Add a new service" in `docs/development.md`, with `src/services/isso/` as the model.
 
 - `src/services/linkding/linkding.container.j2`:
-  - `Image=docker.io/sissbruecker/linkding:latest-plus`, `ContainerName=linkding`,
+  - `Image=localhost/sissbruecker/linkding:latest-plus`, with
+    `upstream: docker.io/sissbruecker/linkding:latest-plus` in the inventory entry so
+    image_updater pulls and scans it. `ContainerName=linkding`,
     `HostName=archive.{{ site.url }}`, `IP={{ websvcs.container_subnet }}.17`, port
     9090, `NoNewPrivileges=true`, `AutoUpdate=local` like the other quadlets.
   - `latest-plus` adds server-side snapshots for bookmarks saved where SingleFile
@@ -47,7 +49,7 @@ Follow "Add a new service" in `docs/development.md`, with `src/services/isso/` a
   `docs/guides/websvcs.md.j2`.
 - Backups: stage the SQLite database consistently in `src/nodes/websvcs/backup.sh.j2`, using
   linkding's own backup command if it has one, or `sqlite3 .backup` like
-  `src/vpnsvcs/backup.sh.j2`. Decide whether snapshot files are backed up or excluded
+  `src/nodes/vpnsvcs/backup.sh.j2`. Decide whether snapshot files are backed up or excluded
   as large, and say which in the header comment.
 - Doc for the maintainer (the guide or `docs/services.md`): browser setup on each
   client, following

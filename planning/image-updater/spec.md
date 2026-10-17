@@ -4,8 +4,8 @@ Replaces registry auto-update with a per-VM script that checks upstream, downloa
 Trivy, loads into local storage and runs `podman auto-update` against `localhost/` images. Nothing
 in a quadlet can pull from a registry, so an unscanned image can't reach a container.
 
-Design: `notes/image-updater-design.md` (grilling session 2026-09-12 to 2026-09-14, status: draft
-awaiting confirmation). Section names below refer to that file. Supersedes supply-chain/01.
+Design: `notes/image-updater-design.md` (grilling session 2026-09-12 to 2026-09-14, implemented).
+Section names below refer to that file. Supersedes supply-chain/01.
 
 ## Issues
 

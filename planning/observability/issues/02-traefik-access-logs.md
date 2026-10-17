@@ -1,6 +1,9 @@
 # 02. Enable Traefik access logs and ship them to VictoriaLogs
 
-Status: resolved Type: task Repo: homelab Source: review finding 19
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 19
 
 ## Do Traefik access logs add anything over HAProxy logs? (answer)
 

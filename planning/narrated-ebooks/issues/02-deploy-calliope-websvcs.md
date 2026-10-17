@@ -13,10 +13,10 @@ folder and later get a read-along EPUB, without logging in to the VM.
 
 ## Change
 
-- **Build:** a `calliope` case in `src/nodes/websvcs/install_svcs.sh` that downloads the
-  fork's tarball and runs `podman build -t calliope`, like `finance_exporter`. Add it
-  to `src/nodes/websvcs/inventory.yml` (no subdomain or uptime; it isn't a web service). If
-  image-updater/04 has landed, put the recipe in `src/services/calliope/build.sh` instead.
+- **Build:** `src/services/calliope/build.sh` builds the image from the fork
+  (babraham123/TTS-Narrated-Ebook-Creator) with `github_build`, like `finance_exporter`, so
+  image_updater rebuilds and scans it. Add it to `src/nodes/websvcs/inventory.yml` (no subdomain
+  or uptime; it isn't a web service).
 - **Inbox and outbox** on the media pool:
   - `/srv/media/books/narrate/inbox`: drop `Title.epub` here, optionally with
     `Title.json` holding `{"lang": "en", "voice": "name", "collection": "books"}`.
@@ -30,7 +30,7 @@ folder and later get a read-along EPUB, without logging in to the VM.
     `default.wav` is used when no voice is given.
 - **Runner:** `src/services/calliope/calliope.container.j2` as a oneshot quadlet
   (`Type=oneshot` in `[Service]`, no `[Install]`), with `PodmanArgs=--gpus=all` like
-  `src/wyoming/whisper.container.j2` and the model cache in a named volume. It's
+  `src/services/wyoming/whisper.container.j2` and the model cache in a named volume. It's
   started by a `calliope.path` unit that watches the inbox, plus a `calliope.timer`
   (hourly, `Persistent=true`) so a job interrupted by pve2 stopping resumes after
   boot. A small wrapper script handles one book per run, oldest first, and moves the
@@ -76,3 +76,7 @@ folder and later get a read-along EPUB, without logging in to the VM.
 - The snapraid config excludes `/books/narrate/work/`.
 - Not done, needs the P4: measuring whisper's and Calliope's peak VRAM together, and
   the real-time factor for the docs. `Nice=10` only lowers CPU priority.
+
+2026-10-17: the fork is on GitHub, and the image is built by `src/services/calliope/build.sh`
+through image_updater's `github_build`, not from the install case. Acceptance still needs a
+deploy, plus the P4 measurements above.

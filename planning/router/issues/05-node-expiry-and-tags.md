@@ -1,7 +1,11 @@
 # 05. Tag the infrastructure nodes and set a default node key expiry
 
-Status: ready-for-human Type: task Repo: homelab Source: maintainer request 2026-09-27, from the
-0.29.4 upgrade; juanfont/headscale#3122 (`node.expiry`), 0.28 "Tags as identity" Blocked by: 03
+Status: ready-for-human
+Type: task
+Repo: homelab
+Source: maintainer request 2026-09-27, from the 0.29.4 upgrade; juanfont/headscale#3122
+  (`node.expiry`), 0.28 "Tags as identity"
+Blocked by: 03
 
 ## Problem
 
@@ -53,3 +57,7 @@ router and the VPS node lets the default expiry apply to personal devices only. 
 - Policy `tests` pass and the public endpoint still reaches only the web front doors.
 
 ## Comments
+
+- 2026-10-17: still waits on 03 (the policy must be loaded before `tagOwners` work).
+  juanfont/headscale#3122 (`node.expiry`) is merged; headscale is at v0.29.5. The templates still
+  have `node.expiry: 0` and no `tagOwners`.

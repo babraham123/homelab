@@ -1,6 +1,10 @@
 # 06. Add the cert-expiry vmalert rules the docs already claim exist
 
-Status: resolved Type: task Repo: homelab Source: review finding 23 Blocked by: 01
+Status: resolved
+Type: task
+Repo: homelab
+Source: review finding 23
+Blocked by: 01
 
 ## Problem
 
