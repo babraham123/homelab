@@ -29,7 +29,6 @@ Exec="--configFile=/config/static/traefik.yml"
 Environment=TZ=America/Los_Angeles
 # The crowdsec middleware's key for AppSec, at /run/secrets/crowdsec_bouncer_key
 Secret=crowdsec_bouncer_secsvcs,type=mount,target=crowdsec_bouncer_key
-Secret=ntfy_admin_password,type=env,target=NTFY_ADMIN_PASSWORD
 Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
 Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
 Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD

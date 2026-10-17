@@ -103,11 +103,13 @@ Two integration models:
 1. **ForwardAuth** (apps with no real auth of their own): Traefik forwards every request to
    Authelia, which returns 200 or a 302 to the login portal. This is the default for all protected
    routes; the flow is shown in the [networking sequence
-   diagram](networking.md#ingress-the-three-tier-chain). The VictoriaMetrics, VictoriaLogs,
-   Alertmanager and ntfy UIs only have a shared admin login, which Traefik injects as basic auth.
-   Traefik multi-layer routing sends only members of the `telemetry` group to those UIs, matching
-   on the `Remote-Groups` header from Authelia. Everyone else gets a 403 page. Their non-browser API
-   routes skip Authelia and rely on the app's own auth.
+   diagram](networking.md#ingress-the-three-tier-chain). The VictoriaMetrics, VictoriaLogs and
+   Alertmanager UIs only have a shared admin login, which Traefik injects as basic auth. Traefik
+   multi-layer routing sends only members of the `telemetry` group to those UIs, matching on the
+   `Remote-Groups` header from Authelia. Everyone else gets a 403 page. Their non-browser API
+   routes skip Authelia and rely on the app's own auth. ntfy's web app is different: Authelia
+   gates only page loads (`Sec-Fetch-Mode: navigate`), then each person signs in to ntfy with
+   their own account, and ntfy's ACLs decide which topics they see.
 2. **OIDC** (apps with native SSO support): Authelia is the issuer for eight clients: Headscale
    and OliveTin (two-factor), Grafana, Home Assistant, Guacamole, Gatus, Readeck and Storyteller.
    OIDC gives the app group-based role mapping, not just a yes/no at the proxy.

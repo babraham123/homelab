@@ -1,32 +1,35 @@
 # auth/13 research notes: ntfy and ntfy-idp-push credentials, TLS, and routes behind Authelia
 
 Research for [13-ntfy-push-credentials-and-routes.md](13-ntfy-push-credentials-and-routes.md),
-checked 2026-10-14 against the repo at `563863f`. Every claim about the repo cites a file and line.
+first checked 2026-10-14; repo citations re-checked 2026-10-17 against `60cb3bb`. Every claim
+about the repo cites a file and line.
 Every other claim cites a source ID, collected under [Sources](#12-sources). INFERENCE marks my own
 reading; UNVERIFIED marks a claim I couldn't confirm in a primary source.
 
-**Updated 2026-10-14 for ntfy-idp-push `f18cc43`** (the idp-acme and idp-review sessions). What
-changed, and where it lands below:
+**Updated 2026-10-17 for ntfy-idp-push v0.2.0 (`331e7e9`).** The first pass read the shim at
+`3ed310f`. What changed since, and where it lands below:
 
 | Change in the shim or its plan | Effect on this research |
 | --- | --- |
-| ACME removed (`ada909a`); the shim serves cert files or plain HTTP behind a proxy that keeps `Host` [SH1] | Unchanged: Traefik terminates TLS (§4) |
-| Decision: ask Authelia to skip Duo's CA pinning when `duo_api.hostname` isn't a Duo host, instead of chasing a pinned chain [SH2] | **Q3 flips**: the target is the existing Let's Encrypt resolver; the GTS resolver and its EAB secrets become a fallback only (§4, §7, §12) |
-| Live test of the pinned clients: GTS ECDSA (leaf → WE1 → GTS Root R4) passes, GTS RSA (WR1-WR4 → R1) and Let's Encrypt fail [SH2] | Settles most of §4's UNVERIFIED chain question for the fallback |
-| `<key>-file` config and `NTFY_IDP_PUSH_<KEY>_FILE` env for `duo-secret-key`, `duo-secret-key-previous`, `ntfy-admin-token`, `oidc-client-secret`; SIGHUP re-reads them (`02185fc`) [SH1] | Shim secrets mount as files (§3, §8) |
-| `backup <path>\|-` writes a consistent SQLite copy while serving (`1fafc27`) [SH1] | secsvcs backup calls it instead of `stage_volume` (§11) |
-| HSTS (1 year) and `nosniff` on every response (`9cbfddf`) [SH1] | One more reason not to add `secure-headers` (§7) |
-| Tagged releases push `ghcr.io/babraham123/ntfy-idp-push:X.Y.Z` (multi-arch); nothing tagged or pushed yet (`f18cc43`) [SH1] | Ticket 14 can pull instead of build once a release exists (§11) |
-| Routes, identity handling and the image's `:8443`/HTTPS defaults are unchanged since `3ed310f` | §1, §5 and §8 still hold |
+| No TLS in the shim at all: ACME removed, then the HTTPS listener; the image listens on plain HTTP :8080 and its healthcheck defaults to `http://127.0.0.1:8080/healthz` [SH1] | Traefik terminates TLS; the image needs no overrides (§1, §8) |
+| Forward-auth is the only sign-in: OIDC removed (`606c231`, `ddd9bc1`). `identity-header` (default `Remote-User`) is believed only from `trusted-proxies`; `auth-mode` and `oidc-*` keys are gone [SH1] | No OIDC client secret (§3); `trusted-proxies` = Traefik (§5) |
+| Routes split into two families: identity (`/enroll`, `/provision`, `/devices`) and token (`/token/*`, `/challenge/*`); `/enroll?code=` became `/token/<code>`, and `/enroll/{verify,resend,password,qr}` moved under `/token/` (`ddd9bc1`, `331e7e9`). Token routes never read the identity header [SH1] | Prefix routing at Traefik; the old code-flow blocker is gone; Authelia's bypass header leak no longer reaches anything that trusts it (§5, §8) |
+| The shim's README now recommends Authelia `bypass` for `^/token/`, `^/challenge/`, `^/auth/v2/`, `^/static/` [SH1] | Fine for the token family; not for `/auth/v2/` in this repo (§5) |
+| Decision: ask Authelia to skip Duo's CA pinning when `duo_api.hostname` isn't a Duo host [SH2]; the shim's docs now state it as a prerequisite [SH1] | **Q3**: the existing Let's Encrypt resolver; GTS only as a fallback (§4, §7) |
+| Live test of the pinned clients: GTS ECDSA (leaf → WE1 → GTS Root R4) passes; GTS RSA and Let's Encrypt fail [SH2] | Settles most of the fallback's chain question (§4) |
+| Secrets from files: `<key>-file` and `NTFY_IDP_PUSH_<KEY>_FILE`, re-read on SIGHUP [SH1] | Shim secrets mount as files (§3, §8) |
+| `backup <path>\|-` writes a consistent SQLite copy while serving [SH1] | secsvcs backup calls it instead of `stage_volume` (§11) |
+| HSTS (1 year) and `nosniff` on every response [SH1] | One more reason not to add `secure-headers` (§7) |
+| Releases: v0.1.1, v0.1.2, v0.2.0 on GitHub; multi-arch image `ghcr.io/babraham123/ntfy-idp-push:0.2.0` / `:0.2` [SH1] | Ticket 14 pulls it as an `upstream:` image; no build (§8, §11) |
+| Still no metrics endpoint [SH1] | Ticket 14's scrape job stays out |
 
-Upstream status, checked 2026-10-14 (homelab `main` is still `563863f`, so the repo citations hold):
+Upstream status, checked 2026-10-17:
 
 | Item | State | Effect |
 | --- | --- | --- |
-| authelia#7647 [AU12] | Open; last activity 2025-07-20; the drafted reply isn't posted | Q3's target waits on it |
-| Authelia PR skipping pinning for non-Duo hosts | None exists | Same |
-| `babraham123/ntfy-idp-push` on GitHub | `main` at `26293a5`, 16 commits behind the local `f18cc43` (still has ACME and the quadlets); no releases | Push before linking it upstream; ticket 14 builds from source until a release exists |
-| ntfy#597 enrollment codes | Branch `token-enroll-codes` (`ebc4a7ba`) pushed to the `babraham123/ntfy` fork; no upstream PR | Stock ntfy has no `/account/token/redeem`; the shim falls back to plain topic links and `/provision/password` |
+| authelia#7647 [AU12] | Open. Reply posted 2026-10-17 proposing the shim and asking whether a PR that skips pinning for non-Duo hosts is acceptable; no maintainer answer yet | Q3's target waits on it |
+| Authelia PR skipping pinning | None yet | Same |
+| ntfy#597 enrollment codes | binwiederhier/ntfy#2068 open, no reviews yet [NT14]; stock ntfy has no `/account/token/redeem` | The shim falls back to plain topic links and `/provision/password` |
 | ntfy header auth / OIDC (#1579, #1971, #1596) | All still open [NT9] [NT10] [NT11] | Q1 unchanged |
 
 Versions that matter:
@@ -35,8 +38,8 @@ Versions that matter:
 | --- | --- | --- |
 | Authelia | v4.39.28, the latest 4.39 tag; no 4.40 tag exists [AU1] | `authelia/authelia:4.39` (`src/services/authelia/authelia.container.j2:14`) |
 | Traefik | v3.7.14, the latest 3.7 tag [TR1] | `traefik:v3.7` (`src/nodes/secsvcs/traefik/traefik.container.j2:13`) |
-| ntfy | v2.30.0 upstream [NT1]; local fork branch `token-enroll-codes` at `ebc4a7ba` (v2.30.0 + 2 commits, ntfy#597) [NT13] | `binwiederhier/ntfy:latest` (`src/services/ntfy/ntfy.container.j2:12`) |
-| ntfy-idp-push | `f18cc43` (local checkout, not pushed) [SH1] | not deployed |
+| ntfy | v2.30.0 upstream [NT1]; fork branch `token-enroll-codes` (ntfy#597), PR #2068 [NT13] [NT14] | `binwiederhier/ntfy:latest` (`src/services/ntfy/ntfy.container.j2:12`) |
+| ntfy-idp-push | v0.2.0 (`331e7e9`, pushed) [SH1] | not deployed |
 | duo_api_golang | v0.3.0, used by Authelia 4.39.28 (`go.mod:17`) [AU1]; the scratch `duoapi.go` copy is byte-identical [DU1] | — |
 
 **The shim's `PLAN.md` no longer exists.** `~/Personal/ntfy-idp-push` has no `PLAN.md` in its tree
@@ -49,18 +52,20 @@ references below are to those files and to the code.
 | --- | --- | --- |
 | `ntfy-ui` router at `routes.yml.j2:96-97` matches every `Mozilla/*` UA on `push.SITE` | Right, with an exception: `/file/` is excluded | `src/nodes/secsvcs/traefik/routes.yml.j2:96` is the comment, `:97` the `telemetry_ui` call with `!PathPrefix(`/file/`)` |
 | `ntfy-auth@file` injects `Authorization: Basic admin:$NTFY_ADMIN_PASSWORD` | Right | `src/nodes/secsvcs/traefik/basic_auth.yml:9-12`; secret at `traefik.container.j2:32` |
-| "Any Authelia-authenticated browser user is therefore ntfy admin" | **Wrong since auth/02.** Only `telemetry` group members get the admin header. Everyone else gets `s403` on *every* browser request, API calls included, so they can't use the web app at all | `routes.yml.j2:15-37` (parent `-ui`, child `-ui-telemetry` with `HeaderRegexp(`Remote-Groups`, …)`, child `-ui-denied` → `s403`); `docs/security.md:109-112` |
+| "Any Authelia-authenticated browser user is therefore ntfy admin" | **Wrong since auth/02.** Only `telemetry` group members get the admin header. Everyone else gets `s403` on *every* browser request, API calls included, so they can't use the web app at all | `routes.yml.j2:15-37` (parent `-ui`, child `-ui-telemetry` with `HeaderRegexp(`Remote-Groups`, …)`, child `-ui-denied` → `s403`); `docs/security.md:107-110` |
 | The header overwrites the Bearer token the web app would send after signing in | Right for `fetch()` calls. WebSocket subscriptions send credentials as `?auth=`, which ntfy prefers over the header. Moot today: `enable-login: false`, so the web app has no session and every call is anonymous plus the admin header | `customRequestHeaders` sets the header; ntfy `readAuthHeader` replaces the header value with `?auth=` [NT2]; web app `Connection.js` adds `auth=` only when a user exists [NT3]; `src/services/ntfy/config.yml.j2.j2:257` |
 | `duo_api` commented out at `configuration.yml.j2:342` | Right (block at `:338-348`) | `src/services/authelia/configuration.yml.j2:338-348` |
 | Secret key as `AUTHELIA_DUO_API_SECRET_KEY` | Right; `_FILE` also works; so does `AUTHELIA_DUO_API_INTEGRATION_KEY` | §3 |
 | Authelia pins Duo's CAs; Let's Encrypt is not in the bundle | Right. ISRG is absent; the only GTS roots present are **R2 and R4** (not R1, R3) | §4 |
-| Matrix row: `idp-push.SITE/c/*` | **Wrong path.** The approve routes are `/challenge/{id}`, `/challenge/{id}/options`, `/assert`, `/deny`, `/fraud` | shim `internal/web/web.go:77-82` [SH1] |
-| Matrix row: `idp-push.SITE/frame/qr` | **Wrong path.** It is `/enroll/qr`, used only by IdP-driven enrollment (authentik); Authelia never calls it | `web.go:75`; Authelia calls only `preauth` and `auth` [AU5] |
-| Matrix: the shim's paths | **Incomplete.** Missing: `/static/` (the approve and enroll pages' JS), `/healthz`, `/enroll/begin`, `/enroll/finish`, `/enroll/resend`, `/enroll/password`, `/enroll/verify/{device}`, `/provision/password`, `/devices/{id}/revoke` | `web.go:65-87` |
-| Matrix: Authelia `bypass` for `/enroll?code=`, `/c/`, … | **Unsafe as written.** On a `bypass` rule Authelia still returns `Remote-User` for any session, including a one-factor session. See §5 | [AU7] |
-| Matrix: `idp-push.SITE/metrics` internal only | **No such endpoint.** The shim has no metrics at `3ed310f` (no `metrics`/`prometheus` in `cmd/` or `internal/`); ticket 14's scrape job has nothing to scrape | [SH1] |
+| Matrix row: `idp-push.SITE/c/*` | **Wrong path.** The approve routes are `/challenge/{id}`, `/challenge/{id}/options`, `/assert`, `/deny`, `/fraud` | shim `internal/web/web.go:73-78` [SH1] |
+| Matrix row: `idp-push.SITE/frame/qr` | **Wrong path.** It is `/token/qr`, used only by IdP-driven enrollment (authentik); Authelia never calls it | `web.go:71`; Authelia calls only `preauth` and `auth` [AU5] |
+| Matrix row: `idp-push.SITE/enroll?code=…` | **Gone.** Code links are `/token/<code>` and post to `/token/begin` and `/token/finish` | `web.go:64-66`; shim `internal/routes/routes.go` [SH1] |
+| Matrix: the shim's paths | **Incomplete.** Missing: `/static/` (the pages' JS), `/healthz`, `/enroll/begin`, `/enroll/finish`, `/token/verify/{device}`, `/token/resend`, `/token/password`, `/provision/password`, `/devices/{id}/revoke` | `web.go:56-83` |
+| Matrix: Authelia `bypass` for the code link, `/c/`, … | **Was unsafe; harmless for the token family now.** On `bypass` Authelia still returns `Remote-User` for a one-factor session, but token routes never read it. Still wrong for `/auth/v2/` (§5) | [AU7] [AU8]; shim `ARCHITECTURE.md` "Provisioning" |
+| Matrix: `idp-push.SITE/metrics` internal only | **No such endpoint**, still at v0.2.0; ticket 14's scrape job has nothing to scrape | [SH1] |
 | `push.SITE/metrics` (port 2587) internal only | Right. With `metrics-listen-http` set, ntfy serves metrics only on that listener and not on :2586 | `config.yml.j2.j2:365-366`; ntfy `server.go:461-467` [NT2] |
-| Problem 1: the shim needs ACME EAB credentials | **No.** The shim has no ACME client: it reads `tls-cert-file`/`tls-key-file` or serves plain HTTP behind a proxy. EAB is needed only by the GTS fallback in Traefik (§4) | shim `README.md:79-83`, `internal/config/config.go` [SH1] |
+| Problem 1: the shim needs ACME EAB credentials | **No.** The shim has no TLS at all: plain HTTP behind the proxy. EAB is needed only by the GTS fallback in Traefik (§4) | shim `README.md` "Reverse proxy and sign-in", `Containerfile` [SH1] |
+| Problem 1: an OIDC client secret if `auth-mode: oidc` | **No.** The shim has no OIDC; forward-auth is the only sign-in | [SH1] |
 | "Authelia pins Duo's CAs", treated as permanent | Pinning is a default of the client Authelia builds, not a property of the protocol; `SetCAPinning(false)` exists and the plan is to get Authelia to use it for non-Duo hosts | §4 [DU1] [SH2] |
 | "The Duo client signs the configured hostname, so Traefik must not rewrite `Host`" | Right; Traefik passes `Host` through by default | §4 |
 
@@ -69,13 +74,13 @@ Ticket 14 errors found on the way (fix them there):
 | Ticket 14 item | Problem | Evidence |
 | --- | --- | --- |
 | `auth-access` `idp-push:push-*:wo` for the admin `idp-push` | **ntfy refuses to start**: `auth-access` entries are only allowed for `user` roles. Admins already have full access; drop the entry | ntfy `cmd/serve.go:709-710` [NT5] |
-| `tls-mode` key | No such key: it is `listen-http` vs `listen-https` + `tls-cert-file`/`tls-key-file` | shim `config.go:37-39,55-56` |
-| `listen-http` behind Traefik | The image sets `NTFY_IDP_PUSH_LISTEN_HTTPS=:8443`, and env overrides the file, so the quadlet must set `Environment=NTFY_IDP_PUSH_LISTEN_HTTPS=` (empty) or startup demands TLS files | shim `Containerfile` `ENV`; `config.go:117` (env after file), `:208-210` |
+| `tls-mode` key | No such key; the shim has no TLS settings, only `listen-http` (the image sets `:8080`) | shim `internal/config/config.go`, `Containerfile` [SH1] |
+| `auth-mode: forward` | No such key; forward-auth is the only mode. `trusted-proxies` is required and `identity-header` defaults to `Remote-User` | shim `config.go:58-60,208-211` [SH1] |
 | `ntfy-base-url: https://push.SITE` | The shim's container resolves `push.SITE` through aardvark to ntfy's container (§4.5), which listens on :2586, not :443. Needs `AddHost=push.{{ site.url }}:{{ secsvcs.container_subnet }}.6` | `ntfy.container.j2:28-29`; `routes.yml.j2:170-173` |
 | Prometheus scrape job | No metrics endpoint (above) | — |
-| Image healthcheck | The image's `HEALTHCHECK` hits `https://127.0.0.1:8443/healthz`; override with `healthcheck http://127.0.0.1:8080/healthz` | shim `Containerfile` [SH1] |
-| `stage_volume ntfy_idp_push` | Works, but the shim's `backup -` gives a consistent copy of the passkey database while serving; use it like the `pg_dumpall` step | `src/nodes/secsvcs/backup.sh.j2:20-29`; shim `README.md` Backup [SH1] |
-| Build from source with `github_build` | Fine until a release is tagged; then pull `ghcr.io/babraham123/ntfy-idp-push:X.Y` like other upstream images | shim `.github/workflows`, `README.md` Releases [SH1] |
+| `stage_volume ntfy_idp_push` | Works, but the shim's `backup -` gives a consistent copy of the passkey database while serving; use it like the `pg_dumpall` step | `src/nodes/secsvcs/backup.sh.j2:20-29`; shim `README.md` "Backup" [SH1] |
+| Build from source with `github_build` | Not needed: v0.2.0 is released. Use `upstream: ghcr.io/babraham123/ntfy-idp-push:0.2`, like the other pulled images | `src/nodes/secsvcs/inventory.yml:5-30`; shim `README.md` "Releases" [SH1] |
+| `/enroll?code=` bypass in Authelia | Code links are `/token/<code>` now; route the whole `/token/` family past Authelia (§8) | [SH1] |
 
 ## 2. Q1: replacing the `ntfy-auth@file` admin-header injection
 
@@ -153,7 +158,7 @@ API at `/v1/account/login` doesn't check it: `EnableLogin` is only echoed to the
 | Other Authelia users | Gain the web app (today: 403) after signing in to ntfy |
 | ntfy-alertmanager's own UI (`ntfy-alertmanager.SITE`) | Unaffected (`routes.yml.j2:103-107`) |
 | Web push | Registration checks read access once, with the caller's identity, and stores the subscription with that user (`server_webpush.go:59-72`); delivery does not re-check (`:89-105`) [NT6]. Subscriptions registered as `admin` keep delivering every topic they named until the browser re-registers or 60 days pass (`server/config.go:43-44`). Clear them at cutover (Follow-up 3) |
-| Access logs | A signed-in SPA puts its token in the WebSocket URL (`?auth=base64(Bearer tk_…)`, `Connection.js:106`). Traefik logs the query (`static.yml.j2:19-29`); the Lua filter redacts only `access_token` (`src/services/fluentbit/journald.lua.j2:42`). Route `/…/ws` with `accessLogs: false`, as for Vaultwarden (`routes.yml.j2:116-124`) |
+| Access logs | A signed-in SPA puts its token in the WebSocket URL (`?auth=base64(Bearer tk_…)`, `Connection.js:106`). Traefik logs the query (`static.yml.j2:19-29`); the Lua filter redacts only `access_token` (`src/services/fluentbit/journald.lua.j2:45`). Route `/…/ws` with `accessLogs: false`, as for Vaultwarden (`routes.yml.j2:116-124`) |
 
 ## 3. Q2: secret plumbing
 
@@ -161,9 +166,9 @@ API at `/v1/account/login` doesn't check it: `EnableLogin` is only echoed to the
 | --- | --- | --- | --- | --- |
 | `ntfy_idp_push_password` (new) | ntfy | `render_secrets.sh` list (`ntfy.container.j2:47`) into `auth-users`, bcrypt-hashed like the others (`config.yml.j2.j2:117-121`) | the repo's 20-char `tr` line | Only ever hashed. `auth-users` is `name:hash:role`; username must match `^[-_.+@a-zA-Z0-9]+$`; bcrypt cost ≥ 10 (`cmd/serve.go:663-688`, `user/util.go`, `user/manager.go:42`) [NT5] |
 | `ntfy_idp_push_admin_token` (new) | ntfy; shim | ntfy: `render_secrets.sh` into `auth-tokens` as `idp-push:<token>:ntfy-idp-push`. Shim: `Secret=ntfy_idp_push_admin_token` (mounted at `/run/secrets/`) plus `NTFY_IDP_PUSH_NTFY_ADMIN_TOKEN_FILE` | `ntfy token generate`, as for `ntfy_alert_token` (`secrets_template.yaml:61-62`) | `^tk_[-_A-Za-z0-9]{29}$` (32 chars; generator emits lowercase) (`user/util.go:24`, `user/manager.go:32-33`); `auth-tokens` is `user:token[:label]`, user must be provisioned (`cmd/serve.go:733-763`) [NT5]. Shim refuses to start unless the token is admin [SH1] |
-| `duo_integration_key` (new) | Authelia; shim | Authelia: `Secret=…,type=env,target=AUTHELIA_DUO_API_INTEGRATION_KEY` (leave `integration_key` out of the YAML). Shim: `NTFY_IDP_PUSH_DUO_INTEGRATION_KEY` | `podman run --rm localhost/ntfy_idp_push:latest keygen` (prints both keys) | Shim emits `DI` + 18 `[A-Z0-9]` (`internal/config/keys.go:26-27`). Authelia checks only non-empty, no format (`validator/duo.go:14-38`) [AU2] |
-| `duo_secret_key` (new) | Authelia; shim | Authelia: `…target=AUTHELIA_DUO_API_SECRET_KEY`. Shim: `Secret=duo_secret_key` plus `NTFY_IDP_PUSH_DUO_SECRET_KEY_FILE` | same `keygen` | 40 alphanumerics (`keys.go:29-32`); Authelia: non-empty only. Rotation: `duo-secret-key-previous` with `duo-key-grace` (shim `ARCHITECTURE.md:185`) |
-| OIDC client id/secret/hash | — | Not needed with `auth-mode: forward` | (pattern `secrets_template.yaml:34-38`) | — |
+| `duo_integration_key` (new) | Authelia; shim | Authelia: `Secret=…,type=env,target=AUTHELIA_DUO_API_INTEGRATION_KEY` (leave `integration_key` out of the YAML). Shim: `NTFY_IDP_PUSH_DUO_INTEGRATION_KEY` | `podman run --rm ghcr.io/babraham123/ntfy-idp-push:0.2 keygen` (prints both keys) | Shim emits `DI` + 18 `[A-Z0-9]` (`internal/config/keys.go:27`). Authelia checks only non-empty, no format (`validator/duo.go:14-38`) [AU2] |
+| `duo_secret_key` (new) | Authelia; shim | Authelia: `…target=AUTHELIA_DUO_API_SECRET_KEY`. Shim: `Secret=duo_secret_key` plus `NTFY_IDP_PUSH_DUO_SECRET_KEY_FILE` | same `keygen` | 40 alphanumerics (`keys.go:30-32`); Authelia: non-empty only. Rotation: `duo-secret-key-previous` with `duo-key-grace` (shim `ARCHITECTURE.md` "Configuration") |
+| OIDC client id/secret/hash | — | Not needed: the shim has no OIDC | — | — |
 | `gts_eab_kid`, `gts_eab_hmac` (**fallback only**, §4) | Traefik (static config), not the shim | Static config can't be templated and file/CLI/env sources are mutually exclusive [TR6], so render the static file at start with `render_secrets.sh` (fallback task 1, §11) | `gcloud publicca external-account-keys create` → `keyId`, `b64MacKey` [GT4] | HMAC base64url, no padding [TR4] [RFC1]. **Single use**: one ACME account per key; void if unused for 7 days; the account then never expires [GT4] |
 
 Authelia 4.39 details [AU3] [AU4]:
@@ -203,14 +208,14 @@ duoapi.NewDuoApi(ikey, skey, host, "", duoapi.SetCAPinning(isDuoHost(host)))
 // isDuoHost: suffix .duosecurity.com or .duofederal.com
 ```
 
-Status: a reply to authelia#7647 proposing this is drafted, not posted [SH2] [AU12]. No Authelia
-release has it. Once one does, `idp-push.SITE` uses the existing `le-http-production` resolver
-(`routes.yml.j2:24,49`) like every other host, and the GTS resolver, its EAB secrets and the chain
-check below are not needed.
+Status: the reply on authelia#7647 proposing this was posted 2026-10-17 and awaits the
+maintainer [AU12]. No PR or release has it yet. Once one does, `idp-push.SITE` uses the existing
+`le-http-production` resolver (`routes.yml.j2:24,49`) like every other host, and the GTS
+resolver, its EAB secrets and the chain check below are not needed.
 
 Until then, Authelia's `duo_api` stays off. Nothing else in auth/13 or auth/14 depends on it: the
 `push.SITE` route change, the shim's enrollment portal, `/provision` and the test push all work
-without Authelia calling the Duo API (INFERENCE from the shim's routes, `web.go:65-87`). If the
+without Authelia calling the Duo API (INFERENCE from the shim's routes, `web.go:56-83`). If the
 upstream change stalls, the fallback is the GTS resolver below; a patched Authelia image built
 with `github_build` is the other option, at the cost of tracking Authelia releases by hand.
 
@@ -262,16 +267,16 @@ among its ACME divergences [GT7]. Traefik has `keyType`, `profile` and `preferre
 
 | | (a) Traefik resolver with GTS + EAB | (b) TCP passthrough; the shim terminates TLS |
 | --- | --- | --- |
-| Who gets the cert | Traefik: EAB supported (`acme.eab.kid`, `acme.eab.hmacEncoded`), any `caServer`, `keyType` `EC256`, `profile`, `preferredChain` [TR4] | Nothing in the stack: the shim dropped its ACME client (`ada909a`) [SH1]. Needs another client plus a cert file hand-off |
-| Coexists with LE | Yes: resolvers are a map, each its own account; sharing `/certificates/acme.json` is by design (data keyed by resolver name) [TR5]. HTTP-01 works as for LE (`static.yml.j2:95-101`; HAProxy passes :80 by `Host`, `haproxy.cfg.j2:117-119`) | — |
-| Routing | Normal HTTP routers: forward-auth for the portal paths, CrowdSec WAF, access logs | An HTTPS router whose `Host` names the same SNI takes precedence over the TCP router [TR3], so *all* paths bypass Traefik's HTTP middlewares; the portal would need `auth-mode: oidc`; no WAF |
-| `Host` | `passHostHeader` defaults to `true` [TR2]; the shim checks `lower(Host) == duo-hostname` (shim `internal/duoapi/duoapi.go:100`) | untouched |
+| Who gets the cert | Traefik: EAB supported (`acme.eab.kid`, `acme.eab.hmacEncoded`), any `caServer`, `keyType` `EC256`, `profile`, `preferredChain` [TR4] | Impossible: the shim has no TLS listener at all [SH1] |
+| Coexists with LE | Yes: resolvers are a map, each its own account; sharing `/certificates/acme.json` is by design (data keyed by resolver name) [TR5]. HTTP-01 works as for LE (`static.yml.j2:95-101`; HAProxy passes :80 by `Host`, `haproxy.cfg.j2:122-124`) | — |
+| Routing | Normal HTTP routers: forward-auth for the portal paths, CrowdSec WAF, access logs | An HTTPS router whose `Host` names the same SNI takes precedence over the TCP router [TR3], so *all* paths bypass Traefik's HTTP middlewares, and the shim's identity routes need forward-auth; no WAF |
+| `Host` | `passHostHeader` defaults to `true` [TR2]; the shim checks `lower(Host) == duo-hostname` (shim `internal/duoapi/duoapi.go:98`) | untouched |
 | Fixing a bad chain | Only through `profile`/`preferredChain`/re-issue | The shim serves whatever chain file you assemble |
 | Verdict | **Fallback** if Authelia's pinning change stalls | Rejected |
 
-Either way Traefik terminates TLS: only the certificate's issuer depends on Authelia. The idp-acme
-session's "the shim must terminate TLS itself" rule applied while the shim had its own ACME client;
-the shim's README now allows `listen-http` behind a proxy that keeps `Host` [SH1] [SH2].
+Either way Traefik terminates TLS: only the certificate's issuer depends on Authelia. The shim
+now requires exactly this: the proxy holds the certificate for `duo-hostname`, from any publicly
+trusted issuer, and preserves `Host` [SH1].
 
 Other facts:
 
@@ -326,43 +331,50 @@ Other facts:
 
 Consequences:
 
-1. **No Authelia `bypass` rules for the shim.** A `bypass` for `^/enroll\?code=` would hand the
-   shim a one-factor user's `Remote-User`; `/enroll?code=` with an empty code falls back to that
-   identity (shim `web.go:201-211`), so a stolen password enrolls a phone, which is exactly what
-   auth/01's `two_factor` reasoning forbids. The same holds for any bypassed path that calls
-   `identity.User`.
+1. **The bypass leak no longer matters to the shim.** Authelia still hands a one-factor user's
+   `Remote-User` to a bypassed route, but the shim's token routes never read the identity header;
+   their code, token, passkey or signature is the whole credential (shim `ARCHITECTURE.md`
+   "Provisioning"). The `/enroll?code=` page that fell back to the header is gone (`331e7e9`), and
+   the identity routes sit behind `two_factor`.
 2. **Duo API calls must not pass through `authelia@file`.** They carry
-   `Authorization: Basic ikey:sig` (`duoapi.go:97-110`) [DU1], which Authelia would try as a login
-   and record as a failure for user `DI…` on every push [AU8].
-3. **Split at Traefik, not in Authelia.** Routers without Authelia get a `strip-remote` middleware
-   that empties the four headers. The router *with* Authelia covers only the identity paths, and its
-   Authelia rule is `two_factor`.
+   `Authorization: Basic ikey:sig` (`duoapi.go:97-110`) [DU1], and this repo's forward-auth endpoint
+   tries `Authorization: Basic` as an Authelia login (`configuration.yml.j2:116-122`, and Authelia's
+   default for `ForwardAuth` [AU8]). Each push would log a failed login for user `DI…`. CrowdSec runs
+   the `LePresidente/authelia` collection on Authelia's log (`crowdsec.container.j2:38`,
+   `victorialogs.yaml.j2:28-37`), whose brute-force scenario keys on the client IP, here Authelia's
+   own container: INFERENCE, a few logins in a row could get Authelia banned from its own Duo
+   endpoint. The shim README's single-route Authelia example has this problem (shim follow-up 1).
+3. **Split at Traefik by prefix, not in Authelia.** The token family and the Duo API get routers
+   without Authelia; everything else on the host goes through `authelia@file` at `two_factor`.
+   Traefik never asks Authelia about the public paths, so no `bypass` rules are needed and the
+   phone's approve page doesn't depend on Authelia. The non-Authelia routers keep a `strip-remote`
+   middleware: the shim's README asks the proxy to strip a client-sent `Remote-User` on every route,
+   and it costs nothing.
 4. **The shim trusts `Remote-User` only from Traefik's IP**: `trusted-proxies:
-   [{{ secsvcs.container_subnet }}.6/32]` (shim `internal/web/identity.go:59-70`). Any other
+   [{{ secsvcs.container_subnet }}.6/32]` (shim `internal/web/web.go:206-210`). Any other
    container on `net.network` that connects directly is refused.
 
 ### The shim's paths, by who authenticates
 
-| Path (shim `web.go`) | Authenticated by | Route |
+| Path (shim `web.go:56-83`) | Authenticated by | Router (§8) |
 | --- | --- | --- |
-| `/auth/v2/*` (`ping` unsigned) | HMAC signature, date skew, replay guard (shim `ARCHITECTURE.md:64-79`) | public, `strip-remote` |
-| `/challenge/{id}`, `/options`, `/assert`, `/fraud` | challenge id + WebAuthn assertion; `Origin` check on POSTs | public, `strip-remote` |
-| `/challenge/{id}/deny` | deny token in the body | public, `strip-remote` |
-| `/static/*`, `/healthz` | none needed | public, `strip-remote` |
-| `/enroll/verify/{device}` (GET form, POST `t=`) | verify token | public, `strip-remote`, **no access log** (the token is in the GET query) |
-| `/enroll/resend`, `/enroll/password` | result token in the body | public, `strip-remote` |
-| `/enroll?code=…` | single-use 5-minute code (`ARCHITECTURE.md:134-136`) | public, `strip-remote`, **no access log** (the code is in the query) |
-| `/enroll/begin`, `/enroll/finish` | code in the JSON body, *or* `Remote-User` (`web.go:222-270`) | portal (Authelia). The code flow needs a shim change to be routable (shim follow-up 1) |
-| `/enroll`, `/provision`, `/provision/password`, `/devices`, `/devices/{id}/revoke` | `Remote-User` | portal (Authelia `two_factor`) |
-| `/enroll/qr` | shim-issued code | not routed (authentik only) |
-| anything else | — | no router → Traefik 404 |
+| `/auth/v2/*` (`ping` unsigned) | HMAC signature, date skew, replay guard (shim `ARCHITECTURE.md` "Duo API facade") | `idp-push-api` |
+| `/challenge/{id}`, `/options`, `/assert`, `/fraud` | challenge id + WebAuthn assertion; `Origin` check on POSTs | `idp-push-api` |
+| `/challenge/{id}/deny` | deny token in the body | `idp-push-api` |
+| `/static/`, `/healthz` | none needed | `idp-push-api` |
+| `/token/{code}`, `/token/begin`, `/token/finish` | single-use 5-minute enrollment code, in the path | `idp-push-token`, **no access log** |
+| `/token/verify/{device}` (GET form, POST `t=`) | verify token, in the GET query | `idp-push-token`, **no access log** |
+| `/token/resend`, `/token/password` | result token in the body | `idp-push-token` |
+| `/token/qr` | shim-issued codes only | `idp-push-token` (authentik only; harmless) |
+| `/enroll`, `/enroll/begin`, `/enroll/finish`, `/provision`, `/provision/password`, `/devices`, `/devices/{id}/revoke` | identity header from Traefik | `idp-push` (Authelia `two_factor`) |
+| anything else | — | `idp-push`: Authelia, then the shim's 404 |
 
 ### Authelia rule
 
 Mark the service `admin: true` in the inventory. That puts `idp-push` in `admin_subdomains` and
-under the existing rule (`configuration.yml.j2:812-818`): `two_factor` for `authelia_gen_access`
+under the existing rule (`configuration.yml.j2:809-817`): `two_factor` for `authelia_gen_access`
 from every network, ahead of the LAN/VPN one-factor rule. No bypass rules. Since Traefik sends only
-the portal paths to Authelia, a path-scoped `resources` rule adds nothing.
+the identity routes to Authelia, a path-scoped `resources` rule adds nothing.
 
 `networks` matching uses the first `X-Forwarded-For` entry from any peer (`middlewares/wrap.go:37-49`)
 [AU10]; Traefik's entrypoints drop forged XFF from untrusted clients (`static.yml.j2:79-81`,
@@ -372,10 +384,10 @@ the portal paths to Authelia, a path-scoped `resources` rule adds nothing.
 
 | Endpoint | Reached by | Off the LAN? | Today |
 | --- | --- | --- | --- |
-| `push.SITE` API and WebSocket | phone apps, browsers, the shim | **Yes**: pushes must arrive anywhere | Public: `push` is a secsvcs subdomain (`src/nodes/secsvcs/inventory.yml:23-24`), so HAProxy routes its SNI (`src/services/haproxy/haproxy.cfg.j2:72-74`) and public DNS points subdomains at the VPS (`docs/networking.md:113-115`) |
-| `idp-push.SITE/challenge/*` | the phone's browser, from the notification (`ARCHITECTURE.md:100-113`) | **Yes**: a login can happen anywhere | Not deployed |
+| `push.SITE` API and WebSocket | phone apps, browsers, the shim | **Yes**: pushes must arrive anywhere | Public: `push` is a secsvcs subdomain (`src/nodes/secsvcs/inventory.yml:23-24`), so HAProxy routes its SNI (`src/services/haproxy/haproxy.cfg.j2:79-81`) and public DNS points subdomains at the VPS (`docs/networking.md:113-115`) |
+| `idp-push.SITE/challenge/*` | the phone's browser, from the notification (shim `ARCHITECTURE.md` "Login") | **Yes**: a login can happen anywhere | Not deployed |
 | `idp-push.SITE/enroll`, `/provision`, `/devices` | the person, phone or desktop | Yes, behind `two_factor` from every network | — |
-| `idp-push.SITE/enroll/verify/*` | the phone, from the setup push | Yes | — |
+| `idp-push.SITE/token/*` | the phone: setup push, `enroll-link` codes | Yes | — |
 | `idp-push.SITE/auth/v2/*` | Authelia only, via `AddHost` | No, but HMAC-signed, so public exposure is safe | — |
 
 Consequences: give the shim `subdomain: idp-push` in the inventory, which adds it to HAProxy's SNI
@@ -388,9 +400,9 @@ list, Unbound and Gatus automatically (`src/nodes.jinja:9,54`). Public DNS must 
 | Question | Decision |
 | --- | --- |
 | Q1 admin header | **Option b.** Delete `ntfy-auth` and Traefik's `NTFY_ADMIN_PASSWORD`. Authelia gates only GET navigations (`Sec-Fetch-Mode: navigate`) on `push.SITE`, minus `/account/token/redeem` and `/file/`. Every other request goes to ntfy unauthenticated by Traefik, as non-browser clients already do. ntfy gets `enable-login: true` and `require-login: true`; people sign in with the account the shim provisions (redeem link, or `/provision/password`). WebSocket requests skip the access log |
-| Q2 secrets | Four new secsvcs secrets (§10), plus two GTS EAB secrets only in the fallback. Podman `Secret=…,type=env` for Authelia; mounted secrets plus `NTFY_IDP_PUSH_<KEY>_FILE` for the shim (SIGHUP re-reads them); `render_secrets.sh` for ntfy's `auth-users`/`auth-tokens` (and Traefik's static EAB block in the fallback). Integration key via `AUTHELIA_DUO_API_INTEGRATION_KEY`, not the YAML. No OIDC client (`auth-mode: forward`) |
+| Q2 secrets | Four new secsvcs secrets (§10), plus two GTS EAB secrets only in the fallback. Podman `Secret=…,type=env` for Authelia; mounted secrets plus `NTFY_IDP_PUSH_<KEY>_FILE` for the shim (SIGHUP re-reads them); `render_secrets.sh` for ntfy's `auth-users`/`auth-tokens` (and Traefik's static EAB block in the fallback). Integration key via `AUTHELIA_DUO_API_INTEGRATION_KEY`, not the YAML. No OIDC client (the shim has none) |
 | Q3 TLS | **Traefik terminates with the existing `le-http-production` resolver; the shim serves plain HTTP on :8080.** Authelia's `duo_api` is enabled only once an Authelia release skips Duo's CA pinning for non-Duo hosts (upstream request, §4); the rest of auth/13 and auth/14 ships before that. Authelia gets `AddHost=idp-push.SITE:<Traefik .6>`. Fallback if upstream stalls: Option a, a `gts-http-production` resolver (EAB, `keyType: EC256`, HTTP-01), with the served chain checked against Duo's bundle after each issuance |
-| Q4 rules and headers | Split the shim's paths at Traefik. Identity paths: `authelia@file`, Authelia `two_factor` through `admin: true`. Everything else: no Authelia, `strip-remote` middleware. **No Authelia `bypass` rules.** Shim `trusted-proxies` = Traefik's `.6/32`. No `secure-headers` on the shim: it sets a stricter CSP, HSTS and `nosniff` itself (`web.go:96-97,114`), and `secure-headers` would replace the CSP (cf. `routes.yml.j2:108-110`) |
+| Q4 rules and headers | Split the shim's paths at Traefik by prefix. `/token/`, `/challenge/`, `/auth/v2/`, `/static/`, `/healthz`: no Authelia, `strip-remote` middleware, no access log for `/token/`. Everything else: `authelia@file`, Authelia `two_factor` through `admin: true`. **No Authelia `bypass` rules**, and above all no forward-auth on `/auth/v2/`. Shim `trusted-proxies` = Traefik's `.6/32`. No `secure-headers` on the shim: it sets a stricter CSP, HSTS and `nosniff` itself (`web.go:96-97,114`), and `secure-headers` would replace the CSP (cf. `routes.yml.j2:108-110`) |
 | Q5 reachability | `push.SITE` stays public. `idp-push.SITE` is public (`subdomain: idp-push`); the Duo API is public too but signed |
 
 ## 8. Target state
@@ -403,13 +415,12 @@ list, Unbound and Gatus automatically (`src/nodes.jinja:9,54`). Public DNS must 
 | `push` | `ntfy-ws` | `PathRegexp(^/[-_A-Za-z0-9,]+/ws$)`, `accessLogs: false` | — | no | `ntfy` |
 | `push` | `ntfy-api` | `Host` only (unchanged) | — | no | `ntfy` |
 | `push` | `/metrics` | not routed; :2587 for the scraper only | — | — | — |
-| `idp-push` | `idp-push-api` | `PathPrefix(/auth/v2/) \|\| PathPrefix(/challenge/) \|\| PathPrefix(/static/) \|\| Path(/healthz) \|\| Path(/enroll/resend) \|\| Path(/enroll/password)` | `strip-remote` | no | `ntfy_idp_push` |
-| `idp-push` | `idp-push-link` | `PathPrefix(/enroll/verify/) \|\| (Path(/enroll) && QueryRegexp(code, .+))`, `accessLogs: false`, explicit priority above `idp-push-portal` | `strip-remote` | no | `ntfy_idp_push` |
-| `idp-push` | `idp-push-portal` | `Path(/enroll) \|\| Path(/enroll/begin) \|\| Path(/enroll/finish) \|\| Path(/provision) \|\| Path(/provision/password) \|\| Path(/devices) \|\| PathPrefix(/devices/)` | `authelia` | `two_factor` (`admin: true`) | `ntfy_idp_push` |
-| `idp-push` | everything else | no router | — | — | Traefik 404 |
+| `idp-push` | `idp-push-api` | `PathPrefix(/auth/v2/) \|\| PathPrefix(/challenge/) \|\| PathPrefix(/static/) \|\| Path(/healthz)` | `strip-remote` | no | `ntfy_idp_push` |
+| `idp-push` | `idp-push-token` | `PathPrefix(/token/)`, `accessLogs: false` | `strip-remote` | no | `ntfy_idp_push` |
+| `idp-push` | `idp-push` | `Host` only | `authelia` | `two_factor` (`admin: true`) | `ntfy_idp_push` |
 
-Rule priority defaults to the rule string's length (`pkg/muxer/http/mux.go:75-77`) [TR8], so
-`idp-push-link` needs an explicit `priority` above the longer portal rule.
+Rule priority defaults to the rule string's length (`pkg/muxer/http/mux.go:75-77`) [TR8], so both
+path routers outrank the `Host`-only catch-all without an explicit `priority`.
 
 ### Config sketch
 
@@ -439,11 +450,11 @@ Rule priority defaults to the rule string's length (`pkg/muxer/http/mux.go:75-77
       rule: Host(`push.{{ site.url }}`)
       service: ntfy@file
       middlewares: []
-    # ntfy-idp-push. Only the identity pages go through Authelia; every other router empties the
-    # Remote-* headers so a client can't pose as a user. No secure-headers: it would replace the
-    # shim's stricter CSP.
+    # ntfy-idp-push. Token and Duo API routes carry their own credential and skip Authelia (Duo's
+    # Basic header would count as a failed Authelia login); they empty the Remote-* headers so a
+    # client can't pose as a user. No secure-headers: it would replace the shim's stricter CSP.
     idp-push-api: &idp_push
-      rule: Host(`idp-push.{{ site.url }}`) && (PathPrefix(`/auth/v2/`) || PathPrefix(`/challenge/`) || PathPrefix(`/static/`) || Path(`/healthz`) || Path(`/enroll/resend`) || Path(`/enroll/password`))
+      rule: Host(`idp-push.{{ site.url }}`) && (PathPrefix(`/auth/v2/`) || PathPrefix(`/challenge/`) || PathPrefix(`/static/`) || Path(`/healthz`))
       entryPoints: websecure
       service: ntfy_idp_push@file
       middlewares:
@@ -451,16 +462,16 @@ Rule priority defaults to the rule string's length (`pkg/muxer/http/mux.go:75-77
       tls:
         options: intermediate@file
         certResolver: le-http-production
-    # Single-use codes and tokens in the query string
-    idp-push-link:
+    # Enrollment codes in the path, verify tokens in the query
+    idp-push-token:
       <<: *idp_push
-      rule: Host(`idp-push.{{ site.url }}`) && (PathPrefix(`/enroll/verify/`) || (Path(`/enroll`) && QueryRegexp(`code`, `.+`)))
-      priority: 1000
+      rule: Host(`idp-push.{{ site.url }}`) && PathPrefix(`/token/`)
       observability:
         accessLogs: false
-    idp-push-portal:
+    # Identity routes: the shim trusts Remote-User from Traefik's address only
+    idp-push:
       <<: *idp_push
-      rule: Host(`idp-push.{{ site.url }}`) && (Path(`/enroll`) || Path(`/enroll/begin`) || Path(`/enroll/finish`) || Path(`/provision`) || Path(`/provision/password`) || Path(`/devices`) || PathPrefix(`/devices/`))
+      rule: Host(`idp-push.{{ site.url }}`)
       middlewares:
         - authelia@file
   services:
@@ -484,7 +495,7 @@ Rule priority defaults to the rule string's length (`pkg/muxer/http/mux.go:75-77
 ```
 
 Fallback only (§4): `src/services/traefik/static.yml.j2`, rendered again at start for the EAB
-values (fallback task 1, §11), and `certResolver: gts-http-production` on the `idp-push-*` routers:
+values (fallback task 1, §11), and `certResolver: gts-http-production` on the `idp-push` routers:
 
 ```yaml
   # Google Trust Services, for hosts Duo clients call: Duo's pinned bundle has GTS Root R2/R4
@@ -535,16 +546,14 @@ enable-login: true
 require-login: true
 ```
 
-Shim quadlet (ticket 14), the parts this research fixes:
+Shim quadlet (ticket 14), the parts this research fixes. The image already listens on plain HTTP
+:8080 and its healthcheck targets it [SH1]:
 
 ```ini
+Image=localhost/babraham123/ntfy-idp-push:0.2
 HostName=idp-push.{{ site.url }}
 # The shim's links and ntfy calls use https://push.SITE, which aardvark would resolve to ntfy:2586
 AddHost=push.{{ site.url }}:{{ secsvcs.container_subnet }}.6
-# The image defaults to :8443 with TLS; Traefik terminates TLS here
-Environment=NTFY_IDP_PUSH_LISTEN_HTTPS=
-Environment=NTFY_IDP_PUSH_LISTEN_HTTP=:8080
-Environment=NTFY_IDP_PUSH_AUTH_MODE=forward
 Environment=NTFY_IDP_PUSH_TRUSTED_PROXIES={{ secsvcs.container_subnet }}.6/32
 # Mounted at /run/secrets/<name>; the shim re-reads *_FILE secrets on SIGHUP
 Secret=ntfy_idp_push_admin_token
@@ -552,26 +561,26 @@ Secret=duo_secret_key
 Environment=NTFY_IDP_PUSH_NTFY_ADMIN_TOKEN_FILE=/run/secrets/ntfy_idp_push_admin_token
 Environment=NTFY_IDP_PUSH_DUO_SECRET_KEY_FILE=/run/secrets/duo_secret_key
 Secret=duo_integration_key,type=env,target=NTFY_IDP_PUSH_DUO_INTEGRATION_KEY
-HealthCmd=/usr/bin/ntfy-idp-push healthcheck http://127.0.0.1:8080/healthz
 ```
 
 Inventory (`src/nodes/secsvcs/inventory.yml`):
 
 ```yaml
   ntfy_idp_push: {subdomain: idp-push, admin: true, uptime: ntfy-idp-push, uptime_path: /healthz,
-                  build: ntfy_idp_push}
+                  upstream: ghcr.io/babraham123/ntfy-idp-push:0.2}
 ```
 
 ## 9. Acceptance checks, restated for this design
 
-The ticket's `curl` checks hold, with one rewording: `/challenge/<id>` (not `/c/<id>`).
+The ticket's `curl` checks hold, reworded for the shim's paths: `/challenge/<id>` (not `/c/<id>`)
+and `/token/<code>` (not `/enroll?code=`).
 
 ```bash
 curl -s https://idp-push.SITE/auth/v2/ping                  # {"time":…}, no redirect
 curl -s -o /dev/null -w '%{http_code}\n' https://idp-push.SITE/challenge/x   # 410/404 from the shim
 curl -s -o /dev/null -w '%{http_code}\n' https://idp-push.SITE/provision    # 302 to auth.SITE
 curl -s -o /dev/null -w '%{http_code}\n' -H 'Remote-User: alice' https://idp-push.SITE/provision  # still 302
-curl -s -o /dev/null -w '%{http_code}\n' 'https://idp-push.SITE/enroll?code=x'  # 410 from the shim
+curl -s -o /dev/null -w '%{http_code}\n' https://idp-push.SITE/token/x      # 410/404 from the shim
 curl -s https://push.SITE/v1/health                         # {"healthy":true}
 curl -s -o /dev/null -w '%{http_code}\n' -H 'Sec-Fetch-Mode: navigate' https://push.SITE/  # 302
 ```
@@ -587,7 +596,7 @@ ntfy_idp_push_password: ""
 # sudo podman run --rmi docker.io/binwiederhier/ntfy:latest token generate
 ntfy_idp_push_admin_token: ""
 # Shared by Authelia's duo_api and ntfy-idp-push. Prints both keys:
-# sudo podman run --rm localhost/ntfy_idp_push:latest keygen
+# sudo podman run --rm ghcr.io/babraham123/ntfy-idp-push:0.2 keygen
 duo_integration_key: ""
 duo_secret_key: ""
 # Fallback only (auth/13 §4): Google Trust Services ACME EAB for Traefik's gts-http-production
@@ -610,7 +619,7 @@ For ticket 14 (or folded into it):
    Traefik with its own IP in `X-Forwarded-For`.
 2. **Traefik `push.SITE`:** replace `routes.yml.j2:96-102` with `ntfy-ui`/`ntfy-ws`/`ntfy-api`
    (§8). Delete `ntfy-auth` (`basic_auth.yml:9-12`) and `traefik.container.j2:32`. Update
-   `docs/security.md:109-112` (ntfy leaves the shared-admin list) and the `telemetry` step in
+   `docs/security.md:107-110` (ntfy leaves the shared-admin list) and the `telemetry` step in
    `docs/guides/secsvcs.md.j2:75`.
 3. **Web push cutover:** stop ntfy, remove `/var/cache/ntfy/webpush.db` (`config.yml.j2.j2:197`),
    start it. Browsers re-register under their own login on the next app load (`hooks.js:191-208`)
@@ -619,17 +628,15 @@ For ticket 14 (or folded into it):
    `idp-push.SITE/provision` and signs in to the web app; then retire the shared `person` login.
 5. **Traefik `idp-push.SITE`:** `strip-remote` middleware, the three routers and the service
    (§8), on `le-http-production`; inventory entry with `subdomain: idp-push`, `admin: true`,
-   `uptime_path: /healthz`.
-6. **Shim container:** mounted secrets with `_FILE` env (§8); `HealthCmd` override; back up with
-   `podman exec ntfy_idp_push ntfy-idp-push backup -` into the stage, as `pg_dumpall` is
-   (`backup.sh.j2:20-29`), instead of `stage_volume`. Image: `github_build` until the shim tags a
-   release, then pull `ghcr.io/babraham123/ntfy-idp-push:X.Y`.
+   `uptime_path: /healthz` and `upstream: ghcr.io/babraham123/ntfy-idp-push:0.2`.
+6. **Shim container:** mounted secrets with `_FILE` env (§8), no listener or healthcheck
+   overrides. Back up with `podman exec ntfy_idp_push ntfy-idp-push backup -` into the stage, as
+   `pg_dumpall` is (`backup.sh.j2:20-29`), instead of `stage_volume`.
 7. **Authelia, gated on upstream:** `duo_api` block, `AddHost` and the two `Secret=` lines (§8),
    once an Authelia release skips Duo's CA pinning for non-Duo hosts. Leave
    `default_2fa_method: 'totp'`. Until then the shim runs for enrollment and provisioning only.
-8. **Upstream request:** post the drafted reply on authelia#7647 [AU12] [SH2] and, if accepted,
-   send the PR (`SetCAPinning(isDuoHost(host))`, a startup log line when pinning is off). Push the
-   shim repo first: the draft links it, and GitHub's `main` is 16 commits behind (`26293a5`).
+8. **Upstream request:** the authelia#7647 reply is posted [AU12]; once the maintainer agrees,
+   send the PR (`SetCAPinning(isDuoHost(host))`, a startup log line when pinning is off).
 
 Fallback, only if the upstream change stalls:
 
@@ -649,26 +656,24 @@ Fallback, only if the upstream change stalls:
 
 For the ntfy-idp-push repo:
 
-1. **Code-flow enrollment behind a path-splitting proxy:** `/enroll/begin`
-   and `/enroll/finish` serve both flows and carry the code in the body, so a proxy can route them
-   only to Authelia. Put the code (or a `flow=code` marker) in the query string of both calls
-   (`internal/web/static/app.js:85,88`), so `idp-push-link` can route them without Authelia; the
-   shim already ignores identity when a code is present (`web.go:201-211,266`). Until then,
-   `enroll-link` codes can't complete behind this Traefik setup; the portal flow works.
-2. **Doc fix:** `ARCHITECTURE.md:163-166` should warn that `Remote-User` must be stripped on
-   every route that doesn't run forward auth, and that IdP `bypass` rules leak one-factor sessions.
-3. **Pinned-CA self-check (fallback only):** a `healthcheck --duo-pinned` mode that calls
+1. **README's Authelia example sends the Duo API through forward-auth:** its single-domain rules
+   bypass `^/auth/v2/` in Authelia, so the proxy still calls Authelia with Duo's
+   `Authorization: Basic`, which Authelia tries as a login (§5). Recommend excluding `/auth/v2/`
+   from the forward-auth route at the proxy instead.
+2. **Pinned-CA self-check (fallback only):** a `healthcheck --duo-pinned` mode that calls
    `/auth/v2/ping` through `duo_api_golang` with default pinning, so a renewal that changes the
-   chain is caught before a login fails. Run it from a timer on secsvcs with an ntfy alert on failure.
-4. **Metrics:** still none at `f18cc43`; either add a `/metrics` endpoint or drop the scrape job
-   from ticket 14.
-5. **Image healthcheck:** the `Containerfile` `HEALTHCHECK` assumes HTTPS on :8443; deriving the
-   URL from `listen-http`/`listen-https` would save every proxied deployment an override.
+   chain is caught before a login fails.
+3. **Metrics:** still none at v0.2.0; either add a `/metrics` endpoint or keep the scrape job out
+   of ticket 14.
+
+Resolved since the first pass: code-flow enrollment is routable by prefix (`/token/*`); the
+README and `ARCHITECTURE.md` now warn that the proxy must strip a client-sent identity header on
+every route; the image listens on plain HTTP :8080 and its healthcheck targets it.
 
 ## 12. Sources
 
 Repo references are inline. Local checkouts: ntfy at `/Users/bereket/Personal/ntfy` (`ebc4a7ba`),
-ntfy-idp-push at `/Users/bereket/Personal/ntfy-idp-push` (`3ed310f`). External:
+ntfy-idp-push at `/Users/bereket/Personal/ntfy-idp-push` (v0.2.0, `331e7e9`). External:
 
 - [AU1] Authelia v4.39.28, Duo client construction and build tags:
   - <https://github.com/authelia/authelia/blob/v4.39.28/internal/server/handlers.go#L339-L352>
@@ -711,7 +716,7 @@ ntfy-idp-push at `/Users/bereket/Personal/ntfy-idp-push` (`3ed310f`). External:
   - <https://github.com/authelia/authelia/blob/v4.39.28/internal/middlewares/wrap.go#L37-L49>
 - [AU11] Authelia trusted header SSO (the proxy must strip):
   - <https://www.authelia.com/integration/trusted-header-sso/introduction/>
-- [AU12] authelia#7647, ntfy as a mobile push method (open):
+- [AU12] authelia#7647, ntfy as a mobile push method (open; reply posted 2026-10-17):
   <https://github.com/authelia/authelia/issues/7647>
 - [DU1] duo_api_golang v0.3.0 `duoapi.go` (bundle L515-1003, `NewDuoApi` L219-265, signing L55,
   L97-110, URL L374-378): <https://github.com/duosecurity/duo_api_golang/blob/v0.3.0/duoapi.go>
@@ -758,6 +763,8 @@ ntfy-idp-push at `/Users/bereket/Personal/ntfy-idp-push` (`3ed310f`). External:
 - [NT12] ntfy#601, username from a header (open): <https://github.com/binwiederhier/ntfy/issues/601>
 - [NT13] ntfy fork, branch `token-enroll-codes`, commits `dc653887` and `ebc4a7ba` (local
   checkout; `server/server.go:110,690,778`, `web/src/app/tokenRedeem.js`)
+- [NT14] ntfy PR #2068, one-time enrollment codes (open):
+  <https://github.com/binwiederhier/ntfy/pull/2068>
 - [PD1] podman-network(1) DNS notes; podman-run(1) `--hostname`:
   - <https://docs.podman.io/en/latest/markdown/podman-network.1.html>
   - <https://docs.podman.io/en/latest/markdown/podman-run.1.html>
@@ -773,11 +780,11 @@ ntfy-idp-push at `/Users/bereket/Personal/ntfy-idp-push` (`3ed310f`). External:
   - <https://www.rfc-editor.org/rfc/rfc8555#section-7.3.4>
 - [RFC2] RFC 9110 §10.2.2 `Location` (fragment inheritance):
   - <https://www.rfc-editor.org/rfc/rfc9110#section-10.2.2>
-- [SH1] ntfy-idp-push `ARCHITECTURE.md`, `README.md`, `internal/web/web.go`,
-  `internal/web/identity.go`, `internal/config/config.go`, `internal/config/keys.go`,
-  `internal/duoapi/duoapi.go`, `Containerfile`, `deploy/compose.yaml` (local checkout, `f18cc43`;
-  commits `ada909a` ACME removal, `02185fc` secret files, `9cbfddf` headers, `1fafc27` backup,
-  `f18cc43` releases)
+- [SH1] ntfy-idp-push v0.2.0 (`331e7e9`): `README.md`, `ARCHITECTURE.md`, `Containerfile`,
+  `deploy/server.yml`, `internal/routes/routes.go`, `internal/web/web.go`,
+  `internal/config/config.go`, `internal/config/keys.go`, `internal/duoapi/duoapi.go`
+  (<https://github.com/babraham123/ntfy-idp-push/tree/v0.2.0>; releases
+  <https://github.com/babraham123/ntfy-idp-push/releases>)
 - [SH2] Claude Code sessions in `~/Personal/ntfy-idp-push`, 2026-10-14: idp-acme (live test of
   duo_api_golang v0.3.0 and duo_client_python's `ca_certs.pem` against GTS ECDSA, GTS RSA, Let's
   Encrypt and Duo hosts; the `SetCAPinning(isDuoHost(host))` proposal; the drafted

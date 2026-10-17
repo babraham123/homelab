@@ -124,28 +124,22 @@ http:
       rule: Host(`alert.janedoe.com`)
       service: alertmanager@file
       middlewares: []
-    # Ref: https://github.com/binwiederhier/ntfy/issues/893#issuecomment-1731314679
+    # Browser navigations only, where Authelia's redirect works. The web app signs in to ntfy
+    # itself, so its fetch, WebSocket and service-worker requests go to ntfy-api with their own
+    # credentials. The redeem page carries its code in the fragment, which Authelia's post-login
+    # redirect would drop.
     ntfy-ui:
-      rule: Host(`push.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`) && !PathPrefix(`/file/`)
-      entryPoints: websecure
-      middlewares:
-        - authelia@file
-        - secure-headers@file
-      tls:
-        options: intermediate@file
-        certResolver: le-http-production
-    ntfy-ui-telemetry:
-      parentRefs: [ntfy-ui]
-      # Authelia joins groups with a bare comma
-      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      <<: *service
+      rule: Host(`push.janedoe.com`) && Method(`GET`) && Header(`Sec-Fetch-Mode`, `navigate`) && !PathPrefix(`/file/`) && !Path(`/account/token/redeem`)
       service: ntfy@file
-      middlewares:
-        - ntfy-auth@file
-    ntfy-ui-denied:
-      parentRefs: [ntfy-ui]
-      rule: PathPrefix(`/`)
-      priority: 1
-      service: s403@file
+    # The signed-in web app sends its token as ?auth= on the WebSocket URL
+    ntfy-ws:
+      <<: *service
+      rule: Host(`push.janedoe.com`) && PathRegexp(`^/[-_A-Za-z0-9,]+/ws$`)
+      service: ntfy@file
+      middlewares: []
+      observability:
+        accessLogs: false
     ntfy-api:
       <<: *service
       rule: Host(`push.janedoe.com`)

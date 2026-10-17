@@ -1,15 +1,10 @@
 # /etc/opt/traefik/config/dynamic/basic_auth.yml
 # Ref:
-#   - https://github.com/binwiederhier/ntfy/blob/main/server/server.go#L1957
 #   - https://stackoverflow.com/a/74016307/1937592
 #   - https://masterminds.github.io/sprig/
 # yamllint disable rule:document-start rule:document-end
 http:
   middlewares:
-    ntfy-auth:
-      headers:
-        customRequestHeaders:
-          Authorization: 'Basic {{ expandenv "admin:$NTFY_ADMIN_PASSWORD" | b64enc }}'
     alertmanager-auth:
       headers:
         customRequestHeaders:

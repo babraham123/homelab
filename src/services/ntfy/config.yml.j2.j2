@@ -252,9 +252,12 @@ web-root: "/"
 # - enable-signup allows users to sign up via the web app, or API
 # - enable-login allows users to log in via the web app, or API
 # - enable-reservations allows users to reserve topics (if their tier allows it)
+# - require-login makes the web app show the login page instead of browsing anonymously
 #
+# People sign in with their own account; Traefik no longer injects one.
 enable-signup: false
-enable-login: false
+enable-login: true
+require-login: true
 enable-reservations: false
 
 # Server URL of a Firebase/APNS-connected ntfy server (likely "https://ntfy.sh").

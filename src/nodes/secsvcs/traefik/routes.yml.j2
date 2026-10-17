@@ -93,8 +93,22 @@ http:
       rule: Host(`alert.{{ site.url }}`)
       service: alertmanager@file
       middlewares: []
-    # Ref: https://github.com/binwiederhier/ntfy/issues/893#issuecomment-1731314679
-{{- telemetry_ui('ntfy', 'Host(`push.' ~ site.url ~ '`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`) && !PathPrefix(`/file/`)', 'ntfy', 'ntfy-auth') }}
+    # Browser navigations only, where Authelia's redirect works. The web app signs in to ntfy
+    # itself, so its fetch, WebSocket and service-worker requests go to ntfy-api with their own
+    # credentials. The redeem page carries its code in the fragment, which Authelia's post-login
+    # redirect would drop.
+    ntfy-ui:
+      <<: *service
+      rule: Host(`push.{{ site.url }}`) && Method(`GET`) && Header(`Sec-Fetch-Mode`, `navigate`) && !PathPrefix(`/file/`) && !Path(`/account/token/redeem`)
+      service: ntfy@file
+    # The signed-in web app sends its token as ?auth= on the WebSocket URL
+    ntfy-ws:
+      <<: *service
+      rule: Host(`push.{{ site.url }}`) && PathRegexp(`^/[-_A-Za-z0-9,]+/ws$`)
+      service: ntfy@file
+      middlewares: []
+      observability:
+        accessLogs: false
     ntfy-api:
       <<: *service
       rule: Host(`push.{{ site.url }}`)

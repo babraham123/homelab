@@ -62,7 +62,7 @@ sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
 | `authelia_gen_access` | Every Authelia-protected subdomain; Readeck user |
 | `headscale_access` | VPN sign-in |
 | `command_general` | OliveTin's general commands |
-| `telemetry` | VictoriaMetrics, VictoriaLogs, Alertmanager and ntfy UIs |
+| `telemetry` | VictoriaMetrics, VictoriaLogs and Alertmanager UIs |
 | `vaultwarden_access` | Vaultwarden sign-in |
 | `grafana_admin`, `hass_admin`, `command_admin`, `guacamole_admin`, `readeck_admin`, `storyteller_admin` | Admin in that app; admins only |
 
