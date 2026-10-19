@@ -13,8 +13,9 @@ Blocked by: step 5 on an Authelia release that skips Duo's CA pinning for non-Du
 Authelia's mobile push needs Duo (`duo_api` is commented out at
 `src/services/authelia/configuration.yml.j2:342`). `ntfy-idp-push` speaks Duo's Auth API, delivers
 the push over the existing ntfy server, and approves only with a WebAuthn assertion from the enrolled
-phone. It also provisions per-person ntfy accounts for the web app, which since auth/13 has no
-injected admin login. It is not deployed: no quadlet, secrets, routes, ntfy account or Authelia config.
+phone. It also syncs per-person ntfy accounts from LLDAP and emails each new person a welcome
+with their sign-in and subscribe links, since the ntfy web app has no injected admin login after
+auth/13. It is not deployed: no quadlet, secrets, routes, ntfy account or Authelia config.
 
 Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
 
@@ -38,6 +39,26 @@ Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
    - Secrets: `Secret=ntfy_idp_push_admin_token` and `Secret=duo_secret_key` mounted at
      `/run/secrets/`, read through `NTFY_IDP_PUSH_NTFY_ADMIN_TOKEN_FILE` and
      `NTFY_IDP_PUSH_DUO_SECRET_KEY_FILE`; `duo_integration_key` as `NTFY_IDP_PUSH_DUO_INTEGRATION_KEY`.
+   - Directory, the LLDAP Authelia reads, with its own read-only bind user rather than Authelia's
+     LLDAP admin:
+     - `directory-type: ldap`, `directory-sync-interval: 15m`
+     - `directory-ldap-address: ldaps://ldap.{{ site.url }}:6360`, `directory-ldap-start-tls: false`,
+       `directory-ldap-tls-skip-verify: false`. LLDAP's cert is from the internal CA:
+       `Volume=/etc/opt/lldap/certificates/ca.chain.pem:/certificates/ca.chain.pem:ro` and
+       `directory-ldap-ca-file: /certificates/ca.chain.pem`, added to the system roots, so Gmail
+       and `push.SITE` still verify against the public CAs
+     - `directory-ldap-base-dn: dc={{ site.url.replace('.', ',dc=') }}`
+     - `directory-ldap-user: uid=ntfy_idp_push,ou=people,<base DN>`, an LLDAP user in
+       `lldap_strict_readonly`; password from `Secret=ntfy_idp_push_ldap_password` through
+       `NTFY_IDP_PUSH_DIRECTORY_LDAP_PASSWORD_FILE`
+     - `directory-ldap-users-filter: (objectClass=person)`; attributes `uid`, `mail`,
+       `displayName`, `memberOf`
+     - `directory-ldap-group-dn: cn=authelia_gen_access,ou=groups,<base DN>`, so service users
+       (`car_uploader`) get no ntfy account or email
+   - Welcome email, through Authelia's Gmail relay: `smtp-host: smtp.gmail.com`, `smtp-port: 587`,
+     `smtp-starttls: true`, `smtp-user: {{ site.email }}`, the existing `authelia_smtp_password`
+     through `NTFY_IDP_PUSH_SMTP_PASSWORD_FILE`, `mail-from: Push <admin@{{ site.url }}>`.
+     `default-topics` feeds the email's subscribe links.
 3. **Install and operations.** `ntfy_idp_push)` case in `src/nodes/secsvcs/install_svcs.sh`. In
    `src/nodes/secsvcs/backup.sh.j2`, `podman exec ntfy_idp_push ntfy-idp-push backup -` into the
    stage, like the `pg_dumpall` step: a consistent copy of the passkey database while serving.
@@ -47,8 +68,7 @@ Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
    `ntfy_idp_push_password`) and an `auth-tokens` entry for `ntfy_idp_push_admin_token`; add both
    secrets to the `render_secrets.sh` list in `src/services/ntfy/ntfy.container.j2`. **No
    `auth-access` entry for `idp-push`**: ntfy refuses to start with ACL entries for an admin.
-   `auth-default-access: deny-all` stays. Until ntfy#597 (binwiederhier/ntfy#2068) ships, the shim
-   falls back to plain topic links and `/provision/password`.
+   `auth-default-access: deny-all` stays. Upstream ntfy, unpatched.
 5. **Authelia (after the upstream pinning change ships).** Uncomment `duo_api` with
    `hostname: idp-push.{{ site.url }}` and `enable_self_enrollment: true` (Authelia then links to
    the shim's `enroll-portal-url`); both keys from env:
@@ -72,15 +92,17 @@ Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
    is new; enrollment steps for a person in `docs/maintenance.md` (first enrollment needs another
    Authelia second factor, or an `enroll-link`).
 
-Steps 1-4, 6 and 7 ship before step 5; the shim then serves provisioning and enrollment only.
+Steps 1-4, 6 and 7 ship before step 5; the shim then serves account sync and enrollment only.
 
 ## Acceptance
 
 - `install_svcs.sh ntfy_idp_push` on secsvcs starts the container healthy; the image passed the scan.
 - `curl` from outside the LAN: `idp-push.SITE/auth/v2/ping`, `/challenge/x` and `/token/x` answer
-  from the shim without an Authelia redirect; `/provision` redirects to Authelia, also with a forged
+  from the shim without an Authelia redirect; `/enroll` redirects to Authelia, also with a forged
   `Remote-User` header.
-- A person provisions their ntfy account at `/provision` and signs in to the ntfy app and web app.
+- Within one sync interval of joining `authelia_gen_access`, a person has an ntfy account and a
+  welcome email, and signs in to the ntfy app and web app from it. A user outside the group gets
+  neither.
 - A person enrolls a phone from `/enroll` after a `two_factor` login; the ntfy app on the phone
   subscribes to its `push-<uuid>` topic; the test push arrives. An `enroll-link` code enrolls too.
 - After step 5: Authelia starts with `duo_api` enabled (release image, no dev flags). Authelia login
@@ -97,3 +119,7 @@ Steps 1-4, 6 and 7 ship before step 5; the shim then serves provisioning and enr
   only, forward-auth only, `/token/` and `/challenge/` routes, secret files, `backup`, no metrics;
   Authelia's `duo_api` split out behind the upstream pinning change.
 - 2026-10-17: auth/13 resolved, so this no longer waits on it; step 5 still waits on authelia#7647.
+- 2026-10-18 (from the ntfy-idp-push session): ntfy upstream rejected one-time sign-in codes, so
+  `/provision` and `/provision/password` are gone and the shim runs against unpatched ntfy. It
+  syncs accounts from LLDAP and sends a welcome email instead: new directory and SMTP config in
+  step 2, new secret `ntfy_idp_push_ldap_password` and LLDAP user `ntfy_idp_push`.
