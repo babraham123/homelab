@@ -1,0 +1,48 @@
+# /etc/opt/ntfy_idp_push/server.yml
+# Ref:
+# https://github.com/babraham123/ntfy-idp-push/blob/main/deploy/server.yml
+# https://github.com/babraham123/ntfy-idp-push/blob/main/README.md
+# Secrets come from files named by NTFY_IDP_PUSH_*_FILE in the quadlet. Unknown keys fail startup.
+---
+listen-http: ":8080"
+# Authelia duo_api.hostname; also the WebAuthn RP ID
+duo-hostname: "idp-push.janedoe.com"
+push-timeout: "60s"
+
+# Traefik alone: anything else that can reach :8080 could sign in as anyone
+trusted-proxies: ["10.10.0.6/32"]
+identity-header: "Remote-User"
+enroll-portal-url: "https://idp-push.janedoe.com/enroll"
+
+ntfy-base-url: "https://push.janedoe.com"
+ntfy-topic-prefix: "push-"
+# Today's `person` grants in src/services/ntfy/config.yml.j2.j2; the welcome email links these
+default-topics: ["hass", "chat"]
+enroll-role: "user"
+enroll-access:
+  - "hass*:ro"
+  - "chat*:rw"
+
+# The LLDAP Authelia reads, through a read-only bind user. Only authelia_gen_access members get
+# an ntfy account and a welcome email, so service users get neither.
+directory-type: "ldap"
+directory-sync-interval: "15m"
+directory-ldap-address: "ldaps://ldap.janedoe.com:6360"
+directory-ldap-start-tls: false
+directory-ldap-tls-skip-verify: false
+directory-ldap-ca-file: "/certificates/ca.chain.pem"
+directory-ldap-base-dn: "dc=janedoe,dc=com"
+directory-ldap-user: "uid=ntfy_idp_push,ou=people,dc=janedoe,dc=com"
+directory-ldap-users-filter: "(objectClass=person)"
+directory-ldap-attribute-username: "uid"
+directory-ldap-attribute-mail: "mail"
+directory-ldap-attribute-display-name: "displayName"
+directory-ldap-attribute-member-of: "memberOf"
+directory-ldap-group-dn: "cn=authelia_gen_access,ou=groups,dc=janedoe,dc=com"
+
+# Authelia's notifier relay and app password
+smtp-host: "smtp.gmail.com"
+smtp-port: 587
+smtp-user: "jdoe@gmail.com"
+smtp-starttls: true
+mail-from: "Push <admin@janedoe.com>"

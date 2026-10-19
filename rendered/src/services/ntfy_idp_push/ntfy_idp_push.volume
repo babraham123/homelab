@@ -1,0 +1,8 @@
+# /etc/containers/systemd/ntfy_idp_push.volume
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#volume-units-volume
+
+[Volume]
+# The image's /var/lib/ntfy-idp-push belongs to its nonroot user, and Podman copies that onto a
+# new volume
+# default: Driver=local
+# /var/lib/containers/storage/volumes

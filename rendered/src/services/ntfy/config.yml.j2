@@ -119,6 +119,9 @@ auth-users:
   - "alert:{{ env('ntfy_alert_password') | password_hash('bcrypt', env('bcrypt_salt')) }}:user"
   - "hass:{{ env('ntfy_hass_password') | password_hash('bcrypt', env('bcrypt_salt')) }}:user"
   - "person:{{ env('ntfy_person_password') | password_hash('bcrypt', env('bcrypt_salt')) }}:user"
+  # ntfy-idp-push creates people's accounts and grants and publishes to push-*. No auth-access
+  # entry: ntfy refuses to start with ACL entries for an admin.
+  - "idp-push:{{ env('ntfy_idp_push_password') | password_hash('bcrypt', env('bcrypt_salt')) }}:admin"
 auth-access:
   - "alert:alert*:rw"
   - "alert:comment*:rw"
@@ -127,6 +130,7 @@ auth-access:
   - "person:chat*:rw"
 auth-tokens:
   - "alert:{{ env('ntfy_alert_token') }}:alert"
+  - "idp-push:{{ env('ntfy_idp_push_admin_token') }}:ntfy-idp-push"
 
 # If set, the X-Forwarded-For header is used to determine the visitor IP address
 # instead of the remote address of the connection.

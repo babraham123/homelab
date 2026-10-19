@@ -123,6 +123,10 @@ endpoints:
     <<: *tier1
     url: "https://vault.janedoe.com/alive"
 
+  - name: ntfy-idp-push
+    <<: *internal
+    url: "https://idp-push.janedoe.com/healthz"
+
   - name: olive_tin
     <<: *internal
     url: "https://command.janedoe.com"

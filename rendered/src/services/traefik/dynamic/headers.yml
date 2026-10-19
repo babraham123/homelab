@@ -16,3 +16,12 @@ http:
         # Setting CSP is more secure but it can break apps. Consider script-src 'self';
         contentSecurityPolicy: "frame-ancestors https://*.janedoe.com https://janedoe.com; object-src 'none'"
         permissionsPolicy: "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
+    # For routes that skip Authelia in front of an app that trusts its identity headers: an
+    # empty value removes the client's copy
+    strip-remote:
+      headers:
+        customRequestHeaders:
+          Remote-User: ""
+          Remote-Groups: ""
+          Remote-Email: ""
+          Remote-Name: ""

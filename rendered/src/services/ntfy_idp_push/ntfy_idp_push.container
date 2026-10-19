@@ -1,0 +1,59 @@
+# /etc/containers/systemd/ntfy_idp_push.container
+# Ref:
+# https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://github.com/babraham123/ntfy-idp-push/blob/main/deploy/compose.yaml
+
+[Unit]
+Description="Homelab: Duo Auth API shim delivering Authelia mobile push over ntfy"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+# Startup fails closed unless ntfy confirms the admin token, and the directory sync reads LLDAP
+Requires=ntfy.service lldap.service
+Wants=network.target
+After=network-online.target ntfy.service lldap.service
+
+[Container]
+Image=localhost/babraham123/ntfy-idp-push:0.3
+ContainerName=ntfy_idp_push
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+HealthCmd=/usr/bin/ntfy-idp-push healthcheck
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
+
+# Plain HTTP :8080; the identity header is trusted from Traefik alone, so nothing else may
+# reach this port and nothing is published
+Network=net.network
+HostName=idp-push.janedoe.com
+IP=10.10.0.18
+# Aardvark would resolve push.SITE to ntfy's plain :2586; the shim's calls go through Traefik
+AddHost=push.janedoe.com:10.10.0.6
+
+Environment=TZ=America/Los_Angeles
+# The distroless image's nonroot user
+Secret=duo_secret_key,uid=65532,gid=65532,mode=0400
+Secret=ntfy_idp_push_admin_token,uid=65532,gid=65532,mode=0400
+Secret=ntfy_idp_push_ldap_password,uid=65532,gid=65532,mode=0400
+Secret=authelia_smtp_password,uid=65532,gid=65532,mode=0400
+Secret=duo_integration_key,type=env,target=NTFY_IDP_PUSH_DUO_INTEGRATION_KEY
+Environment=NTFY_IDP_PUSH_DUO_SECRET_KEY_FILE=/run/secrets/duo_secret_key
+Environment=NTFY_IDP_PUSH_NTFY_ADMIN_TOKEN_FILE=/run/secrets/ntfy_idp_push_admin_token
+Environment=NTFY_IDP_PUSH_DIRECTORY_LDAP_PASSWORD_FILE=/run/secrets/ntfy_idp_push_ldap_password
+Environment=NTFY_IDP_PUSH_SMTP_PASSWORD_FILE=/run/secrets/authelia_smtp_password
+
+# A directory, so a replaced server.yml is seen on SIGHUP
+Volume=/etc/opt/ntfy_idp_push:/etc/ntfy-idp-push:ro
+# LLDAP's LDAPS cert is from the internal CA
+Volume=/etc/opt/lldap/certificates/ca.chain.pem:/certificates/ca.chain.pem:ro
+# The passkey database
+Volume=ntfy_idp_push.volume:/var/lib/ntfy-idp-push
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

@@ -98,6 +98,13 @@ case $1 in
     install_quadlet services/vaultwarden/vaultwarden.container services/vaultwarden/vaultwardendata.volume
     reload_restart vaultwarden
     ;;
+  ntfy_idp_push)
+    # LLDAP's CA chain comes from install_certs
+    ls /etc/opt/lldap/certificates/ca.chain.pem
+    install -D -m 644 -t /etc/opt/ntfy_idp_push services/ntfy_idp_push/server.yml
+    install_quadlet services/ntfy_idp_push/ntfy_idp_push.container services/ntfy_idp_push/ntfy_idp_push.volume
+    reload_restart ntfy_idp_push
+    ;;
   olive_tin)
     # ssh keys should already be in place
     ls /etc/opt/olive_tin/ssh/id_ed25519-cert.pub

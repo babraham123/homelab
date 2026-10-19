@@ -565,6 +565,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: secsvcs Install Ntfy Idp Push
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_ntfy_idp_push
+              id: secsvcs_install_ntfy_idp_push
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: secsvcs Install Olive Tin
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_olive_tin

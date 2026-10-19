@@ -174,6 +174,32 @@ http:
       service: vaultwarden@file
       middlewares:
         - authelia@file
+    # The enrollment and device pages trust Remote-User, so they sit behind Authelia (two_factor:
+    # admin in the inventory). The routes below check their own signature, passkey, code or token
+    # and must not reach Authelia: Duo's Authorization: Basic would count as a failed login.
+    # strip-remote keeps a client-sent Remote-User off them. No secure-headers: the shim sets a
+    # stricter CSP, HSTS and nosniff itself.
+    ntfy_idp_push:
+      <<: *service
+      rule: Host(`idp-push.janedoe.com`)
+      service: ntfy_idp_push@file
+      middlewares:
+        - authelia@file
+    ntfy_idp_push-api:
+      <<: *service
+      rule: Host(`idp-push.janedoe.com`) && (PathPrefix(`/auth/v2/`) || PathPrefix(`/challenge/`) || PathPrefix(`/static/`) || Path(`/healthz`))
+      service: ntfy_idp_push@file
+      middlewares:
+        - strip-remote@file
+    # Enrollment codes ride in the path and verify tokens in the query
+    ntfy_idp_push-token:
+      <<: *service
+      rule: Host(`idp-push.janedoe.com`) && PathPrefix(`/token/`)
+      service: ntfy_idp_push@file
+      middlewares:
+        - strip-remote@file
+      observability:
+        accessLogs: false
     olive_tin:
       <<: *service
       rule: Host(`command.janedoe.com`)
@@ -224,6 +250,10 @@ http:
       loadBalancer:
         servers:
           - url: http://vault.janedoe.com:8080/
+    ntfy_idp_push:
+      loadBalancer:
+        servers:
+          - url: http://idp-push.janedoe.com:8080/
     olive_tin:
       loadBalancer:
         servers:

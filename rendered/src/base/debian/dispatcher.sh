@@ -276,6 +276,9 @@ case "$(hostname)" in
       install_vaultwarden)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vaultwarden
         ;;
+      install_ntfy_idp_push)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy_idp_push
+        ;;
       install_olive_tin)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
         ;;
@@ -302,6 +305,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vaultwarden
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy_idp_push
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec_appsec

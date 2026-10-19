@@ -1,6 +1,6 @@
 # 14. Install ntfy-idp-push on secsvcs and wire it to ntfy and Authelia
 
-Status: needs-triage
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-14; design in ntfy-idp-push v0.2.0 `README.md` and
@@ -21,14 +21,14 @@ Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
 
 ## Scope
 
-1. **Image.** Pulled, not built: `upstream: ghcr.io/babraham123/ntfy-idp-push:0.2` in
+1. **Image.** Pulled, not built: `upstream: ghcr.io/babraham123/ntfy-idp-push:0.3` in
    `src/nodes/secsvcs/inventory.yml`, so `image_updater.py` scans it like the other upstream images.
    The image listens on plain HTTP :8080 and its healthcheck targets that.
 2. **Quadlet.** `src/services/ntfy_idp_push/ntfy_idp_push.container.j2` on secsvcs: `net.network`,
    next free IP (`{{ secsvcs.container_subnet }}.18` today), `HostName=idp-push.{{ site.url }}`,
    `AddHost=push.{{ site.url }}:<Traefik .6>` (aardvark would otherwise resolve `push.SITE` to ntfy's
    :2586), read-only root, all caps dropped, SQLite on `ntfy_idp_push.volume`. Config
-   `src/services/ntfy_idp_push/config.yml.j2`:
+   `src/services/ntfy_idp_push/server.yml.j2`:
    - `duo-hostname: idp-push.{{ site.url }}` (also the WebAuthn RP ID)
    - `ntfy-base-url: https://push.{{ site.url }}`, `ntfy-topic-prefix: push-`
    - `trusted-proxies: [{{ secsvcs.container_subnet }}.6/32]` (Traefik only); `identity-header`
@@ -123,3 +123,12 @@ Steps 1-4, 6 and 7 ship before step 5; the shim then serves account sync and enr
   `/provision` and `/provision/password` are gone and the shim runs against unpatched ntfy. It
   syncs accounts from LLDAP and sends a welcome email instead: new directory and SMTP config in
   step 2, new secret `ntfy_idp_push_ldap_password` and LLDAP user `ntfy_idp_push`.
+- 2026-10-18 agent: steps 1-4, 6 and 7 done: `src/services/ntfy_idp_push/` (quadlet at `.18`,
+  volume, `server.yml.j2`), the inventory entry (`admin: true`, Gatus on `/healthz`), the
+  `ntfy_idp_push)` install case, the backup dump, ntfy's `idp-push` admin user and token, the three
+  Traefik routers plus a shared `strip-remote` middleware in `headers.yml.j2`, the
+  `ntfy_idp_push_ldap_password` secret, and docs (secsvcs guide section, services catalog,
+  new-user steps, "mobile push" in `CONTEXT.md`). Pinned to `0.3`, the first release with directory
+  sync. Left for the maintainer: wait for that release, fill the secrets, create the LLDAP user
+  `ntfy_idp_push` in `lldap_strict_readonly`, add public DNS for `idp-push`, deploy per the
+  secsvcs guide, and run the acceptance list. Step 5 still waits on authelia#7647.

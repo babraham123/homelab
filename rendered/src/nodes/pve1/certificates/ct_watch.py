@@ -37,6 +37,7 @@ EXPECTED = {
     "graph.janedoe.com",
     "home.janedoe.com",
     "homeproxy.janedoe.com",
+    "idp-push.janedoe.com",
     "ldap.janedoe.com",
     "logs.janedoe.com",
     "metrics.janedoe.com",

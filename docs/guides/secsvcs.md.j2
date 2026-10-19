@@ -215,7 +215,8 @@ curl -fsS https://vault.{{ site.url }}/alive
 
 - Users, access and tokens come from the config file,
   [ref](https://docs.ntfy.sh/config/#users-via-the-config)
-- Lock down the databases. Remove any user or token not marked `server config`
+- Lock down the databases. Remove any user or token not marked `server config`, except people's
+  accounts (`role: user`, not provisioned), which ntfy-idp-push keeps in step with LLDAP
 
 ```bash
 chmod 600 /var/opt/ntfy/*.db*
@@ -223,6 +224,41 @@ chmod 600 /var/lib/containers/storage/volumes/systemd-ntfydb/_data/*.db*
 podman exec ntfy ntfy access
 podman exec ntfy ntfy token list
 ```
+
+## ntfy-idp-push
+
+<https://idp-push.{{ site.url }}>: mobile push for Authelia, and each `authelia_gen_access` member's
+ntfy account, created from LLDAP with a welcome email
+
+- Prerequisites:
+  - On pve1, add `ntfy_idp_push_*` and `duo_*` to `/root/secrets/secsvcs.yaml` (recipes in the
+    template), then `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
+  - In LLDAP, create the user `ntfy_idp_push` with that `ntfy_idp_push_ldap_password`, in
+    `lldap_strict_readonly` only
+  - Public DNS resolves `idp-push.{{ site.url }}`
+- Install. ntfy first: the shim refuses to start until ntfy accepts its admin token
+
+```bash
+sudo su
+cd /root/homelab-rendered
+src/nodes/secsvcs/install_svcs.sh ntfy
+src/nodes/secsvcs/install_svcs.sh ntfy_idp_push
+src/nodes/secsvcs/install_svcs.sh traefik
+curl -fsS https://idp-push.{{ site.url }}/healthz
+podman exec ntfy_idp_push ntfy-idp-push user list
+```
+
+- Accounts: within 15 minutes of joining `authelia_gen_access`, a person gets an ntfy account and a
+  welcome email. Leaving the group disables it
+- Phones: `https://idp-push.{{ site.url }}/enroll` after an Authelia two-factor login, so the first
+  phone needs another second factor (TOTP or a security key), or a single-use link:
+  `podman exec ntfy_idp_push ntfy-idp-push enroll-link USER`
+- Lost phone: `podman exec ntfy_idp_push ntfy-idp-push device list USER`, then
+  `device revoke DEVICE_ID`
+- Authelia's "Mobile Push" option stays off until Authelia stops pinning Duo's CA (authelia#7647);
+  until then the shim only manages accounts and enrollment
+- Config changes: reinstall, or edit `/etc/opt/ntfy_idp_push/server.yml` and
+  `podman kill -s HUP ntfy_idp_push` for per-request settings
 
 ## Debugging (optional)
 

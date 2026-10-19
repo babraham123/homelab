@@ -26,6 +26,9 @@ services:
             upstream: docker.io/grafana/grafana-oss:latest}
   vaultwarden: {subdomain: vault, admin: true, uptime: vaultwarden, uptime_path: /alive,
                 uptime_tier: 1, upstream: docker.io/vaultwarden/server:latest}
+  # After ntfy and lldap: it refuses to start until ntfy accepts its admin token
+  ntfy_idp_push: {subdomain: idp-push, admin: true, uptime: ntfy-idp-push, uptime_path: /healthz,
+                  upstream: ghcr.io/babraham123/ntfy-idp-push:0.3}
   olive_tin: {subdomain: command, admin: true, uptime: olive_tin,
               upstream: docker.io/jamesread/olivetin:latest-3k}
   # No subdomain: its LAPI is a published port, never in HAProxy's SNI list
