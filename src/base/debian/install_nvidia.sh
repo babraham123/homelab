@@ -13,6 +13,18 @@ source /etc/os-release
 version=${1:-580}
 distro=${2:-debian${VERSION_ID}}
 
+# The debian12 repo's key is bound by a SHA1 signature, which apt rejects after the cutoff.
+# A forgery needs a SHA1 second preimage, so push the cutoff back; the date forces a review.
+sha1_cutoff=2027-02-01
+if [[ $distro != "debian${VERSION_ID}" ]]; then
+  policy=/etc/crypto-policies/back-ends/apt-sequoia.config
+  [[ -f $policy ]] || install -D -m 644 /usr/share/apt/default-sequoia.config "$policy"
+  # Only the date changes, so the file's quoting stays as shipped
+  sed -i "s/^\(sha1\.second_preimage_resistance\s*=\s*\"\?\)[0-9-]*/\1${sha1_cutoff}/" "$policy"
+  grep -q "^sha1\.second_preimage_resistance\s*=\s*\"\?${sha1_cutoff}" "$policy" ||
+    die "no sha1.second_preimage_resistance line in ${policy}"
+fi
+
 apt update
 apt upgrade -y
 apt install -y "linux-headers-$(uname -r)"
