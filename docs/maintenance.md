@@ -59,7 +59,8 @@ sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
 
 | Group | Grants |
 | --- | --- |
-| `authelia_gen_access` | Every Authelia-protected subdomain; Readeck user; an ntfy account |
+| `authelia_gen_access` | Every Authelia-protected subdomain; Readeck user |
+| `ntfy_access` | An ntfy account, from a welcome email; leaving deletes it. Never empty it: that deletes everyone's |
 | `headscale_access` | VPN sign-in |
 | `command_general` | OliveTin's general commands |
 | `telemetry_access` | VictoriaMetrics, VictoriaLogs and Alertmanager UIs |
@@ -74,7 +75,7 @@ sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
   - Guacamole: signs in with no connections. Then grant them under Settings >> Users >> USER
   - Storyteller: permissions are set at first sign-in, so set the groups before it
   - Vaultwarden: sets their master password; only then can an organization owner add them
-- ntfy: within 15 minutes of joining `authelia_gen_access` they get a welcome email with their ntfy
+- ntfy: within 15 minutes of joining `ntfy_access` they get a welcome email with their ntfy
   login. To enroll their phone for mobile push, they open https://idp-push.SITE_URL/enroll after
   signing in with TOTP or a security key
 

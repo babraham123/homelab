@@ -53,8 +53,8 @@ Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
        `NTFY_IDP_PUSH_DIRECTORY_LDAP_PASSWORD_FILE`
      - `directory-ldap-users-filter: (objectClass=person)`; attributes `uid`, `mail`,
        `displayName`, `memberOf`
-     - `directory-ldap-group-dn: cn=authelia_gen_access,ou=groups,<base DN>`, so service users
-       (`car_uploader`) get no ntfy account or email
+     - `directory-ldap-group-dn: cn=ntfy_access,ou=groups,<base DN>`, a group of its own, so
+       service users get no ntfy account or email
    - Welcome email, through Authelia's Gmail relay: `smtp-host: smtp.gmail.com`, `smtp-port: 587`,
      `smtp-starttls: true`, `smtp-user: {{ site.email }}`, the existing `authelia_smtp_password`
      through `NTFY_IDP_PUSH_SMTP_PASSWORD_FILE`, `mail-from: Push <admin@{{ site.url }}>`.
@@ -99,7 +99,7 @@ Steps 1-4, 6 and 7 ship before step 5; the shim then serves account sync and enr
 - `curl` from outside the LAN: `idp-push.SITE/auth/v2/ping`, `/challenge/x` and `/token/x` answer
   from the shim without an Authelia redirect; `/enroll` redirects to Authelia, also with a forged
   `Remote-User` header.
-- Within one sync interval of joining `authelia_gen_access`, a person has an ntfy account and a
+- Within one sync interval of joining `ntfy_access`, a person has an ntfy account and a
   welcome email, and signs in to the ntfy app and web app from it. A user outside the group gets
   neither.
 - A person enrolls a phone from `/enroll` after a `two_factor` login; the ntfy app on the phone
@@ -131,3 +131,4 @@ Steps 1-4, 6 and 7 ship before step 5; the shim then serves account sync and enr
   sync. Left for the maintainer: wait for that release, fill the secrets, create the LLDAP user
   `ntfy_idp_push` in `lldap_strict_readonly`, deploy per the
   secsvcs guide, and run the acceptance list. Step 5 still waits on authelia#7647.
+- 2026-10-18: accounts follow a new LLDAP group `ntfy_access` rather than `authelia_gen_access`.

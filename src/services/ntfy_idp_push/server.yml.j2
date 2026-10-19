@@ -23,8 +23,9 @@ enroll-access:
   - "hass*:ro"
   - "chat*:rw"
 
-# The LLDAP Authelia reads, through a read-only bind user. Only authelia_gen_access members get
-# an ntfy account and a welcome email, so service users get neither.
+# The LLDAP Authelia reads, through a read-only bind user. Only ntfy_access members get an ntfy
+# account and a welcome email; leaving the group deletes the account, so an empty or renamed
+# group deletes them all.
 directory-type: "ldap"
 directory-sync-interval: "15m"
 directory-ldap-address: "ldaps://ldap.{{ site.url }}:6360"
@@ -38,7 +39,7 @@ directory-ldap-attribute-username: "uid"
 directory-ldap-attribute-mail: "mail"
 directory-ldap-attribute-display-name: "displayName"
 directory-ldap-attribute-member-of: "memberOf"
-directory-ldap-group-dn: "cn=authelia_gen_access,ou=groups,dc={{ site.url.replace('.', ',dc=') }}"
+directory-ldap-group-dn: "cn=ntfy_access,ou=groups,dc={{ site.url.replace('.', ',dc=') }}"
 
 # Authelia's notifier relay and app password
 smtp-host: "smtp.gmail.com"

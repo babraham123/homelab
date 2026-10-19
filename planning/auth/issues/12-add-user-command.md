@@ -40,7 +40,7 @@ root on secsvcs already holds `lldap_admin_password`.
 
    | Role | Groups |
    | --- | --- |
-   | `family` (default) | `authelia_gen_access`, `headscale_access`, `tailscale_family`, `command_general` |
+   | `family` (default) | `authelia_gen_access`, `headscale_access`, `tailscale_family`, `command_general`, `ntfy_access` |
    | `guest` | `headscale_access`, `tailscale_guests` |
 
    Admin groups (`*_admin`, `tailscale_admin`, `telemetry_access`) stay a deliberate manual step in

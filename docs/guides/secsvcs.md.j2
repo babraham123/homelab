@@ -70,8 +70,8 @@ journalctl -eu authelia
   - Add regular users, not in `lldap_password_manager` (it can reset others' passwords)
     - {{ tailscale_admin }}
     - {{ users | join(', ') }}
-  - Create the `authelia_gen_access`, `headscale_access` and `command_general` groups, add users
-    to them
+  - Create the `authelia_gen_access`, `headscale_access`, `command_general` and `ntfy_access`
+    groups, add users to them
   - Create the `telemetry_access` group (metrics, logs and alert UIs), add your user to it
   - Create the `grafana_admin`, `hass_admin`, `command_admin` and `files_admin` groups, add your
     user to them
@@ -227,14 +227,15 @@ podman exec ntfy ntfy token list
 
 ## ntfy-idp-push
 
-<https://idp-push.{{ site.url }}>: mobile push for Authelia, and each `authelia_gen_access` member's
-ntfy account, created from LLDAP with a welcome email
+<https://idp-push.{{ site.url }}>: mobile push for Authelia, and each `ntfy_access` member's ntfy
+account, created from LLDAP with a welcome email
 
 - Prerequisites:
   - On pve1, add `ntfy_idp_push_*` and `duo_*` to `/root/secrets/secsvcs.yaml` (recipes in the
     template), then `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
   - In LLDAP, create the user `ntfy_idp_push` with that `ntfy_idp_push_ldap_password`, in
     `lldap_strict_readonly` only
+  - In LLDAP, create the group `ntfy_access`: the shim won't start until it exists
 - Install. ntfy first: the shim refuses to start until ntfy accepts its admin token
 
 ```bash
@@ -247,8 +248,10 @@ curl -fsS https://idp-push.{{ site.url }}/healthz
 podman exec ntfy_idp_push ntfy-idp-push user list
 ```
 
-- Accounts: within 15 minutes of joining `authelia_gen_access`, a person gets an ntfy account and a
-  welcome email. Leaving the group disables it
+- Accounts: within 15 minutes of joining `ntfy_access`, a person gets an ntfy account and a
+  welcome email. Leaving the group deletes it: its phones are revoked and its ntfy user removed
+- Never empty, rename or delete `ntfy_access`: an empty group deletes every account and phone at
+  the next sync. Only an LDAP error skips a sync
 - Phones: `https://idp-push.{{ site.url }}/enroll` after an Authelia two-factor login, so the first
   phone needs another second factor (TOTP or a security key), or a single-use link:
   `podman exec ntfy_idp_push ntfy-idp-push enroll-link USER`
