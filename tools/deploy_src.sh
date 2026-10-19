@@ -26,5 +26,10 @@ for dir in src/nodes/*/; do
   tools/upload_src.sh "$node" "$project_dir" || echo "${node} upload failed"
 done
 
-echo -e "\nStart the gaming VM and run the following cmd:"
-echo "tools/upload_src.sh gaming \"$project_dir\""
+# The render above is deleted on exit, so the user renders again
+cat <<'EOF'
+
+Start the gaming VM and run the following cmds:
+out=$(mktemp -d)/homelab-rendered
+tools/render_src.sh "$out" && tools/upload_src.sh gaming "$out"
+EOF
