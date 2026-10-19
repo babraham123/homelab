@@ -1,6 +1,6 @@
 # 05. Ingest WiCAN Pro logger batches (JSONL) in car_ingest
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: wican1 session 2026-10-14 (WiCAN Pro BLE-sync app, a separate GPL-3.0 Android repo)
@@ -136,3 +136,10 @@ this ticket's comments.
 - 2026-10-18: Added the `car` label: the source id comes from the app's batch file name (rows
   carry none), mapped to a name through `cars` in `vars.yml`; trips are tracked per car; the Car
   dashboard gets a car selector.
+- 2026-10-18 agent: done in `src/nodes/websvcs/car_ingest.py.j2` and `tests/car_ingest_test.sh`
+  (the seven cases above), `cars` in `vars.template.yml`, and the Car dashboard's `car` variable.
+  Trip state is `/var/lib/car_ingest/trips` (car, last row ms, trip), written only after a
+  successful post. A batch name matches `<source>-<digits>_<digits>-<hex>`; anything else gets
+  `cars.default`. Units for unmapped params come from the EV6 profile in the sync app's copy of
+  `vehicle_profiles.json`. Left for the maintainer: put the dongle's id under `cars.sources` in
+  `vars.yml`, deploy with 03, and check the first real batches (sign, counters).

@@ -15,15 +15,30 @@
   "templating": {
     "list": [
       {
+        "name": "car",
+        "label": "Car",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-metrics-datasource"
+        },
+        "definition": "label_values(car_bms_battery_power, car)",
+        "query": {
+          "query": "label_values(car_bms_battery_power, car)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1
+      },
+      {
         "name": "trip",
         "label": "Trip",
         "type": "query",
         "datasource": {
           "type": "victoriametrics-metrics-datasource"
         },
-        "definition": "label_values(car_bms_battery_power, trip)",
+        "definition": "label_values(car_bms_battery_power{car=\"$car\"}, trip)",
         "query": {
-          "query": "label_values(car_bms_battery_power, trip)",
+          "query": "label_values(car_bms_battery_power{car=\"$car\"}, trip)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
@@ -79,7 +94,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_state_of_charge_display{trip=~\"$trip\"}",
+          "expr": "car_bms_state_of_charge_display{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "display",
           "refId": "A"
         },
@@ -87,7 +102,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_state_of_charge_bms{trip=~\"$trip\"}",
+          "expr": "car_bms_state_of_charge_bms{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "BMS",
           "refId": "B"
         }
@@ -131,7 +146,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_battery_power{trip=~\"$trip\"}",
+          "expr": "car_bms_battery_power{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "power",
           "refId": "A"
         }
@@ -175,7 +190,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_battery_current{trip=~\"$trip\"}",
+          "expr": "car_bms_battery_current{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "current",
           "refId": "A"
         }
@@ -219,7 +234,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_battery_dc_voltage{trip=~\"$trip\"}",
+          "expr": "car_bms_battery_dc_voltage{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "pack",
           "refId": "A"
         }
@@ -264,7 +279,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_minimum_cell_voltage{trip=~\"$trip\"}",
+          "expr": "car_bms_minimum_cell_voltage{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "min",
           "refId": "A"
         },
@@ -272,7 +287,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_maximum_cell_voltage{trip=~\"$trip\"}",
+          "expr": "car_bms_maximum_cell_voltage{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "max",
           "refId": "B"
         },
@@ -280,7 +295,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_battery_cell_voltage_deviation{trip=~\"$trip\"}",
+          "expr": "car_bms_battery_cell_voltage_deviation{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "deviation",
           "refId": "C"
         }
@@ -324,7 +339,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "{__name__=~\"car_bms_battery_pack_b[0-9]+\", trip=~\"$trip\"}",
+          "expr": "{__name__=~\"car_bms_battery_pack_b[0-9]+\", car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "{{__name__}}",
           "refId": "A"
         },
@@ -332,7 +347,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_battery_min_temperature{trip=~\"$trip\"}",
+          "expr": "car_bms_battery_min_temperature{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "min",
           "refId": "B"
         },
@@ -340,7 +355,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_battery_max_temperature{trip=~\"$trip\"}",
+          "expr": "car_bms_battery_max_temperature{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "max",
           "refId": "C"
         },
@@ -348,7 +363,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_battery_inlet_temperature{trip=~\"$trip\"}",
+          "expr": "car_bms_battery_inlet_temperature{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "inlet",
           "refId": "D"
         }
@@ -392,7 +407,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_cumulative_energy_charged{trip=~\"$trip\"}",
+          "expr": "car_bms_cumulative_energy_charged{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "charged",
           "refId": "A"
         },
@@ -400,7 +415,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_cumulative_energy_discharged{trip=~\"$trip\"}",
+          "expr": "car_bms_cumulative_energy_discharged{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "discharged",
           "refId": "B"
         }
@@ -444,7 +459,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_bms_auxillary_battery_voltage{trip=~\"$trip\"}",
+          "expr": "car_bms_auxillary_battery_voltage{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "BMS",
           "refId": "A"
         },
@@ -452,7 +467,7 @@
           "datasource": {
             "type": "victoriametrics-metrics-datasource"
           },
-          "expr": "car_obd_module_voltage{trip=~\"$trip\"}",
+          "expr": "car_obd_module_voltage{car=\"$car\", trip=~\"$trip\"}",
           "legendFormat": "OBD module",
           "refId": "B"
         }

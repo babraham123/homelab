@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
-# Imports Car Scanner recordings (.brc) uploaded to copyparty's /car into VictoriaMetrics,
-# at the samples' original timestamps. Each file is imported once, keyed by sha256 in the
-# state file, so a re-upload adds nothing. Malformed files move to car/failed/; a trip
-# older than VictoriaMetrics' retention stays where it is, recorded as too_old. The .brc
-# files stay in copyparty as the long-term archive. Standard library only.
-# The format is decoded in planning/copyparty/issues/03: .NET BinaryWriter output,
+# Imports car data uploaded to copyparty's /car into VictoriaMetrics, at the samples'
+# original timestamps: Car Scanner recordings (.brc) and WiCAN Pro logger batches
+# (.jsonl, .jsonl.gz). Each file is imported once, keyed by sha256 in the state file, so a
+# re-upload adds nothing. Malformed files move to car/failed/; a file whose oldest sample
+# is past VictoriaMetrics' retention stays where it is, recorded as too_old. The files
+# stay in copyparty as the long-term archive. Standard library only.
+# Every series carries a `car` label and a `trip` label. A .brc file is one trip, named by
+# its stem. WiCAN rows are split into trips by gaps of more than 10 min, each named by its
+# first row in local time, the shape of Car Scanner's stems; a batch continues its car's
+# last trip when it starts within 10 min of it.
+# The .brc format is decoded in planning/copyparty/issues/03: .NET BinaryWriter output,
 # little-endian, strings 7-bit-varint length-prefixed UTF-8. A header, then sensor
 # definitions and samples interleaved, each behind a marker. Anything else fails the file.
+# The JSONL rows are the WiCAN data logger's, as the sync app exports them
+# (planning/copyparty/issues/05).
 # Usage:
 #   src/nodes/websvcs/car_ingest.py         # car_ingest.timer
 #   src/nodes/websvcs/car_ingest.py FILE    # prints FILE's import lines, or why it fails
 
 import base64
 import datetime
+import gzip
 import hashlib
+import json
 import math
 import os
 import re
@@ -34,10 +43,12 @@ CAR = Path("/var/opt/copyparty/data/car")
 STATE = Path("/var/lib/car_ingest/state")
 METRICS = Path("/var/lib/node_exporter/textfile_collector/car_ingest.prom")
 URL = "https://metrics.janedoe.com/api/v1/import/prometheus"
-# The phone's; recording start times are phone-local
+# The phone's; recording start times are phone-local, and trips are named in it
 TIMEZONE = "America/Los_Angeles"
 RETENTION_DAYS = 14
 RESULTS = ("ok", "failed", "too_old")
+DEFAULT_CAR = "ev6"
+CAR_SOURCES = {"wican_AA_BB_CC_DD_EE_01": "ev6"}
 
 MAGIC = "CARSCANNERRECORD"
 DEF_MARKER = 0x00D56190
@@ -50,8 +61,44 @@ UNITS = {
 }
 DOTNET_EPOCH = datetime.datetime(1, 1, 1)
 
+# WiCAN params the Car dashboard charts, onto the Car Scanner series and unit labels so one
+# dashboard serves both: param -> (series, unit, divisor)
+WICAN_SERIES = {
+  "SOC": ("car_bms_state_of_charge_bms", "%", 1),
+  "SOC_D": ("car_bms_state_of_charge_display", "%", 1),
+  "HV_W": ("car_bms_battery_power", "kW", 1000),
+  "HV_A": ("car_bms_battery_current", "A", 1),
+  "HV_V": ("car_bms_battery_dc_voltage", "V", 1),
+  "HV_C_V_MAX": ("car_bms_maximum_cell_voltage", "V", 1),
+  "HV_C_V_MIN": ("car_bms_minimum_cell_voltage", "V", 1),
+  "HV_C_DIFF": ("car_bms_battery_cell_voltage_deviation", "V", 1),
+  "HV_T_MAX": ("car_bms_battery_max_temperature", "°C", 1),
+  "HV_T_MIN": ("car_bms_battery_min_temperature", "°C", 1),
+  "KWH_CHARGED": ("car_bms_cumulative_energy_charged", "kWh", 1),
+  "KWH_DISCHARGED": ("car_bms_cumulative_energy_discharged", "kWh", 1),
+  "LV_V": ("car_bms_auxillary_battery_voltage", "V", 1),
+}
+WICAN_SERIES.update({f"HV_T_{n}": (f"car_bms_battery_pack_b{n:02d}", "°C", 1) for n in range(1, 17)})
+# Every other param's unit, from wican-fw's vehicle_profiles.json, "Kia: EV6"; an empty
+# unit there is "unknown" here, like a param the profile lacks
+WICAN_UNITS = {
+  "SPEED": "km/h", "TMP_A": "°C", "T_CAB": "°C", "REGEN_MAX": "kW", "POWER_MAX": "kW",
+  "HV_H_1": "°C", "HV_KWH_R": "Wh", "SOH": "%", "HV_C_D_MIN_NO": "none",
+  "HV_C_D_MAX_NO": "none", "HV_AH_CHARGED": "Ah", "HV_AH_DISCHARGED": "Ah",
+  "DM_R_RPM": "rpm", "CAPACITOR": "V", "RESISTANCE": "kOhm", "HV_C_V_MAX_NO": "none",
+  "HV_C_V_MIN_NO": "none", "OP_TIME": "hours", "CHARGING_R_A": "A", "LV_SOC": "%",
+  "TYRE_P_FL": "psi", "TYRE_P_FR": "psi", "TYRE_P_RL": "psi", "TYRE_P_RR": "psi",
+  "TYRE_T_FL": "°C", "TYRE_T_FR": "°C", "TYRE_T_RL": "°C", "TYRE_T_RR": "°C",
+  "ODOMETER_MI": "mi", "ODOMETER": "km", "STEER_ANGLE": "deg",
+}
+# ts_quality values whose ts is imported; "unknown" rows have no ts and are dropped
+IMPORTED_QUALITIES = ("journal", "device", "anchor")
+TRIP_GAP_MS = 10 * 60 * 1000
+# <source>-<cursor>-<sha256 prefix>.jsonl[.gz], as the sync app names its batches
+BATCH_NAME = re.compile(r"(?P<source>.+)-(?P<epoch>[0-9]+)_(?P<offset>[0-9]+)-[0-9a-f]+")
 
-class BrcError(Exception):
+
+class FormatError(Exception):
   pass
 
 
@@ -63,7 +110,7 @@ class Reader:
   def take(self, fmt):
     size = struct.calcsize(fmt)
     if self.pos + size > len(self.data):
-      raise BrcError(f"truncated at byte {self.pos}")
+      raise FormatError(f"truncated at byte {self.pos}")
     value = struct.unpack_from(fmt, self.data, self.pos)
     self.pos += size
     return value[0]
@@ -77,11 +124,11 @@ class Reader:
       if not byte & 0x80:
         break
     if self.pos + length > len(self.data):
-      raise BrcError(f"truncated string at byte {self.pos}")
+      raise FormatError(f"truncated string at byte {self.pos}")
     try:
       value = self.data[self.pos:self.pos + length].decode("utf-8")
     except UnicodeDecodeError as e:
-      raise BrcError(f"bad string at byte {self.pos}: {e}") from e
+      raise FormatError(f"bad string at byte {self.pos}: {e}") from e
     self.pos += length
     return value
 
@@ -97,14 +144,19 @@ def label(value):
   return value.replace("\\", "\\\\").replace('"', '\\"')
 
 
-def parse(data, trip):
-  """Returns the recording's samples as (series, value, ms) tuples; raises BrcError."""
+def series(name, unit, trip, car):
+  # Concatenated: doubled braces in a format string would be Jinja's
+  return name + '{unit="' + label(unit) + '",trip="' + label(trip) + '",car="' + label(car) + '"}'
+
+
+def parse_brc(data):
+  """Returns the recording's samples as (name, unit, value, ms) tuples; raises FormatError."""
   r = Reader(data)
   if r.string() != MAGIC:
-    raise BrcError("not a Car Scanner recording")
+    raise FormatError("not a Car Scanner recording")
   version = r.take("<i")
   if version != 2:
-    raise BrcError(f"unsupported version {version}")
+    raise FormatError(f"unsupported version {version}")
   for _ in ("vin", "car name", "car profile", "adapter"):
     r.string()
   # The top two bits of a .NET DateTime hold its Kind.
@@ -120,22 +172,121 @@ def parse(data, trip):
       name = r.string()
       r.string()  # short name
       unit = r.take("<i")
-      unit = label(UNITS.get(unit, f"unknown_{unit}"))
-      # Concatenated: doubled braces in a format string would be Jinja's
-      sensors[sensor_id] = "car_" + slug(name) + '{unit="' + unit + '",trip="' + label(trip) + '"}'
+      sensors[sensor_id] = ("car_" + slug(name), UNITS.get(unit, f"unknown_{unit}"))
     elif marker == SAMPLE_MARKER:
       offset = r.take("<d")
       sensor_id = r.take("<i")
       value = r.take("<d")
       if sensor_id not in sensors:
-        raise BrcError(f"sample for undefined sensor {sensor_id}")
+        raise FormatError(f"sample for undefined sensor {sensor_id}")
       if math.isfinite(value):
-        samples.append((sensors[sensor_id], value, round((start + offset) * 1000)))
+        samples.append((*sensors[sensor_id], value, round((start + offset) * 1000)))
     else:
-      raise BrcError(f"unknown marker {marker:#010x} at byte {r.pos - 4}")
+      raise FormatError(f"unknown marker {marker:#010x} at byte {r.pos - 4}")
   if not samples:
-    raise BrcError("no samples")
+    raise FormatError("no samples")
   return samples
+
+
+def parse_jsonl(data):
+  """Returns a WiCAN batch's importable rows as (name, unit, value, ms) tuples, in time
+  order, and how many unknown-time rows it dropped; raises FormatError."""
+  if data[:2] == b"\x1f\x8b":
+    try:
+      data = gzip.decompress(data)
+    except (OSError, EOFError) as e:
+      raise FormatError(f"bad gzip: {e}") from e
+  try:
+    lines = data.decode("utf-8").splitlines()
+  except UnicodeDecodeError as e:
+    raise FormatError(f"not UTF-8: {e}") from e
+
+  samples, dropped = [], 0
+  for number, line in enumerate(lines, 1):
+    try:
+      row = json.loads(line)
+    except ValueError as e:
+      raise FormatError(f"line {number}: not JSON: {e}") from e
+    if not isinstance(row, dict):
+      raise FormatError(f"line {number}: not an object")
+    # The batch's marker and meta lines
+    if set(row) == {"_file"} or "_cursor" in row:
+      continue
+    param, value, ts, quality = (row.get(k) for k in ("param", "value", "ts", "ts_quality"))
+    if not isinstance(param, str) or "." not in param:
+      raise FormatError(f"line {number}: no <source>.<name> param")
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+      raise FormatError(f"line {number}: value isn't a number")
+    if quality == "unknown":
+      dropped += 1
+      continue
+    if quality not in IMPORTED_QUALITIES:
+      raise FormatError(f"line {number}: unexpected ts_quality {quality!r}")
+    if isinstance(ts, bool) or not isinstance(ts, int):
+      raise FormatError(f"line {number}: {quality} row without an integer ts")
+    if not math.isfinite(value):
+      continue
+    name = param.split(".", 1)[1]
+    series_name, unit, divisor = WICAN_SERIES.get(name, ("car_" + slug(name), WICAN_UNITS.get(name) or "unknown", 1))
+    samples.append((series_name, unit, float(value) / divisor, ts))
+  if not samples:
+    raise FormatError("no importable rows")
+  samples.sort(key=lambda s: s[3])
+  return samples, dropped
+
+
+def batch_car(stem):
+  """The car a batch named STEM (without .jsonl[.gz]) belongs to, and its source id."""
+  match = BATCH_NAME.fullmatch(stem)
+  if not match:
+    return DEFAULT_CAR, None
+  source = match["source"]
+  return CAR_SOURCES.get(source, source), source
+
+
+def file_order(path):
+  """Sorts each dongle's batches by cursor, compared as numbers: offsets aren't padded."""
+  match = BATCH_NAME.fullmatch(batch_stem(path)) if is_batch(path) else None
+  if not match:
+    return path.name, 0, 0, path.name
+  return match["source"], int(match["epoch"]), int(match["offset"]), path.name
+
+
+def trip_name(ms):
+  return datetime.datetime.fromtimestamp(ms / 1000, zoneinfo.ZoneInfo(TIMEZONE)).strftime("%Y-%m-%d %H-%M-%S")
+
+
+def split_trips(samples, last):
+  """Labels time-ordered samples with trips. last is the car's (ms, trip) before this
+  batch, or None. Returns [(name, unit, value, ms, trip)] and the new last."""
+  out = []
+  for name, unit, value, ms in samples:
+    if last is None or abs(ms - last[0]) > TRIP_GAP_MS:
+      last = (ms, trip_name(ms))
+    last = (ms, last[1])
+    out.append((name, unit, value, ms, last[1]))
+  return out, last
+
+
+def is_batch(path):
+  return path.name.lower().endswith((".jsonl", ".jsonl.gz"))
+
+
+def batch_stem(path):
+  return re.sub(r"\.jsonl(\.gz)?$", "", path.name, flags=re.IGNORECASE)
+
+
+def convert(path, data, trips):
+  """FILE's samples as (series, value, ms), its car, and how many rows it dropped. trips is
+  {car: (ms, trip)}, the last trip per car, updated in place for batches."""
+  if not is_batch(path):
+    return [(series(n, u, path.stem, DEFAULT_CAR), v, ms) for n, u, v, ms in parse_brc(data)], DEFAULT_CAR, 0
+  samples, dropped = parse_jsonl(data)
+  car, source = batch_car(batch_stem(path))
+  if source is not None and source not in CAR_SOURCES:
+    log(f"{path.name}: dongle {source} isn't in cars.sources; labelled car={source}", sys.stderr)
+  labelled, trips[car] = split_trips(samples, trips.get(car))
+  return [(series(n, u, trip, car), v, ms) for n, u, v, ms, trip in labelled], car, dropped
 
 
 def import_lines(samples):
@@ -148,13 +299,20 @@ def log(message, stream=sys.stdout):
 
 
 def ingest(car, state, metrics, post, now):
-  """Imports every settled .brc in car not yet in state. post(body) raises on failure,
+  """Imports every settled file in car not yet in state. post(body) raises on failure,
   which stops the run before the file is recorded, so the next run retries it."""
   oldest_ms = (now - RETENTION_DAYS * 86400) * 1000
   (car / "failed").mkdir(parents=True, exist_ok=True)
   state.parent.mkdir(parents=True, exist_ok=True)
   state.touch()
   seen = {line.split("\t")[0] for line in state.read_text().splitlines()}
+  # TSV: car, the last imported row's ms, its trip
+  trips_file = state.with_name("trips")
+  trips = {}
+  if trips_file.exists():
+    for line in trips_file.read_text().splitlines():
+      name, ms, trip = line.split("\t")
+      trips[name] = (int(ms), trip)
 
   def record(sha, result, samples, name):
     with state.open("a") as f:
@@ -162,31 +320,45 @@ def ingest(car, state, metrics, post, now):
     seen.add(sha)
     log(f"{name}: {result} ({samples} samples)")
 
-  for path in sorted(car.iterdir()):
+  def save_trips():
+    tmp = trips_file.with_suffix(".tmp")
+    tmp.write_text("".join(f"{name}\t{ms}\t{trip}\n" for name, (ms, trip) in sorted(trips.items())))
+    tmp.replace(trips_file)
+
+  # Each car's batches in cursor order, so its trips continue across them
+  for path in sorted(car.iterdir(), key=file_order):
     # Files modified in the last minute may still be uploading.
-    if not path.is_file() or path.suffix.lower() != ".brc" or path.stat().st_mtime > now - 60:
+    if not path.is_file() or path.stat().st_mtime > now - 60:
+      continue
+    if path.suffix.lower() != ".brc" and not is_batch(path):
       continue
     data = path.read_bytes()
     sha = hashlib.sha256(data).hexdigest()
     if sha in seen:
       continue
-    # The trip label is the file stem, Car Scanner's recording start.
+    # Trips change only once the file is imported.
+    pending = dict(trips)
     try:
-      samples = parse(data, path.stem)
-    except BrcError as e:
+      samples, _, dropped = convert(path, data, pending)
+    except FormatError as e:
       log(f"{path.name}: {e}", sys.stderr)
       shutil.move(path, car / "failed" / path.name)
       record(sha, "failed", 0, path.name)
       continue
+    if dropped:
+      log(f"{path.name}: dropped {dropped} rows with an unknown time")
     # VictoriaMetrics silently drops samples outside its retention.
     if min(ms for _, _, ms in samples) < oldest_ms:
       record(sha, "too_old", len(samples), path.name)
       continue
     post(import_lines(samples).encode())
+    if pending != trips:
+      trips = pending
+      save_trips()
     record(sha, "ok", len(samples), path.name)
 
   counts = Counter(line.split("\t")[1] for line in state.read_text().splitlines())
-  lines = ["# HELP car_ingest_files_total Car Scanner recordings processed, by outcome.",
+  lines = ["# HELP car_ingest_files_total Car recordings and logger batches processed, by outcome.",
            "# TYPE car_ingest_files_total counter"]
   lines += ['car_ingest_files_total{result="%s"} %d' % (r, counts[r]) for r in RESULTS]
   lines += ["# HELP car_ingest_last_success_timestamp_seconds Unix time of the last car_ingest run that completed.",
@@ -224,9 +396,12 @@ def main():
   if len(sys.argv) == 2:
     path = Path(sys.argv[1])
     try:
-      sys.stdout.write(import_lines(parse(path.read_bytes(), path.stem)))
-    except BrcError as e:
+      samples, _, dropped = convert(path, path.read_bytes(), {})
+    except FormatError as e:
       sys.exit(f"{path}: {e}")
+    if dropped:
+      print(f"{path}: dropped {dropped} rows with an unknown time", file=sys.stderr)
+    sys.stdout.write(import_lines(samples))
     return
   if len(sys.argv) != 1:
     sys.exit("usage: car_ingest.py [FILE]")

@@ -221,7 +221,8 @@ repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plai
   endpoints and image update order `src/nodes.jinja` derives from `tests/fixtures/nodes/`, written
   out from ADR 0006.
 - `car_ingest_test.sh`: `src/nodes/websvcs/car_ingest.py.j2` on synthetic Car Scanner `.brc`
-  recordings: the conversion, and a run's import-once, `failed/`, `too_old` and retry handling.
+  recordings and WiCAN batches: the conversions, param mapping, trips, the `car` label, and a
+  run's import-once, `failed/`, `too_old` and retry handling.
 - `render_test.sh`: a full render of `vars.template.yml` passes every check (skipped by `--fast`,
   since the pre-commit hook renders anyway).
 
