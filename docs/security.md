@@ -95,7 +95,7 @@ comes from pfSense VLAN firewall rules and Authelia's application-layer policies
   `/admin`, its one path behind Authelia's proxy check) get their own two-factor rule ahead of the
   LAN/tailnet downgrade, so a password alone never reaches them. The split is deliberate: Authelia
   decides the factor, the app decides the role (OliveTin's ACLs, LLDAP's admin group, the
-  `telemetry` group below). Proxmox, PBS and pfSense have their own logins and aren't behind
+  `telemetry_access` group below). Proxmox, PBS and pfSense have their own logins and aren't behind
   Authelia.
 
 Two integration models:
@@ -105,8 +105,8 @@ Two integration models:
    routes; the flow is shown in the [networking sequence
    diagram](networking.md#ingress-the-three-tier-chain). The VictoriaMetrics, VictoriaLogs and
    Alertmanager UIs only have a shared admin login, which Traefik injects as basic auth. Traefik
-   multi-layer routing sends only members of the `telemetry` group to those UIs, matching on the
-   `Remote-Groups` header from Authelia. Everyone else gets a 403 page. Their non-browser API
+   multi-layer routing sends only members of the `telemetry_access` group to those UIs, matching
+   on the `Remote-Groups` header from Authelia. Everyone else gets a 403 page. Their non-browser API
    routes skip Authelia and rely on the app's own auth. ntfy's web app is different: Authelia
    gates only page loads (`Sec-Fetch-Mode: navigate`), then each person signs in to ntfy with
    their own account, and ntfy's ACLs decide which topics they see.

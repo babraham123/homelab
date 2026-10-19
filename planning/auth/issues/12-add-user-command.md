@@ -40,10 +40,11 @@ root on secsvcs already holds `lldap_admin_password`.
 
    | Role | Groups |
    | --- | --- |
-   | `family` (default) | `authelia_gen_access`, `headscale_access`, `tailscale_family`, `command_general`, `vaultwarden_access` |
+   | `family` (default) | `authelia_gen_access`, `headscale_access`, `tailscale_family`, `command_general` |
    | `guest` | `headscale_access`, `tailscale_guests` |
 
-   Admin groups (`*_admin`, `tailscale_admin`, `telemetry`) stay a deliberate manual step in LLDAP.
+   Admin groups (`*_admin`, `tailscale_admin`, `telemetry_access`) stay a deliberate manual step in
+   LLDAP.
 3. It sets no password: it starts Authelia's reset-password flow for the user (JSON request body),
    which emails a link through the SMTP notifier. It fails without changes if the username exists.
 4. A wrapper on pve1, `src/nodes/pve1/add_user.sh USERNAME EMAIL [ROLE]`, validates the same

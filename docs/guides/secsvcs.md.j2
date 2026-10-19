@@ -70,9 +70,9 @@ journalctl -eu authelia
   - Add regular users, not in `lldap_password_manager` (it can reset others' passwords)
     - {{ tailscale_admin }}
     - {{ users | join(', ') }}
-  - Create the `authelia_gen_access`, `headscale_access`, `command_general` and
-    `vaultwarden_access` groups, add users to them
-  - Create the `telemetry` group (metrics, logs and alert UIs), add your user to it
+  - Create the `authelia_gen_access`, `headscale_access` and `command_general` groups, add users
+    to them
+  - Create the `telemetry_access` group (metrics, logs and alert UIs), add your user to it
   - Create the `grafana_admin`, `hass_admin`, `command_admin` and `files_admin` groups, add your
     user to them
   - Restore the authelia middleware
@@ -179,7 +179,7 @@ curl -s -o /dev/null -w '%{http_code}\n' 'https://www.{{ site.url }}/?q=<script>
 
 ## Vaultwarden
 
-<https://vault.{{ site.url }}>: SSO-only, gated on the `vaultwarden_access` LLDAP group
+<https://vault.{{ site.url }}>: SSO-only; any Authelia user can sign in
 
 - Prerequisites:
   - On pve1, add `vaultwarden_*` to `/root/secrets/secsvcs.yaml` (recipes in the template), then

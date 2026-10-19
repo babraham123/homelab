@@ -9,7 +9,7 @@
 {#
   Browser UI of a telemetry tool whose own auth is a shared admin login. The parent
   authenticates; its children then match on the Remote-Groups header ForwardAuth set
-  (Traefik deletes any client-sent copy first), so only the telemetry group gets the
+  (Traefik deletes any client-sent copy first), so only the telemetry_access group gets the
   injected admin credentials and everyone else gets the 403 page.
 #}
 {%- macro telemetry_ui(name, rule, service, auth) %}
@@ -25,7 +25,7 @@
     {{ name }}-ui-telemetry:
       parentRefs: [{{ name }}-ui]
       # Authelia joins groups with a bare comma
-      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry_access(,|$)`)
       service: {{ service }}@file
       middlewares:
         - {{ auth }}@file

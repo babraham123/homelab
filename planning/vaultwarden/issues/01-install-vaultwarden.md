@@ -75,7 +75,7 @@ updates (image-updater), non-root read-only container, `/admin` behind Authelia,
   | `SSO_SIGNUPS_MATCH_EMAIL` | `false` | on a fresh install the first SSO login is a signup, so no existing account ever needs associating by email |
   | `SSO_ALLOW_UNKNOWN_EMAIL_VERIFICATION` | `false` (default) | prevents account takeover |
   | `SSO_MASTER_PASSWORD_POLICY` | `{"minComplexity":3,"minLength":12}` | enforced when the master password is set at SSO enrollment |
-  | `SSO_AUTH_ONLY_NOT_SESSION` | `false` (default) | the session lives as long as Authelia's refresh token, so removing a user from `vaultwarden_access` ends it at the next refresh |
+  | `SSO_AUTH_ONLY_NOT_SESSION` | `false` (default) | the session lives as long as Authelia's refresh token, so disabling the LLDAP user ends it at the next refresh |
   | `IP_HEADER` / `IP_HEADER_TRUSTED_PROXIES` | `X-Forwarded-For` / `{{ secsvcs.container_subnet }}.6` | real client IP for rate limits (auth/06); 1.37.4 takes the rightmost untrusted entry, so a forged leading one is ignored |
   | `LOGIN_RATELIMIT_*`, `ADMIN_RATELIMIT_*` | defaults (10/60 s, 3/300 s) | explicit in the quadlet so they're visible |
   | `ADMIN_TOKEN` | secret `vaultwarden_admin_token_hash`, argon2id PHC from `vaultwarden hash` | `/admin` second factor after Authelia |
@@ -101,17 +101,6 @@ updates (image-updater), non-root read-only container, `/admin` behind Authelia,
   silently overrides the quadlet's environment. Say so in the secsvcs guide; change settings in
   the quadlet.
 - **Authelia** (`src/services/authelia/configuration.yml.j2`):
-  - an authorization policy, because the built-in `two_factor` admits every user:
-
-    ```yaml
-    authorization_policies:
-      vaultwarden:
-        default_policy: 'deny'
-        rules:
-          - policy: 'two_factor'
-            subject: 'group:vaultwarden_access'
-    ```
-
   - a custom lifespan `vaultwarden` with `refresh_token: '30 days'`. The global
     `refresh_token: '90 minutes'` would end every Vaultwarden session after about 90 idle minutes;
   - OIDC client `vaultwarden`, from Authelia's Vaultwarden guide:
@@ -122,12 +111,11 @@ updates (image-updater), non-root read-only container, `/admin` behind Authelia,
     - `token_endpoint_auth_method: 'client_secret_basic'`. Vaultwarden uses Basic whenever the
       provider offers it, so Grafana's `client_secret_post` would fail the token exchange;
     - `userinfo_signed_response_alg: 'none'`;
-    - `authorization_policy: 'vaultwarden'`, `lifespan: 'vaultwarden'`.
+    - `authorization_policy: 'two_factor'`: any Authelia user, two factors since it's public;
+    - `lifespan: 'vaultwarden'`.
 
     Don't copy the guide's `SSO_ROLES_*` variables or its `vaultwarden` claim: they belong to the
     OIDCWarden fork and the official image ignores them.
-  - a new LLDAP group `vaultwarden_access`, documented in `docs/maintenance.md` "Add a new user"
-    (ci-and-docs/04).
   - Authelia asks for consent on every SSO login, whatever `consent_mode` says, because the client
     gets refresh tokens. That's expected.
 - **Clients:** check that the Bitwarden browser extension, desktop and mobile apps complete the SSO
@@ -185,7 +173,7 @@ Not adopted from the guide: hiding under a secret subdir. With `SSO_ONLY` and Au
   after grafana, as the stub does today.
 - From the internet (phone on mobile data): browser extension and mobile app log in via Authelia
   two-factor and its consent screen, then unlock with the master password and sync.
-- A user not in `vaultwarden_access` is refused by Authelia.
+- Any Authelia user can sign in, after two factors.
 - The password login is refused (`SSO_ONLY`). `/admin` requires Authelia and then the admin token.
 - A logged-in extension is still signed in and syncing after 2 hours idle.
 - `https://vault.SITE/` carries Vaultwarden's own `Content-Security-Policy`, not
@@ -227,3 +215,7 @@ Not adopted from the guide: hiding under a secret subdir. With `SSO_ONLY` and Au
 - 2026-10-17: body brought up to date: dropped the "Why it waits" section (auth/06 no longer
   blocks this) and the pre-auth/01 note on `/admin`; `vaultwarden` is `admin: true` in the
   inventory, so `/admin` needs two factors from every network.
+- 2026-10-18: no `vaultwarden_access` group: any Authelia user may sign in, like the other
+  services. The client uses the built-in `two_factor` policy rather than `gen_access`, which would
+  let `authelia_gen_access` members in with a password alone on a public service. Skip creating
+  the group.

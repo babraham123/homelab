@@ -48,7 +48,7 @@ http:
     victoriametrics-ui-telemetry:
       parentRefs: [victoriametrics-ui]
       # Authelia joins groups with a bare comma
-      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry_access(,|$)`)
       service: victoriametrics@file
       middlewares:
         - vm-auth@file
@@ -80,7 +80,7 @@ http:
     victorialogs-ui-telemetry:
       parentRefs: [victorialogs-ui]
       # Authelia joins groups with a bare comma
-      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry_access(,|$)`)
       service: victorialogs@file
       middlewares:
         - vl-auth@file
@@ -110,7 +110,7 @@ http:
     alertmanager-ui-telemetry:
       parentRefs: [alertmanager-ui]
       # Authelia joins groups with a bare comma
-      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+      rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry_access(,|$)`)
       service: alertmanager@file
       middlewares:
         - alertmanager-auth@file

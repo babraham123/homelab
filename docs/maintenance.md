@@ -62,8 +62,7 @@ sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
 | `authelia_gen_access` | Every Authelia-protected subdomain; Readeck user |
 | `headscale_access` | VPN sign-in |
 | `command_general` | OliveTin's general commands |
-| `telemetry` | VictoriaMetrics, VictoriaLogs and Alertmanager UIs |
-| `vaultwarden_access` | Vaultwarden sign-in |
+| `telemetry_access` | VictoriaMetrics, VictoriaLogs and Alertmanager UIs |
 | `grafana_admin`, `hass_admin`, `command_admin`, `guacamole_admin`, `readeck_admin`, `storyteller_admin` | Admin in that app; admins only |
 
 - Their first sign-in, at https://auth.SITE_URL: register a TOTP app or a security key. Away from

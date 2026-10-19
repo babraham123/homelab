@@ -1445,12 +1445,6 @@ identity_providers:
         rules:
           - policy: 'one_factor'
             subject: 'group:authelia_gen_access'
-      # The built-in two_factor admits every user
-      vaultwarden:
-        default_policy: 'deny'
-        rules:
-          - policy: 'two_factor'
-            subject: 'group:vaultwarden_access'
 
     ## The lifespans configure the expiration for these token types in the duration common syntax. In addition to this
     ## syntax the lifespans can be customized per-client.
@@ -2249,7 +2243,8 @@ identity_providers:
           - 'refresh_token'
         response_types:
           - 'code'
-        authorization_policy: 'vaultwarden'
+        # Public, so every user needs two factors; gen_access would allow one
+        authorization_policy: 'two_factor'
         lifespan: 'vaultwarden'
         require_pkce: true
         pkce_challenge_method: 'S256'

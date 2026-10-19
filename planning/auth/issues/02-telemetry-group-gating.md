@@ -31,7 +31,7 @@ rule. Confirm on your version.
 
 ## Change
 
-- LLDAP group `telemetry` (human step); add yourself.
+- LLDAP group `telemetry_access` (human step); add yourself.
 - `src/nodes/secsvcs/traefik/routes.yml.j2`, for each of `metrics`, `logs`, `alert`
   (replacing today's `-ui` router; keep the `-api`/`-hass-api` routers untouched):
 
@@ -41,7 +41,7 @@ rule. Confirm on your version.
     middlewares: [authelia@file]
   victoriametrics-ui-telemetry:             # child: authorised group → app, with admin header
     parentRefs: [victoriametrics-ui]
-    rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry(,|$)`)
+    rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry_access(,|$)`)
     service: victoriametrics@file
     middlewares: [vm-auth@file, secure-headers@file]
     entryPoints: websecure
@@ -61,17 +61,17 @@ rule. Confirm on your version.
 - The shared `&service` anchor in `routes.yml` sets `entryPoints`/`tls` on every router; parents
   must not have them, so give parents their own anchor.
 - Optional belt-and-braces: an Authelia `access_control` rule for the same domains with
-  `subject: group:telemetry`. Not required once Traefik enforces it; skip unless you want the denial
-  to land on Authelia's portal instead of a 403.
+  `subject: group:telemetry_access`. Not required once Traefik enforces it; skip unless you want
+  the denial to land on Authelia's portal instead of a 403.
 - Later, per-app real roles instead of a shared admin header (Grafana already maps OIDC groups;
   VictoriaMetrics via `vmauth`). Out of scope.
 
 ## Acceptance
 
-- A user in `authelia_gen_access` but not `telemetry` gets 403 on `metrics.SITE` UI; a `telemetry`
-  member gets the UI with the injected admin basic-auth.
-- `curl -H 'Remote-Groups: telemetry'` without a session still lands on the Authelia redirect (spoof
-  check).
+- A user in `authelia_gen_access` but not `telemetry_access` gets 403 on `metrics.SITE` UI; a
+  `telemetry_access` member gets the UI with the injected admin basic-auth.
+- `curl -H 'Remote-Groups: telemetry_access'` without a session still lands on the Authelia
+  redirect (spoof check).
 - HA → `metrics.SITE` with `Authorization: Token` (the `-hass-api` router) is unaffected.
 
 ## Comments
@@ -82,9 +82,9 @@ rule. Confirm on your version.
   also moved to the parent so the 403 gets it too. Non-members get `s403@file`, the same
   `www/error/403.html` proxy websvcs uses for pve/pbs. ForwardAuth deletes each
   `authResponseHeaders` entry before copying Authelia's value, and Authelia joins groups with a bare
-  comma, so the regex is `(^|,)telemetry(,|$)`. The setup step is in `docs/guides/secsvcs.md.j2`
+  comma, so the regex is `(^|,)telemetry_access(,|$)`. The setup step is in `docs/guides/secsvcs.md.j2`
   and the model is in `docs/security.md#identity-lldap--authelia`. Remaining for a human: create
-  the LLDAP `telemetry` group, add yourself, redeploy secsvcs Traefik, then run the three
+  the LLDAP `telemetry_access` group, add yourself, redeploy secsvcs Traefik, then run the three
   acceptance checks live.
 - 2026-10-17: ntfy dropped from scope: 11c348c (auth/13) took `push.SITE` off `telemetry_ui`, and
   the ntfy web app now signs in to ntfy itself.
