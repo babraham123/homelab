@@ -172,6 +172,30 @@ lspci -nnv | grep TPU
   [ref2](https://forum.proxmox.com/threads/guest-internal-error-when-passing-through-pcie.99239/),
   [ref3](https://www.derekseaman.com/2023/06/home-assistant-frigate-vm-on-proxmox-with-pcie-coral-tpu.html)
 
+### SATA Adapter (PCIe)
+
+- Find the vendor:device id, skip the onboard controller
+  - `lspci -nn | grep SATA`
+- Bind it to vfio before ahci `sudo vim /etc/modprobe.d/sata-passthrough.conf`
+
+```text
+options vfio-pci ids=VENDOR:DEVICE
+softdep ahci pre: vfio-pci
+```
+  
+```bash
+sudo update-initramfs -u -k all
+sudo reboot
+# double check the kernel driver
+lspci -k  | grep -A3 SATA
+```
+
+- In the PVE UI, Go to VM >> Hardware >> Add PCI device
+  - Check Raw Device, ROM-Bar, PCI-Express
+- Reboot the VM
+- ssh into the VM and list the disks. Record them in `vars.yml`
+  - `ls -l /dev/disk/by-id/ata-*`
+
 ## USB Passthrough
 
 Pass thru physical port, [docs](https://pve.proxmox.com/wiki/USB_Physical_Port_Mapping)
