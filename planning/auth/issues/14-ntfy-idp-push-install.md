@@ -87,7 +87,6 @@ Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
    - `idp-push`: everything else on the host, `authelia@file`.
    - A `strip-remote` headers middleware that empties `Remote-User`, `-Groups`, `-Email`, `-Name`.
    - No `secure-headers`: the shim sets a stricter CSP, HSTS and `nosniff` itself.
-   Public DNS must resolve `idp-push.SITE`.
 7. **Docs.** Service catalog entry in `docs/services.md`; "mobile push" in `CONTEXT.md` if the term
    is new; enrollment steps for a person in `docs/maintenance.md` (first enrollment needs another
    Authelia second factor, or an `enroll-link`).
@@ -130,5 +129,5 @@ Steps 1-4, 6 and 7 ship before step 5; the shim then serves account sync and enr
   `ntfy_idp_push_ldap_password` secret, and docs (secsvcs guide section, services catalog,
   new-user steps, "mobile push" in `CONTEXT.md`). Pinned to `0.3`, the first release with directory
   sync. Left for the maintainer: wait for that release, fill the secrets, create the LLDAP user
-  `ntfy_idp_push` in `lldap_strict_readonly`, add public DNS for `idp-push`, deploy per the
+  `ntfy_idp_push` in `lldap_strict_readonly`, deploy per the
   secsvcs guide, and run the acceptance list. Step 5 still waits on authelia#7647.

@@ -235,7 +235,6 @@ ntfy account, created from LLDAP with a welcome email
     template), then `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
   - In LLDAP, create the user `ntfy_idp_push` with that `ntfy_idp_push_ldap_password`, in
     `lldap_strict_readonly` only
-  - Public DNS resolves `idp-push.{{ site.url }}`
 - Install. ntfy first: the shim refuses to start until ntfy accepts its admin token
 
 ```bash
