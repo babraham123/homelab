@@ -85,6 +85,7 @@
         "logtail",
         "lsusb",
         "manualadmin",
+        "maxmind",
         "mdns",
         "mergerfs",
         "middlewares",
