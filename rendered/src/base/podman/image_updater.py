@@ -174,8 +174,10 @@ def secret(name):
 
 
 def notify(priority, title, message):
+  # A person running install or accept is waiting; only the timer may be up before ntfy is
+  attempts = 9 if mode == "run" else 1
   if not ntfy.notify(cfg["ntfy_url"], secret("ntfy_alert_token"), priority, f"{node}: {title}",
-                     message, "package"):
+                     message, "package", attempts):
     warn(f"ntfy post failed: {title}")
 
 
