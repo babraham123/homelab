@@ -62,22 +62,15 @@ apt autoremove --purge
 ## Coral TPU
 
 - In the VM hardware settings, add the PCI device and reboot
-- Install the driver and TPU runtime,
-  [ref](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime)
+- Build and install the driver,
+  [ref](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime).
+  The Edge TPU runtime comes with the container image that uses the TPU
 
 ```bash
 sudo su
 /root/homelab-rendered/src/base/debian/install_coral.sh
-reboot
-```
-
-- If gasket fails to install
-
-```bash
-# Check for missing kernel support
+# If dkms fails on a new kernel
 vim /var/lib/dkms/gasket/1.0/build/make.log
-# Build the driver from source
-/root/homelab-rendered/src/base/debian/build_gasket.sh
 reboot
 ```
 
