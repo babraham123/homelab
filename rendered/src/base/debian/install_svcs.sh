@@ -61,6 +61,8 @@ case $1 in
       secsvcs) slot=21:30 ;;
       *) die "no image_updater slot for $(hostname)" ;;
     esac
+    # skopeo comes from podman's alvistack repo, which drops superseded versions
+    apt update
     apt install -y skopeo wget gnupg
     wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | \
       gpg --dearmor --yes -o /usr/share/keyrings/trivy.gpg
