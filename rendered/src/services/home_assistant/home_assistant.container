@@ -14,7 +14,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=localhost/homeassistant/home-assistant:2026.3.1
+Image=localhost/homeassistant/home-assistant:2026.10
 ContainerName=home_assistant
 AutoUpdate=local
 NoNewPrivileges=true

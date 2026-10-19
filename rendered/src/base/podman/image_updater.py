@@ -59,7 +59,7 @@ nodes = {
       {"container": "vmagent", "image": "localhost/victoriametrics/vmagent:latest", "service": "vmagent", "upstream": "docker.io/victoriametrics/vmagent:latest"},
       {"container": "mosquitto", "image": "localhost/library/eclipse-mosquitto:latest", "service": "mosquitto", "upstream": "docker.io/library/eclipse-mosquitto:latest"},
       {"container": "zigbee2mqtt", "image": "localhost/koenkk/zigbee2mqtt:latest", "service": "zigbee2mqtt", "upstream": "ghcr.io/koenkk/zigbee2mqtt:latest"},
-      {"container": "home_assistant", "image": "localhost/homeassistant/home-assistant:2026.3.1", "service": "home_assistant", "upstream": "docker.io/homeassistant/home-assistant:2026.3.1"},
+      {"container": "home_assistant", "image": "localhost/homeassistant/home-assistant:2026.10", "service": "home_assistant", "upstream": "docker.io/homeassistant/home-assistant:2026.10"},
       {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:5.1"},
     ],
     # Container subnets are local to each node, so ntfy is reached through Traefik.
