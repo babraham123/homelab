@@ -27,7 +27,7 @@ PublishPort=6360:6360
 # Run as root
 Environment=UID=0 GID=0
 Environment=TZ={{ personal.timezone }}
-# https://www.postgresql.org/docs/14/libpq-envars.html
+# https://www.postgresql.org/docs/18/libpq-envars.html
 Environment=PGSSLMODE=verify-full
 Environment=PGSSLROOTCERT=/data/certificates/ca.chain.pem
 #PodmanArgs=--env-merge=LLDAP_DATABASE_URL=postgres://lldap:${PGPASSWORD}@pgdb.{{ site.url }}/lldap

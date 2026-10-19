@@ -47,3 +47,4 @@ smtp-port: 587
 smtp-user: "jdoe@gmail.com"
 smtp-starttls: true
 mail-from: "Push <admin@janedoe.com>"
+...

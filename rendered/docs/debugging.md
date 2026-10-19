@@ -176,8 +176,8 @@ Named volumes are prefixed with `systemd-` by quadlet.
 
 ```bash
 podman volume ls
-podman volume inspect --format '{{ .Mountpoint }}' systemd-postgresdb
-# e.g. /var/lib/containers/storage/volumes/systemd-postgresdb/_data
+podman volume inspect --format '{{ .Mountpoint }}' systemd-postgres18
+# e.g. /var/lib/containers/storage/volumes/systemd-postgres18/_data
 du -sh "$(podman volume inspect --format '{{ .Mountpoint }}' systemd-vmdata)"
 ```
 
@@ -310,7 +310,7 @@ images, and volumes, so back up volume data first.
 
 ```bash
 podman network reload systemd-net   # try this first
-cp -R /var/lib/containers/storage/volumes/systemd-postgresdb/_data /root/pgbackup
+cp -R /var/lib/containers/storage/volumes/systemd-postgres18/_data /root/pgbackup
 podman system reset
 ```
 
@@ -647,7 +647,7 @@ the data.
 
 ```bash
 systemctl stop postgres
-podman volume rm systemd-postgresdb
+podman volume rm systemd-postgres18
 systemctl start postgres
 ```
 

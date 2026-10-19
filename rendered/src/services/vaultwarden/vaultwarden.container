@@ -84,7 +84,7 @@ Environment=EXTENDED_LOGGING=true
 Environment=LOG_LEVEL=warn,vaultwarden::api::identity=info
 
 # libpq reads these beside DATABASE_URL, whose host must be pgdb.janedoe.com to match the cert
-# https://www.postgresql.org/docs/14/libpq-envars.html
+# https://www.postgresql.org/docs/18/libpq-envars.html
 Environment=PGSSLMODE=verify-full
 Environment=PGSSLROOTCERT=/certificates/ca.chain.pem
 # Never Environment=: the admin token's PHC string is full of $, which systemd expands

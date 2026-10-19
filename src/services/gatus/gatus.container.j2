@@ -25,7 +25,7 @@ IP={{ secsvcs.container_subnet }}.9
 Environment=TZ={{ personal.timezone }}
 Environment=GATUS_DELAY_START_SECONDS=5
 Environment=GATUS_LOG_LEVEL=WARN
-# https://www.postgresql.org/docs/14/libpq-envars.html
+# https://www.postgresql.org/docs/18/libpq-envars.html
 Environment=PGSSLMODE=verify-full
 Environment=PGSSLROOTCERT=/etc/ssl/certs/ca.chain.pem
 Secret=gatus_pg_password,type=env,target=PGPASSWORD

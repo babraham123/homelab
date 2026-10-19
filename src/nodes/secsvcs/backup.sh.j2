@@ -3,7 +3,7 @@
 # service, staged under /var/opt/backups for pve1's backup_orchestrator to pull.
 # Usage:
 #   src/nodes/secsvcs/backup.sh
-# Not staged, on purpose: the postgresdb volume (the dump replaces it), vmdata and
+# Not staged, on purpose: the postgres18 volume (the dump replaces it), vmdata and
 # vldata (metrics and logs, large and rebuilt by collection), /var/opt/ntfy (cache).
 
 # shellcheck source=src/base/lib.sh

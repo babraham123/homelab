@@ -10,7 +10,7 @@ After=network-online.target
 
 [Container]
 # https://why-upgrade.depesz.com/
-Image=localhost/library/postgres:14-alpine
+Image=localhost/library/postgres:18-alpine
 ContainerName=postgres
 # The major version is in the tag, so updates stay within it
 AutoUpdate=local
@@ -22,7 +22,7 @@ IP={{ secsvcs.container_subnet }}.3
 # hostPort:containerPort
 PublishPort=5432:5432
 
-# https://www.postgresql.org/docs/14/runtime-config-connection.html#RUNTIME-CONFIG-CONNECTION-SSL
+# https://www.postgresql.org/docs/18/runtime-config-connection.html#RUNTIME-CONFIG-CONNECTION-SSL
 Exec=-c "ssl=on" \
      -c "ssl_cert_file=/certificates/pgdb.crt" \
      -c "ssl_key_file=/certificates/pgdb.key" \
@@ -43,8 +43,8 @@ Secret=hass_pg_password,type=env,target=HASS_POSTGRES_PASSWORD
 Secret=guacamole_pg_password,type=env,target=GUAC_POSTGRES_PASSWORD
 Secret=vaultwarden_pg_password,type=env,target=VAULTWARDEN_POSTGRES_PASSWORD
 
-# on 18, https://github.com/docker-library/postgres/pull/1259
-Volume=postgresdb.volume:/var/lib/postgresql/data
+# The data lives in 18/docker below it: https://github.com/docker-library/postgres/pull/1259
+Volume=postgres18.volume:/var/lib/postgresql
 # https://hub.docker.com/_/postgres#:~:text=and%20POSTGRES_DB.-,Initialization%20scripts,-If%20you%20would
 Volume=/var/opt/db/pg_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 Volume=/etc/opt/db/certificates:/certificates:ro

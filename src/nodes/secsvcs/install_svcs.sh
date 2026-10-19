@@ -19,7 +19,7 @@ case $1 in
     mkdir -p /etc/opt/db/certificates
     install -D -m 644 -t /var/opt/db services/postgres/pg_init.sql
     install -D -m 644 -t /etc/opt/db services/postgres/pg_hba.conf
-    install_quadlet services/postgres/postgres.container services/postgres/postgresdb.volume
+    install_quadlet services/postgres/postgres.container services/postgres/postgres18.volume
     reload_restart postgres
     ;;
   lldap)

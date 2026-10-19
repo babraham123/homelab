@@ -60,7 +60,7 @@ nodes = {
       {"container": "mosquitto", "image": "localhost/library/eclipse-mosquitto:latest", "service": "mosquitto", "upstream": "docker.io/library/eclipse-mosquitto:latest"},
       {"container": "zigbee2mqtt", "image": "localhost/koenkk/zigbee2mqtt:latest", "service": "zigbee2mqtt", "upstream": "ghcr.io/koenkk/zigbee2mqtt:latest"},
       {"container": "home_assistant", "image": "localhost/homeassistant/home-assistant:2026.3.1", "service": "home_assistant", "upstream": "docker.io/homeassistant/home-assistant:2026.3.1"},
-      {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:3.2", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:3.2"},
+      {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:5.1"},
     ],
     # Container subnets are local to each node, so ntfy is reached through Traefik.
     "ntfy_url": "https://push.janedoe.com/alert",
@@ -69,7 +69,7 @@ nodes = {
   },
   "secsvcs": {
     "images": [
-      {"container": "postgres", "image": "localhost/library/postgres:14-alpine", "service": "postgres", "upstream": "docker.io/library/postgres:14-alpine"},
+      {"container": "postgres", "image": "localhost/library/postgres:18-alpine", "service": "postgres", "upstream": "docker.io/library/postgres:18-alpine"},
       {"container": "lldap", "image": "localhost/lldap/lldap:stable", "service": "lldap", "upstream": "docker.io/lldap/lldap:stable"},
       {"container": "authelia", "image": "localhost/authelia/authelia:4.39", "service": "authelia", "upstream": "docker.io/authelia/authelia:4.39"},
       {"container": "victorialogs", "image": "localhost/victoriametrics/victoria-logs:latest", "service": "victorialogs", "upstream": "docker.io/victoriametrics/victoria-logs:latest"},
@@ -80,7 +80,7 @@ nodes = {
       {"container": "olive_tin", "image": "localhost/jamesread/olivetin:latest-3k", "service": "olive_tin", "upstream": "docker.io/jamesread/olivetin:latest-3k"},
       {"container": "crowdsec", "image": "localhost/crowdsecurity/crowdsec:latest", "service": "crowdsec", "upstream": "docker.io/crowdsecurity/crowdsec:latest"},
       {"container": "crowdsec_appsec", "image": "localhost/crowdsecurity/crowdsec:latest", "service": "crowdsec_appsec", "upstream": "docker.io/crowdsecurity/crowdsec:latest"},
-      {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:3.2", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:3.2"},
+      {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:5.1"},
       {"container": "traefik", "image": "localhost/library/traefik:v3.7", "service": "traefik", "upstream": "docker.io/library/traefik:v3.7"},
       {"container": "victoriametrics", "image": "localhost/victoriametrics/victoria-metrics:latest", "service": "victoriametrics", "upstream": "docker.io/victoriametrics/victoria-metrics:latest"},
       {"container": "vmalert", "image": "localhost/victoriametrics/vmalert:latest", "service": "vmalert", "upstream": "docker.io/victoriametrics/vmalert:latest"},
@@ -97,7 +97,7 @@ nodes = {
   },
   "vpnsvcs": {
     "images": [
-      {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:3.2", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:3.2"},
+      {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:5.1"},
       {"container": "vmagent", "image": "localhost/victoriametrics/vmagent:latest", "service": "vmagent", "upstream": "docker.io/victoriametrics/vmagent:latest"},
       {"build": "geoip_generator", "container": "geoip_generator", "image": "localhost/geoip_generator:latest", "service": "geoip_generator"},
     ],
@@ -117,7 +117,7 @@ nodes = {
       {"container": "guacamole", "image": "localhost/guacamole/guacamole:1.6.0", "service": "guacamole", "upstream": "docker.io/guacamole/guacamole:1.6.0"},
       {"container": "guacd", "image": "localhost/guacamole/guacd:1.6.0", "service": "guacd", "upstream": "docker.io/guacamole/guacd:1.6.0"},
       {"build": "finance_exporter", "container": "finance_exporter", "image": "localhost/finance_exporter:latest", "service": "finance_exporter"},
-      {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:3.2", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:3.2"},
+      {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:5.1"},
       {"container": "copyparty", "image": "localhost/copyparty/ac:latest", "service": "copyparty", "upstream": "docker.io/copyparty/ac:latest"},
       {"container": "linkding", "image": "localhost/sissbruecker/linkding:latest-plus", "service": "linkding", "upstream": "docker.io/sissbruecker/linkding:latest-plus"},
       {"container": "readeck", "image": "localhost/readeck/readeck:latest", "service": "readeck", "upstream": "codeberg.org/readeck/readeck:latest"},

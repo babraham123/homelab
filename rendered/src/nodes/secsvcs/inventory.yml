@@ -2,7 +2,7 @@
 # yamllint disable rule:document-start rule:document-end
 debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
-  postgres: {upstream: docker.io/library/postgres:14-alpine}
+  postgres: {upstream: docker.io/library/postgres:18-alpine}
   lldap: {subdomain: ldap, admin: true, upstream: docker.io/lldap/lldap:stable}
   authelia: {subdomain: auth, uptime: authelia, uptime_path: /api/health, uptime_tier: 1,
              uptime_conditions: ['[BODY].status == OK'],
@@ -34,7 +34,7 @@ services:
   # No subdomain: its LAPI is a published port, never in HAProxy's SNI list
   crowdsec: {upstream: docker.io/crowdsecurity/crowdsec:latest}
   crowdsec_appsec: {upstream: docker.io/crowdsecurity/crowdsec:latest, dirs: [services/crowdsec]}
-  fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
+  fluentbit: {upstream: docker.io/fluent/fluent-bit:5.1}
 install_all_svcs: true
 commands:
   - {name: install_keys, script: nodes/secsvcs/commands.sh, pve1_file_transfer: true}

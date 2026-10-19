@@ -9,7 +9,7 @@ services:
   crowdsec_firewall_bouncer: {dirs: [services/crowdsec]}
   deadman: {}
   # Quadlets on the podman network (docs/adr/0007-vps-metrics-pushed.md)
-  fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
+  fluentbit: {upstream: docker.io/fluent/fluent-bit:5.1}
   vmagent: {upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
   geoip_generator: {build: geoip_generator}
 commands:

@@ -74,7 +74,7 @@ timers; see the [reading guide](guides/reading.md).
 | .8 | mosquitto | eclipse-mosquitto | MQTT broker | mqtt (internal DNS only) |
 | .9 | zigbee2mqtt | zigbee2mqtt | Zigbee ↔ MQTT bridge | zigbee.janedoe.com |
 | .11 | home_assistant | home-assistant | Home automation hub | home.janedoe.com |
-| .20 | fluentbit | fluent-bit:3.2 | Journal → VictoriaLogs forwarder | n/a |
+| .20 | fluentbit | fluent-bit:5.1 | Journal → VictoriaLogs forwarder | n/a |
 | .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
 
 ## vpnsvcs: public edge (Linode, 10.13.0.0/24)
@@ -238,7 +238,7 @@ flowchart LR
 
 ## Storage and backups
 
-- **Container state**: named Podman volumes (`postgresdb`, `grafanadata`, `vmdata`, `vldata`,
+- **Container state**: named Podman volumes (`postgres18`, `grafanadata`, `vmdata`, `vldata`,
   `ntfydb`, `vaultwardendata`, `hassdb`, `hassconfig`, `mqttdata`, `z2mdb`, …), `/etc/opt` and
   `/var/opt`
 - **VM disks**: LVM-thin on each host's NVMe, ext4 guests; no ZFS or RAID, backups over redundancy

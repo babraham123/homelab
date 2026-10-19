@@ -1,4 +1,5 @@
-# /etc/containers/systemd/postgresdb.volume
+# /etc/containers/systemd/postgres18.volume
+# Named for the major version: a new major starts on an empty volume and restores a dump into it
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#volume-units-volume
 
 [Volume]

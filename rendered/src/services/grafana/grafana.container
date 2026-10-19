@@ -33,7 +33,7 @@ IP=10.10.0.12
 AddHost=auth.janedoe.com:10.10.0.6
 
 Environment=TZ=America/Los_Angeles
-# https://www.postgresql.org/docs/14/libpq-envars.html
+# https://www.postgresql.org/docs/18/libpq-envars.html
 Secret=grafana_pg_password,type=env,target=PGPASSWORD
 Secret=grafana_oidc_id,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_ID
 Secret=grafana_oidc_secret,type=env,target=GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET

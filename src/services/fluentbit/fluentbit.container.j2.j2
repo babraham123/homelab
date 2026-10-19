@@ -10,7 +10,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=localhost/fluent/fluent-bit:3.2
+Image=localhost/fluent/fluent-bit:5.1
 ContainerName=fluentbit
 AutoUpdate=local
 NoNewPrivileges=true
@@ -22,7 +22,7 @@ HostName=log-collector.{{ site.url }}
 IP={% raw %}{{ subnet }}{% endraw %}.20
 # port 2020, metrics
 
-# https://github.com/fluent/fluent-bit/blob/v3.2.0/dockerfiles/Dockerfile
+# https://github.com/fluent/fluent-bit/blob/v5.1.4/dockerfiles/Dockerfile
 Exec=--config="/fluent-bit/etc/config.yaml"
 
 Environment=TZ={{ personal.timezone }}

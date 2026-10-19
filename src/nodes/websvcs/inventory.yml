@@ -15,7 +15,7 @@ services:
   guacamole: {subdomain: remote, uptime: guacamole, upstream: docker.io/guacamole/guacamole:1.6.0}
   guacd: {upstream: docker.io/guacamole/guacd:1.6.0, dirs: [services/guacamole]}
   finance_exporter: {build: finance_exporter}
-  fluentbit: {upstream: docker.io/fluent/fluent-bit:3.2}
+  fluentbit: {upstream: docker.io/fluent/fluent-bit:5.1}
   snapraid: {}
   copyparty: {subdomain: files, uptime: copyparty, upstream: docker.io/copyparty/ac:latest}
   car_ingest: {}
