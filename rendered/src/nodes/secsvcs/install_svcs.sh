@@ -85,7 +85,6 @@ case $1 in
     ;;
   grafana)
     mkdir -p /etc/opt/grafana/certificates
-    chown -R 472:0 /var/opt/grafana
     install -D -m 644 -t /etc/opt/grafana services/grafana/grafana.ini services/grafana/datasources.yml services/grafana/dashboard.yml
     # Clear old dashboards so ones deleted from the repo stop being provisioned
     rm -f /etc/opt/grafana/dashboards/*.json
