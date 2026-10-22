@@ -25,7 +25,7 @@ noticed when a service broke.
   digest isn't retried until upstream moves.
 - The scan gate blocks on fixable HIGH or CRITICAL findings only (`--ignore-unfixed`); the old image
   keeps running. Two overrides, both needing a person: a `.trivyignore` entry in git with an `exp:`
-  date and a reason, or `accept` run through sudo by manualadmin on the node, which passes one exact
+  date and a reason, or `accept` run as root on the node, which passes one exact
   digest, or one exact set of `build.sh` inputs for a built image. Neither is reachable through
   autoadmin, the dispatcher or OliveTin.
 - Installing a service goes through the same gate: `install_svcs.sh` loads the service's images

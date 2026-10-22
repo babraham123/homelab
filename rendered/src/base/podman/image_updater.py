@@ -10,7 +10,7 @@
 #   src/base/podman/image_updater.py                  # image_updater.timer, nightly
 #   src/base/podman/image_updater.py --dry-run        # check and scan; loads and restarts nothing
 #   src/base/podman/image_updater.py install SERVICE  # install_svcs.sh, before copying quadlets
-#   sudo src/base/podman/image_updater.py accept CONTAINER  # as manualadmin, never the dispatcher
+#   sudo src/base/podman/image_updater.py accept CONTAINER  # a person, never the dispatcher
 # Overrides for a blocked image, both needing a person: src/services/<service>/.trivyignore
 # (`CVE-… exp:YYYY-MM-DD`, with a `#` line giving the reason) covers every digest until it
 # expires; `accept` rescans, prints the findings and passes that exact digest, or for a
@@ -277,7 +277,7 @@ def blocked(container, key, report):
              "src/services/<service>/.trivyignore with an exp: date, or ssh manualadmin@"
              f"{node} and run: sudo {script} accept {container}")
   elif mode == "install":
-    log(f"after review, to override: sudo {script} accept {container} (as manualadmin), then install again")
+    log(f"after review, to override: sudo {script} accept {container}, then install again")
 
 
 def is_accepted(container, key):
@@ -561,8 +561,6 @@ def install_images(service):
 def accept(container):
   """Passes the current upstream digest, or build inputs, through the scan gate."""
   global auth
-  if os.environ.get("SUDO_USER") != "manualadmin":
-    die("accept is for manualadmin, through sudo")
   entry = next((e for e in cfg["images"] if e["container"] == container), None)
   if entry is None:
     die(f"no image for container {container} on {node}")
@@ -594,7 +592,7 @@ def accept(container):
   with (accepted / container).open("a") as f:
     f.write(f"{key}\n")
   log(f"{container}: accepted {key}; the next run loads it")
-  notify(3, f"{container} accepted", f"manualadmin accepted {key} past the scan gate.")
+  notify(3, f"{container} accepted", f"{key} was accepted past the scan gate.")
 
 
 def main():

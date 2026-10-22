@@ -155,7 +155,7 @@ sudo systemctl start image_updater
     CVE-2026-12345 exp:2026-12-31
     ```
 
-  - that digest only: on the node, as manualadmin (never through the dispatcher or OliveTin),
+  - that digest only: on the node as root (never through the dispatcher or OliveTin),
     `sudo /root/homelab-rendered/src/base/podman/image_updater.py accept CONTAINER`. It rescans,
     prints the findings, records the digest and notifies; the next run loads it. For a built image
     it builds and scans instead, and records the `build.sh` inputs, so the next run's build of the
