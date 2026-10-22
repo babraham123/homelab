@@ -53,6 +53,10 @@ Volume=/etc/opt/crowdsec_appsec/config:/etc/crowdsec
 Volume=/etc/opt/crowdsec_appsec/certificates:/certificates:ro
 # The hub's data files; the image refuses to start without a volume here
 Volume=appsecdata.volume:/var/lib/crowdsec/data
+# The same volume as the image's staged copies, so the entrypoint finds every data file
+# already present and links none to the read-only root, where `cscli hub upgrade` can't
+# update them
+Volume=appsecdata.volume:/staging/var/lib/crowdsec/data
 
 [Service]
 # AppSec checks Traefik's key with the LAPI; with the LAPI unreachable and the key not yet

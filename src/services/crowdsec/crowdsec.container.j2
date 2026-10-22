@@ -61,6 +61,10 @@ Volume=/etc/opt/crowdsec/config:/etc/crowdsec
 Volume=/etc/opt/crowdsec/certificates:/certificates:ro
 # Decisions and alerts (SQLite), and the hub's data files
 Volume=crowdsecdb.volume:/var/lib/crowdsec/data
+# The same volume as the image's staged copies, so the entrypoint finds every data file
+# already present and links none to the read-only root, where `cscli hub upgrade` can't
+# update them
+Volume=crowdsecdb.volume:/staging/var/lib/crowdsec/data
 
 [Service]
 Restart=on-failure
