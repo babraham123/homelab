@@ -1,0 +1,29 @@
+# gosu's Go stdlib (usr/local/bin/gosu): not reachable. The entrypoint runs gosu once to drop
+# from root to postgres, and it execs postgres before any network or parsing code runs.
+# Expires so a docker-library rebuild with a newer Go gets picked up and this list reviewed.
+CVE-2025-68121 exp:2027-01-31
+CVE-2025-61726 exp:2027-01-31
+CVE-2025-61729 exp:2027-01-31
+CVE-2026-111943 exp:2027-01-31
+CVE-2026-25679 exp:2027-01-31
+CVE-2026-27145 exp:2027-01-31
+CVE-2026-32280 exp:2027-01-31
+CVE-2026-32281 exp:2027-01-31
+CVE-2026-32283 exp:2027-01-31
+CVE-2026-33811 exp:2027-01-31
+CVE-2026-33814 exp:2027-01-31
+CVE-2026-33818 exp:2027-01-31
+CVE-2026-39820 exp:2027-01-31
+CVE-2026-39821 exp:2027-01-31
+CVE-2026-39822 exp:2027-01-31
+CVE-2026-39836 exp:2027-01-31
+CVE-2026-42499 exp:2027-01-31
+CVE-2026-42504 exp:2027-01-31
+CVE-2026-56853 exp:2027-01-31
+CVE-2026-56858 exp:2027-01-31
+CVE-2026-56859 exp:2027-01-31
+CVE-2026-56860 exp:2027-01-31
+CVE-2026-56862 exp:2027-01-31
+CVE-2026-78667 exp:2027-01-31
+CVE-2026-78669 exp:2027-01-31
+CVE-2026-97031 exp:2027-01-31
