@@ -76,7 +76,7 @@ nodes = {
       {"container": "gatus", "image": "localhost/twinproduction/gatus:latest", "service": "gatus", "upstream": "docker.io/twinproduction/gatus:latest"},
       {"container": "grafana", "image": "localhost/grafana/grafana-oss:latest", "service": "grafana", "upstream": "docker.io/grafana/grafana-oss:latest"},
       {"container": "vaultwarden", "image": "localhost/vaultwarden/server:latest", "service": "vaultwarden", "upstream": "docker.io/vaultwarden/server:latest"},
-      {"container": "ntfy_idp_push", "image": "localhost/babraham123/ntfy-idp-push:0.3", "service": "ntfy_idp_push", "upstream": "ghcr.io/babraham123/ntfy-idp-push:0.3"},
+      {"container": "ntfy_idp_push", "image": "localhost/babraham123/ntfy-idp-push:latest", "service": "ntfy_idp_push", "upstream": "ghcr.io/babraham123/ntfy-idp-push:latest"},
       {"container": "olive_tin", "image": "localhost/jamesread/olivetin:latest-3k", "service": "olive_tin", "upstream": "docker.io/jamesread/olivetin:latest-3k"},
       {"container": "crowdsec", "image": "localhost/crowdsecurity/crowdsec:latest", "service": "crowdsec", "upstream": "docker.io/crowdsecurity/crowdsec:latest"},
       {"container": "crowdsec_appsec", "image": "localhost/crowdsecurity/crowdsec:latest", "service": "crowdsec_appsec", "upstream": "docker.io/crowdsecurity/crowdsec:latest"},
