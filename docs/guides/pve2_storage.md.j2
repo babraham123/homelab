@@ -71,6 +71,13 @@ tools/deploy_src.sh
 ssh autoadmin@websvcs install_snapraid
 ```
 
+- On websvcs, let vmagent scrape the SMART exporter
+
+```bash
+ufw allow in from {{ websvcs.container_subnet }}.7 to any port 9633 proto tcp
+curl -s localhost:9633/metrics | grep smartctl_device_smart_status
+```
+
 - On websvcs, mount
 
 ```bash
@@ -89,7 +96,7 @@ systemctl list-timers 'snapraid-*'
 ```
 
 - Timers: daily sync, weekly scrub, via `snapraid_run.sh`; a sync stops if 200+ files disappeared
-- Alerts: `src/services/vmalert/configs/backups.yml`
+- Alerts: `src/services/vmalert/configs/backups.yml` (parity), `hardware.yml` (SMART)
 
 ## Day to day
 
@@ -105,4 +112,5 @@ systemctl list-timers 'snapraid-*'
   4. On websvcs: `snapraid fix -d dN` for a data disk; `snapraid sync -F` then `snapraid fix` for
      parity
 - Intentional mass delete: `snapraid sync --force-empty`
-- SMART: `smartctl -a /dev/disk/by-id/ata-...` on websvcs; `smartd` logs to the journal
+- SMART: the "Disks" dashboard; `smartctl -a /dev/disk/by-id/ata-...` on websvcs; `smartd` logs
+  to the journal

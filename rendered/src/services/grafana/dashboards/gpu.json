@@ -1,0 +1,698 @@
+{
+  "title": "GPUs",
+  "uid": "gpus",
+  "description": "Tesla P4 in websvcs and RTX 3060 Ti in devtop or gaming, from nvidia_gpu_exporter. Alerts: hardware.yml.",
+  "editable": true,
+  "schemaVersion": 39,
+  "tags": [
+    "hardware",
+    "gpu"
+  ],
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "templating": {
+    "list": [
+      {
+        "name": "host",
+        "label": "Host",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-metrics-datasource"
+        },
+        "definition": "label_values(nvidia_smi_gpu_info, host)",
+        "query": {
+          "query": "label_values(nvidia_smi_gpu_info, host)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "gpu",
+        "label": "GPU",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-metrics-datasource"
+        },
+        "definition": "label_values(nvidia_smi_gpu_info{host=~\"$host\"}, name)",
+        "query": {
+          "query": "label_values(nvidia_smi_gpu_info{host=~\"$host\"}, name)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 1,
+      "title": "Temperature",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_temperature_gpu * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 2,
+      "title": "Power draw",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_power_draw_watts * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 3,
+      "title": "GPU utilisation",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_utilization_gpu_ratio * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 4,
+      "title": "Memory used",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "(nvidia_smi_memory_used_bytes / nvidia_smi_memory_total_bytes) * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.9
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 5,
+      "title": "Temperature",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_temperature_gpu * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "GpuHot fires over 85°C for 5 minutes.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 6,
+      "title": "Power draw and limit",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_power_draw_watts * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_enforced_power_limit_watts * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}}) limit",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 7,
+      "title": "Energy per day",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "integrate(nvidia_smi_power_draw_watts[1d]) / 3.6e6 * on (host, uuid) group_left (name) last_over_time(nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}[1d])",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A",
+          "interval": "1d"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "drawStyle": "bars",
+            "fillOpacity": 60
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "Integrated power draw; a VM that was off draws nothing here.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 8,
+      "title": "Utilisation",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_utilization_gpu_ratio * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}}) GPU",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_utilization_memory_ratio * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}}) memory bus",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 9,
+      "title": "Memory used",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_memory_used_bytes * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_memory_total_bytes * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}}) total",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 10,
+      "title": "Fan",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_fan_speed_ratio * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "The Tesla P4 is passive and reports no fan.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 11,
+      "title": "Clocks",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_clocks_current_graphics_clock_hz * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}}) graphics",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "nvidia_smi_clocks_current_memory_clock_hz * on (host, uuid) group_left (name) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{name}} ({{host}}) memory",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "hertz",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 12,
+      "title": "Clock slowdown reasons",
+      "type": "state-timeline",
+      "description": "Why the driver is holding the clocks down. Thermal slowdown for 5 minutes fires GpuThermalThrottling.",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "label_replace({__name__=~\"nvidia_smi_clocks_(event|throttle)_reasons_.+\", __name__!~\".+_(active|supported|gpu_idle)\", host=~\"$host\"}, \"reason\", \"$1\", \"__name__\", \"nvidia_smi_clocks_(?:event|throttle)_reasons_(.+)\") and on (host, uuid) nvidia_smi_gpu_info{host=~\"$host\", name=~\"$gpu\"}",
+          "legendFormat": "{{host}} {{reason}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "off",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "on",
+                  "color": "orange"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "showValue": "never",
+        "legend": {
+          "showLegend": false
+        },
+        "mergeValues": true,
+        "rowHeight": 0.8
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      }
+    }
+  ]
+}

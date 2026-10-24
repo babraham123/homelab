@@ -1,0 +1,72 @@
+# GPU and media-array disk alerts. GPUs: nvidia_gpu_exporter in websvcs (Tesla P4) and
+# devtop or gaming (RTX 3060 Ti), scraped by websvcs's vmagent; every series carries only
+# `uuid`, so nvidia_smi_gpu_info supplies the card's name. Disks: smartctl_exporter on
+# websvcs, polling only the array; a disk in standby is skipped, so its series go stale
+# rather than alert.
+---
+groups:
+  - name: gpus
+    rules:
+      - alert: GpuHot
+        # The P4 has no fan of its own and lives on case airflow.
+        expr: nvidia_smi_temperature_gpu * on (host, uuid) group_left (name) nvidia_smi_gpu_info > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.name }} on {{ $labels.host }} is at {{ $value }}°C"
+      - alert: GpuThermalThrottling
+        # Drivers from 535 name the flags clocks_event_reasons, older ones
+        # clocks_throttle_reasons; the exporter exports whichever the driver has.
+        expr: |
+          (max by (host, uuid) ({__name__=~"nvidia_smi_clocks_(event|throttle)_reasons_(hw|sw)_thermal_slowdown"}) == 1)
+            * on (host, uuid) group_left (name) nvidia_smi_gpu_info
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.name }} on {{ $labels.host }} is slowing its clocks to cool down"
+          description: "Check case airflow; the P4 needs air pushed through its heatsink."
+      - alert: GpuRecoveryNeeded
+        # Only recent drivers report it.
+        expr: nvidia_smi_gpu_recovery_action * on (host, uuid) group_left (name) nvidia_smi_gpu_info > 0
+        labels:
+          severity: error
+        annotations:
+          summary: "The driver wants {{ $labels.name }} on {{ $labels.host }} reset or the VM rebooted (action {{ $value }})"
+  - name: disks
+    rules:
+      - alert: DiskUnhealthy
+        expr: smartctl_device_smart_status == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SMART health check failed for {{ $labels.device }}"
+          description: "smartctl -H on websvcs no longer reports PASSED. Replace the disk, then snapraid fix."
+      - alert: DiskHot
+        # WD Red Plus drives are rated to 65°C; sustained heat over 50 shortens their life.
+        expr: smartctl_device_temperature{temperature_type="current"} > 50
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.device }} is at {{ $value }}°C"
+          description: "Check pve2's front intake fans and the drive cage."
+      - alert: DiskSectorsGrowing
+        expr: |
+          delta(smartctl_device_attribute{attribute_value_type="raw",
+            attribute_name=~"Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable|Reported_Uncorrect"}[1d]) > 0
+        labels:
+          severity: error
+        annotations:
+          summary: "{{ $labels.device }} {{ $labels.attribute_name }} rose by {{ $value }} in the last day"
+          description: "The disk is losing sectors. Run snapraid scrub, watch the trend, and plan a replacement."
+      - alert: DiskCrcErrors
+        expr: delta(smartctl_device_attribute{attribute_name="UDMA_CRC_Error_Count", attribute_value_type="raw"}[1d]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.device }} logged {{ $value }} SATA CRC errors in the last day"
+          description: "Link errors, not media: reseat or replace the SATA cable, or check the PCIe SATA card."
+...

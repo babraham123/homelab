@@ -56,6 +56,19 @@ scrape_configs:
     relabel_configs:
       - target_label: host
         replacement: pve2
+{%- if websvcs.media.disks %}
+  # The media array's SATA card is passed through too, so SMART is read in websvcs.
+  # install_snapraid only runs the exporter once the disks are declared.
+  - job_name: 'smartctl'
+    static_configs:
+      - targets: ['host.containers.internal:9633']
+    metrics_path: /metrics
+    relabel_configs:
+      - target_label: instance
+        replacement: websvcs.{{ site.url }}:9633
+      - target_label: host
+        replacement: websvcs
+{%- endif %}
   # pve2's GPUs are passed through, so their exporters run in the VMs holding them:
   # the Tesla P4 in websvcs, the RTX 3060 Ti in devtop or gaming.
   - job_name: 'nvidia_gpu'
