@@ -1,6 +1,6 @@
 # 03. Scheduled WAN speed test from secsvcs
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-23
@@ -62,3 +62,9 @@ a degraded modem link or pfSense becoming the bottleneck all look like a quiet n
 - Two `systemctl start net_probe` in a row never run two tests at once.
 
 ## Comments
+
+- 2026-10-24: code in. `src/base/net_probe/` (runner, unit, timer), `install_svcs.sh net_probe`
+  with Ookla 1.2.0 pinned by sha256, `isp` in `vars.template.yml`, `tests/net_probe_test.sh`.
+  Download and upload are one metric, `homelab_speedtest_bits_per_second{direction}`, and the
+  plan speed is exported beside it as `homelab_isp_plan_bits_per_second{direction}`, so 05's
+  alerts need no template. Apply: notes step 18.

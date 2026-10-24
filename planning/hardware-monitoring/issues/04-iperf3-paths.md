@@ -1,6 +1,6 @@
 # 04. Scheduled iperf3 between pve1, pve2 and the VPS
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-23
@@ -50,3 +50,9 @@ over Tailscale is what every public request rides on.
 - `headscale policy check` passes with the new test.
 
 ## Comments
+
+- 2026-10-24: code in. `iperf3_server` debian service on websvcs and vpnsvcs; it listens on every
+  address and ufw admits only secsvcs, like node_exporter, rather than binding one address per
+  host. The VPS rule is in `install_firewall.sh.j2`. pfSense routes subnet traffic without SNAT,
+  so the Headscale ACL names `secsvcs`, not `admin@`: `secsvcs` → `public@:5201`, an ICMP rule,
+  and a policy test.

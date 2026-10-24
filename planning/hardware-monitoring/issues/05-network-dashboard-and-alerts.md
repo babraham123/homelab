@@ -1,6 +1,6 @@
 # 05. Network speed dashboard and alerts
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-23
@@ -33,3 +33,6 @@ they need a place to read them and a threshold that says when they matter.
 - Setting `down_mbps` far above the real speed fires `WanSlow` after three runs.
 
 ## Comments
+
+- 2026-10-24: code in. `network.yml` is plain YAML: `WanSlow` divides by the exported plan speed.
+  `NetProbeAbsent` covers a timer that never ran. `network.json` ("Network").

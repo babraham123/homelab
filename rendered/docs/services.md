@@ -96,6 +96,8 @@ host timers and path units; see the [reading guide](guides/reading.md).
 | pve1, pve2 | vm_watchdog | VM health watchdog |
 | pve1 | cert_notifier (timer) | Email warnings before cert expiry (msmtp) |
 | pve1 | ct_watch (timer) | Daily ctlogs.dev check for certs the homelab didn't request ([Security](security.md#tls-and-trust-hierarchy)) |
+| secsvcs | net_probe (timer) | Hourly pings, speed tests and iperf3 across the network ([Networking](networking.md#throughput-monitoring)); "Network" dashboard |
+| websvcs, vpnsvcs | iperf3_server | iperf3 target for net_probe, `:5201`, secsvcs only |
 | pve1 | backup_orchestrator (timer) | Weekly backup run ([Storage and backups](#storage-and-backups)) |
 | websvcs | snapraid sync/scrub (timers), smartmontools, smartctl_exporter | Media array parity and disk health; "Disks" dashboard |
 | vpnsvcs | haproxy | Public ingress ([Networking](networking.md#ingress-the-three-tier-chain)) |
@@ -212,6 +214,8 @@ flowchart LR
   - `backups.yml`: `BackupStale`, `BackupNeverRan`, `SnapraidStale`
   - `hardware.yml`: GPUs (`GpuHot`, `GpuThermalThrottling`, `GpuRecoveryNeeded`) and the media
     array's SMART (`DiskUnhealthy`, `DiskHot`, `DiskSectorsGrowing`, `DiskCrcErrors`)
+  - `network.yml`: `WanSlow` (three speed tests under half the plan), `VpsPathDown`,
+    `NetProbeStale`, `NetProbeAbsent`
   - `vps.yml`: `VpsMetricsAbsent`, `HaproxyDown`, `HaproxyBackendConnectErrors`
   - `crowdsec.yml`: `CrowdsecDown`, `CrowdsecBouncerStale` (no pull in 10 minutes),
     `CrowdsecAppsecDown` (a node's WAF), `CrowdsecNotParsing` (no Traefik line parsed in an hour)

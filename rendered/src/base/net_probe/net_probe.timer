@@ -1,0 +1,13 @@
+# /etc/systemd/system/net_probe.timer
+
+[Unit]
+Description="Homelab: Runs net_probe.service every hour"
+
+[Timer]
+# Fixed, so the slot hours land on their hour; runs missed while off collapse into one
+OnCalendar=*-*-* *:05:00
+Persistent=true
+Unit=net_probe.service
+
+[Install]
+WantedBy=timers.target

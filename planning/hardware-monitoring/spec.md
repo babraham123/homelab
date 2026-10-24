@@ -71,7 +71,7 @@ flowchart LR
         p4["websvcs<br/>nvidia_gpu_exporter :9835<br/>smartctl_exporter :9633<br/>iperf3 -s :5201"]
         desk["devtop / gaming<br/>nvidia_gpu_exporter :9835"]
     end
-    vps["vpnsvcs<br/>iperf3 -s on tailscale0"]
+    vps["vpnsvcs<br/>iperf3 -s :5201 (ufw: tailscale0)"]
     sec["secsvcs<br/>net_probe.timer (hourly)<br/>ping, speedtest, iperf3 -c"]
     inet(("Ookla server"))
     vmagent["websvcs vmagent"]
@@ -90,6 +90,6 @@ flowchart LR
 | --- | --- | --- | --- |
 | [01](issues/01-gpu-dashboard-and-alerts.md) | GPU dashboard and temperature alerts | `ready-for-human` (code in; verify on deploy) | task |
 | [02](issues/02-media-array-smart.md) | Per-disk SMART metrics, dashboard and alerts for the media array | `ready-for-human` (code in; verify once the array is installed) | task |
-| [03](issues/03-wan-speed-test.md) | Scheduled WAN speed test from secsvcs | `ready-for-agent` | task |
-| [04](issues/04-iperf3-paths.md) | Scheduled iperf3 between pve1, pve2 and the VPS | `ready-for-agent` | task |
-| [05](issues/05-network-dashboard-and-alerts.md) | Network speed dashboard and alerts | `ready-for-agent` | task |
+| [03](issues/03-wan-speed-test.md) | Scheduled WAN speed test from secsvcs | `ready-for-human` (code in; verify on deploy) | task |
+| [04](issues/04-iperf3-paths.md) | Scheduled iperf3 between pve1, pve2 and the VPS | `ready-for-human` (code in; verify on deploy) | task |
+| [05](issues/05-network-dashboard-and-alerts.md) | Network speed dashboard and alerts | `ready-for-human` (code in; verify on deploy) | task |

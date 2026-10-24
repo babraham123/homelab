@@ -1,0 +1,578 @@
+{
+  "title": "Network",
+  "uid": "network",
+  "description": "Speed tests, iperf3 and pings from net_probe on secsvcs, beside pfSense's gateway monitor. Alerts: network.yml.",
+  "editable": true,
+  "schemaVersion": 39,
+  "tags": [
+    "network"
+  ],
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 1,
+      "title": "WAN download",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_speedtest_bits_per_second{direction=\"down\"}",
+          "legendFormat": "download",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 2,
+      "title": "WAN upload",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_speedtest_bits_per_second{direction=\"up\"}",
+          "legendFormat": "upload",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 3,
+      "title": "Share of plan",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_speedtest_bits_per_second / homelab_isp_plan_bits_per_second",
+          "legendFormat": "{{direction}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.5
+              },
+              {
+                "color": "green",
+                "value": 0.8
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "description": "Last speed test against vars.yml isp; WanSlow fires under 50% for three tests.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 4,
+      "title": "VPS ping",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_ping_rtt_seconds{path=\"vps\"}",
+          "legendFormat": "rtt",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "description": "Hourly, over Tailscale; VpsPathDown fires after 3 hours of no replies.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 5,
+      "title": "WAN speed test",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_speedtest_bits_per_second",
+          "legendFormat": "{{direction}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_isp_plan_bits_per_second",
+          "legendFormat": "plan {{direction}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "lineInterpolation": "stepAfter"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "plan.*"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "Ookla at 03, 09, 15 and 21, skipped while the WAN is busy; each result holds until the next test.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 6,
+      "title": "WAN latency",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_speedtest_latency_seconds",
+          "legendFormat": "speed test latency",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_speedtest_jitter_seconds",
+          "legendFormat": "speed test jitter",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "gateways_delay{gateway_name=~\"WAN.*\"} / 1000",
+          "legendFormat": "pfSense gateway {{gateway_name}}",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "lineInterpolation": "stepAfter"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "pfSense's gateway monitor pings continuously; the speed test's numbers are idle latency at test time.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 7,
+      "title": "iperf3",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_iperf_bits_per_second",
+          "legendFormat": "{{path}} {{direction}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "lineInterpolation": "stepAfter"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "10 s each way; up is from secsvcs. pve2 at 01, 07, 13 and 19 while it's on, the VPS at 04.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 8,
+      "title": "iperf3 retransmits",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_iperf_retransmits",
+          "legendFormat": "{{path}} {{direction}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "lineInterpolation": "stepAfter"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 9,
+      "title": "Ping round trip",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_ping_rtt_seconds",
+          "legendFormat": "{{path}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "lineInterpolation": "stepAfter"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 10,
+      "title": "Ping loss",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_ping_loss_ratio",
+          "legendFormat": "{{path}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "gateways_loss{gateway_name=~\"WAN.*\"} / 100",
+          "legendFormat": "pfSense gateway {{gateway_name}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "lineInterpolation": "stepAfter"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "pve2 shows full loss whenever it's off.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 11,
+      "title": "Skipped tests per day",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "increase(homelab_net_probe_skipped_total[1d])",
+          "legendFormat": "{{probe}} {{reason}}",
+          "refId": "A",
+          "interval": "1d"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "drawStyle": "bars",
+            "fillOpacity": 60
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "busy: the path was in use; unreachable: no ping reply or connection; server_busy: someone else's iperf3; error: see journalctl -u net_probe on secsvcs.",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      }
+    }
+  ]
+}

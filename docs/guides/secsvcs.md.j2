@@ -262,6 +262,37 @@ podman exec ntfy_idp_push ntfy-idp-push user list
 - Config changes: reinstall, or edit `/etc/opt/ntfy_idp_push/server.yml` and
   `podman kill -s HUP ntfy_idp_push` for per-request settings
 
+## Network probe
+
+`net_probe.timer` runs hourly: pings to websvcs and the VPS every run; at fixed hours, one at a
+time and only when the path isn't busy, an Ookla speed test (03, 09, 15, 21) and 10-second iperf3
+runs both ways to websvcs (01, 07, 13, 19) and to the VPS (04). Results land in node_exporter's
+textfile collector. `src/base/net_probe/net_probe.py.j2` has the slots and busy thresholds.
+
+- Set `isp.down_mbps` and `isp.up_mbps` in `vars.yml` to the plan's advertised speeds, then
+  `tools/deploy_src.sh`
+- The iperf3 servers. On websvcs:
+
+```bash
+ssh autoadmin@websvcs install_iperf3_server
+ssh -t manualadmin@websvcs sudo ufw allow in from {{ secsvcs.ip }} to any port 5201 proto tcp
+```
+
+- On the VPS: `ssh autoadmin@vpnsvcs install_iperf3_server`, the 5201 rule from
+  `src/nodes/vpnsvcs/install_firewall.sh` (`ufw allow in on tailscale0 from {{ secsvcs.ip }} to any
+  port 5201 proto tcp`), and the reloaded [ACL policy](./vpnsvcs.md#acl-policy), which lets
+  secsvcs reach it
+- Then on secsvcs:
+
+```bash
+ssh autoadmin@secsvcs install_net_probe
+ssh -t manualadmin@secsvcs sudo systemctl start net_probe   # every test is due on the first run
+journalctl -u net_probe --no-pager -n 20
+grep -v '^#' /var/lib/node_exporter/textfile_collector/homelab_net_probe.prom
+```
+
+- Monitor: Grafana "Network" dashboard, alerts in `src/services/vmalert/configs/network.yml`
+
 ## Debugging (optional)
 
 - Find container image name

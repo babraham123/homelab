@@ -1,0 +1,43 @@
+# Network speed alerts, from net_probe on secsvcs (src/base/net_probe/net_probe.py.j2): pings
+# every hour, the speed test at 03, 09, 15 and 21, iperf3 to the VPS at 04. Each result stays
+# in the textfile until the probe's next run, so a `for` spans runs: 13h is three speed tests.
+# The pve2 path never alerts: pve2 is off most of the time.
+---
+groups:
+  - name: network
+    rules:
+      - alert: WanSlow
+        expr: homelab_speedtest_bits_per_second / homelab_isp_plan_bits_per_second < 0.5
+        for: 13h
+        labels:
+          severity: warning
+        annotations:
+          summary: "WAN {{ $labels.direction }} is at {{ $value | humanizePercentage }} of the plan speed"
+          description: "Three speed tests in a row under half the plan. Check the Network dashboard's WAN panels and pfSense's gateway status, then the ISP."
+      - alert: VpsPathDown
+        expr: homelab_ping_loss_ratio{path="vps"} == 1
+        for: 3h
+        labels:
+          severity: warning
+        annotations:
+          summary: "secsvcs can't ping the VPS over Tailscale"
+          description: "Public traffic rides this path. tailscale status on pfSense and the VPS; the Headscale ACL lets secsvcs ping public@."
+      - alert: NetProbeStale
+        expr: |
+          time() - homelab_net_probe_last_success_timestamp_seconds{probe="speedtest"} > 25 * 3600
+            or time() - homelab_net_probe_last_success_timestamp_seconds{probe="iperf_vps"} > 49 * 3600
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "net_probe's {{ $labels.probe }} hasn't succeeded in {{ $value | humanizeDuration }}"
+          description: "homelab_net_probe_skipped_total says why (busy, unreachable, server_busy, error); journalctl -u net_probe on secsvcs."
+      - alert: NetProbeAbsent
+        expr: absent(homelab_net_probe_last_attempt_timestamp_seconds{probe="ping_vps"})
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No net_probe metrics from secsvcs"
+          description: "net_probe.timer isn't enabled, or homelab_net_probe.prom is missing from secsvcs's textfile collector."
+...

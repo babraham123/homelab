@@ -216,6 +216,16 @@ directly instead of falling back to DERP. Everything else gets the default symme
 NAT-PMP are off, and no rule uses static port except pfSense's automatic one for IPsec (ISAKMP).
 See [the router guide](guides/router.md).
 
+## Throughput monitoring
+
+`net_probe` on secsvcs measures the paths the homelab depends on, as the only client: an hourly
+ping to websvcs and to the VPS, an Ookla speed test four times a day, and iperf3 to websvcs
+(pve1 → pfSense → pve2) four times a day and to the VPS over Tailscale once a day, the VPS's
+egress being billed. Heavy tests skip while their path is busy. The iperf3 servers (`:5201`) admit
+only secsvcs: ufw on both, plus a Headscale ACL rule for the VPS, which sees secsvcs's LAN
+address since pfSense routes subnet traffic without SNAT. "Network" dashboard;
+[Services](services.md#observability) for the alerts.
+
 ## Router extras
 
 pfSense also runs CoDel traffic shaping (bufferbloat control), ntopng for traffic inspection,

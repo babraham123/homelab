@@ -97,6 +97,19 @@
         "homesvcs:80,443",
       ]
     },
+    // net_probe on secsvcs: iperf3 and pings to the VPS. Subnet traffic keeps its LAN source
+    // (pfSense routes it without SNAT), so the rule names secsvcs, not a tailnet user.
+    {
+      "action": "accept",
+      "src": ["secsvcs"],
+      "dst": ["public@:5201"]
+    },
+    {
+      "action": "accept",
+      "src": ["secsvcs"],
+      "proto": "icmp",
+      "dst": ["public@:*"]
+    },
 
     // Each user can reach their own devices; nothing above guarantees that.
     // `admin@` is the CLI user the router and VM nodes were registered under.
@@ -142,6 +155,12 @@
         "{{ pve2.ip }}:443", "{{ pve2.subnet }}.1:443", "{{ secsvcs.ip }}:22",
         "{{ homesvcs.ip }}:8123", "{{ router.ip }}:443", "{{ lan.subnet }}.50:443",
       ],
+    },
+    // net_probe: secsvcs reaches the VPS's iperf3 server, nothing else on it
+    {
+      "src": "secsvcs",
+      "accept": ["{{ vpnsvcs.tailnet_ip }}:5201"],
+      "deny": ["{{ vpnsvcs.tailnet_ip }}:22", "{{ vpnsvcs.tailnet_ip }}:9100"],
     },
     // guests: web front doors only, nothing else on the subnets
     {

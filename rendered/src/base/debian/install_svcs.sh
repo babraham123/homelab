@@ -79,6 +79,28 @@ case $1 in
     # (docs/maintenance.md), so installing leaves it as it was.
     exit 0
     ;;
+  net_probe)
+    # Ookla's CLI ships no checksums, so the tarball is pinned here; the iperf3 package
+    # asks whether to run its own daemon, and the default is no.
+    url=https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-x86_64.tgz
+    sha=5690596c54ff9bed63fa3732f818a05dbc2db19ad36ed68f21ca5f64d5cfeeb7
+    wget --output-document=speedtest.tgz "$url"
+    echo "${sha}  speedtest.tgz" | sha256sum --check || die "checksum mismatch: $url"
+    tar xzf speedtest.tgz speedtest
+    install -D -t /usr/local/bin speedtest
+    rm speedtest speedtest.tgz
+    DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
+    # Runs in place, so a deploy updates it
+    install -D -m 644 -t /etc/systemd/system base/net_probe/net_probe.service base/net_probe/net_probe.timer
+    systemctl daemon-reload
+    systemctl enable net_probe.timer
+    systemctl restart net_probe.timer
+    exit 0
+    ;;
+  iperf3_server)
+    DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
+    install -D -m 644 -t /etc/systemd/system base/iperf3_server/iperf3_server.service
+    ;;
   vm_watchdog)
     install_bin base/vm_watchdog/vm_watchdog.sh
     install -D -m 644 -t /etc/systemd/system base/vm_watchdog/vm_watchdog.service

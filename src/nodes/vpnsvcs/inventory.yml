@@ -1,6 +1,6 @@
 # vpnsvcs's part of the node inventory; src/nodes.jinja documents the keys.
 # yamllint disable rule:document-start rule:document-end
-debian_services: [node_exporter, image_updater]
+debian_services: [node_exporter, image_updater, iperf3_server]
 services:
   fail2ban: {}
   headscale: {}
