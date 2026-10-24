@@ -28,6 +28,7 @@
   "hosts": {
     "router": "192.168.1.1/32",
     "lan": "192.168.1.0/24",
+    "lan2": "192.168.3.0/24",
     "pve1": "192.168.4.0/24",
     "pve2": "192.168.2.0/24",
     "websvcs": "192.168.2.20/32",
@@ -35,21 +36,21 @@
     "secsvcs": "192.168.4.20/32",
     "homesvcs": "192.168.4.21/32",
   },
-  // pfSense advertises pve1's and pve2's subnets. `lan` and `router` aren't advertised but are
-  // reached through pfSense's exit node, and `autogroup:internet` excludes private ranges, so
-  // they need their own grants. The VLANs are reached by neither.
+  // pfSense advertises pve1's and pve2's subnets. `lan`, `lan2` and `router` aren't advertised
+  // but are reached through pfSense's exit node, and `autogroup:internet` excludes private
+  // ranges, so they need their own grants. The VLANs are reached by neither.
   "acls": [
     // admin: every tailnet node, the home subnets, and exit nodes
     {
       "action": "accept",
       "src": ["group:admin"],
-      "dst": ["*:*", "router:*", "lan:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
+      "dst": ["*:*", "router:*", "lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
     },
     // family: the home subnets and exit nodes, not other users' devices
     {
       "action": "accept",
       "src": ["group:family"],
-      "dst": ["lan:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
+      "dst": ["lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
     },
     // guests: HTTPS (and HTTP redirect) on the service VMs, plus Moonlight streaming
     // from the gaming VM (Sunshine's default ports, minus the 47990 web UI where pairing
@@ -113,7 +114,7 @@
       "src": "jane@",
       "accept": [
         "192.168.4.10:8006", "192.168.2.10:22", "192.168.1.1:443", "192.168.4.20:22",
-        "192.168.1.50:443", "100.64.0.2:22",
+        "192.168.1.50:443", "192.168.3.50:22", "100.64.0.2:22",
       ],
       "deny": ["192.168.10.50:80", "192.168.20.50:80"],
     },
@@ -122,7 +123,7 @@
       "src": "jasper@",
       "accept": [
         "192.168.4.10:22", "192.168.4.20:443", "192.168.4.21:8123",
-        "192.168.1.1:443", "192.168.1.50:445",
+        "192.168.1.1:443", "192.168.1.50:445", "192.168.3.50:445",
       ],
       "deny": [
         "100.64.0.2:443", "192.168.10.50:80",

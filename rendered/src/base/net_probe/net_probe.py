@@ -30,9 +30,10 @@ SPEEDTEST = "/usr/local/bin/speedtest"
 DOWN_BPS = 1000 * 1e6
 UP_BPS = 1000 * 1e6
 TARGETS = {"pve2": "192.168.2.20", "vps": "100.64.0.2"}
-# pfSense's WAN in Telegraf's net plugin, and pve2's uplink
+# pfSense's WAN in Telegraf's net plugin (igc0: the i226's first port, fixed by the driver), and
+# pve2's physical NICs by pattern, so a NIC rename doesn't silently disable its busy check
 WAN = 'interface="igc0"'
-PVE2_NIC = 'host="pve2", device="eno1"'
+PVE2_NIC = 'host="pve2", device=~"en.*|eth.*"'
 # Heavy tests in run order (no f-strings with braces: this file is Jinja). slots: local hours, apart so one run never carries two of them.
 # busy: (query in bit/s, limit) pairs; any series over its limit skips the test.
 HEAVY = [

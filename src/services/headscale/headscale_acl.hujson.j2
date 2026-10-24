@@ -28,6 +28,7 @@
   "hosts": {
     "router": "{{ router.ip }}/32",
     "lan": "{{ lan.mask }}",
+    "lan2": "{{ lan2.mask }}",
     "pve1": "{{ pve1.mask }}",
     "pve2": "{{ pve2.mask }}",
     "websvcs": "{{ websvcs.ip }}/32",
@@ -35,21 +36,21 @@
     "secsvcs": "{{ secsvcs.ip }}/32",
     "homesvcs": "{{ homesvcs.ip }}/32",
   },
-  // pfSense advertises pve1's and pve2's subnets. `lan` and `router` aren't advertised but are
-  // reached through pfSense's exit node, and `autogroup:internet` excludes private ranges, so
-  // they need their own grants. The VLANs are reached by neither.
+  // pfSense advertises pve1's and pve2's subnets. `lan`, `lan2` and `router` aren't advertised
+  // but are reached through pfSense's exit node, and `autogroup:internet` excludes private
+  // ranges, so they need their own grants. The VLANs are reached by neither.
   "acls": [
     // admin: every tailnet node, the home subnets, and exit nodes
     {
       "action": "accept",
       "src": ["group:admin"],
-      "dst": ["*:*", "router:*", "lan:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
+      "dst": ["*:*", "router:*", "lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
     },
     // family: the home subnets and exit nodes, not other users' devices
     {
       "action": "accept",
       "src": ["group:family"],
-      "dst": ["lan:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
+      "dst": ["lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
     },
     // guests: HTTPS (and HTTP redirect) on the service VMs, plus Moonlight streaming
     // from the gaming VM (Sunshine's default ports, minus the 47990 web UI where pairing
@@ -112,7 +113,7 @@
       "src": "{{ tailscale_admin }}@",
       "accept": [
         "{{ pve1.ip }}:8006", "{{ pve2.ip }}:22", "{{ router.ip }}:443", "{{ secsvcs.ip }}:22",
-        "{{ lan.subnet }}.50:443", "{{ vpnsvcs.tailnet_ip }}:22",
+        "{{ lan.subnet }}.50:443", "{{ lan2.subnet }}.50:22", "{{ vpnsvcs.tailnet_ip }}:22",
       ],
       "deny": ["{{ wifi.trusted.subnet }}.50:80", "{{ wired.trusted.subnet }}.50:80"],
     },
@@ -121,7 +122,7 @@
       "src": "{{ users[-1] }}@",
       "accept": [
         "{{ pve1.ip }}:22", "{{ secsvcs.ip }}:443", "{{ homesvcs.ip }}:8123",
-        "{{ router.ip }}:443", "{{ lan.subnet }}.50:445",
+        "{{ router.ip }}:443", "{{ lan.subnet }}.50:445", "{{ lan2.subnet }}.50:445",
       ],
       "deny": [
         "{{ vpnsvcs.tailnet_ip }}:443", "{{ wifi.trusted.subnet }}.50:80",
