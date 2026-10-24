@@ -230,6 +230,9 @@ tailscale ping --tsmp other_node
 ```
 
 - For an Apple TV, use the Tailscale app. [Ref](https://tailscale.com/kb/1280/appletv)
+  - It gets its own user, so its grants live in `tailscale_extra_acls`: `headscale users create
+    appletv`, then register the code the app shows with
+    `headscale nodes register --user appletv --key KEY`
 
 - For Debian ([src](https://tailscale.com/kb/1626/install-debian-trixie))
 
