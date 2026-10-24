@@ -33,16 +33,11 @@ IP=10.10.0.18
 AddHost=push.janedoe.com:10.10.0.6
 
 Environment=TZ=America/Los_Angeles
-# The distroless image's nonroot user
-Secret=duo_secret_key,uid=65532,gid=65532,mode=0400
-Secret=ntfy_idp_push_admin_token,uid=65532,gid=65532,mode=0400
-Secret=ntfy_idp_push_ldap_password,uid=65532,gid=65532,mode=0400
-Secret=authelia_smtp_password,uid=65532,gid=65532,mode=0400
 Secret=duo_integration_key,type=env,target=NTFY_IDP_PUSH_DUO_INTEGRATION_KEY
-Environment=NTFY_IDP_PUSH_DUO_SECRET_KEY_FILE=/run/secrets/duo_secret_key
-Environment=NTFY_IDP_PUSH_NTFY_ADMIN_TOKEN_FILE=/run/secrets/ntfy_idp_push_admin_token
-Environment=NTFY_IDP_PUSH_DIRECTORY_LDAP_PASSWORD_FILE=/run/secrets/ntfy_idp_push_ldap_password
-Environment=NTFY_IDP_PUSH_SMTP_PASSWORD_FILE=/run/secrets/authelia_smtp_password
+Secret=duo_secret_key,type=env,target=NTFY_IDP_PUSH_DUO_SECRET_KEY
+Secret=ntfy_idp_push_admin_token,type=env,target=NTFY_IDP_PUSH_NTFY_ADMIN_TOKEN
+Secret=ntfy_idp_push_ldap_password,type=env,target=NTFY_IDP_PUSH_DIRECTORY_LDAP_PASSWORD
+Secret=authelia_smtp_password,type=env,target=NTFY_IDP_PUSH_SMTP_PASSWORD
 
 # A directory, so a replaced server.yml is seen on SIGHUP
 Volume=/etc/opt/ntfy_idp_push:/etc/ntfy-idp-push:ro
