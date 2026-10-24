@@ -292,10 +292,9 @@ ufw allow in on $POD_IFACE from 10.13.0.7 to any port 8405,9090 proto tcp
 ufw allow in on $POD_IFACE from 10.13.0.0/24 to any port 53 proto udp
 ufw route allow in on $POD_IFACE out on tailscale0 to 192.168.4.20 port 443 proto tcp
 ufw route allow in on $POD_IFACE out on tailscale0 to 100.100.100.100 port 80 proto tcp
-# HAProxy and Headscale re-bind on the gateway
+# HAProxy and Headscale re-bind on the gateway; Headscale keeps its OIDC config and policy
 src/nodes/vpnsvcs/install_svcs.sh haproxy
-cp src/services/headscale/headscale_private.yaml /etc/headscale/config.yaml
-systemctl restart headscale
+src/nodes/vpnsvcs/install_svcs.sh headscale
 ```
 
 - On pve1: `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`

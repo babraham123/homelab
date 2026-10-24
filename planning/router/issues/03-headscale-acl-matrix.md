@@ -64,3 +64,9 @@ that ACLs don't work for pfSense subnet routes.
   guest. Steps 3–5 (deploy and manual checks) are in `notes/apply-since-5a50097.md` step 11.4.
   Step 6 is open: `docs/security.md` "Current state" still calls the matrix unused, and ADR 0003
   still says pfSense lacks no-SNAT routing.
+- 2026-10-24: steps 3–5 moved to `notes/apply-since-5a50097.md` step 18, which follows
+  `notes/headscale-acls.md`; step 11 no longer reloads the policy, so the first load comes after
+  every node is deployed. The policy gained net_probe's rules (hardware-monitoring/04): `secsvcs`
+  → `public@:5201` and ICMP. `docs/guides/vpnsvcs.md.j2` "Telemetry agents" re-installed the
+  pre-OIDC `headscale_private.yaml`, which would have dropped OIDC and the policy; it now runs
+  `install_svcs.sh headscale`.
