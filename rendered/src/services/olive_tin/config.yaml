@@ -917,6 +917,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: websvcs Install Yt To Audiobook
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_yt_to_audiobook
+              id: websvcs_install_yt_to_audiobook
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: websvcs Install All Svcs
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_all_svcs

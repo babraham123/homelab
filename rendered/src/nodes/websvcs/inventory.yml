@@ -28,6 +28,7 @@ services:
                 upstream: registry.gitlab.com/storyteller-platform/storyteller:web-v2}
   calliope: {build: calliope}
   bookmark_handoff: {build: bookmark_handoff}
+  yt_to_audiobook: {build: yt_to_audiobook}
 install_all_svcs: true
 commands:
   - {name: install_keys, script: nodes/websvcs/commands.sh, pve1_file_transfer: true}

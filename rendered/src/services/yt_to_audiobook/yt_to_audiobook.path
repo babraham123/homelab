@@ -1,0 +1,13 @@
+# /etc/systemd/system/yt_to_audiobook.path
+
+[Unit]
+Description="Homelab: Starts yt_to_audiobook.service while the video inbox has requests"
+RequiresMountsFor=/srv/media
+
+[Path]
+# Retriggers after each run while requests remain, so the inbox drains one video at a time.
+PathExistsGlob=/srv/media/books/videos/inbox/*.json
+Unit=yt_to_audiobook.service
+
+[Install]
+WantedBy=paths.target

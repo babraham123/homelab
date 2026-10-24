@@ -52,7 +52,8 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .21 | storyteller | storyteller:web-v2 | Read-along book library, OPDS | books.janedoe.com |
 | .22 | calliope | built from babraham123/TTS-Narrated-Ebook-Creator | GPU batch job: EPUB → read-along EPUB | n/a |
 | .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
-| .24 | bookmark_handoff | built from `src/services/bookmark_handoff/` | linkding `toread` → Readeck, Readeck `listen` → Calliope inbox (timer) | n/a |
+| .24 | bookmark_handoff | built from `src/services/bookmark_handoff/` | linkding `toread` → Readeck, Readeck `listen` → Calliope inbox, linkding `tolisten` → video inbox (timer) | n/a |
+| .25 | yt_to_audiobook | built from babraham123/yt-to-audiobook | Batch job: YouTube audio + captions → read-along EPUB for Storyteller | n/a |
 | .50 | finance_exporter | built from babraham123/finance-exporter | Market prices, FRED rates and Treasury yields for VictoriaMetrics | n/a |
 
 - `nginx` serves `/var/opt/nginx/www` by subdomain (`www/`, `wifi/` (redirects to the AP's admin
@@ -62,8 +63,8 @@ Container catalog, host services, observability and backups. Hostnames use the p
 - The content isn't in this repo, e.g. [homesite](https://github.com/babraham123/homesite) deploys
   with its own `tools/deploy_src.sh`; this repo owns the nginx config and quadlet
 
-linkding, Readeck, Calliope and Storyteller form one pipeline, joined by two host
-timers; see the [reading guide](guides/reading.md).
+linkding, Readeck, Calliope, yt_to_audiobook and Storyteller form one pipeline, joined by
+host timers and path units; see the [reading guide](guides/reading.md).
 
 ## homesvcs: home automation (pve1, 10.12.0.0/24)
 
@@ -103,6 +104,7 @@ timers; see the [reading guide](guides/reading.md).
 | vpnsvcs | fail2ban | SSH brute-force bans ([Security](security.md#vps-hardening)) |
 | vpnsvcs | deadman (timer) | Watches the alerting path from outside ([Observability](#observability)) |
 | websvcs | calliope (path + timer) | Starts the Calliope job while its inbox has EPUBs |
+| websvcs | yt_to_audiobook (path + timer) | Starts the yt_to_audiobook job while its inbox has requests |
 | websvcs | car_ingest (timer) | Car Scanner `.brc` recordings and WiCAN `.jsonl.gz` batches in copyparty's `/car` → VictoriaMetrics, every 15 min |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 

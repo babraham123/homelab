@@ -11,11 +11,14 @@ flowchart LR
     readeck["Readeck<br/>read.{{ site.url }}"] -- "label listen<br/>(every 15 min)" --> calliope
     inbox["EPUB in the narrate inbox"] --> calliope
     calliope["Calliope on the P4"] --> storyteller["Storyteller<br/>books.{{ site.url }}"]
+    linkding -- "tag tolisten<br/>(every 15 min)" --> yt["yt_to_audiobook<br/>yt-dlp + captions"]
+    yt -- "Videos collection" --> storyteller
 ```
 
 - linkding: bookmarks and full-page copies
 - Readeck: article text, highlights, EPUB export
 - Calliope: narrates EPUBs into read-along EPUBs
+- yt_to_audiobook: turns YouTube videos into read-along EPUBs from their audio and captions
 - Storyteller: serves read-along books to its apps and OPDS readers
 - Away from home, the apps and extensions need the VPN; the web UIs work anywhere via Authelia
 
@@ -68,6 +71,20 @@ flowchart LR
 - On failure: inputs and report in `narrate/failed/<Title>/`; move the book back to the inbox to
   resume
 - The P4 is shared with whisper: voice commands slow down while a book narrates
+- YouTube videos: tag the bookmark `tolisten` in linkding
+  - Within 15 min it's queued for yt_to_audiobook and retagged `transcribed`
+  - Captions in another language: also tag it `lang:xx` (e.g. `lang:de`); default `en`
+  - Within the hour it's in Storyteller's Videos collection, sponsor segments cut, and ntfy
+    sends a notification
+  - Output: `readalouds/videos/<Title>-<id>/`, the audio track with its transcript highlighted
+  - On failure (e.g. no captions): the request and downloads in
+    `/srv/media/books/videos/failed/<Title>-<id>/`; move the `.json` back to
+    `/srv/media/books/videos/inbox` to retry
+  - The converter is [yt-to-audiobook](https://github.com/babraham123/yt-to-audiobook); the
+    homelab keeps only the batch runner around it (`yt_to_audiobook_batch.py`)
+  - yt-dlp breaks when YouTube changes, about monthly. Renovate bumps it in yt-to-audiobook
+    weekly; merge that PR, and the nightly image update rebuilds the image from `main` (or
+    install `yt_to_audiobook` to rebuild now)
 
 ## Read along in Storyteller
 

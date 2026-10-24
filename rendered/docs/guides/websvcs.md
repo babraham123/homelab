@@ -39,6 +39,7 @@ src/nodes/websvcs/install_svcs.sh readeck
 src/nodes/websvcs/install_svcs.sh storyteller
 # Once the API tokens are in the secrets file (Bootstrap the reading apps)
 src/nodes/websvcs/install_svcs.sh bookmark_handoff
+src/nodes/websvcs/install_svcs.sh yt_to_audiobook
 # Once the GPU is set up (Hardware acceleration) and a voice is in place
 # src/nodes/websvcs/install_svcs.sh calliope
 
@@ -128,9 +129,9 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
   - Create the local admin with a long password, keep it in the password manager (OPDS readers use
     it)
   - Sign out, sign in with Authelia
-  - Collections >> New: `Articles`
-  - Settings >> Import: add a watch rule for `/library/books`, and one for `/library/articles`
-    assigned to Articles. Import mode `reference`
+  - Collections >> New: `Articles`, `Videos`
+  - Settings >> Import: add a watch rule for `/library/books`, one for `/library/articles`
+    assigned to Articles, and one for `/library/videos` assigned to Videos. Import mode `reference`
 - Calliope: put a ~15 s reference recording at `/etc/opt/calliope/voices/default.wav`, others as
   `<name>.wav` next to it
   - Install `calliope`; `bookmark_handoff` queues `listen` articles once its inbox exists

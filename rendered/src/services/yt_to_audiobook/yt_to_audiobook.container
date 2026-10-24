@@ -1,0 +1,48 @@
+# /etc/containers/systemd/yt_to_audiobook.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# A oneshot batch job, not a server: yt_to_audiobook.path and yt_to_audiobook.timer start it,
+# and each run turns one video from the inbox into a read-along EPUB
+# (yt_to_audiobook_batch.py, around the image's yt-to-audiobook).
+
+[Unit]
+Description="Homelab: turns one YouTube video from the inbox into a read-along EPUB"
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=/srv/media
+
+[Container]
+Image=localhost/yt_to_audiobook:latest
+ContainerName=yt_to_audiobook
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+# Root in the container writes into Storyteller's 1000:1000 readalouds tree and hands the
+# output to that user.
+AddCapability=CHOWN DAC_OVERRIDE
+ReadOnly=true
+
+Network=net.network
+HostName=yt-to-audiobook.janedoe.com
+# Static, so a dynamic address can't take a server's while a video runs.
+IP=10.11.0.25
+
+Entrypoint=python3
+Exec=/opt/yt_to_audiobook_batch.py
+
+Environment=TZ=America/Los_Angeles
+Environment=NTFY_URL=https://push.janedoe.com/alert
+# Storyteller's PUID:PGID
+Environment=READALOUDS_OWNER=1000:1000
+Secret=ntfy_alert_token,type=env,target=NTFY_ALERT_ACCESS_TOKEN
+
+Volume=/etc/opt/yt_to_audiobook/yt_to_audiobook_batch.py:/opt/yt_to_audiobook_batch.py:ro
+Volume=/srv/media/books/videos:/videos
+Volume=/srv/media/books/readalouds:/readalouds
+
+[Service]
+Type=oneshot
+# Keep the remux and the download's CPU out of the web services' way.
+Nice=10
+# A long video on a slow link; stopping only interrupts it, and the next run resumes it.
+TimeoutStartSec=2h
+TimeoutStopSec=90

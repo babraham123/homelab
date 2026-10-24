@@ -1,0 +1,15 @@
+# /etc/systemd/system/yt_to_audiobook.timer
+
+[Unit]
+Description="Homelab: Runs yt_to_audiobook.service hourly"
+
+[Timer]
+# Backstop for yt_to_audiobook.path: resumes a video cut off by pve2 stopping, and restarts
+# the queue if the path unit hit its trigger limit.
+Persistent=true
+OnCalendar=hourly
+OnBootSec=5min
+Unit=yt_to_audiobook.service
+
+[Install]
+WantedBy=timers.target

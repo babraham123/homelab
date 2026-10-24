@@ -476,6 +476,9 @@ case "$(hostname)" in
       install_bookmark_handoff)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh bookmark_handoff
         ;;
+      install_yt_to_audiobook)
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh yt_to_audiobook
+        ;;
       install_all_svcs)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh crowdsec_appsec
@@ -495,6 +498,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh storyteller
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh calliope
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh bookmark_handoff
+        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh yt_to_audiobook
         ;;
       install_keys)
         require_pve1

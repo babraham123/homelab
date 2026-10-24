@@ -4,7 +4,7 @@
 # reaches linkding and Readeck on their container IPs, under their public host names.
 
 [Unit]
-Description="Homelab: Hands linkding toread bookmarks to Readeck and Readeck listen articles to Calliope"
+Description="Homelab: Hands tagged bookmarks to Readeck, Calliope and yt_to_audiobook"
 Wants=network-online.target
 After=network-online.target linkding.service readeck.service
 RequiresMountsFor=/srv/media
@@ -29,6 +29,7 @@ Secret=linkding_api_token,type=env,target=LINKDING_API_TOKEN
 Secret=readeck_api_token,type=env,target=READECK_API_TOKEN
 
 Volume=/var/opt/bookmark_handoff:/state
+# Calliope's narrate/ and yt_to_audiobook's videos/ inboxes, and the readalouds they make
 Volume=/srv/media/books:/books
 
 [Service]

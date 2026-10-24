@@ -124,6 +124,7 @@ nodes = {
       {"container": "storyteller", "image": "localhost/storyteller-platform/storyteller:web-v2", "service": "storyteller", "upstream": "registry.gitlab.com/storyteller-platform/storyteller:web-v2"},
       {"build": "calliope", "container": "calliope", "image": "localhost/calliope:latest", "service": "calliope"},
       {"build": "bookmark_handoff", "container": "bookmark_handoff", "image": "localhost/bookmark_handoff:latest", "service": "bookmark_handoff"},
+      {"build": "yt_to_audiobook", "container": "yt_to_audiobook", "image": "localhost/yt_to_audiobook:latest", "service": "yt_to_audiobook"},
     ],
     # Container subnets are local to each node, so ntfy is reached through Traefik.
     "ntfy_url": "https://push.janedoe.com/alert",

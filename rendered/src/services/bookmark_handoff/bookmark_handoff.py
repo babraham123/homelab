@@ -4,6 +4,8 @@
 # - linkding bookmarks tagged `toread` go to Readeck, and the tag becomes `readeck`
 # - Readeck articles labelled `listen` go to Calliope's inbox as EPUBs for the `articles`
 #   collection, and the label becomes `narrated`
+# - linkding bookmarks tagged `tolisten` (YouTube videos) go to yt_to_audiobook's inbox as
+#   JSON requests, and the tag becomes `transcribed`; a `lang:xx` tag picks the captions
 # An item whose handoff fails keeps its tag or label, and the next run retries it. The
 # apps are reached on their container IPs, not through Traefik, so Authelia isn't in
 # the path; each app's own API token is.
@@ -22,6 +24,7 @@ import langcodes
 
 books = Path("/books")
 inbox = books / "narrate/inbox"
+videos = books / "videos"
 # linkding ids Readeck has accepted. Readeck's API can't look a bookmark up by URL, so
 # this is what stops a retry after a failed retag from saving it twice.
 sent = Path("/state/sent")
@@ -80,14 +83,20 @@ def narration_lang(tag):
   return lang if lang in narrated_langs else "en"
 
 
-def linkding_to_readeck(linkding, readeck):
-  """Returns how many bookmarks failed, of how many."""
+def tagged(linkding, tag):
+  """Every linkding bookmark tagged TAG."""
   # All pages first: retagging while paging would shift the offsets.
-  bookmarks, url = [], "/api/bookmarks/?q=%23toread&limit=100"
+  bookmarks, url = [], f"/api/bookmarks/?q=%23{tag}&limit=100"
   while url:
     page = linkding.request("GET", url)
     bookmarks += page["results"]
     url = page.get("next")
+  return bookmarks
+
+
+def linkding_to_readeck(linkding, readeck):
+  """Returns how many bookmarks failed, of how many."""
+  bookmarks = tagged(linkding, "toread")
 
   sent.touch()
   done = set(sent.read_text().split())
@@ -164,12 +173,59 @@ def readeck_to_narrate(readeck):
   return failed, len(articles)
 
 
+def linkding_to_video(linkding):
+  """Returns how many bookmarks failed, of how many."""
+  video_inbox = videos / "inbox"
+  if not video_inbox.is_dir():
+    log(f"no {video_inbox} until yt_to_audiobook is installed; tolisten tags wait")
+    return 0, 0
+  bookmarks = tagged(linkding, "tolisten")
+
+  failed = 0
+  for bookmark in bookmarks:
+    ld_id, link = bookmark["id"], bookmark["url"]
+    title = bookmark.get("title") or bookmark.get("website_title") or ""
+    name = slug({"title": title, "id": ld_id})
+    tags = [t for t in bookmark["tag_names"] if t != "tolisten"]
+    # Already queued, transcribed or failed by an earlier run whose retag failed.
+    done = [video_inbox / f"{name}.json", books / "readalouds/videos" / name,
+            videos / "failed" / name]
+    if any(p.exists() for p in done):
+      log(f"{name} is already queued or done; retagging only")
+    else:
+      request = {"url": link, "title": title, "linkding_id": ld_id}
+      lang = next((t.split(":", 1)[1].lower() for t in tags
+                   if t.lower().startswith("lang:") and len(t) > 5), None)
+      if lang:
+        request["lang"] = lang
+      # A hidden temp name doesn't match yt_to_audiobook.path's *.json, so it never sees a
+      # partial file.
+      tmp = video_inbox / f".{name}.json.tmp"
+      try:
+        tmp.write_text(json.dumps(request))
+        tmp.rename(video_inbox / f"{name}.json")
+      except OSError as e:
+        tmp.unlink(missing_ok=True)
+        warn(f"queueing {link} (linkding {ld_id}) failed: {e}; left tagged tolisten")
+        failed += 1
+        continue
+    try:
+      linkding.request("PATCH", f"/api/bookmarks/{ld_id}/", {"tag_names": tags + ["transcribed"]})
+    except OSError as e:
+      warn(f"{name} is queued, but retagging linkding {ld_id} failed: {e}; the next run retries it")
+      failed += 1
+      continue
+    log(f"queued {name} for transcription")
+  return failed, len(bookmarks)
+
+
 def main():
   linkding, readeck = App("LINKDING", "Token"), App("READECK", "Bearer")
   errors = []
-  # Each job runs whatever the other did: one app being down shouldn't hold up the other.
+  # Each job runs whatever the others did: one app being down shouldn't hold up the rest.
   for job, run in [("linkding to Readeck", lambda: linkding_to_readeck(linkding, readeck)),
-                   ("Readeck to narration", lambda: readeck_to_narrate(readeck))]:
+                   ("Readeck to narration", lambda: readeck_to_narrate(readeck)),
+                   ("linkding to video", lambda: linkding_to_video(linkding))]:
     try:
       failed, total = run()
     except OSError as e:

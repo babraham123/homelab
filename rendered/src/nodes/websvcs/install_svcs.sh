@@ -172,10 +172,10 @@ case $1 in
   storyteller)
     install_sqlite3
     require_media
-    mkdir -p /var/opt/storyteller /srv/media/books/readalouds/{books,articles} \
+    mkdir -p /var/opt/storyteller /srv/media/books/readalouds/{books,articles,videos} \
       /srv/media/books/storyteller/{assets,uploads}
     # Storyteller runs as 1000:1000 and writes metadata edits into the books.
-    chown 1000:1000 /srv/media/books/readalouds /srv/media/books/readalouds/{books,articles} \
+    chown 1000:1000 /srv/media/books/readalouds /srv/media/books/readalouds/{books,articles,videos} \
       /srv/media/books/storyteller/{assets,uploads}
     install -D -m 644 -t /etc/opt/storyteller services/storyteller/config.json
     install_quadlet services/storyteller/storyteller.container
@@ -193,6 +193,18 @@ case $1 in
     systemctl daemon-reload
     systemctl enable --now calliope.path calliope.timer
     ;;
+  yt_to_audiobook)
+    require_media
+    mkdir -p /srv/media/books/videos/{inbox,work,failed} /srv/media/books/readalouds/videos
+    chown 1000:1000 /srv/media/books/readalouds/videos
+    install -D -m 644 -t /etc/opt/yt_to_audiobook services/yt_to_audiobook/yt_to_audiobook_batch.py
+    install_quadlet services/yt_to_audiobook/yt_to_audiobook.container
+    install -D -m 644 -t /etc/systemd/system services/yt_to_audiobook/yt_to_audiobook.path \
+      services/yt_to_audiobook/yt_to_audiobook.timer
+    # yt_to_audiobook.service is a oneshot; the path unit and the timer start it.
+    systemctl daemon-reload
+    systemctl enable --now yt_to_audiobook.path yt_to_audiobook.timer
+    ;;
   finance_exporter)
     install -D -m 644 -t /etc/opt/finance_exporter services/finance_exporter/config.yaml
     install_quadlet services/finance_exporter/finance_exporter.container
@@ -200,7 +212,8 @@ case $1 in
     ;;
   bookmark_handoff)
     require_media
-    mkdir -p /var/opt/bookmark_handoff
+    # The video inbox too, so tolisten bookmarks queue before yt_to_audiobook is installed.
+    mkdir -p /var/opt/bookmark_handoff /srv/media/books/videos/inbox
     install_quadlet services/bookmark_handoff/bookmark_handoff.container
     install -D -m 644 -t /etc/systemd/system services/bookmark_handoff/bookmark_handoff.timer
     # bookmark_handoff.service is a oneshot; the timer starts it.

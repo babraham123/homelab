@@ -75,3 +75,13 @@ Service `src/services/yt_to_audiobook/`, modelled on Calliope's runner, not on t
 - Stopping websvcs mid-download and starting it again finishes the same request without
   re-downloading what it had.
 - The render passes, including shellcheck of `build.sh`.
+
+## Comments
+
+- 2026-10-23: the converter moved to its own repo,
+  [babraham123/yt-to-audiobook](https://github.com/babraham123/yt-to-audiobook), which pins
+  yt-dlp, yt-dlp-ejs and mutagen and has its own Containerfile, CI and Renovate. `build.sh` is
+  now `github_build` from its `main`, like Calliope's. The runner stays here as
+  `src/services/yt_to_audiobook/yt_to_audiobook_batch.py`, bind-mounted and calling
+  `convert()`; it owns the inbox, `failed/`, delivery to `readalouds/videos/<slug>/` and ntfy.
+  The yt-dlp bump in "Image" above is now a Renovate PR in that repo.

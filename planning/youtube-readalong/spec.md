@@ -33,6 +33,11 @@ Maintainer decisions (2026-10-23):
 - A separate container, `yt_to_audiobook`, not a job inside `bookmark_handoff`: yt-dlp plus
   ffmpeg is a larger image that churns monthly, a download can outlast the handoff's
   600 s timeout, and only this container needs egress to YouTube and SponsorBlock.
+- 2026-10-23: the converter is its own repo,
+  [babraham123/yt-to-audiobook](https://github.com/babraham123/yt-to-audiobook): fetch,
+  captions, cuts and the EPUB writer, with a CLI and tests. The homelab builds its image from
+  `main` with `github_build`, as Calliope's, and keeps only the batch runner here
+  (`yt_to_audiobook_batch.py`: the inbox, `failed/`, delivery to Storyteller, ntfy).
 - Output lands in `/srv/media/books/readalouds/videos/<Title>/`, a third Storyteller
   collection beside `books` and `articles`.
 
@@ -44,7 +49,8 @@ Constraints:
 - `/srv/media` is mergerfs. Nothing in this pipeline relies on inotify over it; the path
   unit polls `PathExistsGlob`, as `calliope.path` does.
 - yt-dlp breaks roughly monthly when YouTube changes. It is pinned by hash in
-  `requirements.txt`; the fix is a bump and a deploy. A residential IP should not need
+  yt-to-audiobook's `requirements.txt`; the fix is Renovate's bump there, which the nightly
+  image update builds from `main`. A residential IP should not need
   cookies; if YouTube starts demanding sign-in, a cookies file becomes a SOPS secret
   mounted read-only.
 - The media array is parity-only. Downloads are re-fetchable and are not backed up.
