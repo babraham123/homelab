@@ -237,6 +237,9 @@ case "$(hostname)" in
       install_image_updater)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
         ;;
+      install_net_probe)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh net_probe
+        ;;
       install_postgres)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh postgres
         ;;
@@ -358,6 +361,9 @@ case "$(hostname)" in
       install_image_updater)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
         ;;
+      install_iperf3_server)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh iperf3_server
+        ;;
       install_fail2ban)
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh fail2ban
         ;;
@@ -421,6 +427,9 @@ case "$(hostname)" in
         ;;
       install_image_updater)
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
+        ;;
+      install_iperf3_server)
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh iperf3_server
         ;;
       install_traefik)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik

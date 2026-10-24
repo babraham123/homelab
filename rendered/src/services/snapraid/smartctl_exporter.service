@@ -1,0 +1,27 @@
+# /etc/systemd/system/smartctl_exporter.service
+# Ref: https://github.com/prometheus-community/smartctl_exporter
+
+[Unit]
+Description="Homelab: SMART metrics for the media array"
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+# Root for raw device access. Only the declared disks, so the VM's virtual disks aren't
+# scanned; smartctl's default --nocheck=standby leaves a sleeping disk asleep.
+# Accessible at :9633/metrics
+ExecStart=/usr/local/bin/smartctl_exporter \
+  --smartctl.device=/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AA \
+  --smartctl.device=/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AB \
+  --smartctl.device=/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AC \
+  --smartctl.device=/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AD \
+  --web.listen-address=:9633
+Restart=on-failure
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

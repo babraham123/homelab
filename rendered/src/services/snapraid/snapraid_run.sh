@@ -1,8 +1,8 @@
 #!/bin/bash
-# Runs a snapraid sync or scrub, then records the result for node_exporter and checks
-# every array disk's SMART health. Driven by snapraid-sync.timer (daily) and
-# snapraid-scrub.timer (weekly). The array is media only; parity is its only
-# protection, so a failed sync is worth an alert (src/services/vmalert/configs/backups.yml).
+# Runs a snapraid sync or scrub, then records the result for node_exporter. Driven by
+# snapraid-sync.timer (daily) and snapraid-scrub.timer (weekly). The array is media only;
+# parity is its only protection, so a failed sync is worth an alert
+# (src/services/vmalert/configs/backups.yml).
 # Usage:
 #   /usr/local/bin/snapraid_run.sh sync|scrub
 
@@ -12,9 +12,8 @@ export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 job=${1:-}
 textfile=/var/lib/node_exporter/textfile_collector
-disks=(/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AA /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AB /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AC /dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AD)
 mounts=(/mnt/disk1 /mnt/disk2 /mnt/disk3 /mnt/parity)
-(( ${#disks[@]} )) || die "no disks in websvcs.media.disks (vars.yml)"
+(( ${#mounts[@]} )) || die "no disks in websvcs.media.disks (vars.yml)"
 
 # Usage: write_prom FILE LINES...; atomic, node_exporter only reads *.prom
 write_prom() {
@@ -24,17 +23,6 @@ write_prom() {
   printf '%s\n' "$@" > "${file}.tmp"
   chmod 644 "${file}.tmp"
   mv "${file}.tmp" "$file"
-}
-
-smart_health() {
-  local lines=('# HELP homelab_smart_healthy 1 when smartctl -H reports the disk as PASSED.'
-               '# TYPE homelab_smart_healthy gauge') dev healthy
-  for dev in "${disks[@]}"; do
-    healthy=0
-    smartctl -H "$dev" | grep -q 'PASSED' && healthy=1
-    lines+=("homelab_smart_healthy{device=\"$(basename "$dev")\"} ${healthy}")
-  done
-  write_prom homelab_smart.prom "${lines[@]}"
 }
 
 case $job in
@@ -67,7 +55,6 @@ case $job in
     ;;
 esac
 
-smart_health
 write_prom "homelab_snapraid_${job}.prom" \
   '# HELP homelab_snapraid_last_success_timestamp_seconds Unix time of the last successful snapraid job.' \
   '# TYPE homelab_snapraid_last_success_timestamp_seconds gauge' \

@@ -1,0 +1,624 @@
+{
+  "title": "Disks",
+  "uid": "disks",
+  "description": "The websvcs media array: SMART from smartctl_exporter, I/O and space from node_exporter, snapraid from its textfile metrics. Alerts: hardware.yml, backups.yml.",
+  "editable": true,
+  "schemaVersion": 39,
+  "tags": [
+    "hardware",
+    "disks"
+  ],
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "templating": {
+    "list": [
+      {
+        "name": "device",
+        "label": "Disk",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-metrics-datasource"
+        },
+        "definition": "label_values(smartctl_device, device)",
+        "query": {
+          "query": "label_values(smartctl_device, device)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 1,
+      "title": "Array disks",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "smartctl_device{device=~\"$device\"}",
+          "legendFormat": "",
+          "refId": "info",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (device) (smartctl_device_smart_status{device=~\"$device\"})",
+          "legendFormat": "",
+          "refId": "smart_status",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (device) (smartctl_device_temperature{device=~\"$device\", temperature_type=\"current\"})",
+          "legendFormat": "",
+          "refId": "temperature",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (device) (smartctl_device_power_on_seconds{device=~\"$device\"})",
+          "legendFormat": "",
+          "refId": "power_on",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (device) (smartctl_device_power_cycle_count{device=~\"$device\"})",
+          "legendFormat": "",
+          "refId": "power_cycles",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (device) (smartctl_device_attribute{device=~\"$device\", attribute_value_type=\"raw\", attribute_name=\"Reallocated_Sector_Ct\"})",
+          "legendFormat": "",
+          "refId": "reallocated",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (device) (smartctl_device_attribute{device=~\"$device\", attribute_value_type=\"raw\", attribute_name=\"Current_Pending_Sector\"})",
+          "legendFormat": "",
+          "refId": "pending",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (device) (smartctl_device_attribute{device=~\"$device\", attribute_value_type=\"raw\", attribute_name=\"Offline_Uncorrectable\"})",
+          "legendFormat": "",
+          "refId": "uncorrectable",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "max by (device) (smartctl_device_attribute{device=~\"$device\", attribute_value_type=\"raw\", attribute_name=\"UDMA_CRC_Error_Count\"})",
+          "legendFormat": "",
+          "refId": "crc",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "description": "A disk in standby is skipped and keeps its last reading. Any rise in the sector counters fires DiskSectorsGrowing; CRC errors point at cabling.",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "device",
+                "model_name",
+                "serial_number",
+                "firmware_version",
+                "Value #smart_status",
+                "Value #temperature",
+                "Value #power_on",
+                "Value #power_cycles",
+                "Value #reallocated",
+                "Value #pending",
+                "Value #uncorrectable",
+                "Value #crc"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "Value #info": true
+            },
+            "renameByName": {
+              "model_name": "Model",
+              "serial_number": "Serial",
+              "device": "Device",
+              "firmware_version": "Firmware",
+              "Value #smart_status": "Health",
+              "Value #temperature": "°C",
+              "Value #power_on": "Powered on",
+              "Value #power_cycles": "Power cycles",
+              "Value #reallocated": "Reallocated",
+              "Value #pending": "Pending",
+              "Value #uncorrectable": "Uncorrectable",
+              "Value #crc": "CRC errors"
+            },
+            "indexByName": {
+              "device": 0,
+              "model_name": 1,
+              "serial_number": 2,
+              "firmware_version": 3,
+              "Value #smart_status": 4,
+              "Value #temperature": 5,
+              "Value #power_on": 6,
+              "Value #power_cycles": 7,
+              "Value #reallocated": 8,
+              "Value #pending": 9,
+              "Value #uncorrectable": 10,
+              "Value #crc": 11
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Health"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "PASSED",
+                        "color": "green"
+                      },
+                      "0": {
+                        "text": "FAILING",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "°C"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 45
+                    },
+                    {
+                      "color": "red",
+                      "value": 50
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Powered on"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Reallocated|Pending|Uncorrectable|CRC errors"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 2,
+      "title": "Temperature",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "smartctl_device_temperature{device=~\"$device\", temperature_type=\"current\"}",
+          "legendFormat": "{{device}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 45
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "DiskHot fires over 50°C for 15 minutes.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 3,
+      "title": "Throughput",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "rate(node_disk_read_bytes_total[$__rate_interval]) * on (host, device) group_left (model, serial) node_disk_info{host=\"websvcs\", model!~\"QEMU.*\"}",
+          "legendFormat": "{{device}} {{serial}} read",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "-rate(node_disk_written_bytes_total[$__rate_interval]) * on (host, device) group_left (model, serial) node_disk_info{host=\"websvcs\", model!~\"QEMU.*\"}",
+          "legendFormat": "{{device}} {{serial}} write",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "From node_exporter in websvcs; writes are drawn below the axis.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 4,
+      "title": "Busy",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "rate(node_disk_io_time_seconds_total[$__rate_interval]) * on (host, device) group_left (model, serial) node_disk_info{host=\"websvcs\", model!~\"QEMU.*\"}",
+          "legendFormat": "{{device}} {{serial}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "Share of time the disk had I/O in flight.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 5,
+      "title": "Space used",
+      "type": "bargauge",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "1 - node_filesystem_avail_bytes{host=\"websvcs\", mountpoint=~\"/mnt/.+|/srv/media\"} / node_filesystem_size_bytes",
+          "legendFormat": "{{mountpoint}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 6,
+      "title": "Since the last snapraid run",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "time() - homelab_snapraid_last_success_timestamp_seconds",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 172800
+              },
+              {
+                "color": "red",
+                "value": 691200
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "description": "Daily sync, weekly scrub; SnapraidStale fires after 8 days.",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 23
+      }
+    }
+  ]
+}

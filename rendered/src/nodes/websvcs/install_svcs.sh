@@ -153,20 +153,33 @@ case $1 in
     ;;
   snapraid)
     # Media array: snapraid parity over the passed-through HDDs, mergerfs union, SMART
-    # on the guest side since the SATA controller is passed through whole. Disk layout
-    # (partitions, mkfs, fstab, first sync) is manual: docs/guides/pve2_storage.md.
+    # (smartd, smartctl_exporter) on the guest side since the SATA controller is passed
+    # through whole. Disk layout (partitions, mkfs, fstab, first sync) is manual:
+    # docs/guides/pve2_storage.md.
     apt-get install -y snapraid mergerfs smartmontools
     mkdir -p /var/snapraid
     install -D -m 644 services/snapraid/snapraid.conf /etc/snapraid.conf
     install_bin services/snapraid/snapraid_run.sh
-    install -D -m 644 -t /etc/systemd/system services/snapraid/snapraid-*.service services/snapraid/snapraid-*.timer
+    SE_VERSION=$(curl -s "https://api.github.com/repos/prometheus-community/smartctl_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    se="smartctl_exporter-${SE_VERSION}.linux-amd64"
+    url="https://github.com/prometheus-community/smartctl_exporter/releases/download/v${SE_VERSION}"
+    wget "$url/$se.tar.gz" "$url/sha256sums.txt"
+    sha256sum --check --ignore-missing sha256sums.txt || die "checksum mismatch: $se.tar.gz"
+    tar xzf "$se.tar.gz"
+    install -D -t /usr/local/bin "$se/smartctl_exporter"
+    rm -rf "$se" "$se.tar.gz" sha256sums.txt
+    install -D -m 644 -t /etc/systemd/system services/snapraid/snapraid-*.service \
+      services/snapraid/snapraid-*.timer services/snapraid/smartctl_exporter.service
     systemctl daemon-reload
     systemctl enable --now smartmontools
     if grep -q '^/dev/disk' services/snapraid/media.fstab; then
       systemctl enable --now snapraid-sync.timer snapraid-scrub.timer
+      systemctl enable smartctl_exporter
+      reload_restart smartctl_exporter
     else
-      # No disks declared in vars.yml yet: the timers would only fail
-      systemctl disable --now snapraid-sync.timer snapraid-scrub.timer 2> /dev/null || true
+      # No disks declared in vars.yml yet: the timers would only fail, and the exporter
+      # would scan the VM's virtual disks
+      systemctl disable --now snapraid-sync.timer snapraid-scrub.timer smartctl_exporter 2> /dev/null || true
     fi
     ;;
   storyteller)

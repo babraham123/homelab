@@ -27,49 +27,30 @@
   // see https://github.com/tailscale/tailscale/issues/3800 for more information.
   "hosts": {
     "router": "192.168.1.1/32",
-    "pve1": "192.168.4.0/24",
-    "pve2": "192.168.2.0/24",
     "lan": "192.168.1.0/24",
     "lan2": "192.168.3.0/24",
-    "wifitrusted": "192.168.10.0/24",
-    "wiredtrusted": "192.168.20.0/24",
+    "pve1": "192.168.4.0/24",
+    "pve2": "192.168.2.0/24",
     "websvcs": "192.168.2.20/32",
     "gaming": "192.168.2.21/32",
     "secsvcs": "192.168.4.20/32",
     "homesvcs": "192.168.4.21/32",
   },
-  // Subnet routes advertised by pfSense are reached by naming the CIDR in `dst`; the
-  // ACL is enforced on the router before SNAT, in netstack and kernel mode alike.
+  // pfSense advertises pve1's and pve2's subnets. `lan`, `lan2` and `router` aren't advertised
+  // but are reached through pfSense's exit node, and `autogroup:internet` excludes private
+  // ranges, so they need their own grants. The VLANs are reached by neither.
   "acls": [
-    // admin: every tailnet node, every routed subnet, and the exit node
+    // admin: every tailnet node, the home subnets, and exit nodes
     {
       "action": "accept",
       "src": ["group:admin"],
-      "dst": [
-        "*:*",
-        "router:*",
-        "pve1:*",
-        "pve2:*",
-        "lan:*",
-        "lan2:*",
-        "wifitrusted:*",
-        "wiredtrusted:*",
-        "autogroup:internet:*",
-      ]
+      "dst": ["*:*", "router:*", "lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
     },
-    // family: the home subnets and the exit node, not other users' devices
+    // family: the home subnets and exit nodes, not other users' devices
     {
       "action": "accept",
       "src": ["group:family"],
-      "dst": [
-        "pve1:*",
-        "pve2:*",
-        "lan:*",
-        "lan2:*",
-        "wifitrusted:*",
-        "wiredtrusted:*",
-        "autogroup:internet:*",
-      ]
+      "dst": ["lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
     },
     // guests: HTTPS (and HTTP redirect) on the service VMs, plus Moonlight streaming
     // from the gaming VM (Sunshine's default ports, minus the 47990 web UI where pairing
@@ -97,6 +78,19 @@
         "homesvcs:80,443",
       ]
     },
+    // net_probe on secsvcs: iperf3 and pings to the VPS. Subnet traffic keeps its LAN source
+    // (pfSense routes it without SNAT), so the rule names secsvcs, not a tailnet user.
+    {
+      "action": "accept",
+      "src": ["secsvcs"],
+      "dst": ["public@:5201"]
+    },
+    {
+      "action": "accept",
+      "src": ["secsvcs"],
+      "proto": "icmp",
+      "dst": ["public@:*"]
+    },
 
     // Each user can reach their own devices; nothing above guarantees that.
     // `admin@` is the CLI user the router and VM nodes were registered under.
@@ -115,23 +109,26 @@
   ],
   // Evaluated by `headscale policy check` and on every policy load (0.29+).
   "tests": [
-    // admin: everything, including management GUIs and every subnet
+    // admin: everything on the tailnet and the home subnets, including management GUIs
     {
       "src": "jane@",
       "accept": [
-        "192.168.4.10:8006", "192.168.2.10:22", "192.168.1.1:443",
-        "192.168.4.20:22", "192.168.1.50:443", "192.168.3.50:22",
-        "192.168.10.50:80", "192.168.20.50:80",
+        "192.168.4.10:8006", "192.168.2.10:22", "192.168.1.1:443", "192.168.4.20:22",
+        "192.168.1.50:443", "192.168.3.50:22", "100.64.0.2:22",
       ],
+      "deny": ["192.168.10.50:80", "192.168.20.50:80"],
     },
-    // family: home subnets but not the IoT/guest VLANs, which aren't advertised
+    // family: the home subnets, but not the VLANs or other users' devices
     {
       "src": "jasper@",
       "accept": [
         "192.168.4.10:22", "192.168.4.20:443", "192.168.4.21:8123",
-        "192.168.1.1:443", "192.168.1.50:445", "192.168.10.50:80",
+        "192.168.1.1:443", "192.168.1.50:445", "192.168.3.50:445",
       ],
-      "deny": ["192.168.11.50:80", "192.168.12.50:80"],
+      "deny": [
+        "100.64.0.2:443", "192.168.10.50:80",
+        "192.168.11.50:80",
+      ],
     },
     // public endpoint (HAProxy): web front doors and the CrowdSec LAPI only
     {
@@ -143,6 +140,12 @@
         "192.168.2.10:443", "192.168.2.1:443", "192.168.4.20:22",
         "192.168.4.21:8123", "192.168.1.1:443", "192.168.1.50:443",
       ],
+    },
+    // net_probe: secsvcs reaches the VPS's iperf3 server, nothing else on it
+    {
+      "src": "secsvcs",
+      "accept": ["100.64.0.2:5201"],
+      "deny": ["100.64.0.2:22", "100.64.0.2:9100"],
     },
     // guests: web front doors only, nothing else on the subnets
     {

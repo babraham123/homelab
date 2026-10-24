@@ -32,6 +32,8 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
 - [ESPHome on homesvcs](esphome/spec.md) — 3 issues (maintainer request, added 2026-10-13)
 - [Home Assistant config ownership](hass-config/spec.md) — 1 issue (maintainer request, added
   2026-10-14)
+- [Hardware and network monitoring](hardware-monitoring/spec.md) — 5 issues (maintainer
+  request, added 2026-10-23)
 
 Archived prototype, not a feature: [services-inventory](services-inventory/README.md), the
 declarative per-node `services.yml` that restructure/01 judged too complex and replaced with the

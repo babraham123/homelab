@@ -1,7 +1,7 @@
-# Backup and media-array alerts, from the textfile metrics written by pve1's
-# backup_orchestrator.sh and websvcs' snapraid_run.sh. The backup run is weekly, so
-# fifteen days of silence is two missed runs: one skipped week (pve1's
-# skip_next_backup) stays quiet.
+# Backup and media-array parity alerts, from the textfile metrics written by pve1's
+# backup_orchestrator.sh and websvcs' snapraid_run.sh; disk health is in hardware.yml.
+# The backup run is weekly, so fifteen days of silence is two missed runs: one skipped
+# week (pve1's skip_next_backup) stays quiet.
 ---
 groups:
   - name: backups
@@ -32,12 +32,4 @@ groups:
         annotations:
           summary: "snapraid {{ $labels.job }} hasn't succeeded in over 8 days"
           description: "Parity is stale; media changed since then is unprotected. See journalctl -u snapraid-{{ $labels.job }} on websvcs."
-      - alert: DiskUnhealthy
-        expr: homelab_smart_healthy == 0
-        for: 10m
-        labels:
-          severity: critical
-        annotations:
-          summary: "SMART health check failed for {{ $labels.device }}"
-          description: "smartctl -H on websvcs no longer reports PASSED. Replace the disk, then snapraid fix."
 ...

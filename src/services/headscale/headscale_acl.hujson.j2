@@ -27,49 +27,30 @@
   // see https://github.com/tailscale/tailscale/issues/3800 for more information.
   "hosts": {
     "router": "{{ router.ip }}/32",
-    "pve1": "{{ pve1.mask }}",
-    "pve2": "{{ pve2.mask }}",
     "lan": "{{ lan.mask }}",
     "lan2": "{{ lan2.mask }}",
-    "wifitrusted": "{{ wifi.trusted.mask }}",
-    "wiredtrusted": "{{ wired.trusted.mask }}",
+    "pve1": "{{ pve1.mask }}",
+    "pve2": "{{ pve2.mask }}",
     "websvcs": "{{ websvcs.ip }}/32",
     "gaming": "{{ gaming.ip }}/32",
     "secsvcs": "{{ secsvcs.ip }}/32",
     "homesvcs": "{{ homesvcs.ip }}/32",
   },
-  // Subnet routes advertised by pfSense are reached by naming the CIDR in `dst`; the
-  // ACL is enforced on the router before SNAT, in netstack and kernel mode alike.
+  // pfSense advertises pve1's and pve2's subnets. `lan`, `lan2` and `router` aren't advertised
+  // but are reached through pfSense's exit node, and `autogroup:internet` excludes private
+  // ranges, so they need their own grants. The VLANs are reached by neither.
   "acls": [
-    // admin: every tailnet node, every routed subnet, and the exit node
+    // admin: every tailnet node, the home subnets, and exit nodes
     {
       "action": "accept",
       "src": ["group:admin"],
-      "dst": [
-        "*:*",
-        "router:*",
-        "pve1:*",
-        "pve2:*",
-        "lan:*",
-        "lan2:*",
-        "wifitrusted:*",
-        "wiredtrusted:*",
-        "autogroup:internet:*",
-      ]
+      "dst": ["*:*", "router:*", "lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
     },
-    // family: the home subnets and the exit node, not other users' devices
+    // family: the home subnets and exit nodes, not other users' devices
     {
       "action": "accept",
       "src": ["group:family"],
-      "dst": [
-        "pve1:*",
-        "pve2:*",
-        "lan:*",
-        "lan2:*",
-        "wifitrusted:*",
-        "wiredtrusted:*",
-        "autogroup:internet:*",
-      ]
+      "dst": ["lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
     },
     // guests: HTTPS (and HTTP redirect) on the service VMs, plus Moonlight streaming
     // from the gaming VM (Sunshine's default ports, minus the 47990 web UI where pairing
@@ -97,6 +78,19 @@
         "homesvcs:80,443",
       ]
     },
+    // net_probe on secsvcs: iperf3 and pings to the VPS. Subnet traffic keeps its LAN source
+    // (pfSense routes it without SNAT), so the rule names secsvcs, not a tailnet user.
+    {
+      "action": "accept",
+      "src": ["secsvcs"],
+      "dst": ["public@:5201"]
+    },
+    {
+      "action": "accept",
+      "src": ["secsvcs"],
+      "proto": "icmp",
+      "dst": ["public@:*"]
+    },
 
     // Each user can reach their own devices; nothing above guarantees that.
     // `admin@` is the CLI user the router and VM nodes were registered under.
@@ -114,23 +108,26 @@
   ],
   // Evaluated by `headscale policy check` and on every policy load (0.29+).
   "tests": [
-    // admin: everything, including management GUIs and every subnet
+    // admin: everything on the tailnet and the home subnets, including management GUIs
     {
       "src": "{{ tailscale_admin }}@",
       "accept": [
-        "{{ pve1.ip }}:8006", "{{ pve2.ip }}:22", "{{ router.ip }}:443",
-        "{{ secsvcs.ip }}:22", "{{ lan.subnet }}.50:443", "{{ lan2.subnet }}.50:22",
-        "{{ wifi.trusted.subnet }}.50:80", "{{ wired.trusted.subnet }}.50:80",
+        "{{ pve1.ip }}:8006", "{{ pve2.ip }}:22", "{{ router.ip }}:443", "{{ secsvcs.ip }}:22",
+        "{{ lan.subnet }}.50:443", "{{ lan2.subnet }}.50:22", "{{ vpnsvcs.tailnet_ip }}:22",
       ],
+      "deny": ["{{ wifi.trusted.subnet }}.50:80", "{{ wired.trusted.subnet }}.50:80"],
     },
-    // family: home subnets but not the IoT/guest VLANs, which aren't advertised
+    // family: the home subnets, but not the VLANs or other users' devices
     {
       "src": "{{ users[-1] }}@",
       "accept": [
         "{{ pve1.ip }}:22", "{{ secsvcs.ip }}:443", "{{ homesvcs.ip }}:8123",
-        "{{ router.ip }}:443", "{{ lan.subnet }}.50:445", "{{ wifi.trusted.subnet }}.50:80",
+        "{{ router.ip }}:443", "{{ lan.subnet }}.50:445", "{{ lan2.subnet }}.50:445",
       ],
-      "deny": ["{{ wifi.iot.subnet }}.50:80", "{{ wifi.guest.subnet }}.50:80"],
+      "deny": [
+        "{{ vpnsvcs.tailnet_ip }}:443", "{{ wifi.trusted.subnet }}.50:80",
+        "{{ wifi.iot.subnet }}.50:80",
+      ],
     },
     // public endpoint (HAProxy): web front doors and the CrowdSec LAPI only
     {
@@ -142,6 +139,12 @@
         "{{ pve2.ip }}:443", "{{ pve2.subnet }}.1:443", "{{ secsvcs.ip }}:22",
         "{{ homesvcs.ip }}:8123", "{{ router.ip }}:443", "{{ lan.subnet }}.50:443",
       ],
+    },
+    // net_probe: secsvcs reaches the VPS's iperf3 server, nothing else on it
+    {
+      "src": "secsvcs",
+      "accept": ["{{ vpnsvcs.tailnet_ip }}:5201"],
+      "deny": ["{{ vpnsvcs.tailnet_ip }}:22", "{{ vpnsvcs.tailnet_ip }}:9100"],
     },
     // guests: web front doors only, nothing else on the subnets
     {

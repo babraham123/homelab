@@ -119,6 +119,11 @@ model:
   # Supported wake word models: https://github.com/dscripka/openWakeWord?tab=readme-ov-file#pre-trained-models
   wake: "hey_jarvis,weather" # 2.5 MB, CPU only
 
+# The ISP plan's advertised speeds, for net_probe's busy check and the WanSlow alert
+isp:
+  down_mbps: 1000
+  up_mbps: 1000
+
 retention:
   log_days: 14
   metric_days: 14

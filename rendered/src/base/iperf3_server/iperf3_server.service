@@ -1,0 +1,21 @@
+# /etc/systemd/system/iperf3_server.service
+# Ref: https://software.es.net/iperf/invoking.html
+
+[Unit]
+Description="Homelab: iperf3 server for secsvcs's net_probe"
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+# Listens on every address; ufw admits only secsvcs (websvcs.md, install_firewall.sh)
+ExecStart=/usr/bin/iperf3 --server --port 5201
+Restart=on-failure
+DynamicUser=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

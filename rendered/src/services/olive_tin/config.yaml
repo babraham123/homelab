@@ -461,6 +461,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: secsvcs Install Net Probe
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_net_probe
+              id: secsvcs_install_net_probe
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: secsvcs Install Postgres
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_postgres
@@ -649,6 +657,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: vpnsvcs Install Iperf3 Server
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_iperf3_server
+              id: vpnsvcs_install_iperf3_server
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: vpnsvcs Install Fail2ban
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs install_fail2ban
@@ -769,6 +785,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_image_updater
               id: websvcs_install_image_updater
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: websvcs Install Iperf3 Server
+              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
+              shell: ssh autoadmin@websvcs install_iperf3_server
+              id: websvcs_install_iperf3_server
               maxConcurrent: 1
               timeout: 60
 

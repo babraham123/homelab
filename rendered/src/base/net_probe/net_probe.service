@@ -1,0 +1,18 @@
+# /etc/systemd/system/net_probe.service
+
+[Unit]
+Description="Homelab: Pings, speed test and iperf3 across the network"
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+
+# Slot hours are local time
+Environment=TZ=America/Los_Angeles
+
+# Runs in place, so a deploy updates it
+ExecStart=/root/homelab-rendered/src/base/net_probe/net_probe.py
+
+# A run with every test due takes about two minutes
+TimeoutStartSec=10min
