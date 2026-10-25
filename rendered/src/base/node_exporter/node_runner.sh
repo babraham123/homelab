@@ -10,8 +10,12 @@ source /usr/local/lib/homelab/lib.sh
 SVC_LIST=$(homelab_services | paste -sd '|' -)
 
 # Ref: https://github.com/prometheus/node_exporter?tab=readme-ov-file#collectors
+# Podman's veths come and go with each container restart: a teardown mid-scrape fails the
+# netclass collector, and every new name starts a new series.
 /usr/local/bin/node_exporter \
   --collector.textfile.directory /var/lib/node_exporter/textfile_collector \
   --collector.systemd \
   --collector.systemd.enable-restarts-metrics \
-  --collector.systemd.unit-include="($SVC_LIST)\\.service"
+  --collector.systemd.unit-include="($SVC_LIST)\\.service" \
+  --collector.netclass.ignored-devices='^veth' \
+  --collector.netdev.device-exclude='^veth'
