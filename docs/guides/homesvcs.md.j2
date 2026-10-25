@@ -31,7 +31,6 @@ src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
 src/nodes/homesvcs/install_svcs.sh home_assistant
 src/nodes/homesvcs/install_svcs.sh fluentbit
 
-systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
 # Every image unchanged: the installs just loaded them

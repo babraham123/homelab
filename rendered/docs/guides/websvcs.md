@@ -52,7 +52,6 @@ src/nodes/websvcs/install_svcs.sh yt_to_audiobook
 src/nodes/websvcs/install_svcs.sh finance_exporter
 src/nodes/websvcs/install_svcs.sh fluentbit
 
-systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
 # Expect every image unchanged

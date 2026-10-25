@@ -82,3 +82,19 @@ homelab_services() {
   systemctl list-units --all --type=service --plain --no-legend |
     awk '/Homelab: / { sub(/\.service$/, "", $1); print $1 }' | sort -u
 }
+# Usage: watch_homelab_units, at the top of an install script. Fluent Bit's journal filter
+# and node_exporter's unit filter are the homelab_services listed when they start, so when
+# the script exits having added or removed one, the running ones restart and pick it up.
+watch_homelab_units() {
+  homelab_units_before=$(homelab_services)
+  trap restart_unit_watchers EXIT
+}
+restart_unit_watchers() {
+  [[ $(homelab_services) != "$homelab_units_before" ]] || return 0
+  local unit
+  for unit in fluentbit node_exporter; do
+    if systemctl is-active -q "$unit"; then
+      systemctl restart "$unit"
+    fi
+  done
+}

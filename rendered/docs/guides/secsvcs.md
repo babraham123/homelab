@@ -32,7 +32,6 @@ src/nodes/secsvcs/install_svcs.sh crowdsec
 src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
 src/nodes/secsvcs/install_svcs.sh fluentbit
 
-systemctl restart node_exporter
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
 # Expect every image unchanged

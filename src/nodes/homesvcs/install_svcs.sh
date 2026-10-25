@@ -9,6 +9,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/svcs_lib.sh"
 
 cd "$rendered"
+watch_homelab_units
 
 # Every image the case's quadlets name is downloaded (or built) and passes the scan gate
 # before any quadlet is copied; a blocked image stops the install here.
