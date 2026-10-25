@@ -161,9 +161,8 @@ sudo systemctl start image_updater
     it builds and scans instead, and records the `build.sh` inputs, so the next run's build of the
     same inputs passes.
 - Built images: every one has a `src/services/<service>/build.sh` (`versions`, `build TAG`), and
-  is rebuilt through the scan gate when any input it reports changes, like `geoip_generator`'s base
-  image digests, haproxy-mapper commit and own files. The render fails for a `build:` image
-  without one.
+  is rebuilt through the scan gate when any input it reports changes, like `geoip_generator`'s
+  haproxy-mapper commit and base image digests. The render fails for a `build:` image without one.
 - Roll back by hand: `podman tag localhost/NAME:rollback localhost/NAME:TAG`, then
   `systemctl restart CONTAINER`. The updater doesn't retry that digest; it moves on when upstream
   does.
