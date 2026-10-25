@@ -2091,8 +2091,10 @@ identity_providers:
         public: false
 
         ## Audience this client is allowed to request.
-        audience:{% for host in inv.uptime | map(attribute='host') | sort %}
-          - 'https://{{ host }}'{% endfor %}
+        # The bearer check needs an audience equal to the whole URL Authelia sees, path
+        # included, so each entry is a Gatus check's exact URL.
+        audience:{% for url in inv.uptime | map(attribute='url') | sort %}
+          - '{{ url }}'{% endfor %}
 
         requested_audience_mode: 'implicit'
 

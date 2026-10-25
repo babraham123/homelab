@@ -72,15 +72,15 @@ endpoints:
 
   - name: traefik homesvcs
     <<: *tier1
-    url: "https://homeproxy.janedoe.com"
+    url: "https://homeproxy.janedoe.com/"
 
   - name: zigbee2mqtt
     <<: *internal
-    url: "https://zigbee.janedoe.com"
+    url: "https://zigbee.janedoe.com/"
 
   - name: home assistant
     <<: *tier1
-    url: "https://home.janedoe.com"
+    url: "https://home.janedoe.com/"
 
   - name: authelia
     <<: *tier1
@@ -93,23 +93,23 @@ endpoints:
 
   - name: traefik secsvcs
     <<: *tier1
-    url: "https://secproxy.janedoe.com"
+    url: "https://secproxy.janedoe.com/"
 
   - name: victoriametrics
     <<: *internal
-    url: "https://metrics.janedoe.com"
+    url: "https://metrics.janedoe.com/"
 
   - name: victorialogs
     <<: *internal
-    url: "https://logs.janedoe.com"
+    url: "https://logs.janedoe.com/"
 
   - name: vmalert
     <<: *internal
-    url: "https://vmalert.janedoe.com"
+    url: "https://vmalert.janedoe.com/"
 
   - name: alertmanager
     <<: *internal
-    url: "https://alert.janedoe.com"
+    url: "https://alert.janedoe.com/"
 
   - name: ntfy health check
     <<: *tier1
@@ -117,7 +117,7 @@ endpoints:
 
   - name: grafana
     <<: *tier1
-    url: "https://graph.janedoe.com"
+    url: "https://graph.janedoe.com/"
 
   - name: vaultwarden
     <<: *tier1
@@ -129,23 +129,23 @@ endpoints:
 
   - name: olive_tin
     <<: *internal
-    url: "https://command.janedoe.com"
+    url: "https://command.janedoe.com/"
 
   - name: traefik websvcs
     <<: *tier1
-    url: "https://webproxy.janedoe.com"
+    url: "https://webproxy.janedoe.com/"
 
   - name: homepage
     <<: *tier1
-    url: "https://dash.janedoe.com"
+    url: "https://dash.janedoe.com/"
 
   - name: guacamole
     <<: *internal
-    url: "https://remote.janedoe.com"
+    url: "https://remote.janedoe.com/"
 
   - name: copyparty
     <<: *internal
-    url: "https://files.janedoe.com"
+    url: "https://files.janedoe.com/"
 
   - name: linkding
     <<: *internal
