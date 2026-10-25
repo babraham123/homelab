@@ -87,7 +87,7 @@ yt_to_audiobook images carry their own batch runners (`/opt/*_batch.py`, from ea
 | ----- | --------- | ------- | --------- | ----- |
 | .7 | vmagent | vmagent | Local metrics scraper | n/a |
 | .20 | fluentbit | fluent-bit | Journal → VictoriaLogs forwarder | n/a |
-| .30 | geoip_generator | built from `src/services/geoip_generator/` | Weekly GeoIP maps for HAProxy (timer) | n/a |
+| .30 | geoip_generator | built from babraham123/haproxy-mapper | Weekly GeoIP maps for HAProxy (timer) | n/a |
 
 ## Host-level services (not containerized)
 
