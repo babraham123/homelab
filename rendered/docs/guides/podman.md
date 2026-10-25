@@ -82,7 +82,10 @@ ufw allow in from 10.10.0.7 to any port 9100 proto tcp
 ## Image updater
 
 Pulls or builds, scans and loads every `localhost/` image, nightly and on install.
-[Maintenance](../maintenance.md#container-images)
+[Maintenance](../maintenance.md#container-images). The case installs
+[podman-image-updater](https://github.com/babraham123/podman-image-updater) at its pinned commit
+as `/usr/local/bin/image_updater`, and links its config to the rendered
+`src/base/podman/image_updater.json`.
 
 - Add `docker_hub_username`, `docker_hub_token` and `ntfy_alert_token` to the node's secrets file
 - Install before any service

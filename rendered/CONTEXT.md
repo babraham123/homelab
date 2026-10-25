@@ -37,10 +37,13 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   lists, uptime endpoints and image update order from it; the render (`tools/check_rendered.py`)
   checks it against the scripts its dispatcher cases run, `routes.yml`, the quadlets' `Image=` and
   the OliveTin buttons.
-- **image updater** — `src/base/podman/image_updater.py`, on every node that runs quadlets: each
-  night, and when a service is installed, it downloads (or builds) each image, passes it through the
-  **scan gate** (Trivy: a fixable HIGH or CRITICAL CVE blocks it, unless a `.trivyignore` entry or
-  `accept` overrides it) and loads it under its `localhost/` name, which is all a quadlet can run.
+- **image updater** — `image_updater`
+  ([podman-image-updater](https://github.com/babraham123/podman-image-updater), pinned in
+  `src/base/debian/install_svcs.sh`, its image list rendered from the node inventory by
+  `src/base/podman/image_updater.json.j2`), on every node that runs quadlets: each night, and when
+  a service is installed, it downloads (or builds) each image, passes it through the **scan gate**
+  (Trivy: a fixable HIGH or CRITICAL CVE blocks it, unless a `.trivyignore` entry or `accept`
+  overrides it) and loads it under its `localhost/` name, which is all a quadlet can run.
 - **rendered tree** — `/root/homelab-rendered` on each node: the part of a render that node uses
   (`tools/node_dirs.sh`), the only thing scripts on the node execute from.
 

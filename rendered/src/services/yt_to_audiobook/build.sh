@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds localhost/yt_to_audiobook for src/base/podman/image_updater.py, which scans the
+# Builds localhost/yt_to_audiobook for the image updater, which scans the
 # result before it replaces the running image. Its inputs are yt-to-audiobook's main branch,
 # by commit, and the images its Containerfile builds from (FROM, COPY --from), by digest.
 # yt_to_audiobook_batch.py is mounted at run time, so it isn't one.

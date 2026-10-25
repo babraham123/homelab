@@ -13,7 +13,7 @@ watch_homelab_units
 
 # Every image the case's quadlets name is downloaded (or built) and passes the scan gate
 # before any quadlet is copied; a blocked image stops the install here.
-base/podman/image_updater.py install "${1:?usage: $0 SERVICE_NAME}"
+/usr/local/bin/image_updater install "${1:?usage: $0 SERVICE_NAME}"
 
 # HAProxy, Headscale and the CrowdSec bouncer serve metrics on the podman bridge gateway
 # (net.network)

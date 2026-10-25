@@ -16,9 +16,11 @@ noticed when a service broke.
   `AutoUpdate=local`. The upstream ref lives in the node inventory (`upstream:`, `build:`,
   `update_last:`), and the render fails if a quadlet's `Image=` doesn't match it. Nothing in a
   quadlet can pull, so an unscanned image can't reach a container.
-- Each node that runs quadlets (vpnsvcs, homesvcs, websvcs, secsvcs) runs
-  `src/base/podman/image_updater.py` on its own timer, 30 minutes apart, the notification path on
-  secsvcs last. For each image in update order (install order, `update_last` entries at the end):
+- Each node that runs quadlets (vpnsvcs, homesvcs, websvcs, secsvcs) runs the image updater
+  ([podman-image-updater](https://github.com/babraham123/podman-image-updater), installed pinned
+  to a commit and its hash, with its image list rendered from the node inventory into
+  `src/base/podman/image_updater.json`) on its own timer, 30 minutes apart, the notification path
+  on secsvcs last. For each image in update order (install order, `update_last` entries at the end):
   compare the upstream digest with the one handled last (remote against remote), download it by
   digest, scan it with Trivy, tag the current image `:rollback`, load the new one, and run
   `podman auto-update`. A container whose update fails is pointed back at `:rollback` and that

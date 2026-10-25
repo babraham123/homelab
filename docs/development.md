@@ -36,8 +36,10 @@
     executable, since `install` defaults to 755; a directory tree, like Traefik's `plugins-local/`,
     is removed and copied again with `cp -r`), then ends with `reload_restart <unit>` if it installs
     a unit. Runs from `/root/homelab-rendered/src`, so its paths start with `base/`, `nodes/` or
-    `services/`. Before the case, `src/base/podman/image_updater.py install SERVICE` loads the
-    service's images and passes them through the scan gate, or stops the install
+    `services/`. Before the case, `/usr/local/bin/image_updater install SERVICE` (the [image
+    updater](https://github.com/babraham123/podman-image-updater), with the image list in
+    `src/base/podman/image_updater.json.j2`) loads the service's images and passes them through
+    the scan gate, or stops the install
   - `inventory.yml`: the node's part of the node inventory (keys documented in `src/nodes.jinja`)
   - `commands.sh` - Other tasks that run as root and are triggered remotely
   - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config
@@ -223,6 +225,8 @@ repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plai
 - `car_ingest_test.sh`: `src/nodes/websvcs/car_ingest.py.j2` on synthetic Car Scanner `.brc`
   recordings and WiCAN batches: the conversions, param mapping, trips, the `car` label, and a
   run's import-once, `failed/`, `too_old` and retry handling.
+- `image_updater_test.sh`: the image updater's config, `src/base/podman/image_updater.json.j2`,
+  from a fixture inventory.
 - `render_test.sh`: a full render of `vars.template.yml` passes every check (skipped by `--fast`,
   since the pre-commit hook renders anyway).
 
