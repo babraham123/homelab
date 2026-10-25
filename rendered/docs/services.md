@@ -65,7 +65,9 @@ Container catalog, host services, observability and backups. Hostnames use the p
   with its own `tools/deploy_src.sh`; this repo owns the nginx config and quadlet
 
 linkding, Readeck, Calliope, yt_to_audiobook and Storyteller form one pipeline, joined by
-host timers and path units; see the [reading guide](guides/reading.md).
+host timers and path units; see the [reading guide](guides/reading.md). The calliope and
+yt_to_audiobook images carry their own batch runners (`/opt/*_batch.py`, from each repo's
+`batch/`), which their quadlets run: one book or video from the inbox per run.
 
 ## homesvcs: home automation (pve1, 10.12.0.0/24)
 

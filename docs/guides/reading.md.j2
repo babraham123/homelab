@@ -83,8 +83,8 @@ flowchart LR
   - On failure (e.g. no captions): the request and downloads in
     `/srv/media/books/videos/failed/<Title>-<id>/`; move the `.json` back to
     `/srv/media/books/videos/inbox` to retry
-  - The converter is [yt-to-audiobook](https://github.com/babraham123/yt-to-audiobook); the
-    homelab keeps only the batch runner around it (`yt_to_audiobook_batch.py`)
+  - The converter and its batch runner (the inbox, `failed/`, delivery, ntfy) are
+    [yt-to-audiobook](https://github.com/babraham123/yt-to-audiobook)
   - yt-dlp breaks when YouTube changes, about monthly. Renovate bumps it in yt-to-audiobook
     weekly; merge that PR, and the nightly image update rebuilds the image from `main` (or
     install `yt_to_audiobook` to rebuild now)
