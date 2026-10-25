@@ -156,20 +156,10 @@ http:
         - authelia@file
     ntfy_idp_push-api:
       <<: *service
-      rule: Host(`idp-push.{{ site.url }}`) && (PathPrefix(`/auth/v2/`) || PathPrefix(`/challenge/`) || PathPrefix(`/static/`) || PathPrefix(`/subscribe/`))
+      rule: Host(`idp-push.{{ site.url }}`) && (PathPrefix(`/auth/v2/`) || PathPrefix(`/challenge/`) || PathPrefix(`/static/`) || PathPrefix(`/subscribe/`) || PathPrefix(`/token/`))
       service: ntfy_idp_push@file
       middlewares:
         - strip-remote@file
-    # The enrollment barcode (/token/qr) carries the whole enrollment link, code included, in its
-    # query
-    ntfy_idp_push-token:
-      <<: *service
-      rule: Host(`idp-push.{{ site.url }}`) && PathPrefix(`/token/`)
-      service: ntfy_idp_push@file
-      middlewares:
-        - strip-remote@file
-      observability:
-        accessLogs: false
     olive_tin:
       <<: *service
       rule: Host(`command.{{ site.url }}`)
