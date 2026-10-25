@@ -1,0 +1,23 @@
+
+{
+  "victoriametrics": {
+    "query_url": "http://metrics.janedoe.com:8428/api/v1/query",
+    "user": "admin",
+    "password_command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "victoriametrics_admin_password"]
+  },
+  "isp": {"down_mbps": 1000, "up_mbps": 1000},
+  "targets": {"pve2": "192.168.2.20", "vps": "100.64.0.2"},
+  "metrics_path": "/var/lib/node_exporter/textfile_collector/homelab_net_probe.prom",
+  "speedtest": "/usr/local/bin/speedtest",
+  "tests": [
+    {"test": "speedtest", "slots": [3, 9, 15, 21], "busy": [
+      {"query": "rate(net_bytes_recv{interface=\"igc0\"}[5m]) * 8", "limit_bps": 300000000},
+      {"query": "rate(net_bytes_sent{interface=\"igc0\"}[5m]) * 8", "limit_bps": 300000000}
+    ]},
+    {"test": "iperf", "path": "pve2", "slots": [1, 7, 13, 19], "busy": [
+      {"query": "rate(node_network_receive_bytes_total{host=\"pve2\", device=~\"en.*|eth.*\"}[5m]) * 8", "limit_bps": 200000000},
+      {"query": "rate(node_network_transmit_bytes_total{host=\"pve2\", device=~\"en.*|eth.*\"}[5m]) * 8", "limit_bps": 200000000}
+    ]},
+    {"test": "iperf", "path": "vps", "slots": [4]}
+  ]
+}

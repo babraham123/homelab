@@ -38,6 +38,9 @@ systemctl list-units --state=failed
 
 - Headscale is a GitHub release, not an apt package: `sudo
   /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale` installs the latest
+- net_probe and Ookla's speedtest CLI are pinned by URL and sha256 in the `net_probe` case of
+  `src/base/debian/install_svcs.sh`: set both to the new commit or version, deploy, then
+  `ssh autoadmin@secsvcs install_net_probe`
 - PVE and PBS point releases: pve2 (PBS is local) then pve1, per the [Proxmox
   guide](guides/proxmox.md#minor-version), which also has the major-version path
 - Container images update themselves nightly; see [Container images](#container-images)

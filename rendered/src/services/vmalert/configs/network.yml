@@ -1,4 +1,4 @@
-# Network speed alerts, from net_probe on secsvcs (src/base/net_probe/net_probe.py.j2): pings
+# Network speed alerts, from net_probe on secsvcs (src/base/net_probe/config.json.j2): pings
 # every hour, the speed test at 03, 09, 15 and 21, iperf3 to the VPS at 04. Each result stays
 # in the textfile until the probe's next run, so a `for` spans runs: 13h is three speed tests.
 # The pve2 path never alerts: pve2 is off most of the time.

@@ -68,3 +68,6 @@ a degraded modem link or pfSense becoming the bottleneck all look like a quiet n
   Download and upload are one metric, `homelab_speedtest_bits_per_second{direction}`, and the
   plan speed is exported beside it as `homelab_isp_plan_bits_per_second{direction}`, so 05's
   alerts need no template. Apply: notes step 18.
+- 2026-10-25: the runner is now its own repo, github.com/babraham123/net-probe, with its tests.
+  `install_svcs.sh net_probe` installs it to `/usr/local/bin/net_probe` at a pinned commit,
+  checked by sha256; `src/base/net_probe/config.json.j2` is its config, rendered from `vars.yml`.

@@ -11,8 +11,9 @@ Type=oneshot
 # Slot hours are local time
 Environment=TZ={{ personal.timezone }}
 
-# Runs in place, so a deploy updates it
-ExecStart=/root/homelab-rendered/src/base/net_probe/net_probe.py
+# The script is pinned by install_svcs.sh net_probe; the config is read in place, so a
+# deploy updates it
+ExecStart=/usr/local/bin/net_probe --config /root/homelab-rendered/src/base/net_probe/config.json
 
 # A run with every test due takes about two minutes
 TimeoutStartSec=10min
