@@ -5,7 +5,7 @@
 ---
 global:
   # The smarthost and SMTP sender used for mail notifications.
-  smtp_smarthost: 'smtp-relay.gmail.com:587'
+  smtp_smarthost: 'smtp.gmail.com:587'
   smtp_from: 'Alert <admin@{{ site.url }}>'
   smtp_auth_username: '{{ site.email }}'
   smtp_auth_password: '{% raw %}{{ env('alert_smtp_password') }}{% endraw %}'

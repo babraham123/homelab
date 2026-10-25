@@ -163,7 +163,7 @@ attachment-expiry-duration: "48h"
 # - smtp-sender-from is the e-mail address of the sender
 # - smtp-sender-user/smtp-sender-pass are the username and password of the SMTP user (leave blank for no auth)
 #
-smtp-sender-addr: "smtp-relay.gmail.com:587"
+smtp-sender-addr: "smtp.gmail.com:587"
 smtp-sender-from: "Notification <admin@{{ site.url }}>"
 smtp-sender-user: {{ site.email }}
 smtp-sender-pass: {% raw %}{{ env('alert_smtp_password') }}{% endraw %}
