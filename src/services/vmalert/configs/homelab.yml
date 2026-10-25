@@ -14,7 +14,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "{{ $labels.instance }} is not answering node_exporter scrapes"
+          summary: "{{ $labels.host }} is not answering node_exporter scrapes"
           description: "The host is down, node_exporter stopped, or its collector can't reach it (ufw, pve host up?)."
       - alert: DiskAlmostFull
         expr: node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|ramfs"} / node_filesystem_size_bytes < 0.10
@@ -22,7 +22,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "{{ $labels.mountpoint }} on {{ $labels.instance }} has {{ $value | humanizePercentage }} free"
+          summary: "{{ $labels.mountpoint }} on {{ $labels.host }} has {{ $value | humanizePercentage }} free"
           description: "Podman images and journald are the usual growth on the VMs: podman image prune, journalctl --vacuum-size."
       - alert: DiskFillingIn24h
         # Only once under 30% so a fresh VM's first image pulls don't extrapolate to full.
@@ -33,21 +33,21 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "{{ $labels.mountpoint }} on {{ $labels.instance }} fills up within a day at the current rate"
+          summary: "{{ $labels.mountpoint }} on {{ $labels.host }} fills up within a day at the current rate"
       - alert: MemoryPressure
         expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.10
         for: 10m
         labels:
           severity: warning
         annotations:
-          summary: "{{ $labels.instance }} has {{ $value | humanizePercentage }} of memory available"
+          summary: "{{ $labels.host }} has {{ $value | humanizePercentage }} of memory available"
       - alert: HighLoad
         expr: node_load15 / count without (cpu, mode) (node_cpu_seconds_total{mode="idle"}) > 2
         for: 15m
         labels:
           severity: warning
         annotations:
-          summary: "{{ $labels.instance }} load15 is {{ $value | printf \"%.1f\" }} per core"
+          summary: "{{ $labels.host }} load15 is {{ $value | printf \"%.1f\" }} per core"
       - alert: HighCpuTemp
         # Only the hosts have sensors; pve1 is fanless.
         expr: node_hwmon_temp_celsius > 85
@@ -55,7 +55,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "{{ $labels.instance }} {{ $labels.chip }} {{ $labels.sensor }} is at {{ $value }}°C"
+          summary: "{{ $labels.host }} {{ $labels.chip }} {{ $labels.sensor }} is at {{ $value }}°C"
       - alert: SystemdUnitFailed
         # node_runner.sh exports only the "Homelab:" units, so this is every quadlet,
         # the host services and the backup orchestrator; a restart loop ends up here.
@@ -64,7 +64,7 @@ groups:
         labels:
           severity: error
         annotations:
-          summary: "{{ $labels.name }} failed on {{ $labels.instance }}"
+          summary: "{{ $labels.name }} failed on {{ $labels.host }}"
           description: "journalctl -u {{ $labels.name }} on the node."
       - alert: ServiceRestartLoop
         # Counts systemd's automatic restarts (Restart=on-failure), including the ones after
@@ -74,7 +74,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "{{ $labels.name }} on {{ $labels.instance }} restarted {{ $value | printf \"%.0f\" }} times in 1h"
+          summary: "{{ $labels.name }} on {{ $labels.host }} restarted {{ $value | printf \"%.0f\" }} times in 1h"
           description: "A crash or a failed health check. journalctl -u {{ $labels.name }} on the node."
       - alert: ClockSkew
         expr: abs(node_timex_offset_seconds) > 0.5 or node_timex_sync_status == 0
@@ -82,7 +82,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "{{ $labels.instance }} clock is off or unsynced"
+          summary: "{{ $labels.host }} clock is off or unsynced"
           description: "TOTP, TLS and the SSH certs all need the clocks within seconds. timedatectl on the node."
 
   - name: scrapes
@@ -95,7 +95,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Scrape target {{ $labels.job }} on {{ $labels.instance }} is down"
+          summary: "Scrape target {{ $labels.job }} on {{ $labels.host }} is down"
 
   - name: traefik
     rules:

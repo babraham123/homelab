@@ -26,7 +26,8 @@ HostName=alert.janedoe.com
 IP=10.10.0.10
 # port 9093
 
-Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.yml"
+Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.yml" \
+     --web.external-url="https://alert.janedoe.com"
 
 Environment=TZ=America/Los_Angeles
 Volume=/etc/opt/alertmanager:/config:ro
