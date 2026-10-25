@@ -41,7 +41,7 @@ sudo su
 apt update
 apt upgrade
 apt install -y zsh vim iproute2 git less curl wget zip unzip ethtool jq unattended-upgrades ufw screen zstd
-# python3: node scripts such as image_updater.py
+# python3: node scripts such as image_updater
 apt install -y python3
 chsh -s /bin/zsh
 

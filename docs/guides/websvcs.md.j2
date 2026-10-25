@@ -55,7 +55,7 @@ src/nodes/websvcs/install_svcs.sh fluentbit
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
 # Expect every image unchanged
-src/base/podman/image_updater.py --dry-run
+image_updater --dry-run
 ```
 
 ## GPU metrics

@@ -1,8 +1,8 @@
 #!/bin/bash
-# Builds localhost/finance_exporter for src/base/podman/image_updater.py, which scans the
-# result before it replaces the running image. Its inputs are babraham123/finance-exporter's
-# main branch, by commit, and the images its Dockerfile builds from, by digest. config.yaml
-# is mounted at run time, so it isn't one.
+# Builds localhost/finance_exporter for the image updater, which scans the result before it
+# replaces the running image. Its inputs are babraham123/finance-exporter's main branch, by
+# commit, and the images its Dockerfile builds from, by digest. config.yaml is mounted at
+# run time, so it isn't one.
 # Usage:
 #   src/services/finance_exporter/build.sh versions    # the inputs, one per line
 #   src/services/finance_exporter/build.sh build TAG   # builds localhost/finance_exporter:TAG

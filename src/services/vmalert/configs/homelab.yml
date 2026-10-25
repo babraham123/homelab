@@ -156,7 +156,7 @@ groups:
           summary: "{{ $labels.name }} certificate expires in {{ $value | humanizeDuration }}"
 
   - name: image_updater
-    # From the textfile metrics src/base/podman/image_updater.py writes. Age, not absent():
+    # From the textfile metrics the image updater writes. Age, not absent():
     # a powered-off websvcs has no series, so it doesn't alert. One that boots after days
     # off catches up within half an hour (Persistent=true), inside the `for`.
     rules:

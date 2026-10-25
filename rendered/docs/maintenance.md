@@ -127,7 +127,8 @@ sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 
 `image_updater.timer` updates every image on vpnsvcs (20:00), homesvcs (20:30), websvcs (21:00)
 and secsvcs (21:30) each night, behind a Trivy scan: a fixable HIGH or CRITICAL CVE blocks the new
-image, and the old one keeps running. Design: [ADR 0008](adr/0008-scanned-image-updater.md).
+image, and the old one keeps running. Design: [ADR 0008](adr/0008-scanned-image-updater.md); the
+script: [podman-image-updater](https://github.com/babraham123/podman-image-updater).
 
 | ntfy `alert` topic | Priority |
 | --- | --- |
@@ -141,7 +142,7 @@ image, and the old one keeps running. Design: [ADR 0008](adr/0008-scanned-image-
 ssh manualadmin@NODE
 sudo journalctl -u image_updater
 # What would change, with scan results; loads and restarts nothing
-sudo /root/homelab-rendered/src/base/podman/image_updater.py --dry-run
+sudo image_updater --dry-run
 # A run now
 sudo systemctl start image_updater
 ```
@@ -156,10 +157,9 @@ sudo systemctl start image_updater
     ```
 
   - that digest only: on the node as root (never through the dispatcher or OliveTin),
-    `sudo /root/homelab-rendered/src/base/podman/image_updater.py accept CONTAINER`. It rescans,
-    prints the findings, records the digest and notifies; the next run loads it. For a built image
-    it builds and scans instead, and records the `build.sh` inputs, so the next run's build of the
-    same inputs passes.
+    `sudo image_updater accept CONTAINER`. It rescans, prints the findings, records the digest and
+    notifies; the next run loads it. For a built image it builds and scans instead, and records the
+    `build.sh` inputs, so the next run's build of the same inputs passes.
 - Built images: every one has a `src/services/<service>/build.sh` (`versions`, `build TAG`), and
   is rebuilt through the scan gate when any input it reports changes, like `geoip_generator`'s base
   image digests, haproxy-mapper commit and own files. The render fails for a `build:` image
@@ -167,6 +167,9 @@ sudo systemctl start image_updater
 - Roll back by hand: `podman tag localhost/NAME:rollback localhost/NAME:TAG`, then
   `systemctl restart CONTAINER`. The updater doesn't retry that digest; it moves on when upstream
   does.
+- Update the updater itself: set `commit` and `sha` (`sha256sum image_updater.py` at that commit)
+  in the `image_updater` case of `src/base/debian/install_svcs.sh`, deploy, then run
+  `install_image_updater` on each node. A deploy alone only changes its image list.
 
 ## Alerting pipeline test
 

@@ -72,6 +72,17 @@ case $1 in
       > /etc/apt/sources.list.d/trivy.list
     apt update
     apt install -y trivy
+    # github.com/babraham123/podman-image-updater, pinned to a commit and its file's hash
+    commit=ec6da3687f2d1d1292099bfe21e13f1714b1b68f
+    sha=d8556c5912a09f44bd3f1fa51feecef20c3201bccda8b374bc79e9b26390b9e2
+    url="https://raw.githubusercontent.com/babraham123/podman-image-updater/${commit}/image_updater.py"
+    wget --output-document=image_updater.py "$url"
+    echo "${sha}  image_updater.py" | sha256sum --check || die "checksum mismatch: $url"
+    install -D image_updater.py /usr/local/bin/image_updater
+    rm image_updater.py
+    # Its default config path; a link, so a deploy updates the image list in place
+    install -d -m 700 /etc/image_updater
+    ln -sfn "${rendered}/base/podman/image_updater.json" /etc/image_updater/config.json
     install -D -m 644 -t /etc/systemd/system base/podman/image_updater.service \
       base/podman/image_updater.timer
     mkdir -p /etc/systemd/system/image_updater.timer.d

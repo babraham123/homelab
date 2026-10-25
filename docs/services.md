@@ -91,6 +91,7 @@ host timers and path units; see the [reading guide](guides/reading.md).
 | Host | Service | Purpose |
 | ------ | --------- | --------- |
 | container VMs | mdns_repeater | Bridge mDNS between VM NIC and Podman network |
+| container VMs, vpnsvcs | image_updater (timer) | Nightly image updates behind a Trivy scan ([podman-image-updater](https://github.com/babraham123/podman-image-updater), [Maintenance](maintenance.md#container-images)) |
 | container VMs, vpnsvcs, pve1, pve2 | node_exporter | Host metrics |
 | websvcs, devtop, gaming | nvidia_gpu_exporter | GPU temperature, power, clocks for the cards pve2 passes through; "GPUs" dashboard |
 | pve1, pve2 | vm_watchdog | VM health watchdog |

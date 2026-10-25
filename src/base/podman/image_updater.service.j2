@@ -12,7 +12,9 @@ Type=exec
 
 Environment=TZ={{ personal.timezone }}
 
-ExecStart=/root/homelab-rendered/src/base/podman/image_updater.py
+# Installed by src/base/debian/install_svcs.sh image_updater; reads
+# /etc/image_updater/config.json, a link to src/base/podman/image_updater.json
+ExecStart=/usr/local/bin/image_updater
 
 # Backstop only. The script stops starting images at its own deadline, since a killed
 # podman auto-update can leave a unit stopped.

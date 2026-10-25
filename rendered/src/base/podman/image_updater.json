@@ -1,0 +1,83 @@
+{
+  "registry_auth": {
+    "docker.io": {
+      "username": {"command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "docker_hub_username"]},
+      "password": {"command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "docker_hub_token"]}
+    }
+  },
+  "hosts": {
+    "homesvcs": {
+      "images": [
+        {"container": "traefik", "image": "localhost/library/traefik:v3.7", "service": "traefik", "trivyignore": "/root/homelab-rendered/src/services/traefik/.trivyignore", "upstream": "docker.io/library/traefik:v3.7"},
+        {"container": "crowdsec_appsec", "image": "localhost/crowdsecurity/crowdsec:latest", "service": "crowdsec_appsec", "trivyignore": "/root/homelab-rendered/src/services/crowdsec_appsec/.trivyignore", "upstream": "docker.io/crowdsecurity/crowdsec:latest"},
+        {"container": "vmagent", "image": "localhost/victoriametrics/vmagent:latest", "service": "vmagent", "trivyignore": "/root/homelab-rendered/src/services/vmagent/.trivyignore", "upstream": "docker.io/victoriametrics/vmagent:latest"},
+        {"container": "mosquitto", "image": "localhost/library/eclipse-mosquitto:latest", "service": "mosquitto", "trivyignore": "/root/homelab-rendered/src/services/mosquitto/.trivyignore", "upstream": "docker.io/library/eclipse-mosquitto:latest"},
+        {"container": "zigbee2mqtt", "image": "localhost/koenkk/zigbee2mqtt:latest", "service": "zigbee2mqtt", "trivyignore": "/root/homelab-rendered/src/services/zigbee2mqtt/.trivyignore", "upstream": "ghcr.io/koenkk/zigbee2mqtt:latest"},
+        {"container": "home_assistant", "image": "localhost/homeassistant/home-assistant:2026.10", "service": "home_assistant", "trivyignore": "/root/homelab-rendered/src/services/home_assistant/.trivyignore", "upstream": "docker.io/homeassistant/home-assistant:2026.10"},
+        {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "trivyignore": "/root/homelab-rendered/src/services/fluentbit/.trivyignore", "upstream": "docker.io/fluent/fluent-bit:5.1"}
+      ],
+      "ntfy": {"url": "https://push.janedoe.com/alert", "token": {"command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "ntfy_alert_token"]}},
+      "deadline_s": 1500,
+      "boot_delay_s": 0
+    },
+    "secsvcs": {
+      "images": [
+        {"container": "postgres", "image": "localhost/library/postgres:18-alpine", "service": "postgres", "trivyignore": "/root/homelab-rendered/src/services/postgres/.trivyignore", "upstream": "docker.io/library/postgres:18-alpine"},
+        {"container": "lldap", "image": "localhost/lldap/lldap:stable", "service": "lldap", "trivyignore": "/root/homelab-rendered/src/services/lldap/.trivyignore", "upstream": "docker.io/lldap/lldap:stable"},
+        {"container": "authelia", "image": "localhost/authelia/authelia:4.39", "service": "authelia", "trivyignore": "/root/homelab-rendered/src/services/authelia/.trivyignore", "upstream": "docker.io/authelia/authelia:4.39"},
+        {"container": "victorialogs", "image": "localhost/victoriametrics/victoria-logs:latest", "service": "victorialogs", "trivyignore": "/root/homelab-rendered/src/services/victorialogs/.trivyignore", "upstream": "docker.io/victoriametrics/victoria-logs:latest"},
+        {"container": "gatus", "image": "localhost/twinproduction/gatus:latest", "service": "gatus", "trivyignore": "/root/homelab-rendered/src/services/gatus/.trivyignore", "upstream": "docker.io/twinproduction/gatus:latest"},
+        {"container": "grafana", "image": "localhost/grafana/grafana-oss:latest", "service": "grafana", "trivyignore": "/root/homelab-rendered/src/services/grafana/.trivyignore", "upstream": "docker.io/grafana/grafana-oss:latest"},
+        {"container": "vaultwarden", "image": "localhost/vaultwarden/server:latest", "service": "vaultwarden", "trivyignore": "/root/homelab-rendered/src/services/vaultwarden/.trivyignore", "upstream": "docker.io/vaultwarden/server:latest"},
+        {"container": "ntfy_idp_push", "image": "localhost/babraham123/ntfy-idp-push:latest", "service": "ntfy_idp_push", "trivyignore": "/root/homelab-rendered/src/services/ntfy_idp_push/.trivyignore", "upstream": "ghcr.io/babraham123/ntfy-idp-push:latest"},
+        {"container": "olive_tin", "image": "localhost/jamesread/olivetin:latest-3k", "service": "olive_tin", "trivyignore": "/root/homelab-rendered/src/services/olive_tin/.trivyignore", "upstream": "docker.io/jamesread/olivetin:latest-3k"},
+        {"container": "crowdsec", "image": "localhost/crowdsecurity/crowdsec:latest", "service": "crowdsec", "trivyignore": "/root/homelab-rendered/src/services/crowdsec/.trivyignore", "upstream": "docker.io/crowdsecurity/crowdsec:latest"},
+        {"container": "crowdsec_appsec", "image": "localhost/crowdsecurity/crowdsec:latest", "service": "crowdsec_appsec", "trivyignore": "/root/homelab-rendered/src/services/crowdsec_appsec/.trivyignore", "upstream": "docker.io/crowdsecurity/crowdsec:latest"},
+        {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "trivyignore": "/root/homelab-rendered/src/services/fluentbit/.trivyignore", "upstream": "docker.io/fluent/fluent-bit:5.1"},
+        {"container": "traefik", "image": "localhost/library/traefik:v3.7", "service": "traefik", "trivyignore": "/root/homelab-rendered/src/services/traefik/.trivyignore", "upstream": "docker.io/library/traefik:v3.7"},
+        {"container": "victoriametrics", "image": "localhost/victoriametrics/victoria-metrics:latest", "service": "victoriametrics", "trivyignore": "/root/homelab-rendered/src/services/victoriametrics/.trivyignore", "upstream": "docker.io/victoriametrics/victoria-metrics:latest"},
+        {"container": "vmalert", "image": "localhost/victoriametrics/vmalert:latest", "service": "vmalert", "trivyignore": "/root/homelab-rendered/src/services/vmalert/.trivyignore", "upstream": "docker.io/victoriametrics/vmalert:latest"},
+        {"container": "alertmanager", "image": "localhost/prom/alertmanager:latest", "service": "alertmanager", "trivyignore": "/root/homelab-rendered/src/services/alertmanager/.trivyignore", "upstream": "docker.io/prom/alertmanager:latest"},
+        {"container": "ntfy-alertmanager", "image": "localhost/xenrox/ntfy-alertmanager:latest", "service": "ntfy-alertmanager", "trivyignore": "/root/homelab-rendered/src/services/ntfy-alertmanager/.trivyignore", "upstream": "docker.io/xenrox/ntfy-alertmanager:latest"},
+        {"container": "ntfy", "image": "localhost/binwiederhier/ntfy:latest", "service": "ntfy", "trivyignore": "/root/homelab-rendered/src/services/ntfy/.trivyignore", "upstream": "docker.io/binwiederhier/ntfy:latest"}
+      ],
+      "ntfy": {"url": "http://10.10.0.13:2586/alert", "token": {"command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "ntfy_alert_token"]}},
+      "deadline_s": 0,
+      "boot_delay_s": 900
+    },
+    "vpnsvcs": {
+      "images": [
+        {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "trivyignore": "/root/homelab-rendered/src/services/fluentbit/.trivyignore", "upstream": "docker.io/fluent/fluent-bit:5.1"},
+        {"container": "vmagent", "image": "localhost/victoriametrics/vmagent:latest", "service": "vmagent", "trivyignore": "/root/homelab-rendered/src/services/vmagent/.trivyignore", "upstream": "docker.io/victoriametrics/vmagent:latest"},
+        {"build": "geoip_generator", "build_script": "/root/homelab-rendered/src/services/geoip_generator/build.sh", "container": "geoip_generator", "image": "localhost/geoip_generator:latest", "service": "geoip_generator", "trivyignore": "/root/homelab-rendered/src/services/geoip_generator/.trivyignore"}
+      ],
+      "ntfy": {"url": "https://push.janedoe.com/alert", "token": {"command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "ntfy_alert_token"]}},
+      "deadline_s": 1500,
+      "boot_delay_s": 0
+    },
+    "websvcs": {
+      "images": [
+        {"container": "traefik", "image": "localhost/library/traefik:v3.7", "service": "traefik", "trivyignore": "/root/homelab-rendered/src/services/traefik/.trivyignore", "upstream": "docker.io/library/traefik:v3.7"},
+        {"container": "crowdsec_appsec", "image": "localhost/crowdsecurity/crowdsec:latest", "service": "crowdsec_appsec", "trivyignore": "/root/homelab-rendered/src/services/crowdsec_appsec/.trivyignore", "upstream": "docker.io/crowdsecurity/crowdsec:latest"},
+        {"container": "vmagent", "image": "localhost/victoriametrics/vmagent:latest", "service": "vmagent", "trivyignore": "/root/homelab-rendered/src/services/vmagent/.trivyignore", "upstream": "docker.io/victoriametrics/vmagent:latest"},
+        {"container": "nginx", "image": "localhost/library/nginx:stable", "service": "nginx", "trivyignore": "/root/homelab-rendered/src/services/nginx/.trivyignore", "upstream": "docker.io/library/nginx:stable"},
+        {"container": "homepage", "image": "localhost/gethomepage/homepage:latest", "service": "homepage", "trivyignore": "/root/homelab-rendered/src/services/homepage/.trivyignore", "upstream": "ghcr.io/gethomepage/homepage:latest"},
+        {"container": "isso", "image": "localhost/isso-comments/isso:release", "service": "isso", "trivyignore": "/root/homelab-rendered/src/services/isso/.trivyignore", "upstream": "ghcr.io/isso-comments/isso:release"},
+        {"container": "guacamole", "image": "localhost/guacamole/guacamole:1.6.0", "service": "guacamole", "trivyignore": "/root/homelab-rendered/src/services/guacamole/.trivyignore", "upstream": "docker.io/guacamole/guacamole:1.6.0"},
+        {"container": "guacd", "image": "localhost/guacamole/guacd:1.6.0", "service": "guacd", "trivyignore": "/root/homelab-rendered/src/services/guacd/.trivyignore", "upstream": "docker.io/guacamole/guacd:1.6.0"},
+        {"build": "finance_exporter", "build_script": "/root/homelab-rendered/src/services/finance_exporter/build.sh", "container": "finance_exporter", "image": "localhost/finance_exporter:latest", "service": "finance_exporter", "trivyignore": "/root/homelab-rendered/src/services/finance_exporter/.trivyignore"},
+        {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "trivyignore": "/root/homelab-rendered/src/services/fluentbit/.trivyignore", "upstream": "docker.io/fluent/fluent-bit:5.1"},
+        {"container": "copyparty", "image": "localhost/copyparty/ac:latest", "service": "copyparty", "trivyignore": "/root/homelab-rendered/src/services/copyparty/.trivyignore", "upstream": "docker.io/copyparty/ac:latest"},
+        {"container": "linkding", "image": "localhost/sissbruecker/linkding:latest-plus", "service": "linkding", "trivyignore": "/root/homelab-rendered/src/services/linkding/.trivyignore", "upstream": "docker.io/sissbruecker/linkding:latest-plus"},
+        {"container": "readeck", "image": "localhost/readeck/readeck:latest", "service": "readeck", "trivyignore": "/root/homelab-rendered/src/services/readeck/.trivyignore", "upstream": "codeberg.org/readeck/readeck:latest"},
+        {"container": "storyteller", "image": "localhost/storyteller-platform/storyteller:web-v2", "service": "storyteller", "trivyignore": "/root/homelab-rendered/src/services/storyteller/.trivyignore", "upstream": "registry.gitlab.com/storyteller-platform/storyteller:web-v2"},
+        {"build": "calliope", "build_script": "/root/homelab-rendered/src/services/calliope/build.sh", "container": "calliope", "image": "localhost/calliope:latest", "service": "calliope", "trivyignore": "/root/homelab-rendered/src/services/calliope/.trivyignore"},
+        {"build": "bookmark_handoff", "build_script": "/root/homelab-rendered/src/services/bookmark_handoff/build.sh", "container": "bookmark_handoff", "image": "localhost/bookmark_handoff:latest", "service": "bookmark_handoff", "trivyignore": "/root/homelab-rendered/src/services/bookmark_handoff/.trivyignore"},
+        {"build": "yt_to_audiobook", "build_script": "/root/homelab-rendered/src/services/yt_to_audiobook/build.sh", "container": "yt_to_audiobook", "image": "localhost/yt_to_audiobook:latest", "service": "yt_to_audiobook", "trivyignore": "/root/homelab-rendered/src/services/yt_to_audiobook/.trivyignore"}
+      ],
+      "ntfy": {"url": "https://push.janedoe.com/alert", "token": {"command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "ntfy_alert_token"]}},
+      "deadline_s": 1500,
+      "boot_delay_s": 0
+    }
+  }
+}

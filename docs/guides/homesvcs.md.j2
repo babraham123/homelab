@@ -34,7 +34,7 @@ src/nodes/homesvcs/install_svcs.sh fluentbit
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
 # Every image unchanged: the installs just loaded them
-src/base/podman/image_updater.py --dry-run
+image_updater --dry-run
 ```
 
 - On initial install, disable HA OIDC

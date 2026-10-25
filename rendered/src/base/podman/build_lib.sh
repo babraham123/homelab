@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Helpers for the src/services/<service>/build.sh scripts that image_updater.py runs,
+# Helpers for the src/services/<service>/build.sh scripts that the image updater runs,
 # sourced after lib.sh:
 #   # shellcheck source=src/base/podman/build_lib.sh
 #   source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/build_lib.sh"
