@@ -44,6 +44,9 @@ flowchart LR
 
 - Tag a bookmark `toread` in linkding; within 15 min it's in Readeck and retagged `readeck`
 - Errors: `journalctl -u bookmark_handoff`
+- The handoff (this, `listen` and `tolisten`) is
+  [bookmark-handoff](https://github.com/babraham123/bookmark-handoff), run by
+  `bookmark_handoff.timer`
 - Clients sign in through Readeck, then Authelia
   - Readeck browser extension (Firefox, Chrome)
   - Readeck apps for Android and iOS
