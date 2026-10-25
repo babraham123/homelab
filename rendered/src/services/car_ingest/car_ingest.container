@@ -1,0 +1,40 @@
+# /etc/containers/systemd/car_ingest.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# A oneshot job, not a server: car_ingest.timer runs it every 15 minutes. It imports the
+# Car Scanner recordings and WiCAN batches uploaded to copyparty's /car into VictoriaMetrics
+# on secsvcs (https://github.com/babraham123/car-ingest).
+
+[Unit]
+Description="Homelab: Imports car recordings from copyparty into VictoriaMetrics"
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=localhost/car_ingest:latest
+ContainerName=car_ingest
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+# Root in the container still needs it to move copyparty's uploads (1000:1000) to failed/
+# and to write node_exporter's textfile directory.
+AddCapability=DAC_OVERRIDE
+ReadOnly=true
+
+Network=net.network
+IP=10.11.0.26
+
+# The phone's zone: recording start times are phone-local, and trips are named in it
+Environment=TZ=America/Los_Angeles
+Environment=CAR_INGEST_VM_URL=https://metrics.janedoe.com
+Environment=CAR_INGEST_RETENTION_DAYS=14
+Environment=CAR_INGEST_DEFAULT_CAR=ev6
+Environment=CAR_INGEST_CAR_SOURCES=wican_AA_BB_CC_DD_EE_01=ev6
+Secret=victoriametrics_admin_password,type=env,target=CAR_INGEST_VM_PASSWORD
+
+Volume=/var/opt/copyparty/data/car:/car
+Volume=/var/lib/car_ingest:/state
+Volume=/var/lib/node_exporter/textfile_collector:/metrics
+
+[Service]
+Type=oneshot
+TimeoutStartSec=10m

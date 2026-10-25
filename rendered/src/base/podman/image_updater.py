@@ -119,6 +119,7 @@ nodes = {
       {"build": "finance_exporter", "container": "finance_exporter", "image": "localhost/finance_exporter:latest", "service": "finance_exporter"},
       {"container": "fluentbit", "image": "localhost/fluent/fluent-bit:5.1", "service": "fluentbit", "upstream": "docker.io/fluent/fluent-bit:5.1"},
       {"container": "copyparty", "image": "localhost/copyparty/ac:latest", "service": "copyparty", "upstream": "docker.io/copyparty/ac:latest"},
+      {"build": "car_ingest", "container": "car_ingest", "image": "localhost/car_ingest:latest", "service": "car_ingest"},
       {"container": "linkding", "image": "localhost/sissbruecker/linkding:latest-plus", "service": "linkding", "upstream": "docker.io/sissbruecker/linkding:latest-plus"},
       {"container": "readeck", "image": "localhost/readeck/readeck:latest", "service": "readeck", "upstream": "codeberg.org/readeck/readeck:latest"},
       {"container": "storyteller", "image": "localhost/storyteller-platform/storyteller:web-v2", "service": "storyteller", "upstream": "registry.gitlab.com/storyteller-platform/storyteller:web-v2"},

@@ -31,7 +31,7 @@ Environment=XDG_CONFIG_HOME=/state
 # Ref: https://github.com/9001/copyparty/tree/hovudstraum/scripts/docker
 Volume=/etc/opt/copyparty:/cfg:ro
 Volume=/var/opt/copyparty/state:/state
-# A host path, not a named volume, so car_ingest on the host can read uploads
+# A host path, not a named volume, so car_ingest's container can mount /car
 Volume=/var/opt/copyparty/data:/w
 
 [Service]
