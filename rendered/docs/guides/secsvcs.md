@@ -266,7 +266,9 @@ podman exec ntfy_idp_push ntfy-idp-push user list
 `net_probe.timer` runs hourly: pings to websvcs and the VPS every run; at fixed hours, one at a
 time and only when the path isn't busy, an Ookla speed test (03, 09, 15, 21) and 10-second iperf3
 runs both ways to websvcs (01, 07, 13, 19) and to the VPS (04). Results land in node_exporter's
-textfile collector. `src/base/net_probe/net_probe.py.j2` has the slots and busy thresholds.
+textfile collector. The probe is [net-probe](https://github.com/babraham123/net-probe), which
+`install_net_probe` fetches at the commit pinned in `src/base/debian/install_svcs.sh` and checks
+against its sha256; `src/base/net_probe/config.json.j2` has the targets, slots and busy thresholds.
 
 - Set `isp.down_mbps` and `isp.up_mbps` in `vars.yml` to the plan's advertised speeds, then
   `tools/deploy_src.sh`

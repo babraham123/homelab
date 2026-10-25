@@ -103,7 +103,13 @@ case $1 in
     install -D -t /usr/local/bin speedtest
     rm speedtest speedtest.tgz
     DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
-    # Runs in place, so a deploy updates it
+    # The probe itself, pinned to a commit; base/net_probe/config.json is its config
+    url=https://raw.githubusercontent.com/babraham123/net-probe/53d791be849c30d0596349f793152a976dcf49b6/net_probe.py
+    sha=e54c3b9e961018a81327e6cc51e1eb61f19f48a032dcc389b75e507d4ecae1b0
+    wget --output-document=net_probe.py "$url"
+    echo "${sha}  net_probe.py" | sha256sum --check || die "checksum mismatch: $url"
+    install -D net_probe.py /usr/local/bin/net_probe
+    rm net_probe.py
     install -D -m 644 -t /etc/systemd/system base/net_probe/net_probe.service base/net_probe/net_probe.timer
     systemctl daemon-reload
     systemctl enable net_probe.timer

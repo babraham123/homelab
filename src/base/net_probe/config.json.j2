@@ -1,0 +1,34 @@
+{#
+  net_probe's config (github.com/babraham123/net-probe), read in place by net_probe.service on
+  secsvcs, so a deploy updates it. JSON allows no comments, so they are Jinja's, gone once rendered.
+  Heavy tests in run order. slots: local hours, apart so one run never carries two of them.
+  busy: queries in bit/s; any series over its limit skips the test.
+  - speedtest: 21:00 catches the ISP's evening peak, 03:00 is the baseline. igc0 is pfSense's
+    WAN in Telegraf's net plugin (the i226's first port, fixed by the driver).
+  - iperf pve2: a Moonlight stream from the gaming VM crosses pfSense too. pve2's physical NICs
+    are matched by pattern, so a NIC rename doesn't silently disable its busy check.
+  - iperf vps: the reverse run is billed VPS egress, so once a day, when public traffic is
+    negligible.
+#}
+{
+  "victoriametrics": {
+    "query_url": "http://metrics.{{ site.url }}:8428/api/v1/query",
+    "user": "admin",
+    "password_command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "victoriametrics_admin_password"]
+  },
+  "isp": {"down_mbps": {{ isp.down_mbps }}, "up_mbps": {{ isp.up_mbps }}},
+  "targets": {"pve2": "{{ websvcs.ip }}", "vps": "{{ vpnsvcs.tailnet_ip }}"},
+  "metrics_path": "/var/lib/node_exporter/textfile_collector/homelab_net_probe.prom",
+  "speedtest": "/usr/local/bin/speedtest",
+  "tests": [
+    {"test": "speedtest", "slots": [3, 9, 15, 21], "busy": [
+      {"query": "rate(net_bytes_recv{interface=\"igc0\"}[5m]) * 8", "limit_bps": {{ (0.3 * isp.down_mbps * 1e6) | int }}},
+      {"query": "rate(net_bytes_sent{interface=\"igc0\"}[5m]) * 8", "limit_bps": {{ (0.3 * isp.up_mbps * 1e6) | int }}}
+    ]},
+    {"test": "iperf", "path": "pve2", "slots": [1, 7, 13, 19], "busy": [
+      {"query": "rate(node_network_receive_bytes_total{host=\"pve2\", device=~\"en.*|eth.*\"}[5m]) * 8", "limit_bps": 200000000},
+      {"query": "rate(node_network_transmit_bytes_total{host=\"pve2\", device=~\"en.*|eth.*\"}[5m]) * 8", "limit_bps": 200000000}
+    ]},
+    {"test": "iperf", "path": "vps", "slots": [4]}
+  ]
+}
