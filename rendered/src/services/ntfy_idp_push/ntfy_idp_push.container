@@ -20,7 +20,8 @@ AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true
-HealthCmd=/usr/bin/ntfy-idp-push healthcheck
+# Exec form: distroless has no /bin/sh to run the string form
+HealthCmd=["/usr/bin/ntfy-idp-push", "healthcheck"]
 HealthInterval=30s
 HealthRetries=3
 HealthOnFailure=kill
