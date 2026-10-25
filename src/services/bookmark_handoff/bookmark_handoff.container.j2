@@ -1,7 +1,10 @@
 # /etc/containers/systemd/bookmark_handoff.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
-# A oneshot job, not a server: bookmark_handoff.timer runs it every 15 minutes. It
-# reaches linkding and Readeck on their container IPs, under their public host names.
+# A oneshot job, not a server: bookmark_handoff.timer runs it every 15 minutes. The image
+# is babraham123/bookmark-handoff; its README documents the environment. It reaches
+# linkding and Readeck on their container IPs, under their public host names, so Authelia
+# isn't in the path; each app's own API token is. Tag names and paths are the image's
+# defaults: toread, listen, tolisten, and the /books and /state mounts below.
 
 [Unit]
 Description="Homelab: Hands tagged bookmarks to Readeck, Calliope and yt_to_audiobook"
