@@ -2,7 +2,7 @@
 # Builds localhost/calliope for src/base/podman/image_updater.py, which scans the result
 # before it replaces the running image. Its inputs are TTS-Narrated-Ebook-Creator's main
 # branch, by commit, and the images its Containerfile builds from (FROM, COPY --from), by
-# digest. calliope_batch.py is mounted at run time, so it isn't one.
+# digest. The branch carries the quadlet's entrypoint, batch/calliope_batch.py, too.
 # Usage:
 #   src/services/calliope/build.sh versions    # the inputs, one per line
 #   src/services/calliope/build.sh build TAG   # builds localhost/calliope:TAG

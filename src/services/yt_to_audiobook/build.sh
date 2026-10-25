@@ -2,7 +2,7 @@
 # Builds localhost/yt_to_audiobook for src/base/podman/image_updater.py, which scans the
 # result before it replaces the running image. Its inputs are yt-to-audiobook's main branch,
 # by commit, and the images its Containerfile builds from (FROM, COPY --from), by digest.
-# yt_to_audiobook_batch.py is mounted at run time, so it isn't one.
+# The branch carries the quadlet's entrypoint, batch/yt_to_audiobook_batch.py, too.
 # Usage:
 #   src/services/yt_to_audiobook/build.sh versions    # the inputs, one per line
 #   src/services/yt_to_audiobook/build.sh build TAG   # builds localhost/yt_to_audiobook:TAG

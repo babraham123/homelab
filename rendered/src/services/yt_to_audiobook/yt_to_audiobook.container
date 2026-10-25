@@ -1,8 +1,8 @@
 # /etc/containers/systemd/yt_to_audiobook.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # A oneshot batch job, not a server: yt_to_audiobook.path and yt_to_audiobook.timer start it,
-# and each run turns one video from the inbox into a read-along EPUB
-# (yt_to_audiobook_batch.py, around the image's yt-to-audiobook).
+# and each run turns one video from the inbox into a read-along EPUB (the image's
+# /opt/yt_to_audiobook_batch.py, from yt-to-audiobook's batch/; its README has the inbox format).
 
 [Unit]
 Description="Homelab: turns one YouTube video from the inbox into a read-along EPUB"
@@ -35,7 +35,6 @@ Environment=NTFY_URL=https://push.janedoe.com/alert
 Environment=READALOUDS_OWNER=1000:1000
 Secret=ntfy_alert_token,type=env,target=NTFY_ALERT_ACCESS_TOKEN
 
-Volume=/etc/opt/yt_to_audiobook/yt_to_audiobook_batch.py:/opt/yt_to_audiobook_batch.py:ro
 Volume=/srv/media/books/videos:/videos
 Volume=/srv/media/books/readalouds:/readalouds
 

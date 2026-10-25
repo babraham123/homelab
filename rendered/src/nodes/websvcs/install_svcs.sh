@@ -199,7 +199,6 @@ case $1 in
     require_media
     mkdir -p /etc/opt/calliope/voices /srv/media/books/narrate/{inbox,work,failed} \
       /srv/media/books/readalouds/{books,articles}
-    install -D -m 644 -t /etc/opt/calliope services/calliope/calliope_batch.py
     install_quadlet services/calliope/calliope.container services/calliope/calliope_cache.volume
     install -D -m 644 -t /etc/systemd/system services/calliope/calliope.path \
       services/calliope/calliope.timer
@@ -211,7 +210,6 @@ case $1 in
     require_media
     mkdir -p /srv/media/books/videos/{inbox,work,failed} /srv/media/books/readalouds/videos
     chown 1000:1000 /srv/media/books/readalouds/videos
-    install -D -m 644 -t /etc/opt/yt_to_audiobook services/yt_to_audiobook/yt_to_audiobook_batch.py
     install_quadlet services/yt_to_audiobook/yt_to_audiobook.container
     install -D -m 644 -t /etc/systemd/system services/yt_to_audiobook/yt_to_audiobook.path \
       services/yt_to_audiobook/yt_to_audiobook.timer
