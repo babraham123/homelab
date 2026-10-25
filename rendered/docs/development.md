@@ -60,9 +60,10 @@
 
 - Every script that runs on a Debian or PVE node sources `src/base/lib.sh` first:
   `set -euo pipefail`, `log`/`warn`/`die`, `require_root`, `require_reachable`/`wait_reachable`,
-  `install_quadlet`, `reload_restart`. Scripts run in place source it relative to themselves; copies
-  installed to `/usr/local/bin` with `install_bin` (and the dispatcher) source
-  `/usr/local/lib/homelab/lib.sh`, which `install_lib` puts there
+  `install_quadlet`, `reload_restart`, `fetch_pinned` (a download checked against a pinned
+  sha256). Scripts run in place source it relative to themselves; copies installed to
+  `/usr/local/bin` with `install_bin` (and the dispatcher) source `/usr/local/lib/homelab/lib.sh`,
+  which `install_lib` puts there
 - The container VMs' `install_svcs.sh` also source `src/base/podman/svcs_lib.sh`:
   `install_traefik_config NODE` and `install_fluentbit_config [CONFIG]`, the config steps every
   Traefik and Fluent Bit case shares. The case still installs the quadlet and restarts the unit

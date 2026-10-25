@@ -1,8 +1,7 @@
 #!/bin/bash
-# Builds localhost/geoip_generator for src/base/podman/image_updater.py, which scans the
-# result before it replaces the running image. Its inputs are babraham123/haproxy-mapper's
-# main branch, by commit, and the images its geoip_generator.Containerfile builds from, by
-# digest.
+# Builds localhost/geoip_generator for the image updater, which scans the result before it
+# replaces the running image. Its inputs are babraham123/haproxy-mapper's main branch, by commit,
+# and the images its geoip_generator.Containerfile builds from, by digest.
 # Usage:
 #   src/services/geoip_generator/build.sh versions    # the inputs, one per line
 #   src/services/geoip_generator/build.sh build TAG   # builds localhost/geoip_generator:TAG

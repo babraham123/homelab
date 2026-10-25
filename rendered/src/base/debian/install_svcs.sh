@@ -75,9 +75,8 @@ case $1 in
     # github.com/babraham123/podman-image-updater, pinned to a commit and its file's hash
     commit=ec6da3687f2d1d1292099bfe21e13f1714b1b68f
     sha=d8556c5912a09f44bd3f1fa51feecef20c3201bccda8b374bc79e9b26390b9e2
-    url="https://raw.githubusercontent.com/babraham123/podman-image-updater/${commit}/image_updater.py"
-    wget --output-document=image_updater.py "$url"
-    echo "${sha}  image_updater.py" | sha256sum --check || die "checksum mismatch: $url"
+    fetch_pinned "https://raw.githubusercontent.com/babraham123/podman-image-updater/${commit}/image_updater.py" \
+      "$sha" image_updater.py
     install -D image_updater.py /usr/local/bin/image_updater
     rm image_updater.py
     # Its default config path; a link, so a deploy updates the image list in place
@@ -95,19 +94,18 @@ case $1 in
   net_probe)
     # Ookla's CLI ships no checksums, so the tarball is pinned here; the iperf3 package
     # asks whether to run its own daemon, and the default is no.
-    url=https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-x86_64.tgz
-    sha=5690596c54ff9bed63fa3732f818a05dbc2db19ad36ed68f21ca5f64d5cfeeb7
-    wget --output-document=speedtest.tgz "$url"
-    echo "${sha}  speedtest.tgz" | sha256sum --check || die "checksum mismatch: $url"
+    fetch_pinned https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-x86_64.tgz \
+      5690596c54ff9bed63fa3732f818a05dbc2db19ad36ed68f21ca5f64d5cfeeb7 speedtest.tgz
     tar xzf speedtest.tgz speedtest
     install -D -t /usr/local/bin speedtest
     rm speedtest speedtest.tgz
     DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
-    # The probe itself, pinned to a commit; base/net_probe/config.json is its config
-    url=https://raw.githubusercontent.com/babraham123/net-probe/53d791be849c30d0596349f793152a976dcf49b6/net_probe.py
+    # github.com/babraham123/net-probe, pinned to a commit and its file's hash;
+    # base/net_probe/config.json is its config
+    commit=53d791be849c30d0596349f793152a976dcf49b6
     sha=e54c3b9e961018a81327e6cc51e1eb61f19f48a032dcc389b75e507d4ecae1b0
-    wget --output-document=net_probe.py "$url"
-    echo "${sha}  net_probe.py" | sha256sum --check || die "checksum mismatch: $url"
+    fetch_pinned "https://raw.githubusercontent.com/babraham123/net-probe/${commit}/net_probe.py" \
+      "$sha" net_probe.py
     install -D net_probe.py /usr/local/bin/net_probe
     rm net_probe.py
     install -D -m 644 -t /etc/systemd/system base/net_probe/net_probe.service base/net_probe/net_probe.timer

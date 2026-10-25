@@ -63,6 +63,13 @@ receive_files() {
   cd "$dir"
 }
 
+# Usage: fetch_pinned URL SHA256 FILE; downloads URL to FILE, or dies unless it hashes
+# to SHA256. For downloads that ship no signature, pinned by the caller instead.
+fetch_pinned() {
+  wget --output-document="$3" "$1"
+  echo "$2  $3" | sha256sum --check || die "checksum mismatch: $1"
+}
+
 install_lib() { install -D -m 644 "${rendered}/base/lib.sh" /usr/local/lib/homelab/lib.sh; }
 # Usage: install_bin SCRIPT...; for scripts run from /usr/local/bin, which source the
 # installed library
