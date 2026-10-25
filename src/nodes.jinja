@@ -53,7 +53,7 @@
     sudo_cmds[node]:  sorted commands the dispatcher runs with sudo (sudoers)
     subdomains[node]: sorted subdomains its Traefik serves (Unbound, HAProxy)
     admin_subdomains: sorted subdomains of the admin services, all nodes (Authelia)
-    uptime:           Gatus internal endpoints, [{name, host, url, tier, conditions}]
+    uptime:           Gatus internal endpoints, [{name, node, host, url, tier, conditions}]
     images[node]:     container images in update order (install order, update_last
                       entries last), [{service, container, image, upstream | build}] -#}
 {%- set dispatch = {} -%}
@@ -129,7 +129,7 @@
   {%- endfor -%}
   {%- for svc in services.values() if svc.uptime is defined -%}
     {%- set host = svc.subdomain ~ '.' ~ site.url -%}
-    {%- do uptime.append({'name': svc.uptime, 'host': host,
+    {%- do uptime.append({'name': svc.uptime, 'node': node, 'host': host,
         'url': 'https://' ~ host ~ svc.get('uptime_path', ''),
         'tier': svc.get('uptime_tier', 2),
         'conditions': svc.get('uptime_conditions', [])}) -%}

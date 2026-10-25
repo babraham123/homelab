@@ -1,7 +1,8 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/victoriametrics/prometheus.yml
 # Ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration
 # Every target carries a `host` label (the node, no port): ntfy-alertmanager tags pushes
-# by it, and it stays the same for every job on a node.
+# by it, and it stays the same for every job on a node, except Gatus's endpoint series.
 ---
 global:
   scrape_interval: 10s
@@ -46,6 +47,15 @@ scrape_configs:
       - targets: ['uptime.{{ site.url }}:8080']
     metrics_path: /metrics
     relabel_configs: *host
+    # Each endpoint's host is the node serving it, not the one running Gatus. Matched by
+    # name, not group: the group is part of the key Gatus stores the history under.
+    metric_relabel_configs:
+{%- for node, endpoints in inv.uptime | groupby('node') %}
+      - source_labels: [name]
+        regex: '{{ endpoints | map(attribute='name') | join('|') }}'
+        target_label: host
+        replacement: {{ node }}
+{%- endfor %}
   - job_name: 'crowdsec'
     # Engine and LAPI; cs_lapi_bouncer_requests_total shows each bouncer's pulls
     static_configs:
