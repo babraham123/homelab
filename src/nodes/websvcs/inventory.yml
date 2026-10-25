@@ -18,7 +18,7 @@ services:
   fluentbit: {upstream: docker.io/fluent/fluent-bit:5.1}
   snapraid: {}
   copyparty: {subdomain: files, uptime: copyparty, upstream: docker.io/copyparty/ac:latest}
-  car_ingest: {}
+  car_ingest: {build: car_ingest}
   # These need the media array mounted.
   linkding: {subdomain: archive, uptime: linkding, uptime_path: /health,
              upstream: docker.io/sissbruecker/linkding:latest-plus}

@@ -54,6 +54,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
 | .24 | bookmark_handoff | built from `src/services/bookmark_handoff/` | linkding `toread` → Readeck, Readeck `listen` → Calliope inbox, linkding `tolisten` → video inbox (timer) | n/a |
 | .25 | yt_to_audiobook | built from babraham123/yt-to-audiobook | Batch job: YouTube audio + captions → read-along EPUB for Storyteller | n/a |
+| .26 | car_ingest | built from babraham123/car-ingest | Car Scanner `.brc` recordings and WiCAN `.jsonl.gz` batches in copyparty's `/car` → VictoriaMetrics, every 15 min (timer) | n/a |
 | .50 | finance_exporter | built from babraham123/finance-exporter | Market prices, FRED rates and Treasury yields for VictoriaMetrics | n/a |
 
 - `nginx` serves `/var/opt/nginx/www` by subdomain (`www/`, `wifi/` (redirects to the AP's admin
@@ -108,7 +109,6 @@ host timers and path units; see the [reading guide](guides/reading.md).
 | vpnsvcs | deadman (timer) | Watches the alerting path from outside ([Observability](#observability)) |
 | websvcs | calliope (path + timer) | Starts the Calliope job while its inbox has EPUBs |
 | websvcs | yt_to_audiobook (path + timer) | Starts the yt_to_audiobook job while its inbox has requests |
-| websvcs | car_ingest (timer) | Car Scanner `.brc` recordings and WiCAN `.jsonl.gz` batches in copyparty's `/car` → VictoriaMetrics, every 15 min |
 | router | Unbound, mDNS-Bridge, ntopng, Telegraf | DNS, discovery, traffic + metrics |
 
 pve1, pve2, pbs2 and the router serve their own web UIs as pve1/pve2/pbs2/router.janedoe.com:

@@ -242,7 +242,14 @@ case $1 in
     reload_restart copyparty
     ;;
   car_ingest)
-    install_timer nodes/websvcs car_ingest
+    mkdir -p /var/lib/car_ingest /var/opt/copyparty/data/car/failed
+    # copyparty (1000:1000) owns /car, whichever of the two installs first
+    chown 1000:1000 /var/opt/copyparty/data/car /var/opt/copyparty/data/car/failed
+    install_quadlet services/car_ingest/car_ingest.container
+    install -D -m 644 -t /etc/systemd/system services/car_ingest/car_ingest.timer
+    # car_ingest.service is a oneshot; the timer starts it.
+    systemctl daemon-reload
+    systemctl enable --now car_ingest.timer
     ;;
   *)
     die "unknown service: $1"

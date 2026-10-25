@@ -214,7 +214,7 @@ tests/run.sh --fast   # skips the full render, about 3 s
 
 `tests/run.sh` runs every `test_*` function in `tests/*_test.sh`, each in its own subshell from the
 repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plain bash, plus
-`python3` for the parser the car suite tests.
+`python3` where a suite drives a Python script.
 
 - `check_rendered_test.sh`: `tools/check_rendered.py` on `tests/fixtures/tree`, a minimal rendered
   tree in the repo's layout (`src/nodes/<node>/inventory.yml` and all) that passes; each test breaks
@@ -222,9 +222,6 @@ repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plai
 - `nodes_jinja_test.sh`: the dispatcher cases, sudoers grants, OliveTin buttons, subdomains, uptime
   endpoints and image update order `src/nodes.jinja` derives from `tests/fixtures/nodes/`, written
   out from ADR 0006.
-- `car_ingest_test.sh`: `src/nodes/websvcs/car_ingest.py.j2` on synthetic Car Scanner `.brc`
-  recordings and WiCAN batches: the conversions, param mapping, trips, the `car` label, and a
-  run's import-once, `failed/`, `too_old` and retry handling.
 - `image_updater_test.sh`: the image updater's config, `src/base/podman/image_updater.json.j2`,
   from a fixture inventory.
 - `render_test.sh`: a full render of `vars.template.yml` passes every check (skipped by `--fast`,

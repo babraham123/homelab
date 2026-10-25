@@ -144,10 +144,10 @@ ticker:
   tips: [10Y]
   rates: [T10Y2Y, MORTGAGE30US]
 
-# car_ingest's `car` label. WiCAN batches name their dongle (wican:<BLE MAC>, with every
-# character outside [A-Za-z0-9._-] made _); sources maps it to a car. Car Scanner
-# recordings, and batches named otherwise, get default. An unmapped dongle is labelled
-# with its id, so it shows up as its own car.
+# car_ingest's `car` label (src/services/car_ingest/car_ingest.container.j2). WiCAN
+# batches name their dongle (wican:<BLE MAC>, with every character outside [A-Za-z0-9._-]
+# made _); sources maps it to a car. Car Scanner recordings, and batches named otherwise,
+# get default. An unmapped dongle is labelled with its id, so it shows up as its own car.
 cars:
   default: ev6
   sources:
