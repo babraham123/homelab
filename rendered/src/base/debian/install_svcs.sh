@@ -24,6 +24,7 @@ case $1 in
     echo "MDNS_REPEATER_OPTS=\"$from $to\"" >> /etc/default/mdns-repeater
     ../base/debian/add_homelab_tag.sh mdns-repeater.service
     install -D -m 644 mdns-repeater.service /etc/systemd/system/mdns_repeater.service
+    install -D -m 644 -t /etc/systemd/system/mdns_repeater.service.d ../base/mdns_repeater/retry.conf
     cd ..
     rm -rf mdns*
     ;;
