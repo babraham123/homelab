@@ -29,9 +29,8 @@ base_images() {
     grep / | sort -u
 }
 
-# Usage: github_base_images OWNER/REPO COMMIT FILE; the image refs FILE (a Containerfile)
-# builds from
-github_base_images() { curl -fsS "https://raw.githubusercontent.com/$1/$2/$3" | base_images; }
+# Usage: github_file OWNER/REPO COMMIT FILE; FILE's contents at COMMIT
+github_file() { curl -fsS "https://raw.githubusercontent.com/$1/$2/$3"; }
 
 # Usage: github_latest_release OWNER/REPO; the latest release's tag
 github_latest_release() {
@@ -70,7 +69,7 @@ github_build() {
       # stop the script.
       commit=$(github_commit "$repo")
       echo "${name}@${commit}"
-      github_base_images "$repo" "$commit" "$file" | image_versions
+      github_file "$repo" "$commit" "$file" | image_versions
       ;;
     build)
       src=$(mktemp -d)
