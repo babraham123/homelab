@@ -28,7 +28,7 @@ also require review threads to be resolved before a merge.
 | podman-image-updater, net-probe, TTS-Narrated-Ebook-Creator | `test` |
 | car-ingest, bookmark-handoff, yt-to-audiobook, ntfy-idp-push, finance-exporter | `test`, `image` |
 | homesite | `site` |
-| haproxy-mapper | `build`, `geoip_generator`, `geoip_generator_image` |
+| haproxy-mapper | `build`, `geoip_generator_image` |
 | bt-courier-android | `test`, `reproducible-build (ubuntu-22.04)`, `reproducible-build (ubuntu-24.04)`, `reproducible-compare`, `secret-scan` |
 
 A required check that is skipped counts as passed, so a job that only runs after others (like
