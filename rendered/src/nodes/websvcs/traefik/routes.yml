@@ -25,9 +25,17 @@ http:
       <<: *service
       rule: Host(`dash.janedoe.com`)
       service: homepage@file
+    # Public: the blog's visitors read and post comments here
     isso:
       <<: *service
       rule: Host(`comment.janedoe.com`)
+      service: isso@file
+      middlewares:
+        - secure-headers@file
+    # Authelia, then isso's admin password
+    isso-admin:
+      <<: *service
+      rule: Host(`comment.janedoe.com`) && PathPrefix(`/admin`)
       service: isso@file
     guacamole:
       <<: *service

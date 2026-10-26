@@ -25,9 +25,17 @@ http:
       <<: *service
       rule: Host(`dash.{{ site.url }}`)
       service: homepage@file
+    # Public: the blog's visitors read and post comments here
     isso:
       <<: *service
       rule: Host(`comment.{{ site.url }}`)
+      service: isso@file
+      middlewares:
+        - secure-headers@file
+    # Authelia, then isso's admin password
+    isso-admin:
+      <<: *service
+      rule: Host(`comment.{{ site.url }}`) && PathPrefix(`/admin`)
       service: isso@file
     guacamole:
       <<: *service
