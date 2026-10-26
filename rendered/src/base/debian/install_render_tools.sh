@@ -15,7 +15,13 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 cd "$tmp"
 YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-wget "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64.tar.gz" -O - | tar xz
+url="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}"
+wget "$url/yq_linux_amd64.tar.gz" "$url/checksums" "$url/checksums_hashes_order"
+# checksums has a line per file and a column per hash, in checksums_hashes_order's order
+col=$(( $(grep -nx 'SHA-256' checksums_hashes_order | cut -d: -f1) + 1 ))
+sha=$(awk -v col="$col" '$1 == "yq_linux_amd64.tar.gz" { print $col }' checksums)
+echo "${sha}  yq_linux_amd64.tar.gz" | sha256sum --check || die "checksum mismatch: yq_linux_amd64.tar.gz"
+tar xzf yq_linux_amd64.tar.gz
 mv yq_linux_amd64 /usr/bin/yq
 ./install-man-page.sh
 yq --version

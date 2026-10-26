@@ -20,7 +20,9 @@ cd "$tmp"
 apt update
 apt install -y build-essential pkg-config libelf-dev zlib1g-dev
 libbpf_version=1.5.0
-wget "https://github.com/libbpf/libbpf/archive/refs/tags/v${libbpf_version}.tar.gz" -O - | tar xz
+fetch_pinned "https://github.com/libbpf/libbpf/archive/refs/tags/v${libbpf_version}.tar.gz" \
+  53492aff6dd47e4da04ef5e672d753b9743848bdb38e9d90eafbe190b7983c44 libbpf.tar.gz
+tar xzf libbpf.tar.gz
 cd "libbpf-${libbpf_version}/src"
 make
 make install

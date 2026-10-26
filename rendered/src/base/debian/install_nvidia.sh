@@ -29,7 +29,14 @@ apt update
 apt upgrade -y
 apt install -y "linux-headers-$(uname -r)"
 
-wget -O /tmp/cuda-keyring.deb "https://developer.download.nvidia.com/compute/cuda/repos/${distro}/x86_64/cuda-keyring_1.1-1_all.deb"
+# The keyring every later package is verified against, so it's pinned per repo
+case $distro in
+  debian12) sha=e7f219eab6fe4819cdb5c15b98233dc3420302d9c00883219cd3d896857cf48d ;;
+  debian13) sha=d0d4ef986a44400f9db33c600ef33a985175e7cc63d805a10e1839c7a1e78f5f ;;
+  *) die "no cuda-keyring sha256 for ${distro}" ;;
+esac
+fetch_pinned "https://developer.download.nvidia.com/compute/cuda/repos/${distro}/x86_64/cuda-keyring_1.1-1_all.deb" \
+  "$sha" /tmp/cuda-keyring.deb
 dpkg -i /tmp/cuda-keyring.deb
 rm /tmp/cuda-keyring.deb
 apt update
