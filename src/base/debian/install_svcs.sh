@@ -34,7 +34,7 @@ case $1 in
     rm -rf mdns*
     ;;
   node_exporter)
-    NE_VERSION=$(curl -s "https://api.github.com/repos/prometheus/node_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    NE_VERSION=$(github_latest_version prometheus/node_exporter)
     ne="node_exporter-${NE_VERSION}.linux-amd64"
     url="https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}"
     wget "$url/$ne.tar.gz" "$url/sha256sums.txt"
@@ -54,7 +54,7 @@ case $1 in
     ;;
   nvidia_gpu_exporter)
     # The deb adds the nvidia_gpu_exporter user and unit; it serves :9835/metrics.
-    NGE_VERSION=$(curl -s "https://api.github.com/repos/utkuozdemir/nvidia_gpu_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    NGE_VERSION=$(github_latest_version utkuozdemir/nvidia_gpu_exporter)
     deb="nvidia-gpu-exporter_${NGE_VERSION}_linux_amd64.deb"
     url="https://github.com/utkuozdemir/nvidia_gpu_exporter/releases/download/v${NGE_VERSION}"
     wget "$url/$deb" "$url/checksums.txt"

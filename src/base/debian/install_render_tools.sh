@@ -17,7 +17,7 @@ pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passli
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 cd "$tmp"
-YQ_VERSION=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+YQ_VERSION=$(github_latest_version mikefarah/yq)
 url="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}"
 wget "$url/yq_linux_amd64.tar.gz" "$url/checksums" "$url/checksums_hashes_order"
 # checksums has a line per file and a column per hash, in checksums_hashes_order's order

@@ -70,6 +70,13 @@ fetch_pinned() {
   echo "$2  $3" | sha256sum --check || die "checksum mismatch: $1"
 }
 
+# Usage: github_latest_version OWNER/REPO; the latest release's tag without its v. Dies
+# with curl's error, e.g. the API's rate limit, which a bare failed lookup in $( ) hides.
+github_latest_version() {
+  curl -fsS "https://api.github.com/repos/$1/releases/latest" |
+    grep -Po '"tag_name": "v\K[0-9.]+' || die "can't look up $1's latest release"
+}
+
 install_lib() { install -D -m 644 "${rendered}/base/lib.sh" /usr/local/lib/homelab/lib.sh; }
 # Usage: install_bin SCRIPT...; for scripts run from /usr/local/bin, which source the
 # installed library
