@@ -46,7 +46,7 @@ fd . --type f --extension sh --exec-batch \
 # Rendered Python, so *.py.j2 files are checked without their Jinja: syntax errors,
 # undefined names, unused imports and variables.
 fd . --type f --extension py --exec-batch \
-  uvx --quiet ruff@0.17.0 check --quiet --no-cache --select E9,F || status=1
+  uvx --quiet ruff@0.17.2 check --quiet --no-cache --select E9,F || status=1
 
 if [ "$status" -ne 0 ]; then
   echo "pre-commit: checks failed (paths are relative to the repo root)" >&2
