@@ -14,6 +14,17 @@ curl -fsSL "https://download.opensuse.org/repositories/home:/alvistack/Debian_${
   | tee /etc/apt/trusted.gpg.d/alvistack.gpg > /dev/null
 echo "deb http://downloadcontent.opensuse.org/repositories/home:/alvistack/Debian_${VERSION_ID}/ /" \
   | tee /etc/apt/sources.list.d/alvistack.list > /dev/null
+# alvistack versions everything with epoch 100, so unpinned it replaces Debian's python3-*, zstd,
+# etc. on every upgrade, with file layouts that collide with Debian's split packages.
+cat > /etc/apt/preferences.d/alvistack <<'EOF'
+Package: *
+Pin: origin downloadcontent.opensuse.org
+Pin-Priority: 100
+
+Package: podman* buildah skopeo containers-common containers-storage containernetworking cri-o-runc crun conmon catatonit passt fuse-overlayfs slirp4netns
+Pin: origin downloadcontent.opensuse.org
+Pin-Priority: 500
+EOF
 
 apt update
 apt -y upgrade
