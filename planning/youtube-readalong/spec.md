@@ -52,7 +52,7 @@ Constraints:
 - yt-dlp breaks roughly monthly when YouTube changes. It is pinned by hash in
   yt-to-audiobook's `requirements.txt`; the fix is Renovate's bump there, which the nightly
   image update builds from `main`. A residential IP should not need
-  cookies; if YouTube starts demanding sign-in, a cookies file becomes a SOPS secret
+  cookies; if YouTube starts demanding sign-in, a cookies file becomes an AGE secret
   mounted read-only.
 - The media array is parity-only. Downloads are re-fetchable and are not backed up.
   Storyteller's position data is in its own database, already covered.

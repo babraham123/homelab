@@ -183,7 +183,7 @@ curl -s -o /dev/null -w '%{http_code}\n' 'https://www.{{ site.url }}/?q=<script>
 - Prerequisites:
   - On pve1, add `vaultwarden_*` to `/root/secrets/secsvcs.yaml` (recipes in the template), then
     `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs`
-  - Keep the plaintext admin token in the escrow bundle; SOPS holds only its hash
+  - Keep the plaintext admin token in the escrow bundle; the secrets file holds only its hash
   - Set your LLDAP email to `{{ site.email }}` (`ORG_CREATION_USERS`)
 - Install. On an existing Postgres cluster, create the database by hand once
 

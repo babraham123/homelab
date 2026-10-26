@@ -5,6 +5,4 @@
 # Called in place by msmtp (root only), so a deploy updates it; the AppArmor profile
 # names this path.
 
-SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub) \
-SOPS_AGE_KEY_FILE=/root/secrets/age.txt \
-  sops -d /root/secrets/pve1.yaml | yq ".msmtp_password"
+age -d -i /root/secrets/age.txt /root/secrets/pve1.yaml.age | yq ".msmtp_password"

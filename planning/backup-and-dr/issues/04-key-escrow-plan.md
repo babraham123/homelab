@@ -20,13 +20,13 @@ Write `docs/guides/escrow.md` and implement it:
    Two sticks, two locations (home + off-site).
 2. **Contents:** the rows marked "Escrow" in `docs/guides/pve1_recovery.md.j2` (the canonical
    list): `/root/secrets/age.txt`, `age.pub`, `pbs_client.key`, `pve1.yaml` (holds
-   `pbs2_backup_token`) and the per-host SOPS `*.yaml`; the root and intermediate CA keys, certs,
+   `pbs2_backup_token`) and the per-host `*.yaml.age`; the root and intermediate CA keys, certs,
    `index.txt`, `serial`, `crlnumber` and CRLs, and the service keys under `/root/ca/`; the SSH user
-   and host CA keys under `/root/ssh/`; `vars.yml`. Plus Vaultwarden's plaintext admin token (SOPS
-   holds only its hash) and a password-protected Bitwarden JSON export. Not escrowed, per that
-   guide: `acme.json` lives on secsvcs, homesvcs and websvcs and is covered by their PBS VM backups;
-   `/root/acme/`, host recipient keys and SSH host certs are regenerated; pfSense `config.xml` and
-   `/etc/pve` are covered by PBS backups (and Auto Config Backup).
+   and host CA keys under `/root/ssh/`; `vars.yml`. Plus Vaultwarden's plaintext admin token (the
+   secrets file holds only its hash) and a password-protected Bitwarden JSON export. Not escrowed,
+   per that guide: `acme.json` lives on secsvcs, homesvcs and websvcs and is covered by their PBS
+   VM backups; `/root/acme/`, host recipient keys and SSH host certs are regenerated; pfSense
+   `config.xml` and `/etc/pve` are covered by PBS backups (and Auto Config Backup).
 3. **Second AGE recipient.** Generate an offline AGE key kept only on the sticks and add its public
    key as a recipient in `secret_update.sh` (`-R /root/secrets/age_escrow.pub`) so a future
    re-encryption of the secret files is possible without pve1.
@@ -55,3 +55,5 @@ Write `docs/guides/escrow.md` and implement it:
   the two additions above. Dropped from the list: `acme.json` (on the VMs, covered by PBS),
   `/root/acme/`, host recipient keys and the gaming VM's SSH cert material (regenerated), pfSense
   `config.xml` and the `/etc/pve` tarball (PBS backups).
+- 2026-10-25: SOPS is gone (ADR 0004): pve1's per-host source is `/root/secrets/<host>.yaml.age`, the
+  same file each VM has, so the escrow set lists the `.yaml.age` files instead of `.yaml`.

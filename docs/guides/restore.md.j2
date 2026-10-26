@@ -29,7 +29,7 @@ ls /root/backups/secsvcs/files/etc/opt/
 ```bash
 # On pve1, or any machine with proxmox-backup-client, the token and the key
 export PBS_REPOSITORY='pve1@pbs!backup@pbs2.{{ site.url }}:backup1'
-export PBS_PASSWORD=$(sops -d /root/secrets/pve1.yaml | yq .pbs2_backup_token)
+export PBS_PASSWORD=$(age -d -i /root/secrets/age.txt /root/secrets/pve1.yaml.age | yq .pbs2_backup_token)
 proxmox-backup-client snapshot list --ns files
 proxmox-backup-client catalog dump host/pve1/2026-10-04T02:00:00Z backups.pxar --ns files \
   --keyfile /root/secrets/pbs_client.key | grep secsvcs/dumps

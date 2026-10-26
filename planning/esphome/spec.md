@@ -78,7 +78,7 @@ Onboarding steps: [docs/guides/esphome.md.j2](../../docs/guides/esphome.md.j2).
   - it's also inside the homesvcs VM image in PBS.
 
   Both run in the weekly Saturday backup.
-- **`secrets.yaml` is rendered at install from the homesvcs SOPS bundle,** mode 600. ESPHome reads
+- **`secrets.yaml` is rendered at install from the homesvcs secrets file,** mode 600. ESPHome reads
   `!secret` only from that file, not from Podman secrets. It holds only `wifi_ssid` and
   `wifi_password`, the names the New Device wizard looks for, so the wizard fills them in without
   asking. Each device keeps its own API key in its YAML:

@@ -28,7 +28,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   the node inventory, stripping one `.j2` extension.
 - **second pass** — files named `*.j2.j2` survive the render as `*.j2` and are rendered again on the
   node: by `render_host.sh` at install time (`install_svcs.sh`) for per-host parameters, or *at
-  container startup* (`ExecStartPre`) by `render_secrets.sh` for SOPS/AGE secrets
+  container startup* (`ExecStartPre`) by `render_secrets.sh` for AGE secrets
   (`render_services.sh` for Fluent Bit's unit list). Plaintext secrets never sit in the rendered
   tree.
 - **node inventory** — `src/nodes/<node>/inventory.yml`, one per node: per node, the dispatcher

@@ -109,7 +109,7 @@ curl -s "$H/api/services/proxy?group=Calendar&service=Home%20events&index=0&endp
 podman exec homepage node -e 'fetch("https://api.open-meteo.com/v1/forecast?latitude="+process.env.HOMEPAGE_VAR_HOME_LATITUDE+"&longitude="+process.env.HOMEPAGE_VAR_HOME_LONGITUDE+"&current_weather=true").then(r=>console.log(r.status))'
 podman logs --since 1h homepage 2>&1 | grep -iE 'error|proxmox|calendar|openmeteo' | tail -30
 # 4. Drop the removed widgets' secrets: on pve1, delete dash_pve1_api_token, dash_pve2_api_token
-#    and dash_pbs2_api_token in the sops editor (secret_update.sh recreates all podman secrets)
+#    and dash_pbs2_api_token in secret_update.sh's editor (it recreates all podman secrets)
 sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs
 # 5. Revoke the unused tokens
 pveum user token remove api_ro@pam homepage                  # pve1 and pve2

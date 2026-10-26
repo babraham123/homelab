@@ -222,10 +222,10 @@ podman secret ls
 age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age | yq ".SECRET_NAME"
 ```
 
-On pve1 the source files are SOPS-encrypted:
+On pve1, every host's file, encrypted to pve1's key too:
 
 ```bash
-sops -d /root/secrets/HOST.yaml | yq ".SECRET_NAME"
+age -d -i /root/secrets/age.txt /root/secrets/HOST.yaml.age | yq ".SECRET_NAME"
 ```
 
 Use `head -c -1` to strip the trailing newline when piping a secret into a file or another command.

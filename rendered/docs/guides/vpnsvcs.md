@@ -347,7 +347,7 @@ ls /etc/haproxy/countries | wc -l  # about 250 maps
 
 ```bash
 sudo su
-# From pve1: sops -d /root/secrets/secsvcs.yaml | yq .crowdsec_bouncer_vpnsvcs
+# From pve1: age -d -i /root/secrets/age.txt /root/secrets/secsvcs.yaml.age | yq .crowdsec_bouncer_vpnsvcs
 vim /etc/opt/secrets/crowdsec_bouncer_key
 chmod 600 /etc/opt/secrets/*
 ```
@@ -388,9 +388,9 @@ journalctl -u crowdsec-firewall-bouncer --no-pager | tail   # no TLS or 403 erro
 
 ```bash
 sudo su
-# From pve1: sops -d /root/secrets/secsvcs.yaml | yq .alertmanager_admin_password
+# From pve1: age -d -i /root/secrets/age.txt /root/secrets/secsvcs.yaml.age | yq .alertmanager_admin_password
 vim /etc/opt/secrets/alertmanager_admin_password
-# From pve1: sops -d /root/secrets/pve1.yaml | yq .msmtp_password
+# From pve1: age -d -i /root/secrets/age.txt /root/secrets/pve1.yaml.age | yq .msmtp_password
 vim /etc/opt/secrets/msmtp_password
 # A long random topic name; subscribe to https://ntfy.sh/<topic> in the phone's ntfy app
 LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32 | tee /etc/opt/secrets/deadman_ntfy_topic; echo

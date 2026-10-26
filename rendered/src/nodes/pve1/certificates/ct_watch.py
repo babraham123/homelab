@@ -99,9 +99,10 @@ def rows():
 
 def alert_token():
   # The alert token is a secsvcs secret; pve1 holds every host's secrets file.
-  return subprocess.run(["sops", "-d", "--extract", '["ntfy_alert_token"]', "/root/secrets/secsvcs.yaml"],
-                        env={**os.environ, "SOPS_AGE_KEY_FILE": "/root/secrets/age.txt"},
-                        check=True, text=True, stdout=subprocess.PIPE).stdout.strip()
+  secrets = subprocess.run(["age", "-d", "-i", "/root/secrets/age.txt", "/root/secrets/secsvcs.yaml.age"],
+                           check=True, stdout=subprocess.PIPE).stdout
+  return subprocess.run(["yq", ".ntfy_alert_token"], input=secrets, check=True,
+                        stdout=subprocess.PIPE).stdout.decode().strip()
 
 
 now = datetime.now(timezone.utc)

@@ -20,6 +20,8 @@ export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 # shellcheck source=src/base/debian/backup_lib.sh
 source "${rendered}/base/debian/backup_lib.sh"
+# shellcheck source=src/nodes/pve1/secrets_lib.sh
+source "${rendered}/nodes/pve1/secrets_lib.sh"
 
 storage=pbs2
 backups=/root/backups
@@ -100,10 +102,8 @@ step_sleep_pve2() {
 storage_active() { pvesm status --storage "$storage" | grep -qw active; }
 is_down() { ! is_reachable "$1"; }
 
-# Usage: secret NAME. Reads pve1's own secrets file; pve1 holds every host's SOPS file.
-secret() {
-  SOPS_AGE_KEY_FILE=/root/secrets/age.txt sops -d /root/secrets/pve1.yaml | yq ".$1"
-}
+# Usage: secret NAME; one of pve1's own secrets
+secret() { secret_get pve1 "$1"; }
 
 ok=()
 failed=()
@@ -158,7 +158,7 @@ write_metrics() {
 notify() {
   local token
   # The alert token is a secsvcs secret; pve1 holds every host's secrets file.
-  token=$(SOPS_AGE_KEY_FILE=/root/secrets/age.txt sops -d /root/secrets/secsvcs.yaml | yq '.ntfy_alert_token')
+  token=$(secret_get secsvcs ntfy_alert_token)
   curl -fsS -o /dev/null \
     -H "Authorization: Bearer $token" \
     -H "X-Title: $1" \

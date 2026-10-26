@@ -38,7 +38,7 @@ apt install -y age jq gnupg2 zstd
 
 ## Secrets
 
-- On the VM host, update the SOPS/AGE secrets file if needed
+- On the VM host, update the AGE secrets file if needed
 - Configure secrets
 
 ```bash

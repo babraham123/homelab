@@ -1,28 +1,23 @@
 #!/bin/bash
-# Updates and installs custom secrets.
+# Edits a host's secrets and, for a VM, installs them on it with placeholder Podman secrets.
 # Usage:
-#   /root/homelab-rendered/src/nodes/pve1/secret_update.sh SUBDOMAIN
+#   /root/homelab-rendered/src/nodes/pve1/secret_update.sh HOST   # pve1 edits pve1's own
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
+# shellcheck source=src/nodes/pve1/secrets_lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/secrets_lib.sh"
 
 host="$1"
 addr="manualadmin@${host}"
 
 require_root
-require_reachable "$host"
-
-SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)
-export SOPS_AGE_RECIPIENTS
-export SOPS_AGE_KEY_FILE="/root/secrets/age.txt"
+[[ $host == pve1 ]] || require_reachable "$host"
 
 # Record secrets, see template for commands
-sops "/root/secrets/${host}.yaml"
-# The host copy is plain age, to pve1's key and the host's SSH key: hosts have age, not sops
-sops -d "/root/secrets/${host}.yaml" | sudo age -e -R /root/secrets/age.pub -R "/root/secrets/${host}_id_ed25519.pub" -o "/root/secrets/${host}.yaml.age"
-chmod 600 "/root/secrets/${host}.yaml"
-chmod 400 "/root/secrets/${host}.yaml.age"
-scp "/root/secrets/${host}.yaml.age" "${addr}:/home/manualadmin/secrets.yaml.age"
+secret_edit "$host"
+[[ $host != pve1 ]] || exit 0
+scp "${secrets}/${host}.yaml.age" "${addr}:/home/manualadmin/secrets.yaml.age"
 
 echo "manualadmin's sudo password on ${host}:"
 ssh -t "$addr" '

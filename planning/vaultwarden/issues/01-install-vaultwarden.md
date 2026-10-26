@@ -157,7 +157,7 @@ updates (image-updater), non-root read-only container, `/admin` behind Authelia,
     already in `pg_dumpall`;
   - list `vaultwardendata` with the other volumes in `docs/services.md`;
   - the plaintext admin token lives with the maintainer and in the escrow bundle
-    (backup-and-dr/04). SOPS holds only its hash.
+    (backup-and-dr/04). The secrets file holds only its hash.
 
   Add a periodic **password-protected Bitwarden JSON export** to the escrow bundle
   (backup-and-dr/04), so the passwords needed to rebuild the homelab don't live only in the homelab.

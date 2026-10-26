@@ -309,7 +309,7 @@ chmod 400 /root/secrets/pbs_client.key
 proxmox-backup-manager cert info | grep Fingerprint
 # pve1: the token, the key, namespace pve1
 pvesm add pbs pbs2 --server pbs2.{{ site.url }} --datastore backup1 --namespace pve1 \
-  --username 'pve1@pbs!backup' --password "$(sops -d /root/secrets/pve1.yaml | yq .pbs2_backup_token)" \
+  --username 'pve1@pbs!backup' --password "$(age -d -i /root/secrets/age.txt /root/secrets/pve1.yaml.age | yq .pbs2_backup_token)" \
   --fingerprint 'FINGERPRINT' --encryption-key /root/secrets/pbs_client.key --content backup
 # pve2: its own token, namespace pve2, the same key copied from pve1
 proxmox-backup-manager user generate-token pve2@pbs backup   # copy the value, shown once
@@ -356,7 +356,7 @@ ufw allow in from {{ secsvcs.ip }} to any port 9100 proto tcp
 ```bash
 ssh manualadmin@pve1
 sudo su
-sops /root/secrets/pve1.yaml
+/root/homelab-rendered/src/nodes/pve1/secret_update.sh pve1
 ```
 
 After pve1, secsvcs and victoriametrics are set up, for pve1, pve2 and pbs2.

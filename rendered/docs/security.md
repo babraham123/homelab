@@ -256,14 +256,14 @@ from its `install_svcs.sh` cases, so the allowlist stays in sync with the servic
 
 ## Secrets
 
-SOPS + AGE, kept out of git and written to disk encrypted (see [ADR
+AGE, kept out of git and written to disk encrypted (see [ADR
 0004](adr/0004-sops-age-secrets.md)):
 
-- Source of truth is on pve1: one SOPS file per host at `/root/secrets/<host>.yaml`, encrypted to
-  pve1's AGE key. SOPS encrypts YAML *values*, leaving keys readable.
-- Each host gets `/etc/opt/secrets/secrets.yaml.age`, encrypted with plain `age` to pve1's key and
-  the host's ed25519 SSH key. The host's private key sits beside it in the root-only
-  `/etc/opt/secrets/`.
+- Source of truth is on pve1: one age file per host at `/root/secrets/<host>.yaml.age`, encrypted
+  to pve1's AGE key and, for a VM, the host's ed25519 SSH key. The whole file is encrypted, names
+  included; `secrets_template.yaml` lists the names.
+- Each VM gets that same file as `/etc/opt/secrets/secrets.yaml.age`. The host's private key sits
+  beside it in the root-only `/etc/opt/secrets/`.
 - Git holds only `src/nodes/<node>/secrets_template.yaml` (names, no values).
 - Podman uses the `shell` secrets driver: Podman stores placeholders, and at container startup
   `get_secret_by_id.sh` decrypts the requested value from the host file. Quadlets consume them as
@@ -275,8 +275,9 @@ SOPS + AGE, kept out of git and written to disk encrypted (see [ADR
 - pve1's AGE key is the single point of failure; a lost VM key can be replaced by rerunning
   `secret_update.sh`. What must be kept off pve1, and how to recover each trust root, is in [pve1
   disaster recovery](guides/pve1_recovery.md).
-- Rotation: `src/nodes/pve1/secret_update.sh <host>` edits the SOPS file, re-encrypts and
-  redistributes it, and recreates the Podman placeholders; then restart affected services.
+- Rotation: `src/nodes/pve1/secret_update.sh <host>` edits the file (decrypted only in
+  `/dev/shm`), re-encrypts and redistributes it, and recreates the Podman placeholders; then
+  restart affected services.
 
 ## VPS hardening
 

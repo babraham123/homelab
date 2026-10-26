@@ -114,8 +114,8 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
   - No HAProxy or sshd acquisitions. HAProxy logs no `httplog`/`tcplog` lines, and every HTTP
     request it forwards is in Traefik's log; sshd's journal isn't shipped (Fluent Bit takes only
     "Homelab:" units), and fail2ban guards SSH.
-  - The CAPI credentials stay in the config dir instead of SOPS: the entrypoint registers and
-    rewrites them itself, and the dir is already persistent and backed up.
+  - The CAPI credentials stay in the config dir instead of the secrets file: the entrypoint
+    registers and rewrites them itself, and the dir is already persistent and backed up.
   - Untested: the `pack_json` tail query, the `.yaml.local` bouncer override and the read-only,
     no-capability container are source-derived. Check them with the guides' steps on first apply.
 - 2026-10-12 agent: Part B step 5 implemented, not yet applied to the nodes; step 6 (CRS in-band)

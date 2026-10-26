@@ -40,8 +40,8 @@ systemctl list-units --state=failed
   `headscale` case of `src/nodes/vpnsvcs/install_svcs.sh.j2` (the sha256 is the deb's line in
   the release's `checksums.txt`): set both, deploy, then `sudo
   /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale`
-- SOPS (pve1, `src/nodes/pve1/init_secrets.sh`) and mdns-repeater (the `mdns_repeater` case of
-  `src/base/debian/install_svcs.sh`) are pinned the same way, by version and sha256 and by commit
+- mdns-repeater is pinned the same way, by commit, in the `mdns_repeater` case of
+  `src/base/debian/install_svcs.sh`
 - net_probe and Ookla's speedtest CLI are pinned by URL and sha256 in the `net_probe` case of
   `src/base/debian/install_svcs.sh`: set both to the new commit or version, deploy, then
   `ssh autoadmin@secsvcs install_net_probe`

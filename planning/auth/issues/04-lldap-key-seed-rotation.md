@@ -28,8 +28,9 @@ forcing past that would have broken login for every user.
    password string, so the derived key is unchanged. `secret_update.sh secsvcs`, restart lldap,
    confirm login. This step is a no-op cryptographically.
 3. Change `Secret=lldap_admin_password,...,target=LLDAP_KEY_SEED` to `Secret=lldap_key_seed,...`.
-4. Now rotate the admin password freely: update `lldap_admin_password` in SOPS (it is consumed by
-   lldap `LLDAP_LDAP_USER_PASS` and by Authelia `AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD`),
+4. Now rotate the admin password freely: update `lldap_admin_password` in the secrets file (it is
+   consumed by lldap `LLDAP_LDAP_USER_PASS` and by Authelia
+   `AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD`),
    `secret_update.sh secsvcs`, restart `lldap` then `authelia`.
 5. Optionally later rotate the seed itself with a planned all-users password reset.
 

@@ -117,7 +117,7 @@ Fanless "router box" mini PC from AliExpress; low idle power (~15–20 W) since 
 
 The four physical NICs are passed through to the pfSense router VM, so pve1 itself reaches the
 network only via the virtual bridge `vmbr0` (no physical port; pfSense is its gateway). It hosts the
-router, `secsvcs`, and `homesvcs`, plus the trust roots: private CA, SSH CA, SOPS/AGE secrets, and
+router, `secsvcs`, and `homesvcs`, plus the trust roots: private CA, SSH CA, AGE secrets, and
 provisioning scripts. It should be the most secure host in the system.
 
 ### pve2: on-demand tower
@@ -183,7 +183,7 @@ Recorded as ADRs in `docs/adr/`:
   Compose](adr/0001-podman-quadlets-over-kubernetes.md)
 - [HAProxy in TCP/SNI-passthrough mode at the edge](adr/0002-haproxy-sni-passthrough.md)
 - [Self-hosted Headscale instead of managed Tailscale](adr/0003-self-hosted-headscale.md)
-- [SOPS + AGE for secrets instead of a secrets manager](adr/0004-sops-age-secrets.md)
+- [AGE for secrets instead of a secrets manager](adr/0004-sops-age-secrets.md)
 - [SSH forced-command dispatcher instead of a config-management
   agent](adr/0005-ssh-forced-command-dispatcher.md)
 - [Declared node inventory instead of parsing configs at render time](adr/0006-node-inventory.md)
@@ -191,7 +191,7 @@ Recorded as ADRs in `docs/adr/`:
 
 ## Secrets
 
-Secrets stay out of git. They use SOPS + AGE encryption and are written to disk encrypted, one file
+Secrets stay out of git. They use AGE encryption and are written to disk encrypted, one file
 per host, managed from pve1. Podman's shell secrets driver decrypts them into containers at startup;
 `*.j2.j2` second-pass templates render secret values into config files for apps that need them
 there. See [Security](security.md#secrets) for the full pipeline.

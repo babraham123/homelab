@@ -38,8 +38,8 @@ Answer under `## Answer` before changing anything:
 - **Current state:** does the storage already have a key? Check `ls /etc/pve/priv/storage/pbs2.enc`
   and the `encryption-key` line in `storage.cfg`.
 - **What it protects:** PBS data at rest on pve2's disk, and above all the offsite copy (03), where
-  the datastore leaves the house. The images contain `/root/secrets`, private CA keys and the SOPS
-  files.
+  the datastore leaves the house. The images contain `/root/secrets`, private CA keys and the age
+  secrets files.
 - **What it costs:**
   - Without the key, nothing can be restored, so it joins the escrow set (04) and the DR guide (09).
   - Confirm that PBS verify jobs still work, since they check the encrypted chunks' digests.
@@ -83,7 +83,7 @@ rejected: the datastore sits on the same box as most of the VMs.
 **Identity:** user `pve1@pbs`, token `pve1@pbs!backup`, `DatastoreBackup` on
 `/datastore/backup1/pve1` and `/datastore/backup1/files` (the new namespace for the host backups;
 retention is per namespace). The secret is `pbs2_backup_token` in `/root/secrets/pve1.yaml`
-(`src/nodes/pve1/secrets_template.yaml`); the orchestrator reads it with sops for `PBS_PASSWORD`.
+(`src/nodes/pve1/secrets_template.yaml`); the orchestrator reads it with age for `PBS_PASSWORD`.
 pve2 has its own `pve2@pbs!backup`, `DatastoreBackup` on `/datastore/backup1/pve2`; the secret
 lives only in pve2's storage entry (`/etc/pve/priv/storage/pbs2.pw`), since PBS is local and a lost
 token is regenerated there. Neither host's storage entry holds `root@pam`'s password.

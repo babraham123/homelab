@@ -44,7 +44,7 @@
   - `commands.sh` - Other tasks that run as root and are triggered remotely
   - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config
     shared by every node is `src/services/traefik/`
-  - `secrets_template.yaml`: template for SOPS-encrypted secrets
+  - `secrets_template.yaml`: template for the node's AGE-encrypted secrets
 - `src/services/<service>/`, one per service. May contain:
   - `*.container`: Podman quadlet systemd unit files
   - `*.volume`: Podman volume definitions
@@ -103,7 +103,7 @@ flowchart TB
 
     subgraph node["On the node"]
         dispatch["install_&lt;svc&gt; → dispatcher.sh allowlist<br/>→ install_svcs.sh → quadlets into<br/>/etc/containers/systemd"]
-        second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with SOPS/AGE secrets<br/>(render_host.sh already ran at install)"]
+        second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with AGE secrets<br/>(render_host.sh already ran at install)"]
     end
 
     vars --> allvars

@@ -18,11 +18,10 @@ Recover pve1 after a dead SSD or a lost trust root (AGE key, private CA, SSH CA,
 
 | Path on pve1 | What | Covered by | If lost |
 | --- | --- | --- | --- |
-| `/root/secrets/age.txt`, `age.pub` | AGE identity for every SOPS file and `secrets.yaml.age` | Escrow, PBS host backup | [Only the AGE key is lost](#only-the-age-key-is-lost) |
+| `/root/secrets/age.txt`, `age.pub` | AGE identity for every host's secrets file | Escrow, PBS host backup | [Only the AGE key is lost](#only-the-age-key-is-lost) |
 | `/root/secrets/pbs_client.key` | PBS client encryption key | Escrow; pve2's `/etc/pve/priv/storage/pbs2.enc` | Nothing in PBS restores; rebuild from the guides |
-| `/root/secrets/pve1.yaml` | pve1's secrets | Escrow, PBS host backup | Re-enter from `src/nodes/pve1/secrets_template.yaml` |
-| `/root/secrets/{secsvcs,homesvcs,websvcs,vpnsvcs}.yaml` | SOPS source of each host's secrets | Escrow, PBS host backup | [AGE scenario](#only-the-age-key-is-lost) |
-| `/root/secrets/<host>.yaml.age` | per-host copy pushed to `/etc/opt/secrets/` | Regenerate | `secret_update.sh <host>` |
+| `/root/secrets/pve1.yaml.age` | pve1's secrets | Escrow, PBS host backup | Re-enter from `src/nodes/pve1/secrets_template.yaml` |
+| `/root/secrets/{secsvcs,homesvcs,websvcs,vpnsvcs}.yaml.age` | each host's secrets, the same file the host has in `/etc/opt/secrets/` | Escrow, PBS host backup, the host's copy | [AGE scenario](#only-the-age-key-is-lost) |
 | `/root/secrets/<host>_id_ed25519.pub` | host recipient key | Regenerate | re-`scp` from the host ([pve1 guide](./pve1.md#secrets)) |
 | `/root/ca/private/ca.key.pem`, `certs/ca.cert.pem`, `index.txt`, `serial`, `crlnumber` | root CA | Escrow, PBS host backup | [Only the private CA is lost](#only-the-private-ca-is-lost) |
 | `/root/ca/intermediate/private/intermediate.key.pem`, `certs/`, `index.txt`, `serial`, `crlnumber`, `crl/` | intermediate CA | Escrow, PBS host backup | same |
@@ -167,7 +166,6 @@ proxmox-backup-client restore host/pve1/TIMESTAMP backups.pxar /tmp/restore --ns
 ```bash
 chmod 700 /root/secrets /root/ca/private /root/ca/intermediate/private /root/ssh/public
 chmod 400 /root/secrets/age.* /root/secrets/*.yaml.age /root/secrets/*_id_ed25519.pub
-chmod 600 /root/secrets/*.yaml
 chmod 400 /root/ca/private/ca.key.pem /root/ca/intermediate/private/*.key.pem
 chmod 400 /root/ssh/ca_ssh_key /root/ssh/ca_ssh_host_key
 ```
@@ -231,18 +229,16 @@ cd /root/ca
 ### Only the AGE key is lost
 
 - From escrow or the PBS host backup: restore `age.txt`/`age.pub` and stop
-- Otherwise rebuild from each host's `secrets.yaml.age`, starting with a new key:
+- Otherwise rebuild from each host's copy, which its own SSH key decrypts, starting with a new key:
 
 ```bash
 ssh manualadmin@pve1
 sudo su
 cd /root/secrets
-mkdir -p lost && mv age.* ./*.yaml lost/
+mkdir -p lost && mv age.* ./*.yaml.age lost/
 age-keygen -o age.txt
 age-keygen -y age.txt > age.pub
 chmod 400 age.*
-export SOPS_AGE_RECIPIENTS=$(cat /root/secrets/age.pub)
-export SOPS_AGE_KEY_FILE=/root/secrets/age.txt
 ```
 
 - For each host (websvcs needs pve2 on); asks for `manualadmin`'s sudo password:
@@ -253,14 +249,14 @@ umask 077
 ssh -t "manualadmin@${host}" 'umask 077; sudo age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/secrets.yaml.age > /dev/shm/secrets.yaml'
 scp "manualadmin@${host}:/dev/shm/secrets.yaml" "/dev/shm/${host}.yaml"
 ssh "manualadmin@${host}" 'rm /dev/shm/secrets.yaml'
-sops -e "/dev/shm/${host}.yaml" > "/root/secrets/${host}.yaml"
+age -e -R /root/secrets/age.pub -R "/root/secrets/${host}_id_ed25519.pub" "/dev/shm/${host}.yaml" > "/root/secrets/${host}.yaml.age"
 rm "/dev/shm/${host}.yaml"
-chmod 600 "/root/secrets/${host}.yaml"
+chmod 400 "/root/secrets/${host}.yaml.age"
 # Save and quit the editor
 /root/homelab-rendered/src/nodes/pve1/secret_update.sh "$host"
 ```
 
-- Host SSH broken: decrypt through the guest agent on its Proxmox host, then continue from `sops -e`:
+- Host SSH broken: decrypt through the guest agent on its Proxmox host, then continue from `age -e`:
 
 ```bash
 umask 077
@@ -268,7 +264,8 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
   | jq -r '."out-data"' > /dev/shm/HOST.yaml
 ```
 
-- Recreate `pve1.yaml` with `sops /root/secrets/pve1.yaml` from
+- pve1's own file was encrypted to the lost key only: recreate it with
+  `/root/homelab-rendered/src/nodes/pve1/secret_update.sh pve1` from
   `src/nodes/pve1/secrets_template.yaml`:
   - a new Gmail app password ([Notifications](./pve1.md#notifications))
   - a new `api_ro` password on PBS ([Proxmox guide, Monitoring](./proxmox.md#monitoring))
