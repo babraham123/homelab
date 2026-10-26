@@ -2,7 +2,8 @@
 # src/base/podman/image_updater.json.j2, the image updater's config, against the config
 # format in github.com/babraham123/podman-image-updater's README: one hosts entry per node
 # with install_image_updater, in node-name order; its images in the src/nodes.jinja update
-# order, each with its service's .trivyignore and, if built, build.sh; secsvcs reaches ntfy
+# order, each with the .trivyignore and, if built, build.sh in its service's dir (its first
+# `dirs` entry, default services/<service>); secsvcs reaches ntfy
 # straight at the container with no deadline and waits 15 minutes after boot, every other
 # node through Traefik with a 25-minute deadline; every secret comes from get_secret.sh.
 # shellcheck source=tests/lib.sh
@@ -25,6 +26,12 @@ services:
   app:
     build: app
   plain: {}
+  appsec:
+    upstream: docker.io/library/waf:1
+    dirs: [services/shared, services/other]
+  worker:
+    build: worker
+    dirs: [services/shared]
 EOF
   cat > "${tmp}/inventory/other/inventory.yml" <<'EOF'
 debian_services: [node_exporter]
@@ -60,6 +67,8 @@ secsvcs {'url': 'http://10.10.0.13:2586/alert', 'token': {'command': ['/root/hom
   {}
 websvcs {'url': 'https://push.example.com/alert', 'token': {'command': ['/root/homelab-rendered/src/base/podman/get_secret.sh', 'ntfy_alert_token']}} 1500 0
   {"build": "app", "build_script": "/root/homelab-rendered/src/services/app/build.sh", "container": "app", "image": "localhost/app:latest", "service": "app", "trivyignore": "/root/homelab-rendered/src/services/app/.trivyignore"}
+  {"container": "appsec", "image": "localhost/library/waf:1", "service": "appsec", "trivyignore": "/root/homelab-rendered/src/services/shared/.trivyignore", "upstream": "docker.io/library/waf:1"}
+  {"build": "worker", "build_script": "/root/homelab-rendered/src/services/shared/build.sh", "container": "worker", "image": "localhost/worker:latest", "service": "worker", "trivyignore": "/root/homelab-rendered/src/services/shared/.trivyignore"}
   {}
 {'registry_auth': {'docker.io': {'username': {'command': ['/root/homelab-rendered/src/base/podman/get_secret.sh', 'docker_hub_username']}, 'password': {'command': ['/root/homelab-rendered/src/base/podman/get_secret.sh', 'docker_hub_token']}}}}
 EOF

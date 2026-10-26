@@ -55,7 +55,9 @@
     admin_subdomains: sorted subdomains of the admin services, all nodes (Authelia)
     uptime:           Gatus internal endpoints, [{name, node, url, tier, conditions}]
     images[node]:     container images in update order (install order, update_last
-                      entries last), [{service, container, image, upstream | build}] -#}
+                      entries last), [{service, dir, container, image, upstream | build}];
+                      dir: the service's first `dirs` entry, default services/<service>,
+                      where its .trivyignore and build.sh live -#}
 {%- set dispatch = {} -%}
 {%- set commands = {} -%}
 {%- set buttons = {} -%}
@@ -139,7 +141,8 @@
   {%- for name, svc in services.items() -%}
     {%- for container, c in svc.get('containers', {name: svc}).items()
         if c.upstream is defined or c.build is defined -%}
-      {%- set entry = {'service': name, 'container': container} -%}
+      {%- set entry = {'service': name, 'container': container,
+          'dir': svc.dirs[0] if svc.dirs is defined else 'services/' ~ name} -%}
       {%- if c.upstream is defined -%}
         {%- do entry.update({'upstream': c.upstream,
             'image': 'localhost/' ~ c.upstream.split('/', 1)[-1]}) -%}

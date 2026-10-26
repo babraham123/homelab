@@ -197,10 +197,9 @@ def check_quadlet_images(nodes):
 def check_build_scripts(nodes):
   for node, spec in nodes.items():
     for i in spec["images"]:
-      svc = i["service"]
-      if not i.get("upstream") and not os.path.isfile(f"src/services/{svc}/build.sh"):
-        fail(inventory(node),
-             f"services.{svc}: built image {i['image']} has no src/services/{svc}/build.sh")
+      svc, script = i["service"], f"src/{i['dir']}/build.sh"
+      if not i.get("upstream") and not os.path.isfile(script):
+        fail(inventory(node), f"services.{svc}: built image {i['image']} has no {script}")
 
 
 def script_file(script):

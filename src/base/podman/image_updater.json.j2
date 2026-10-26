@@ -1,8 +1,8 @@
 {% import 'src/nodes.jinja' as inv with context -%}
 {#- The image updater's config (github.com/babraham123/podman-image-updater, format in its
     README): one hosts entry per node with install_image_updater, its images in update
-    order (src/nodes.jinja images[node]), each with its service's .trivyignore and, for a
-    built image, its build.sh (tools/check_rendered.py requires one). install_svcs.sh
+    order (src/nodes.jinja images[node]), each with the .trivyignore and, for a built
+    image, the build.sh (tools/check_rendered.py requires one) in its service's dir. install_svcs.sh
     image_updater links /etc/image_updater/config.json here, so a deploy updates it.
     deadline_s: no image is started after 25 minutes, so the run stays inside its 30-minute
     slot (image_updater.timer); what's left runs the next night. The notification path runs
@@ -23,9 +23,10 @@
     {{ node | tojson }}: {
       "images": [
 {%- for i in inv.images[node] %}
-{%- set entry = dict(i, trivyignore=src ~ 'services/' ~ i.service ~ '/.trivyignore') %}
+{%- set entry = dict(i, trivyignore=src ~ i.dir ~ '/.trivyignore') %}
+{%- do entry.pop('dir') %}
 {%- if i.build is defined %}
-{%- do entry.update({'build_script': src ~ 'services/' ~ i.service ~ '/build.sh'}) %}
+{%- do entry.update({'build_script': src ~ i.dir ~ '/build.sh'}) %}
 {%- endif %}
         {{ entry | tojson }}{{ "," if not loop.last }}
 {%- endfor %}

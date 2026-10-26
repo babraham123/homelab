@@ -155,8 +155,9 @@ sudo systemctl start image_updater
 ```
 
 - Override a blocked image, after reading its findings. Either:
-  - every digest until a date: add the CVE to `src/services/<service>/.trivyignore` with the
-    reason, then deploy
+  - every digest until a date: add the CVE to `.trivyignore` in the service's dir (its first
+    `dirs` entry in the inventory, default `src/services/<service>/`) with the reason, then
+    deploy
 
     ```text
     # Not reachable: the vulnerable parser only reads files from the image itself
@@ -167,7 +168,7 @@ sudo systemctl start image_updater
     `sudo image_updater accept CONTAINER`. It rescans, prints the findings, records the digest and
     notifies; the next run loads it. For a built image it builds and scans instead, and records the
     `build.sh` inputs, so the next run's build of the same inputs passes.
-- Built images: every one has a `src/services/<service>/build.sh` (`versions`, `build TAG`), and
+- Built images: every one has a `build.sh` (`versions`, `build TAG`) in its service's dir, and
   is rebuilt through the scan gate when any input it reports changes, like `geoip_generator`'s
   haproxy-mapper commit and base image digests. The render fails for a `build:` image without one.
 - Roll back by hand: `podman tag localhost/NAME:rollback localhost/NAME:TAG`, then
