@@ -4,6 +4,24 @@
 --   https://docs.fluentbit.io/manual/pipeline/filters/lua
 --   https://www.freedesktop.org/software/systemd/man/latest/systemd.journal-fields.html
 
+-- devtop and gaming share one GPU, so one of them is usually off and vmagent logs its
+-- unreachable exporter every scrape. Only the can't-connect errors go; anything else from a
+-- running desktop's exporter stays.
+local desktop_off_errors = {"no route to host", "context deadline exceeded",
+  "Client.Timeout exceeded", "connection refused"}
+
+function is_desktop_off(service, message)
+  if service ~= "vmagent" or not message:find('job="nvidia_gpu_desktops"', 1, true) then
+    return false
+  end
+  for _, err in ipairs(desktop_off_errors) do
+    if message:find(err, 1, true) then
+      return true
+    end
+  end
+  return false
+end
+
 function process_msg(tag, timestamp, record)
   local retention_period = 14 * 24 * 60 * 60
   local now = os.time()
@@ -23,6 +41,9 @@ function process_msg(tag, timestamp, record)
   new_record["service"] = record["container_name"]
     or (record["systemd_unit"] or ""):gsub("%.service$", "")
   new_record["message"] = record["message"] or ""
+  if is_desktop_off(new_record["service"], new_record["message"]) then
+    return -1, new_timestamp, {}
+  end
   new_record["code"] = (record["code_func"] or "") .. " " .. (record["code_file"] or "") .. ":" .. (record["code_line"] or "")
   new_record["priority"] = record["priority"] or ""
   if record["errno"] then

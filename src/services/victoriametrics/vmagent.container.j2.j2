@@ -38,6 +38,7 @@ Exec=--promscrape.config="/etc/prometheus/prometheus.yml" \
      --remoteWrite.forceVMProto \
      --usePromCompatibleNaming \
      --loggerLevel="WARN" \
+     --promscrape.suppressScrapeErrorsDelay=1h \
      --loggerTimezone="{{ personal.timezone }}"
      # Influx pushes (PVE, PBS, pfSense, HA) go to VictoriaMetrics's HTTP /write and
      # /api/v2/write on secsvcs, not to vmagent
