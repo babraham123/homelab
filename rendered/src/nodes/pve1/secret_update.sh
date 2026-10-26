@@ -26,8 +26,9 @@ sudo mkdir -p /etc/opt/secrets
 sudo mv /home/manualadmin/secrets.yaml.age /etc/opt/secrets/secrets.yaml.age
 sudo chown root:root /etc/opt/secrets/secrets.yaml.age
 
-echo "placeholder" > /tmp/placeholder.txt
 sudo podman secret rm --all
-sudo /root/homelab-rendered/src/base/podman/list_secrets.sh | xargs -I% sudo podman secret create "%" /tmp/placeholder.txt
+sudo /root/homelab-rendered/src/base/podman/list_secrets.sh | while read -r name; do
+  echo placeholder | sudo podman secret create "$name" -
+done
 sudo podman secret ls
 '
