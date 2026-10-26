@@ -111,8 +111,8 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.21.0/24 to any p
 - Connect to InfluxDB
   - Go to Settings >> Devices & Services >> Add Integration
   - Search InfluxDB and add
-  - version = 2.x/3, url = <https://metrics.janedoe.com:443/api/v2/write>, verify SSL,
-    organization = hass, bucket = hass
+  - version = 2.x/3, url = <https://metrics.janedoe.com:443> (the client adds
+    `/api/v2/write`), verify SSL, organization = hass, bucket = hass
   - To get the token, run
     `/root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_creds_hash`
 - Create the backup token
