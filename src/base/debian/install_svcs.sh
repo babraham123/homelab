@@ -108,14 +108,14 @@ case $1 in
     install -D -t /usr/local/bin speedtest
     rm speedtest speedtest.tgz
     DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
-    # github.com/babraham123/net-probe, pinned to a commit and its file's hash;
+    # github.com/babraham123/net-probe, pinned to a release and its asset's hash;
     # base/net_probe/config.json is its config
-    commit=4a03583e3017b02714f64df11f7040a7344de4ce
-    sha=7717d05cd0dcce45fd773f522619d18e42f873f0cf78be0ab3e5998311527e63
-    fetch_pinned "https://raw.githubusercontent.com/babraham123/net-probe/${commit}/net_probe.py" \
-      "$sha" net_probe.py
-    install -D net_probe.py /usr/local/bin/net_probe
-    rm net_probe.py
+    tag=v1.0.0
+    sha=453335caab35112ee881d2fedc30571a454d1f175885ac48d647ed84364551b3
+    fetch_pinned "https://github.com/babraham123/net-probe/releases/download/${tag}/net_probe" \
+      "$sha" net_probe
+    install -D net_probe /usr/local/bin/net_probe
+    rm net_probe
     install -D -m 644 -t /etc/systemd/system base/net_probe/net_probe.service base/net_probe/net_probe.timer
     systemctl daemon-reload
     systemctl enable net_probe.timer
