@@ -35,18 +35,21 @@ case $1 in
     ;;
   node_exporter)
     NE_VERSION=$(curl -s "https://api.github.com/repos/prometheus/node_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    wget --output-document=ne.tar.gz "https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}/node_exporter-${NE_VERSION}.linux-amd64.tar.gz"
-    tar xzf ne.tar.gz
-    install -D -o node_exporter -g node_exporter -t /usr/local/bin \
-      "node_exporter-${NE_VERSION}.linux-amd64/node_exporter"
-    rm -rf "node_exporter-${NE_VERSION}.linux-amd64" ne.tar.gz
+    ne="node_exporter-${NE_VERSION}.linux-amd64"
+    url="https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}"
+    wget "$url/$ne.tar.gz" "$url/sha256sums.txt"
+    sha256sum --check --ignore-missing sha256sums.txt || die "checksum mismatch: $ne.tar.gz"
+    tar xzf "$ne.tar.gz"
+    # Root owns what the service runs and the textfiles it reads, so a compromised
+    # exporter can't replace its own code or forge another job's metrics.
+    install -D -t /usr/local/bin "$ne/node_exporter"
+    rm -rf "$ne" "$ne.tar.gz" sha256sums.txt
 
-    install -d -o node_exporter -g node_exporter /var/lib/node_exporter \
+    install -d -m 755 -o root -g root /var/lib/node_exporter \
       /var/lib/node_exporter/textfile_collector
 
     install_lib
-    install -D -o node_exporter -g node_exporter base/node_exporter/node_runner.sh \
-      /usr/local/bin/node_exporter_runner.sh
+    install -D base/node_exporter/node_runner.sh /usr/local/bin/node_exporter_runner.sh
     install -D -m 644 -t /etc/systemd/system base/node_exporter/node_exporter.service
     ;;
   nvidia_gpu_exporter)

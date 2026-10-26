@@ -16,6 +16,24 @@ Environment=TZ=America/Los_Angeles
 User=node_exporter
 Group=node_exporter
 
+# Read-only view of the system: the collectors only read /proc, /sys, mounts and systemd over
+# D-Bus. AF_NETLINK is for the netdev and netclass collectors.
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+
 # Accessible at :9100/metrics
 
 ExecStart=/usr/local/bin/node_exporter_runner.sh
