@@ -44,8 +44,8 @@ apt install -y age jq gnupg2 zstd
 ```bash
 sudo su
 # Read secrets from age-encrypted file
-mkdir -p /etc/opt/secrets
-chmod 700 /etc/opt/secrets
+# The mode applies only when it's created: vpnsvcs's is 711, so Headscale reaches its files
+mkdir -p -m 700 /etc/opt/secrets
 cp /home/manualadmin/.ssh/id_ed25519* /etc/opt/secrets
 chmod 600 /etc/opt/secrets/*
 cp /root/homelab-rendered/src/base/podman/containers.conf /etc/containers
