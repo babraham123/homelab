@@ -85,6 +85,12 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.21.0/24 to any p
 
 - Create an `admin` account
 - Go thru the setup wizard
+- Check the HTTP settings: Settings >> System >> Network. A first boot imports them from
+  `configuration.yaml`'s `http:` block; without them Traefik's requests get 400s
+  - Use X-Forwarded-For on; trusted proxies `10.12.0.6`,
+    `10.12.0.1`, `127.0.0.1`, `::1`
+  - IP ban on, login attempts threshold 5
+  - CORS allowed origins `https://home.janedoe.com`, `https://auth.janedoe.com`
 - Go to Admin >> enable Advanced Mode
 - Setup areas
   - Go to Settings >> Areas, ... >> create any missing areas

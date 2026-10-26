@@ -50,6 +50,10 @@ scene: !include scenes.yaml
 backup:
 
 # Ref: https://www.home-assistant.io/integrations/http/
+# Imported into .storage/http on first boot, then ignored: change these in the UI. Kept so a
+# fresh install starts behind Traefik already configured.
+# TODO(2027.2): YAML stops working; remove the block and rely on the homesvcs guide's
+# Onboarding step (Settings >> System >> Network).
 http:
   server_port: 8123
   # Pass in as a Bearer token. /api/ endpoints are available on the server port
