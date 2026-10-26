@@ -111,10 +111,11 @@ case $1 in
 #     mkdir -p /etc/opt/piper
 #     mkdir -p /var/opt/piper
 #     install_wyoming
-#     WP_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-piper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-#     WY_VERSION=$(curl -s "https://api.github.com/repos/OHF-voice/wyoming/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+#     WP_VERSION=$(github_latest_version rhasspy/wyoming-piper)
+#     WY_VERSION=$(github_latest_version OHF-voice/wyoming)
 #     # TODO: Watch for migration to https://github.com/OHF-Voice/piper1-gpl
-#     PI_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/piper/releases" | grep -Po '"tag_name": "v\K[0-9.]+' | head -1)
+#     # rhasspy/piper is archived; v1.2.0 is its last binary release
+#     PI_VERSION=1.2.0
 #
 #     podman build -t piper /etc/opt/wyoming/src/piper \
 #       --build-arg WYOMING_PIPER_VERSION="$WP_VERSION" \
@@ -128,7 +129,7 @@ case $1 in
 #     mkdir -p /etc/opt/whisper
 #     mkdir -p /var/opt/whisper
 #     install_wyoming
-#     WW_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-faster-whisper/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+#     WW_VERSION=$(github_latest_version rhasspy/wyoming-faster-whisper)
 #
 #     podman build -t whisper /etc/opt/wyoming/src/whisper \
 #       --build-arg WYOMING_WHISPER_VERSION="$WW_VERSION"
@@ -139,7 +140,7 @@ case $1 in
 #     mkdir -p /etc/opt/openwakeword
 #     mkdir -p /var/opt/openwakeword
 #     install_wyoming
-#     OW_VERSION=$(curl -s "https://api.github.com/repos/rhasspy/wyoming-openwakeword/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+#     OW_VERSION=$(github_latest_version rhasspy/wyoming-openwakeword)
 #
 #     podman build -t openwakeword /etc/opt/wyoming/src/openwakeword \
 #       --build-arg WYOMING_OPENWAKEWORD_VERSION="$OW_VERSION"
@@ -161,7 +162,7 @@ case $1 in
     mkdir -p /var/snapraid
     install -D -m 644 services/snapraid/snapraid.conf /etc/snapraid.conf
     install_bin services/snapraid/snapraid_run.sh
-    SE_VERSION=$(curl -s "https://api.github.com/repos/prometheus-community/smartctl_exporter/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+    SE_VERSION=$(github_latest_version prometheus-community/smartctl_exporter)
     se="smartctl_exporter-${SE_VERSION}.linux-amd64"
     url="https://github.com/prometheus-community/smartctl_exporter/releases/download/v${SE_VERSION}"
     wget "$url/$se.tar.gz" "$url/sha256sums.txt"

@@ -9,10 +9,13 @@
 # Usage: image_digest REF; REF's current remote digest
 image_digest() { skopeo inspect --no-tags "docker://$1" | jq -r .Digest; }
 
-# Usage: github_commit OWNER/REPO [BRANCH]; the branch's head commit, default main
+# Usage: github_commit OWNER/REPO [BRANCH]; the branch's head commit, default main. Over
+# git, not the API, for the same rate limit as github_latest_tag.
 github_commit() {
-  curl -fsS -H 'Accept: application/vnd.github.sha' \
-    "https://api.github.com/repos/$1/commits/${2:-main}"
+  local commit
+  commit=$(git ls-remote "https://github.com/$1" "refs/heads/${2:-main}" | cut -f1)
+  [[ -n $commit ]] || die "can't look up $1's ${2:-main}"
+  echo "$commit"
 }
 
 # Usage: github_source OWNER/REPO COMMIT DIR; extracts the repo at COMMIT into DIR
@@ -31,11 +34,6 @@ base_images() {
 
 # Usage: github_file OWNER/REPO COMMIT FILE; FILE's contents at COMMIT
 github_file() { curl -fsS "https://raw.githubusercontent.com/$1/$2/$3"; }
-
-# Usage: github_latest_release OWNER/REPO; the latest release's tag
-github_latest_release() {
-  curl -fsS "https://api.github.com/repos/$1/releases/latest" | jq -er .tag_name
-}
 
 # Usage: github_asset_sha OWNER/REPO TAG ASSET; ASSET's sha256, from the release's
 # ASSET.sha256. Same origin as the asset, so it catches a corrupt or replaced download,
@@ -97,7 +95,7 @@ github_release_build() {
   case ${5:-} in
     versions)
       # Assigned before use, as in github_build
-      tag=$(github_latest_release "$repo")
+      tag=$(github_latest_tag "$repo")
       sha=$(github_asset_sha "$repo" "$tag" "$asset")
       file_sha=$(sha256sum < "$file" | cut -d' ' -f1)
       echo "${repo#*/}@${tag}"
@@ -110,7 +108,7 @@ github_release_build() {
       src=$(mktemp -d)
       # shellcheck disable=SC2064 # src is local, so expand it now
       trap "rm -rf '$src'" EXIT
-      tag=$(github_latest_release "$repo")
+      tag=$(github_latest_tag "$repo")
       sha=$(github_asset_sha "$repo" "$tag" "$asset")
       curl -fsSL -o "${src}/${asset}" "https://github.com/${repo}/releases/download/${tag}/${asset}"
       echo "${sha}  ${src}/${asset}" | sha256sum --check || die "checksum mismatch: ${asset} ${tag}"

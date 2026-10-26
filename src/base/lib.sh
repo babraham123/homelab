@@ -70,11 +70,20 @@ fetch_pinned() {
   echo "$2  $3" | sha256sum --check || die "checksum mismatch: $1"
 }
 
-# Usage: github_latest_version OWNER/REPO; the latest release's tag without its v. Dies
-# with curl's error, e.g. the API's rate limit, which a bare failed lookup in $( ) hides.
+# Usage: github_latest_tag OWNER/REPO; the latest release's tag. Read from github.com's
+# redirect, not the API, whose 60 unauthenticated requests an hour a shared VPS IP uses up.
+github_latest_tag() {
+  local url
+  url=$(curl -fsSLo /dev/null -w '%{url_effective}' "https://github.com/$1/releases/latest") ||
+    die "can't look up $1's latest release"
+  [[ $url == */releases/tag/* ]] || die "$1 has no release"
+  echo "${url##*/releases/tag/}"
+}
+# Usage: github_latest_version OWNER/REPO; the latest release's tag without its v
 github_latest_version() {
-  curl -fsS "https://api.github.com/repos/$1/releases/latest" |
-    grep -Po '"tag_name": "v\K[0-9.]+' || die "can't look up $1's latest release"
+  local tag
+  tag=$(github_latest_tag "$1")
+  echo "${tag#v}"
 }
 
 install_lib() { install -D -m 644 "${rendered}/base/lib.sh" /usr/local/lib/homelab/lib.sh; }
