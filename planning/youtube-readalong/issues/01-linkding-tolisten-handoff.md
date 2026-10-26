@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 Type: task
-Repo: homelab
+Repo: bookmark-handoff, homelab
 Source: maintainer request 2026-10-23
 
 ## Problem
@@ -13,7 +13,7 @@ Readeck and `listen` articles to Calliope's inbox every 15 minutes; it needs a t
 
 ## Change
 
-- **Job:** `linkding_to_video(linkding)` in `src/services/bookmark_handoff/bookmark_handoff.py`,
+- **Job:** `linkding_to_video(linkding)` in the bookmark-handoff repo's `bookmark_handoff.py`,
   after `readeck_to_narrate` in `main()`'s job list, so each job runs whatever the others did.
   - Query `/api/bookmarks/?q=%23tolisten&limit=100`, all pages first, as `linkding_to_readeck`
     does.
@@ -44,3 +44,12 @@ Readeck and `listen` articles to Calliope's inbox every 15 minutes; it needs a t
   `transcribed`; a second run changes nothing.
 - A bookmark tagged while the inbox directory is missing keeps its tag, and the run exits 0.
 - The render passes.
+
+## Comments
+
+- 2026-10-25: `bookmark_handoff.py` moved to babraham123/bookmark-handoff, so the job, its
+  header comment and its tests belong there; the quadlet, install case and reading guide stay in
+  the homelab. That repo's `bookmark_handoff.py` already has `linkding_to_video` (tag from
+  `TOLISTEN_TAG`, inbox under `VIDEOS_DIR`, default `/books/videos`, which the quadlet's
+  `/srv/media/books:/books` volume covers), and the `bookmark_handoff` install case creates
+  `/srv/media/books/videos/inbox`.

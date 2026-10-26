@@ -521,13 +521,13 @@ Degrade, don't fail, unless `--strict-voices` is set: multi → dialogue → sin
   - `src/calliope/tts.py`:
     `ChatterboxBackend.prepare_conditionals`, `FakeBackend`
   - `src/calliope/cache.py`: `clip_key`
+  - `batch/calliope_batch.py`: the batch runner the homelab's quadlet runs
   - `Containerfile`
   - `pyproject.toml`
   - `uv.lock`: transformers 5.2.0
 - **Homelab:**
   - `planning/narrated-ebooks/spec.md`
   - `planning/narrated-ebooks/issues/02-deploy-calliope-websvcs.md`
-  - `src/services/calliope/calliope_batch.py`
   - `src/services/calliope/calliope.container.j2`
   - `docs/guides/gpu.md` (driver 580)
   - `docs/architecture.md` (pve2 hardware) and `docs/services.md` (wyoming

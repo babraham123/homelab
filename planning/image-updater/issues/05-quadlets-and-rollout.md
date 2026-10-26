@@ -47,7 +47,13 @@ Code done 2026-10-11; the rollout below is what's left.
   images before copying quadlets.
 
 Rollout per node, vpnsvcs included (homesvcs → websvcs → secsvcs → vpnsvcs): add the new secrets
-(`secret_update.sh`), deploy, `install_image_updater`, run `image_updater.py` once, which loads the
-images under their new names, then `install_all_svcs` (or each service on vpnsvcs).
+(`secret_update.sh`), deploy, `install_image_updater`, run `/usr/local/bin/image_updater` once,
+which loads the images under their new names, then `install_all_svcs` (or each service on
+vpnsvcs).
 
 ## Comments
+
+- 2026-10-25: the updater is now github.com/babraham123/podman-image-updater, installed by
+  `install_image_updater` to `/usr/local/bin/image_updater` at a pinned commit, with its image
+  list in `src/base/podman/image_updater.json.j2`. The install-time gate in each `install_svcs.sh`
+  is `/usr/local/bin/image_updater install "$1"`; the rollout above uses that path.

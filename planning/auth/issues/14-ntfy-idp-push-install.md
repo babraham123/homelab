@@ -22,7 +22,7 @@ Decisions and config sketches: [research-13.md](../research-13.md) §7-§10.
 ## Scope
 
 1. **Image.** Pulled, not built: `upstream: ghcr.io/babraham123/ntfy-idp-push:0.3` in
-   `src/nodes/secsvcs/inventory.yml`, so `image_updater.py` scans it like the other upstream images.
+   `src/nodes/secsvcs/inventory.yml`, so the image updater scans it like the other upstream images.
    The image listens on plain HTTP :8080 and its healthcheck targets that.
 2. **Quadlet.** `src/services/ntfy_idp_push/ntfy_idp_push.container.j2` on secsvcs: `net.network`,
    next free IP (`{{ secsvcs.container_subnet }}.18` today), `HostName=idp-push.{{ site.url }}`,

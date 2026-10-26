@@ -2,7 +2,7 @@
 
 Status: ready-for-human
 Type: task
-Repo: homelab
+Repo: homelab, car-ingest
 Source: maintainer request 2026-09-26; `notes/TODO.md` "car data upload"
 Blocked by: 01, 02
 
@@ -14,16 +14,19 @@ batches are 05's.
 
 ## Change
 
-- `src/nodes/websvcs/car_ingest.py.j2` (one stdlib Python script) + `car_ingest.{service,timer}`
-  (every 15 min while websvcs is up), installed by a `car_ingest` case in `src/nodes/websvcs/install_svcs.sh`:
-  - scan `/var/opt/copyparty/data/car/` for files not recorded in `/var/lib/car_ingest/state` (keyed
-    by sha256, so re-uploads are skipped);
+- `car_ingest.py` (one stdlib Python script) in the car-ingest repo
+  (<https://github.com/babraham123/car-ingest>), run on websvcs as the `car_ingest` container:
+  `src/services/car_ingest/` holds its `build.sh`, quadlet and timer (every 15 min while websvcs is
+  up), installed by a `car_ingest` case in `src/nodes/websvcs/install_svcs.sh`:
+  - scan `/var/opt/copyparty/data/car/` (mounted at `/car`) for files not recorded in
+    `/var/lib/car_ingest/state` (keyed by sha256, so re-uploads are skipped);
   - parse each `.brc` (format below) into `/api/v1/import/prometheus` lines with explicit
     timestamps: `car_<sensor>{unit="...",trip="<file stem>"}`, where `<sensor>` is the sensor name
     slugified (`[BMS] Battery Power` → `bms_battery_power`). Sample time = header start time +
-    sample offset. The start time is phone-local, so convert it with `personal.timezone`;
+    sample offset. The start time is phone-local, so convert it with `personal.timezone`
+    (`CAR_INGEST_TIMEZONE`/`TZ` in the quadlet);
   - POST to `https://metrics.{{ site.url }}/api/v1/import/...` with the same basic-auth credentials
-    vmagent uses (`VM_ADMIN_PASSWORD` from the websvcs secrets);
+    vmagent uses (the `victoriametrics_admin_password` Podman secret);
   - record file hash, sample count and outcome; move failed files to `car/failed/`;
   - write `car_ingest_last_success_timestamp_seconds` and `car_ingest_files_total{result=...}` to
     `/var/lib/node_exporter/textfile_collector/`.
@@ -36,9 +39,9 @@ batches are 05's.
 
 ## BRC format
 
-Decoded from the 02 sample (`notes/2026-05-24 20-10-53.brc`); every sample matches the CSV export
-of the same recording. It is .NET `BinaryWriter` output, little-endian; strings are 7-bit-varint
-length-prefixed UTF-8.
+The reference copy is the car-ingest repo's `docs/brc-format.md`. Decoded from the 02 sample
+(`notes/2026-05-24 20-10-53.brc`); every sample matches the CSV export of the same recording. It
+is .NET `BinaryWriter` output, little-endian; strings are 7-bit-varint length-prefixed UTF-8.
 
 | Part | Layout |
 | --- | --- |
@@ -93,3 +96,8 @@ series (car data included) is explored in observability/09.
 - 2026-10-14: `car_ingest.sh.j2` and `car_ingest_brc.py` are one stdlib script,
   `src/nodes/websvcs/car_ingest.py.j2`; `car_ingest.py FILE` prints a file's import lines or
   why it fails. Still 3587 samples from the 02 sample. The tests now cover a whole run.
+- 2026-10-25: car_ingest moved to its own repo, babraham123/car-ingest (`car_ingest.py`, its
+  tests, `docs/brc-format.md`, `docs/wican-jsonl.md`), configured by `CAR_INGEST_*` environment
+  variables. websvcs runs it as the `car_ingest` container from `src/services/car_ingest/`, built
+  through the scan gate; the old host script, service and `tests/car_ingest_test.sh` are gone. The
+  remaining deploy is repo-extraction/09.

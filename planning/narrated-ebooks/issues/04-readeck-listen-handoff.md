@@ -2,7 +2,7 @@
 
 Status: ready-for-human
 Type: task
-Repo: homelab
+Repo: homelab, bookmark-handoff
 Source: maintainer request 2026-10-11
 Blocked by: 02, 03, web-archiving/02
 
@@ -16,8 +16,9 @@ read-along books in Storyteller, with no manual export.
 Flow: Readeck label `listen` → Readeck EPUB export → Calliope inbox →
 `readalouds/articles/<Title>/` → Storyteller's **Articles** collection.
 
-- The Readeck job in `src/services/bookmark_handoff/bookmark_handoff.py`, which also runs
-  web-archiving/03's linkding handoff, in the `bookmark_handoff` container started by
+- The Readeck job in `bookmark_handoff.py` in the bookmark-handoff repo
+  (<https://github.com/babraham123/bookmark-handoff>), which also runs web-archiving/03's linkding
+  handoff, in the `bookmark_handoff` container (`src/services/bookmark_handoff/`) started by
   `bookmark_handoff.timer` on websvcs every 15 minutes with `Persistent=true`. It shares that
   handoff's API wrapper, journal logging and the "change the label only after success" rule.
   - Reach Readeck on its container IP (`.18:8000`), not through Traefik.
@@ -64,3 +65,8 @@ own `readeck_narrate` case and timer; acceptance needs a deploy.
 Readeck job in `src/services/bookmark_handoff/bookmark_handoff.py`, one container and timer
 shared with web-archiving/03. The duplicate check above (relabel only when `<slug>` is already
 in the inbox, `readalouds/articles` or `failed`) carried over. Acceptance still needs a deploy.
+
+2026-10-25: `bookmark_handoff.py` moved to its own repo, babraham123/bookmark-handoff, with tests
+against faked linkding and Readeck APIs; tag and label names are environment variables defaulting
+to `listen` and `narrated`. The homelab keeps the quadlet and timer, and `build.sh` builds the
+image from that repo. Acceptance still needs a deploy.

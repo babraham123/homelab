@@ -2,7 +2,7 @@
 
 Status: ready-for-human
 Type: task
-Repo: homelab
+Repo: homelab, bookmark-handoff
 Source: maintainer request 2026-10-11
 Blocked by: 01, 02
 
@@ -13,9 +13,10 @@ Readeck without being saved a second time.
 
 ## Change
 
-- `src/services/bookmark_handoff/bookmark_handoff.py`, run on websvcs in the
-  `bookmark_handoff` container (a oneshot quadlet) by `bookmark_handoff.timer`, every 15
-  minutes with `Persistent=true`. The same script also runs narrated-ebooks/04's Readeck
+- `bookmark_handoff.py` in the bookmark-handoff repo
+  (<https://github.com/babraham123/bookmark-handoff>), run on websvcs in the `bookmark_handoff`
+  container (a oneshot quadlet, `src/services/bookmark_handoff/`) by `bookmark_handoff.timer`,
+  every 15 minutes with `Persistent=true`. The same script also runs narrated-ebooks/04's Readeck
   `listen` job.
   - Reach both apps on their container IPs (`.17:9090`, `.18:8000`) under their public
     host names, not through Traefik, so Authelia isn't in the path.
@@ -64,3 +65,8 @@ their `.service`/`.timer`) with `src/services/bookmark_handoff/bookmark_handoff.
 container, which also runs narrated-ebooks/04. The sent-ids state moved from
 `/var/lib/linkding_handoff/sent` to `/var/opt/bookmark_handoff/sent`, which websvcs's backup
 stages. Acceptance still needs a deploy to websvcs.
+
+2026-10-25: `bookmark_handoff.py` moved to babraham123/bookmark-handoff, with tests against faked
+linkding and Readeck APIs; the `toread`/`readeck` tags are environment variables with those
+defaults. `src/services/bookmark_handoff/build.sh` builds the image from that repo; the quadlet,
+timer and secrets stay here. Acceptance still needs a deploy to websvcs.

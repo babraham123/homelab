@@ -20,8 +20,8 @@ over Tailscale is what every public request rides on.
    - vpnsvcs: bound to `vpnsvcs.tailnet_ip`; ufw in on `tailscale0` to 5201
 2. **Headscale ACL**: `admin@` (the router's user, which SNATs secsvcs onto the tailnet) to
    `public@:5201`, plus a `tests` entry. The VPS gets no new outbound rule.
-3. **Probe**, in `net_probe.py.j2` (03), one target list in the template; 03's runner orders,
-   slots and busy-checks them:
+3. **Probe**, in net_probe's config `src/base/net_probe/config.json.j2` (03), one target list;
+   03's runner (the net-probe repo) orders, slots and busy-checks them:
    - `pve2`: slots 01, 07, 13, 19, apart from the speed test's so one hourly run never carries
      both. Busy check: pve2's `vmbr0` over 200 Mbit/s for the last 5 minutes (a Moonlight
      stream from the gaming VM crosses pfSense). Skipped as `unreachable` without trying when
@@ -56,3 +56,5 @@ over Tailscale is what every public request rides on.
   host. The VPS rule is in `install_firewall.sh.j2`. pfSense routes subnet traffic without SNAT,
   so the Headscale ACL names `secsvcs`, not `admin@`: `secsvcs` → `public@:5201`, an ICMP rule,
   and a policy test.
+- 2026-10-25: the probe code is in the net-probe repo now; the targets, slots and busy checks
+  above are entries in `src/base/net_probe/config.json.j2`.

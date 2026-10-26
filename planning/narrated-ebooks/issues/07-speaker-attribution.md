@@ -77,13 +77,13 @@ In the fork (sections 3, "Running Qwen3-8B on the P4", 5, 6, 7, 8 and 9 of the r
   license, so it is an evaluation bar only), on CPU or the P4; they never go into the Calliope
   image. Score all with PDNC's gold quote spans, so the comparison measures attribution alone, then
   Qwen3-8B again with `quotes.py`'s spans for the end-to-end number.
+- `batch/calliope_batch.py`, the batch runner baked into the image: `books` default to `multi`.
+  Sidecar `series` maps to `--series-cast <NARRATE_DIR>/casts/<series>.json`, `cast` to a temp
+  `--cast` file; a `Title.speakers.json` in the inbox becomes `--speakers`. `speakers.json` and the
+  report are kept next to the book in `readalouds/books/<Title>/` for corrections.
 
 In the homelab:
 
-- `calliope_batch.py`: `books` default to `multi`. Sidecar `series` maps to
-  `--series-cast /narrate/casts/<series>.json`, `cast` to a temp `--cast` file; a
-  `Title.speakers.json` in the inbox becomes `--speakers`. `speakers.json` and the report are kept
-  next to the book in `readalouds/books/<Title>/` for corrections.
 - `/srv/media/books/narrate/casts/` created by the `calliope` install case.
 - `docs/guides/reading.md.j2`: the voice library and `voices.json`, series and cast fields, and how
   to correct a speaker and re-run a book.
@@ -103,3 +103,8 @@ In the homelab:
 - A forced attribution failure (wrong `--llm-model` path) produces a dialogue-voice book, exit 0,
   and an ntfy message saying it fell back.
 - A second book with the same `series` reuses the first book's voices.
+
+## Comments
+
+- 2026-10-25: the batch runner moved into the fork as `batch/calliope_batch.py`, so its part of
+  this change lands there; the homelab keeps the casts directory and the reading guide.

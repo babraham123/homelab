@@ -80,3 +80,8 @@ folder and later get a read-along EPUB, without logging in to the VM.
 2026-10-17: the fork is on GitHub, and the image is built by `src/services/calliope/build.sh`
 through image_updater's `github_build`, not from the install case. Acceptance still needs a
 deploy, plus the P4 measurements above.
+
+2026-10-25: the wrapper moved into the fork as `batch/calliope_batch.py`, baked into the image at
+`/opt/calliope_batch.py`; the quadlet runs it from there instead of mounting it, and its paths
+are `NARRATE_DIR`, `READALOUDS_DIR` and `VOICES_DIR` (defaults `/narrate`, `/readalouds`,
+`/voices`). Acceptance still needs a deploy, plus the P4 measurements above.

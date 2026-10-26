@@ -2,7 +2,7 @@
 
 Status: ready-for-human
 Type: task
-Repo: homelab
+Repo: homelab, car-ingest
 Source: wican1 session 2026-10-14 (WiCAN Pro BLE-sync app, a separate GPL-3.0 Android repo)
 Blocked by: 03
 
@@ -40,8 +40,8 @@ car itself and logs to its SD card. A phone app pulls the log over BLE and uploa
 
 ## Change
 
-- `car_ingest.py` accepts `.jsonl.gz` and `.jsonl` next to `.brc`; gzip is recognised by its magic
-  bytes.
+- `car_ingest.py` (the car-ingest repo) accepts `.jsonl.gz` and `.jsonl` next to `.brc`; gzip is
+  recognised by its magic bytes.
 - Skip `_file` and `_cursor` lines. Fail the file on any other line that isn't a row. Ignore
   `ts_raw`.
 - `ts_quality`: import `journal`, `device` and `anchor` rows. Drop `unknown` ones (`ts` is `null`)
@@ -80,7 +80,8 @@ car itself and logs to its SD card. A phone app pulls the log over BLE and uploa
     e.g. `wican_AA_BB_CC_DD_EE_01-1784000060_0-0123456789abcdef.jsonl.gz`. Take `<source>` as the
     name's stem with its last two `-` fields removed (the cursor and hash contain no `-`).
   - A new `cars` map in `vars.yml` (and `vars.template.yml`) names each source:
-    `cars: {default: ev6, sources: {wican_AA_BB_CC_DD_EE_01: ev6}}`. The label is the mapped name;
+    `cars: {default: ev6, sources: {wican_AA_BB_CC_DD_EE_01: ev6}}`, passed to the container as
+    `CAR_INGEST_DEFAULT_CAR` and `CAR_INGEST_CAR_SOURCES`. The label is the mapped name;
     an unmapped source is labelled with the source itself and logged, so a new dongle shows up as
     its own car rather than merging into one. `.brc` files and JSONL names without the
     `<source>-<cursor>-<hash>` shape get `cars.default`.
@@ -90,7 +91,7 @@ car itself and logs to its SD card. A phone app pulls the log over BLE and uploa
   - 03 isn't deployed yet, so no imported series lack the label and nothing needs backfilling.
 - Unchanged from 03: sha256 dedup, malformed files to `failed/`, `too_old` judged on the oldest
   row, a failed POST records nothing, the textfile metrics.
-- Tests in `tests/car_ingest_test.sh`, sharing the existing `ingest()` and `state()` helpers:
+- Tests in the car-ingest repo's `tests/test_car_ingest.py`:
   - plain and gzipped batches;
   - marker and meta lines skipped, a malformed line fails the file;
   - `journal`, `device` and `anchor` rows imported at `ts`, `unknown` rows dropped, an unlisted
@@ -143,3 +144,7 @@ this ticket's comments.
   `cars.default`. Units for unmapped params come from the EV6 profile in the sync app's copy of
   `vehicle_profiles.json`. Left for the maintainer: put the dongle's id under `cars.sources` in
   `vars.yml`, deploy with 03, and check the first real batches (sign, counters).
+- 2026-10-25: car_ingest moved to babraham123/car-ingest; the cases above are its
+  `tests/test_car_ingest.py`, and the JSONL notes are its `docs/wican-jsonl.md`. The `cars` map
+  still lives in `vars.yml` and reaches the container as environment variables. Deploy is
+  repo-extraction/09.

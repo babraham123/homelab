@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 Type: task
-Repo: homelab
+Repo: homelab, yt-to-audiobook
 Source: maintainer request 2026-10-23
 Blocked by: 01
 
@@ -27,8 +27,9 @@ Service `src/services/yt_to_audiobook/`, modelled on Calliope's runner, not on t
   - `/srv/media/books/videos/failed/<slug>/`: the request and whatever was fetched
   - `/srv/media/books/readalouds/videos/<Title>/Title.readaloud.epub`: output, chowned
     `1000:1000` like Calliope's, EPUB written last via a dotted temp name and `os.replace`
-- **Runner** `yt_to_audiobook.py`, mounted at `/opt/yt_to_audiobook.py:ro` like `calliope_batch.py`
-  so a script edit doesn't rebuild the image. One request per run, oldest first:
+- **Runner** `batch/yt_to_audiobook_batch.py` in yt-to-audiobook, baked into the image at
+  `/opt/yt_to_audiobook_batch.py` and run as the quadlet's entrypoint, like Calliope's
+  `calliope_batch.py`. One request per run, oldest first:
   1. `yt-dlp` with `-f "ba[ext=m4a]" --embed-metadata --embed-thumbnail --write-info-json
      --write-subs --write-auto-subs --sub-lang <lang>,<lang>-orig --sub-format vtt
      --sponsorblock-mark sponsor,selfpromo,interaction,intro,outro,preview --continue
@@ -51,7 +52,7 @@ Service `src/services/yt_to_audiobook/`, modelled on Calliope's runner, not on t
   7. SIGTERM leaves the request in the inbox and `work/<slug>` in place; `TimeoutStopSec=90`.
 - **Units:** `yt_to_audiobook.container.j2` (`Type=oneshot`, `ReadOnly=true`,
   `DropCapability=all`, `NoNewPrivileges=true`, IP `{{ websvcs.container_subnet }}.25`,
-  `TimeoutStartSec=2h`, volumes for `/videos`, `/readalouds` and the script; no GPU),
+  `TimeoutStartSec=2h`, volumes for `/videos` and `/readalouds`; no GPU),
   `yt_to_audiobook.path` with `PathExistsGlob=/srv/media/books/videos/inbox/*.json`, and
   `yt_to_audiobook.timer` (hourly, `Persistent=true`, `OnBootSec=5min`) as the backstop,
   copied from Calliope's pair. The install case enables both.
@@ -85,3 +86,7 @@ Service `src/services/yt_to_audiobook/`, modelled on Calliope's runner, not on t
   `src/services/yt_to_audiobook/yt_to_audiobook_batch.py`, bind-mounted and calling
   `convert()`; it owns the inbox, `failed/`, delivery to `readalouds/videos/<slug>/` and ntfy.
   The yt-dlp bump in "Image" above is now a Renovate PR in that repo.
+- 2026-10-25: the runner moved into yt-to-audiobook as `batch/yt_to_audiobook_batch.py`, baked
+  into the image at `/opt/yt_to_audiobook_batch.py` with `VIDEOS_DIR` and `READALOUDS_DIR`
+  defaulting to `/videos` and `/readalouds`. The quadlet no longer mounts a script; a runner edit
+  ships through the image's rebuild, like the converter.

@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 Type: task
-Repo: TTS-Narrated-Ebook-Creator (fork), homelab
+Repo: TTS-Narrated-Ebook-Creator (fork), bookmark-handoff, homelab
 Source: maintainer request 2026-10-11; design in [multivoice-research.md](../multivoice-research.md)
 Blocked by: 01, 02
 
@@ -39,15 +39,19 @@ In the fork (sections 1, 2, 4, 5, 6 and 8 of the research doc):
   dialogue); one `<par>` per sentence; quote clips in the dialogue voice's band and the tag in the
   narrator's; epubcheck passes; the single-mode regression guard above; `quotes.py` tables per
   language.
+- `batch/calliope_batch.py`, the batch runner baked into the image: sidecar fields `voice_mode` and
+  `dialogue_voice` (a name in `VOICES_DIR`, `/etc/opt/calliope/voices` on websvcs, checked like
+  `voice`), mapped to the flags. The default comes from the collection: `articles` → `single`,
+  `books` → `dialogue` until 07 lands. The ntfy message says when a run fell back. Its README's
+  "Batch runner" section documents the new fields.
+
+In the bookmark-handoff repo:
+
+- `bookmark_handoff.py`: write `voice_mode: "single"` into each article's sidecar, so articles never
+  pay for segmentation or attribution.
 
 In the homelab:
 
-- `calliope_batch.py`: sidecar fields `voice_mode` and `dialogue_voice` (a name in
-  `/etc/opt/calliope/voices`, checked like `voice`), mapped to the flags. The default comes from the
-  collection: `articles` → `single`, `books` → `dialogue` until 07 lands. The ntfy message says when
-  a run fell back.
-- `src/services/bookmark_handoff/bookmark_handoff.py`: write `voice_mode: "single"` into each
-  article's sidecar, so articles never pay for segmentation or attribution.
 - `docs/guides/reading.md.j2`: the sidecar fields, and a `dialogue.wav` next to `default.wav`.
 
 ## Acceptance
@@ -57,3 +61,9 @@ In the homelab:
   dialogue voice, highlighting stays in sync in Storyteller, and the report records how many
   segments under 3 characters QA flagged.
 - A Readeck article still narrates in one voice, and its clip keys match a run before this change.
+
+## Comments
+
+- 2026-10-25: the batch runner moved into the fork as `batch/calliope_batch.py` and
+  `bookmark_handoff.py` into babraham123/bookmark-handoff, so their parts of this change land in
+  those repos; the homelab keeps only the reading guide.

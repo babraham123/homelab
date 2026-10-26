@@ -386,3 +386,7 @@ No separate backfill script is needed if 03 grows a `--reimport` flag.
 ## Comments
 
 - 2026-10-12: researched and resolved; see Answer.
+- 2026-10-25: `car_ingest.py` is now the `car_ingest` container on websvcs, built from
+  babraham123/car-ingest. The backfill above is a one-off `podman run` of `localhost/car_ingest`
+  with `--state-dir` (or `CAR_INGEST_STATE_DIR`) on an empty directory and `CAR_INGEST_VM_URL` at
+  the long-term instance.

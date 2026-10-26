@@ -36,8 +36,9 @@ Maintainer decisions (2026-10-23):
 - 2026-10-23: the converter is its own repo,
   [babraham123/yt-to-audiobook](https://github.com/babraham123/yt-to-audiobook): fetch,
   captions, cuts and the EPUB writer, with a CLI and tests. The homelab builds its image from
-  `main` with `github_build`, as Calliope's, and keeps only the batch runner here
-  (`yt_to_audiobook_batch.py`: the inbox, `failed/`, delivery to Storyteller, ntfy).
+  `main` with `github_build`, as Calliope's. Since 2026-10-25 the batch runner is in that repo
+  too (`batch/yt_to_audiobook_batch.py`: the inbox, `failed/`, delivery to Storyteller, ntfy),
+  baked into the image; the homelab keeps the quadlet, path and timer units.
 - Output lands in `/srv/media/books/readalouds/videos/<Title>/`, a third Storyteller
   collection beside `books` and `articles`.
 

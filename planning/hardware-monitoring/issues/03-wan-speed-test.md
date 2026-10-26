@@ -2,7 +2,7 @@
 
 Status: ready-for-human
 Type: task
-Repo: homelab
+Repo: homelab, net-probe
 Source: maintainer request 2026-10-23
 
 ## Problem
@@ -13,7 +13,9 @@ a degraded modem link or pfSense becoming the bottleneck all look like a quiet n
 ## Change
 
 1. **`net_probe`**, a debian service on secsvcs, the probe host for 03 and 04:
-   - `src/base/net_probe/net_probe.py.j2`, stdlib only
+   - `net_probe.py`, stdlib only, in the net-probe repo (<https://github.com/babraham123/net-probe>),
+     installed to `/usr/local/bin/net_probe` at a pinned commit; its config is
+     `src/base/net_probe/config.json.j2`, rendered from `vars.yml`
    - `net_probe.service` (oneshot, "Homelab:" description, `TimeoutStartSec=10min`) and
      `net_probe.timer`: `OnCalendar=*:05`, `Persistent=true`, no random delay, so slots land
      on their hour
@@ -23,7 +25,7 @@ a degraded modem link or pfSense becoming the bottleneck all look like a quiet n
      and a manual `systemctl start net_probe` waits in the same queue. Within a run, probes go
      one at a time, light before heavy: pings, then the speed test, the pve2 iperf3, the VPS
      iperf3. The pings see the idle path, and no test competes with another.
-   - **Slots.** Each heavy probe declares its slot hours in the template (speed test: 03, 09, 15,
+   - **Slots.** Each heavy probe declares its slot hours in the config (speed test: 03, 09, 15,
      21). It is due when its latest slot is after its last success. A due probe that is skipped
      stays due and retries on the next hourly run, until it succeeds or its next slot arrives,
      so it runs at most once per slot. Runs missed while secsvcs was down collapse into one at

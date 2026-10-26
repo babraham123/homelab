@@ -735,15 +735,15 @@ No `HealthCmd`: not a core service, and not in use. Candidate if one is wanted l
 
 As on secsvcs (vmagent port 8429).
 
-#### geoip_generator (`localhost/geoip_generator:latest`, built from `src/services/haproxy/`)
+#### geoip_generator (`localhost/geoip_generator:latest`, from the haproxy-mapper fork)
 
-`python:3-alpine` plus a static `haproxy-mapper`, root,
-`ENTRYPOINT ["python3", "/usr/local/bin/geoip_generator.py"]` (`geoip_generator.Containerfile`). A
-`Type=oneshot` unit started weekly by `geoip_generator.timer`. The script downloads and unpacks
-GeoLite2 into a `tempfile.TemporaryDirectory()` (under `/tmp`, the automatic tmpfs), runs
-`haproxy-mapper` there, then rewrites `*.map` in `/etc/haproxy/countries`, the only volume
-(`geoip_generator.py`). That directory is created by root with `mkdir -p` and its maps are
-`chmod 644` (`install_svcs.sh.j2`, `haproxy`), so container root writes it as the owner and needs no
+`python:3-alpine` plus a static `haproxy-mapper`, root, `ENTRYPOINT ["python3",
+"/usr/local/bin/geoip_generator.py"]` (the fork's `geoip_generator.Containerfile`). A `Type=oneshot`
+unit started weekly by `geoip_generator.timer`. The script downloads and unpacks GeoLite2 into a
+`tempfile.TemporaryDirectory()` (under `/tmp`, the automatic tmpfs), runs `haproxy-mapper` there,
+then rewrites `*.map` in `/etc/haproxy/countries`, the only volume (`OUTPUT_DIR` in the fork's
+`geoip_generator.py`). That directory is created by root with `mkdir -p` and its maps are `chmod
+644` (`install_svcs.sh.j2`, `haproxy`), so container root writes it as the owner and needs no
 capability. Python can't write `__pycache__` on a read-only root and skips it silently. The download
 and maps sit in RAM while it runs, a few tens of MB on the VPS.
 

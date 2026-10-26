@@ -76,3 +76,8 @@ other node scripts), `image_updater.service.j2` and `image_updater.timer`.
 - 2026-09-27: unblocked; 02 is resolved. The list is `inv.images[node]` from
   `{% import 'src/nodes.jinja' as inv with context %}` (not `<node>_images` in
   `all_vars.yml`): `[{service, container, image, upstream | build}]`, update order.
+- 2026-10-25: the script is now github.com/babraham123/podman-image-updater (`image_updater.py`,
+  stdlib, with its tests), installed to `/usr/local/bin/image_updater` at a pinned commit. Its
+  per-node image list and ntfy settings are `src/base/podman/image_updater.json.j2`, rendered
+  from `src/nodes.jinja`; `src/base/podman/image_updater.sh.j2` and `image_updater.py.j2` are
+  gone.

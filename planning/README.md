@@ -34,6 +34,8 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
   2026-10-14)
 - [Hardware and network monitoring](hardware-monitoring/spec.md) — 5 issues (maintainer
   request, added 2026-10-23)
+- [Extract standalone components](repo-extraction/spec.md) — 11 issues (maintainer request,
+  added 2026-10-25)
 
 Archived prototype, not a feature: [services-inventory](services-inventory/README.md), the
 declarative per-node `services.yml` that restructure/01 judged too complex and replaced with the

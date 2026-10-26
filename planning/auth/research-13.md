@@ -108,7 +108,8 @@ Phones and services don't use this router: the ntfy apps, Home Assistant, ntfy-a
 `ntfy_alert_token` scripts all send non-`Mozilla` UAs and their own credentials (INFERENCE from their
 configs: `src/services/alertmanager/ntfy-alertmanager.scfg.j2.j2:68`,
 `src/services/home_assistant/home_assistant.container.j2:40`,
-`src/base/podman/image_updater.py.j2:122`).
+the podman-image-updater repo's `image_updater.py`, its ntfy URL and token from
+`src/base/podman/image_updater.json.j2`).
 
 ### Options
 
