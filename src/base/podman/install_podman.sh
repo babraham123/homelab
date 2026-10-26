@@ -18,4 +18,8 @@ echo "deb http://downloadcontent.opensuse.org/repositories/home:/alvistack/Debia
 apt update
 apt -y upgrade
 apt -y install podman podman-netavark podman-aardvark-dns podman-compose libgpgme11-dev buildah libyajl2 uidmap
+# The quadlets are systemd's to start, so this unit has nothing to start at boot, and a podman
+# upgrade's postinst restarts it, whose ExecStop stops and removes every container. Masking
+# leaves a running instance alone; `disable --now` would run that ExecStop.
+systemctl mask podman-restart.service
 podman --version
