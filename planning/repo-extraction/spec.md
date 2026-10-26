@@ -79,5 +79,5 @@ flowchart LR
 | [07](issues/07-ci-and-renovate.md) | CI and Renovate for the new repos and the fork | `resolved` | task |
 | [08](issues/08-publish-repos.md) | Create and push the repos, fast-forward the forks | `ready-for-human` | task |
 | [09](issues/09-deploy-and-cutover.md) | Deploy and cut over each node | `ready-for-human` | task |
-| [10](issues/10-calliope-ci.md) | CI for TTS-Narrated-Ebook-Creator | `needs-triage` | task |
+| [10](issues/10-calliope-ci.md) | CI for TTS-Narrated-Ebook-Creator | `resolved` | task |
 | [11](issues/11-ruff-format.md) | Adopt `ruff format` in the new repos | `resolved` | task |
