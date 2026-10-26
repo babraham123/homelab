@@ -24,8 +24,8 @@ In this order:
    done
    ```
 
-   Don't amend or rebase podman-image-updater or net-probe first: the homelab pins their first
-   commits (`ec6da36`, `53d791b`). If either changes, update `commit` and `sha` in its case in
+   Don't amend or rebase podman-image-updater or net-probe first: the homelab pins their
+   current heads (`182213a`, `93502ea`). If either changes, update `commit` and `sha` in its case in
    `src/base/debian/install_svcs.sh`.
 2. Existing repos, fast-forwarding `main` to the work branches:
 

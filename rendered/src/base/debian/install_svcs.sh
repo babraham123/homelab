@@ -73,8 +73,8 @@ case $1 in
     apt update
     apt install -y trivy
     # github.com/babraham123/podman-image-updater, pinned to a commit and its file's hash
-    commit=ec6da3687f2d1d1292099bfe21e13f1714b1b68f
-    sha=d8556c5912a09f44bd3f1fa51feecef20c3201bccda8b374bc79e9b26390b9e2
+    commit=182213a783fbd0d072e126167fbb5a219be78443
+    sha=e590628b69ca8308c3d0c108c9fffafaeff371c2bd0115057901bc82945b8b80
     fetch_pinned "https://raw.githubusercontent.com/babraham123/podman-image-updater/${commit}/image_updater.py" \
       "$sha" image_updater.py
     install -D image_updater.py /usr/local/bin/image_updater
@@ -102,8 +102,8 @@ case $1 in
     DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
     # github.com/babraham123/net-probe, pinned to a commit and its file's hash;
     # base/net_probe/config.json is its config
-    commit=53d791be849c30d0596349f793152a976dcf49b6
-    sha=e54c3b9e961018a81327e6cc51e1eb61f19f48a032dcc389b75e507d4ecae1b0
+    commit=93502eaf8875398389c9dfad724e210fc02fabb0
+    sha=7717d05cd0dcce45fd773f522619d18e42f873f0cf78be0ab3e5998311527e63
     fetch_pinned "https://raw.githubusercontent.com/babraham123/net-probe/${commit}/net_probe.py" \
       "$sha" net_probe.py
     install -D net_probe.py /usr/local/bin/net_probe

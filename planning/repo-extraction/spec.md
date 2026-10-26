@@ -25,7 +25,8 @@ Maintainer decisions (2026-10-25):
     gate, like `finance_exporter` and Calliope.
 - **Public repos:** the nodes fetch commits and sources without credentials.
 - **CI and Renovate** follow yt-to-audiobook's: GitHub Actions pinned by digest, unit tests,
-  `ruff check --select E9,F` (the homelab pre-commit hook's level), an image build where there is a
+  `ruff check` at the homelab pre-commit hook's level (`E9,F`) and `ruff format --check`, both set
+  by each repo's `ruff.toml` (haproxy-mapper's job lints only), an image build where there is a
   Containerfile; Renovate on a Monday schedule with a 3-day minimum release age, grouping Actions
   and base images, and tracking the ruff version CI runs.
 
@@ -43,8 +44,9 @@ Constraints:
 
 - Nothing works on a node until the repos are on GitHub: a pinned commit must exist there, and
   `github_build` reads `main`. 08 publishes them; 09 deploys.
-- The pins are the new repos' first commits (podman-image-updater `ec6da36`, net-probe
-  `53d791b`). Rewriting those repos' history before the push would invalidate them.
+- The pins are the new repos' current heads, after the `ruff format` commit (podman-image-updater
+  `182213a`, net-probe `93502ea`). Rewriting those repos' history before the push would invalidate
+  them.
 
 ## Flow
 
@@ -78,4 +80,4 @@ flowchart LR
 | [08](issues/08-publish-repos.md) | Create and push the repos, fast-forward the forks | `ready-for-human` | task |
 | [09](issues/09-deploy-and-cutover.md) | Deploy and cut over each node | `ready-for-human` | task |
 | [10](issues/10-calliope-ci.md) | CI for TTS-Narrated-Ebook-Creator | `needs-triage` | task |
-| [11](issues/11-ruff-format.md) | Adopt `ruff format` in the new repos | `needs-triage` | task |
+| [11](issues/11-ruff-format.md) | Adopt `ruff format` in the new repos | `resolved` | task |
