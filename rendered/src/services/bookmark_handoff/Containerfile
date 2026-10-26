@@ -1,5 +1,5 @@
 # bookmark-handoff's release zipapp, its libraries vendored in, which build.sh downloads
 # into the build context.
-FROM docker.io/library/python:3.14-alpine
+FROM docker.io/library/python:3.15-alpine
 COPY bookmark_handoff /usr/local/bin/bookmark_handoff
 ENTRYPOINT ["python3", "/usr/local/bin/bookmark_handoff"]
