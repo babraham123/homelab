@@ -44,8 +44,8 @@ Constraints:
 
 - Nothing works on a node until the repos are on GitHub: a pinned commit must exist there, and
   `github_build` reads `main`. 08 publishes them; 09 deploys.
-- The pins are the new repos' current heads, after the `ruff format` commit (podman-image-updater
-  `182213a`, net-probe `93502ea`). Rewriting those repos' history before the push would invalidate
+- The pins are the new repos' current heads, after the `ruff format` commits (podman-image-updater
+  `25251e2`, net-probe `4a03583`). Rewriting those repos' history before the push would invalidate
   them.
 
 ## Flow

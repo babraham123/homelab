@@ -19,16 +19,15 @@ reformat changes the file's hash, so it lands with a pin bump in the homelab.
 ## Answer
 
 Done 2026-10-25. Each repo has a `ruff.toml`: 2-space indents and 100 columns to match the
-homelab, `skip-magic-trailing-comma`, and lint rules `E9,F`. Ruff can't fill a literal across
-lines, so the packed tables (car-ingest's `UNITS` and `WICAN_UNITS`, bookmark-handoff's
-`narrated_langs` and its language test cases) sit between `# fmt: off` and `# fmt: on`. CI runs
-`ruff check .` and `ruff format --check .`.
+homelab, `skip-magic-trailing-comma`, and lint rules `E9,F`. Literals are formatted like
+everything else, one item per line once they don't fit. CI runs `ruff check .` and
+`ruff format --check .`.
 
 | Repo | Commit |
 | --- | --- |
-| podman-image-updater | `182213a` |
-| net-probe | `93502ea` |
-| car-ingest | `f52ed0e` |
-| bookmark-handoff | `e906dad` |
+| podman-image-updater | `25251e2` |
+| net-probe | `4a03583` |
+| car-ingest | `6824a94` |
+| bookmark-handoff | `14c9821` |
 
 The homelab pins moved to the podman-image-updater and net-probe commits, with their new sha256s.
