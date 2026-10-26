@@ -21,6 +21,7 @@ scp "${secrets}/${host}.yaml.age" "${addr}:/home/manualadmin/secrets.yaml.age"
 
 echo "manualadmin's sudo password on ${host}:"
 ssh -t "$addr" '
+set -euo pipefail
 sudo mkdir -p /etc/opt/secrets
 sudo mv /home/manualadmin/secrets.yaml.age /etc/opt/secrets/secrets.yaml.age
 sudo chown root:root /etc/opt/secrets/secrets.yaml.age
