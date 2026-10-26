@@ -81,8 +81,8 @@ case $1 in
     apt update
     apt install -y trivy
     # github.com/babraham123/podman-image-updater, pinned to a release and its asset's hash
-    tag=v1.0.0
-    sha=156a3e03037889064ce831876a10f7d2de663a4ea75a1d34cc1603aba78cfb7b
+    tag=v1.1.0
+    sha=d5d83f3968600f21289284bab561d56040ac9d6e7dd1e0eee77fe3e0f6f2efd1
     fetch_pinned "https://github.com/babraham123/podman-image-updater/releases/download/${tag}/image_updater" \
       "$sha" image_updater
     install -D image_updater /usr/local/bin/image_updater

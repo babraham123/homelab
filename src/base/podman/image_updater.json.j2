@@ -44,6 +44,10 @@
       "deadline_s": 1500,
       "boot_delay_s": 0
 {%- endif %}
+{%- if node == 'vpnsvcs' %},
+{#- No jars in its images, and the ~1 GB Java DB is a lot for the VPS's disk. #}
+      "java_db": false
+{%- endif %}
     }{{ "," if not loop.last }}
 {%- endfor %}
   }

@@ -53,7 +53,8 @@
       ],
       "ntfy": {"url": "https://push.janedoe.com/alert", "token": {"command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "ntfy_alert_token"]}},
       "deadline_s": 1500,
-      "boot_delay_s": 0
+      "boot_delay_s": 0,
+      "java_db": false
     },
     "websvcs": {
       "images": [
