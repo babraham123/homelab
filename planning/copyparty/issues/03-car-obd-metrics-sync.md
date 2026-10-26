@@ -101,3 +101,8 @@ series (car data included) is explored in observability/09.
   variables. websvcs runs it as the `car_ingest` container from `src/services/car_ingest/`, built
   through the scan gate; the old host script, service and `tests/car_ingest_test.sh` are gone. The
   remaining deploy is repo-extraction/09.
+- 2026-10-25: car-ingest v1.0.0 is a package (`src/car_ingest/`) that `build.py` packs into one
+  zipapp, published as the release asset `car_ingest`; CLI flags and environment variables are
+  unchanged. `src/services/car_ingest/build.sh` builds the latest release instead of main: its own
+  `Containerfile` copies in that asset, checked against the release's `car_ingest.sha256`
+  (`github_release_build` in `src/base/podman/build_lib.sh`).
