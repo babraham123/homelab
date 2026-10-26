@@ -27,7 +27,7 @@ jobs:
           uv tool install yamllint==1.38.0
           uv tool install shellcheck-py==0.11.0.1
           uv tool dir --bin >> "$GITHUB_PATH"
-          npm install -g markdownlint-cli2@0.23.3
+          npm install -g markdownlint-cli2@0.24.0
       # The hook renders the committed tree, runs every check and the fast tests, then
       # replaces rendered/ and stages it; a staged change means rendered/ is stale.
       - run: .githooks/pre-commit
