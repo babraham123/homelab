@@ -1,0 +1,87 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "minimumReleaseAge": "3 days",
+  "enabledManagers": [
+    "github-actions",
+    "custom.regex"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Images pinned to a version. The image updater follows each tag as written, so a new version only arrives by changing it. localhost/ is where the updater loads an upstream image, and rendered/ is matched too, so the PR stays in step with the pre-commit render that CI compares.",
+      "managerFilePatterns": [
+        "/^(src|docs|rendered)/.+/"
+      ],
+      "matchStrings": [
+        "(?:docker\\.io|localhost)/(?<depName>[a-z0-9._-]+/[a-z0-9._-]+):(?<currentValue>v?\\d[A-Za-z0-9._-]*)"
+      ],
+      "datasourceTemplate": "docker",
+      "packageNameTemplate": "docker.io/{{{depName}}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Python tools pinned in CI and the pre-commit hook",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.+\\.ya?ml$/",
+        "/^\\.githooks/pre-commit$/"
+      ],
+      "matchStrings": [
+        "(?<depName>ruff)@(?<currentValue>\\d[\\d.]*)",
+        "(?<depName>jinjanator|jinjanator-plugin-ansible|yamllint|shellcheck-py)==(?<currentValue>\\d[\\d.]*)"
+      ],
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "description": "Node tools pinned in CI",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.+\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "(?<depName>markdownlint-cli2)@(?<currentValue>\\d[\\d.]*)"
+      ],
+      "datasourceTemplate": "npm"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "A new major version of a service usually needs a migration, so it waits for approval on the dashboard",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchPackageNames": [
+        "docker.io/guacamole/**"
+      ],
+      "groupName": "Guacamole"
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDatasources": [
+        "pypi",
+        "npm"
+      ],
+      "groupName": "CI tools"
+    }
+  ]
+}
