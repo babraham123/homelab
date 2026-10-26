@@ -38,9 +38,10 @@ updating the ruleset, or every PR waits on a check that never reports.
 ## Renovate
 
 Every repo has a `renovate.json` that runs on Monday mornings, waits 3 days after a release (for
-Maven artifacts in bt-courier-android, only when the registry says when it was released), and pins
-Actions by digest. Repos with a Containerfile or Dockerfile pin its base images by digest too, and
-all but the homelab turn on `osvVulnerabilityAlerts`, which opens fix PRs outside the schedule.
+Maven artifacts in bt-courier-android, only when the registry says when it was released; never for
+a PR that only pins the version in use), and pins Actions by digest. Repos with a Containerfile or
+Dockerfile pin its base images by digest too, and all but the homelab turn on
+`osvVulnerabilityAlerts`, which opens fix PRs outside the schedule.
 TTS-Narrated-Ebook-Creator holds the CUDA base at 12.4 and skips torch, torchaudio and
 CTranslate2, whose newer builds drop CUDA 12.4 or Pascal.
 
