@@ -9,7 +9,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 require_root
 
 apt install -y python3-pip
-pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
+# passlib needs bcrypt 4.0. Debian's python3-bcrypt, where some package pulled it in, has no
+# RECORD for pip to uninstall, so the pin goes into /usr/local beside it, which wins on sys.path.
+pip3 install --break-system-packages --ignore-installed "bcrypt==4.0.1"
+pip3 install --break-system-packages jinjanator jinjanator-plugin-ansible passlib
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
