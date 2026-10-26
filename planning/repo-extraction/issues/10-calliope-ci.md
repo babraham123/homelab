@@ -18,9 +18,10 @@ image (CUDA, PyTorch, Chatterbox) is likely too large to build on GitHub's free 
 
 ## Comments
 
-- 2026-10-25 agent: done in the fork (40be31a, db8c15f), the first option plus Renovate.
+- 2026-10-25 agent: done in the fork (40be31a to 40d89c0), the first option plus Renovate.
   - CI runs `ruff check`, `ruff format --check` and `pytest` with the fake backend on uv's Python
-    3.12, with ffmpeg and epubcheck so no test skips. No image build.
+    3.12, with ffmpeg and epubcheck 5.4.0 so no test skips. No image build. Ubuntu's epubcheck
+    4.x applies EPUB 3.2 rules, which reject the SMIL `seq` textref without a fragment.
   - `ruff.toml`: 100 columns, rules `E9` and `F`; the upstream `src/epub_processor_*.py` scripts
     are excluded so merges from upstream stay clean.
   - Renovate holds `nvidia/cuda` to 12.4.x and skips torch, torchaudio and CTranslate2, whose newer
