@@ -14,6 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        # No lock file to key a cache on
+        with:
+          enable-cache: false
       # The pre-commit hook's tools; jq and yq come with the runner. jinjanator's extras
       # match install_render_tools.sh, which renders on the nodes.
       - run: |
