@@ -50,7 +50,11 @@ image_versions() {
   local images image digest
   images=$(base_images)
   for image in $images; do
-    digest=$(image_digest "$image")
+    case $image in
+      # Pinned in the file, so the pin is the input; skopeo also rejects a tag with a digest
+      *@*) digest=${image#*@} image=${image%@*} ;;
+      *) digest=$(image_digest "$image") ;;
+    esac
     echo "${image##*/}@${digest}"
   done
 }
