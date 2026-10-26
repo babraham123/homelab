@@ -18,7 +18,7 @@ noticed when a service broke.
   quadlet can pull, so an unscanned image can't reach a container.
 - Each node that runs quadlets (vpnsvcs, homesvcs, websvcs, secsvcs) runs the image updater
   ([podman-image-updater](https://github.com/babraham123/podman-image-updater), installed pinned
-  to a commit and its hash, with its image list rendered from the node inventory into
+  to a release tag and its hash, with its image list rendered from the node inventory into
   `src/base/podman/image_updater.json`) on its own timer, 30 minutes apart, the notification path
   on secsvcs last. For each image in update order (install order, `update_last` entries at the end):
   compare the upstream digest with the one handled last (remote against remote), download it by

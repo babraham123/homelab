@@ -80,13 +80,13 @@ case $1 in
       > /etc/apt/sources.list.d/trivy.list
     apt update
     apt install -y trivy
-    # github.com/babraham123/podman-image-updater, pinned to a commit and its file's hash
-    commit=25251e2ad9bcf42ac6947df1a77e49026d4e4db7
-    sha=e590628b69ca8308c3d0c108c9fffafaeff371c2bd0115057901bc82945b8b80
-    fetch_pinned "https://raw.githubusercontent.com/babraham123/podman-image-updater/${commit}/image_updater.py" \
-      "$sha" image_updater.py
-    install -D image_updater.py /usr/local/bin/image_updater
-    rm image_updater.py
+    # github.com/babraham123/podman-image-updater, pinned to a release and its asset's hash
+    tag=v1.0.0
+    sha=156a3e03037889064ce831876a10f7d2de663a4ea75a1d34cc1603aba78cfb7b
+    fetch_pinned "https://github.com/babraham123/podman-image-updater/releases/download/${tag}/image_updater" \
+      "$sha" image_updater
+    install -D image_updater /usr/local/bin/image_updater
+    rm image_updater
     # Its default config path; a link, so a deploy updates the image list in place
     install -d -m 700 /etc/image_updater
     ln -sfn "${rendered}/base/podman/image_updater.json" /etc/image_updater/config.json

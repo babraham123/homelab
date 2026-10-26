@@ -83,7 +83,7 @@ ufw allow in from 10.10.0.7 to any port 9100 proto tcp
 
 Pulls or builds, scans and loads every `localhost/` image, nightly and on install.
 [Maintenance](../maintenance.md#container-images). The case installs
-[podman-image-updater](https://github.com/babraham123/podman-image-updater) at its pinned commit
+[podman-image-updater](https://github.com/babraham123/podman-image-updater) at its pinned release tag
 as `/usr/local/bin/image_updater`, and links its config to the rendered
 `src/base/podman/image_updater.json`.
 

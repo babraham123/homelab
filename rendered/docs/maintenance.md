@@ -174,9 +174,10 @@ sudo systemctl start image_updater
 - Roll back by hand: `podman tag localhost/NAME:rollback localhost/NAME:TAG`, then
   `systemctl restart CONTAINER`. The updater doesn't retry that digest; it moves on when upstream
   does.
-- Update the updater itself: set `commit` and `sha` (`sha256sum image_updater.py` at that commit)
-  in the `image_updater` case of `src/base/debian/install_svcs.sh`, deploy, then run
-  `install_image_updater` on each node. A deploy alone only changes its image list.
+- Update the updater itself: set `tag` and `sha` (the sha256 in that release's notes, or its
+  `image_updater.sha256` asset) in the `image_updater` case of `src/base/debian/install_svcs.sh`,
+  deploy, then run `install_image_updater` on each node. A deploy alone only changes its image
+  list.
 
 ## Alerting pipeline test
 
