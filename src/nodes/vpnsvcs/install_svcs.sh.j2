@@ -27,8 +27,10 @@ case $1 in
     # sqlite3 takes the consistent DB snapshot for backup.sh
     apt install -y sqlite3
     nonlocal_bind
-    HS_VERSION=$(curl -s "https://api.github.com/repos/juanfont/headscale/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-    wget --output-document=headscale.deb "https://github.com/juanfont/headscale/releases/download/v${HS_VERSION}/headscale_${HS_VERSION}_linux_amd64.deb"
+    # Pinned: the release's checksums.txt comes from the same place as the deb
+    version=0.29.5
+    fetch_pinned "https://github.com/juanfont/headscale/releases/download/v${version}/headscale_${version}_linux_amd64.deb" \
+      9e8ec12a65229435863a2cdf5082853c282808e845efd3a1f0b0c02b8f84d723 headscale.deb
     dpkg --install headscale.deb
     rm headscale.deb
     base/debian/add_homelab_tag.sh /usr/lib/systemd/system/headscale.service

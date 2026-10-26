@@ -13,8 +13,13 @@ watch_homelab_units
 case $1 in
   mdns_repeater)
     apt install -y build-essential
-    git clone https://github.com/babraham123/mdns-repeater
+    # Pinned to a commit; git checks the tree against it
+    mkdir mdns-repeater
     cd mdns-repeater
+    git init --quiet
+    git fetch --quiet --depth 1 https://github.com/babraham123/mdns-repeater \
+      7ab67cbd1c9beea14d64c5ef3175caba62b687f5
+    git checkout --quiet FETCH_HEAD
     make all
     install -D -t /usr/local/bin mdns-repeater
     from=$(ip -j -4 route show to default | jq -r '.[0].dev')

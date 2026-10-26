@@ -10,12 +10,14 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 require_root
 [[ ! -e /root/secrets ]] || die "/root/secrets already exists"
 
-apt install -y age curl moreutils jq
+apt install -y age wget moreutils jq
 
-SOPS_VERSION=$(curl -s "https://api.github.com/repos/getsops/sops/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
-curl -Lo /tmp/sops.deb "https://github.com/getsops/sops/releases/latest/download/sops_${SOPS_VERSION}_amd64.deb"
-apt --fix-broken install -y /tmp/sops.deb
-rm -f /tmp/sops.deb
+# The static binary, pinned: the release's checksums list it, not the deb
+version=3.13.3
+fetch_pinned "https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.linux.amd64" \
+  e5bec3346a873ae91d871550f3e698c1aad962aff462a080e40f25fde17fef6b /tmp/sops
+install -D /tmp/sops /usr/local/bin/sops
+rm /tmp/sops
 
 for rc in /root/.zshrc /root/.bashrc; do
   # shellcheck disable=SC2016 # expanded by the shell that sources the rc file
