@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      # The pre-commit hook's tools; jq and yq come with the runner. jinjanator's extras
+      # match install_render_tools.sh, which renders on the nodes.
+      - run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends fd-find
+          sudo ln -s "$(command -v fdfind)" /usr/local/bin/fd
+          uv tool install jinjanator==25.3.1 --with jinjanator-plugin-ansible==25.1.0 \
+            --with passlib==1.7.4 --with bcrypt==4.0.1
+          uv tool install yamllint==1.38.0
+          uv tool install shellcheck-py==0.11.0.1
+          uv tool dir --bin >> "$GITHUB_PATH"
+          npm install -g markdownlint-cli2@0.23.3
+      # The hook renders the committed tree, runs every check and the fast tests, then
+      # replaces rendered/ and stages it; a staged change means rendered/ is stale.
+      - run: .githooks/pre-commit
+      - run: git diff --cached --stat --exit-code

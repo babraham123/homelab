@@ -22,7 +22,7 @@ mkdir -p "$project_dir"
 # An exclude list rather than copy-then-delete, so personal details never touch the
 # output, even briefly. docs/agents is instructions for coding agents, not a published doc.
 rsync -a --delete \
-  --exclude /.git --exclude /.gitignore --exclude /.vscode --exclude /.fdignore \
+  --exclude /.git --exclude /.github --exclude /.gitignore --exclude /.vscode --exclude /.fdignore \
   --exclude /.claude --exclude /.scratch --exclude /planning --exclude /notes \
   --exclude /docs/agents \
   --exclude /rendered --exclude /tests --exclude /.gitattributes \
