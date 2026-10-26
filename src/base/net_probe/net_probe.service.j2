@@ -10,6 +10,8 @@ Type=oneshot
 
 # Slot hours are local time
 Environment=TZ={{ personal.timezone }}
+# Ookla's speedtest aborts without $HOME, which systemd sets only with User=
+Environment=HOME=/root
 
 # The script is pinned by install_svcs.sh net_probe; the config is read in place, so a
 # deploy updates it

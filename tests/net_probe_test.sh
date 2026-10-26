@@ -28,7 +28,7 @@ test_targets_and_textfile() {
 {'pve2': '192.168.2.20', 'vps': '100.64.0.2'} /var/lib/node_exporter/textfile_collector/homelab_net_probe.prom
 EOF
   assert_eq "$(config 'print(c["victoriametrics"]["query_url"])')" <<EOF
-http://metrics.example.com:8428/api/v1/query
+https://metrics.example.com/api/v1/query
 EOF
 }
 

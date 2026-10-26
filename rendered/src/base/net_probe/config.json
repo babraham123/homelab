@@ -1,7 +1,7 @@
 
 {
   "victoriametrics": {
-    "query_url": "http://metrics.janedoe.com:8428/api/v1/query",
+    "query_url": "https://metrics.janedoe.com/api/v1/query",
     "user": "admin",
     "password_command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "victoriametrics_admin_password"]
   },

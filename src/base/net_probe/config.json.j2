@@ -3,6 +3,7 @@
   secsvcs, so a deploy updates it. JSON allows no comments, so they are Jinja's, gone once rendered.
   Heavy tests in run order. slots: local hours, apart so one run never carries two of them.
   busy: queries in bit/s; any series over its limit skips the test.
+  victoriametrics: through Traefik, since metrics.SITE is this host's IP and 8428 isn't published.
   - speedtest: 21:00 catches the ISP's evening peak, 03:00 is the baseline. igc0 is pfSense's
     WAN in Telegraf's net plugin (the i226's first port, fixed by the driver).
   - iperf pve2: a Moonlight stream from the gaming VM crosses pfSense too. pve2's physical NICs
@@ -12,7 +13,7 @@
 #}
 {
   "victoriametrics": {
-    "query_url": "http://metrics.{{ site.url }}:8428/api/v1/query",
+    "query_url": "https://metrics.{{ site.url }}/api/v1/query",
     "user": "admin",
     "password_command": ["/root/homelab-rendered/src/base/podman/get_secret.sh", "victoriametrics_admin_password"]
   },
