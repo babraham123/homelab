@@ -18,11 +18,13 @@ jobs:
         with:
           enable-cache: false
       # The pre-commit hook's tools; jq and yq come with the runner. jinjanator's extras
-      # match install_render_tools.sh, which renders on the nodes.
+      # match install_render_tools.sh, which renders on the nodes. Only the ansible plugin is
+      # pinned: it requires one jinjanator-plugins series, and the resolver picks the newest
+      # jinjanator built against it, as pip does on the nodes.
       - run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends fd-find
           sudo ln -s "$(command -v fdfind)" /usr/local/bin/fd
-          uv tool install jinjanator==25.3.1 --with jinjanator-plugin-ansible==25.1.0 \
+          uv tool install jinjanator --with jinjanator-plugin-ansible==25.1.0 \
             --with passlib==1.7.4 --with bcrypt==4.0.1
           uv tool install yamllint==1.38.0
           uv tool install shellcheck-py==0.11.0.1

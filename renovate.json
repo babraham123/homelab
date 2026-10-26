@@ -34,7 +34,7 @@
       ],
       "matchStrings": [
         "(?<depName>ruff)@(?<currentValue>\\d[\\d.]*)",
-        "(?<depName>jinjanator|jinjanator-plugin-ansible|yamllint|shellcheck-py)==(?<currentValue>\\d[\\d.]*)"
+        "(?<depName>jinjanator-plugin-ansible|yamllint|shellcheck-py)==(?<currentValue>\\d[\\d.]*)"
       ],
       "datasourceTemplate": "pypi"
     },
