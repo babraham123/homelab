@@ -37,12 +37,19 @@ systemctl list-units | grep Homelab
 image_updater --dry-run
 ```
 
+- Home Assistant config: `src/services/home_assistant/config` is installed to
+  `/etc/opt/home_assistant/config`, mounted writable at `/config/homelab`;
+  `/config/configuration.yaml` and `custom_sentences` link into it. The UI's
+  `automations.yaml`, `scripts.yaml` and `scenes.yaml`, and `.storage`, stay in the
+  `hassconfig` volume. Edits under `/etc/opt/home_assistant/config` can be tried with a
+  restart, but the next install stops on them, with a diff, until they're in git or discarded
+  (`rm -r /etc/opt/home_assistant/config.installed`). An install checks the new config in the
+  running container (`check_config`) before restarting, and puts the old one back if it fails.
 - On initial install, disable HA OIDC
 
 ```bash
 # Comment out the sections called `auth_oidc`
-volpath=$(podman volume inspect -f '{% raw %}{{ .Mountpoint }}{% endraw %}' systemd-hassconfig)
-vim $volpath/configuration.yaml
+vim /etc/opt/home_assistant/config/configuration.yaml
 systemctl restart home_assistant
 ```
 
@@ -135,7 +142,7 @@ ssh -t manualadmin@pve1 'sudo /root/homelab-rendered/src/nodes/pve1/secret_updat
 
 ```bash
 # Uncomment the sections called `auth_oidc`
-vim $volpath/configuration.yaml
+vim /etc/opt/home_assistant/config/configuration.yaml
 systemctl restart home_assistant
 ```
 

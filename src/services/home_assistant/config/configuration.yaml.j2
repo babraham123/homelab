@@ -1,20 +1,24 @@
 # /etc/opt/home_assistant/config/configuration.yaml
+# Mounted at /config/homelab, and /config/configuration.yaml links here, so includes resolve
+# from /config: homelab/... is this directory, the rest is the UI-owned hassconfig volume.
 # Triggers: https://www.home-assistant.io/docs/automation/trigger
 ---
 
 # Ref: https://www.home-assistant.io/integrations/homeassistant/
 homeassistant:
   name: Home
+  # Ref: https://www.home-assistant.io/docs/configuration/packages/
+  packages: !include_dir_named homelab/packages
   latitude: !env_var HOME_LATITUDE
   longitude: !env_var HOME_LONGITUDE
   elevation: !env_var HOME_ELEVATION
   radius: 100
-  unit_system: us_customary
-  currency: USD
-  country: US
+  unit_system: {% if personal.units == "metric" %}metric{% else %}us_customary{% endif %}
+  currency: {{ personal.currency }}
+  country: {{ personal.country_code }}
   time_zone: !env_var TZ
-  external_url: "https://home.janedoe.com:443"
-  internal_url: "https://home.janedoe.com:443"
+  external_url: "https://home.{{ site.url }}:443"
+  internal_url: "https://home.{{ site.url }}:443"
   allowlist_external_dirs: []
   allowlist_external_urls: []
   media_dirs:
@@ -32,11 +36,13 @@ homeassistant:
 # Make sure browsers and Google Cast support the video container and codec
 default_config:
 
-group: !include groups.yaml
-automation: !include automations.yaml
+# The UI editors write these files in the volume. Automations from git go in
+# homelab/automations/ and show in the UI as read-only.
+# Ref: https://www.home-assistant.io/docs/automation/yaml/
+automation ui: !include automations.yaml
+automation manual: !include_dir_merge_list homelab/automations
 script: !include scripts.yaml
 scene: !include scenes.yaml
-mqtt: !include mqtt.yaml
 
 # Ref: https://www.home-assistant.io/integrations/backup/
 # Core loads it by default; listed because homesvcs `backup_hass` depends on its
@@ -48,12 +54,12 @@ http:
   server_port: 8123
   # Pass in as a Bearer token. /api/ endpoints are available on the server port
   cors_allowed_origins:
-    - https://home.janedoe.com
-    - https://auth.janedoe.com
+    - https://home.{{ site.url }}
+    - https://auth.{{ site.url }}
   use_x_forwarded_for: true
   trusted_proxies:
-    - 10.12.0.6
-    - 10.12.0.1
+    - {{ homesvcs.container_subnet }}.6
+    - {{ homesvcs.container_subnet }}.1
     - 127.0.0.1
     - ::1
   ip_ban_enabled: true
@@ -64,7 +70,7 @@ http:
 auth_oidc:
   client_id: !env_var OIDC_CLIENT_ID
   client_secret: !env_var OIDC_CLIENT_SECRET
-  discovery_url: "https://auth.janedoe.com/.well-known/openid-configuration"
+  discovery_url: "https://auth.{{ site.url }}/.well-known/openid-configuration"
   display_name: "Authelia OpenID Connect (SSO)"
   id_token_signing_alg: RS256
   features:
@@ -84,13 +90,13 @@ auth_oidc:
 
 # Ref: https://www.home-assistant.io/integrations/recorder/
 recorder:
-  # db_url: "postgresql://hass@pgdb.janedoe.com:5432/hass"
+  # db_url: "postgresql://hass@pgdb.{{ site.url }}:5432/hass"
   db_url: "sqlite:////data/hass.db"
   db_max_retries: 10
   db_retry_wait: 3 # seconds
   auto_purge: true
   auto_repack: true
-  purge_keep_days: 14
+  purge_keep_days: {{ retention.hass_days }}
   commit_interval: 5 # seconds
   exclude:
     domains:
@@ -153,23 +159,5 @@ notify:
       icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/home-assistant.png
     title_param_name: title
     message_param_name: message
-    resource: https://push.janedoe.com
-
-# Ref: https://www.home-assistant.io/integrations/shell_command/
-shell_command:
-  ntfy: >
-      password='!env_var NTFY_HASS_PASSWORD';
-      creds='hass:$password';
-      curl
-      -X POST
-      --url 'https://push.janedoe.com/hass'
-      -u "$creds"
-      --data '{{ message }}'
-      --header 'X-Title: {{ title }}'
-      --header 'X-Tags: {{ tags }}'
-      --header 'X-Priority: {{ priority }}'
-      --header 'X-Delay: {{ delay }}'
-      --header 'X-Actions: {{ actions }}'
-      --header 'X-Click: {{ click }}'
-      --header 'X-Icon: {{ icon }}'
+    resource: https://push.{{ site.url }}
 ...

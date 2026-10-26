@@ -45,6 +45,9 @@ Secret=home_elevation,type=env,target=HOME_ELEVATION
 # HACS integrations end up in /config/custom_components
 # AppDaemon apps end up in /config/appdaemon/apps
 Volume=hassconfig.volume:/config
+# Config from git. Writable, so it can be tried out live; install_svcs.sh refuses to
+# overwrite edits made here until they're in git or discarded.
+Volume=/etc/opt/home_assistant/config:/config/homelab
 Volume=/var/opt/home_assistant/media:/media
 Volume=/etc/opt/home_assistant/certs/ca.chain.pem:/ssl/certs/ca.chain.pem:ro
 Volume=hassdb.volume:/data
