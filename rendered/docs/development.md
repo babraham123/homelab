@@ -16,21 +16,21 @@
   `src/base/podman/render_*.sh` scripts:
   - `render_host.sh`, at install time from `src/base/podman/install_svcs.sh`: the shared services'
     quadlets for this node, given its name, inventory services and container addresses
-    (`host_vars` in `src/nodes.jinja`)
+    (`inv.host_vars`, from `tools/inventory.py`)
   - `render_secrets.sh`, at container start (`ExecStartPre`): secrets injection
   - `render_services.sh`, at container start: Fluent Bit's config, with the node's "Homelab:" units
 - `src/nodes/<node>/inventory.yml`, one per node, is the node inventory: each node's dispatcher
   entries (services in install order, other commands) and each service's subdomain, Gatus endpoint,
   container address (`ip`, read back as `inv.addr.<node>.<service>`) and container image facts
   (`upstream`/`build`, `update_last`, `containers`). `render_src.sh`
-  appends it to `vars.yml` as `nodes:` in a private temp `all_vars.yml`, and templates import
-  `src/nodes.jinja` for the lists derived from it (dispatcher cases, sudoers grants, OliveTin
-  buttons, DNS/SNI subdomains, uptime endpoints, image update order). See [ADR
-  0006](adr/0006-node-inventory.md)
+  appends it to `vars.yml` as `nodes:` in a private temp `all_vars.yml`, together with the lists
+  `tools/inventory.py` derives from it as `inv:` (dispatcher cases, sudoers grants, OliveTin
+  buttons, DNS/SNI subdomains, uptime endpoints, image update order), which templates read as
+  `inv.<name>`. See [ADR 0006](adr/0006-node-inventory.md)
 
 ### Service Structure
 
-`src/` has three groups, plus `nodes.jinja`:
+`src/` has three groups:
 
 - `src/nodes/<node>/`, one per node. May contain:
   - `install_svcs.sh`: one `case` per service that installs configs to `/etc/opt/<service>/` and
@@ -42,7 +42,7 @@
     updater](https://github.com/babraham123/podman-image-updater), with the image list in
     `src/base/podman/image_updater.json.j2`) loads the service's images and passes them through
     the scan gate, or stops the install
-  - `inventory.yml`: the node's part of the node inventory (keys documented in `src/nodes.jinja`)
+  - `inventory.yml`: the node's part of the node inventory (keys documented in `tools/inventory.py`)
   - `commands.sh` - Other tasks that run as root and are triggered remotely
   - `traefik/`: the node's reverse proxy routing rules (HTTP routers, middlewares); the config
     shared by every node is `src/services/traefik/`
@@ -71,8 +71,9 @@
   `shared: true` and the dispatcher runs this script for them. Node-specific pieces stay in the
   node's dir: Traefik's routes and quadlet drop-ins (`traefik/traefik.container.d/`), vmagent's
   `prometheus.yml`
-- `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die` and `node_inventory` (the
-  inventory files gathered under `nodes:`, shared by the render and the tests)
+- `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die` and `template_vars` (the
+  template data: vars, the inventory files under `nodes:` and `inv:`, shared by the render and the
+  tests)
 - Router (`/bin/sh` on pfSense), gaming and macOS scripts get a copy of their own directory only, so
   they stand alone; `msmtp_password.sh` runs under msmtp with no options set, so it stands alone too
 
@@ -102,7 +103,7 @@ flowchart TB
         allvars["all_vars.yml<br/>private temp dir, deleted after the render"]
         render["render_src.sh: jinjanate every *.j2 in place<br/>(*.j2.j2 survives as *.j2 for the second pass)"]
         validate["check_rendered.py: yamllint, every JSON parses,<br/>duplicate container-IP check,<br/>inventory.yml vs scripts / routes.yml / quadlet Image= / OliveTin"]
-        upload["upload_src.sh per node: scp its src/ paths<br/>(tools/node_dirs.sh) as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
+        upload["upload_src.sh per node: scp its src/ paths<br/>(tools/inventory.py dirs) as manualadmin,<br/>sudo mv to /root/homelab-rendered"]
     end
 
     subgraph node["On the node"]
@@ -161,11 +162,11 @@ real values, so keep it out of shared paths such as a fixed `/tmp/homelab-render
 `homelab-rendered`, since `upload_src.sh` moves it into place by that name.
 
 Rendering ends with `tools/check_rendered.py`, which reports every failure as `error: FILE: MESSAGE`.
-It is a uv script (dependencies inline, run by `uv run`); the inventory facts it checks come from a
-jinjanate render of `src/nodes.jinja`. It lints YAML (`yamllint`), JSON and markdown
+It is a uv script (dependencies inline, run by `uv run`); the inventory facts it checks are the `inv:`
+lists in the template data. It lints YAML (`yamllint`), JSON and markdown
 (`.markdownlint-cli2.yaml`: only rules for markdown that renders wrong, broken heading links and the
 100-column line limit), rejects duplicate container `IP=`s, and checks the node inventory, through
-the lists `src/nodes.jinja` derives from it, against the files it describes:
+the lists `tools/inventory.py` derives from it, against the files it describes:
 
 - every repo script a dispatcher case runs exists and has the case it is called with (services,
   `debian_services`, `commands[].script` and the paths in `commands[].run`);
@@ -176,7 +177,7 @@ the lists `src/nodes.jinja` derives from it, against the files it describes:
   `Image=localhost/` + the ref without its host, or `Image=localhost/<build>:latest`;
 - the OliveTin config has a button for every dispatcher case except the `pve1_file_transfer` ones,
   none for those, and every `ssh autoadmin@NODE CASE` it runs names a real case;
-- every node and service dir a node uses is among those `tools/node_dirs.sh` ships it: absolute
+- every node and service dir a node uses is among those `tools/inventory.py dirs` ships it: absolute
   and `../` paths in its node and service dirs, and `src/`-relative ones in its node dir,
   dispatcher lines and `debian_services` cases.
 
@@ -225,8 +226,8 @@ repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plai
 - `check_rendered_test.sh`: `tools/check_rendered.py` on `tests/fixtures/tree`, a minimal rendered
   tree in the repo's layout (`src/nodes/<node>/inventory.yml` and all) that passes; each test breaks
   one invariant and expects that invariant's error alone.
-- `nodes_jinja_test.sh`: the dispatcher cases, sudoers grants, OliveTin buttons, subdomains, uptime
-  endpoints and image update order `src/nodes.jinja` derives from `tests/fixtures/nodes/`, written
+- `inventory_test.sh`: the dispatcher cases, sudoers grants, OliveTin buttons, subdomains, uptime
+  endpoints and image update order `tools/inventory.py` derives from `tests/fixtures/nodes/`, written
   out from ADR 0006.
 - `image_updater_test.sh`: the image updater's config, `src/base/podman/image_updater.json.j2`,
   from a fixture inventory.

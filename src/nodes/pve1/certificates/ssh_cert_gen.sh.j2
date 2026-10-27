@@ -1,4 +1,3 @@
-{% import 'src/nodes.jinja' as inv with context -%}
 {% set others = inv.nodes_with.install_ssh_ca | reject('eq', 'pve1') | join(' ') -%}
 #!/bin/bash
 # Generate SSH certificates and distribute them to all servers.

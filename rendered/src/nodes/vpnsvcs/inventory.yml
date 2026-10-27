@@ -1,4 +1,4 @@
-# vpnsvcs's part of the node inventory; src/nodes.jinja documents the keys.
+# vpnsvcs's part of the node inventory; tools/inventory.py documents the keys.
 # yamllint disable rule:document-start rule:document-end
 debian_services: [node_exporter, image_updater, iperf3_server]
 services:
@@ -23,6 +23,8 @@ services:
     ip: 30
     build: geoip_generator
 image_updater_slot: '20:00'
+# No jars in its images, and the ~1 GB Java DB is a lot for the VPS's disk
+image_updater_java_db: false
 commands:
   - name: backup
     run: [sudo /root/homelab-rendered/src/nodes/vpnsvcs/backup.sh]

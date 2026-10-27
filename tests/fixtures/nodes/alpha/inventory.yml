@@ -1,5 +1,5 @@
-# With gaming/ and router/, uses every inventory form src/nodes.jinja derives lists
-# from; tests/nodes_jinja_test.sh holds the expected lists. `services` is deliberately
+# With gaming/ and router/, uses every inventory form tools/inventory.py derives lists
+# from; tests/inventory_test.sh holds the expected lists. `services` is deliberately
 # not in alphabetical order, since key order is install order.
 # yamllint disable rule:document-start rule:document-end
 debian_services: [node_exporter, mdns_repeater]

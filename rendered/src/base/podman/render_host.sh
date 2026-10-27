@@ -1,6 +1,6 @@
 #!/bin/bash
 # Renders FILE.j2 into FILE, next to it, for this node: the second pass of a file the
-# container VMs share. The template gets the node's src/nodes.jinja host_vars:
+# container VMs share. The template gets the node's inv.host_vars (tools/inventory.py):
 #   node:     the node name, which is the hostname
 #   services: its inventory services, e.g. services.traefik.subdomain
 #   addr:     its containers' IP addresses, e.g. addr.traefik

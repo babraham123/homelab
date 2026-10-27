@@ -31,8 +31,8 @@ fi
 
 # Only the src/ paths this node uses, in the same tree shape so the
 # /root/homelab-rendered/src/... paths in its scripts hold
-paths=$(cd "$project_dir" && tools/node_dirs.sh "$host")
-[ -n "$paths" ] || die "${host} isn't a debian node (tools/node_dirs.sh), so nothing to upload"
+paths=$(cd "$project_dir" && tools/inventory.py dirs "$host")
+[ -n "$paths" ] || die "${host} isn't a debian node (tools/inventory.py dirs), so nothing to upload"
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
 mkdir -p "${stage}/homelab-rendered/src"

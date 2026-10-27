@@ -1,4 +1,4 @@
-# secsvcs's part of the node inventory; src/nodes.jinja documents the keys.
+# secsvcs's part of the node inventory; tools/inventory.py documents the keys.
 # yamllint disable rule:document-start rule:document-end
 debian_services: [mdns_repeater, node_exporter, image_updater, net_probe]
 services:

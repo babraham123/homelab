@@ -1,4 +1,4 @@
-# pve2's part of the node inventory; src/nodes.jinja documents the keys.
+# pve2's part of the node inventory; tools/inventory.py documents the keys.
 # yamllint disable rule:document-start rule:document-end
 debian_services: [vm_watchdog]
 commands:

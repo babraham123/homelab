@@ -1,6 +1,6 @@
 # shellcheck shell=bash
-# src/nodes.jinja over tests/fixtures/nodes/<node>/inventory.yml. Expected lists follow
-# ADR 0006 and the src/nodes.jinja header: nodes in name order; cases in the order
+# tools/inventory.py over tests/fixtures/nodes/<node>/inventory.yml, as templates read it
+# (inv.<name>). Expected lists follow ADR 0006 and the tools/inventory.py header: nodes in name order; cases in the order
 # debian_services, services (install order; shared ones run src/base/podman's script),
 # install_all_svcs, commands, triggers;
 # sudoers holds the sorted, unique sudo lines without `sudo `; scripts live under
@@ -14,7 +14,7 @@ test_dispatcher_cases() {
   out=$(render_inventory "$inventory" <<'EOF'
 {% for node in nodes -%}
 # {{ node }}
-{{ inv.cases(node) }}
+{{ inv.cases[node] }}
 {% endfor -%}
 EOF
 )
@@ -111,7 +111,7 @@ EOF
 test_olive_tin_buttons() {
   out=$(render_inventory "$inventory" <<'EOF'
 {% for node in nodes -%}
-{{ node }}: {{ inv.commands[node] | join(' ') }}
+{{ node }}: {{ inv.dispatch[node] | map(attribute='name') | join(' ') }}
 {{ node }} buttons: {{ inv.buttons[node] | join(' ') }}
 {% endfor -%}
 EOF

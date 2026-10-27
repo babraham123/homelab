@@ -1,4 +1,4 @@
-# websvcs's part of the node inventory; src/nodes.jinja documents the keys.
+# websvcs's part of the node inventory; tools/inventory.py documents the keys.
 # yamllint disable rule:document-start rule:document-end
 # websvcs is the default route, so its subdomains need no DNS or SNI entries; they
 # only name the uptime URLs.

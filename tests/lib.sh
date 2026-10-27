@@ -2,7 +2,7 @@
 # Helpers shared by tests/*_test.sh. tests/run.sh sources the test file, and so this,
 # in a fresh subshell per test, from the repo root.
 
-# For node_inventory, the same assembly of the inventory files render_src.sh uses
+# For template_vars, the same template data render_src.sh builds
 # shellcheck source=tools/lib.sh
 source tools/lib.sh
 
@@ -24,11 +24,10 @@ assert_eq() {
     flunk "$(diff -u <(printf '%s\n' "$expected") <(printf '%s\n' "$1") | sed '1s/.*/--- expected/; 2s/.*/+++ actual/')"
 }
 
-# Copies tests/fixtures/tree to $tmp/tree with the repo's src/nodes.jinja and lint configs,
-# so the checks run with the derivation and lint rules a real render uses.
+# Copies tests/fixtures/tree to $tmp/tree with the repo's lint configs, so the checks run
+# with the lint rules a real render uses.
 fixture_tree() {
   cp -R tests/fixtures/tree "${tmp}/tree"
-  cp src/nodes.jinja "${tmp}/tree/src/"
   cp lint.yaml .markdownlint-cli2.yaml "${tmp}/tree/"
 }
 
@@ -43,7 +42,7 @@ edit() {
 # Runs tools/check_rendered.py on the fixture tree, rendered with tests/fixtures/site.yml
 # and the tree's own inventory files
 check_tree() {
-  { cat tests/fixtures/site.yml; node_inventory "${tmp}/tree/src/nodes"; } > "${tmp}/all_vars.yml"
+  template_vars "${tmp}/tree/src/nodes" < tests/fixtures/site.yml > "${tmp}/all_vars.yml"
   tools/check_rendered.py "${tmp}/tree" "${tmp}/all_vars.yml" < /dev/null 2>&1
 }
 
@@ -54,12 +53,10 @@ expect_errors() {
   assert_eq "$out"
 }
 
-# Renders the template on stdin against the inventory under $1 (<node>/inventory.yml),
-# with src/nodes.jinja imported as `inv`
+# Renders the template on stdin against the inventory under $1 (<node>/inventory.yml)
 render_inventory() {
-  mkdir -p "${tmp}/jinja/src"
-  cp src/nodes.jinja "${tmp}/jinja/src/"
-  { cat tests/fixtures/site.yml; node_inventory "$1"; } > "${tmp}/jinja/all_vars.yml"
-  { echo "{% import 'src/nodes.jinja' as inv with context -%}"; cat; } > "${tmp}/jinja/test.j2"
+  mkdir -p "${tmp}/jinja"
+  template_vars "$1" < tests/fixtures/site.yml > "${tmp}/jinja/all_vars.yml"
+  cat > "${tmp}/jinja/test.j2"
   (cd "${tmp}/jinja" && jinjanate --quiet test.j2 all_vars.yml)
 }

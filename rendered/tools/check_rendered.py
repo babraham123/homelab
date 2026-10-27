@@ -9,7 +9,8 @@
 # against fixture trees. A uv script: `uv run` installs its dependencies, listed above.
 # Usage:
 #   tools/check_rendered.py /dir/with/rendered/copy /path/to/all_vars.yml
-# all_vars.yml is the data file the copy was rendered with: vars.yml plus `nodes:`.
+# all_vars.yml is the data file the copy was rendered with: vars.yml plus `nodes:` and
+# `inv:` (tools/lib.sh template_vars).
 # Reports every failure as "error: FILE: MESSAGE" and exits 1 if there was any.
 
 import json
@@ -17,37 +18,19 @@ import os
 import re
 import subprocess
 import sys
-import tempfile
 from collections import Counter
 from pathlib import Path
 
 import yaml
 
-TOOLS = Path(__file__).resolve().parent
+# No __pycache__ next to the script, in the repo or the rendered copy
+sys.dont_write_bytecode = True
+from inventory import upload_dirs  # noqa: E402
 
 # Traefik's fallback route: it serves hosts that have no DNS or SNI entry, so it may
 # route more hosts than the inventory lists.
 DEFAULT_ROUTE_NODE = "websvcs"
 
-# Every inventory fact the checks use, derived by src/nodes.jinja (the same derivation
-# the dispatchers, sudoers and OliveTin use). Rendered by jinjanate, like the repo.
-FACTS_TEMPLATE = """\
-{% import 'src/nodes.jinja' as inv with context -%}
-{"site": {{ site.url | tojson }}, "nodes": {
-{%- for node, spec in nodes.items() %}
-  {{ node | tojson }}: {
-    "services": {{ spec.get('services', {}) | list | tojson }},
-    "shared": {{ inv.shared[node] | tojson }},
-    "addr": {{ inv.addr[node] | tojson }},
-    "image_updater_slot": {{ spec.get('image_updater_slot') | tojson }},
-    "debian_services": {{ spec.get('debian_services', []) | tojson }},
-    "cases": {{ inv.dispatch[node] | tojson }},
-    "subdomains": {{ inv.subdomains[node] | tojson }},
-    "images": {{ inv.images[node] | tojson }}
-  }{{ "," if not loop.last }}
-{%- endfor %}
-}}
-"""
 
 failed = False
 
@@ -107,17 +90,26 @@ def case_block(path, label):
   return block
 
 
-def derive_facts(all_vars):
-  with tempfile.TemporaryDirectory() as work:
-    template = Path(work, "facts.j2")
-    template.write_text(FACTS_TEMPLATE)
-    out = subprocess.run(["jinjanate", "--quiet", str(template), all_vars],
-                         stdout=subprocess.PIPE, text=True)
-  if out.returncode:
-    print("error: src/nodes.jinja: can't derive the inventory facts (jinjanate error above)",
-          file=sys.stderr)
-    sys.exit(1)
-  return json.loads(out.stdout)
+def load_facts(all_vars):
+  """Every inventory fact the checks use, from the data the copy was rendered with: the
+  same lists tools/inventory.py derived for the templates."""
+  data = yaml.safe_load(Path(all_vars).read_text())
+  inv = data["inv"]
+  nodes = {}
+  for node, spec in data["nodes"].items():
+    spec = spec or {}
+    nodes[node] = {
+      "inventory": spec,
+      "services": list(spec.get("services") or {}),
+      "shared": inv["shared"][node],
+      "addr": inv["addr"][node],
+      "image_updater_slot": spec.get("image_updater_slot"),
+      "debian_services": spec.get("debian_services", []),
+      "cases": inv["dispatch"][node],
+      "subdomains": inv["subdomains"][node],
+      "images": inv["images"][node],
+    }
+  return data["site"]["url"], nodes
 
 
 def check_yaml():
@@ -357,7 +349,7 @@ def src_refs(lines, prefix):
 
 
 # upload_src.sh ships a debian node all of base/ but only the node and service dirs
-# node_dirs.sh lists, in the same tree shape, so every nodes/ and services/ path it uses
+# upload_dirs lists, in the same tree shape, so every nodes/ and services/ path it uses
 # must be among them. That is every absolute (/root/homelab-rendered/src/...,
 # ${rendered}/...) or ../ path in its node and service dirs, plus the src/-relative paths
 # in its node dir, dispatcher lines, debian_services cases and shared services' cases.
@@ -365,12 +357,11 @@ def src_refs(lines, prefix):
 # those nodes run, like the shared traefik install.
 def check_upload_dirs(nodes):
   for node, spec in nodes.items():
-    out = subprocess.run([TOOLS / "node_dirs.sh", node], stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT, text=True)
-    if out.returncode:
-      fail(inventory(node), out.stdout.strip().removeprefix(f"error: {inventory(node)}: "))
+    try:
+      paths = upload_dirs(node, spec["inventory"])
+    except ValueError as e:
+      fail(inventory(node), e)
       continue
-    paths = out.stdout.split()
     if not paths:
       continue
     shipped = [line for path in paths if path != "base" for line in tree_lines(f"src/{path}")]
@@ -390,8 +381,7 @@ def check_upload_dirs(nodes):
 def main():
   tree, all_vars = sys.argv[1], os.path.abspath(sys.argv[2])
   os.chdir(tree)
-  facts = derive_facts(all_vars)
-  nodes = facts["nodes"]
+  site, nodes = load_facts(all_vars)
   check_yaml()
   check_json()
   check_markdown()
@@ -403,7 +393,7 @@ def main():
   check_install_cases(nodes)
   check_image_updater_slots(nodes)
   check_unique_subdomains(nodes)
-  check_routes(facts["site"], nodes)
+  check_routes(site, nodes)
   check_olive_tin(nodes)
   check_upload_dirs(nodes)
   sys.exit(1 if failed else 0)

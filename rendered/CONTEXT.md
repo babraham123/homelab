@@ -38,7 +38,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   drop-ins under `traefik/`, vmagent's `prometheus.yml`).
 - **node inventory** — `src/nodes/<node>/inventory.yml`, one per node: per node, the dispatcher
   entries (services in install order, other commands) and each service's subdomain, Gatus endpoint,
-  container address and image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers
+  container address and image facts. `tools/inventory.py` derives the dispatcher cases, sudoers
   grants, DNS/SNI subdomain lists, uptime endpoints, container addresses and image update order
   from it; the render (`tools/check_rendered.py`) checks it against the scripts its dispatcher
   cases run, `routes.yml`, the quadlets' `Image=` and `IP=` and the OliveTin buttons.
@@ -54,7 +54,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   (Trivy: a fixable HIGH or CRITICAL CVE blocks it, unless a `.trivyignore` entry or `accept`
   overrides it) and loads it under its `localhost/` name, which is all a quadlet can run.
 - **rendered tree** — `/root/homelab-rendered` on each node: the part of a render that node uses
-  (`tools/node_dirs.sh`), the only thing scripts on the node execute from.
+  (`tools/inventory.py dirs`), the only thing scripts on the node execute from.
 
 ## Access model
 

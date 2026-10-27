@@ -1,54 +1,44 @@
-{% import 'src/nodes.jinja' as inv with context -%}
 {#- The image updater's config (github.com/babraham123/podman-image-updater, format in its
     README): one hosts entry per node with install_image_updater, its images in update
-    order (src/nodes.jinja images[node]), each with the .trivyignore and, for a built
-    image, the build.sh (tools/check_rendered.py requires one) in its service's dir. install_svcs.sh
+    order (inv.images[node]), each with the .trivyignore and, for a built image, the
+    build.sh (tools/check_rendered.py requires one) in its service's dir. install_svcs.sh
     image_updater links /etc/image_updater/config.json here, so a deploy updates it.
     deadline_s: no image is started after 25 minutes, so the run stays inside its 30-minute
     slot (image_updater.timer); what's left runs the next night. The notification path runs
     on the node with ntfy (secsvcs), its slot is last, and nothing has to fit after it. -#}
 {%- set src = '/root/homelab-rendered/src/' -%}
-{%- macro secret(name) -%}
-{"command": {{ [src ~ 'base/podman/get_secret.sh', name] | tojson }}}
-{%- endmacro -%}
-{
-  "registry_auth": {
-    "docker.io": {
-      "username": {{ secret('docker_hub_username') }},
-      "password": {{ secret('docker_hub_token') }}
-    }
-  },
-  "hosts": {
-{%- for node in inv.nodes_with.install_image_updater %}
-    {{ node | tojson }}: {
-      "images": [
-{%- for i in inv.images[node] %}
-{%- set entry = dict(i, trivyignore=src ~ i.dir ~ '/.trivyignore') %}
-{%- do entry.pop('dir') %}
-{%- if i.build is defined %}
-{%- do entry.update({'build_script': src ~ i.dir ~ '/build.sh'}) %}
-{%- endif %}
-        {{ entry | tojson }}{{ "," if not loop.last }}
-{%- endfor %}
-      ],
-{%- if 'ntfy' in nodes[node].services %}
-{#- Straight to the container: no DNS, Traefik or TLS between the updater and ntfy while
-    their images update. A catch-up run after a pve1 reboot waits for ntfy and the rest to
-    settle. #}
-      "ntfy": {"url": "http://{{ inv.addr[node].ntfy }}:2586/alert", "token": {{ secret('ntfy_alert_token') }}},
-      "deadline_s": 0,
-      "boot_delay_s": 900
-{%- else %}
-{#- Container subnets are local to each node, so ntfy is reached through Traefik. #}
-      "ntfy": {"url": "https://push.{{ site.url }}/alert", "token": {{ secret('ntfy_alert_token') }}},
-      "deadline_s": 1500,
-      "boot_delay_s": 0
-{%- endif %}
-{%- if node == 'vpnsvcs' %},
-{#- No jars in its images, and the ~1 GB Java DB is a lot for the VPS's disk. #}
-      "java_db": false
-{%- endif %}
-    }{{ "," if not loop.last }}
-{%- endfor %}
-  }
-}
+{%- set get_secret = src ~ 'base/podman/get_secret.sh' -%}
+{%- set hosts = {} -%}
+{%- for node in inv.nodes_with.install_image_updater -%}
+  {%- set spec = nodes[node] -%}
+  {%- set images = [] -%}
+  {%- for i in inv.images[node] -%}
+    {%- set image = dict(i, trivyignore=src ~ i.dir ~ '/.trivyignore') -%}
+    {%- do image.pop('dir') -%}
+    {%- if i.build is defined -%}
+      {%- do image.update({'build_script': src ~ i.dir ~ '/build.sh'}) -%}
+    {%- endif -%}
+    {%- do images.append(image) -%}
+  {%- endfor -%}
+  {%- set token = {'command': [get_secret, 'ntfy_alert_token']} -%}
+  {%- if 'ntfy' in spec.services -%}
+    {#- Straight to the container: no DNS, Traefik or TLS between the updater and ntfy
+        while their images update. A catch-up run after a pve1 reboot waits for ntfy and
+        the rest to settle. -#}
+    {%- set host = {'ntfy': {'url': 'http://' ~ inv.addr[node].ntfy ~ ':2586/alert', 'token': token},
+        'deadline_s': 0, 'boot_delay_s': 900} -%}
+  {%- else -%}
+    {#- Container subnets are local to each node, so ntfy is reached through Traefik. -#}
+    {%- set host = {'ntfy': {'url': 'https://push.' ~ site.url ~ '/alert', 'token': token},
+        'deadline_s': 1500, 'boot_delay_s': 0} -%}
+  {%- endif -%}
+  {%- do host.update({'images': images}) -%}
+  {%- if spec.image_updater_java_db is defined -%}
+    {%- do host.update({'java_db': spec.image_updater_java_db}) -%}
+  {%- endif -%}
+  {%- do hosts.update({node: host}) -%}
+{%- endfor -%}
+{{ {'registry_auth': {'docker.io': {
+      'username': {'command': [get_secret, 'docker_hub_username']},
+      'password': {'command': [get_secret, 'docker_hub_token']}}},
+    'hosts': hosts} | tojson(indent=2) }}

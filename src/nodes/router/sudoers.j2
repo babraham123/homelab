@@ -1,3 +1,2 @@
-{% import 'src/nodes.jinja' as inv with context -%}
 # Allow autoadmin to run these specific commands without a password
 autoadmin ALL=(root) NOPASSWD: {{ inv.sudo_cmds.router | join(', ') }}

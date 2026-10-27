@@ -1,4 +1,3 @@
-{% import 'src/nodes.jinja' as inv with context -%}
 #!/bin/sh
 # SSH Forced Command Dispatcher
 # This script is triggered by the SSH daemon when the specific automation key is used.
@@ -29,7 +28,7 @@ require_pve1() {
 }
 
 case "${SSH_ORIGINAL_COMMAND:-}" in
-{{ inv.cases('router') }}
+{{ inv.cases.router }}
   *)
     unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
     ;;

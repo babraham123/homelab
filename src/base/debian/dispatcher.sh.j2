@@ -1,4 +1,3 @@
-{% import 'src/nodes.jinja' as inv with context -%}
 #!/bin/bash
 # SSH Forced Command Dispatcher, shared by the Debian nodes
 # This script is triggered by the SSH daemon when the specific automation key is used.
@@ -37,7 +36,7 @@ case "$(hostname)" in
 {%- for node in inv.debian_nodes %}
   {{ node }})
     case "${SSH_ORIGINAL_COMMAND:-}" in
-{{ inv.cases(node) | indent(4, true) }}
+{{ inv.cases[node] | indent(4, true) }}
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;

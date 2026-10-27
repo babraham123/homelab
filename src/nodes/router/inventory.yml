@@ -1,4 +1,4 @@
-# router's part of the node inventory; src/nodes.jinja documents the keys.
+# router's part of the node inventory; tools/inventory.py documents the keys.
 # yamllint disable rule:document-start rule:document-end
 commands:
   - name: install_certs

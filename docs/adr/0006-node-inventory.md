@@ -19,6 +19,13 @@ Amended: services also carry `ip`, their container's host number, and `src/nodes
 does every config that names another container; the render checks the addresses are unique per
 node and match each quadlet's `IP=`.
 
+Amended: the derivation is `tools/inventory.py`, a uv script, in place of the Jinja macro file
+`src/nodes.jinja`, which had grown into a program written in `{% do %}` statements and read
+per-node vars through a private Jinja attribute. `tools/lib.sh`'s `template_vars` adds its output
+to the template data as `inv:`, so templates read `inv.<name>` without an import, and
+`check_rendered.py` reads the same lists. Its `dirs` subcommand replaces `tools/node_dirs.sh`, so the
+debian-node test lives in one place. The key reference is in `tools/inventory.py`.
+
 ## Context
 
 Four scripts reverse-engineered template variables from other files at render time:

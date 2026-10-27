@@ -240,7 +240,7 @@ EOF
 }
 
 # secsvcs is a debian node in the fixture, so upload_src.sh ships it only base/ and its
-# node_dirs.sh paths; a case copying from a dir no service of it names isn't among them
+# upload_dirs paths; a case copying from a dir no service of it names isn't among them
 test_upload_dir_not_shipped() {
   fixture_tree
   mkdir -p "${tmp}/tree/src/services/shared"

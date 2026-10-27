@@ -40,21 +40,15 @@ if [ -e .git ]; then
   } > "${project_dir}/DEPLOYED"
 fi
 
-# Assemble jinja2 config file. jinjanate takes one data file, so the node inventory
-# (src/nodes/<node>/inventory.yml, gathered under `nodes:` in node-name order) is
-# appended to vars.yml rather than passed alongside it. It holds everything in
-# vars.yml, so it lives in its own private temp dir, outside the repo and the output.
+# Assemble the template data (tools/lib.sh template_vars): vars.yml without its ending
+# "...", the node inventory and what tools/inventory.py derives from it. It holds
+# everything in vars.yml, so it lives in its own private temp dir, outside the repo and
+# the output.
 vars_dir=$(mktemp -d)
 trap 'rm -rf "$vars_dir"' EXIT
 all_vars="${vars_dir}/all_vars.yml"
 cut_line=$(grep -n "^\.\.\." vars.yml | cut -d: -f1)
-{
-  # Exclude the ending "..."
-  head -n "$((cut_line-1))" vars.yml
-  echo
-  node_inventory src/nodes
-  echo -e "...\n"
-} > "$all_vars"
+head -n "$((cut_line-1))" vars.yml | template_vars src/nodes > "$all_vars"
 
 # Render the files
 fdfind="fdfind"
