@@ -1,0 +1,10 @@
+# diffusers and transformers: exact pins of chatterbox-tts 0.1.7. Every advisory needs an
+# attacker-controlled Hub repo through from_pretrained or save_pretrained. Calliope loads only
+# Chatterbox's own weights (hf_hub_download, models built in code; diffusers supplies layers,
+# never a pipeline) and faster-whisper's CTranslate2 models. Expires to recheck for a
+# chatterbox-tts release that lifts the pins.
+CVE-2026-44513 exp:2027-01-31
+CVE-2026-45804 exp:2027-01-31
+CVE-2026-4372 exp:2027-01-31
+CVE-2026-5241 exp:2027-01-31
+CVE-2026-9856 exp:2027-01-31
