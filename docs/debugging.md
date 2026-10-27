@@ -653,6 +653,8 @@ systemctl start postgres
 
 ## Observability
 
+Example PromQL and LogsQL, and the labels and log fields they use: [queries](queries.md).
+
 | Endpoint | What |
 | ---------- | ------ |
 | `metrics.janedoe.com/targets` | secsvcs scrape targets and their errors |

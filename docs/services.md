@@ -119,7 +119,8 @@ pve1, pve2, pbs2 and the router serve their own web UIs as pve1/pve2/pbs2/router
 
 ## Observability
 
-Metrics and logs converge on secsvcs; alerts end as phone push notifications.
+Metrics and logs converge on secsvcs; alerts end as phone push notifications. Labels, log fields
+and example queries: [queries](queries.md).
 
 ```mermaid
 flowchart LR

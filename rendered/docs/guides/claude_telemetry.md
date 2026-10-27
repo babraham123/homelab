@@ -1,0 +1,70 @@
+# Claude Code: metrics and logs
+
+Give Claude Code on a Mac query access to VictoriaMetrics and VictoriaLogs through their MCP servers
+([mcp-victoriametrics](https://github.com/VictoriaMetrics/mcp-victoriametrics),
+[mcp-victorialogs](https://github.com/VictoriaMetrics/mcp-victorialogs)).
+
+- The API routes on `metrics.janedoe.com` and `logs.janedoe.com` skip Authelia and take only the
+  shared `admin` basic auth ([security](../security.md)), so the servers send that as a header
+- Neither name is public: the Mac must be on the LAN or the tailnet
+
+## 1. Install
+
+- From the release binaries: `go install` refuses these modules (their `go.mod` has `replace`
+  directives). Rerun to update.
+
+```bash
+mkdir -p ~/.local/bin
+tmp=$(mktemp -d)
+for r in mcp-victoriametrics mcp-victorialogs; do
+  gh release download -R "VictoriaMetrics/$r" -D "$tmp/$r" -p "${r}_Darwin_arm64.tar.gz" -p checksums.txt
+  (cd "$tmp/$r" && shasum -a 256 --check --ignore-missing checksums.txt) || break
+  tar -xzf "$tmp/$r/${r}_Darwin_arm64.tar.gz" -C ~/.local/bin "$r"
+done
+rm -rf "$tmp"
+```
+
+## 2. Passwords into the Keychain
+
+- `claude mcp add -e` stores values in plaintext in `~/.claude.json`; `tools/mcp_victoria.sh` reads
+  the Keychain at launch instead
+- On secsvcs, print each password
+
+```bash
+sudo /root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_password
+sudo /root/homelab-rendered/src/base/podman/get_secret.sh victorialogs_admin_password
+```
+
+- On the Mac, store each one (`-w` last prompts for it)
+
+```bash
+security add-generic-password -a admin -s victoriametrics_admin_password -w
+security add-generic-password -a admin -s victorialogs_admin_password -w
+```
+
+## 3. Check access
+
+- `tools/mcp_victoria.sh metrics|logs` runs either server: the URL from `vars.yml`, the password
+  from the Keychain as a basic auth header
+- Check the route and password first; a 200 with results means both work
+
+```bash
+pw=$(security find-generic-password -s victoriametrics_admin_password -w)
+curl -u "admin:$pw" https://metrics.janedoe.com/api/v1/query --data-urlencode 'query=up'
+```
+
+## 4. Register
+
+- Local scope: only sessions started in this repo load them; the entries live in `~/.claude.json`,
+  not in git
+
+```bash
+cd ~/Personal/homelab
+claude mcp add -s local victoriametrics -- "$PWD/tools/mcp_victoria.sh" metrics
+claude mcp add -s local victorialogs -- "$PWD/tools/mcp_victoria.sh" logs
+```
+
+- Restart Claude Code; `/mcp` lists both as connected
+- Labels, log fields and example queries to start from: [queries](../queries.md)
+- A password rotation needs only the Keychain entry updated:
+  `security add-generic-password -U -a admin -s victoriametrics_admin_password -w`

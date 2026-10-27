@@ -18,6 +18,7 @@ it to see rendered output, but edit only the templates.
 - [Development and code structure](docs/development.md)
 - [Maintenance commands](docs/maintenance.md)
 - [Debugging](docs/debugging.md)
+- [Metrics and log queries: labels, fields, PromQL and LogsQL](docs/queries.md)
 - [GitHub repository rules](docs/github.md)
 - [Domain glossary](CONTEXT.md) and [decision records](docs/adr/)
 

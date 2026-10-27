@@ -4,6 +4,7 @@
 
 - Setup your local computer. Here are the instructions for a [Mac](./guides/mac_personal.md)
 - Create a `vars.yml` file from the `vars.template.yml` example
+- Optional: give Claude Code query access to metrics and logs ([guide](./guides/claude_telemetry.md))
 
 ## Code structure
 
