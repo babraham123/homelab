@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/ntfy_idp_push.container
 # Ref:
 # https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
@@ -30,9 +31,9 @@ HealthOnFailure=kill
 # reach this port and nothing is published
 Network=net.network
 HostName=idp-push.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.18
+IP={{ inv.addr.secsvcs.ntfy_idp_push }}
 # Aardvark would resolve push.SITE to ntfy's plain :2586; the shim's calls go through Traefik
-AddHost=push.{{ site.url }}:{{ secsvcs.container_subnet }}.6
+AddHost=push.{{ site.url }}:{{ inv.addr.secsvcs.traefik }}
 
 Environment=TZ={{ personal.timezone }}
 Secret=duo_integration_key,type=env,target=NTFY_IDP_PUSH_DUO_INTEGRATION_KEY

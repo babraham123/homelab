@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/car_ingest.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # A oneshot job, not a server: car_ingest.timer runs it every 15 minutes. It imports the
@@ -21,7 +22,7 @@ AddCapability=DAC_OVERRIDE
 ReadOnly=true
 
 Network=net.network
-IP={{ websvcs.container_subnet }}.26
+IP={{ inv.addr.websvcs.car_ingest }}
 
 # The phone's zone: recording start times are phone-local, and trips are named in it
 Environment=TZ={{ personal.timezone }}

@@ -30,7 +30,7 @@ HealthOnFailure=kill
 # AppSec, port = 7422 (acquis.d/appsec.yaml); Prometheus metrics, port = 6060
 Network=net.network
 HostName=appsec.janedoe.com
-IP={{ subnet }}.23
+IP={{ addr.crowdsec_appsec }}
 
 Environment=TZ=America/Los_Angeles
 Environment=DISABLE_LOCAL_API=true

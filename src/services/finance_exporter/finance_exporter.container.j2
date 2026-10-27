@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/finance_exporter.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -19,7 +20,7 @@ Tmpfs=/root/.cache
 
 Network=net.network
 HostName=finance-exporter.{{ site.url }}
-IP={{ websvcs.container_subnet }}.50
+IP={{ inv.addr.websvcs.finance_exporter }}
 # port 8002
 
 Environment=TZ={{ personal.timezone }}

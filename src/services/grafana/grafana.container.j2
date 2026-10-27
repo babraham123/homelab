@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/grafana.container
 # Ref:
 # https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
@@ -29,8 +30,8 @@ HealthStartPeriod=2m
 # http web front-end, port = 3000
 Network=net.network
 HostName=graph.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.12
-AddHost=auth.{{ site.url }}:{{ secsvcs.container_subnet }}.6
+IP={{ inv.addr.secsvcs.grafana }}
+AddHost=auth.{{ site.url }}:{{ inv.addr.secsvcs.traefik }}
 
 Environment=TZ={{ personal.timezone }}
 # https://www.postgresql.org/docs/18/libpq-envars.html

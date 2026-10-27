@@ -4,7 +4,7 @@
 # yamllint disable rule:document-start rule:document-end
 debian_services: [node_exporter, mdns_repeater]
 services:
-  zeta: {subdomain: z, admin: true, uptime: zeta, upstream: docker.io/library/nginx:stable}
+  zeta: {ip: 5, subdomain: z, admin: true, uptime: zeta, upstream: docker.io/library/nginx:stable}
   proxy: {shared: true}
   app:
     subdomain: app
@@ -16,7 +16,7 @@ services:
     update_last: true
   pod:
     containers:
-      pod-db: {upstream: ghcr.io/acme/db:16, update_last: true}
+      pod-db: {ip: 7, upstream: ghcr.io/acme/db:16, update_last: true}
       pod-web: {build: pod-web}
   plain: {}
 install_all_svcs: true

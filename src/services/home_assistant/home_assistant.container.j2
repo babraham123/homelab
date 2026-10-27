@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/home_assistant.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://sequr.be/blog/2022/12/home-assistant-container-part-12-migrating-to-podman/
@@ -21,7 +22,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=home.{{ site.url }}
-IP={{ homesvcs.container_subnet }}.11
+IP={{ inv.addr.homesvcs.home_assistant }}
 # UI: port 8123
 # Shelly CoIoT protocol:
 # PublishPort=5683:5683

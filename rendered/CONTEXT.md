@@ -28,7 +28,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   the node inventory, stripping one `.j2` extension.
 - **second pass** — files named `*.j2.j2` survive the render as `*.j2` and are rendered again on the
   node: by `render_host.sh` at install time for a shared service's per-node values (the node's
-  name, container subnet and inventory services), or *at container startup* (`ExecStartPre`) by
+  name, inventory services and container addresses), or *at container startup* (`ExecStartPre`) by
   `render_secrets.sh` for AGE secrets (`render_services.sh` for Fluent Bit's unit list).
   Plaintext secrets never sit in the rendered tree.
 - **shared service** — a platform service every container VM runs: Traefik, CrowdSec AppSec,
@@ -37,11 +37,15 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   template for all nodes. A node's own additions stay in its dir (Traefik routes and quadlet
   drop-ins under `traefik/`, vmagent's `prometheus.yml`).
 - **node inventory** — `src/nodes/<node>/inventory.yml`, one per node: per node, the dispatcher
-  entries (services in install order, other commands) and each service's subdomain, Gatus endpoint
-  and image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI subdomain
-  lists, uptime endpoints and image update order from it; the render (`tools/check_rendered.py`)
-  checks it against the scripts its dispatcher cases run, `routes.yml`, the quadlets' `Image=` and
-  the OliveTin buttons.
+  entries (services in install order, other commands) and each service's subdomain, Gatus endpoint,
+  container address and image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers
+  grants, DNS/SNI subdomain lists, uptime endpoints, container addresses and image update order
+  from it; the render (`tools/check_rendered.py`) checks it against the scripts its dispatcher
+  cases run, `routes.yml`, the quadlets' `Image=` and `IP=` and the OliveTin buttons.
+- **container address** — `inv.addr.<node>.<service>`: the node's `container_subnet` plus the
+  service's `ip` from its inventory. The quadlet's `IP=` and every config that reaches the
+  container (AddHost, trusted proxies, scrape targets, ufw rules in the guides) use it, so a
+  container is renumbered in its inventory alone.
 - **image updater** — `image_updater`
   ([podman-image-updater](https://github.com/babraham123/podman-image-updater), pinned in
   `src/base/debian/install_svcs.sh`, its image list rendered from the node inventory by

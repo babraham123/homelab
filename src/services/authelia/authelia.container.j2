@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/authelia.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -18,7 +19,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=auth.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.5
+IP={{ inv.addr.secsvcs.authelia }}
 # hostPort:containerPort
 PublishPort=9091:9091
 # port 9959, metrics

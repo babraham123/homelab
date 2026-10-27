@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # pve2 storage: the media array
 
 Four HDDs on a PCIe SATA card passed through to websvcs; snapraid parity, mergerfs pool at
@@ -74,7 +75,7 @@ ssh autoadmin@websvcs install_snapraid
 - On websvcs, let vmagent scrape the SMART exporter
 
 ```bash
-ufw allow in from {{ websvcs.container_subnet }}.7 to any port 9633 proto tcp
+ufw allow in from {{ inv.addr.websvcs.vmagent }} to any port 9633 proto tcp
 curl -s localhost:9633/metrics | grep smartctl_device_smart_status
 ```
 

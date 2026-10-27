@@ -33,9 +33,9 @@
       ],
 {%- if 'ntfy' in nodes[node].services %}
 {#- Straight to the container: no DNS, Traefik or TLS between the updater and ntfy while
-    their images update. IP: ntfy.container. A catch-up run after a pve1 reboot waits for
-    ntfy and the rest to settle. #}
-      "ntfy": {"url": "http://{{ inv.host_vars[node].subnet }}.13:2586/alert", "token": {{ secret('ntfy_alert_token') }}},
+    their images update. A catch-up run after a pve1 reboot waits for ntfy and the rest to
+    settle. #}
+      "ntfy": {"url": "http://{{ inv.addr[node].ntfy }}:2586/alert", "token": {{ secret('ntfy_alert_token') }}},
       "deadline_s": 0,
       "boot_delay_s": 900
 {%- else %}

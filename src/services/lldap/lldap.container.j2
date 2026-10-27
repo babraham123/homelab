@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/lldap.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -20,7 +21,7 @@ NoNewPrivileges=true
 # http web front-end, port = 17170
 Network=net.network
 HostName=ldap.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.4
+IP={{ inv.addr.secsvcs.lldap }}
 # hostPort:containerPort
 PublishPort=6360:6360
 

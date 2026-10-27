@@ -3,8 +3,8 @@
 # Renders FILE.j2 into FILE, next to it, for this node: the second pass of a file the
 # container VMs share. The template gets the node's src/nodes.jinja host_vars:
 #   node:     the node name, which is the hostname
-#   subnet:   its container_subnet from vars.yml
 #   services: its inventory services, e.g. services.traefik.subdomain
+#   addr:     its containers' IP addresses, e.g. addr.traefik
 # Usage:
 #   src/base/podman/render_host.sh FILE
 # Ref:

@@ -4,9 +4,9 @@
 # yamllint disable rule:document-start rule:document-end
 debian_services: [node_exporter, image_updater]
 services:
-  proxy: {shared: true, upstream: docker.io/library/traefik:v3}
+  proxy: {shared: true, ip: 6, upstream: docker.io/library/traefik:v3}
   db: {}
-  web: {subdomain: www, upstream: docker.io/library/nginx:stable}
+  web: {ip: 2, subdomain: www, upstream: docker.io/library/nginx:stable}
 install_all_svcs: true
 image_updater_slot: '21:30'
 commands:

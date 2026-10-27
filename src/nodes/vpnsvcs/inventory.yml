@@ -12,12 +12,15 @@ services:
   # Quadlets on the podman network (docs/adr/0007-vps-metrics-pushed.md)
   fluentbit:
     shared: true
+    ip: 20
     upstream: docker.io/fluent/fluent-bit:5.1
   vmagent:
     shared: true
+    ip: 7
     upstream: docker.io/victoriametrics/vmagent:latest
     dirs: [services/victoriametrics]
   geoip_generator:
+    ip: 30
     build: geoip_generator
 image_updater_slot: '20:00'
 commands:

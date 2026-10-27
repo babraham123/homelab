@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/vaultwarden.container
 # Ref:
 # https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
@@ -30,9 +31,9 @@ HealthStartPeriod=2m
 
 Network=net.network
 HostName=vault.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.17
+IP={{ inv.addr.secsvcs.vaultwarden }}
 # SSO discovery, token and userinfo calls go through Traefik
-AddHost=auth.{{ site.url }}:{{ secsvcs.container_subnet }}.6
+AddHost=auth.{{ site.url }}:{{ inv.addr.secsvcs.traefik }}
 
 # The image listens on 80 and grants no capability to bind it as non-root
 User=1000
@@ -68,7 +69,7 @@ Environment=SSO_AUTH_ONLY_NOT_SESSION=false
 
 # Traefik is the only proxy; the rightmost untrusted entry is the client
 Environment=IP_HEADER=X-Forwarded-For
-Environment=IP_HEADER_TRUSTED_PROXIES={{ secsvcs.container_subnet }}.6
+Environment=IP_HEADER_TRUSTED_PROXIES={{ inv.addr.secsvcs.traefik }}
 # The defaults, here so they're visible
 Environment=LOGIN_RATELIMIT_SECONDS=60
 Environment=LOGIN_RATELIMIT_MAX_BURST=10

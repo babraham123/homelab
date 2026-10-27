@@ -14,6 +14,11 @@ Amended: the cross-checks live in `tools/check_rendered.py` and also cover the s
 `commands[].run`, websvcs subdomains (each must be routed; only unlisted routes are allowed there)
 and the OliveTin buttons (one per dispatcher case, none for a missing case).
 
+Amended: services also carry `ip`, their container's host number, and `src/nodes.jinja` outputs
+`addr`, each node's container addresses. Quadlets stay hand-written but take `IP=` from `addr`, as
+does every config that names another container; the render checks the addresses are unique per
+node and match each quadlet's `IP=`.
+
 ## Context
 
 Four scripts reverse-engineered template variables from other files at render time:

@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/gatus.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -19,7 +20,7 @@ ReadOnly=true
 # http web front-end, port = 8080
 Network=net.network
 HostName=uptime.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.9
+IP={{ inv.addr.secsvcs.gatus }}
 # AddHost isn't needed, Gatus uses external DNS
 
 Environment=TZ={{ personal.timezone }}

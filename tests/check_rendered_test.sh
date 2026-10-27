@@ -36,10 +36,49 @@ EOF
 
 test_duplicate_container_ip() {
   fixture_tree
-  printf '[Container]\nIP=10.0.0.2\n' > "${tmp}/tree/src/services/web/db.container"
+  edit src/nodes/secsvcs/inventory.yml 's/web: \{ip: 2,/web: {ip: 6,/'
+  edit src/services/web/web.container 's/^IP=.*/IP=10.0.0.6/'
   expect_errors <<'EOF'
-error: src/services/web/db.container src/services/web/web.container: IP=10.0.0.2 is set in more than one quadlet
+error: src/nodes/secsvcs/inventory.yml: proxy and web have the same ip, 10.0.0.6
 EOF
+}
+
+test_gateway_container_ip() {
+  fixture_tree
+  edit src/nodes/secsvcs/inventory.yml 's/web: \{ip: 2,/web: {ip: 1,/'
+  edit src/services/web/web.container 's/^IP=.*/IP=10.0.0.1/'
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/inventory.yml: web: ip 1 isn't a host number from 2 to 254
+EOF
+}
+
+test_quadlet_ip_mismatch() {
+  fixture_tree
+  edit src/services/web/web.container 's/^IP=.*/IP=10.0.0.3/'
+  expect_errors <<'EOF'
+error: src/services/web/web.container: IP=10.0.0.3, expected 10.0.0.2 (src/nodes/secsvcs/inventory.yml services.web)
+EOF
+}
+
+test_quadlet_ip_without_inventory_ip() {
+  fixture_tree
+  edit src/nodes/secsvcs/inventory.yml 's/web: \{ip: 2, /web: {/'
+  expect_errors <<'EOF'
+error: src/services/web/web.container: IP=10.0.0.2, expected no IP=, as there is no ip (src/nodes/secsvcs/inventory.yml services.web)
+EOF
+}
+
+# A second-pass quadlet is rendered on the node, from its addr
+test_second_pass_quadlet_ip() {
+  fixture_tree
+  mv "${tmp}/tree/src/services/proxy/proxy.container" "${tmp}/tree/src/services/proxy/proxy.container.j2"
+  edit src/services/proxy/proxy.container.j2 's/^IP=.*/IP={{ subnet }}.6/'
+  expect_errors <<'EOF'
+error: src/services/proxy/proxy.container.j2: IP={{ subnet }}.6, expected {{ addr.proxy }} (src/nodes/secsvcs/inventory.yml services.proxy)
+EOF
+  edit src/services/proxy/proxy.container.j2 's/^IP=.*/IP={{ addr.proxy }}/'
+  out=$(check_tree) || flunk "$out"
+  assert_eq "$out" < /dev/null
 }
 
 test_upstream_without_registry_host() {

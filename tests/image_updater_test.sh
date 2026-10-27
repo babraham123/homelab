@@ -15,6 +15,7 @@ test_config_from_the_inventory() {
 debian_services: [image_updater]
 services:
   ntfy:
+    ip: 13
     upstream: docker.io/binwiederhier/ntfy:v2
     update_last: true
   db:

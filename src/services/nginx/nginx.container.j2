@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/nginx.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -17,7 +18,7 @@ NoNewPrivileges=true
 # Listening to port 8100
 Network=net.network
 HostName=static.{{ site.url }}
-IP={{ websvcs.container_subnet }}.8
+IP={{ inv.addr.websvcs.nginx }}
 
 Environment=TZ={{ personal.timezone }}
 # The whole dir, so the www symlink and the releases/ it points into both resolve.

@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/ntfy.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -26,7 +27,7 @@ HealthOnFailure=kill
 # port 25 for the basic SMTP server
 Network=net.network
 HostName=push.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.13
+IP={{ inv.addr.secsvcs.ntfy }}
 
 Exec=serve --config="/etc/ntfy/server.yml"
 

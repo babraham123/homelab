@@ -19,7 +19,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName={% raw %}{{ services.traefik.subdomain }}{% endraw %}.{{ site.url }}
-IP={% raw %}{{ subnet }}{% endraw %}.6
+IP={% raw %}{{ addr.traefik }}{% endraw %}
 # hostPort:containerPort
 PublishPort=80:80
 PublishPort=443:443

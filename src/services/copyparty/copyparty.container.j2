@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/copyparty.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -17,7 +18,7 @@ DropCapability=all
 
 Network=net.network
 HostName=files.{{ site.url }}
-IP={{ websvcs.container_subnet }}.19
+IP={{ inv.addr.websvcs.copyparty }}
 # port 3923
 
 User=1000

@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # Home Assistant setup
 
 Guide to setup Home Assistant and related services on PVE1.
@@ -87,7 +88,7 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE from {{ wired.iot.mask }} to 
 - Go thru the setup wizard
 - Check the HTTP settings: Settings >> System >> Network. A first boot imports them from
   `configuration.yaml`'s `http:` block; without them Traefik's requests get 400s
-  - Use X-Forwarded-For on; trusted proxies `{{ homesvcs.container_subnet }}.6`,
+  - Use X-Forwarded-For on; trusted proxies `{{ inv.addr.homesvcs.traefik }}`,
     `{{ homesvcs.container_subnet }}.1`, `127.0.0.1`, `::1`
   - IP ban on, login attempts threshold 5
   - CORS allowed origins `https://home.{{ site.url }}`, `https://auth.{{ site.url }}`

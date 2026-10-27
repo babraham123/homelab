@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/victoriametrics.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
@@ -24,7 +25,7 @@ HealthOnFailure=kill
 # http web front-end, ":8428/vmui"
 Network=net.network
 HostName=metrics.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.7
+IP={{ inv.addr.secsvcs.victoriametrics }}
 
 # https://docs.victoriametrics.com/#capacity-planning
 Exec=--storageDataPath="/storage" \

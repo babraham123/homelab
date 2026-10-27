@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/geoip_generator.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # Run weekly by geoip_generator.timer, not at boot. The maps land in /etc/haproxy/countries
@@ -19,7 +20,7 @@ DropCapability=all
 ReadOnly=true
 
 Network=net.network
-IP={{ vpnsvcs.container_subnet }}.30
+IP={{ inv.addr.vpnsvcs.geoip_generator }}
 # Downloads from download.maxmind.com: ufw routes this IP out to the internet
 
 Environment=TZ={{ personal.timezone }}

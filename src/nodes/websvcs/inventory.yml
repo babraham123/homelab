@@ -6,6 +6,7 @@ debian_services: [mdns_repeater, node_exporter, nvidia_gpu_exporter, image_updat
 services:
   traefik:
     shared: true
+    ip: 6
     subdomain: webproxy
     admin: true
     uptime: traefik websvcs
@@ -13,56 +14,71 @@ services:
     upstream: docker.io/library/traefik:v3.7
   crowdsec_appsec:
     shared: true
+    ip: 23
     upstream: docker.io/crowdsecurity/crowdsec:latest
     dirs: [services/crowdsec]
   vmagent:
     shared: true
+    ip: 7
     upstream: docker.io/victoriametrics/vmagent:latest
     dirs: [services/victoriametrics]
   nginx:
+    ip: 8
     subdomain: www
     upstream: docker.io/library/nginx:stable
   homepage:
+    ip: 9
     subdomain: dash
     uptime: homepage
     uptime_tier: 1
     upstream: ghcr.io/gethomepage/homepage:latest
   isso:
+    ip: 10
     subdomain: comment
     upstream: ghcr.io/isso-comments/isso:release
   finance_exporter:
+    ip: 50
     build: finance_exporter
   fluentbit:
     shared: true
+    ip: 20
     upstream: docker.io/fluent/fluent-bit:5.1
   snapraid: {}
   copyparty:
+    ip: 19
     subdomain: files
     uptime: copyparty
     upstream: docker.io/copyparty/ac:latest
   car_ingest:
+    ip: 26
     build: car_ingest
   # These need the media array mounted.
   linkding:
+    ip: 17
     subdomain: archive
     uptime: linkding
     uptime_path: /health
     upstream: docker.io/sissbruecker/linkding:latest-plus
   readeck:
+    ip: 18
     subdomain: read
     uptime: readeck
     uptime_path: /api/info
     upstream: codeberg.org/readeck/readeck:latest
   storyteller:
+    ip: 21
     subdomain: books
     uptime: storyteller
     uptime_path: /api/health
     upstream: registry.gitlab.com/storyteller-platform/storyteller:web-v2
   calliope:
+    ip: 22
     build: calliope
   bookmark_handoff:
+    ip: 24
     build: bookmark_handoff
   yt_to_audiobook:
+    ip: 25
     build: yt_to_audiobook
 install_all_svcs: true
 image_updater_slot: '21:00'

@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/vmalert.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
@@ -25,7 +26,7 @@ HealthOnFailure=kill
 
 Network=net.network
 HostName=vmalert.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.11
+IP={{ inv.addr.secsvcs.vmalert }}
 # https://docs.victoriametrics.com/vmalert/#web
 # metrics at :8880/metrics
 # api at :8880/api/v1

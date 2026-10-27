@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/mosquitto.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -16,7 +17,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=mqtt.{{ site.url }}
-IP={{ homesvcs.container_subnet }}.8
+IP={{ inv.addr.homesvcs.mosquitto }}
 # hostPort:containerPort
 PublishPort=8883:8883
 

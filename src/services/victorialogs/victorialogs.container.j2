@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/victorialogs.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
@@ -20,7 +21,7 @@ ReadOnly=true
 # http web front-end, ":9428/select/vmui"
 Network=net.network
 HostName=logs.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.8
+IP={{ inv.addr.secsvcs.victorialogs }}
 
 # https://docs.victoriametrics.com/victorialogs/#retention
 Exec=--storageDataPath="/storage" \

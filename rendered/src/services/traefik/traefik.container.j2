@@ -19,7 +19,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName={{ services.traefik.subdomain }}.janedoe.com
-IP={{ subnet }}.6
+IP={{ addr.traefik }}
 # hostPort:containerPort
 PublishPort=80:80
 PublishPort=443:443

@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/alertmanager.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/deployment/docker/README.md
@@ -23,7 +24,7 @@ HealthOnFailure=kill
 
 Network=net.network
 HostName=alert.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.10
+IP={{ inv.addr.secsvcs.alertmanager }}
 # port 9093
 
 Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.yml" \

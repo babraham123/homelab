@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/vmagent/prometheus.yml
 # Ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration
 # Every target carries a `host` label (the node, no port): ntfy-alertmanager tags pushes
@@ -27,7 +28,7 @@ scrape_configs:
     relabel_configs: *host
   - job_name: 'traefik'
     static_configs:
-      - targets: ['{{ homesvcs.container_subnet }}.6:8082']
+      - targets: ['{{ inv.addr.homesvcs.traefik }}:8082']
     metrics_path: /metrics
     relabel_configs:
       - target_label: instance

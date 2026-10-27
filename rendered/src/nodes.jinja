@@ -8,6 +8,9 @@
                        Key order is install order. Per service, all optional:
                          shared:      true moves its case to src/base/podman/install_svcs.sh,
                                       the platform services every container VM runs
+                         ip:          its container's host number on the node's
+                                      container_subnet; the quadlet's IP= and every
+                                      reference to it use addr[node][<service>]
                          subdomain:   host its Traefik router answers on
                          admin:       true makes Authelia require two_factor on the
                                       subdomain from every network, LAN and VPN
@@ -29,7 +32,7 @@
                                       default [services/<service>] if it exists.
                                       upload_src.sh ships a debian node only base/,
                                       its src/nodes/<node>/ and these (tools/node_dirs.sh)
-                         containers:  {<quadlet name>: {upstream | build, update_last}}, in
+                         containers:  {<quadlet name>: {ip, upstream | build, update_last}}, in
                                       place of the keys above, when the case installs
                                       other quadlets than <service>.container
       install_all_svcs: true adds install_all_svcs, installing `services` in order
@@ -62,8 +65,11 @@
                       dir: the service's first `dirs` entry, default services/<service>,
                       where its .trivyignore and build.sh live
     shared[node]:     its shared services, in install order
-    host_vars[node]:  {node, subnet, services} for each node with a container_subnet in
-                      vars.yml: what src/base/podman/render_host.sh gives the second pass -#}
+    addr[node]:       {<quadlet name>: its container's IP address} for the containers with
+                      an ip; vpnsvcs's vmagent is addr.vpnsvcs.vmagent
+    host_vars[node]:  {node, services, addr} for each node with a container_subnet in
+                      vars.yml: what src/base/podman/render_host.sh gives the second pass,
+                      where addr is addr[node] -#}
 {%- set dispatch = {} -%}
 {%- set commands = {} -%}
 {%- set buttons = {} -%}
@@ -75,6 +81,7 @@
 {%- set uptime = [] -%}
 {%- set images = {} -%}
 {%- set shared = {} -%}
+{%- set addr = {} -%}
 {%- set host_vars = {} -%}
 {#- vars.yml keys per-node values by node name (secsvcs.container_subnet), and Jinja has
     no lookup of a variable by a computed name; the import context holds them all. -#}
@@ -171,9 +178,15 @@
   {%- endfor -%}
   {%- do images.update({node: first + last}) -%}
 
+  {%- do addr.update({node: {}}) -%}
+  {%- for name, svc in services.items() -%}
+    {%- for container, c in svc.get('containers', {name: svc}).items() if c.ip is defined -%}
+      {%- do addr[node].update({container: context[node].container_subnet ~ '.' ~ c.ip}) -%}
+    {%- endfor -%}
+  {%- endfor -%}
+
   {%- if context.get(node, {}).container_subnet is defined -%}
-    {%- do host_vars.update({node: {'node': node, 'subnet': context[node].container_subnet,
-        'services': services}}) -%}
+    {%- do host_vars.update({node: {'node': node, 'services': services, 'addr': addr[node]}}) -%}
   {%- endif -%}
 {%- endfor -%}
 

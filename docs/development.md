@@ -15,13 +15,14 @@
 - `*.j2.j2` files undergo a *second* render pass on the node, by one of the
   `src/base/podman/render_*.sh` scripts:
   - `render_host.sh`, at install time from `src/base/podman/install_svcs.sh`: the shared services'
-    quadlets for this node, given its name, container subnet and inventory services
+    quadlets for this node, given its name, inventory services and container addresses
     (`host_vars` in `src/nodes.jinja`)
   - `render_secrets.sh`, at container start (`ExecStartPre`): secrets injection
   - `render_services.sh`, at container start: Fluent Bit's config, with the node's "Homelab:" units
 - `src/nodes/<node>/inventory.yml`, one per node, is the node inventory: each node's dispatcher
-  entries (services in install order, other commands) and each service's subdomain, Gatus endpoint
-  and container image facts (`upstream`/`build`, `update_last`, `containers`). `render_src.sh`
+  entries (services in install order, other commands) and each service's subdomain, Gatus endpoint,
+  container address (`ip`, read back as `inv.addr.<node>.<service>`) and container image facts
+  (`upstream`/`build`, `update_last`, `containers`). `render_src.sh`
   appends it to `vars.yml` as `nodes:` in a private temp `all_vars.yml`, and templates import
   `src/nodes.jinja` for the lists derived from it (dispatcher cases, sudoers grants, OliveTin
   buttons, DNS/SNI subdomains, uptime endpoints, image update order). See [ADR

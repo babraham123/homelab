@@ -3,7 +3,7 @@
 # requires-python = ">=3.12"
 # dependencies = ["pyyaml>=6,<7"]
 # ///
-# Checks a rendered copy of the repo: YAML, JSON, markdown and container IPs, then the
+# Checks a rendered copy of the repo: YAML, JSON and markdown, then the
 # node inventory (src/nodes/<node>/inventory.yml, ADR 0006) against the scripts, routes,
 # quadlets and OliveTin buttons it describes. Called by render_src.sh; tests/ runs it
 # against fixture trees. A uv script: `uv run` installs its dependencies, listed above.
@@ -38,6 +38,7 @@ FACTS_TEMPLATE = """\
   {{ node | tojson }}: {
     "services": {{ spec.get('services', {}) | list | tojson }},
     "shared": {{ inv.shared[node] | tojson }},
+    "addr": {{ inv.addr[node] | tojson }},
     "image_updater_slot": {{ spec.get('image_updater_slot') | tojson }},
     "debian_services": {{ spec.get('debian_services', []) | tojson }},
     "cases": {{ inv.dispatch[node] | tojson }},
@@ -155,15 +156,17 @@ def check_markdown():
     fail(line.split(" ", 1)[0], line.split(" error ", 1)[-1])
 
 
-def check_container_ips():
-  files_by_ip = {}
-  for path in sorted(Path(".").rglob("*.container")):
-    for line in text_lines(path):
-      if line.startswith("IP="):
-        files_by_ip.setdefault(line, []).append(str(path))
-  for ip, files in sorted(files_by_ip.items()):
-    if len(files) > 1:
-      fail(" ".join(sorted(set(files))), f"{ip} is set in more than one quadlet")
+# Containers on one node share its container subnet, whose .1 is the bridge gateway.
+def check_container_addrs(nodes):
+  for node, spec in nodes.items():
+    by_addr = {}
+    for container, addr in spec["addr"].items():
+      by_addr.setdefault(addr, []).append(container)
+      if not 2 <= int(addr.rsplit(".", 1)[1]) <= 254:
+        fail(inventory(node), f"{container}: ip {addr.rsplit('.', 1)[1]} isn't a host number from 2 to 254")
+    for addr, containers in sorted(by_addr.items()):
+      if len(containers) > 1:
+        fail(inventory(node), f"{' and '.join(containers)} have the same ip, {addr}")
 
 
 # The image updater pulls upstream refs as written and loads them as localhost/<path>,
@@ -178,8 +181,9 @@ def check_upstream_refs(nodes):
 
 
 # The image updater loads images under these names, so a quadlet whose Image= differs
-# would never be updated.
-def check_quadlet_images(nodes):
+# would never be updated. Its IP= is its addr from the inventory, which every reference
+# to it uses; a second-pass quadlet gets the node's from render_host.sh.
+def check_quadlets(nodes):
   for node, spec in nodes.items():
     for i in spec["images"]:
       svc, container, image = i["service"], i["container"], i["image"]
@@ -196,10 +200,16 @@ def check_quadlet_images(nodes):
       file = f"src/{quadlet}"
       if not os.path.isfile(file):
         file += ".j2"
-      actual = "\n".join(line.removeprefix("Image=") for line in
-                         (text_lines(file) if os.path.isfile(file) else []) if line.startswith("Image="))
+      lines = text_lines(file) if os.path.isfile(file) else []
+      actual = "\n".join(line.removeprefix("Image=") for line in lines if line.startswith("Image="))
       if actual != image:
         fail(file, f"Image={actual}, expected {image} {where}")
+      ip = "\n".join(line.removeprefix("IP=") for line in lines if line.startswith("IP=")) or None
+      expected = spec["addr"].get(container)
+      if expected and file.endswith(".j2"):
+        expected = f"{{{{ addr.{container} }}}}"
+      if ip != expected:
+        fail(file, f"IP={ip or ''}, expected {expected or 'no IP=, as there is no ip'} {where}")
 
 
 # The image updater builds a built image only through its service's build.sh, so one
@@ -385,9 +395,9 @@ def main():
   check_yaml()
   check_json()
   check_markdown()
-  check_container_ips()
+  check_container_addrs(nodes)
   check_upstream_refs(nodes)
-  check_quadlet_images(nodes)
+  check_quadlets(nodes)
   check_build_scripts(nodes)
   check_dispatch_scripts(nodes)
   check_install_cases(nodes)

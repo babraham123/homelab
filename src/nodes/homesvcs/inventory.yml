@@ -4,6 +4,7 @@ debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
   traefik:
     shared: true
+    ip: 6
     subdomain: homeproxy
     admin: true
     uptime: traefik homesvcs
@@ -11,25 +12,31 @@ services:
     upstream: docker.io/library/traefik:v3.7
   crowdsec_appsec:
     shared: true
+    ip: 23
     upstream: docker.io/crowdsecurity/crowdsec:latest
     dirs: [services/crowdsec]
   vmagent:
     shared: true
+    ip: 7
     upstream: docker.io/victoriametrics/vmagent:latest
     dirs: [services/victoriametrics]
   mosquitto:
+    ip: 8
     upstream: docker.io/library/eclipse-mosquitto:latest
   zigbee2mqtt:
+    ip: 9
     subdomain: zigbee
     uptime: zigbee2mqtt
     upstream: ghcr.io/koenkk/zigbee2mqtt:latest
   home_assistant:
+    ip: 11
     subdomain: home
     uptime: home assistant
     uptime_tier: 1
     upstream: docker.io/homeassistant/home-assistant:2026.10
   fluentbit:
     shared: true
+    ip: 20
     upstream: docker.io/fluent/fluent-bit:5.1
 install_all_svcs: true
 image_updater_slot: '20:30'

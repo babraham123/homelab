@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/bookmark_handoff.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # A oneshot job, not a server: bookmark_handoff.timer runs it every 15 minutes. The image
@@ -21,12 +22,12 @@ DropCapability=all
 ReadOnly=true
 
 Network=net.network
-IP={{ websvcs.container_subnet }}.24
+IP={{ inv.addr.websvcs.bookmark_handoff }}
 
 Environment=TZ={{ personal.timezone }}
-Environment=LINKDING_URL=http://{{ websvcs.container_subnet }}.17:9090
+Environment=LINKDING_URL=http://{{ inv.addr.websvcs.linkding }}:9090
 Environment=LINKDING_HOST=archive.{{ site.url }}:9090
-Environment=READECK_URL=http://{{ websvcs.container_subnet }}.18:8000
+Environment=READECK_URL=http://{{ inv.addr.websvcs.readeck }}:8000
 Environment=READECK_HOST=read.{{ site.url }}:8000
 Secret=linkding_api_token,type=env,target=LINKDING_API_TOKEN
 Secret=readeck_api_token,type=env,target=READECK_API_TOKEN

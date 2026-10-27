@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/linkding.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -20,7 +21,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=archive.{{ site.url }}
-IP={{ websvcs.container_subnet }}.17
+IP={{ inv.addr.websvcs.linkding }}
 # port 9090
 # Chromium renders through /dev/shm; Podman's default is 64 MB.
 PodmanArgs=--shm-size=512m

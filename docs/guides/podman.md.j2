@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # Podman setup
 
 Initial setup to install Podman on a Debian VM or the VPS and configure it with the relevant scripts
@@ -74,9 +75,9 @@ src/base/debian/install_svcs.sh node_exporter
 - Allow access from metrics container to host in order to scrape node_exporter
 
 ```bash
-# Use {{ secsvcs.container_subnet }}.7 on secsvcs, {{ websvcs.container_subnet }}.7 on websvcs, {{ homesvcs.container_subnet }}.7 on homesvcs,
-# {{ vpnsvcs.container_subnet }}.7 on vpnsvcs
-ufw allow in from {{ secsvcs.container_subnet }}.7 to any port 9100 proto tcp
+# Use {{ inv.addr.secsvcs.victoriametrics }} on secsvcs, {{ inv.addr.websvcs.vmagent }} on websvcs, {{ inv.addr.homesvcs.vmagent }} on homesvcs,
+# {{ inv.addr.vpnsvcs.vmagent }} on vpnsvcs
+ufw allow in from {{ inv.addr.secsvcs.victoriametrics }} to any port 9100 proto tcp
 ```
 
 ## Image updater

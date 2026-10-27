@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/calliope.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # A oneshot batch job, not a server: calliope.path and calliope.timer start it, and
@@ -18,7 +19,7 @@ NoNewPrivileges=true
 Network=net.network
 HostName=calliope.{{ site.url }}
 # Static, so a dynamic address can't take a server's while a book runs.
-IP={{ websvcs.container_subnet }}.22
+IP={{ inv.addr.websvcs.calliope }}
 
 PodmanArgs=--gpus=all
 Entrypoint=python3

@@ -3,12 +3,15 @@
 debian_services: [mdns_repeater, node_exporter, image_updater, net_probe]
 services:
   postgres:
+    ip: 3
     upstream: docker.io/library/postgres:18-alpine
   lldap:
+    ip: 4
     subdomain: ldap
     admin: true
     upstream: docker.io/lldap/lldap:stable
   authelia:
+    ip: 5
     subdomain: auth
     uptime: authelia
     uptime_path: /api/health
@@ -17,6 +20,7 @@ services:
     upstream: docker.io/authelia/authelia:4.39
   traefik:
     shared: true
+    ip: 6
     subdomain: secproxy
     admin: true
     uptime: traefik secsvcs
@@ -24,35 +28,42 @@ services:
     upstream: docker.io/library/traefik:v3.7
     update_last: true
   victoriametrics:
+    ip: 7
     subdomain: metrics
     uptime: victoriametrics
     upstream: docker.io/victoriametrics/victoria-metrics:latest
     update_last: true
   victorialogs:
+    ip: 8
     subdomain: logs
     uptime: victorialogs
     upstream: docker.io/victoriametrics/victoria-logs:latest
   gatus:
+    ip: 9
     subdomain: uptime
     upstream: docker.io/twinproduction/gatus:latest
   vmalert:
+    ip: 11
     subdomain: vmalert
     admin: true
     uptime: vmalert
     upstream: docker.io/victoriametrics/vmalert:latest
     update_last: true
   alertmanager:
+    ip: 10
     subdomain: alert
     admin: true
     uptime: alertmanager
     upstream: docker.io/prom/alertmanager:latest
     update_last: true
   ntfy-alertmanager:
+    ip: 14
     subdomain: ntfy-alertmanager
     dirs: [services/alertmanager]
     upstream: docker.io/xenrox/ntfy-alertmanager:latest
     update_last: true
   ntfy:
+    ip: 13
     subdomain: push
     uptime: ntfy health check
     uptime_path: /v1/health
@@ -60,11 +71,13 @@ services:
     upstream: docker.io/binwiederhier/ntfy:latest
     update_last: true
   grafana:
+    ip: 12
     subdomain: graph
     uptime: grafana
     uptime_tier: 1
     upstream: docker.io/grafana/grafana-oss:latest
   vaultwarden:
+    ip: 17
     subdomain: vault
     admin: true
     uptime: vaultwarden
@@ -73,25 +86,30 @@ services:
     upstream: docker.io/vaultwarden/server:latest
   # After ntfy and lldap: it refuses to start until ntfy accepts its admin token
   ntfy_idp_push:
+    ip: 18
     subdomain: idp-push
     admin: true
     uptime: ntfy-idp-push
     uptime_path: /healthz
     upstream: ghcr.io/babraham123/ntfy-idp-push:latest
   olive_tin:
+    ip: 15
     subdomain: command
     admin: true
     uptime: olive_tin
     upstream: docker.io/jamesread/olivetin:latest-3k
   # No subdomain: its LAPI is a published port, never in HAProxy's SNI list
   crowdsec:
+    ip: 16
     upstream: docker.io/crowdsecurity/crowdsec:latest
   crowdsec_appsec:
     shared: true
+    ip: 23
     upstream: docker.io/crowdsecurity/crowdsec:latest
     dirs: [services/crowdsec]
   fluentbit:
     shared: true
+    ip: 20
     upstream: docker.io/fluent/fluent-bit:5.1
 install_all_svcs: true
 image_updater_slot: '21:30'

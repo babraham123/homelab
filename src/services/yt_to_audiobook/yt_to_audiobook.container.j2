@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/yt_to_audiobook.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # A oneshot batch job, not a server: yt_to_audiobook.path and yt_to_audiobook.timer start it,
@@ -24,7 +25,7 @@ ReadOnly=true
 Network=net.network
 HostName=yt-to-audiobook.{{ site.url }}
 # Static, so a dynamic address can't take a server's while a video runs.
-IP={{ websvcs.container_subnet }}.25
+IP={{ inv.addr.websvcs.yt_to_audiobook }}
 
 Entrypoint=python3
 Exec=/opt/yt_to_audiobook_batch.py

@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/readeck.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -17,14 +18,14 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=read.{{ site.url }}
-IP={{ websvcs.container_subnet }}.18
+IP={{ inv.addr.websvcs.readeck }}
 # port 8000
 
 Environment=TZ={{ personal.timezone }}
 # Ref: https://readeck.org/en/docs/configuration
 # config.toml is generated on first start with the secret key; these override it.
 Environment=READECK_SERVER_BASE_URL=https://read.{{ site.url }}
-Environment=READECK_TRUSTED_PROXIES={{ websvcs.container_subnet }}.6
+Environment=READECK_TRUSTED_PROXIES={{ inv.addr.websvcs.traefik }}
 # Ref: https://readeck.org/en/docs/external-auth
 # Readeck overwrites a linked user's group from the IdP at every login, falling back
 # to `user`: without the admin mapping the admin is demoted.

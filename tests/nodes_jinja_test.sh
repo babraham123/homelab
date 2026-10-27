@@ -166,18 +166,34 @@ pod pod-db localhost/acme/db:16
 EOF
 }
 
+# Addresses: the node's container_subnet plus each ip, keyed by quadlet name, so a
+# `containers` entry has its own
+test_container_addrs() {
+  out=$(render_inventory "$inventory" <<'EOF'
+{% for node in nodes -%}
+{{ node }}: {{ inv.addr[node] }}
+{% endfor -%}
+EOF
+)
+  assert_eq "$out" <<'EOF'
+alpha: {'zeta': '10.9.0.5', 'pod-db': '10.9.0.7'}
+gaming: {}
+router: {}
+EOF
+}
+
 # render_host.sh's data: only nodes with a container_subnet (alpha, in site.yml), with
-# their inventory services
+# their inventory services and addresses
 test_host_vars() {
   out=$(render_inventory "$inventory" <<'EOF'
 {% for node, h in inv.host_vars.items() -%}
-{{ node }}: {{ h.node }} {{ h.subnet }} {{ h.services | list | join(' ') }}
+{{ node }}: {{ h.node }} {{ h.services | list | join(' ') }} {{ h.addr | list | join(' ') }}
 {% endfor -%}
 shared: {{ inv.shared.alpha | join(' ') }}
 EOF
 )
   assert_eq "$out" <<'EOF'
-alpha: alpha 10.9.0 zeta proxy app pod plain
+alpha: alpha zeta proxy app pod plain zeta pod-db
 shared: proxy
 EOF
 }

@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/homepage.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -16,13 +17,13 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=dash.{{ site.url }}
-IP={{ websvcs.container_subnet }}.9
+IP={{ inv.addr.websvcs.homepage }}
 # port 3000
 
 Environment=PUID=1000 PGID=1000
 Environment=TZ={{ personal.timezone }}
 Environment=LOG_TARGETS=stdout
-Environment=HOMEPAGE_ALLOWED_HOSTS=dash.{{ site.url }},{{ websvcs.container_subnet }}.9:3000
+Environment=HOMEPAGE_ALLOWED_HOSTS=dash.{{ site.url }},{{ inv.addr.websvcs.homepage }}:3000
 
 Secret=home_ical_url,type=env,target=HOMEPAGE_VAR_HOME_ICAL_URL
 Secret=home_latitude,type=env,target=HOMEPAGE_VAR_HOME_LATITUDE

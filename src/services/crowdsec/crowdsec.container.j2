@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/crowdsec.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 # https://github.com/crowdsecurity/crowdsec/blob/master/build/docker/README.md
@@ -30,7 +31,7 @@ HealthOnFailure=kill
 # LAPI (TLS), port = 8455 (config.yaml.local); Prometheus metrics, port = 6060
 Network=net.network
 HostName=crowdsec.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.16
+IP={{ inv.addr.secsvcs.crowdsec }}
 # hostPort:containerPort; ufw admits the VPS only (docs/guides/secsvcs.md)
 PublishPort=8455:8455
 

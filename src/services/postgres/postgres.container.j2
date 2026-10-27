@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/postgres.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -18,7 +19,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=pgdb.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.3
+IP={{ inv.addr.secsvcs.postgres }}
 # hostPort:containerPort
 PublishPort=5432:5432
 

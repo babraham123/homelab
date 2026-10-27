@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/copyparty/copyparty.conf
 # Loaded by the image's initcfg, which already sets `chdir: /w` and includes /cfg/*.conf.
 # Ref:
@@ -11,7 +12,7 @@
   idp-h-usr: Remote-User
   idp-h-grp: Remote-Groups
   # Only Traefik may set the identity and client-IP headers.
-  xff-src: {{ websvcs.container_subnet }}.6/32
+  xff-src: {{ inv.addr.websvcs.traefik }}/32
   # The rightmost X-Forwarded-For entry is the one Traefik appended; anything left of it
   # came from the client.
   rproxy: -1

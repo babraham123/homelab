@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/zigbee2mqtt.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -19,7 +20,7 @@ ReadOnly=true
 
 Network=net.network
 HostName=zigbee.{{ site.url }}
-IP={{ homesvcs.container_subnet }}.9
+IP={{ inv.addr.homesvcs.zigbee2mqtt }}
 # UI: port 8080
 
 Environment=TZ={{ personal.timezone }}

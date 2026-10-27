@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/alertmanager.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -22,7 +23,7 @@ HealthOnFailure=kill
 
 Network=net.network
 HostName=ntfy-alertmanager.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.14
+IP={{ inv.addr.secsvcs['ntfy-alertmanager'] }}
 # port 2588
 
 Exec=--config="/etc/ntfy-alertmanager/config.scfg"

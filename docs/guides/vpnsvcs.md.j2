@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # VPN Services setup
 
 - Buy a domain name from a DNS registrar / provider (ie Namecheap)
@@ -291,7 +292,7 @@ headscale --user USER_ID preauthkeys create --expiration 1h
 sudo su
 cd /root/homelab-rendered
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-ufw allow in on $POD_IFACE from {{ vpnsvcs.container_subnet }}.7 to any port 8405,9090 proto tcp
+ufw allow in on $POD_IFACE from {{ inv.addr.vpnsvcs.vmagent }} to any port 8405,9090 proto tcp
 ufw allow in on $POD_IFACE from {{ vpnsvcs.container_subnet }}.0/24 to any port 53 proto udp
 ufw route allow in on $POD_IFACE out on tailscale0 to {{ secsvcs.ip }} port 443 proto tcp
 ufw route allow in on $POD_IFACE out on tailscale0 to 100.100.100.100 port 80 proto tcp
@@ -330,7 +331,7 @@ cd /root/homelab-rendered
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
 # Only the generator reaches the internet, for download.maxmind.com
-ufw route allow in on $POD_IFACE out on $NET_IFACE from {{ vpnsvcs.container_subnet }}.30 to any port 443 proto tcp
+ufw route allow in on $POD_IFACE out on $NET_IFACE from {{ inv.addr.vpnsvcs.geoip_generator }} to any port 443 proto tcp
 src/nodes/vpnsvcs/install_svcs.sh geoip_generator
 systemctl start geoip_generator    # one run now
 ls /etc/haproxy/countries | wc -l  # about 250 maps
@@ -358,7 +359,7 @@ chmod 600 /etc/opt/secrets/*
 cd /root/homelab-rendered
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 ufw allow out on tailscale0 from any to {{ secsvcs.ip }} port 8455 proto tcp
-ufw allow in on $POD_IFACE from {{ vpnsvcs.container_subnet }}.7 to any port 60601 proto tcp
+ufw allow in on $POD_IFACE from {{ inv.addr.vpnsvcs.vmagent }} to any port 60601 proto tcp
 src/nodes/vpnsvcs/install_svcs.sh crowdsec_firewall_bouncer
 nft list tables                       # crowdsec and crowdsec6
 journalctl -u crowdsec-firewall-bouncer --no-pager | tail   # no TLS or 403 errors

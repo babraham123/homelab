@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/traefik/config/dynamic/smtp.yml
 # References:
 #   - https://doc.traefik.io/traefik/routing/routers/#configuring-tcp-routers
@@ -16,4 +17,4 @@ tcp:
     ntfy-mail:
       loadBalancer:
         servers:
-          - address: {{ secsvcs.container_subnet }}.13:25
+          - address: {{ inv.addr.secsvcs.ntfy }}:25

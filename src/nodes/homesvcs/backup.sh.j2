@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 #!/bin/bash
 # homesvcs backup: Home Assistant's native backup plus the config and small state of
 # every service, staged under /var/opt/backups for pve1's backup_orchestrator to pull.
@@ -28,7 +29,7 @@ trap 'rm -f "$marker"' EXIT
 # stays out of the process list. Needs an admin user's token.
 printf 'header = "Authorization: Bearer %s"\n' "$token" | \
   curl -sS --fail-with-body --max-time 1800 -K - -X POST \
-  http://{{ homesvcs.container_subnet }}.11:8123/api/services/backup/create
+  http://{{ inv.addr.homesvcs.home_assistant }}:8123/api/services/backup/create
 echo
 archive=$(find "$volpath/backups" -maxdepth 1 -name 'Custom_backup_*.tar' \
   -newer "$marker" -printf '%T@ %p\n' | sort -n | tail -n 1 | cut -d' ' -f2-)

@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/ntfy_idp_push/server.yml
 # Ref:
 # https://github.com/babraham123/ntfy-idp-push/blob/main/deploy/server.yml
@@ -10,7 +11,7 @@ duo-hostname: "idp-push.{{ site.url }}"
 push-timeout: "60s"
 
 # Traefik alone: anything else that can reach :8080 could sign in as anyone
-trusted-proxies: ["{{ secsvcs.container_subnet }}.6/32"]
+trusted-proxies: ["{{ inv.addr.secsvcs.traefik }}/32"]
 identity-header: "Remote-User"
 enroll-portal-url: "https://idp-push.{{ site.url }}/enroll"
 

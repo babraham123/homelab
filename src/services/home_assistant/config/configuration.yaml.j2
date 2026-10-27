@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/opt/home_assistant/config/configuration.yaml
 # Mounted at /config/homelab, and /config/configuration.yaml links here, so includes resolve
 # from /config: homelab/... is this directory, the rest is the UI-owned hassconfig volume.
@@ -62,7 +63,7 @@ http:
     - https://auth.{{ site.url }}
   use_x_forwarded_for: true
   trusted_proxies:
-    - {{ homesvcs.container_subnet }}.6
+    - {{ inv.addr.homesvcs.traefik }}
     - {{ homesvcs.container_subnet }}.1
     - 127.0.0.1
     - ::1

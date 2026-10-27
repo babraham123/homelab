@@ -1,3 +1,4 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 # /etc/containers/systemd/olive_tin.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
 
@@ -18,8 +19,8 @@ ReadOnly=true
 
 Network=net.network
 HostName=command.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.15
-AddHost=auth.{{ site.url }}:{{ secsvcs.container_subnet }}.6
+IP={{ inv.addr.secsvcs.olive_tin }}
+AddHost=auth.{{ site.url }}:{{ inv.addr.secsvcs.traefik }}
 DNSSearch={{ site.url }}
 # port 1337
 
