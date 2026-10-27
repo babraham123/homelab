@@ -1,7 +1,8 @@
 # shellcheck shell=bash
 # src/nodes.jinja over tests/fixtures/nodes/<node>/inventory.yml. Expected lists follow
 # ADR 0006 and the src/nodes.jinja header: nodes in name order; cases in the order
-# debian_services, services (install order), install_all_svcs, commands, triggers;
+# debian_services, services (install order; shared ones run src/base/podman's script),
+# install_all_svcs, commands, triggers;
 # sudoers holds the sorted, unique sudo lines without `sudo `; scripts live under
 # /root/homelab-rendered/src, except the router's under /root/router-src.
 # shellcheck source=tests/lib.sh
@@ -28,6 +29,9 @@ EOF
   install_zeta)
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh zeta
     ;;
+  install_proxy)
+    sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
+    ;;
   install_app)
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh app
     ;;
@@ -39,6 +43,7 @@ EOF
     ;;
   install_all_svcs)
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh zeta
+    sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh app
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh pod
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
@@ -88,6 +93,7 @@ EOF
 /root/homelab-rendered/src/base/debian/commands.sh install_ca
 /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
 /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+/root/homelab-rendered/src/base/podman/install_svcs.sh proxy
 /root/homelab-rendered/src/nodes/alpha/backup.sh
 /root/homelab-rendered/src/nodes/alpha/commands.sh install_keys
 /root/homelab-rendered/src/nodes/alpha/install_svcs.sh app
@@ -111,8 +117,8 @@ test_olive_tin_buttons() {
 EOF
 )
   assert_eq "$out" <<'EOF'
-alpha: install_node_exporter install_mdns_repeater install_zeta install_app install_pod install_plain install_all_svcs install_keys build_map check_gpu backup install_ca
-alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_app install_pod install_plain install_all_svcs build_map check_gpu backup install_ca
+alpha: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_keys build_map check_gpu backup install_ca
+alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs build_map check_gpu backup install_ca
 gaming: StartSunshine StopSunshine
 gaming buttons: StartSunshine StopSunshine
 router: install_certs
@@ -157,5 +163,21 @@ zeta zeta localhost/library/nginx:stable
 pod pod-web localhost/pod-web:latest
 app app localhost/app:latest
 pod pod-db localhost/acme/db:16
+EOF
+}
+
+# render_host.sh's data: only nodes with a container_subnet (alpha, in site.yml), with
+# their inventory services
+test_host_vars() {
+  out=$(render_inventory "$inventory" <<'EOF'
+{% for node, h in inv.host_vars.items() -%}
+{{ node }}: {{ h.node }} {{ h.subnet }} {{ h.services | list | join(' ') }}
+{% endfor -%}
+shared: {{ inv.shared.alpha | join(' ') }}
+EOF
+)
+  assert_eq "$out" <<'EOF'
+alpha: alpha 10.9.0 zeta proxy app pod plain
+shared: proxy
 EOF
 }

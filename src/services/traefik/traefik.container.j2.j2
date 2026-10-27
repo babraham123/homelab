@@ -1,11 +1,12 @@
 # /etc/containers/systemd/traefik.container
 # Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# Shared by the container VMs, rendered for each by base/podman/render_host.sh. A node's
+# own additions are drop-ins in src/nodes/<node>/traefik/traefik.container.d/.
 
 [Unit]
-Description="Homelab: Traefik reverse proxy, main traffic entrypoint for secsvcs"
+Description="Homelab: Traefik reverse proxy, main traffic entrypoint for {% raw %}{{ node }}{% endraw %}"
 StartLimitIntervalSec=30
 StartLimitBurst=10
-Requires=authelia.service
 Wants=network.target
 After=network-online.target
 
@@ -17,21 +18,17 @@ AutoUpdate=local
 NoNewPrivileges=true
 
 Network=net.network
-HostName=secproxy.{{ site.url }}
-IP={{ secsvcs.container_subnet }}.6
+HostName={% raw %}{{ services.traefik.subdomain }}{% endraw %}.{{ site.url }}
+IP={% raw %}{{ subnet }}{% endraw %}.6
 # hostPort:containerPort
 PublishPort=80:80
 PublishPort=443:443
-PublishPort=465:465
 
 Exec="--configFile=/config/static/traefik.yml"
 
 Environment=TZ={{ personal.timezone }}
 # The crowdsec middleware's key for AppSec, at /run/secrets/crowdsec_bouncer_key
-Secret=crowdsec_bouncer_secsvcs,type=mount,target=crowdsec_bouncer_key
-Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
-Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
-Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
+Secret=crowdsec_bouncer_{% raw %}{{ node }}{% endraw %},type=mount,target=crowdsec_bouncer_key
 Volume=/etc/opt/traefik/config:/config
 Volume=/etc/opt/traefik/certificates:/certificates
 Volume=/etc/opt/traefik/plugins-local:/plugins-local:ro

@@ -9,9 +9,10 @@ services:
   crowdsec_firewall_bouncer: {dirs: [services/crowdsec]}
   deadman: {}
   # Quadlets on the podman network (docs/adr/0007-vps-metrics-pushed.md)
-  fluentbit: {upstream: docker.io/fluent/fluent-bit:5.1}
-  vmagent: {upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
+  fluentbit: {shared: true, upstream: docker.io/fluent/fluent-bit:5.1}
+  vmagent: {shared: true, upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
   geoip_generator: {build: geoip_generator}
+image_updater_slot: '20:00'
 commands:
   - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/vpnsvcs/backup.sh], pve1_file_transfer: true}
   - {name: install_ssh_ca, script: base/debian/commands.sh, pve1_file_transfer: true}

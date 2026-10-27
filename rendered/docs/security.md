@@ -251,8 +251,8 @@ sharply different powers:
 So automation (OliveTin buttons, deploy scripts, cert distribution) can trigger predefined actions
 remotely, but a stolen `autoadmin` key cannot run arbitrary commands or read or write files, and only
 pve1's key reaches the secrets. The render fails if a node's `services` in its `inventory.yml` differ
-from its `install_svcs.sh` cases, so the allowlist stays in sync with the services that exist (see
-[ADR 0006](adr/0006-node-inventory.md)).
+from its `install_svcs.sh` cases (`src/base/podman/install_svcs.sh` for shared ones), so the
+allowlist stays in sync with the services that exist (see [ADR 0006](adr/0006-node-inventory.md)).
 
 ## Secrets
 

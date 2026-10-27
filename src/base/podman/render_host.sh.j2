@@ -1,37 +1,31 @@
+{% import 'src/nodes.jinja' as inv with context -%}
 #!/bin/bash
-# Renders the given file in the same directory as it's template (FILENAME.j2).
-# Includes basic networking details about the host.
+# Renders FILE.j2 into FILE, next to it, for this node: the second pass of a file the
+# container VMs share. The template gets the node's src/nodes.jinja host_vars:
+#   node:     the node name, which is the hostname
+#   subnet:   its container_subnet from vars.yml
+#   services: its inventory services, e.g. services.traefik.subdomain
 # Usage:
-#   src/base/podman/render_host.sh SUBDOMAIN FILENAME
+#   src/base/podman/render_host.sh FILE
 # Ref:
 # https://github.com/kpfleming/jinjanator
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
-file=$2
+file=${1:?usage: $0 FILE}
 rm -f "$file"
 
 if [ ! -f "$file.j2" ]; then
   die "file template $file.j2 does not exist"
 fi
 
-case $1 in
-  secsvcs)
-    subnet="{{ secsvcs.container_subnet }}"
+case $(hostname -s) in
+{%- for node, vars in inv.host_vars.items() %}
+  {{ node }})
+    vars='{{ vars | tojson }}'
     ;;
-  websvcs)
-    subnet="{{ websvcs.container_subnet }}"
-    ;;
-  homesvcs)
-    subnet="{{ homesvcs.container_subnet }}"
-    ;;
-  vpnsvcs)
-    subnet="{{ vpnsvcs.container_subnet }}"
-    ;;
-  *)
-    die "unknown service: $1"
-    ;;
+{%- endfor %}
 esac
 
-echo "subnet: $subnet" | jinjanate --quiet --format=yaml -o "$file" "$file.j2"
+echo "$vars" | jinjanate --quiet --format=json -o "$file" "$file.j2"

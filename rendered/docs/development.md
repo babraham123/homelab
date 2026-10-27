@@ -14,8 +14,9 @@
 - All `*.j2` files are processed through Jinja2 via `jinjanate` at render time
 - `*.j2.j2` files undergo a *second* render pass on the node, by one of the
   `src/base/podman/render_*.sh` scripts:
-  - `render_host.sh`, at install time from `install_svcs.sh`: per-node values in the vmagent and
-    Fluent Bit quadlets
+  - `render_host.sh`, at install time from `src/base/podman/install_svcs.sh`: the shared services'
+    quadlets for this node, given its name, container subnet and inventory services
+    (`host_vars` in `src/nodes.jinja`)
   - `render_secrets.sh`, at container start (`ExecStartPre`): secrets injection
   - `render_services.sh`, at container start: Fluent Bit's config, with the node's "Homelab:" units
 - `src/nodes/<node>/inventory.yml`, one per node, is the node inventory: each node's dispatcher
@@ -64,9 +65,11 @@
   sha256). Scripts run in place source it relative to themselves; copies installed to
   `/usr/local/bin` with `install_bin` (and the dispatcher) source `/usr/local/lib/homelab/lib.sh`,
   which `install_lib` puts there
-- The container VMs' `install_svcs.sh` also source `src/base/podman/svcs_lib.sh`:
-  `install_traefik_config NODE` and `install_fluentbit_config [CONFIG]`, the config steps every
-  Traefik and Fluent Bit case shares. The case still installs the quadlet and restarts the unit
+- `src/base/podman/install_svcs.sh` installs the shared services (Traefik, CrowdSec AppSec,
+  vmagent, Fluent Bit) on whichever container VM runs it; a node's inventory marks them
+  `shared: true` and the dispatcher runs this script for them. Node-specific pieces stay in the
+  node's dir: Traefik's routes and quadlet drop-ins (`traefik/traefik.container.d/`), vmagent's
+  `prometheus.yml`
 - `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die` and `node_inventory` (the
   inventory files gathered under `nodes:`, shared by the render and the tests)
 - Router (`/bin/sh` on pfSense), gaming and macOS scripts get a copy of their own directory only, so

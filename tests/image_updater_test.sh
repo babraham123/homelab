@@ -3,8 +3,8 @@
 # format in github.com/babraham123/podman-image-updater's README: one hosts entry per node
 # with install_image_updater, in node-name order; its images in the src/nodes.jinja update
 # order, each with the .trivyignore and, if built, build.sh in its service's dir (its first
-# `dirs` entry, default services/<service>); secsvcs reaches ntfy
-# straight at the container with no deadline and waits 15 minutes after boot, every other
+# `dirs` entry, default services/<service>); the node that runs ntfy
+# reaches it straight at the container with no deadline and waits 15 minutes after boot, every other
 # node through Traefik with a 25-minute deadline; every secret comes from get_secret.sh.
 # shellcheck source=tests/lib.sh
 source tests/lib.sh

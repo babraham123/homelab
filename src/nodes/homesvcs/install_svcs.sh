@@ -5,8 +5,6 @@
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
-# shellcheck source=src/base/podman/svcs_lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/svcs_lib.sh"
 
 cd "$rendered"
 watch_homelab_units
@@ -23,22 +21,6 @@ sync_dir() {
 }
 
 case $1 in
-  traefik)
-    install_traefik_config homesvcs
-    install_quadlet nodes/homesvcs/traefik/traefik.container
-    reload_restart traefik
-    ;;
-  crowdsec_appsec)
-    install_appsec_config homesvcs
-    install_quadlet services/crowdsec/crowdsec_appsec.container services/crowdsec/appsecdata.volume
-    reload_restart crowdsec_appsec
-    ;;
-  vmagent)
-    install -D -m 644 -t /etc/opt/vmagent nodes/homesvcs/prometheus.yml
-    base/podman/render_host.sh homesvcs services/victoriametrics/vmagent.container
-    install_quadlet services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
-    reload_restart vmagent
-    ;;
   mosquitto)
     mkdir -p /etc/opt/mosquitto/certificates
     install -D -m 644 -t /etc/opt/mosquitto services/mosquitto/mosquitto.conf
@@ -97,12 +79,6 @@ case $1 in
     cp -R "$config" "$installed"
     install_quadlet services/home_assistant/home_assistant.container services/home_assistant/hassdb.volume
     reload_restart home_assistant
-    ;;
-  fluentbit)
-    install_fluentbit_config
-    base/podman/render_host.sh homesvcs services/fluentbit/fluentbit.container
-    install_quadlet services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
-    reload_restart fluentbit
     ;;
   *)
     die "unknown service: $1"

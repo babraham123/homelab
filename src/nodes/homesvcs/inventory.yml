@@ -2,16 +2,17 @@
 # yamllint disable rule:document-start rule:document-end
 debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
-  traefik: {subdomain: homeproxy, admin: true, uptime: traefik homesvcs, uptime_tier: 1,
+  traefik: {shared: true, subdomain: homeproxy, admin: true, uptime: traefik homesvcs, uptime_tier: 1,
             upstream: docker.io/library/traefik:v3.7}
-  crowdsec_appsec: {upstream: docker.io/crowdsecurity/crowdsec:latest, dirs: [services/crowdsec]}
-  vmagent: {upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
+  crowdsec_appsec: {shared: true, upstream: docker.io/crowdsecurity/crowdsec:latest, dirs: [services/crowdsec]}
+  vmagent: {shared: true, upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
   mosquitto: {upstream: docker.io/library/eclipse-mosquitto:latest}
   zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt, upstream: ghcr.io/koenkk/zigbee2mqtt:latest}
   home_assistant: {subdomain: home, uptime: home assistant, uptime_tier: 1,
                    upstream: docker.io/homeassistant/home-assistant:2026.10}
-  fluentbit: {upstream: docker.io/fluent/fluent-bit:5.1}
+  fluentbit: {shared: true, upstream: docker.io/fluent/fluent-bit:5.1}
 install_all_svcs: true
+image_updater_slot: '20:30'
 commands:
   - {name: install_keys, script: nodes/homesvcs/commands.sh, pve1_file_transfer: true}
   - {name: install_certs, script: nodes/homesvcs/commands.sh, pve1_file_transfer: true}

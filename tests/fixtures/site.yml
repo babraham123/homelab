@@ -1,3 +1,6 @@
 # The vars.yml stand-in for fixture inventories; tests append the inventory to it.
 site:
   url: example.com
+# alpha's per-node vars
+alpha:
+  container_subnet: 10.9.0

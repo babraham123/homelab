@@ -73,13 +73,13 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
         ;;
       install_traefik)
-        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh traefik
         ;;
       install_crowdsec_appsec)
-        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
         ;;
       install_vmagent)
-        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh vmagent
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
         ;;
       install_mosquitto)
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh mosquitto
@@ -91,16 +91,16 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh home_assistant
         ;;
       install_fluentbit)
-        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         ;;
       install_all_svcs)
-        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh traefik
-        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
-        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh vmagent
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh mosquitto
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh home_assistant
-        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         ;;
       install_keys)
         require_pve1
@@ -250,7 +250,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
         ;;
       install_traefik)
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh traefik
         ;;
       install_victoriametrics)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victoriametrics
@@ -289,16 +289,16 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
         ;;
       install_crowdsec_appsec)
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
         ;;
       install_fluentbit)
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         ;;
       install_all_svcs)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh postgres
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh lldap
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh traefik
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victoriametrics
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victorialogs
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh gatus
@@ -311,8 +311,8 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy_idp_push
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh olive_tin
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         ;;
       install_keys)
         require_pve1
@@ -383,10 +383,10 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh deadman
         ;;
       install_fluentbit)
-        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         ;;
       install_vmagent)
-        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh vmagent
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
         ;;
       install_geoip_generator)
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh geoip_generator
@@ -432,13 +432,13 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/debian/install_svcs.sh iperf3_server
         ;;
       install_traefik)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh traefik
         ;;
       install_crowdsec_appsec)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh crowdsec_appsec
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
         ;;
       install_vmagent)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh vmagent
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
         ;;
       install_nginx)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh nginx
@@ -453,7 +453,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh finance_exporter
         ;;
       install_fluentbit)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         ;;
       install_snapraid)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
@@ -483,14 +483,14 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh yt_to_audiobook
         ;;
       install_all_svcs)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh traefik
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh crowdsec_appsec
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh vmagent
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh traefik
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh nginx
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh homepage
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh isso
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh finance_exporter
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh copyparty
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh car_ingest

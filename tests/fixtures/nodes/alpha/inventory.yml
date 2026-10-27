@@ -5,6 +5,7 @@
 debian_services: [node_exporter, mdns_repeater]
 services:
   zeta: {subdomain: z, admin: true, uptime: zeta, upstream: docker.io/library/nginx:stable}
+  proxy: {shared: true}
   app:
     subdomain: app
     uptime: app health

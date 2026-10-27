@@ -4,16 +4,16 @@
 # only name the uptime URLs.
 debian_services: [mdns_repeater, node_exporter, nvidia_gpu_exporter, image_updater, iperf3_server]
 services:
-  traefik: {subdomain: webproxy, admin: true, uptime: traefik websvcs, uptime_tier: 1,
+  traefik: {shared: true, subdomain: webproxy, admin: true, uptime: traefik websvcs, uptime_tier: 1,
             upstream: docker.io/library/traefik:v3.7}
-  crowdsec_appsec: {upstream: docker.io/crowdsecurity/crowdsec:latest, dirs: [services/crowdsec]}
-  vmagent: {upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
+  crowdsec_appsec: {shared: true, upstream: docker.io/crowdsecurity/crowdsec:latest, dirs: [services/crowdsec]}
+  vmagent: {shared: true, upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
   nginx: {subdomain: www, upstream: docker.io/library/nginx:stable}
   homepage: {subdomain: dash, uptime: homepage, uptime_tier: 1,
              upstream: ghcr.io/gethomepage/homepage:latest}
   isso: {subdomain: comment, upstream: ghcr.io/isso-comments/isso:release}
   finance_exporter: {build: finance_exporter}
-  fluentbit: {upstream: docker.io/fluent/fluent-bit:5.1}
+  fluentbit: {shared: true, upstream: docker.io/fluent/fluent-bit:5.1}
   snapraid: {}
   copyparty: {subdomain: files, uptime: copyparty, upstream: docker.io/copyparty/ac:latest}
   car_ingest: {build: car_ingest}
@@ -28,6 +28,7 @@ services:
   bookmark_handoff: {build: bookmark_handoff}
   yt_to_audiobook: {build: yt_to_audiobook}
 install_all_svcs: true
+image_updater_slot: '21:00'
 commands:
   - {name: install_keys, script: nodes/websvcs/commands.sh, pve1_file_transfer: true}
   - {name: install_certs, script: nodes/websvcs/commands.sh, pve1_file_transfer: true}

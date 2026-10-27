@@ -238,3 +238,64 @@ test_upload_dir_missing() {
 error: src/nodes/secsvcs/inventory.yml: src/services/nope doesn't exist
 EOF
 }
+
+# proxy is shared in the fixture: its case and quadlet are src/base/podman's
+test_shared_quadlet_image_mismatch() {
+  fixture_tree
+  edit src/services/proxy/proxy.container 's|^Image=.*|Image=localhost/library/traefik:v2|'
+  expect_errors <<'EOF'
+error: src/services/proxy/proxy.container: Image=localhost/library/traefik:v2, expected localhost/library/traefik:v3 (src/nodes/secsvcs/inventory.yml services.proxy)
+EOF
+}
+
+test_shared_case_in_node_script() {
+  fixture_tree
+  edit src/nodes/secsvcs/install_svcs.sh 's/^  db\)/  proxy)\n    ;;\n  db)/'
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/install_svcs.sh: the proxy case is shared in src/nodes/secsvcs/inventory.yml, so src/base/podman/install_svcs.sh runs it
+EOF
+}
+
+test_shared_case_not_in_inventory() {
+  fixture_tree
+  edit src/base/podman/install_svcs.sh 's/^  proxy\)/  cache)\n    ;;\n  proxy)/'
+  expect_errors <<'EOF'
+error: src/base/podman/install_svcs.sh: the cache case isn't a shared service in any node's inventory
+EOF
+}
+
+# A shared case's paths count as the node's own, like a debian_services case's
+test_shared_case_upload_dir_not_shipped() {
+  fixture_tree
+  mkdir -p "${tmp}/tree/src/services/shared"
+  touch "${tmp}/tree/src/services/shared/proxy.conf"
+  edit src/base/podman/install_svcs.sh 's|^    install_quadlet|    cp services/shared/proxy.conf /etc\n&|'
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/inventory.yml: uses src/services/shared, which upload_src.sh doesn't ship to it; add it to a service's dirs
+EOF
+}
+
+test_image_updater_slot_missing() {
+  fixture_tree
+  edit src/nodes/secsvcs/inventory.yml '/^image_updater_slot:/d'
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/inventory.yml: no image_updater_slot, but it runs image_updater
+EOF
+}
+
+test_image_updater_slot_malformed() {
+  fixture_tree
+  edit src/nodes/secsvcs/inventory.yml "s/^image_updater_slot: .*/image_updater_slot: '9:30'/"
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/inventory.yml: image_updater_slot is 9:30, expected HH:MM
+EOF
+}
+
+test_image_updater_slot_taken() {
+  fixture_tree
+  edit src/nodes/websvcs/inventory.yml "s/^services:/debian_services: [image_updater]\nimage_updater_slot: '21:30'\n&/"
+  edit src/services/olive_tin/config.yaml 's/^  - shell: ssh autoadmin@websvcs install_blog$/&\n  - shell: ssh autoadmin@websvcs install_image_updater/'
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/inventory.yml src/nodes/websvcs/inventory.yml: image_updater_slot 21:30 is set for more than one node
+EOF
+}

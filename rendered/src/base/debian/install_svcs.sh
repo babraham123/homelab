@@ -63,14 +63,9 @@ case $1 in
     rm "$deb" checksums.txt
     ;;
   image_updater)
-    # 30 minutes apart; the notification path on secsvcs goes last
-    case $(hostname) in
-      vpnsvcs) slot=20:00 ;;
-      homesvcs) slot=20:30 ;;
-      websvcs) slot=21:00 ;;
-      secsvcs) slot=21:30 ;;
-      *) die "no image_updater slot for $(hostname)" ;;
-    esac
+    # The node's image_updater_slot: 30 minutes apart, the notification path on secsvcs
+    # last. tools/check_rendered.py checks every image_updater node has one.
+    slot=$(yq '.image_updater_slot' "nodes/$(hostname -s)/inventory.yml")
     # skopeo comes from podman's alvistack repo, which drops superseded versions
     apt update
     apt install -y skopeo wget gnupg

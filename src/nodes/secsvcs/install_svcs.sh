@@ -5,8 +5,6 @@
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
-# shellcheck source=src/base/podman/svcs_lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/svcs_lib.sh"
 
 cd "$rendered"
 watch_homelab_units
@@ -34,16 +32,6 @@ case $1 in
     install -D -m 644 -t /etc/opt/authelia/config services/authelia/configuration.yml
     install_quadlet services/authelia/authelia.container
     reload_restart authelia
-    ;;
-  traefik)
-    install_traefik_config secsvcs
-    install_quadlet nodes/secsvcs/traefik/traefik.container
-    reload_restart traefik
-    ;;
-  crowdsec_appsec)
-    install_appsec_config secsvcs
-    install_quadlet services/crowdsec/crowdsec_appsec.container services/crowdsec/appsecdata.volume
-    reload_restart crowdsec_appsec
     ;;
   victoriametrics)
     install -D -m 644 -t /etc/opt/victoriametrics nodes/secsvcs/prometheus.yml
@@ -123,12 +111,6 @@ case $1 in
     install -D -m 644 services/crowdsec/allowlist.yaml /etc/opt/crowdsec/config/parsers/s02-enrich/homelab-allowlist.yaml
     install_quadlet services/crowdsec/crowdsec.container services/crowdsec/crowdsecdb.volume
     reload_restart crowdsec
-    ;;
-  fluentbit)
-    install_fluentbit_config nodes/secsvcs/fluentbit.yaml.j2
-    base/podman/render_host.sh secsvcs services/fluentbit/fluentbit.container
-    install_quadlet services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
-    reload_restart fluentbit
     ;;
   *)
     die "unknown service: $1"

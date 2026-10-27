@@ -5,8 +5,6 @@
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
-# shellcheck source=src/base/podman/svcs_lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/svcs_lib.sh"
 
 cd "$rendered"
 watch_homelab_units
@@ -107,18 +105,6 @@ case $1 in
     systemctl daemon-reload
     systemctl enable geoip_generator.timer
     systemctl restart geoip_generator.timer
-    ;;
-  fluentbit)
-    install_fluentbit_config
-    base/podman/render_host.sh vpnsvcs services/fluentbit/fluentbit.container
-    install_quadlet services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
-    reload_restart fluentbit
-    ;;
-  vmagent)
-    install -D -m 644 -t /etc/opt/vmagent nodes/vpnsvcs/prometheus.yml
-    base/podman/render_host.sh vpnsvcs services/victoriametrics/vmagent.container
-    install_quadlet services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
-    reload_restart vmagent
     ;;
   deadman)
     install -d -m 700 /var/lib/deadman

@@ -2,11 +2,13 @@
 # every Host() rule is listed. tests/check_rendered_test.sh breaks one invariant at a
 # time in this tree.
 # yamllint disable rule:document-start rule:document-end
-debian_services: [node_exporter]
+debian_services: [node_exporter, image_updater]
 services:
+  proxy: {shared: true, upstream: docker.io/library/traefik:v3}
   db: {}
   web: {subdomain: www, upstream: docker.io/library/nginx:stable}
 install_all_svcs: true
+image_updater_slot: '21:30'
 commands:
   - {name: install_certs, script: nodes/secsvcs/commands.sh}
   - {name: install_dispatcher, script: base/debian/commands.sh, pve1_file_transfer: true}

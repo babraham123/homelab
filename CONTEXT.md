@@ -27,10 +27,15 @@ Vocabulary used throughout this repo. Use these terms exactly; see
 - **render** (first pass) — `tools/render_src.sh`: jinjanate every `*.j2` against `vars.yml` plus
   the node inventory, stripping one `.j2` extension.
 - **second pass** — files named `*.j2.j2` survive the render as `*.j2` and are rendered again on the
-  node: by `render_host.sh` at install time (`install_svcs.sh`) for per-host parameters, or *at
-  container startup* (`ExecStartPre`) by `render_secrets.sh` for AGE secrets
-  (`render_services.sh` for Fluent Bit's unit list). Plaintext secrets never sit in the rendered
-  tree.
+  node: by `render_host.sh` at install time for a shared service's per-node values (the node's
+  name, container subnet and inventory services), or *at container startup* (`ExecStartPre`) by
+  `render_secrets.sh` for AGE secrets (`render_services.sh` for Fluent Bit's unit list).
+  Plaintext secrets never sit in the rendered tree.
+- **shared service** — a platform service every container VM runs: Traefik, CrowdSec AppSec,
+  vmagent, Fluent Bit. Marked `shared: true` in each node's inventory, which keeps its install
+  order and image facts; its case is in `src/base/podman/install_svcs.sh` and its quadlet is one
+  template for all nodes. A node's own additions stay in its dir (Traefik routes and quadlet
+  drop-ins under `traefik/`, vmagent's `prometheus.yml`).
 - **node inventory** — `src/nodes/<node>/inventory.yml`, one per node: per node, the dispatcher
   entries (services in install order, other commands) and each service's subdomain, Gatus endpoint
   and image facts. `src/nodes.jinja` derives the dispatcher cases, sudoers grants, DNS/SNI subdomain

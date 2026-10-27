@@ -5,8 +5,6 @@
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
-# shellcheck source=src/base/podman/svcs_lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../../base/podman/svcs_lib.sh"
 
 # Only the wyoming cases, not in use, call this
 # function install_wyoming() {
@@ -34,22 +32,6 @@ watch_homelab_units
 /usr/local/bin/image_updater install "${1:?usage: $0 SERVICE_NAME}"
 
 case $1 in
-  traefik)
-    install_traefik_config websvcs
-    install_quadlet nodes/websvcs/traefik/traefik.container
-    reload_restart traefik
-    ;;
-  crowdsec_appsec)
-    install_appsec_config websvcs
-    install_quadlet services/crowdsec/crowdsec_appsec.container services/crowdsec/appsecdata.volume
-    reload_restart crowdsec_appsec
-    ;;
-  vmagent)
-    install -D -m 644 -t /etc/opt/vmagent nodes/websvcs/prometheus.yml
-    base/podman/render_host.sh websvcs services/victoriametrics/vmagent.container
-    install_quadlet services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
-    reload_restart vmagent
-    ;;
   nginx)
     install -D -m 644 -t /etc/opt/nginx/conf services/nginx/nginx.conf services/nginx/mime.types
     install_quadlet services/nginx/nginx.container
@@ -135,12 +117,6 @@ case $1 in
 #     install_quadlet services/wyoming/openwakeword.container
 #     reload_restart openwakeword
 #     ;;
-  fluentbit)
-    install_fluentbit_config
-    base/podman/render_host.sh websvcs services/fluentbit/fluentbit.container
-    install_quadlet services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
-    reload_restart fluentbit
-    ;;
   snapraid)
     # Media array: snapraid parity over the passed-through HDDs, mergerfs union, SMART
     # (smartd, smartctl_exporter) on the guest side since the SATA controller is passed

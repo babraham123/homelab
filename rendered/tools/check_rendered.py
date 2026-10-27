@@ -37,6 +37,8 @@ FACTS_TEMPLATE = """\
 {%- for node, spec in nodes.items() %}
   {{ node | tojson }}: {
     "services": {{ spec.get('services', {}) | list | tojson }},
+    "shared": {{ inv.shared[node] | tojson }},
+    "image_updater_slot": {{ spec.get('image_updater_slot') | tojson }},
     "debian_services": {{ spec.get('debian_services', []) | tojson }},
     "cases": {{ inv.dispatch[node] | tojson }},
     "subdomains": {{ inv.subdomains[node] | tojson }},
@@ -61,6 +63,14 @@ def warn(message):
 
 def inventory(node):
   return f"src/nodes/{node}/inventory.yml"
+
+
+SHARED_SCRIPT = "src/base/podman/install_svcs.sh"
+
+
+def install_script(node, spec, svc):
+  """The install_svcs.sh that holds a service's case."""
+  return SHARED_SCRIPT if svc in spec["shared"] else f"src/nodes/{node}/install_svcs.sh"
 
 
 def text_lines(path):
@@ -171,11 +181,11 @@ def check_upstream_refs(nodes):
 # would never be updated.
 def check_quadlet_images(nodes):
   for node, spec in nodes.items():
-    script = f"src/nodes/{node}/install_svcs.sh"
-    if not os.path.isfile(script):
-      continue  # check_dispatch_scripts reports it
     for i in spec["images"]:
       svc, container, image = i["service"], i["container"], i["image"]
+      script = install_script(node, spec, svc)
+      if not os.path.isfile(script):
+        continue  # check_dispatch_scripts reports it
       where = f"({inventory(node)} services.{svc})"
       pattern = rf"[A-Za-z0-9_./-]+/{re.escape(container)}\.container"
       quadlet = next((m[0] for line in case_block(script, svc) if (m := re.search(pattern, line))), None)
@@ -230,7 +240,9 @@ def check_dispatch_scripts(nodes):
 
 
 # The reverse of check_dispatch_scripts for install_svcs.sh: a case the inventory
-# doesn't list would have no dispatcher case, sudo grant or OliveTin button.
+# doesn't list would have no dispatcher case, sudo grant or OliveTin button. A node's
+# own script holds its services that aren't shared; the shared script, the services some
+# node marks shared.
 def check_install_cases(nodes):
   for node, spec in nodes.items():
     file = f"src/nodes/{node}/install_svcs.sh"
@@ -238,6 +250,30 @@ def check_install_cases(nodes):
       continue
     for svc in sorted(cases(file) - set(spec["services"])):
       fail(file, f"the {svc} case isn't in {inventory(node)} services")
+    for svc in sorted(cases(file) & set(spec["shared"])):
+      fail(file, f"the {svc} case is shared in {inventory(node)}, so {SHARED_SCRIPT} runs it")
+  if os.path.isfile(SHARED_SCRIPT):
+    shared = {svc for spec in nodes.values() for svc in spec["shared"]}
+    for svc in sorted(cases(SHARED_SCRIPT) - shared):
+      fail(SHARED_SCRIPT, f"the {svc} case isn't a shared service in any node's inventory")
+
+
+# image_updater.timer runs at the node's slot; without one it would never run.
+def check_image_updater_slots(nodes):
+  slots = {}
+  for node, spec in nodes.items():
+    if "image_updater" not in spec["debian_services"]:
+      continue
+    slot = spec["image_updater_slot"]
+    if slot is None:
+      fail(inventory(node), "no image_updater_slot, but it runs image_updater")
+    elif not re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", str(slot)):
+      fail(inventory(node), f"image_updater_slot is {slot}, expected HH:MM")
+    else:
+      slots.setdefault(slot, []).append(inventory(node))
+  for slot, files in sorted(slots.items()):
+    if len(files) > 1:
+      fail(" ".join(files), f"image_updater_slot {slot} is set for more than one node")
 
 
 def check_unique_subdomains(nodes):
@@ -314,9 +350,9 @@ def src_refs(lines, prefix):
 # node_dirs.sh lists, in the same tree shape, so every nodes/ and services/ path it uses
 # must be among them. That is every absolute (/root/homelab-rendered/src/...,
 # ${rendered}/...) or ../ path in its node and service dirs, plus the src/-relative paths
-# in its node dir, dispatcher lines and debian_services cases. base/ is skipped: its
-# scripts serve every node and name other nodes' dirs only in what those nodes run,
-# like svcs_lib.sh's traefik install.
+# in its node dir, dispatcher lines, debian_services cases and shared services' cases.
+# base/ is skipped: its scripts serve every node and name other nodes' dirs only in what
+# those nodes run, like the shared traefik install.
 def check_upload_dirs(nodes):
   for node, spec in nodes.items():
     out = subprocess.run([TOOLS / "node_dirs.sh", node], stdout=subprocess.PIPE,
@@ -331,7 +367,8 @@ def check_upload_dirs(nodes):
     own = (tree_lines(f"src/nodes/{node}")
            + [line for c in spec["cases"] for line in c["run"]]
            + [line for svc in spec["debian_services"]
-              for line in case_block("src/base/debian/install_svcs.sh", svc)])
+              for line in case_block("src/base/debian/install_svcs.sh", svc)]
+           + [line for svc in spec["shared"] for line in case_block(SHARED_SCRIPT, svc)])
     refs = src_refs(shipped, ANCHORED) | src_refs(own, rf"({ANCHORED}|^|[^A-Za-z0-9_./-])")
     for ref in sorted(refs):
       # Other paths that happen to match, like a container's /data/services/
@@ -354,6 +391,7 @@ def main():
   check_build_scripts(nodes)
   check_dispatch_scripts(nodes)
   check_install_cases(nodes)
+  check_image_updater_slots(nodes)
   check_unique_subdomains(nodes)
   check_routes(facts["site"], nodes)
   check_olive_tin(nodes)

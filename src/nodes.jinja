@@ -6,6 +6,8 @@
       debian_services: src/base/debian/install_svcs.sh cases, dispatched as install_<name>
       services:        src/nodes/<node>/install_svcs.sh cases, dispatched as install_<name>.
                        Key order is install order. Per service, all optional:
+                         shared:      true moves its case to src/base/podman/install_svcs.sh,
+                                      the platform services every container VM runs
                          subdomain:   host its Traefik router answers on
                          admin:       true makes Authelia require two_factor on the
                                       subdomain from every network, LAN and VPN
@@ -31,6 +33,7 @@
                                       place of the keys above, when the case installs
                                       other quadlets than <service>.container
       install_all_svcs: true adds install_all_svcs, installing `services` in order
+      image_updater_slot: HH:MM its image_updater.timer runs, 30 minutes apart per node
       commands:        other dispatcher cases, in order. Either
                          {name, script}: runs `sudo <script> <name>`; script is under src/;
                                          `sudo: false` drops the sudo
@@ -57,7 +60,10 @@
     images[node]:     container images in update order (install order, update_last
                       entries last), [{service, dir, container, image, upstream | build}];
                       dir: the service's first `dirs` entry, default services/<service>,
-                      where its .trivyignore and build.sh live -#}
+                      where its .trivyignore and build.sh live
+    shared[node]:     its shared services, in install order
+    host_vars[node]:  {node, subnet, services} for each node with a container_subnet in
+                      vars.yml: what src/base/podman/render_host.sh gives the second pass -#}
 {%- set dispatch = {} -%}
 {%- set commands = {} -%}
 {%- set buttons = {} -%}
@@ -68,6 +74,11 @@
 {%- set admin_subdomains = [] -%}
 {%- set uptime = [] -%}
 {%- set images = {} -%}
+{%- set shared = {} -%}
+{%- set host_vars = {} -%}
+{#- vars.yml keys per-node values by node name (secsvcs.container_subnet), and Jinja has
+    no lookup of a variable by a computed name; the import context holds them all. -#}
+{%- set context = self._TemplateReference__context -%}
 
 {%- macro path(node, script) -%}
 {#- upload_src.sh ships only src/nodes/router to the router, as /root/router-src -#}
@@ -83,8 +94,14 @@
         'run': ['sudo ' ~ path(node, 'base/debian/install_svcs.sh') ~ ' ' ~ svc]}) -%}
   {%- endfor -%}
   {%- set install_all = [] -%}
-  {%- for svc in services -%}
-    {%- do install_all.append('sudo ' ~ path(node, 'nodes/' ~ node ~ '/install_svcs.sh') ~ ' ' ~ svc) -%}
+  {%- do shared.update({node: []}) -%}
+  {%- for svc, svc_spec in services.items() -%}
+    {%- if svc_spec.get('shared', false) -%}
+      {%- do shared[node].append(svc) -%}
+    {%- endif -%}
+    {%- set script = 'base/podman/install_svcs.sh' if svc in shared[node]
+        else 'nodes/' ~ node ~ '/install_svcs.sh' -%}
+    {%- do install_all.append('sudo ' ~ path(node, script) ~ ' ' ~ svc) -%}
     {%- do entries.append({'name': 'install_' ~ svc, 'run': [install_all[-1]], 'pve1_file_transfer': false}) -%}
   {%- endfor -%}
   {%- if spec.get('install_all_svcs', false) -%}
@@ -153,6 +170,11 @@
     {%- endfor -%}
   {%- endfor -%}
   {%- do images.update({node: first + last}) -%}
+
+  {%- if context.get(node, {}).container_subnet is defined -%}
+    {%- do host_vars.update({node: {'node': node, 'subnet': context[node].container_subnet,
+        'services': services}}) -%}
+  {%- endif -%}
 {%- endfor -%}
 
 {%- set admin_subdomains = admin_subdomains | sort -%}

@@ -6,7 +6,7 @@
     image_updater links /etc/image_updater/config.json here, so a deploy updates it.
     deadline_s: no image is started after 25 minutes, so the run stays inside its 30-minute
     slot (image_updater.timer); what's left runs the next night. The notification path runs
-    on secsvcs, its slot is last, and nothing has to fit after it. -#}
+    on the node with ntfy (secsvcs), its slot is last, and nothing has to fit after it. -#}
 {%- set src = '/root/homelab-rendered/src/' -%}
 {%- macro secret(name) -%}
 {"command": {{ [src ~ 'base/podman/get_secret.sh', name] | tojson }}}
@@ -31,11 +31,11 @@
         {{ entry | tojson }}{{ "," if not loop.last }}
 {%- endfor %}
       ],
-{%- if node == 'secsvcs' %}
+{%- if 'ntfy' in nodes[node].services %}
 {#- Straight to the container: no DNS, Traefik or TLS between the updater and ntfy while
     their images update. IP: ntfy.container. A catch-up run after a pve1 reboot waits for
     ntfy and the rest to settle. #}
-      "ntfy": {"url": "http://{{ secsvcs.container_subnet }}.13:2586/alert", "token": {{ secret('ntfy_alert_token') }}},
+      "ntfy": {"url": "http://{{ inv.host_vars[node].subnet }}.13:2586/alert", "token": {{ secret('ntfy_alert_token') }}},
       "deadline_s": 0,
       "boot_delay_s": 900
 {%- else %}

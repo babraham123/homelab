@@ -132,9 +132,10 @@ sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ## Container images
 
 `image_updater.timer` updates every image on vpnsvcs (20:00), homesvcs (20:30), websvcs (21:00)
-and secsvcs (21:30) each night, behind a Trivy scan: a fixable HIGH or CRITICAL CVE blocks the new
-image, and the old one keeps running. Design: [ADR 0008](adr/0008-scanned-image-updater.md); the
-script: [podman-image-updater](https://github.com/babraham123/podman-image-updater).
+and secsvcs (21:30) each night (each node's `image_updater_slot`), behind a Trivy scan: a fixable
+HIGH or CRITICAL CVE blocks the new image, and the old one keeps running. Design: [ADR
+0008](adr/0008-scanned-image-updater.md); the script:
+[podman-image-updater](https://github.com/babraham123/podman-image-updater).
 
 | ntfy `alert` topic | Priority |
 | --- | --- |
