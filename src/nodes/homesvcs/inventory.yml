@@ -2,23 +2,57 @@
 # yamllint disable rule:document-start rule:document-end
 debian_services: [mdns_repeater, node_exporter, image_updater]
 services:
-  traefik: {shared: true, subdomain: homeproxy, admin: true, uptime: traefik homesvcs, uptime_tier: 1,
-            upstream: docker.io/library/traefik:v3.7}
-  crowdsec_appsec: {shared: true, upstream: docker.io/crowdsecurity/crowdsec:latest, dirs: [services/crowdsec]}
-  vmagent: {shared: true, upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
-  mosquitto: {upstream: docker.io/library/eclipse-mosquitto:latest}
-  zigbee2mqtt: {subdomain: zigbee, uptime: zigbee2mqtt, upstream: ghcr.io/koenkk/zigbee2mqtt:latest}
-  home_assistant: {subdomain: home, uptime: home assistant, uptime_tier: 1,
-                   upstream: docker.io/homeassistant/home-assistant:2026.10}
-  fluentbit: {shared: true, upstream: docker.io/fluent/fluent-bit:5.1}
+  traefik:
+    shared: true
+    subdomain: homeproxy
+    admin: true
+    uptime: traefik homesvcs
+    uptime_tier: 1
+    upstream: docker.io/library/traefik:v3.7
+  crowdsec_appsec:
+    shared: true
+    upstream: docker.io/crowdsecurity/crowdsec:latest
+    dirs: [services/crowdsec]
+  vmagent:
+    shared: true
+    upstream: docker.io/victoriametrics/vmagent:latest
+    dirs: [services/victoriametrics]
+  mosquitto:
+    upstream: docker.io/library/eclipse-mosquitto:latest
+  zigbee2mqtt:
+    subdomain: zigbee
+    uptime: zigbee2mqtt
+    upstream: ghcr.io/koenkk/zigbee2mqtt:latest
+  home_assistant:
+    subdomain: home
+    uptime: home assistant
+    uptime_tier: 1
+    upstream: docker.io/homeassistant/home-assistant:2026.10
+  fluentbit:
+    shared: true
+    upstream: docker.io/fluent/fluent-bit:5.1
 install_all_svcs: true
 image_updater_slot: '20:30'
 commands:
-  - {name: install_keys, script: nodes/homesvcs/commands.sh, pve1_file_transfer: true}
-  - {name: install_certs, script: nodes/homesvcs/commands.sh, pve1_file_transfer: true}
-  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh], pve1_file_transfer: true}
-  - {name: install_ssh_ca, script: base/debian/commands.sh, pve1_file_transfer: true}
-  - {name: host_key, run: [cat /etc/ssh/ssh_host_ed25519_key.pub]}
-  - {name: install_dispatcher, script: base/debian/commands.sh}
-  - {name: install_ca, script: base/debian/commands.sh, pve1_file_transfer: true}
-  - {name: copy_acme_certs, script: base/debian/commands.sh, pve1_file_transfer: true}
+  - name: install_keys
+    script: nodes/homesvcs/commands.sh
+    pve1_file_transfer: true
+  - name: install_certs
+    script: nodes/homesvcs/commands.sh
+    pve1_file_transfer: true
+  - name: backup
+    run: [sudo /root/homelab-rendered/src/nodes/homesvcs/backup.sh]
+    pve1_file_transfer: true
+  - name: install_ssh_ca
+    script: base/debian/commands.sh
+    pve1_file_transfer: true
+  - name: host_key
+    run: [cat /etc/ssh/ssh_host_ed25519_key.pub]
+  - name: install_dispatcher
+    script: base/debian/commands.sh
+  - name: install_ca
+    script: base/debian/commands.sh
+    pve1_file_transfer: true
+  - name: copy_acme_certs
+    script: base/debian/commands.sh
+    pve1_file_transfer: true

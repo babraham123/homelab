@@ -4,37 +4,88 @@
 # only name the uptime URLs.
 debian_services: [mdns_repeater, node_exporter, nvidia_gpu_exporter, image_updater, iperf3_server]
 services:
-  traefik: {shared: true, subdomain: webproxy, admin: true, uptime: traefik websvcs, uptime_tier: 1,
-            upstream: docker.io/library/traefik:v3.7}
-  crowdsec_appsec: {shared: true, upstream: docker.io/crowdsecurity/crowdsec:latest, dirs: [services/crowdsec]}
-  vmagent: {shared: true, upstream: docker.io/victoriametrics/vmagent:latest, dirs: [services/victoriametrics]}
-  nginx: {subdomain: www, upstream: docker.io/library/nginx:stable}
-  homepage: {subdomain: dash, uptime: homepage, uptime_tier: 1,
-             upstream: ghcr.io/gethomepage/homepage:latest}
-  isso: {subdomain: comment, upstream: ghcr.io/isso-comments/isso:release}
-  finance_exporter: {build: finance_exporter}
-  fluentbit: {shared: true, upstream: docker.io/fluent/fluent-bit:5.1}
+  traefik:
+    shared: true
+    subdomain: webproxy
+    admin: true
+    uptime: traefik websvcs
+    uptime_tier: 1
+    upstream: docker.io/library/traefik:v3.7
+  crowdsec_appsec:
+    shared: true
+    upstream: docker.io/crowdsecurity/crowdsec:latest
+    dirs: [services/crowdsec]
+  vmagent:
+    shared: true
+    upstream: docker.io/victoriametrics/vmagent:latest
+    dirs: [services/victoriametrics]
+  nginx:
+    subdomain: www
+    upstream: docker.io/library/nginx:stable
+  homepage:
+    subdomain: dash
+    uptime: homepage
+    uptime_tier: 1
+    upstream: ghcr.io/gethomepage/homepage:latest
+  isso:
+    subdomain: comment
+    upstream: ghcr.io/isso-comments/isso:release
+  finance_exporter:
+    build: finance_exporter
+  fluentbit:
+    shared: true
+    upstream: docker.io/fluent/fluent-bit:5.1
   snapraid: {}
-  copyparty: {subdomain: files, uptime: copyparty, upstream: docker.io/copyparty/ac:latest}
-  car_ingest: {build: car_ingest}
+  copyparty:
+    subdomain: files
+    uptime: copyparty
+    upstream: docker.io/copyparty/ac:latest
+  car_ingest:
+    build: car_ingest
   # These need the media array mounted.
-  linkding: {subdomain: archive, uptime: linkding, uptime_path: /health,
-             upstream: docker.io/sissbruecker/linkding:latest-plus}
-  readeck: {subdomain: read, uptime: readeck, uptime_path: /api/info,
-            upstream: codeberg.org/readeck/readeck:latest}
-  storyteller: {subdomain: books, uptime: storyteller, uptime_path: /api/health,
-                upstream: registry.gitlab.com/storyteller-platform/storyteller:web-v2}
-  calliope: {build: calliope}
-  bookmark_handoff: {build: bookmark_handoff}
-  yt_to_audiobook: {build: yt_to_audiobook}
+  linkding:
+    subdomain: archive
+    uptime: linkding
+    uptime_path: /health
+    upstream: docker.io/sissbruecker/linkding:latest-plus
+  readeck:
+    subdomain: read
+    uptime: readeck
+    uptime_path: /api/info
+    upstream: codeberg.org/readeck/readeck:latest
+  storyteller:
+    subdomain: books
+    uptime: storyteller
+    uptime_path: /api/health
+    upstream: registry.gitlab.com/storyteller-platform/storyteller:web-v2
+  calliope:
+    build: calliope
+  bookmark_handoff:
+    build: bookmark_handoff
+  yt_to_audiobook:
+    build: yt_to_audiobook
 install_all_svcs: true
 image_updater_slot: '21:00'
 commands:
-  - {name: install_keys, script: nodes/websvcs/commands.sh, pve1_file_transfer: true}
-  - {name: install_certs, script: nodes/websvcs/commands.sh, pve1_file_transfer: true}
-  - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/websvcs/backup.sh], pve1_file_transfer: true}
-  - {name: install_ssh_ca, script: base/debian/commands.sh, pve1_file_transfer: true}
-  - {name: host_key, run: [cat /etc/ssh/ssh_host_ed25519_key.pub]}
-  - {name: install_dispatcher, script: base/debian/commands.sh}
-  - {name: install_ca, script: base/debian/commands.sh, pve1_file_transfer: true}
-  - {name: copy_acme_certs, script: base/debian/commands.sh, pve1_file_transfer: true}
+  - name: install_keys
+    script: nodes/websvcs/commands.sh
+    pve1_file_transfer: true
+  - name: install_certs
+    script: nodes/websvcs/commands.sh
+    pve1_file_transfer: true
+  - name: backup
+    run: [sudo /root/homelab-rendered/src/nodes/websvcs/backup.sh]
+    pve1_file_transfer: true
+  - name: install_ssh_ca
+    script: base/debian/commands.sh
+    pve1_file_transfer: true
+  - name: host_key
+    run: [cat /etc/ssh/ssh_host_ed25519_key.pub]
+  - name: install_dispatcher
+    script: base/debian/commands.sh
+  - name: install_ca
+    script: base/debian/commands.sh
+    pve1_file_transfer: true
+  - name: copy_acme_certs
+    script: base/debian/commands.sh
+    pve1_file_transfer: true
