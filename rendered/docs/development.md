@@ -128,19 +128,20 @@ flowchart TB
 
 Only validated output ever ships, and secrets only materialize inside the node at container start;
 the rendered tree on disk still has secret placeholders in its `*.j2` files. `deploy_src.sh` runs
-render + upload for every node in one command, and archives the repo plus `vars.yml` to pve1
-(`archive_repo`). It always skips the gaming VM and prints the upload command to run once it's
-started. A render from a git checkout writes `DEPLOYED` (commit, uncommitted file count, render
-time) at the tree's root; after each upload the node publishes it as `homelab_deployed_info` and
-`homelab_deployed_timestamp_seconds`, shown per node in the "Deployed commits" table on the Homelab
-alerts dashboard. Nothing alerts on drift.
+render + upload for every node in one command, or only the nodes it's given, and archives the
+repo plus `vars.yml` to pve1 (`archive_repo`) either way. A full deploy skips the gaming VM and
+prints the command to run once it's started. A render from a git checkout writes `DEPLOYED`
+(commit, uncommitted file count, render time) at the tree's root; after each upload the node
+publishes it as `homelab_deployed_info` and `homelab_deployed_timestamp_seconds`, shown per node in
+the "Deployed commits" table on the Homelab alerts dashboard. Nothing alerts on drift.
 
 ## Deploy changes
 
-Render and deploy to all nodes:
+Render and deploy to all nodes, or to the named ones:
 
 ```bash
 tools/deploy_src.sh
+tools/deploy_src.sh websvcs vpnsvcs
 ```
 
 Render templates locally:
