@@ -43,10 +43,13 @@ skopeo inspect docker://docker.io/sissbruecker/linkding:latest-plus | jq -r .Dig
 
 ## Storyteller
 
-storyteller isn't installed: the scan gate blocks every digest so far. `web-v2` (2.14.23, built
-2026-10-01) ships Next 15.5.18. The quadlet now tracks `web-v3.0.0-beta`, which ships Next 16.3.8.
-Both have Next's unauthenticated RCEs, GHSA-2464-fhr4-w9xw and GHSA-673q-mjm6-r5xr, which are
-fixed in 16.4.1.
+The scan gate blocks every storyteller digest so far. The quadlet tracks `web-v2` (2.14.23, built
+2026-10-01), which ships Next 15.5.18 with Next's unauthenticated RCE GHSA-2464-fhr4-w9xw. Every
+path to it is behind Authelia, so its digest runs on an `accept`.
+
+The 3.0 betas aren't an option yet. `web-v3.0.0-beta` ships Next 16.3.8, which adds
+GHSA-673q-mjm6-r5xr; both are fixed in 16.4.1. On websvcs it also never started: the entrypoint
+handed off to `run-server.sh`, which never created `/data/logs`.
 
 - `src/services/storyteller/.trivyignore` waives piscina and sharp until 2026-12-31.
 - tar, lodash, undici, picomatch, brace-expansion and ip-address still block, as does readium's
@@ -58,18 +61,18 @@ By the check date:
 # On websvcs as root
 trivy image --severity HIGH,CRITICAL --ignore-unfixed -q \
   --ignorefile /root/homelab-rendered/src/services/storyteller/.trivyignore \
-  registry.gitlab.com/storyteller-platform/storyteller:web-v3.0.0-beta
+  registry.gitlab.com/storyteller-platform/storyteller:web-v2
 ```
 
-- **Clean:** the nightly run loads it. Then run `install_svcs.sh storyteller` and work through
-  the setup checks in narrated-ebooks issue 03.
+- **Clean:** the nightly run loads it, with no `accept`.
 - **Only Next is fixed:** review the remaining findings, and either waive them in `.trivyignore`
   with a reason or run `image_updater accept storyteller`.
-- **3.x stable ships:** move the quadlet, inventory and `docs/services.md` to its tag.
+- **3.x stable ships:** check that it starts, then move the quadlet, inventory and
+  `docs/services.md` to its tag.
 - **Before 2026-12-31:** review the piscina and sharp waivers.
 
 ## Acceptance criteria
 
 - [ ] The running linkding image has no fixable CRITICAL in chromium or PyJWT
 - [ ] No `accept` is needed for linkding's current digest
-- [ ] storyteller runs a digest with Next 16.4.1 or later
+- [ ] storyteller runs a digest whose Next has the GHSA-2464-fhr4-w9xw fix

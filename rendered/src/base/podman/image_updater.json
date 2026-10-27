@@ -335,10 +335,10 @@
         },
         {
           "container": "storyteller",
-          "image": "localhost/storyteller-platform/storyteller:web-v3.0.0-beta",
+          "image": "localhost/storyteller-platform/storyteller:web-v2",
           "service": "storyteller",
           "trivyignore": "/root/homelab-rendered/src/services/storyteller/.trivyignore",
-          "upstream": "registry.gitlab.com/storyteller-platform/storyteller:web-v3.0.0-beta"
+          "upstream": "registry.gitlab.com/storyteller-platform/storyteller:web-v2"
         },
         {
           "build": "calliope",
