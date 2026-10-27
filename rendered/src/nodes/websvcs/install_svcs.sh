@@ -122,7 +122,8 @@ case $1 in
     # (smartd, smartctl_exporter) on the guest side since the SATA controller is passed
     # through whole. Disk layout (partitions, mkfs, fstab, first sync) is manual:
     # docs/guides/pve2_storage.md.
-    apt-get install -y snapraid mergerfs smartmontools
+    # hdparm -C reads a disk's power state without waking it, to check polls let it spin down
+    apt-get install -y snapraid mergerfs smartmontools hdparm
     mkdir -p /var/snapraid
     install -D -m 644 services/snapraid/snapraid.conf /etc/snapraid.conf
     install_bin services/snapraid/snapraid_run.sh
