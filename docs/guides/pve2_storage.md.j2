@@ -96,6 +96,8 @@ systemctl list-timers 'snapraid-*'
 ```
 
 - Timers: daily sync, weekly scrub, via `snapraid_run.sh`; a sync stops if 200+ files disappeared
+- Spin-down: `hd-idle` stops a disk after 15 minutes without I/O; `hdparm -C /dev/sdX` shows
+  `standby` once it has
 - Alerts: `src/services/vmalert/configs/backups.yml` (parity), `hardware.yml` (SMART)
 
 ## Day to day

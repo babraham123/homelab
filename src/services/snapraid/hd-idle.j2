@@ -1,0 +1,7 @@
+# /etc/default/hd-idle
+# The array's WD drives ship with no standby timer set. hd-idle times idleness from host I/O in
+# /proc/diskstats, which smartctl_exporter's SMART polls don't count toward; a drive-side
+# timer (hdparm -S) can be reset by every poll and never fire. -i 0 first leaves every other
+# disk, the VM's virtual ones, alone.
+HD_IDLE_OPTS="-i 0
+{%- for d in websvcs.media.disks %} -a /dev/disk/by-id/{{ d.id }} -i 900 -c ata{% endfor %}"

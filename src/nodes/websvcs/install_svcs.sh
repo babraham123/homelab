@@ -123,9 +123,10 @@ case $1 in
     # through whole. Disk layout (partitions, mkfs, fstab, first sync) is manual:
     # docs/guides/pve2_storage.md.
     # hdparm -C reads a disk's power state without waking it, to check polls let it spin down
-    apt-get install -y snapraid mergerfs smartmontools hdparm
+    apt-get install -y snapraid mergerfs smartmontools hdparm hd-idle
     mkdir -p /var/snapraid
     install -D -m 644 services/snapraid/snapraid.conf /etc/snapraid.conf
+    install -D -m 644 services/snapraid/hd-idle /etc/default/hd-idle
     install_bin services/snapraid/snapraid_run.sh
     SE_VERSION=$(github_latest_version prometheus-community/smartctl_exporter)
     se="smartctl_exporter-${SE_VERSION}.linux-amd64"
@@ -141,12 +142,14 @@ case $1 in
     systemctl enable --now smartmontools
     if grep -q '^/dev/disk' services/snapraid/media.fstab; then
       systemctl enable --now snapraid-sync.timer snapraid-scrub.timer
-      systemctl enable smartctl_exporter
+      systemctl enable smartctl_exporter hd-idle
       reload_restart smartctl_exporter
+      reload_restart hd-idle
     else
       # No disks declared in vars.yml yet: the timers would only fail, and the exporter
       # would scan the VM's virtual disks
-      systemctl disable --now snapraid-sync.timer snapraid-scrub.timer smartctl_exporter 2> /dev/null || true
+      systemctl disable --now snapraid-sync.timer snapraid-scrub.timer smartctl_exporter \
+        hd-idle 2> /dev/null || true
     fi
     ;;
   storyteller)
