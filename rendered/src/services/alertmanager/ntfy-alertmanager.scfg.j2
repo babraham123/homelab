@@ -95,8 +95,9 @@ ntfy {
   # openssl s_client -connect HOST:PORT | openssl x509 -fingerprint -sha512 -noout
   # For convenience ntfy-alertmanager will convert the certificate to lower case and remove all colons.
   # certificate-fingerprint 13:6D:2B:88:9C:57:36:D0:81:B4:B2:9C:79:09:27:62:92:CF:B8:6A:6B:D3:AD:46:35:CB:70:17:EB:99:6E:28:08:2A:B8:C6:79:4B:F6:2E:81:79:41:98:1D:53:C8:07:B3:5C:24:5F:B1:8E:B6:FB:66:B5:DD:B4:D0:5C:29:91
-  # Forward all messages to the specified email address.
-  email-address jdoe+alert2@gmail.com
+  # Forward all messages to the specified email address. Unset: Alertmanager already emails
+  # every alert, so this would only send a second copy.
+  # email-address foo@bar
   # Call the specified number for all alerts. Use `yes` to pick the first of your verified numbers.
   # call +123456789
 }

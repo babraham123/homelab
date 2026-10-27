@@ -139,3 +139,12 @@ commands:
   - name: backup
     run: [sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh]
     pve1_file_transfer: true
+  # Alertmanager silences for maintenance (src/services/alertmanager/mute_alerts.sh)
+  - name: mute_alerts_1h
+    script: services/alertmanager/mute_alerts.sh
+  - name: mute_alerts_4h
+    script: services/alertmanager/mute_alerts.sh
+  - name: mute_alerts_24h
+    script: services/alertmanager/mute_alerts.sh
+  - name: unmute_alerts
+    script: services/alertmanager/mute_alerts.sh

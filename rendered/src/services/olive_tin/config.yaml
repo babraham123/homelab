@@ -94,6 +94,39 @@ dashboards:
               acls: [general]
               timeout: 60
 
+      # Admins only: no acls, so only addToEveryAction's admins ACL grants them
+      - title: Alerts
+        type: fieldset
+        contents:
+          - inlineAction:
+              title: Mute alerts 1h
+              icon: <iconify-icon icon="material-symbols:notifications-off"></iconify-icon>
+              shell: ssh autoadmin@secsvcs mute_alerts_1h
+              id: main_mute_alerts_1h
+              maxConcurrent: 1
+              timeout: 60
+          - inlineAction:
+              title: Mute alerts 4h
+              icon: <iconify-icon icon="material-symbols:notifications-off"></iconify-icon>
+              shell: ssh autoadmin@secsvcs mute_alerts_4h
+              id: main_mute_alerts_4h
+              maxConcurrent: 1
+              timeout: 60
+          - inlineAction:
+              title: Mute alerts 24h
+              icon: <iconify-icon icon="material-symbols:notifications-off"></iconify-icon>
+              shell: ssh autoadmin@secsvcs mute_alerts_24h
+              id: main_mute_alerts_24h
+              maxConcurrent: 1
+              timeout: 60
+          - inlineAction:
+              title: Unmute alerts
+              icon: <iconify-icon icon="material-symbols:notifications-active"></iconify-icon>
+              shell: ssh autoadmin@secsvcs unmute_alerts
+              id: main_unmute_alerts
+              maxConcurrent: 1
+              timeout: 60
+
   - title: All Commands
     contents:
       - title: devtop
@@ -633,6 +666,38 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_dispatcher
               id: secsvcs_install_dispatcher
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Mute Alerts 1h
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs mute_alerts_1h
+              id: secsvcs_mute_alerts_1h
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Mute Alerts 4h
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs mute_alerts_4h
+              id: secsvcs_mute_alerts_4h
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Mute Alerts 24h
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs mute_alerts_24h
+              id: secsvcs_mute_alerts_24h
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Unmute Alerts
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs unmute_alerts
+              id: secsvcs_unmute_alerts
               maxConcurrent: 1
               timeout: 60
 

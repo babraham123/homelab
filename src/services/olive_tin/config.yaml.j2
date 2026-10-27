@@ -94,6 +94,20 @@ dashboards:
               acls: [general]
               timeout: 60
 
+      # Admins only: no acls, so only addToEveryAction's admins ACL grants them
+      - title: Alerts
+        type: fieldset
+        contents:
+{%- for cmd in ['mute_alerts_1h', 'mute_alerts_4h', 'mute_alerts_24h', 'unmute_alerts'] %}
+          - inlineAction:
+              title: {{ cmd | replace("_", " ") | capitalize }}
+              icon: <iconify-icon icon="material-symbols:notifications-{{ 'active' if cmd == 'unmute_alerts' else 'off' }}"></iconify-icon>
+              shell: ssh autoadmin@secsvcs {{ cmd }}
+              id: main_{{ cmd }}
+              maxConcurrent: 1
+              timeout: 60
+{%- endfor %}
+
   - title: All Commands
     contents:
 {%- set icons = {'secsvcs': 'security', 'homesvcs': 'home', 'websvcs': 'cloud',

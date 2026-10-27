@@ -348,6 +348,18 @@ case "$(hostname)" in
         require_pve1
         sudo /root/homelab-rendered/src/nodes/secsvcs/backup.sh
         ;;
+      mute_alerts_1h)
+        sudo /root/homelab-rendered/src/services/alertmanager/mute_alerts.sh mute_alerts_1h
+        ;;
+      mute_alerts_4h)
+        sudo /root/homelab-rendered/src/services/alertmanager/mute_alerts.sh mute_alerts_4h
+        ;;
+      mute_alerts_24h)
+        sudo /root/homelab-rendered/src/services/alertmanager/mute_alerts.sh mute_alerts_24h
+        ;;
+      unmute_alerts)
+        sudo /root/homelab-rendered/src/services/alertmanager/mute_alerts.sh unmute_alerts
+        ;;
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;

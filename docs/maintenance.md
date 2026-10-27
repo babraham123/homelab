@@ -182,13 +182,13 @@ sudo systemctl start image_updater
 ## Alerting pipeline test
 
 Once a year, with the backup restore test. Last done: never. Every alert goes vmalert → Alertmanager
-→ ntfy-alertmanager → ntfy → phone, plus two emails (`+alert@` from Alertmanager, `+alert2@` from
-ntfy-alertmanager); the VPS's `deadman` timer watches that path from outside and reports to
-`+alert@` and a private ntfy.sh topic.
+→ ntfy-alertmanager → ntfy → phone, plus an email to `+alert@` from Alertmanager; the VPS's
+`deadman` timer watches that path from outside and reports to `+alert@` and a private ntfy.sh
+topic.
 
 | # | Test | How | Expect |
 | --- | --- | --- | --- |
-| 1 | Full path from vmalert | With the phone on mobile data: on secsvcs, `/etc/opt/vmalert/pipeline_test.yml` with `alert: PipelineTest, expr: vector(1), labels: {severity: critical, host: secsvcs}`; `systemctl restart vmalert`. Then delete it and restart vmalert again (`install_vmalert` also clears it) | ntfy priority 5, `rotating_light`, `secsvcs` tag within `group_wait` (30 s) plus one evaluation; email to `+alert@` and `+alert2@`. After the delete: ntfy `resolved,tada` priority 1 and a resolved email |
+| 1 | Full path from vmalert | With the phone on mobile data: on secsvcs, `/etc/opt/vmalert/pipeline_test.yml` with `alert: PipelineTest, expr: vector(1), labels: {severity: critical, host: secsvcs}`; `systemctl restart vmalert`. Then delete it and restart vmalert again (`install_vmalert` also clears it) | ntfy priority 5, `rotating_light`, `secsvcs` tag within `group_wait` (30 s) plus one evaluation; email to `+alert@`. After the delete: ntfy `resolved,tada` priority 1 and a resolved email |
 | 2 | Dead-man switch | `systemctl stop alertmanager` on secsvcs, then `systemctl start alertmanager` | `deadman`: email + ntfy.sh push within 15 min; a recovery notice after the start |
 
 ## Disaster recovery
