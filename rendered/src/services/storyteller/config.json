@@ -1,6 +1,8 @@
 {
   "webUrl": "https://books.janedoe.com",
   "opdsEnabled": true,
+  "importMode": "reference",
+  "importRules": [{ "kind": "watch", "path": "/library/books" }],
   "authProviders": [
     {
       "kind": "custom",

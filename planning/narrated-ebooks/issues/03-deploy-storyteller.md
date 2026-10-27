@@ -49,10 +49,10 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
     for the `internal` and `vpn` networks, like web-archiving/01. Storyteller still
     enforces its own login there.
 - **Library:**
-  - Add a watched folder `/library/books` for the default library.
-  - Add a collection **Articles** that watches `/library/articles`, which 04 fills.
-  - Configure these in `STORYTELLER_CONFIG` (JSON) if it supports watch folders and
-    collections, so they live in the repo. Otherwise document them as manual steps.
+  - `STORYTELLER_CONFIG` holds the `/library/books` watch rule and locks the default import
+    mode to reference. Its rules can't carry collections, so the websvcs guide adds the
+    **Articles** (`/library/articles`, which 04 fills) and **Videos** (`/library/videos`)
+    rules by hand.
 - **Integration:** an `install_svcs.sh` case, a `src/nodes/websvcs/inventory.yml` entry
   `storyteller: {subdomain: books, uptime: storyteller}`, a Traefik router and
   service, a Homepage tile, and the guide line.

@@ -1,6 +1,8 @@
 {
   "webUrl": "https://books.{{ site.url }}",
   "opdsEnabled": true,
+  "importMode": "reference",
+  "importRules": [{ "kind": "watch", "path": "/library/books" }],
   "authProviders": [
     {
       "kind": "custom",

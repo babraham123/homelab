@@ -83,9 +83,14 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
   - Create the local admin with a long password, keep it in the password manager (OPDS readers use
     it)
   - Sign out, sign in with Authelia
-  - Collections >> New: `Articles`, `Videos`
-  - Settings >> Import: add a watch rule for `/library/books`, one for `/library/articles`
-    assigned to Articles, and one for `/library/videos` assigned to Videos. Import mode `reference`
+  - Collections >> New: `Articles`, `Videos`. Tick Public, or add each reader as a member: a
+    private collection's books are hidden from everyone else
+  - Settings >> Import: `config.json` holds the `/library/books` watch rule, with no collection,
+    and locks the default import mode to reference in place, so Calliope's and yt_to_audiobook's
+    files stay where they write them. Add a watch rule for `/library/articles` assigned to
+    Articles, and one for `/library/videos` assigned to Videos, both on import mode "Use default"
+  - Settings >> Import: scan now. A Calliope book in `readalouds/books/<Title>/` shows up in the
+    library
 - Calliope: put a ~15 s reference recording at `/etc/opt/calliope/voices/default.wav`, others as
   `<name>.wav` next to it
   - Install `calliope`; `bookmark_handoff` queues `listen` articles once its inbox exists
