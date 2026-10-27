@@ -449,12 +449,6 @@ case "$(hostname)" in
       install_isso)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh isso
         ;;
-      install_guacamole)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacamole
-        ;;
-      install_guacd)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
-        ;;
       install_finance_exporter)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh finance_exporter
         ;;
@@ -495,8 +489,6 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh nginx
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh homepage
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh isso
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacamole
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh guacd
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh finance_exporter
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh fluentbit
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh snapraid

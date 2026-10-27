@@ -75,18 +75,6 @@ case $1 in
     install_quadlet services/isso/isso.container services/isso/issodb.volume
     reload_restart isso
     ;;
-  guacamole)
-    mkdir -p /etc/opt/guacamole/certs
-    mkdir -p /etc/opt/guacamole/config
-    chown -R 1001:1001 /etc/opt/guacamole
-    install_quadlet services/guacamole/guacamole.container
-    reload_restart guacamole
-    ;;
-  guacd)
-    mkdir -p /etc/opt/guacd
-    install_quadlet services/guacamole/guacd.container
-    reload_restart guacd
-    ;;
   linkding)
     install_sqlite3
     require_media

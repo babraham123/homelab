@@ -71,7 +71,7 @@ sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
 | `headscale_access` | VPN sign-in |
 | `command_general` | OliveTin's general commands |
 | `telemetry_access` | VictoriaMetrics, VictoriaLogs and Alertmanager UIs |
-| `grafana_admin`, `hass_admin`, `command_admin`, `guacamole_admin`, `readeck_admin`, `storyteller_admin` | Admin in that app; admins only |
+| `grafana_admin`, `hass_admin`, `command_admin`, `readeck_admin`, `storyteller_admin` | Admin in that app; admins only |
 
 - Their first sign-in, at https://auth.SITE_URL: register a TOTP app or a security key. Away from
   home and the VPN every subdomain requires it.
@@ -79,7 +79,6 @@ sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale
   - Grafana: Viewer, or Admin with `grafana_admin`
   - Home Assistant: a person is created; admin with `hass_admin`
   - Headscale: `tailscale up --login-server https://vpn.SITE_URL:443 --accept-routes`
-  - Guacamole: signs in with no connections. Then grant them under Settings >> Users >> USER
   - Storyteller: permissions are set at first sign-in, so set the groups before it
   - Vaultwarden: sets their master password; only then can an organization owner add them
 - ntfy: within 15 minutes of joining `ntfy_access` they get a welcome email with their ntfy

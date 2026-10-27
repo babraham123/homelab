@@ -70,12 +70,6 @@
       "dependencyDashboardApproval": true
     },
     {
-      "matchPackageNames": [
-        "docker.io/guacamole/**"
-      ],
-      "groupName": "Guacamole"
-    },
-    {
       "matchManagers": [
         "github-actions"
       ],

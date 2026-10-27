@@ -37,14 +37,6 @@ http:
       <<: *service
       rule: Host(`comment.janedoe.com`) && PathPrefix(`/admin`)
       service: isso@file
-    guacamole:
-      <<: *service
-      rule: Host(`remote.janedoe.com`)
-      service: guacamole@file
-      middlewares:
-        - authelia@file
-        - no-buffering@file
-        - secure-headers@file
     linkding:
       <<: *service
       rule: Host(`archive.janedoe.com`)
@@ -90,10 +82,6 @@ http:
       loadBalancer:
         servers:
           - url: http://comment.janedoe.com:8080/
-    guacamole:
-      loadBalancer:
-        servers:
-          - url: http://remote.janedoe.com:8080/
     linkding:
       loadBalancer:
         servers:

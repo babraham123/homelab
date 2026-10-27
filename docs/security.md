@@ -110,8 +110,8 @@ Two integration models:
    routes skip Authelia and rely on the app's own auth. ntfy's web app is different: Authelia
    gates only page loads (`Sec-Fetch-Mode: navigate`), then each person signs in to ntfy with
    their own account, and ntfy's ACLs decide which topics they see.
-2. **OIDC** (apps with native SSO support): Authelia is the issuer for eight clients: Headscale
-   and OliveTin (two-factor), Grafana, Home Assistant, Guacamole, Gatus, Readeck and Storyteller.
+2. **OIDC** (apps with native SSO support): Authelia is the issuer for seven clients: Headscale
+   and OliveTin (two-factor), Grafana, Home Assistant, Gatus, Readeck and Storyteller.
    OIDC gives the app group-based role mapping, not just a yes/no at the proxy.
 
 ```mermaid

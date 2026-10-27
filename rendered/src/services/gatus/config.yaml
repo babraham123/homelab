@@ -139,10 +139,6 @@ endpoints:
     <<: *tier1
     url: "https://dash.janedoe.com/"
 
-  - name: guacamole
-    <<: *internal
-    url: "https://remote.janedoe.com/"
-
   - name: copyparty
     <<: *internal
     url: "https://files.janedoe.com/"

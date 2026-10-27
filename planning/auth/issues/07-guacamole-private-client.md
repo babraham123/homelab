@@ -1,6 +1,6 @@
 # 07. Move Guacamole to a private OIDC client with code flow and PKCE
 
-Status: ready-for-agent
+Status: wontfix (Guacamole removed)
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-27; upstream GUACAMOLE-2258

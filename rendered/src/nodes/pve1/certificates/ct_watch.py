@@ -47,7 +47,6 @@ EXPECTED = {
     "pve1.janedoe.com",
     "pve2.janedoe.com",
     "read.janedoe.com",
-    "remote.janedoe.com",
     "router.janedoe.com",
     "secproxy.janedoe.com",
     "uptime.janedoe.com",

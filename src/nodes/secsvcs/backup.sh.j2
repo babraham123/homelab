@@ -14,7 +14,7 @@ source "${rendered}/base/debian/backup_lib.sh"
 
 stage_init
 
-# Postgres: Authelia, LLDAP, Gatus, Grafana, Guacamole and Vaultwarden state. Connect via
+# Postgres: Authelia, LLDAP, Gatus, Grafana and Vaultwarden state. Connect via
 # the container hostname, not the socket or loopback, so pg_hba's scram-sha-256 rule
 # applies instead of the image's trust rules.
 dir=$(dump_dir postgres)

@@ -35,7 +35,7 @@ flowchart TB
     end
 
     subgraph pve2["pve2 (tower, on demand)<br/>192.168.2.10"]
-        websvcs["websvcs<br/>192.168.2.20<br/>nginx, Homepage, Guacamole"]
+        websvcs["websvcs<br/>192.168.2.20<br/>nginx, Homepage"]
         devtop["devtop<br/>192.168.2.22<br/>Linux desktop"]
         gaming["gaming<br/>192.168.2.21<br/>Windows, RTX 3060 Ti"]
     end

@@ -845,22 +845,6 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: websvcs Install Guacamole
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_guacamole
-              id: websvcs_install_guacamole
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
-              title: websvcs Install Guacd
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_guacd
-              id: websvcs_install_guacd
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
               title: websvcs Install Finance Exporter
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_finance_exporter

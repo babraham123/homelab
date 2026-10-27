@@ -37,14 +37,6 @@ http:
       <<: *service
       rule: Host(`comment.{{ site.url }}`) && PathPrefix(`/admin`)
       service: isso@file
-    guacamole:
-      <<: *service
-      rule: Host(`remote.{{ site.url }}`)
-      service: guacamole@file
-      middlewares:
-        - authelia@file
-        - no-buffering@file
-        - secure-headers@file
     linkding:
       <<: *service
       rule: Host(`archive.{{ site.url }}`)
@@ -90,10 +82,6 @@ http:
       loadBalancer:
         servers:
           - url: http://comment.{{ site.url }}:8080/
-    guacamole:
-      loadBalancer:
-        servers:
-          - url: http://remote.{{ site.url }}:8080/
     linkding:
       loadBalancer:
         servers:

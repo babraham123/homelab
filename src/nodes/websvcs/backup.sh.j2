@@ -8,8 +8,7 @@
 # array under /srv/media and its member disks: snapraid parity is the media's only
 # protection, the web archive (linkding snapshots, Readeck articles), read-along books
 # and Storyteller's processed books and uploads included; yt_to_audiobook's downloads
-# under /srv/media/books/videos are re-fetchable. Guacamole's state is in
-# Postgres on secsvcs. The homesite releases are in the homesite repo; only the live
+# under /srv/media/books/videos are re-fetchable. The homesite releases are in the homesite repo; only the live
 # release is kept here.
 
 # shellcheck source=src/base/lib.sh

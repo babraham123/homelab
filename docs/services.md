@@ -15,7 +15,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 
 | IP | Service | Image | Purpose | URL |
 | ----- | --------- | ------- | --------- | ----- |
-| .3 | postgres | postgres | Authelia, Guacamole and Vaultwarden storage | pgdb (internal DNS only) |
+| .3 | postgres | postgres | Authelia and Vaultwarden storage | pgdb (internal DNS only) |
 | .4 | lldap | lldap | User/group directory | ldap.janedoe.com |
 | .5 | authelia | authelia | SSO portal, OIDC provider | auth.janedoe.com |
 | .6 | traefik | traefik | Node ingress, TLS termination | secproxy.janedoe.com |
@@ -43,8 +43,6 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .8 | nginx | nginx | Static site + error pages | `www.janedoe.com`, apex |
 | .9 | homepage | homepage | Service dashboard | dash.janedoe.com |
 | .10 | isso | isso | Blog comments | comment.janedoe.com |
-| .15 | guacd | guacd | Guacamole protocol daemon | n/a |
-| .16 | guacamole | guacamole | Browser remote desktop | remote.janedoe.com |
 | .17 | linkding | linkding:latest-plus | Bookmarks and page archive | archive.janedoe.com |
 | .18 | readeck | readeck | Read-it-later reader | read.janedoe.com |
 | .19 | copyparty | copyparty/ac | File server (behind Authelia) | files.janedoe.com |

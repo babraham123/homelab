@@ -35,11 +35,6 @@ CREATE DATABASE grafana OWNER grafana;
 --   LC_COLLATE = 'en_US.UTF-8'
 --   LC_CTYPE = 'en_US.UTF-8';
 
---- Set up Guacamole DB for first time ---
-\set pw6 `echo "'$GUAC_POSTGRES_PASSWORD'"`
-CREATE USER guacamole WITH ENCRYPTED PASSWORD :pw6;
-CREATE DATABASE guacamole OWNER guacamole;
-
 --- Set up Vaultwarden DB for first time ---
 \set pw7 `echo "'$VAULTWARDEN_POSTGRES_PASSWORD'"`
 CREATE USER vaultwarden WITH ENCRYPTED PASSWORD :pw7;

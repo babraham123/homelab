@@ -102,8 +102,6 @@ secrets:
   hass_oidc_id:             {owner: home_assistant, gen: *oidc_id, remote: homesvcs}
   hass_oidc_secret:         {owner: home_assistant, gen: *oidc_hash, remote: homesvcs}
   hass_oidc_secret_hash:    {owner: home_assistant, gen: *oidc_hash, remote: homesvcs}
-  guacamole_pg_password:    {owner: guacamole,    gen: *alnum20, remote: websvcs}
-  guacamole_oidc_id:        {owner: guacamole,    gen: *oidc_id, remote: websvcs}
 
 # ---------------------------------------------------------------------------
 # Services. `order` drives install/start sequence and its reverse drives the
@@ -133,7 +131,6 @@ services:
       - {db: authelia,  user: authelia,  secret: authelia_pg_password}
       - {db: gatus,     user: gatus,     secret: gatus_pg_password}
       - {db: grafana,   user: grafana,   secret: grafana_pg_password}
-      - {db: guacamole, user: guacamole, secret: guacamole_pg_password}
       # - {db: hass, user: hass, secret: hass_pg_password}  # HA still on sqlite
 
   lldap:

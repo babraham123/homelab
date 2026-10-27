@@ -325,7 +325,7 @@ systemctl --type=service
 - From 14: hand each database to its app's role first, so the dump carries the owners
 
 ```bash
-for db in lldap authelia gatus grafana guacamole; do
+for db in lldap authelia gatus grafana; do
   podman exec postgres psql -U postgres -c "ALTER DATABASE $db OWNER TO $db"
 done
 ```

@@ -9,8 +9,8 @@ Blocked by: 09
 ## Problem
 
 Adding a person is a manual checklist (`docs/maintenance.md` "Add a new user"): edit `vars.yml`,
-deploy and reload the Headscale ACL, create the LLDAP user, add six or more groups by hand, grant
-Guacamole connections per user. After auth/09 the ACL step disappears and every remaining admin
+deploy and reload the Headscale ACL, create the LLDAP user, add six or more groups by hand. After
+auth/09 the ACL step disappears and every remaining admin
 step is an LLDAP write, so one command can do it. What stays with the person is what must happen on
 their own devices: setting a password, enrolling 2FA, installing Tailscale and setting a Vaultwarden
 master password.
@@ -56,17 +56,14 @@ root on secsvcs already holds `lldap_admin_password`.
    - Install Tailscale and sign in: `tailscale up --login-server https://vpn.SITE_URL:443
      --accept-routes`.
    - Family: open Vaultwarden and set a master password; an organization owner then confirms you.
-6. One-time Guacamole setup, so connections follow groups: grant connections to a Guacamole user
-   group named after an LLDAP group (`OPENID_GROUPS_CLAIM_TYPE=groups` is already set), instead of
-   per user.
-7. Replace `docs/maintenance.md` "Add a new user" with the pve1 command and the remaining manual
+6. Replace `docs/maintenance.md` "Add a new user" with the pve1 command and the remaining manual
    steps: Vaultwarden organization confirmation (needs the owner's vault key) and any admin groups.
 
 ## Acceptance
 
 - One run from pve1 creates a working family user: after the person follows the message, they sign
-  in to every `authelia_gen_access` app, join the tailnet with family access and see their
-  Guacamole connections, with no other admin step but the Vaultwarden confirmation.
+  in to every `authelia_gen_access` app, and join the tailnet with family access, with no
+  other admin step but the Vaultwarden confirmation.
 - A `guest` run gives tailnet access matching router/03's guest checks and nothing else.
 - Re-running for an existing username changes nothing and says so.
 - OliveTin's key is rejected by `add_user`.
