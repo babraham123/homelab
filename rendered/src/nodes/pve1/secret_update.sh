@@ -14,17 +14,27 @@ addr="manualadmin@${host}"
 require_root
 [[ $host == pve1 ]] || require_reachable "$host"
 
+file="${secrets}/${host}.yaml.age"
+before=$(sha256sum "$file" 2> /dev/null || true)
 # Record secrets, see template for commands
 secret_edit "$host"
 [[ $host != pve1 ]] || exit 0
-scp "${secrets}/${host}.yaml.age" "${addr}:/home/manualadmin/secrets.yaml.age"
-
+# An earlier run may have saved edits and stopped before pushing them, e.g. at the sudo prompt
+if [[ $(sha256sum "$file") == "$before" ]]; then
+  read -rp "No changes. Push ${host}'s secrets anyway? [y/N] " push
+  [[ $push == [yY] ]] || exit 0
+fi
 echo "manualadmin's sudo password on ${host}:"
-ssh -t "$addr" '
+# The file rides in the command, base64'd, and is written as root, so no copy lands where
+# manualadmin, whose SSH key also decrypts it, could read it. Written beside the old one,
+# then moved over it, so lookups never see a partial file.
+ssh -t "$addr" "secrets_b64=$(base64 -w0 "$file")"'
 set -euo pipefail
-sudo mkdir -p /etc/opt/secrets
-sudo mv /home/manualadmin/secrets.yaml.age /etc/opt/secrets/secrets.yaml.age
-sudo chown root:root /etc/opt/secrets/secrets.yaml.age
+sudo -v
+sudo mkdir -p -m 700 /etc/opt/secrets
+base64 -d <<< "$secrets_b64" |
+  sudo install -m 400 -o root -g root /dev/stdin /etc/opt/secrets/secrets.yaml.age.new
+sudo mv /etc/opt/secrets/secrets.yaml.age.new /etc/opt/secrets/secrets.yaml.age
 
 sudo podman secret rm --all
 sudo /root/homelab-rendered/src/base/podman/list_secrets.sh | while read -r name; do
