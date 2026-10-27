@@ -33,3 +33,4 @@ while pve2 is up. Accepted.
 | [01](issues/01-linkding-singlefile.md) | Run linkding on websvcs with SingleFile uploads | `ready-for-human` | task |
 | [02](issues/02-readeck.md) | Run Readeck on websvcs with Authelia OIDC | `ready-for-human` | task |
 | [03](issues/03-toread-handoff.md) | Hand off `toread` bookmarks from linkding to Readeck | `ready-for-human` | task |
+| [04](issues/04-linkding-image-cves.md) | Clear the linkding and storyteller scan-gate holds (check by 2026-11-09) | `ready-for-human` | task |

@@ -11,9 +11,10 @@ After=network-online.target
 RequiresMountsFor=/srv/media
 
 [Container]
-# web-v2 follows stable 2.x releases only. The CPU build: alignment is rare here, since
-# Calliope's books arrive aligned, and the CUDA builds target newer GPUs than the P4.
-Image=localhost/storyteller-platform/storyteller:web-v2
+# web-v3.0.0-beta follows the 3.0 betas, which get Next.js security fixes ahead of 2.x; move
+# to the stable 3.x tag once it ships. The CPU build: alignment is rare here, since Calliope's
+# books arrive aligned, and the CUDA builds target newer GPUs than the P4.
+Image=localhost/storyteller-platform/storyteller:web-v3.0.0-beta
 ContainerName=storyteller
 AutoUpdate=local
 NoNewPrivileges=true

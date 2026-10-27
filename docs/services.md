@@ -47,7 +47,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .18 | readeck | readeck | Read-it-later reader | read.janedoe.com |
 | .19 | copyparty | copyparty/ac | File server (behind Authelia) | files.janedoe.com |
 | .20 | fluentbit | fluent-bit | journald → VictoriaLogs forwarder | n/a |
-| .21 | storyteller | storyteller:web-v2 | Read-along book library, OPDS | books.janedoe.com |
+| .21 | storyteller | storyteller:web-v3.0.0-beta | Read-along book library, OPDS | books.janedoe.com |
 | .22 | calliope | built from babraham123/TTS-Narrated-Ebook-Creator | GPU batch job: EPUB → read-along EPUB | n/a |
 | .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
 | .24 | bookmark_handoff | built from babraham123/bookmark-handoff | linkding `toread` → Readeck, Readeck `listen` → Calliope inbox, linkding `tolisten` → video inbox (timer) | n/a |
