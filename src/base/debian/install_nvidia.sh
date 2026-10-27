@@ -27,7 +27,8 @@ fi
 
 apt update
 apt upgrade -y
-apt install -y "linux-headers-$(uname -r)"
+# The metapackage brings each future kernel's headers, so DKMS rebuilds the module on upgrade
+apt install -y "linux-headers-$(uname -r)" linux-headers-amd64
 
 # The keyring every later package is verified against, so it's pinned per repo
 case $distro in
