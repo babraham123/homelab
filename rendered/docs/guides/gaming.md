@@ -9,6 +9,8 @@ VM](./vm_windows.md)
 
 ```PowerShell
 winget install --scope machine utkuozdemir.nvidia_gpu_exporter
+# winget's alias is on the new PATH, which this shell doesn't have yet
+$env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
 nvidia_gpu_exporter install
 # LocalSubnet is pve2's subnet, which holds websvcs
 New-NetFirewallRule -DisplayName "Nvidia GPU Exporter" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 9835 -Profile Any -RemoteAddress LocalSubnet
