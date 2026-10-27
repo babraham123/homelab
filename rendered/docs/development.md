@@ -200,11 +200,13 @@ nodes' files. The router and gaming VM get only their node dir.
 `.githooks/pre-commit` renders the staged tree against `vars.template.yml` in a temp dir, which runs
 every check above, lints the markdown in `planning/` (never rendered), runs `tests/run.sh --fast`,
 then runs `shellcheck -x --severity=warning` over `tests/*.sh` and the rendered `*.sh` files (so
-`*.sh.j2` scripts are checked with their Jinja filled in). If everything passes it replaces
+`*.sh.j2` scripts are checked with their Jinja filled in) and ruff over the rendered Python. These
+checks are `run_checks` in `tools/lib.sh`. If everything passes it replaces
 `rendered/` with that render and stages it, so every commit carries a readable copy of what the
 nodes get, with example values. `rendered/` is generated: edit the templates, never the copy. It is
 left out of the deploy render and marked `linguist-generated` so GitHub collapses it in diffs. The
-hook takes about 12 s. Activate it once per clone:
+hook takes about 12 s. Activate it once per clone, with the relative path so each worktree runs
+its own branch's hook (the hook refuses to run with any other value):
 
 ```bash
 git config core.hooksPath .githooks
@@ -212,6 +214,13 @@ git config core.hooksPath .githooks
 
 Skip it for one commit with `git commit --no-verify`; `rendered/` is then stale until the next
 commit that runs the hook.
+
+Run the same checks on the working tree, uncommitted and untracked files included, without
+touching the index or `rendered/`:
+
+```bash
+tools/check.sh
+```
 
 ### Tests
 
@@ -232,6 +241,8 @@ repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plai
   out from ADR 0006.
 - `image_updater_test.sh`: the image updater's config, `src/base/podman/image_updater.json.j2`,
   from a fixture inventory.
+- `vars_test.sh`: `vars.template.yml` and `vars.yml` (when present) have the same top-level keys,
+  and `render_src.sh` explains a missing vars file or a missing closing `...`.
 - `render_test.sh`: a full render of `vars.template.yml` passes every check (skipped by `--fast`,
   since the pre-commit hook renders anyway).
 

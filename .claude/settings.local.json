@@ -18,10 +18,7 @@
       "Bash(gh repo *)",
       "Bash(gh search *)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(git log *)",
-      "Bash(git -C /Users/babraham/Projects/homelab log --oneline)",
-      "Bash(git -C /Users/babraham/Projects/homelab show * --stat)",
-      "Bash(git -C /Users/babraham/Projects/homelab show * -p)"
+      "Bash(git log *)"
     ],
     "deny": [],
     "ask": []

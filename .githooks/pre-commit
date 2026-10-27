@@ -1,17 +1,19 @@
 #!/bin/bash
-# Renders the staged tree against vars.template.yml, which runs every render-time check
-# (see tools/check_rendered.py), lints planning/'s markdown, runs the fixture tests in
-# tests/, then shellchecks the rendered scripts and ruff-checks the rendered Python, so *.j2
-# files are checked without their Jinja. If everything passes, the render replaces rendered/
-# and is staged with the commit.
+# Runs the checks (tools/lib.sh run_checks) on the staged tree, rendered against
+# vars.template.yml. If everything passes, the render replaces rendered/ and is staged
+# with the commit. tools/check.sh runs the same checks on the working tree.
 # Activate with: git config core.hooksPath .githooks
 # Skip once with: git commit --no-verify
 
 set -uo pipefail
 
-for tool in jinjanate uv fd yq yamllint jq shellcheck markdownlint-cli2; do
-  command -v "$tool" > /dev/null || { echo "pre-commit: ${tool} not installed" >&2; exit 1; }
-done
+# Relative, so each worktree runs its own branch's hook rather than the main checkout's.
+hooks_path=$(git config core.hooksPath)
+if [ "$hooks_path" != .githooks ]; then
+  echo "pre-commit: core.hooksPath is '${hooks_path}', expected '.githooks'." >&2
+  echo "Run: git config core.hooksPath .githooks" >&2
+  exit 1
+fi
 
 repo=$(pwd)
 tmp=$(mktemp -d)
@@ -20,38 +22,13 @@ trap 'rm -rf "$tmp"' EXIT
 # The index, not the working tree, is what gets committed.
 git checkout-index --all --prefix="${tmp}/src/"
 cd "${tmp}/src" || exit 1
-cp vars.template.yml vars.yml
+# shellcheck source=tools/lib.sh
+source tools/lib.sh
 
-status=0
-tools/render_src.sh "${tmp}/rendered" > "${tmp}/render.log" 2>&1 || {
-  status=1
-  cat "${tmp}/render.log" >&2
-}
-
-# planning/ is never rendered, so its markdown is linted here rather than by the render.
-markdownlint-cli2 "planning/**/*.md" > /dev/null || status=1
-
-# The render is the passing case against the real tree, so only the fixture tests run
-# here. tests/ isn't rendered, so its scripts are shellchecked in place.
-tests/run.sh --fast > "${tmp}/tests.log" 2>&1 || {
-  status=1
-  cat "${tmp}/tests.log" >&2
-}
-shellcheck -x --severity=warning tests/*.sh || status=1
-
-# A failed render may stop before every file is rendered; check what exists.
-if [ -d "${tmp}/rendered" ]; then cd "${tmp}/rendered" || exit 1; fi
-fd . --type f --extension sh --exec-batch \
-  shellcheck -x --source-path=SCRIPTDIR --severity=warning .githooks/pre-commit || status=1
-# Rendered Python, so *.py.j2 files are checked without their Jinja: syntax errors,
-# undefined names, unused imports and variables.
-fd . --type f --extension py --exec-batch \
-  uvx --quiet ruff@0.17.2 check --quiet --no-cache --select E9,F || status=1
-
-if [ "$status" -ne 0 ]; then
+run_checks "${tmp}/rendered" || {
   echo "pre-commit: checks failed (paths are relative to the repo root)" >&2
-  exit "$status"
-fi
+  exit 1
+}
 
 # Agent instructions and repo-level files aren't templates; copies would only mislead.
 out="${repo}/rendered"

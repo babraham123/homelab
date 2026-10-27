@@ -1,0 +1,18 @@
+{
+  "worktree": {
+    "baseRef": "head"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in \"$CLAUDE_PROJECT_DIR\"/*.md) ;; *) exit 0 ;; esac; cd \"$CLAUDE_PROJECT_DIR\" || exit 0; out=$(markdownlint-cli2 \":${f#\"$CLAUDE_PROJECT_DIR\"/}\" 2>&1) || { printf '%s\\n' \"$out\" >&2; exit 2; }"
+          }
+        ]
+      }
+    ]
+  }
+}
