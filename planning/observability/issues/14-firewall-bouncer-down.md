@@ -1,6 +1,6 @@
 # 14. The CrowdSec firewall bouncer on vpnsvcs is neither pulling decisions nor serving metrics
 
-Status: needs-triage
+Status: resolved
 Type: task
 Repo: homelab
 Source: queries.md verification 2026-10-27
@@ -56,3 +56,16 @@ on the current build:
 - `up{job="crowdsec_firewall_bouncer"} == 1` and `fw_bouncer_dropped_packets` exists.
 - `TargetDown` and `CrowdsecBouncerStale` resolve.
 - `{hostname="vpnsvcs", service="crowdsec-firewall-bouncer"}` returns lines in VictoriaLogs.
+
+## Answer
+
+Done 2026-10-28, the guide's CrowdSec section on the current VPS: `install_ca` (the bouncer
+verifies the LAPI against the homelab chain), the key file, the 8455 egress rule,
+`install_crowdsec_firewall_bouncer`, and the 60601 ingress rule, which `install_network.sh` now
+derives from the inventory's `open_ports`. Two script fixes fell out: `add_homelab_tag.sh`
+resolves a packaged unit's file through systemd (the bouncer deb installs it under
+`/etc/systemd/system`), and the bouncer unit carries the Homelab tag, so its journal ships.
+
+After start: 17,578 decisions loaded into nftables, the LAPI counts the `vpnsvcs` bouncer's
+stream pulls, `up{job="crowdsec_firewall_bouncer"} == 1` with the `fw_bouncer_*` series present,
+and CrowdsecBouncerStale resolved.
