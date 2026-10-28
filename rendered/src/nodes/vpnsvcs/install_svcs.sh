@@ -31,7 +31,7 @@ case $1 in
       9e8ec12a65229435863a2cdf5082853c282808e845efd3a1f0b0c02b8f84d723 headscale.deb
     dpkg --install headscale.deb
     rm headscale.deb
-    base/debian/add_homelab_tag.sh /usr/lib/systemd/system/headscale.service
+    base/debian/add_homelab_tag.sh headscale.service
     install -D -m 644 services/headscale/headscale.yaml /etc/headscale/config.yaml
     install -D -m 644 services/headscale/headscale_acl.hujson /etc/headscale/acl.hujson
     touch /etc/opt/secrets/hs_oidc_id
@@ -45,14 +45,14 @@ case $1 in
     curl -fsSL https://pkgs.tailscale.com/stable/debian/trixie.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
     sudo apt update
     sudo apt install -y tailscale
-    base/debian/add_homelab_tag.sh /usr/lib/systemd/system/tailscaled.service
+    base/debian/add_homelab_tag.sh tailscaled.service
     systemctl enable tailscaled
     reload_restart tailscaled
     ;;
   haproxy)
     apt install -y haproxy
     nonlocal_bind
-    base/debian/add_homelab_tag.sh /usr/lib/systemd/system/haproxy.service
+    base/debian/add_homelab_tag.sh haproxy.service
     # The files haproxy.cfg references must exist before it's checked
     curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
     mkdir -p /etc/haproxy/countries
@@ -69,7 +69,7 @@ case $1 in
   fail2ban)
     apt install -y fail2ban python3-systemd
     install -D -m 644 -t /etc/fail2ban nodes/vpnsvcs/fail2ban.local nodes/vpnsvcs/jail.local
-    base/debian/add_homelab_tag.sh /usr/lib/systemd/system/fail2ban.service
+    base/debian/add_homelab_tag.sh fail2ban.service
     systemctl enable fail2ban
     reload_restart fail2ban
     fail2ban-client status
@@ -95,7 +95,7 @@ case $1 in
     key=$(tr -d '\n' < /etc/opt/secrets/crowdsec_bouncer_key)
     [[ -n $key ]] || die "/etc/opt/secrets/crowdsec_bouncer_key is empty"
     sed -i "s/PLACEHOLDER_KEY/${key}/" "$conf"
-    base/debian/add_homelab_tag.sh /usr/lib/systemd/system/crowdsec-firewall-bouncer.service
+    base/debian/add_homelab_tag.sh crowdsec-firewall-bouncer.service
     systemctl enable crowdsec-firewall-bouncer
     reload_restart crowdsec-firewall-bouncer
     ;;
