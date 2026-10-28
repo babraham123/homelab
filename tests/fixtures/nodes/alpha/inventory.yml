@@ -31,3 +31,4 @@ commands:
       - nvidia-smi
   - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/alpha/backup.sh]}
   - {name: install_ca, script: base/debian/commands.sh}
+  - {name: install_dispatcher, script: base/debian/commands.sh}

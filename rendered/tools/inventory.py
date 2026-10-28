@@ -48,7 +48,8 @@
 #                      containers:  {<quadlet name>: {ip, upstream | build, update_last}}, in
 #                                   place of the keys above, when the case installs
 #                                   other quadlets than <service>.container
-#   install_all_svcs: true adds install_all_svcs, installing `services` in order
+#   install_all_svcs: true adds install_all_svcs, installing `services` in order, after
+#                    install_dispatcher when the node has that command
 #   install_some_svcs: [names] adds install_some_svcs, installing just these, in `services`
 #                    order, for a node where the rest are too disruptive to reinstall blindly
 #   image_updater_slot: HH:MM its image_updater.timer runs, 30 minutes apart per node
@@ -133,14 +134,18 @@ def dispatch(node, spec):
   install = {name: sudo(SHARED_SCRIPT if svc.get("shared") else f"nodes/{node}/install_svcs.sh", name)
              for name, svc in services(spec).items()}
   cases += [case(f"install_{name}", [line]) for name, line in install.items()]
+  # The dispatcher and sudoers first, so the run picks up this deploy's changed cases and
+  # grants (install_dispatcher renames the script, so the running one is left intact)
+  first = [sudo("base/debian/commands.sh", "install_dispatcher")] \
+    if any(c.get("name") == "install_dispatcher" for c in spec.get("commands", [])) else []
   if spec.get("install_all_svcs"):
-    cases.append(case("install_all_svcs", list(install.values())))
+    cases.append(case("install_all_svcs", first + list(install.values())))
   some = spec.get("install_some_svcs")
   if some:
     unknown = set(some) - set(install)
     if unknown:
       sys.exit(f"{node}: install_some_svcs names unknown services {sorted(unknown)}")
-    cases.append(case("install_some_svcs", [line for name, line in install.items() if name in some]))
+    cases.append(case("install_some_svcs", first + [line for name, line in install.items() if name in some]))
   for cmd in spec.get("commands", []):
     if "run" in cmd:
       run = cmd["run"]

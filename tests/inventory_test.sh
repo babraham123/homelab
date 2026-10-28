@@ -42,6 +42,7 @@ EOF
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
     ;;
   install_all_svcs)
+    sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh zeta
     sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh app
@@ -49,6 +50,7 @@ EOF
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
     ;;
   install_some_svcs)
+    sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
     sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
     ;;
@@ -68,6 +70,9 @@ EOF
     ;;
   install_ca)
     sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+    ;;
+  install_dispatcher)
+    sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
     ;;
 # gaming
   StartSunshine)
@@ -95,6 +100,7 @@ EOF
   assert_eq "$out" <<'EOF'
 # alpha
 /root/homelab-rendered/src/base/debian/commands.sh install_ca
+/root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
 /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
 /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
 /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
@@ -121,8 +127,8 @@ test_olive_tin_buttons() {
 EOF
 )
   assert_eq "$out" <<'EOF'
-alpha: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs install_keys build_map check_gpu backup install_ca
-alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs build_map check_gpu backup install_ca
+alpha: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs install_keys build_map check_gpu backup install_ca install_dispatcher
+alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs build_map check_gpu backup install_ca install_dispatcher
 gaming: StartSunshine StopSunshine
 gaming buttons: StartSunshine StopSunshine
 router: install_certs
