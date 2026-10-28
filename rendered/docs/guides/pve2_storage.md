@@ -71,10 +71,9 @@ tools/deploy_src.sh
 ssh autoadmin@websvcs install_snapraid
 ```
 
-- On websvcs, let vmagent scrape the SMART exporter
+- On websvcs, check the SMART exporter (vmagent's ufw rule for it comes from `install_network.sh`)
 
 ```bash
-ufw allow in from 10.11.0.7 to any port 9633 proto tcp
 curl -s localhost:9633/metrics | grep smartctl_device_smart_status
 ```
 

@@ -51,7 +51,6 @@ image_updater --dry-run
 ```bash
 cd /root/homelab-rendered
 src/base/debian/install_svcs.sh nvidia_gpu_exporter
-ufw allow in from 10.11.0.7 to any port 9835 proto tcp
 curl -s localhost:9835/metrics | grep nvidia_smi_temperature_gpu
 ```
 

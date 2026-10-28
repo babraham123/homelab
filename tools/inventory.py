@@ -54,6 +54,9 @@
 #   install_some_svcs: [names] adds install_some_svcs, installing just these of either list,
 #                    in that order, for a node where the rest are too disruptive to reinstall
 #                    blindly
+#   host_ports:      ports of exporters on the host itself that its vmagent scrapes through the
+#                    bridge gateway; src/base/podman/install_network.sh opens them in ufw to
+#                    vmagent's address, which needs services.vmagent.ip
 #   image_updater_slot: HH:MM its image_updater.timer runs, 30 minutes apart per node
 #   image_updater_java_db: false skips Trivy's Java DB, for nodes whose images hold no jars
 #   commands:        other dispatcher cases, in order. Either

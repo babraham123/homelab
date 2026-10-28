@@ -26,6 +26,8 @@ services:
 # or the tunnel every home service is reached through.
 install_some_svcs: [node_exporter, image_updater, iperf3_server, fail2ban, haproxy, crowdsec_firewall_bouncer, deadman,
                     fluentbit, vmagent, geoip_generator]
+# HAProxy's exporter, Headscale, the firewall bouncer
+host_ports: [8405, 9090, 60601]
 image_updater_slot: '20:00'
 # No jars in its images, and the ~1 GB Java DB is a lot for the VPS's disk
 image_updater_java_db: false

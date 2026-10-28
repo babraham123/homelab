@@ -285,13 +285,13 @@ headscale --user USER_ID preauthkeys create --expiration 1h
 - Do the `/etc/hosts` step in [Add public endpoint](#add-public-endpoint)
 - Follow the [Podman guide](./podman.md): Install Podman, Networking, Secrets, Monitoring and Image
   updater
-- Open the gateway to vmagent and the containers' path to secsvcs
+- Open the containers' path to secsvcs (`install_network.sh` opened the gateway's exporter
+  ports to vmagent)
 
 ```bash
 sudo su
 cd /root/homelab-rendered
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
-ufw allow in on $POD_IFACE from {{ inv.addr.vpnsvcs.vmagent }} to any port 8405,9090 proto tcp
 ufw allow in on $POD_IFACE from {{ vpnsvcs.container_subnet }}.0/24 to any port 53 proto udp
 ufw route allow in on $POD_IFACE out on tailscale0 to {{ secsvcs.ip }} port 443 proto tcp
 ufw route allow in on $POD_IFACE out on tailscale0 to 100.100.100.100 port 80 proto tcp
@@ -352,13 +352,11 @@ vim /etc/opt/secrets/crowdsec_bouncer_key
 chmod 600 /etc/opt/secrets/*
 ```
 
-- Open the firewall and install
+- Open the LAPI egress and install (`install_network.sh` opened `60601` to vmagent)
 
 ```bash
 cd /root/homelab-rendered
-POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 ufw allow out on tailscale0 from any to {{ secsvcs.ip }} port 8455 proto tcp
-ufw allow in on $POD_IFACE from {{ inv.addr.vpnsvcs.vmagent }} to any port 60601 proto tcp
 src/nodes/vpnsvcs/install_svcs.sh crowdsec_firewall_bouncer
 nft list tables                       # crowdsec and crowdsec6
 journalctl -u crowdsec-firewall-bouncer --no-pager | tail   # no TLS or 403 errors

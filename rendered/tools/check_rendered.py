@@ -278,6 +278,19 @@ def check_image_updater_slots(nodes):
       fail(" ".join(files), f"image_updater_slot {slot} is set for more than one node")
 
 
+# install_network.sh opens host_ports to vmagent's address, built from services.vmagent.ip.
+def check_host_ports(nodes):
+  for node, spec in nodes.items():
+    ports = spec["inventory"].get("host_ports")
+    if not ports:
+      continue
+    if "vmagent" not in spec["addr"]:
+      fail(inventory(node), "host_ports needs services.vmagent.ip")
+    bad = [p for p in ports if not isinstance(p, int) or not 1 <= p <= 65535]
+    if bad:
+      fail(inventory(node), f"host_ports holds {bad}, expected port numbers")
+
+
 def check_unique_subdomains(nodes):
   counts = Counter(s for spec in nodes.values() for s in spec["subdomains"])
   for subdomain in sorted(s for s, n in counts.items() if n > 1):
@@ -392,6 +405,7 @@ def main():
   check_dispatch_scripts(nodes)
   check_install_cases(nodes)
   check_image_updater_slots(nodes)
+  check_host_ports(nodes)
   check_unique_subdomains(nodes)
   check_routes(site, nodes)
   check_olive_tin(nodes)
