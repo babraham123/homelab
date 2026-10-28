@@ -7,8 +7,6 @@ services:
     ip: 6
     subdomain: homeproxy
     admin: true
-    uptime: traefik homesvcs
-    uptime_tier: 1
     upstream: docker.io/library/traefik:v3.7
   crowdsec_appsec:
     shared: true

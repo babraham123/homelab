@@ -32,6 +32,9 @@
 #                                   proxies, login, and what you'd open first)
 #                      uptime_conditions: extra Gatus conditions, appended to the
 #                                   anchor's (status, latency, cert expiry)
+#                      uptime_oauth: false checks without the Authelia bearer token, for
+#                                   a path its Traefik router serves without ForwardAuth
+#                                   and the app itself rejects foreign tokens on
 #                      upstream:    pulled image, full ref with registry host and
 #                                   namespace (docker.io/library/nginx:stable); the
 #                                   quadlet's Image= must be localhost/ + the ref
@@ -68,7 +71,7 @@
 #   sudo_cmds[node]:  sorted commands the dispatcher runs with sudo (sudoers)
 #   subdomains[node]: sorted subdomains its Traefik serves (Unbound, HAProxy)
 #   admin_subdomains: sorted subdomains of the admin services, all nodes (Authelia)
-#   uptime:           Gatus internal endpoints, [{name, node, url, tier, conditions}]
+#   uptime:           Gatus internal endpoints, [{name, node, url, tier, conditions, oauth}]
 #   images[node]:     container images in update order (install order, update_last
 #                     entries last), [{service, dir, container, image, upstream | build}];
 #                     dir: the service's first `dirs` entry, default services/<service>,
@@ -160,7 +163,8 @@ def uptime(node, spec, site_url):
   return [{"name": svc["uptime"], "node": node,
            "url": f"https://{svc['subdomain']}.{site_url}{svc.get('uptime_path', '/')}",
            "tier": svc.get("uptime_tier", 2),
-           "conditions": svc.get("uptime_conditions", [])}
+           "conditions": svc.get("uptime_conditions", []),
+           "oauth": svc.get("uptime_oauth", True)}
           for svc in services(spec).values() if "uptime" in svc]
 
 

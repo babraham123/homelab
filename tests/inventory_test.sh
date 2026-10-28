@@ -126,8 +126,8 @@ router buttons: install_certs
 EOF
 }
 
-# Uptime: path / unless given (Authelia matches the Gatus audience to the exact URL), tier 2
-# and no extra conditions unless given
+# Uptime: path / unless given (Authelia matches the Gatus audience to the exact URL), tier 2,
+# the Authelia bearer token and no extra conditions unless given
 test_subdomains_and_uptime() {
   out=$(render_inventory "$inventory" <<'EOF'
 {% for node in nodes -%}
@@ -135,7 +135,7 @@ test_subdomains_and_uptime() {
 {% endfor -%}
 admin: {{ inv.admin_subdomains | join(' ') }}
 {% for u in inv.uptime -%}
-{{ u.name }} | {{ u.node }} | {{ u.url }} | {{ u.tier }} | {{ u.conditions }}
+{{ u.name }} | {{ u.node }} | {{ u.url }} | {{ u.tier }} | {{ u.conditions }} | {{ u.oauth }}
 {% endfor -%}
 EOF
 )
@@ -144,8 +144,8 @@ alpha: app z
 gaming:
 router:
 admin: z
-zeta | alpha | https://z.example.com/ | 2 | []
-app health | alpha | https://app.example.com/health | 1 | ['[BODY].status == OK']
+zeta | alpha | https://z.example.com/ | 2 | [] | True
+app health | alpha | https://app.example.com/health | 1 | ['[BODY].status == OK'] | False
 EOF
 }
 

@@ -52,6 +52,12 @@ http:
       service: victoriametrics@file
       middlewares:
         - vm-auth@file
+    victoriametrics-ui-bearer:
+      parentRefs: [victoriametrics-ui]
+      rule: HeaderRegexp(`Authorization`, `^Bearer `)
+      service: victoriametrics@file
+      middlewares:
+        - vm-auth@file
     victoriametrics-ui-denied:
       parentRefs: [victoriametrics-ui]
       rule: PathPrefix(`/`)
@@ -84,6 +90,12 @@ http:
       service: victorialogs@file
       middlewares:
         - vl-auth@file
+    victorialogs-ui-bearer:
+      parentRefs: [victorialogs-ui]
+      rule: HeaderRegexp(`Authorization`, `^Bearer `)
+      service: victorialogs@file
+      middlewares:
+        - vl-auth@file
     victorialogs-ui-denied:
       parentRefs: [victorialogs-ui]
       rule: PathPrefix(`/`)
@@ -111,6 +123,12 @@ http:
       parentRefs: [alertmanager-ui]
       # Authelia joins groups with a bare comma
       rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry_access(,|$)`)
+      service: alertmanager@file
+      middlewares:
+        - alertmanager-auth@file
+    alertmanager-ui-bearer:
+      parentRefs: [alertmanager-ui]
+      rule: HeaderRegexp(`Authorization`, `^Bearer `)
       service: alertmanager@file
       middlewares:
         - alertmanager-auth@file

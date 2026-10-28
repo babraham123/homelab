@@ -9,8 +9,6 @@ services:
     ip: 6
     subdomain: webproxy
     admin: true
-    uptime: traefik websvcs
-    uptime_tier: 1
     upstream: docker.io/library/traefik:v3.7
   crowdsec_appsec:
     shared: true

@@ -270,7 +270,8 @@ sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh SERVICE
 1. Add a case for it to `install_svcs.sh`, ending with `reload_restart <unit>`
 1. Add it under `services` in `src/nodes/<node>/inventory.yml`, in install order, with its
    `subdomain` and, to monitor it in Gatus, `uptime` (plus `uptime_path` if the health check isn't
-   `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions) and
+   `/`, `uptime_tier: 1` for a 2-minute check, `uptime_conditions` for extra Gatus conditions,
+   `uptime_oauth: false` when the path has no ForwardAuth and the app rejects a foreign token) and
    its image (`upstream: <full ref>` or `build: <name>`; `update_last: true` for the notification
    path on secsvcs), and `admin: true` for an admin tool that needs two factors from every network.
    This adds the dispatcher case, sudoers grant, OliveTin button, DNS/SNI

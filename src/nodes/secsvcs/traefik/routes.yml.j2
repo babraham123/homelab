@@ -10,7 +10,10 @@
   Browser UI of a telemetry tool whose own auth is a shared admin login. The parent
   authenticates; its children then match on the Remote-Groups header ForwardAuth set
   (Traefik deletes any client-sent copy first), so only the telemetry_access group gets the
-  injected admin credentials and everyone else gets the 403 page.
+  injected admin credentials and everyone else gets the 403 page. The Gatus check sends a
+  browser User-Agent with an Authelia bearer token, which carries no groups: a bearer the
+  parent accepted gets the admin credentials too, since Gatus is the only client allowed
+  the authelia.bearer.authz scope (src/services/authelia/configuration.yml.j2).
 #}
 {%- macro telemetry_ui(name, rule, service, auth) %}
     {{ name }}-ui:
@@ -26,6 +29,12 @@
       parentRefs: [{{ name }}-ui]
       # Authelia joins groups with a bare comma
       rule: HeaderRegexp(`Remote-Groups`, `(^|,)telemetry_access(,|$)`)
+      service: {{ service }}@file
+      middlewares:
+        - {{ auth }}@file
+    {{ name }}-ui-bearer:
+      parentRefs: [{{ name }}-ui]
+      rule: HeaderRegexp(`Authorization`, `^Bearer `)
       service: {{ service }}@file
       middlewares:
         - {{ auth }}@file

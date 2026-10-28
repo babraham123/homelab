@@ -12,6 +12,7 @@ services:
     uptime_path: /health
     uptime_tier: 1
     uptime_conditions: ['[BODY].status == OK']
+    uptime_oauth: false
     build: app
     update_last: true
   pod:

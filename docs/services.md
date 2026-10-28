@@ -202,7 +202,7 @@ flowchart LR
 - **Retention** for metrics, logs and Home Assistant history: `vars.yml`
 - **Gatus**, independent of the metrics pipeline:
   - HTTPS checks generated from the `uptime` keys in `src/nodes/<node>/inventory.yml`, every 10
-    minutes; every 2 for `uptime_tier: 1` (the proxies, the login portal, the pages opened first)
+    minutes; every 2 for `uptime_tier: 1` (the login portal, the pages opened first)
   - Every HTTPS check fails with under 14 days of cert left; a `tls://` check covers LDAPS;
     cert_notifier emails cover Postgres and Mosquitto
   - No notifier of its own: results are scraped, and `EndpointDown` and the cert rules fire through

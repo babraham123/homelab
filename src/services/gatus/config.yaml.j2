@@ -27,18 +27,23 @@ public-endpoint: &public
     User-Agent: "Mozilla/5.0 (gatus-robot; Linux x86_64)"
   conditions:
     - "[STATUS] == 200"
-    - "[RESPONSE_TIME] < 1000"
+    - "[RESPONSE_TIME] < 2000"
     # ACME renews at 30 days out, so this only fires once renewal has been failing.
     - "[CERTIFICATE_EXPIRATION] > 336h"
+
+internal-client: &internal-client
+  timeout: 10s
+  dns-resolver: udp://1.1.1.1:53
 
 internal-endpoint: &internal
   group: internal
   interval: 10m
   client:
-    timeout: 10s
-    dns-resolver: udp://1.1.1.1:53
+    <<: *internal-client
     # https://www.authelia.com/integration/openid-connect/oauth-2.0-bearer-token-usage
     # https://www.authelia.com/integration/openid-connect/uptime-kuma/
+    # Each endpoint fetches its own token and counts the fetch in its response time, so
+    # the Authelia client's lifespan is a day (src/services/authelia/configuration.yml.j2).
     oauth2:
       # Don't use :9091, gatus uses external DNS
       token-url: https://auth.{{ site.url }}/api/oidc/token
@@ -49,12 +54,13 @@ internal-endpoint: &internal
     User-Agent: "Mozilla/5.0 (gatus-robot; Linux x86_64)"
   conditions:
     - "[STATUS] == 200"
-    - "[RESPONSE_TIME] < 1000"
+    # The WAN round trip through the VPS, plus a token fetch once a day
+    - "[RESPONSE_TIME] < 2000"
     # ACME renews at 30 days out, so this only fires once renewal has been failing.
     - "[CERTIFICATE_EXPIRATION] > 336h"
 
-# Tier 1: the proxies, the login portal and the pages opened first. 2 minutes on
-# these ~8 endpoints is ~4 requests a minute at HAProxy, nothing against its
+# Tier 1: the login portal and the pages opened first; every check already passes through
+# the proxies. 2 minutes on these ~8 endpoints is ~4 requests a minute at HAProxy, nothing against its
 # stick-table limits (conn_rate(3s) > 50). Every check passes through Authelia's
 # ForwardAuth, so when auth is down every endpoint fails; Alertmanager inhibits the
 # rest behind the authelia EndpointDown (src/services/alertmanager/config.yml.j2.j2).
@@ -73,10 +79,13 @@ endpoints:
   - name: {{ endpoint.name }}
     <<: *{{ 'tier1' if endpoint.tier == 1 else 'internal' }}
     url: "{{ endpoint.url }}"
+{%- if not endpoint.oauth %}
+    client: *internal-client
+{%- endif %}
 {%- if endpoint.conditions %}
     conditions:
       - "[STATUS] == 200"
-      - "[RESPONSE_TIME] < 1000"
+      - "[RESPONSE_TIME] < 2000"
       - "[CERTIFICATE_EXPIRATION] > 336h"
 {%- for condition in endpoint.conditions %}
       - "{{ condition }}"

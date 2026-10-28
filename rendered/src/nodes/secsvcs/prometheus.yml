@@ -50,15 +50,15 @@ scrape_configs:
     # name, not group: the group is part of the key Gatus stores the history under.
     metric_relabel_configs:
       - source_labels: [name]
-        regex: 'traefik homesvcs|zigbee2mqtt|home assistant'
+        regex: 'zigbee2mqtt|home assistant'
         target_label: host
         replacement: homesvcs
       - source_labels: [name]
-        regex: 'authelia|traefik secsvcs|victoriametrics|victorialogs|vmalert|alertmanager|ntfy health check|grafana|vaultwarden|ntfy-idp-push|olive_tin'
+        regex: 'authelia|victoriametrics|victorialogs|vmalert|alertmanager|ntfy health check|grafana|vaultwarden|ntfy-idp-push|olive_tin'
         target_label: host
         replacement: secsvcs
       - source_labels: [name]
-        regex: 'traefik websvcs|homepage|copyparty|linkding|readeck|storyteller'
+        regex: 'homepage|copyparty|linkding|readeck|storyteller'
         target_label: host
         replacement: websvcs
   - job_name: 'crowdsec'

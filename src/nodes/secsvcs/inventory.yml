@@ -23,8 +23,6 @@ services:
     ip: 6
     subdomain: secproxy
     admin: true
-    uptime: traefik secsvcs
-    uptime_tier: 1
     upstream: docker.io/library/traefik:v3.7
     update_last: true
   victoriametrics:
@@ -68,12 +66,14 @@ services:
     uptime: ntfy health check
     uptime_path: /v1/health
     uptime_tier: 1
+    uptime_oauth: false
     upstream: docker.io/binwiederhier/ntfy:latest
     update_last: true
   grafana:
     ip: 12
     subdomain: graph
     uptime: grafana
+    uptime_path: /api/health
     uptime_tier: 1
     upstream: docker.io/grafana/grafana-oss:latest
   vaultwarden:

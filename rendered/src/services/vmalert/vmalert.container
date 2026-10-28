@@ -46,8 +46,7 @@ Exec=--datasource.url="http://metrics.janedoe.com:8428/" \
      --rule="/etc/alerts/*.yml" \
      --loggerLevel="WARN" \
      --loggerTimezone="America/Los_Angeles" \
-     --external.url="https://vmalert.janedoe.com" \
-     --external.label="grafana_url=https://graph.janedoe.com,vm_dash=G7Z9GzMGz,vg_dash=wNf0q_kZk,va_dash=LzldHAVnz" \
+     --external.url="https://graph.janedoe.com" \
      --external.alert.source='explore?orgId=1&left={"datasource":"VictoriaMetrics","queries":[{"expr":{{$$expr|jsonEscape|queryEscape}},"refId":"A"}],"range":{"from":"now-1h","to":"now"}}'
 
 Environment=TZ=America/Los_Angeles

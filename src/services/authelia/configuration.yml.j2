@@ -1457,6 +1457,12 @@ identity_providers:
           authorize_code: '1 minute'
           id_token: '1 hour'
           refresh_token: '30 days'
+        # Gatus refetches its bearer token when it expires, inside the check's response time
+        gatus:
+          access_token: '24 hours'
+          authorize_code: '1 minute'
+          id_token: '1 hour'
+          refresh_token: '90 minutes'
 
     ## Cross-Origin Resource Sharing (CORS) settings.
     cors:
@@ -2023,8 +2029,12 @@ identity_providers:
         ## Audience this client is allowed to request.
         # The bearer check needs an audience equal to the whole URL Authelia sees, path
         # included, so each entry is a Gatus check's exact URL.
-        audience:{% for url in inv.uptime | map(attribute='url') | sort %}
+        audience:{% for url in inv.uptime | selectattr('oauth') | map(attribute='url') | sort %}
           - '{{ url }}'{% endfor %}
+
+        # One token fetch per check per day, so the fetch's latency stays out of the
+        # measured response time (lifespans.custom.gatus)
+        lifespan: 'gatus'
 
         requested_audience_mode: 'implicit'
 
