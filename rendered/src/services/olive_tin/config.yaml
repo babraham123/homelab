@@ -558,14 +558,6 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: secsvcs Install Vmalert
-              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
-              shell: ssh autoadmin@secsvcs install_vmalert
-              id: secsvcs_install_vmalert
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
               title: secsvcs Install Alertmanager
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_alertmanager
@@ -574,10 +566,10 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: secsvcs Install Ntfy-Alertmanager
+              title: secsvcs Install Vmalert
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
-              shell: ssh autoadmin@secsvcs install_ntfy-alertmanager
-              id: secsvcs_install_ntfy-alertmanager
+              shell: ssh autoadmin@secsvcs install_vmalert
+              id: secsvcs_install_vmalert
               maxConcurrent: 1
               timeout: 60
 
@@ -586,6 +578,14 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_ntfy
               id: secsvcs_install_ntfy
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Install Ntfy-Alertmanager
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_ntfy-alertmanager
+              id: secsvcs_install_ntfy-alertmanager
               maxConcurrent: 1
               timeout: 60
 

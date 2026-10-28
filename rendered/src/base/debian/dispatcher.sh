@@ -261,17 +261,17 @@ case "$(hostname)" in
       install_gatus)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh gatus
         ;;
-      install_vmalert)
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert
-        ;;
       install_alertmanager)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh alertmanager
         ;;
-      install_ntfy-alertmanager)
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
+      install_vmalert)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert
         ;;
       install_ntfy)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy
+        ;;
+      install_ntfy-alertmanager)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
         ;;
       install_grafana)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana
@@ -302,10 +302,10 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victoriametrics
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh victorialogs
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh gatus
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh alertmanager
-        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vaultwarden
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy_idp_push

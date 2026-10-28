@@ -54,7 +54,7 @@ scrape_configs:
         target_label: host
         replacement: homesvcs
       - source_labels: [name]
-        regex: 'authelia|victoriametrics|victorialogs|vmalert|alertmanager|ntfy health check|grafana|vaultwarden|ntfy-idp-push|olive_tin'
+        regex: 'authelia|victoriametrics|victorialogs|alertmanager|vmalert|ntfy health check|grafana|vaultwarden|ntfy-idp-push|olive_tin'
         target_label: host
         replacement: secsvcs
       - source_labels: [name]

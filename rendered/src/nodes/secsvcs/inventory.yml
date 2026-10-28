@@ -40,13 +40,7 @@ services:
     ip: 9
     subdomain: uptime
     upstream: docker.io/twinproduction/gatus:latest
-  vmalert:
-    ip: 11
-    subdomain: vmalert
-    admin: true
-    uptime: vmalert
-    upstream: docker.io/victoriametrics/vmalert:latest
-    update_last: true
+  # Install order: vmalert Requires= alertmanager, ntfy-alertmanager posts to ntfy.
   alertmanager:
     ip: 10
     subdomain: alert
@@ -54,11 +48,12 @@ services:
     uptime: alertmanager
     upstream: docker.io/prom/alertmanager:latest
     update_last: true
-  ntfy-alertmanager:
-    ip: 14
-    subdomain: ntfy-alertmanager
-    dirs: [services/alertmanager]
-    upstream: docker.io/xenrox/ntfy-alertmanager:latest
+  vmalert:
+    ip: 11
+    subdomain: vmalert
+    admin: true
+    uptime: vmalert
+    upstream: docker.io/victoriametrics/vmalert:latest
     update_last: true
   ntfy:
     ip: 13
@@ -68,6 +63,12 @@ services:
     uptime_tier: 1
     uptime_oauth: false
     upstream: docker.io/binwiederhier/ntfy:latest
+    update_last: true
+  ntfy-alertmanager:
+    ip: 14
+    subdomain: ntfy-alertmanager
+    dirs: [services/alertmanager]
+    upstream: docker.io/xenrox/ntfy-alertmanager:latest
     update_last: true
   grafana:
     ip: 12

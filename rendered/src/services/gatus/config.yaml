@@ -101,13 +101,13 @@ endpoints:
     <<: *internal
     url: "https://logs.janedoe.com/"
 
-  - name: vmalert
-    <<: *internal
-    url: "https://vmalert.janedoe.com/"
-
   - name: alertmanager
     <<: *internal
     url: "https://alert.janedoe.com/"
+
+  - name: vmalert
+    <<: *internal
+    url: "https://vmalert.janedoe.com/"
 
   - name: ntfy health check
     <<: *tier1

@@ -167,13 +167,6 @@
           "upstream": "docker.io/victoriametrics/victoria-metrics:latest"
         },
         {
-          "container": "vmalert",
-          "image": "localhost/victoriametrics/vmalert:latest",
-          "service": "vmalert",
-          "trivyignore": "/root/homelab-rendered/src/services/vmalert/.trivyignore",
-          "upstream": "docker.io/victoriametrics/vmalert:latest"
-        },
-        {
           "container": "alertmanager",
           "image": "localhost/prom/alertmanager:latest",
           "service": "alertmanager",
@@ -181,11 +174,11 @@
           "upstream": "docker.io/prom/alertmanager:latest"
         },
         {
-          "container": "ntfy-alertmanager",
-          "image": "localhost/xenrox/ntfy-alertmanager:latest",
-          "service": "ntfy-alertmanager",
-          "trivyignore": "/root/homelab-rendered/src/services/alertmanager/.trivyignore",
-          "upstream": "docker.io/xenrox/ntfy-alertmanager:latest"
+          "container": "vmalert",
+          "image": "localhost/victoriametrics/vmalert:latest",
+          "service": "vmalert",
+          "trivyignore": "/root/homelab-rendered/src/services/vmalert/.trivyignore",
+          "upstream": "docker.io/victoriametrics/vmalert:latest"
         },
         {
           "container": "ntfy",
@@ -193,6 +186,13 @@
           "service": "ntfy",
           "trivyignore": "/root/homelab-rendered/src/services/ntfy/.trivyignore",
           "upstream": "docker.io/binwiederhier/ntfy:latest"
+        },
+        {
+          "container": "ntfy-alertmanager",
+          "image": "localhost/xenrox/ntfy-alertmanager:latest",
+          "service": "ntfy-alertmanager",
+          "trivyignore": "/root/homelab-rendered/src/services/alertmanager/.trivyignore",
+          "upstream": "docker.io/xenrox/ntfy-alertmanager:latest"
         }
       ],
       "ntfy": {
