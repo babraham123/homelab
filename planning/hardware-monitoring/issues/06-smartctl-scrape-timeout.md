@@ -1,6 +1,6 @@
 # 06. smartctl_exporter on websvcs never answers a scrape
 
-Status: needs-triage
+Status: resolved
 Type: task
 Repo: homelab
 Source: queries.md verification 2026-10-27
@@ -39,3 +39,21 @@ spin-down.
 - `up{job="smartctl"} == 1` and `smartctl_device_smart_status` has one series per array disk.
 - `hdparm -C` shows the disks staying in standby across several scrapes.
 - Issue 02's dashboard and alerts have data.
+
+## Answer
+
+Not the disks: with all four in standby, `smartctl --nocheck=standby` exits in 8 ms and the
+exporter answers loopback in 28 ms. The scrape timed out because ufw dropped it. vmagent reaches
+host exporters through the bridge gateway (`host.containers.internal` = 10.91.0.1 from the
+container), and `install_network.sh` resets ufw to the base rules on every run, which discards
+the per-exporter rule the pve2 storage guide adds by hand. The nvidia rule from the websvcs guide
+had survived; the 9633 one had not. Re-adding it on websvcs (2026-10-28) turned `up == 1` on the
+next scrape.
+
+While the disks sleep the exporter exposes only `smartctl_devices` and its build info, so the
+per-disk series and `hardware.yml`'s alerts have data only during the nightly snapraid runs and
+media use. That is the intended trade-off with hd-idle.
+
+Follow-up: make the exporter rules survive a reset by deriving them in `install_network.sh`
+from the inventory (websvcs 9633 and 9835 from `inv.addr.websvcs.vmagent`; vpnsvcs 60601 from its
+vmagent, see observability 14), instead of guide steps.

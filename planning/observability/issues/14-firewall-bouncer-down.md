@@ -27,14 +27,27 @@ unhealthy independently of the metrics port, though: it may be crash-looping on 
 URL after the move. Its journal is not shipped to VictoriaLogs (no `crowdsec-firewall-bouncer`
 unit in vpnsvcs' `homelab_services`), so the node's journal is the only record.
 
+## Findings (2026-10-28)
+
+The bouncer section of the VPS guide (`docs/guides/vpnsvcs.md.j2`, "CrowdSec") has not been done
+on the current build:
+
+- `crowdsec-firewall-bouncer.service` is not in vpnsvcs' Homelab unit list, which node_exporter
+  and Fluent Bit both filter on; the list was rebuilt when node_exporter restarted today.
+- The LAPI counts requests only from the three Traefik bouncers and logs no auth failures, so
+  nothing contacts it with the vpnsvcs key.
+- The scrape dies waiting for a connection while 8405 and 9090 on the same gateway IP work:
+  ufw's default deny without the guide's `60601` rule, same shape as hardware-monitoring 06.
+- Today's `install_some_svcs` did not run on vpnsvcs (HAProxy and vmagent still date from
+  2026-10-26). The install case dies when `/etc/opt/secrets/crowdsec_bouncer_key` is empty, which
+  would abort a run at that step.
+
 ## Change
 
-- On vpnsvcs: `systemctl status crowdsec-firewall-bouncer`, `journalctl -u crowdsec-firewall-bouncer
-  -n 50`, `nft list ruleset | grep -A5 crowdsec`, `curl -m 3 10.93.0.1:60601/metrics` from the
-  host and from inside the vmagent container.
-- Fix whichever it is: the LAPI key or URL in the bouncer config, or an nftables rule allowing the
-  podman subnet to reach the gateway's `60601` (and `8405`, `9090` for the other exporters if they
-  share the symptom, though those scrape fine today).
+- Do the guide's CrowdSec section on vpnsvcs: the key file, the two ufw rules (egress 8455 over
+  tailscale0, ingress 60601 from vmagent), then `install_crowdsec_firewall_bouncer`.
+- Move the ufw exporter rules into `install_network.sh`, derived from the inventory, so a reset
+  keeps them (hardware-monitoring 06's follow-up).
 - Add the bouncer unit to vpnsvcs' `homelab_services` so its journal is queryable next time.
 
 ## Acceptance
