@@ -1,9 +1,9 @@
 function def {
   # Get the man page of a cmd, source code for a bash function, definition
-  # of a cmd alias or the value of an environment variable.
+  # of a cmd alias, the value of an environment variable or the path of a cmd.
   # Example: def def
   local name=$1
-  man $name 2>/dev/null || declare -f $name || alias $name || eval "test -n \"\$$name\" && echo \\\$$name=\$$name" || echo "$name is unknown"
+  man $name 2>/dev/null || declare -f $name || alias $name || eval "test -n \"\$$name\" && echo \\\$$name=\$$name" || { whence $name >/dev/null && whence -v $name } || echo "$name is unknown"
 }
 
 function mans {
