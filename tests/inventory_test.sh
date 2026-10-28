@@ -2,7 +2,7 @@
 # tools/inventory.py over tests/fixtures/nodes/<node>/inventory.yml, as templates read it
 # (inv.<name>). Expected lists follow ADR 0006 and the tools/inventory.py header: nodes in name order; cases in the order
 # debian_services, services (install order; shared ones run src/base/podman's script),
-# install_all_svcs, commands, triggers;
+# install_all_svcs, install_some_svcs, commands, triggers;
 # sudoers holds the sorted, unique sudo lines without `sudo `; scripts live under
 # /root/homelab-rendered/src, except the router's under /root/router-src.
 # shellcheck source=tests/lib.sh
@@ -46,6 +46,10 @@ EOF
     sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh app
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh pod
+    sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
+    ;;
+  install_some_svcs)
+    sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
     ;;
   install_keys)
@@ -117,8 +121,8 @@ test_olive_tin_buttons() {
 EOF
 )
   assert_eq "$out" <<'EOF'
-alpha: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_keys build_map check_gpu backup install_ca
-alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs build_map check_gpu backup install_ca
+alpha: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs install_keys build_map check_gpu backup install_ca
+alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs build_map check_gpu backup install_ca
 gaming: StartSunshine StopSunshine
 gaming buttons: StartSunshine StopSunshine
 router: install_certs

@@ -403,6 +403,15 @@ case "$(hostname)" in
       install_geoip_generator)
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh geoip_generator
         ;;
+      install_some_svcs)
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh fail2ban
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh haproxy
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh crowdsec_firewall_bouncer
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh deadman
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
+        sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh geoip_generator
+        ;;
       backup)
         require_pve1
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/backup.sh

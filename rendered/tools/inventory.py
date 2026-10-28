@@ -49,6 +49,8 @@
 #                                   place of the keys above, when the case installs
 #                                   other quadlets than <service>.container
 #   install_all_svcs: true adds install_all_svcs, installing `services` in order
+#   install_some_svcs: [names] adds install_some_svcs, installing just these, in `services`
+#                    order, for a node where the rest are too disruptive to reinstall blindly
 #   image_updater_slot: HH:MM its image_updater.timer runs, 30 minutes apart per node
 #   image_updater_java_db: false skips Trivy's Java DB, for nodes whose images hold no jars
 #   commands:        other dispatcher cases, in order. Either
@@ -128,12 +130,17 @@ def dispatch(node, spec):
 
   cases = [case(f"install_{svc}", [sudo("base/debian/install_svcs.sh", svc)])
            for svc in spec.get("debian_services", [])]
-  install_all = []
-  for name, svc in services(spec).items():
-    install_all.append(sudo(SHARED_SCRIPT if svc.get("shared") else f"nodes/{node}/install_svcs.sh", name))
-    cases.append(case(f"install_{name}", install_all[-1:]))
+  install = {name: sudo(SHARED_SCRIPT if svc.get("shared") else f"nodes/{node}/install_svcs.sh", name)
+             for name, svc in services(spec).items()}
+  cases += [case(f"install_{name}", [line]) for name, line in install.items()]
   if spec.get("install_all_svcs"):
-    cases.append(case("install_all_svcs", install_all))
+    cases.append(case("install_all_svcs", list(install.values())))
+  some = spec.get("install_some_svcs")
+  if some:
+    unknown = set(some) - set(install)
+    if unknown:
+      sys.exit(f"{node}: install_some_svcs names unknown services {sorted(unknown)}")
+    cases.append(case("install_some_svcs", [line for name, line in install.items() if name in some]))
   for cmd in spec.get("commands", []):
     if "run" in cmd:
       run = cmd["run"]

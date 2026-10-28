@@ -802,6 +802,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: vpnsvcs Install Some Svcs
+              icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
+              shell: ssh autoadmin@vpnsvcs install_some_svcs
+              id: vpnsvcs_install_some_svcs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: vpnsvcs Host Key
               icon: <iconify-icon icon="material-symbols:vpn-key"></iconify-icon>
               shell: ssh autoadmin@vpnsvcs host_key
