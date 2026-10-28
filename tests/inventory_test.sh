@@ -48,11 +48,13 @@ EOF
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh app
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh pod
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
+    sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
     ;;
   install_some_svcs)
     sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
     sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
+    sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
     ;;
   install_keys)
     require_pve1
@@ -73,6 +75,9 @@ EOF
     ;;
   install_dispatcher)
     sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+    ;;
+  failed_units)
+    sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
     ;;
 # gaming
   StartSunshine)
@@ -99,6 +104,7 @@ EOF
 )
   assert_eq "$out" <<'EOF'
 # alpha
+/root/homelab-rendered/src/base/debian/commands.sh failed_units
 /root/homelab-rendered/src/base/debian/commands.sh install_ca
 /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
 /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
@@ -127,8 +133,8 @@ test_olive_tin_buttons() {
 EOF
 )
   assert_eq "$out" <<'EOF'
-alpha: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs install_keys build_map check_gpu backup install_ca install_dispatcher
-alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs build_map check_gpu backup install_ca install_dispatcher
+alpha: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs install_keys build_map check_gpu backup install_ca install_dispatcher failed_units
+alpha buttons: install_node_exporter install_mdns_repeater install_zeta install_proxy install_app install_pod install_plain install_all_svcs install_some_svcs build_map check_gpu backup install_ca install_dispatcher failed_units
 gaming: StartSunshine StopSunshine
 gaming buttons: StartSunshine StopSunshine
 router: install_certs

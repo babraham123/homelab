@@ -56,6 +56,15 @@ case "$(hostname)" in
         require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
         ;;
+      failed_units)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
+        ;;
+      reboot)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh reboot
+        ;;
+      upgrade)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh upgrade
+        ;;
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
         ;;
@@ -102,6 +111,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh home_assistant
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
         ;;
       install_keys)
         require_pve1
@@ -132,6 +142,18 @@ case "$(hostname)" in
       copy_acme_certs)
         require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
+        ;;
+      failed_units)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
+        ;;
+      update_images)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh update_images
+        ;;
+      reboot)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh reboot
+        ;;
+      upgrade)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh upgrade
         ;;
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
@@ -174,6 +196,9 @@ case "$(hostname)" in
       install_ca)
         require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      failed_units)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
         ;;
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
@@ -221,6 +246,9 @@ case "$(hostname)" in
       install_ca)
         require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      failed_units)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
         ;;
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
@@ -315,6 +343,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh crowdsec
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
         ;;
       install_keys)
         require_pve1
@@ -361,6 +390,18 @@ case "$(hostname)" in
         ;;
       unmute_alerts)
         sudo /root/homelab-rendered/src/services/alertmanager/mute_alerts.sh unmute_alerts
+        ;;
+      failed_units)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
+        ;;
+      update_images)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh update_images
+        ;;
+      reboot)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh reboot
+        ;;
+      upgrade)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh upgrade
         ;;
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
@@ -414,6 +455,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh geoip_generator
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
         ;;
       backup)
         require_pve1
@@ -432,6 +474,18 @@ case "$(hostname)" in
       install_ca)
         require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ca
+        ;;
+      failed_units)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
+        ;;
+      update_images)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh update_images
+        ;;
+      reboot)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh reboot
+        ;;
+      upgrade)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh upgrade
         ;;
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"
@@ -525,6 +579,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh calliope
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh bookmark_handoff
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh yt_to_audiobook
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
         ;;
       install_keys)
         require_pve1
@@ -555,6 +610,18 @@ case "$(hostname)" in
       copy_acme_certs)
         require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh copy_acme_certs
+        ;;
+      failed_units)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
+        ;;
+      update_images)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh update_images
+        ;;
+      reboot)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh reboot
+        ;;
+      upgrade)
+        sudo /root/homelab-rendered/src/base/debian/commands.sh upgrade
         ;;
       *)
         unauthorized "command '${SSH_ORIGINAL_COMMAND:-}'"

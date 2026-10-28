@@ -26,14 +26,11 @@ Once a year
   vpnsvcs, homesvcs, devtop, websvcs (`ssh autoadmin@router start_pve2` first), secsvcs
 
 ```bash
-ssh manualadmin@NODE
-sudo apt update
-sudo apt full-upgrade
-# Reboot if this prints anything
-cat /var/run/reboot-required
-sudo reboot
+ssh autoadmin@NODE upgrade
+# Only if upgrade ended with "reboot required"
+ssh autoadmin@NODE reboot
 # Every homelab unit is back
-systemctl list-units --state=failed
+ssh autoadmin@NODE failed_units
 ```
 
 - Headscale is a GitHub release, not an apt package, pinned by version and sha256 in the
@@ -143,7 +140,8 @@ HIGH or CRITICAL CVE blocks the new image, and the old one keeps running. Design
 | Update failed, rolled back to the previous image | 4 |
 | Updater broken, a registry still failing after two retries, or the Trivy DB refresh failed | 5 |
 
-`ImageUpdaterStale` fires after 36 h without a clean run.
+`ImageUpdaterStale` fires after 36 h without a clean run. `ssh autoadmin@NODE update_images` runs
+the same gated update now, after a `.trivyignore` change or a pinned-image bump.
 
 ```bash
 ssh manualadmin@NODE

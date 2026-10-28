@@ -16,3 +16,9 @@ commands:
   - name: install_ca
     script: base/debian/commands.sh
     pve1_file_transfer: true
+  - name: failed_units
+    script: base/debian/commands.sh
+  - name: reboot
+    script: base/debian/commands.sh
+  - name: upgrade
+    script: base/debian/commands.sh

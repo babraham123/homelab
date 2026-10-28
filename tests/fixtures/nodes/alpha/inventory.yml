@@ -32,3 +32,4 @@ commands:
   - {name: backup, run: [sudo /root/homelab-rendered/src/nodes/alpha/backup.sh]}
   - {name: install_ca, script: base/debian/commands.sh}
   - {name: install_dispatcher, script: base/debian/commands.sh}
+  - {name: failed_units, script: base/debian/commands.sh}

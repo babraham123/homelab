@@ -37,6 +37,31 @@ case $1 in
     systemctl restart sshd
     systemctl status sshd --no-pager
     ;;
+  # Anything not running: failed units, and containers that exited or are unhealthy
+  failed_units)
+    systemctl list-units --failed --no-pager
+    if command -v podman > /dev/null; then
+      podman ps -a --filter status=exited --filter status=created --filter health=unhealthy \
+        --format '{{.Names}}\t{{.Status}}'
+    fi
+    ;;
+  # The nightly scanned update, now (base/podman/image_updater.service)
+  update_images)
+    systemctl start image_updater
+    systemctl status image_updater --no-pager
+    ;;
+  reboot)
+    systemctl reboot
+    ;;
+  # Everything unattended-upgrades leaves out (docs/maintenance.md)
+  upgrade)
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get -y full-upgrade
+    DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
+    if [ -f /var/run/reboot-required ]; then
+      echo "reboot required: ssh autoadmin@$(hostname) reboot"
+    fi
+    ;;
   install_ca)
     receive_files ca-chain.cert.pem
     mv ca-chain.cert.pem /etc/ssl/certs/janedoe.com.ca_chain.cert.pem

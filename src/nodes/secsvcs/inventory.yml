@@ -149,3 +149,11 @@ commands:
     script: services/alertmanager/mute_alerts.sh
   - name: unmute_alerts
     script: services/alertmanager/mute_alerts.sh
+  - name: failed_units
+    script: base/debian/commands.sh
+  - name: update_images
+    script: base/debian/commands.sh
+  - name: reboot
+    script: base/debian/commands.sh
+  - name: upgrade
+    script: base/debian/commands.sh
