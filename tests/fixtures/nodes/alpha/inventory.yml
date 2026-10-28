@@ -21,6 +21,7 @@ services:
       pod-web: {build: pod-web}
   plain: {}
 install_all_svcs: true
+open_ports: {9633: [zeta], 5201: [router]}
 install_some_svcs: [plain, proxy, mdns_repeater]
 commands:
   - {name: install_keys, script: nodes/alpha/commands.sh, pve1_file_transfer: true}

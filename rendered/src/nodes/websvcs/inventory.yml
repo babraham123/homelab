@@ -79,8 +79,8 @@ services:
     ip: 25
     build: yt_to_audiobook
 install_all_svcs: true
-# smartctl_exporter, nvidia_gpu_exporter
-host_ports: [9633, 9835]
+# iperf3 for net_probe; smartctl_exporter and nvidia_gpu_exporter for vmagent
+open_ports: {5201: [secsvcs], 9633: [vmagent], 9835: [vmagent]}
 image_updater_slot: '21:00'
 commands:
   - name: install_keys

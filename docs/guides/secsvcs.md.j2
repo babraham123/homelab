@@ -272,11 +272,10 @@ against its sha256; `src/base/net_probe/config.json.j2` has the targets, slots a
 
 - Set `isp.down_mbps` and `isp.up_mbps` in `vars.yml` to the plan's advertised speeds, then
   `tools/deploy_src.sh`
-- The iperf3 servers. On websvcs:
+- The iperf3 servers. On websvcs (`install_network.sh` opened 5201 to secsvcs):
 
 ```bash
 ssh autoadmin@websvcs install_iperf3_server
-ssh -t manualadmin@websvcs sudo ufw allow in from {{ secsvcs.ip }} to any port 5201 proto tcp
 ```
 
 - On the VPS: `ssh autoadmin@vpnsvcs install_iperf3_server`, the 5201 rule from

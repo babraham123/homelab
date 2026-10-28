@@ -185,6 +185,22 @@ pod pod-db localhost/acme/db:16
 EOF
 }
 
+# ufw rules from open_ports, in port order: a container source by its address on the bridge,
+# a node source by its vars.yml ip
+test_ufw_rules() {
+  out=$(render_inventory "$inventory" <<'EOF'
+{% for node in nodes -%}
+{{ node }}: {{ inv.ufw[node] }}
+{% endfor -%}
+EOF
+)
+  assert_eq "$out" <<'EOF'
+alpha: [{'port': 5201, 'from': '192.0.2.1', 'bridge': False}, {'port': 9633, 'from': '10.9.0.5', 'bridge': True}]
+gaming: []
+router: []
+EOF
+}
+
 # Addresses: the node's container_subnet plus each ip, keyed by quadlet name, so a
 # `containers` entry has its own
 test_container_addrs() {

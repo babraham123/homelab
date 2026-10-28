@@ -4,5 +4,7 @@ site:
 # Per-node vars: alpha's for tests/fixtures/nodes, secsvcs's for tests/fixtures/tree
 alpha:
   container_subnet: 10.9.0
+router:
+  ip: 192.0.2.1
 secsvcs:
   container_subnet: 10.0.0

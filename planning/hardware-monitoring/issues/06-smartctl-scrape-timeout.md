@@ -54,6 +54,6 @@ While the disks sleep the exporter exposes only `smartctl_devices` and its build
 per-disk series and `hardware.yml`'s alerts have data only during the nightly snapraid runs and
 media use. That is the intended trade-off with hd-idle.
 
-Follow-up: make the exporter rules survive a reset by deriving them in `install_network.sh`
-from the inventory (websvcs 9633 and 9835 from `inv.addr.websvcs.vmagent`; vpnsvcs 60601 from its
-vmagent, see observability 14), instead of guide steps.
+Follow-up, done the same day: `install_network.sh` now opens each node's `open_ports` from the
+inventory (websvcs 9633 and 9835 to vmagent, 5201 to secsvcs; vpnsvcs 8405, 9090 and 60601 to
+vmagent), instead of guide steps.

@@ -54,9 +54,10 @@
 #   install_some_svcs: [names] adds install_some_svcs, installing just these of either list,
 #                    in that order, for a node where the rest are too disruptive to reinstall
 #                    blindly
-#   host_ports:      ports of exporters on the host itself that its vmagent scrapes through the
-#                    bridge gateway; src/base/podman/install_network.sh opens them in ufw to
-#                    vmagent's address, which needs services.vmagent.ip
+#   open_ports:      {port: [source, ...]} ports on the host itself that install_network.sh
+#                    opens in ufw, each to its sources only: a container of this node (its
+#                    address, on the bridge interface; vmagent for an exporter it scrapes) or
+#                    another node (its ip in vars.yml; secsvcs for iperf3)
 #   image_updater_slot: HH:MM its image_updater.timer runs, 30 minutes apart per node
 #   image_updater_java_db: false skips Trivy's Java DB, for nodes whose images hold no jars
 #   commands:        other dispatcher cases, in order. Either
@@ -85,6 +86,8 @@
 #                     dir: the service's first `dirs` entry, default services/<service>,
 #                     where its .trivyignore and build.sh live
 #   shared[node]:     its shared services, in install order
+#   ufw[node]:        its open_ports as rules, [{port, from: address, bridge: true for a
+#                     container source}], in port order
 #   addr[node]:       {<quadlet name>: its container's IP address} for the containers with
 #                     an ip; vpnsvcs's vmagent is inv.addr.vpnsvcs.vmagent
 #   host_vars[node]:  {node, services, addr} for each node with a container_subnet in
@@ -210,6 +213,20 @@ def addr(node, spec, node_vars):
   return {container: f"{node_vars['container_subnet']}.{ip}" for container, ip in ips.items()}
 
 
+def ufw(node, spec, addrs, data):
+  rules = []
+  for port, sources in sorted((spec.get("open_ports") or {}).items()):
+    for src in sources:
+      if src in addrs:
+        rules.append({"port": port, "from": addrs[src], "bridge": True})
+      elif (data.get(src) or {}).get("ip"):
+        rules.append({"port": port, "from": data[src]["ip"], "bridge": False})
+      else:
+        sys.exit(f"error: src/nodes/{node}/inventory.yml: open_ports {port} names {src}, "
+                 "neither one of its containers with an ip nor a node with an ip in vars.yml")
+  return rules
+
+
 def derive(data):
   nodes = {node: spec or {} for node, spec in data["nodes"].items()}
   node_vars = {node: data.get(node) or {} for node in nodes}
@@ -236,6 +253,7 @@ def derive(data):
     "shared": {node: [name for name, svc in services(spec).items() if svc.get("shared")]
                for node, spec in nodes.items()},
     "addr": addrs,
+    "ufw": {node: ufw(node, spec, addrs[node], data) for node, spec in nodes.items()},
     "host_vars": {node: {"node": node, "services": services(spec), "addr": addrs[node]}
                   for node, spec in nodes.items() if "container_subnet" in node_vars[node]},
   }

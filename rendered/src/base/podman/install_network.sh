@@ -3,7 +3,7 @@
 # Traefik's traffic through to its container: Podman writes its own iptables rules, so
 # routed traffic needs a ufw rule naming the network's interface. vpnsvcs keeps the rules
 # from its guide and publishes nothing; it gets only the image builds' egress. Every node
-# gets its host_ports opened to vmagent.
+# gets its open_ports.
 # Usage:
 #   /root/homelab-rendered/src/base/podman/install_network.sh
 
@@ -34,14 +34,20 @@ if [[ "$node" != vpnsvcs ]]; then
   ufw allow in on "$POD_IFACE" to any port 53
   ufw route allow in on "$POD_IFACE" out on "$NET_IFACE"
 fi
-# Host exporters its vmagent scrapes through the bridge gateway (host_ports in the node's
-# inventory), from vmagent's address only; ufw drops bridge-to-host traffic otherwise
-inventory="${rendered}/nodes/${node}/inventory.yml"
-subnet=$(podman network inspect systemd-net | jq -r '.[0].subnets[0].subnet')
-vmagent="${subnet%.0/24}.$(yq '.services.vmagent.ip' "$inventory")"
-for port in $(yq '.host_ports // [] | .[]' "$inventory"); do
-  ufw allow in on "$POD_IFACE" from "$vmagent" to any port "$port" proto tcp
-done
+# Ports ufw opens on the host, each to its sources (open_ports in the inventory): the
+# exporters its vmagent scrapes through the bridge gateway, iperf3 for secsvcs's net_probe
+case $node in
+  vpnsvcs)
+    ufw allow in on "$POD_IFACE" from 10.13.0.7 to any port 8405 proto tcp
+    ufw allow in on "$POD_IFACE" from 10.13.0.7 to any port 9090 proto tcp
+    ufw allow in on "$POD_IFACE" from 10.13.0.7 to any port 60601 proto tcp
+    ;;
+  websvcs)
+    ufw allow in from 192.168.4.20 to any port 5201 proto tcp
+    ufw allow in on "$POD_IFACE" from 10.11.0.7 to any port 9633 proto tcp
+    ufw allow in on "$POD_IFACE" from 10.11.0.7 to any port 9835 proto tcp
+    ;;
+esac
 # Image builds (build.sh) run on Podman's default network and fetch packages: DNS, plus HTTP
 # for Debian's apt mirrors
 BUILD_IFACE=$(podman network inspect podman | jq -r '.[0].network_interface')
