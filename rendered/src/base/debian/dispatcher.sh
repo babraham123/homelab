@@ -104,6 +104,9 @@ case "$(hostname)" in
         ;;
       install_all_svcs)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh traefik
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
@@ -325,6 +328,10 @@ case "$(hostname)" in
         ;;
       install_all_svcs)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh net_probe
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh postgres
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh lldap
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh authelia
@@ -448,6 +455,9 @@ case "$(hostname)" in
         ;;
       install_some_svcs)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh iperf3_server
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh fail2ban
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh haproxy
         sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh crowdsec_firewall_bouncer
@@ -562,6 +572,11 @@ case "$(hostname)" in
         ;;
       install_all_svcs)
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh nvidia_gpu_exporter
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh image_updater
+        sudo /root/homelab-rendered/src/base/debian/install_svcs.sh iperf3_server
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh traefik
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh crowdsec_appsec
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent

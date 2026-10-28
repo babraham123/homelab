@@ -24,7 +24,8 @@ services:
     build: geoip_generator
 # Not headscale and tailscaled: each pulls its package again and restarts the control plane
 # or the tunnel every home service is reached through.
-install_some_svcs: [fail2ban, haproxy, crowdsec_firewall_bouncer, deadman, fluentbit, vmagent, geoip_generator]
+install_some_svcs: [node_exporter, image_updater, iperf3_server, fail2ban, haproxy, crowdsec_firewall_bouncer, deadman,
+                    fluentbit, vmagent, geoip_generator]
 image_updater_slot: '20:00'
 # No jars in its images, and the ~1 GB Java DB is a lot for the VPS's disk
 image_updater_java_db: false

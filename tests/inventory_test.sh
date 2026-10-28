@@ -43,6 +43,8 @@ EOF
     ;;
   install_all_svcs)
     sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+    sudo /root/homelab-rendered/src/base/debian/install_svcs.sh node_exporter
+    sudo /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh zeta
     sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh app
@@ -52,6 +54,7 @@ EOF
     ;;
   install_some_svcs)
     sudo /root/homelab-rendered/src/base/debian/commands.sh install_dispatcher
+    sudo /root/homelab-rendered/src/base/debian/install_svcs.sh mdns_repeater
     sudo /root/homelab-rendered/src/base/podman/install_svcs.sh proxy
     sudo /root/homelab-rendered/src/nodes/alpha/install_svcs.sh plain
     sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units

@@ -48,10 +48,12 @@
 #                      containers:  {<quadlet name>: {ip, upstream | build, update_last}}, in
 #                                   place of the keys above, when the case installs
 #                                   other quadlets than <service>.container
-#   install_all_svcs: true adds install_all_svcs, installing `services` in order, after
-#                    install_dispatcher and before failed_units when the node has them
-#   install_some_svcs: [names] adds install_some_svcs, installing just these, in `services`
-#                    order, for a node where the rest are too disruptive to reinstall blindly
+#   install_all_svcs: true adds install_all_svcs, installing `debian_services` then `services`
+#                    in order, after install_dispatcher and before failed_units when the node
+#                    has them
+#   install_some_svcs: [names] adds install_some_svcs, installing just these of either list,
+#                    in that order, for a node where the rest are too disruptive to reinstall
+#                    blindly
 #   image_updater_slot: HH:MM its image_updater.timer runs, 30 minutes apart per node
 #   image_updater_java_db: false skips Trivy's Java DB, for nodes whose images hold no jars
 #   commands:        other dispatcher cases, in order. Either
@@ -129,11 +131,10 @@ def dispatch(node, spec):
   def sudo(script, arg):
     return f"sudo {script_path(node, script)} {arg}"
 
-  cases = [case(f"install_{svc}", [sudo("base/debian/install_svcs.sh", svc)])
-           for svc in spec.get("debian_services", [])]
-  install = {name: sudo(SHARED_SCRIPT if svc.get("shared") else f"nodes/{node}/install_svcs.sh", name)
-             for name, svc in services(spec).items()}
-  cases += [case(f"install_{name}", [line]) for name, line in install.items()]
+  install = {svc: sudo("base/debian/install_svcs.sh", svc) for svc in spec.get("debian_services", [])}
+  install |= {name: sudo(SHARED_SCRIPT if svc.get("shared") else f"nodes/{node}/install_svcs.sh", name)
+              for name, svc in services(spec).items()}
+  cases = [case(f"install_{name}", [line]) for name, line in install.items()]
   # The dispatcher and sudoers first, so the run picks up this deploy's changed cases and
   # grants (install_dispatcher renames the script, so the running one is left intact);
   # failed_units last, to show what the run broke.

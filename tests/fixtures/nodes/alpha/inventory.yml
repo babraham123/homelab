@@ -21,7 +21,7 @@ services:
       pod-web: {build: pod-web}
   plain: {}
 install_all_svcs: true
-install_some_svcs: [plain, proxy]
+install_some_svcs: [plain, proxy, mdns_repeater]
 commands:
   - {name: install_keys, script: nodes/alpha/commands.sh, pve1_file_transfer: true}
   - {name: build_map, script: nodes/alpha/commands.sh, sudo: false}
