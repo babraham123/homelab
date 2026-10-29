@@ -17,8 +17,6 @@ local noise = {
   smartctl_exporter = {"device is in a low-power mode"},
   -- A scraper closed the connection before the response was written
   node_exporter = {"write: broken pipe"},
-  -- A trace per Authelia lookup; logins, warnings and errors stay
-  lldap = {"LDAP request [", "LDAP session start:", "LDAP session end:"},
 }
 
 function is_noise(service, message)
