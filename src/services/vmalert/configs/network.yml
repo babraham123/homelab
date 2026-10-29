@@ -23,9 +23,16 @@ groups:
           summary: "secsvcs can't ping the VPS over Tailscale"
           description: "Public traffic rides this path. tailscale status on pfSense and the VPS; the Headscale ACL lets secsvcs ping public@."
       - alert: NetProbeStale
+        # A probe that has never succeeded has no success series, so the last clause goes by its
+        # attempts: two days of them with no success is stale too. The speed test crashed on every
+        # run for its first four days and nothing said so.
         expr: |
           time() - homelab_net_probe_last_success_timestamp_seconds{probe="speedtest"} > 25 * 3600
             or time() - homelab_net_probe_last_success_timestamp_seconds{probe="iperf_vps"} > 49 * 3600
+            or (
+              time() - min_over_time(homelab_net_probe_last_attempt_timestamp_seconds{probe=~"speedtest|iperf_vps"}[3d]) > 49 * 3600
+                unless homelab_net_probe_last_success_timestamp_seconds
+            )
         for: 1h
         labels:
           severity: warning

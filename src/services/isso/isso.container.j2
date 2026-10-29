@@ -30,6 +30,8 @@ Secret=isso_admin_password,type=env,target=ADMIN_PASSWORD
 
 Volume=/etc/opt/isso/config:/etc/isso.d:ro
 Volume=issodb.volume:/var/lib/isso
+# gunicorn's control socket; read-only root otherwise logs an error at every start
+Tmpfs=/root/.gunicorn
 
 [Service]
 Restart=on-failure

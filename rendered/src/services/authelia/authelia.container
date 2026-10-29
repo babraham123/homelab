@@ -8,7 +8,7 @@ StartLimitBurst=10
 Requires=lldap.service
 Requires=postgres.service
 Wants=network.target
-After=network-online.target
+After=network-online.target lldap.service postgres.service
 
 [Container]
 Image=localhost/authelia/authelia:4.39

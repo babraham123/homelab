@@ -9,7 +9,7 @@ StartLimitBurst=10
 Requires=victoriametrics.service
 Requires=alertmanager.service
 Wants=network.target
-After=network-online.target
+After=network-online.target victoriametrics.service alertmanager.service
 
 [Container]
 Image=localhost/victoriametrics/vmalert:latest

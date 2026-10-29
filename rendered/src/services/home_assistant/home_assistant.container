@@ -11,7 +11,7 @@ Requires=zigbee2mqtt.service
 # TODO: fix esphome integration
 # Requires=esphome.service
 Wants=network.target
-After=network-online.target
+After=network-online.target mosquitto.service zigbee2mqtt.service
 
 [Container]
 Image=localhost/homeassistant/home-assistant:2026.10
