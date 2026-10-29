@@ -9,13 +9,16 @@ After=network-online.target
 [Service]
 Type=simple
 # Root for raw device access. Only the declared disks, so the VM's virtual disks aren't
-# scanned; smartctl's default --nocheck=standby leaves a sleeping disk asleep.
+# scanned; smartctl's default --nocheck=standby leaves a sleeping disk asleep, and the
+# exporter logs that refusal (exit 2) as two warnings and an error per disk per scrape:
+# the log level keeps the error only.
 # Accessible at :9633/metrics
 ExecStart=/usr/local/bin/smartctl_exporter \
   --smartctl.device=/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AA \
   --smartctl.device=/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AB \
   --smartctl.device=/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AC \
   --smartctl.device=/dev/disk/by-id/ata-WDC_WD80EFPX-68C4ZN0_WD-RD0000AD \
+  --log.level=error \
   --web.listen-address=:9633
 Restart=on-failure
 ProtectSystem=strict

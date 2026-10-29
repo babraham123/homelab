@@ -10,6 +10,12 @@
 local desktop_off_errors = {"no route to host", "context deadline exceeded",
   "Client.Timeout exceeded", "connection refused"}
 
+-- The metrics and log pushes (every vmagent, telegraf, Home Assistant, Fluent Bit) are most
+-- of secsvcs's Traefik access log, one 204 after another. Only their failures are kept, for
+-- CrowdSec and the RequestErrorsToAPI alert.
+local push_routers = {["victoriametrics-api@file"] = true,
+  ["victoriametrics-hass-api@file"] = true, ["victorialogs-api@file"] = true}
+
 function is_desktop_off(service, message)
   if service ~= "vmagent" or not message:find('job="nvidia_gpu_desktops"', 1, true) then
     return false
@@ -58,6 +64,9 @@ function process_msg(tag, timestamp, record)
   -- keep its CamelCase and request_/downstream_ header fields, redact the one query
   -- parameter that carries a session token, and replace the JSON blob with one line.
   if record["RequestMethod"] then
+    if push_routers[record["RouterName"]] and (tonumber(record["DownstreamStatus"]) or 0) < 300 then
+      return -1, new_timestamp, {}
+    end
     for key, value in pairs(record) do
       if key:match("^[A-Z]") or key:match("^request_") or key:match("^downstream_") or key == "entryPointName" then
         new_record[key] = value

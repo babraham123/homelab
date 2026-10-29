@@ -1,8 +1,11 @@
 # /etc/opt/crowdsec/config/config.yaml.local
 # Ref: https://docs.crowdsec.net/docs/next/configuration/crowdsec_configuration/#overriding-values
 # Merged over the image's config.yaml. The LAPI listens on 8455, not CrowdSec's default
-# 8080, which many other apps also default to.
+# 8080, which many other apps also default to. Info logs a line per request the WAF
+# inspects and every database flush, more than everything else on the node but Traefik.
 ---
+common:
+  log_level: warning
 api:
   server:
     listen_uri: 0.0.0.0:8455

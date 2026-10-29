@@ -5,3 +5,6 @@
 
 [Definition]
 logtarget = SYSTEMD-JOURNAL
+# Bans and unbans are NOTICE; the "Found" line per matched login attempt (INFO) was
+# hundreds a day
+loglevel = NOTICE

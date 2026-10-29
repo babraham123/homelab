@@ -30,6 +30,9 @@ global
 defaults
     log global
     option dontlognull
+    # Only sessions that ended in an error, timeout or retry: nothing reads the normal ones
+    # (CrowdSec parses Traefik's access log), and they were thousands a day.
+    option dontlog-normal
     timeout connect 5000
     timeout client  50000
     timeout server  50000

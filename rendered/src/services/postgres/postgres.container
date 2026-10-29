@@ -29,7 +29,8 @@ Exec=-c "ssl=on" \
      -c "ssl_ca_file=/certificates/ca.chain.crt" \
      -c "ssl_min_protocol_version=TLSv1.2" \
      -c "ssl_ciphers=HIGH:+3DES:!aNULL" \
-     -c "hba_file=/etc/postgresql/pg_hba.conf"
+     -c "hba_file=/etc/postgresql/pg_hba.conf" \
+     -c "log_checkpoints=off"
 
 Environment=PGTZ=America/Los_Angeles
 Environment=POSTGRES_HOST_AUTH_METHOD=scram-sha-256
