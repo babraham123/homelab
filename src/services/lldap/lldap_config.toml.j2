@@ -129,6 +129,9 @@ key_file = ""
 ## list to silence the warning.
 #ignored_user_attributes = [ "sAMAccountName" ]
 #ignored_group_attributes = [ "mail", "userPrincipalName" ]
+# Authelia's group search asks for memberof, which lldap doesn't have on groups, and lldap
+# warned twice per lookup.
+ignored_group_attributes = [ "memberof" ]
 
 ## Options to configure SMTP parameters, to send password reset emails.
 ## To set these options from environment variables, use the following format

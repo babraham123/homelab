@@ -99,6 +99,9 @@ frontend https_all
 frontend http_all
     mode http
     bind *:80
+    # Without it the frontend logs "Connect from" on every accept, which dontlog-normal
+    # (defaults) can't filter; the full line at close it can.
+    option httplog
 
     timeout tarpit 5s
 

@@ -10,6 +10,26 @@
 local desktop_off_errors = {"no route to host", "context deadline exceeded",
   "Client.Timeout exceeded", "connection refused"}
 
+-- Lines that repeat all day and say nothing new, by service and a piece of the message;
+-- the journal on the node still has them.
+local noise = {
+  -- A disk in standby: smartctl declines to wake it (exit 2), an error per disk per scrape
+  smartctl_exporter = {"device is in a low-power mode"},
+  -- A scraper closed the connection before the response was written
+  node_exporter = {"write: broken pipe"},
+  -- A trace per Authelia lookup; logins, warnings and errors stay
+  lldap = {"LDAP request [", "LDAP session start:", "LDAP session end:"},
+}
+
+function is_noise(service, message)
+  for _, piece in ipairs(noise[service] or {}) do
+    if message:find(piece, 1, true) then
+      return true
+    end
+  end
+  return false
+end
+
 -- The metrics and log pushes (every vmagent, telegraf, Home Assistant, Fluent Bit) are most
 -- of secsvcs's Traefik access log, one 204 after another. Only their failures are kept, for
 -- CrowdSec and the RequestErrorsToAPI alert.
@@ -47,7 +67,8 @@ function process_msg(tag, timestamp, record)
   new_record["service"] = record["container_name"]
     or (record["systemd_unit"] or ""):gsub("%.service$", "")
   new_record["message"] = record["message"] or ""
-  if is_desktop_off(new_record["service"], new_record["message"]) then
+  if is_desktop_off(new_record["service"], new_record["message"])
+      or is_noise(new_record["service"], new_record["message"]) then
     return -1, new_timestamp, {}
   end
   new_record["code"] = (record["code_func"] or "") .. " " .. (record["code_file"] or "") .. ":" .. (record["code_line"] or "")
