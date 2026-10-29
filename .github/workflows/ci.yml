@@ -32,5 +32,6 @@ jobs:
           npm install -g markdownlint-cli2@0.24.0
       # The hook renders the committed tree, runs every check and the fast tests, then
       # replaces rendered/ and stages it; a staged change means rendered/ is stale.
-      - run: .githooks/pre-commit
+      # It refuses to run unless it is the active hook, so activate it as a clone would.
+      - run: git config core.hooksPath .githooks && .githooks/pre-commit
       - run: git diff --cached --stat --exit-code
