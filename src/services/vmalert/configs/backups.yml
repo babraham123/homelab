@@ -1,5 +1,6 @@
 # Backup and media-array parity alerts, from the textfile metrics written by pve1's
-# backup_orchestrator.sh and websvcs' snapraid_run.sh; disk health is in hardware.yml.
+# backup_orchestrator.sh and websvcs' snapraid_run.sh, one series per `step`; disk health is
+# in hardware.yml.
 # The backup run is weekly, so fifteen days of silence is two missed runs: one skipped
 # week (pve1's skip_next_backup) stays quiet.
 ---
@@ -12,7 +13,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Backup step {{ $labels.job }} hasn't succeeded in over 15 days"
+          summary: "Backup step {{ $labels.step }} hasn't succeeded in over 15 days"
           description: "Last success {{ $value | humanizeDuration }} ago. See journalctl -u backup_orchestrator on pve1."
       - alert: BackupNeverRan
         expr: absent(homelab_backup_last_success_timestamp_seconds)
@@ -30,6 +31,6 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "snapraid {{ $labels.job }} hasn't succeeded in over 8 days"
-          description: "Parity is stale; media changed since then is unprotected. See journalctl -u snapraid-{{ $labels.job }} on websvcs."
+          summary: "snapraid {{ $labels.step }} hasn't succeeded in over 8 days"
+          description: "Parity is stale; media changed since then is unprotected. See journalctl -u snapraid-{{ $labels.step }} on websvcs."
 ...

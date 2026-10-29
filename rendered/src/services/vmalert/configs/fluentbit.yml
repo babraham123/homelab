@@ -4,12 +4,10 @@ groups:
     rules:
       - alert: NoOutputBytesProcessed
         expr: rate(fluentbit_output_proc_bytes_total[5m]) == 0
-        annotations:
-          message: |
-            Fluent Bit instance {{ $labels.instance }}'s output plugin {{ $labels.name }} has not processed any
-            bytes for at least 15 minutes.
-          summary: No Output Bytes Processed
         for: 15m
         labels:
           severity: critical
+        annotations:
+          summary: "Fluent Bit on {{ $labels.host }} has shipped no logs for 15 minutes"
+          description: "Its {{ $labels.name }} output to VictoriaLogs is stuck, so nothing from {{ $labels.host }} reaches the logs. podman logs fluentbit there; is VictoriaLogs up?"
 ...

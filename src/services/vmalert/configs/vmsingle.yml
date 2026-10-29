@@ -54,9 +54,10 @@ groups:
           severity: warning
         annotations:
           dashboard: "{{ $externalURL }}/d/wNf0q_kZk_vm?viewPanel=35&var-instance={{ $labels.instance }}"
-          summary: "Too many errors served for path {{ $labels.path }} (instance {{ $labels.instance }})"
-          description: "Requests to path {{ $labels.path }} are receiving errors.
-            Please verify if clients are sending correct requests."
+          summary: "VictoriaMetrics rejects requests to {{ $labels.path }}{{ if $labels.reason }}: {{ $labels.reason }}{{ end }}"
+          description: "A client keeps sending requests VictoriaMetrics refuses. Its address and path are in
+            Traefik's access log on secsvcs (router victoriametrics-api, status 4xx); for \"unsupported\", the
+            path is wrong, as with a client that appends /api/v2/write to a URL that already ends in it."
 
       - alert: RowsRejectedOnIngestion
         expr: rate(vm_rows_ignored_total[5m]) > 0
@@ -121,15 +122,4 @@ groups:
             for the current load. It is likely more RAM is needed for optimal handling of the current number of active time series.
             See also https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3976#issuecomment-1476883183"
 
-      - alert: LabelsLimitExceededOnIngestion
-        expr: increase(vm_metrics_with_dropped_labels_total[5m]) > 0
-        for: 15m
-        labels:
-          severity: warning
-        annotations:
-          dashboard: "{{ $externalURL }}/d/wNf0q_kZk_vm?viewPanel=74&var-instance={{ $labels.instance }}"
-          summary: "Metrics ingested in ({{ $labels.instance }}) are exceeding labels limit"
-          description: "VictoriaMetrics limits the number of labels per each metric with `-maxLabelsPerTimeseries` command-line flag.\n
-           This prevents from ingesting metrics with too many labels. Please verify that `-maxLabelsPerTimeseries` is configured
-           correctly or that clients which send these metrics aren't misbehaving."
 ...

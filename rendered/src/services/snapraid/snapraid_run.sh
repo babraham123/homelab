@@ -58,4 +58,4 @@ esac
 write_prom "homelab_snapraid_${job}.prom" \
   '# HELP homelab_snapraid_last_success_timestamp_seconds Unix time of the last successful snapraid job.' \
   '# TYPE homelab_snapraid_last_success_timestamp_seconds gauge' \
-  "homelab_snapraid_last_success_timestamp_seconds{job=\"${job}\"} $(date +%s)"
+  "homelab_snapraid_last_success_timestamp_seconds{step=\"${job}\"} $(date +%s)"

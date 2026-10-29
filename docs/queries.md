@@ -15,7 +15,7 @@ run against the live instances.
   `nvidia_gpu_desktops` carries `host="gaming"` and `host="devtop"`
 - `job`: the scrape job, per node in `src/nodes/<node>/prometheus.yml.j2`; `instance` is the
   scrape address, rarely useful here
-- `exported_job`: the job label a pushed metric came with (`homelab_backup_*` per backup job)
+- `step`: the backup step on `homelab_backup_*` and the snapraid job on `homelab_snapraid_*`
 - `alertname`, `alertgroup`, `alertstate`: on `ALERTS`. Groups: `backups`, `crowdsec`,
   `fluentbit`, `hosts`, `network`, `pipeline`, `scrapes`, `uptime`, `vm-health`, `vmagent`,
   `vmalert`, `vmsingle`, `vps`
@@ -138,7 +138,7 @@ headscale_nodestore_nodes
 ### Jobs and freshness
 
 ```promql
-# Days since the last good run (backups per exported_job, probes per probe)
+# Days since the last good run (backups per step, probes per probe)
 (time() - homelab_backup_last_success_timestamp_seconds) / 86400
 (time() - homelab_snapraid_last_success_timestamp_seconds) / 86400
 (time() - homelab_net_probe_last_success_timestamp_seconds) / 3600

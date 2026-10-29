@@ -109,9 +109,10 @@ groups:
   - name: scrapes
     rules:
       - alert: TargetDown
-        # Hosts have NodeDown, VictoriaMetrics components ServiceDown (health.yml).
+        # Hosts have NodeDown, VictoriaMetrics components ServiceDown (health.yml), CrowdSec
+        # and HAProxy their own (crowdsec.yml, vps.yml).
         # nvidia_gpu_desktops: devtop and gaming are off most of the time.
-        expr: up{job!~"node_exporter.*|victoriametrics|vmagent|vmalert|nvidia_gpu_desktops"} == 0
+        expr: up{job!~"node_exporter.*|victoriametrics|vmagent|vmalert|crowdsec|crowdsec_appsec|haproxy|nvidia_gpu_desktops"} == 0
         for: 5m
         labels:
           severity: warning

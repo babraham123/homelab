@@ -126,27 +126,27 @@ run() {
   fi
 }
 
-# Keeps the previous timestamp of failed jobs, so staleness alerts fire per job. Jobs
+# Keeps the previous timestamp of failed steps, so staleness alerts fire per step. Steps
 # no longer in STEPS are dropped, or a renamed step would alert as stale forever.
 write_metrics() {
-  local name='homelab_backup_last_success_timestamp_seconds' job value
+  local name='homelab_backup_last_success_timestamp_seconds' step value
   declare -A previous=() last=()
   if [[ -f $metrics ]]; then
-    while read -r job value; do
-      [[ $job =~ job=\"([^\"]+)\" ]] && previous[${BASH_REMATCH[1]}]=$value
+    while read -r step value; do
+      [[ $step =~ step=\"([^\"]+)\" ]] && previous[${BASH_REMATCH[1]}]=$value
     done < <(grep "^${name}{" "$metrics")
   fi
-  for job in "${STEPS[@]}"; do
-    [[ -v previous[$job] ]] && last[$job]=${previous[$job]}
-    [[ -v done_at[$job] ]] && last[$job]=${done_at[$job]}
+  for step in "${STEPS[@]}"; do
+    [[ -v previous[$step] ]] && last[$step]=${previous[$step]}
+    [[ -v done_at[$step] ]] && last[$step]=${done_at[$step]}
   done
 
   mkdir -p "$(dirname "$metrics")"
   {
     echo "# HELP ${name} Unix time of the last successful backup_orchestrator step."
     echo "# TYPE ${name} gauge"
-    for job in "${!last[@]}"; do
-      echo "${name}{job=\"${job}\"} ${last[$job]}"
+    for step in "${!last[@]}"; do
+      echo "${name}{step=\"${step}\"} ${last[$step]}"
     done
   } > "${metrics}.tmp"
   chmod 644 "${metrics}.tmp"

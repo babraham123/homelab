@@ -282,7 +282,7 @@ flowchart LR
   4. `prune.sh` on pve2 (dispatcher `prune`): the PBS prune jobs, then garbage collection. After
      the upload, so this run's snapshots count, and while PBS is up
   5. `acme_transfer.sh`: Traefik's renewed certs onto pve1, pve2, PBS and pfSense, while pve2 is up
-  6. A `homelab_backup_last_success_timestamp_seconds{job}` metric per step, `BackupStale` after 15
+  6. A `homelab_backup_last_success_timestamp_seconds{step}` metric per step, `BackupStale` after 15
      days (`src/services/vmalert/configs/backups.yml`), an ntfy summary, and pve2 off again if it
      was off
 - **Retention**, PBS prune jobs per namespace, set in `src/nodes/pve2/prune.sh`:
