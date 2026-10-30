@@ -40,6 +40,7 @@ case $node in
   vpnsvcs)
     ufw allow in on "$POD_IFACE" from 10.13.0.7 to any port 8405 proto tcp
     ufw allow in on "$POD_IFACE" from 10.13.0.7 to any port 9090 proto tcp
+    ufw allow in on "$POD_IFACE" from 10.13.0.7 to any port 9100 proto tcp
     ufw allow in on "$POD_IFACE" from 10.13.0.7 to any port 60601 proto tcp
     ;;
   websvcs)
