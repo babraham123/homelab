@@ -31,6 +31,9 @@ Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.ym
 
 Environment=TZ={{ personal.timezone }}
 Volume=/etc/opt/alertmanager:/config:ro
+# Notification log and silences; without it a restart (every image update) forgets what
+# was sent and pushes every firing alert again.
+Volume=amdata.volume:/alertmanager
 Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
 
 [Service]

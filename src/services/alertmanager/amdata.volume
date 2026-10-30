@@ -1,0 +1,9 @@
+# /etc/containers/systemd/amdata.volume
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#volume-units-volume
+
+[Volume]
+# nobody, the image's user
+User=65534
+Group=65534
+# default: Driver=local
+# /var/lib/containers/storage/volumes

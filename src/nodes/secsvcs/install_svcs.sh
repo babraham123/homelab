@@ -58,7 +58,7 @@ case $1 in
     ;;
   alertmanager)
     install -D -m 644 -t /etc/opt/alertmanager services/alertmanager/config.yml.j2 services/alertmanager/web_config.yml.j2
-    install_quadlet services/alertmanager/alertmanager.container
+    install_quadlet services/alertmanager/alertmanager.container services/alertmanager/amdata.volume
     reload_restart alertmanager
     ;;
   ntfy-alertmanager)

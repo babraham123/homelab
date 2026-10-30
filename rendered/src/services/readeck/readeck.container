@@ -14,6 +14,12 @@ Image=localhost/readeck/readeck:latest
 ContainerName=readeck
 AutoUpdate=local
 NoNewPrivileges=true
+# bookmark_handoff orders after this unit; "healthy" means the server answers, not that
+# the container exists.
+HealthCmd=readeck healthcheck -config config.toml
+HealthInterval=10s
+HealthRetries=3
+Notify=healthy
 
 Network=net.network
 HostName=read.janedoe.com

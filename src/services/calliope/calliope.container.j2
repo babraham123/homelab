@@ -39,6 +39,9 @@ Volume=calliope_cache.volume:/cache
 
 [Service]
 Type=oneshot
+# The CDI spec lists /dev/nvidia-modeset, which the driver only creates on first use; at
+# boot the path unit fires before anything has used the GPU. Creates the missing nodes.
+ExecStartPre=/usr/bin/nvidia-modprobe -m -u -c 0
 # The GPU is shared with whisper; keep the CPU side of a book out of its way too.
 Nice=10
 # A book takes hours; stopping only interrupts it, and the next run resumes it.

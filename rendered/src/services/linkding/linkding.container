@@ -17,6 +17,12 @@ Image=localhost/sissbruecker/linkding:latest-plus
 ContainerName=linkding
 AutoUpdate=local
 NoNewPrivileges=true
+# bookmark_handoff orders after this unit; "healthy" means uWSGI answers, not that the
+# container exists.
+HealthCmd=curl -fsS -o /dev/null http://127.0.0.1:9090/health
+HealthInterval=10s
+HealthRetries=3
+Notify=healthy
 
 Network=net.network
 HostName=archive.janedoe.com
