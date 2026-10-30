@@ -36,6 +36,7 @@ not `origin/main`.
 - [Development and code structure](docs/development.md)
 - [Maintenance commands](docs/maintenance.md)
 - [Debugging](docs/debugging.md)
+- [Assisted apply sessions: Claude reads the recorded terminal and stages each next command](docs/guides/claude_apply.md)
 - [Metrics and log queries: labels, fields, PromQL and LogsQL](docs/queries.md)
 - [GitHub repository rules](docs/github.md)
 - [Domain glossary](CONTEXT.md) and [decision records](docs/adr/)
