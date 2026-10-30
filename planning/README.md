@@ -37,6 +37,8 @@ see each `spec.md`. Conventions: `docs/agents/issue-tracker.md`.
 - [Extract standalone components](repo-extraction/spec.md) — 11 issues (maintainer request,
   added 2026-10-25)
 - [Host secrets](host-secrets/spec.md) — 1 issue (maintainer request, added 2026-10-26)
+- [VM provisioning with cloud-init](vm-provisioning/spec.md) — no issues, deferred until the next
+  new VM (maintainer request, added 2026-10-30)
 
 Archived prototype, not a feature: [services-inventory](services-inventory/README.md), the
 declarative per-node `services.yml` that restructure/01 judged too complex and replaced with the
