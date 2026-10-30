@@ -13,13 +13,15 @@
 - `vars.yml` contains specific/personal values for rendering (gitignored), `vars.template.yml` is an
   example
 - All `*.j2` files are processed through Jinja2 via `jinjanate` at render time
-- `*.j2.j2` files undergo a *second* render pass on the node, by one of the
-  `src/base/podman/render_*.sh` scripts:
-  - `render_host.sh`, at install time from `src/base/podman/install_svcs.sh`: the shared services'
-    quadlets for this node, given its name, inventory services and container addresses
-    (`inv.host_vars`, from `tools/inventory.py`)
-  - `render_secrets.sh`, at container start (`ExecStartPre`): secrets injection
-  - `render_services.sh`, at container start: Fluent Bit's config, with the node's "Homelab:" units
+- `*.j2.j2` files undergo a *second* render pass on the node, at container start
+  (`ExecStartPre`), by one of the `src/base/podman/render_*.sh` scripts. Its Jinja is written
+  with square brackets, `[[ var ]]` and `[% block %]` (`src/base/podman/second_pass.py`), which the
+  first pass leaves as text, so no `{% raw %}` and no pass ever sees the other's variables:
+  - `render_secrets.sh`: secrets injection, `[[ env('SECRET') ]]`, for apps that take a secret
+    only inline (Alertmanager's bcrypt hash, ntfy's users and tokens, ntfy-alertmanager). Apps
+    with a `*_file` option read the secret file Podman mounts under `/run/secrets/` instead
+    (Alertmanager's `config.yml`)
+  - `render_services.sh`: Fluent Bit's config, with the node's "Homelab:" units
 - `src/nodes/<node>/inventory.yml`, one per node, is the node inventory: each node's dispatcher
   entries (services in install order, other commands) and each service's subdomain, Gatus endpoint,
   container address (`ip`, read back as `inv.addr.<node>.<service>`) and container image facts
@@ -70,8 +72,8 @@
 - `src/base/podman/install_svcs.sh` installs the shared services (Traefik, CrowdSec AppSec,
   vmagent, Fluent Bit) on whichever container VM runs it; a node's inventory marks them
   `shared: true` and the dispatcher runs this script for them. Node-specific pieces stay in the
-  node's dir: Traefik's routes and quadlet drop-ins (`traefik/traefik.container.d/`), vmagent's
-  `prometheus.yml`
+  node's dir: each shared quadlet's drop-in (`<quadlet>.container.d/<node>.conf`, with at least its
+  container's `IP=`), Traefik's routes, vmagent's `prometheus.yml`
 - `tools/*.sh` source `tools/lib.sh`, the workstation's `warn`/`die` and `template_vars` (the
   template data: vars, the inventory files under `nodes:` and `inv:`, shared by the render and the
   tests)
@@ -109,7 +111,7 @@ flowchart TB
 
     subgraph node["On the node"]
         dispatch["install_&lt;svc&gt; → dispatcher.sh allowlist<br/>→ install_svcs.sh → quadlets into<br/>/etc/containers/systemd"]
-        second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with AGE secrets<br/>(render_host.sh already ran at install)"]
+        second["Container ExecStartPre: render_secrets.sh<br/>renders remaining *.j2 with AGE secrets"]
     end
 
     vars --> allvars

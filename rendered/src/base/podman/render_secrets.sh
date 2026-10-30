@@ -1,5 +1,6 @@
 #!/bin/bash
-# Renders the given file in the same directory as it's template (FILENAME.j2).
+# Renders the given file in the same directory as its template (FILENAME.j2), the second
+# pass of a *.j2.j2: [[ env('SECRET') ]] and [% %] blocks (second_pass.py).
 # Includes the given secrets as env vars while rendering.
 # The rendered file will be owned by root.
 # Usage:
@@ -30,7 +31,7 @@ if [ -f "$file" ]; then
   chmod 600 "$file"
 fi
 
-jinjanate --quiet -o "$file" "$file.j2"
+jinjanate --quiet --customize "$(dirname "$0")/second_pass.py" -o "$file" "$file.j2"
 chmod 400 "$file"
 
 echo "Rendered the file $file"

@@ -9,6 +9,14 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 
 node=$(hostname -s)
 
+# Usage: install_dropins QUADLET; the node's own lines for a shared quadlet, at least its
+# container's IP: nodes/<node>/QUADLET.container.d/*. Replaced whole, so a drop-in
+# deleted from the repo stops applying.
+install_dropins() {
+  rm -rf "/etc/containers/systemd/$1.container.d"
+  install -D -m 644 -t "/etc/containers/systemd/$1.container.d" "nodes/${node}/$1.container.d/"*
+}
+
 cd "$rendered"
 watch_homelab_units
 
@@ -25,14 +33,8 @@ case $1 in
     install -D -m 644 services/traefik/static.yml /etc/opt/traefik/config/static/traefik.yml
     rm -rf /etc/opt/traefik/plugins-local
     cp -r services/traefik/plugins-local /etc/opt/traefik/
-    base/podman/render_host.sh services/traefik/traefik.container
     install_quadlet services/traefik/traefik.container
-    # The node's own additions to the quadlet, if any. Replaced whole, so a drop-in
-    # deleted from the repo stops applying.
-    rm -rf /etc/containers/systemd/traefik.container.d
-    if [ -d "nodes/${node}/traefik/traefik.container.d" ]; then
-      install -D -m 644 -t /etc/containers/systemd/traefik.container.d "nodes/${node}/traefik/traefik.container.d/"*
-    fi
+    install_dropins traefik
     reload_restart traefik
     ;;
   crowdsec_appsec)
@@ -41,14 +43,14 @@ case $1 in
     install -D -m 644 -t /etc/opt/crowdsec_appsec/config/acquis.d services/crowdsec/appsec.yaml
     install -D -m 644 services/crowdsec/allowlist.yaml \
       /etc/opt/crowdsec_appsec/config/parsers/s02-enrich/homelab-allowlist.yaml
-    base/podman/render_host.sh services/crowdsec/crowdsec_appsec.container
     install_quadlet services/crowdsec/crowdsec_appsec.container services/crowdsec/appsecdata.volume
+    install_dropins crowdsec_appsec
     reload_restart crowdsec_appsec
     ;;
   vmagent)
     install -D -m 644 -t /etc/opt/vmagent "nodes/${node}/prometheus.yml"
-    base/podman/render_host.sh services/victoriametrics/vmagent.container
     install_quadlet services/victoriametrics/vmagent.container services/victoriametrics/vmagentdata.volume
+    install_dropins vmagent
     reload_restart vmagent
     ;;
   fluentbit)
@@ -56,8 +58,8 @@ case $1 in
     install -D -m 644 -t /etc/opt/fluentbit services/fluentbit/journald.lua
     install -D -m 644 base/debian/journald.conf /etc/systemd/journald.conf.d/homelab.conf
     systemctl restart systemd-journald
-    base/podman/render_host.sh services/fluentbit/fluentbit.container
     install_quadlet services/fluentbit/fluentbit.container services/fluentbit/fbdata.volume
+    install_dropins fluentbit
     reload_restart fluentbit
     ;;
   *)

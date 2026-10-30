@@ -268,10 +268,11 @@ AGE, kept out of git and written to disk encrypted (see [ADR
 - Podman uses the `shell` secrets driver: Podman stores placeholders, and at container startup
   `get_secret_by_id.sh` decrypts the requested value from the host file. Quadlets consume them as
   env vars (`type=env`) or files under `/run/secrets/`.
-- Apps that only read secrets from a config file use `*.j2.j2` second-pass templates:
-  `render_secrets.sh` (via `get_secret.sh`) renders the final config root-owned `chmod 400`. These
-  rendered configs are the only place plaintext sits on disk; the rendered tree itself only ever
-  holds templates.
+- Apps that take a secret only inline in a config file (a bcrypt hash, ntfy's users) use `*.j2.j2`
+  second-pass templates: `render_secrets.sh` (via `get_secret.sh`) renders the final config
+  root-owned `chmod 400`. These rendered configs are the only place plaintext sits on disk; the
+  rendered tree itself only ever holds templates. An app with a `*_file` option reads the mounted
+  secret instead (Alertmanager's SMTP and webhook passwords).
 - pve1's AGE key is the single point of failure; a lost VM key can be replaced by rerunning
   `secret_update.sh`. What must be kept off pve1, and how to recover each trust root, is in [pve1
   disaster recovery](guides/pve1_recovery.md).

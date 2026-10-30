@@ -1,0 +1,37 @@
+# /etc/containers/systemd/traefik.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# Shared by the container VMs. A node's own lines (its address, the crowdsec bouncer key
+# and any additions) are its drop-in in src/nodes/<node>/traefik.container.d/.
+
+[Unit]
+Description="Homelab: Traefik reverse proxy, main traffic entrypoint"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+
+[Container]
+Image=localhost/library/traefik:v3.7
+ContainerName=traefik
+AddCapability=CAP_NET_BIND_SERVICE
+AutoUpdate=local
+NoNewPrivileges=true
+
+Network=net.network
+# hostPort:containerPort
+PublishPort=80:80
+PublishPort=443:443
+
+Exec="--configFile=/config/static/traefik.yml"
+
+Environment=TZ={{ personal.timezone }}
+Volume=/etc/opt/traefik/config:/config
+Volume=/etc/opt/traefik/certificates:/certificates
+Volume=/etc/opt/traefik/plugins-local:/plugins-local:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

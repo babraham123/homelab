@@ -26,8 +26,8 @@ pipeline:
       strip_underscores: on
       lowercase: on
       systemd_filter_type: or
-      systemd_filter:{% raw %}{% for svc in homelab_services %}
-        - _SYSTEMD_UNIT={{ svc }}.service{% endfor %}{% endraw %}
+      systemd_filter:[% for svc in homelab_services %]
+        - _SYSTEMD_UNIT=[[ svc ]].service[% endfor %]
       processors:
         logs:
           # Traefik's access log is one JSON object per line: split it into fields
@@ -49,14 +49,14 @@ pipeline:
       match: '*'
       host: logs.{{ site.url }}
       {#- On the node that runs VictoriaLogs (secsvcs), its own port rather than Traefik #}
-      port: {% raw %}{{ 9428 if 'victorialogs' in homelab_services else 443 }}{% endraw %}
+      port: [[ 9428 if 'victorialogs' in homelab_services else 443 ]]
       http_user: admin
       http_passwd: ${VL_ADMIN_PASSWORD}
-{%- raw %}{% if 'victorialogs' not in homelab_services %}
+[%- if 'victorialogs' not in homelab_services %]
       tls: on
       tls.verify: on
       tls.verify_hostname: on
-{%- endif %}{% endraw %}
+[%- endif %]
       # compress: gzip
       uri: /insert/jsonline?_stream_fields=service,hostname&_msg_field=message&_time_field=date
       format: json_lines

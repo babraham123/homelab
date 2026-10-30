@@ -1,7 +1,7 @@
 # /etc/opt/ntfy-alertmanager/config.scfg.j2
 # Ref: https://git.xenrox.net/~xenrox/ntfy-alertmanager
 # Container-to-container URLs are always <hostname>.SITE:<container port>, never through
-# Traefik (see src/services/alertmanager/config.yml.j2.j2).
+# Traefik (see src/services/alertmanager/config.yml.j2).
 
 # Public facing base URL of the service (e.g. https://ntfy-alertmanager.xenrox.net)
 # This setting is required for the "Silence" feature.
@@ -17,7 +17,7 @@ log-format text
 alert-mode multi
 # Optionally protect with HTTP basic authentication
 user admin
-password {% raw %}{{ env('ntfy_alertmanager_admin_password') }}{% endraw %}
+password [[ env('ntfy_alertmanager_admin_password') ]]
 
 labels {
   # https://docs.ntfy.sh/publish/#message-priority
@@ -65,7 +65,7 @@ ntfy {
   topic http://push.{{ site.url }}:2586/alert
   # ntfy authentication via Basic Auth (https://docs.ntfy.sh/publish/#username-password)
   user alert
-  password {% raw %}{{ env('ntfy_alert_password') }}{% endraw %}
+  password [[ env('ntfy_alert_password') ]]
   # ntfy authentication via access tokens (https://docs.ntfy.sh/publish/#access-tokens)
   # Either access-token or a user/password combination can be used - not both.
   # access-token foobar
@@ -94,7 +94,7 @@ alertmanager {
   silence-duration 24h
   # Basic authentication (https://prometheus.io/docs/alerting/latest/https/)
   user admin
-  password {% raw %}{{ env('alertmanager_admin_password') }}{% endraw %}
+  password [[ env('alertmanager_admin_password') ]]
   # By default the Alertmanager URL gets parsed from the webhook. In case that
   # Alertmanager is not reachable under that URL, it can be overwritten here.
   url https://alert.{{ site.url }}

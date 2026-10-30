@@ -163,7 +163,7 @@ def check_container_addrs(nodes):
 
 # The image updater loads images under these names, so a quadlet whose Image= differs
 # would never be updated. Its IP= is its addr from the inventory, which every reference
-# to it uses; a second-pass quadlet gets the node's from render_host.sh.
+# to it uses; a shared quadlet's is in the node's drop-in, src/nodes/<node>/<quadlet>.d/.
 def check_quadlets(nodes):
   for node, spec in nodes.items():
     for i in spec["images"]:
@@ -177,20 +177,19 @@ def check_quadlets(nodes):
       if not quadlet:
         fail(script, f"the {svc} case copies no {container}.container {where}")
         continue
-      # A *.container.j2.j2 source is still *.container.j2 until install time
       file = f"src/{quadlet}"
-      if not os.path.isfile(file):
-        file += ".j2"
       lines = text_lines(file) if os.path.isfile(file) else []
       actual = "\n".join(line.removeprefix("Image=") for line in lines if line.startswith("Image="))
       if actual != image:
         fail(file, f"Image={actual}, expected {image} {where}")
-      ip = "\n".join(line.removeprefix("IP=") for line in lines if line.startswith("IP=")) or None
+      dropins = sorted(Path(f"src/nodes/{node}/{container}.container.d").glob("*"))
+      ips = [(f, line.removeprefix("IP=")) for f in [Path(file), *dropins]
+             for line in text_lines(f) if line.startswith("IP=")]
+      ip = "\n".join(ip for _, ip in ips) or None
       expected = spec["addr"].get(container)
-      if expected and file.endswith(".j2"):
-        expected = f"{{{{ addr.{container} }}}}"
       if ip != expected:
-        fail(file, f"IP={ip or ''}, expected {expected or 'no IP=, as there is no ip'} {where}")
+        at = ips[0][0] if ips else f"src/nodes/{node}/{container}.container.d" if svc in spec["shared"] else file
+        fail(at, f"IP={ip or ''}, expected {expected or 'no IP=, as there is no ip'} {where}")
 
 
 # The image updater builds a built image only through its service's build.sh, so one

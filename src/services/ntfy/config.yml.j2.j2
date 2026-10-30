@@ -115,13 +115,13 @@ auth-startup-queries: |
 # - auth-tokens is a list of "<username>:<token>[:<label>]" entries, generate with "ntfy token generate"
 #
 auth-users:
-  - "admin:{% raw %}{{ env('ntfy_admin_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:admin"
-  - "alert:{% raw %}{{ env('ntfy_alert_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:user"
-  - "hass:{% raw %}{{ env('ntfy_hass_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:user"
-  - "person:{% raw %}{{ env('ntfy_person_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:user"
+  - "admin:[[ env('ntfy_admin_password') | password_hash('bcrypt', env('bcrypt_salt')) ]]:admin"
+  - "alert:[[ env('ntfy_alert_password') | password_hash('bcrypt', env('bcrypt_salt')) ]]:user"
+  - "hass:[[ env('ntfy_hass_password') | password_hash('bcrypt', env('bcrypt_salt')) ]]:user"
+  - "person:[[ env('ntfy_person_password') | password_hash('bcrypt', env('bcrypt_salt')) ]]:user"
   # ntfy-idp-push creates people's accounts and grants and publishes to push-*. No auth-access
   # entry: ntfy refuses to start with ACL entries for an admin.
-  - "idp-push:{% raw %}{{ env('ntfy_idp_push_password') | password_hash('bcrypt', env('bcrypt_salt')) }}{% endraw %}:admin"
+  - "idp-push:[[ env('ntfy_idp_push_password') | password_hash('bcrypt', env('bcrypt_salt')) ]]:admin"
 auth-access:
   - "alert:alert*:rw"
   - "alert:comment*:rw"
@@ -129,8 +129,8 @@ auth-access:
   - "person:hass*:ro"
   - "person:chat*:rw"
 auth-tokens:
-  - "alert:{% raw %}{{ env('ntfy_alert_token') }}{% endraw %}:alert"
-  - "idp-push:{% raw %}{{ env('ntfy_idp_push_admin_token') }}{% endraw %}:ntfy-idp-push"
+  - "alert:[[ env('ntfy_alert_token') ]]:alert"
+  - "idp-push:[[ env('ntfy_idp_push_admin_token') ]]:ntfy-idp-push"
 
 # If set, the X-Forwarded-For header is used to determine the visitor IP address
 # instead of the remote address of the connection.
@@ -166,7 +166,7 @@ attachment-expiry-duration: "48h"
 smtp-sender-addr: "smtp.gmail.com:587"
 smtp-sender-from: "Notification <admin@{{ site.url }}>"
 smtp-sender-user: {{ site.email }}
-smtp-sender-pass: {% raw %}{{ env('alert_smtp_password') }}{% endraw %}
+smtp-sender-pass: [[ env('alert_smtp_password') ]]
 
 # If enabled, ntfy will launch a lightweight SMTP server for incoming messages. Once configured, users can send
 # emails to a topic e-mail address to publish messages to a topic.
@@ -196,8 +196,8 @@ smtp-server-addr-prefix: "ntfy-"
 # - web-push-email-address is the admin email address send to the push provider, e.g. `sysadmin@example.com`
 # - web-push-startup-queries is an optional list of queries to run on startup`
 #
-web-push-public-key: {% raw %}{{ env('ntfy_webpush_public_key') }}{% endraw %}
-web-push-private-key: {% raw %}{{ env('ntfy_webpush_private_key') }}{% endraw %}
+web-push-public-key: [[ env('ntfy_webpush_public_key') ]]
+web-push-private-key: [[ env('ntfy_webpush_private_key') ]]
 web-push-file: "/var/cache/ntfy/webpush.db"
 web-push-email-address: "{{ site.email }}"
 web-push-startup-queries: |

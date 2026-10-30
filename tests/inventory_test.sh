@@ -277,18 +277,12 @@ error: src/nodes/beta/inventory.yml: commands.nothing: runs either a script or r
 EOF
 }
 
-# render_host.sh's data: only nodes with a container_subnet (alpha, in site.yml), with
-# their inventory services and addresses
-test_host_vars() {
+test_shared_services() {
   out=$(render_inventory "$inventory" <<'EOF'
-{% for node, h in inv.host_vars.items() -%}
-{{ node }}: {{ h.node }} {{ h.services | list | join(' ') }} {{ h.addr | list | join(' ') }}
-{% endfor -%}
 shared: {{ inv.shared.alpha | join(' ') }}
 EOF
 )
   assert_eq "$out" <<'EOF'
-alpha: alpha zeta proxy app pod plain zeta pod-db
 shared: proxy
 EOF
 }

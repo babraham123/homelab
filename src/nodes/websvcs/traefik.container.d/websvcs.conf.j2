@@ -1,0 +1,9 @@
+# /etc/containers/systemd/traefik.container.d/websvcs.conf
+# websvcs's additions to the shared src/services/traefik/traefik.container: its address.
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html (drop-ins)
+
+[Container]
+HostName={{ nodes.websvcs.services.traefik.subdomain }}.{{ site.url }}
+IP={{ inv.addr.websvcs.traefik }}
+# The crowdsec middleware's key for AppSec, at /run/secrets/crowdsec_bouncer_key
+Secret=crowdsec_bouncer_websvcs,type=mount,target=crowdsec_bouncer_key

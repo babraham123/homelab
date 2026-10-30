@@ -90,9 +90,6 @@
 #                     container source}], in port order
 #   addr[node]:       {<quadlet name>: its container's IP address} for the containers with
 #                     an ip; vpnsvcs's vmagent is inv.addr.vpnsvcs.vmagent
-#   host_vars[node]:  {node, services, addr} for each node with a container_subnet in
-#                     vars.yml: what src/base/podman/render_host.sh gives the second pass,
-#                     where addr is addr[node]
 #
 # Before deriving, every file is checked against the shape below (NODE), so a misspelled
 # or mistyped key fails the render instead of being ignored; the cross-file checks are
@@ -364,8 +361,6 @@ def derive(data):
                for node, spec in nodes.items()},
     "addr": addrs,
     "ufw": {node: ufw(node, spec, addrs[node], data) for node, spec in nodes.items()},
-    "host_vars": {node: {"node": node, "services": services(spec), "addr": addrs[node]}
-                  for node, spec in nodes.items() if "container_subnet" in node_vars[node]},
   }
 
 

@@ -35,15 +35,18 @@ Volume=/etc/opt/alertmanager:/config:ro
 # was sent and pushes every firing alert again.
 Volume=amdata.volume:/alertmanager
 Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
+# config.yml's *_file secrets, at /run/secrets/<name>
+Secret=alert_smtp_password,type=mount
+Secret=ntfy_alertmanager_admin_password,type=mount
 
 [Service]
 Restart=on-failure
 TimeoutStartSec=300
 
-ExecStartPre=/root/homelab-rendered/src/base/podman/render_secrets.sh /etc/opt/alertmanager/config.yml alert_smtp_password,ntfy_alertmanager_admin_password
+# web_config.yml takes the admin password only as an inline bcrypt hash
 ExecStartPre=/root/homelab-rendered/src/base/podman/render_secrets.sh /etc/opt/alertmanager/web_config.yml alertmanager_admin_password,bcrypt_salt
 # User defined in the AM dockerfile
-ExecStartPre=chown nobody:nogroup /etc/opt/alertmanager/config.yml /etc/opt/alertmanager/web_config.yml
+ExecStartPre=chown nobody:nogroup /etc/opt/alertmanager/web_config.yml
 
 [Install]
 WantedBy=multi-user.target

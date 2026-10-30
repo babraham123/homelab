@@ -59,17 +59,30 @@ error: src/services/web/web.container: IP=10.0.0.2, expected no IP=, as there is
 EOF
 }
 
-# A second-pass quadlet is rendered on the node, from its addr
-test_second_pass_quadlet_ip() {
+# A shared quadlet's IP= is the node's drop-in
+test_dropin_quadlet_ip_mismatch() {
   fixture_tree
-  mv "${tmp}/tree/src/services/proxy/proxy.container" "${tmp}/tree/src/services/proxy/proxy.container.j2"
-  edit src/services/proxy/proxy.container.j2 's/^IP=.*/IP={{ subnet }}.6/'
+  edit src/nodes/secsvcs/proxy.container.d/secsvcs.conf 's/^IP=.*/IP=10.0.0.7/'
   expect_errors <<'EOF'
-error: src/services/proxy/proxy.container.j2: IP={{ subnet }}.6, expected {{ addr.proxy }} (src/nodes/secsvcs/inventory.yml services.proxy)
+error: src/nodes/secsvcs/proxy.container.d/secsvcs.conf: IP=10.0.0.7, expected 10.0.0.6 (src/nodes/secsvcs/inventory.yml services.proxy)
 EOF
-  edit src/services/proxy/proxy.container.j2 's/^IP=.*/IP={{ addr.proxy }}/'
-  out=$(check_tree) || flunk "$out"
-  assert_eq "$out" < /dev/null
+}
+
+test_dropin_quadlet_ip_missing() {
+  fixture_tree
+  rm -r "${tmp}/tree/src/nodes/secsvcs/proxy.container.d"
+  expect_errors <<'EOF'
+error: src/nodes/secsvcs/proxy.container.d: IP=, expected 10.0.0.6 (src/nodes/secsvcs/inventory.yml services.proxy)
+EOF
+}
+
+test_dropin_quadlet_ip_twice() {
+  fixture_tree
+  edit src/services/proxy/proxy.container 's/^Image=.*/&\nIP=10.0.0.6/'
+  expect_errors <<'EOF'
+error: src/services/proxy/proxy.container: IP=10.0.0.6
+10.0.0.6, expected 10.0.0.6 (src/nodes/secsvcs/inventory.yml services.proxy)
+EOF
 }
 
 test_quadlet_image_mismatch() {

@@ -10,8 +10,9 @@
 # https://manpages.debian.org/buster/fd-find/fdfind.1.en.html
 # https://github.com/kpfleming/jinjanator
 # Note:
-# The *.j2.j2 extension indicates that the file will go thru a second pass of jinjanate,
-# usually during service startup. See src/base/podman/render_secrets.sh for an example.
+# The *.j2.j2 extension indicates that the file will go thru a second pass of jinjanate on
+# the node at service startup, written as [[ ]] and [% %] so this pass leaves it alone.
+# See src/base/podman/render_secrets.sh and second_pass.py.
 
 # shellcheck source=tools/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"

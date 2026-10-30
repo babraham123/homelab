@@ -9,3 +9,8 @@ Maintainer decision: leave the `{% raw %}` convention as is. Revisit if a second
 variable is ever silently rendered empty.
 
 ## Comments
+
+- 2026-10-30: moot. The second pass now uses its own delimiters, `[[ ]]` and `[% %]`
+  (`src/base/podman/second_pass.py`), so no `{% raw %}` remains and neither pass can render the
+  other's variables. The host pass is gone too: a shared quadlet's per-node lines are the node's
+  drop-in, `src/nodes/<node>/<quadlet>.container.d/`.

@@ -1,0 +1,18 @@
+# /etc/containers/systemd/traefik.container.d/secsvcs.conf
+# secsvcs's additions to the shared src/services/traefik/traefik.container: its address,
+# the SMTP entrypoint (traefik/smtp.yml) and the admin passwords traefik/basic_auth.yml
+# sends upstream.
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html (drop-ins)
+
+[Unit]
+Requires=authelia.service
+
+[Container]
+HostName={{ nodes.secsvcs.services.traefik.subdomain }}.{{ site.url }}
+IP={{ inv.addr.secsvcs.traefik }}
+PublishPort=465:465
+# The crowdsec middleware's key for AppSec, at /run/secrets/crowdsec_bouncer_key
+Secret=crowdsec_bouncer_secsvcs,type=mount,target=crowdsec_bouncer_key
+Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
+Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
