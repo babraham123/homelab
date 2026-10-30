@@ -14,5 +14,46 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "WebSearch",
+      "Bash(git show:*)",
+      "Bash(git diff:*)",
+      "Bash(ls:*)",
+      "Bash(gh repo *)",
+      "Bash(gh search *)",
+      "Bash(git log *)",
+      "Bash(tools/wait_prompt.sh)",
+      "Bash(tools/wait_prompt.sh *)",
+      "Bash(tools/apply_next.sh *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:docs.victoriametrics.com)",
+      "WebFetch(domain:www.authelia.com)",
+      "WebFetch(domain:docs.podman.io)",
+      "WebFetch(domain:doc.traefik.io)",
+      "WebFetch(domain:docs.crowdsec.net)",
+      "WebFetch(domain:tailscale.com)",
+      "WebFetch(domain:headscale.net)",
+      "WebFetch(domain:pve.proxmox.com)",
+      "WebFetch(domain:pbs.proxmox.com)",
+      "WebFetch(domain:docs.netgate.com)",
+      "WebFetch(domain:grafana.com)",
+      "WebFetch(domain:prometheus.io)",
+      "WebFetch(domain:docs.fluentbit.io)",
+      "WebFetch(domain:docs.ntfy.sh)",
+      "WebFetch(domain:docs.olivetin.app)",
+      "WebFetch(domain:gethomepage.dev)",
+      "WebFetch(domain:www.home-assistant.io)",
+      "WebFetch(domain:www.zigbee2mqtt.io)",
+      "WebFetch(domain:www.postgresql.org)",
+      "WebFetch(domain:linkding.link)",
+      "WebFetch(domain:readeck.org)",
+      "WebFetch(domain:manpages.debian.org)",
+      "WebFetch(domain:docs.kernel.org)",
+      "WebFetch(domain:ssl-config.mozilla.org)"
+    ]
   }
 }
