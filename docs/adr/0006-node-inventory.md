@@ -26,6 +26,14 @@ to the template data as `inv:`, so templates read `inv.<name>` without an import
 `check_rendered.py` reads the same lists. Its `dirs` subcommand replaces `tools/node_dirs.sh`, so the
 debian-node test lives in one place. The key reference is in `tools/inventory.py`.
 
+Amended: `tools/inventory.py` checks each file against a declared shape (its `NODE` table: the
+allowed keys, each value's type and the keys that only make sense together) before deriving
+anything, so a misspelled or mistyped key fails the render rather than being read as absent. The
+per-key format checks `check_rendered.py` had (`ip` range, `upstream` ref, `image_updater_slot`
+format) moved there; the cross-file checks stay. A CUE schema was prototyped for the same job and
+rejected: it would add a binary to the laptop and CI for checks a page of Python expresses, and the
+file format gains nothing.
+
 ## Context
 
 Four scripts reverse-engineered template variables from other files at render time:

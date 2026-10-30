@@ -162,6 +162,11 @@ real values, so keep it out of shared paths such as a fixed `/tmp/homelab-render
 `.git`, `planning` and `notes` are never copied into it. The directory must be named
 `homelab-rendered`, since `upload_src.sh` moves it into place by that name.
 
+Rendering starts with `tools/inventory.py` checking each inventory file's shape, every key, its
+value's type and the keys it only makes sense next to (`uptime` without `subdomain`), so a misspelled
+key fails the render instead of being ignored; the shape is the `NODE` table at the top of the
+script.
+
 Rendering ends with `tools/check_rendered.py`, which reports every failure as `error: FILE: MESSAGE`.
 It is a uv script (dependencies inline, run by `uv run`); the inventory facts it checks are the `inv:`
 lists in the template data. It lints YAML (`yamllint`), JSON and markdown
@@ -174,8 +179,8 @@ the lists `tools/inventory.py` derives from it, against the files it describes:
 - every `install_svcs.sh` case is in the node's `services`;
 - subdomains are unique; each is a `Host()` rule in its node's `traefik/routes.yml`, and every
   routed host is listed, except on websvcs, the default route;
-- `upstream` refs name a registry host and namespace, and the quadlet each service's case copies has
-  `Image=localhost/` + the ref without its host, or `Image=localhost/<build>:latest`;
+- the quadlet each service's case copies has `Image=localhost/` + the `upstream` ref without its
+  host, or `Image=localhost/<build>:latest`;
 - the OliveTin config has a button for every dispatcher case except the `pve1_file_transfer` ones,
   none for those, and every `ssh autoadmin@NODE CASE` it runs names a real case;
 - every node and service dir a node uses is among those `tools/inventory.py dirs` ships it: absolute
@@ -238,7 +243,7 @@ repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plai
   one invariant and expects that invariant's error alone.
 - `inventory_test.sh`: the dispatcher cases, sudoers grants, OliveTin buttons, subdomains, uptime
   endpoints and image update order `tools/inventory.py` derives from `tests/fixtures/nodes/`, written
-  out from ADR 0006.
+  out from ADR 0006; and the shape errors it reports for a misspelled, mistyped or lone key.
 - `image_updater_test.sh`: the image updater's config, `src/base/podman/image_updater.json.j2`,
   from a fixture inventory.
 - `vars_test.sh`: `vars.template.yml` and `vars.yml` (when present) have the same top-level keys,

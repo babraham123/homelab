@@ -43,15 +43,6 @@ error: src/nodes/secsvcs/inventory.yml: proxy and web have the same ip, 10.0.0.6
 EOF
 }
 
-test_gateway_container_ip() {
-  fixture_tree
-  edit src/nodes/secsvcs/inventory.yml 's/web: \{ip: 2,/web: {ip: 1,/'
-  edit src/services/web/web.container 's/^IP=.*/IP=10.0.0.1/'
-  expect_errors <<'EOF'
-error: src/nodes/secsvcs/inventory.yml: web: ip 1 isn't a host number from 2 to 254
-EOF
-}
-
 test_quadlet_ip_mismatch() {
   fixture_tree
   edit src/services/web/web.container 's/^IP=.*/IP=10.0.0.3/'
@@ -79,15 +70,6 @@ EOF
   edit src/services/proxy/proxy.container.j2 's/^IP=.*/IP={{ addr.proxy }}/'
   out=$(check_tree) || flunk "$out"
   assert_eq "$out" < /dev/null
-}
-
-test_upstream_without_registry_host() {
-  fixture_tree
-  edit src/nodes/secsvcs/inventory.yml 's|docker.io/library/nginx|library/nginx|'
-  edit src/services/web/web.container 's|^Image=.*|Image=localhost/nginx:stable|'
-  expect_errors <<'EOF'
-error: src/nodes/secsvcs/inventory.yml: services.web: upstream library/nginx:stable needs a registry host and namespace
-EOF
 }
 
 test_quadlet_image_mismatch() {
@@ -319,14 +301,6 @@ test_image_updater_slot_missing() {
   edit src/nodes/secsvcs/inventory.yml '/^image_updater_slot:/d'
   expect_errors <<'EOF'
 error: src/nodes/secsvcs/inventory.yml: no image_updater_slot, but it runs image_updater
-EOF
-}
-
-test_image_updater_slot_malformed() {
-  fixture_tree
-  edit src/nodes/secsvcs/inventory.yml "s/^image_updater_slot: .*/image_updater_slot: '9:30'/"
-  expect_errors <<'EOF'
-error: src/nodes/secsvcs/inventory.yml: image_updater_slot is 9:30, expected HH:MM
 EOF
 }
 

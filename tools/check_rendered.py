@@ -156,22 +156,9 @@ def check_container_addrs(nodes):
     by_addr = {}
     for container, addr in spec["addr"].items():
       by_addr.setdefault(addr, []).append(container)
-      if not 2 <= int(addr.rsplit(".", 1)[1]) <= 254:
-        fail(inventory(node), f"{container}: ip {addr.rsplit('.', 1)[1]} isn't a host number from 2 to 254")
     for addr, containers in sorted(by_addr.items()):
       if len(containers) > 1:
         fail(inventory(node), f"{' and '.join(containers)} have the same ip, {addr}")
-
-
-# The image updater pulls upstream refs as written and loads them as localhost/<path>,
-# which only works with an explicit registry host and namespace.
-def check_upstream_refs(nodes):
-  for node, spec in nodes.items():
-    for i in spec["images"]:
-      upstream = i.get("upstream")
-      if upstream and not re.match(r"^[^/]+\.[^/]+/[^/]+/[^/]+", upstream):
-        fail(inventory(node),
-             f"services.{i['service']}: upstream {upstream} needs a registry host and namespace")
 
 
 # The image updater loads images under these names, so a quadlet whose Image= differs
@@ -271,8 +258,6 @@ def check_image_updater_slots(nodes):
     slot = spec["image_updater_slot"]
     if slot is None:
       fail(inventory(node), "no image_updater_slot, but it runs image_updater")
-    elif not re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", str(slot)):
-      fail(inventory(node), f"image_updater_slot is {slot}, expected HH:MM")
     else:
       slots.setdefault(slot, []).append(inventory(node))
   for slot, files in sorted(slots.items()):
@@ -388,7 +373,6 @@ def main():
   check_json()
   check_markdown()
   check_container_addrs(nodes)
-  check_upstream_refs(nodes)
   check_quadlets(nodes)
   check_build_scripts(nodes)
   check_dispatch_scripts(nodes)

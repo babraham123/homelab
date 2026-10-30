@@ -93,8 +93,13 @@
 #   host_vars[node]:  {node, services, addr} for each node with a container_subnet in
 #                     vars.yml: what src/base/podman/render_host.sh gives the second pass,
 #                     where addr is addr[node]
+#
+# Before deriving, every file is checked against the shape below (NODE), so a misspelled
+# or mistyped key fails the render instead of being ignored; the cross-file checks are
+# tools/check_rendered.py's.
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -103,6 +108,109 @@ import yaml
 RENDERED_SRC = "/root/homelab-rendered/src/"
 SHARED_SCRIPT = "base/podman/install_svcs.sh"
 DEBIAN_DISPATCHER = "base/debian/commands.sh"
+
+# The inventory's shape. A key's wanted value is a type, a literal (the one value that
+# means anything), a compiled regex (a string matching it whole), a range (an integer in
+# it), a set (one of its members), [X] (a list of X) or a mapping: with string keys, the
+# allowed keys and their values; with one pattern key, any keys of that pattern and their
+# values. NEEDS are the keys a service key only makes sense next to.
+NAME = re.compile(r"[a-z0-9_-]+")  # services, quadlets, commands: dispatched and matched by name
+IMAGE = {
+  "ip": range(2, 255),
+  # The image updater pulls the ref as written and loads it as localhost/<path>, which
+  # only works with an explicit registry host and namespace
+  "upstream": re.compile(r"[^/]+\.[^/]+/[^/]+/[^/]+"),
+  "build": NAME,
+  "update_last": True,
+}
+SERVICE = IMAGE | {
+  "shared": True,
+  "subdomain": re.compile(r"[a-z0-9-]+"),
+  "admin": True,
+  "uptime": str,
+  "uptime_path": re.compile(r"/.*"),
+  "uptime_tier": {1, 2},
+  "uptime_conditions": [str],
+  "uptime_oauth": bool,
+  "dirs": [str],
+  "containers": {NAME: IMAGE},
+}
+NEEDS = {"uptime": "subdomain", "admin": "subdomain", "uptime_path": "uptime", "uptime_tier": "uptime",
+         "uptime_conditions": "uptime", "uptime_oauth": "uptime"}
+COMMAND = {"name": NAME, "script": str, "sudo": bool, "run": [str], "pve1_file_transfer": True}
+NODE = {
+  "debian_services": [NAME],
+  "services": {NAME: SERVICE},
+  "install_all_svcs": True,
+  "install_some_svcs": [NAME],
+  "open_ports": {range(1, 65536): [NAME]},
+  "image_updater_slot": re.compile(r"([01][0-9]|2[0-3]):[0-5][0-9]"),
+  "image_updater_java_db": False,
+  "commands": [COMMAND],
+  "triggers": [str],
+}
+
+
+def shape(value, want, path):
+  """Where a value departs from its wanted shape, as "PATH: MESSAGE" lines."""
+  def at(key):
+    return f"{path}.{key}" if path else str(key)
+
+  if isinstance(want, dict):
+    value = value if value is not None else {}  # `name: {}` and `name:` alike
+    if not isinstance(value, dict):
+      return [f"{path}: {value!r} isn't a mapping"]
+    pattern = next((key for key in want if not isinstance(key, str)), None)
+    errors = []
+    for key, item in value.items():
+      if pattern is not None:
+        errors += shape(key, pattern, at(key)) + shape(item, want[pattern], at(key))
+      elif key in want:
+        errors += shape(item, want[key], at(key))
+      else:
+        errors.append(f"{at(key)}: unknown key")
+    return errors
+  if isinstance(want, list):
+    if not isinstance(value, list):
+      return [f"{path}: {value!r} isn't a list"]
+    return [e for i, item in enumerate(value) for e in shape(item, want[0], f"{path}[{i}]")]
+  if want is True or want is False:  # a literal, before the types: a bool is an int too
+    ok, expected = value is want, f"{str(want).lower()}, the only value it takes"
+  elif want is bool:
+    ok, expected = isinstance(value, bool), "true or false"
+  elif want is str:
+    ok, expected = isinstance(value, str), "a string"
+  elif isinstance(want, range):
+    ok, expected = type(value) is int and value in want, f"an integer from {want.start} to {want.stop - 1}"
+  elif isinstance(want, set):
+    ok, expected = type(value) is not bool and value in want, f"one of {sorted(want)}"
+  else:
+    ok, expected = isinstance(value, str) and want.fullmatch(value), f"a string matching {want.pattern}"
+  return [] if ok else [f"{path}: {value!r} isn't {expected}"]
+
+
+def validate(node, spec):
+  """Everything wrong with one node's inventory, as "error: FILE: MESSAGE" lines: first
+  its shape, then, if that holds, the keys that only make sense together."""
+  errors = shape(spec, NODE, "")
+  if not errors:
+    for name, svc in services(spec).items():
+      at = f"services.{name}"
+      errors += [f"{at}: {key} needs {need}" for key, need in NEEDS.items() if key in svc and need not in svc]
+      if "containers" in svc and (inline := sorted(set(svc) & set(IMAGE))):
+        errors.append(f"{at}: containers replaces {', '.join(inline)}")
+      for container, facts in (svc.get("containers") or {name: svc}).items():
+        if "upstream" in (facts or {}) and "build" in facts:
+          errors.append(f"{at}: {container} is either pulled (upstream) or built (build), not both")
+    for i, cmd in enumerate(spec.get("commands") or []):
+      at = f"commands[{i}]" if "name" not in cmd else f"commands.{cmd['name']}"
+      if "name" not in cmd:
+        errors.append(f"{at}: needs a name")
+      if ("script" in cmd) == ("run" in cmd):
+        errors.append(f"{at}: runs either a script or run lines, not both or neither")
+      if "sudo" in cmd and "script" not in cmd:
+        errors.append(f"{at}: sudo only applies to a script")
+  return [f"error: src/nodes/{node}/inventory.yml: {e}" for e in errors]
 
 
 def services(spec):
@@ -229,6 +337,8 @@ def ufw(node, spec, addrs, data):
 
 def derive(data):
   nodes = {node: spec or {} for node, spec in data["nodes"].items()}
+  if errors := [e for node, spec in nodes.items() for e in validate(node, spec)]:
+    sys.exit("\n".join(errors))
   node_vars = {node: data.get(node) or {} for node in nodes}
   cases = {node: dispatch(node, spec) for node, spec in nodes.items()}
   nodes_with = {}
@@ -287,8 +397,11 @@ def main():
       inventory = Path(f"src/nodes/{node}/inventory.yml")
       if not inventory.is_file():
         sys.exit(f"error: {inventory} doesn't exist")
+      spec = yaml.safe_load(inventory.read_text()) or {}
+      if errors := validate(node, spec):
+        sys.exit("\n".join(errors))
       try:
-        paths = upload_dirs(node, yaml.safe_load(inventory.read_text()) or {})
+        paths = upload_dirs(node, spec)
       except ValueError as e:
         sys.exit(f"error: {inventory}: {e}")
       for path in paths:
