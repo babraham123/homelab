@@ -1,9 +1,9 @@
 # /etc/systemd/system/vm_watchdog.service
 
 [Unit]
-Description="Homelab: Restart VMs if they become unresponsive"
-StartLimitIntervalSec=30
-StartLimitBurst=10
+Description="Homelab: Reset VMs that freeze"
+StartLimitIntervalSec=300
+StartLimitBurst=5
 Requires=pve-guests.service
 # Stops before pve-guests shuts the VMs down, so it can't reset a guest mid-shutdown
 # (backup_orchestrator powers pve2 off after every run).
@@ -16,10 +16,15 @@ Type=simple
 
 Environment=TZ={{ personal.timezone }}
 
-ExecStart=/usr/local/bin/vm_watchdog.sh
+# Runs in place, so a deploy and a restart update it
+ExecStart=/root/homelab-rendered/src/base/vm_watchdog/vm_watchdog.py
 
 Restart=on-failure
-TimeoutStartSec=300
+RestartSec=30
+# SIGTERM to the script alone: it finishes the check under way, and a reset's qm stop and
+# qm start run to the end instead of leaving the VM off
+KillMode=mixed
+TimeoutStopSec=420
 
 [Install]
 WantedBy=multi-user.target

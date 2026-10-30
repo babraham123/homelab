@@ -122,7 +122,6 @@ case $1 in
     install -D -m 644 -t /etc/systemd/system base/iperf3_server/iperf3_server.service
     ;;
   vm_watchdog)
-    install_bin base/vm_watchdog/vm_watchdog.sh
     install -D -m 644 -t /etc/systemd/system base/vm_watchdog/vm_watchdog.service
     ;;
   *)

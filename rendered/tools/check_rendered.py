@@ -73,8 +73,10 @@ def tree_lines(path):
 
 
 def cases(path):
-  """Case labels of a script's `case` blocks."""
-  return {m[1] for line in text_lines(path) if (m := re.match(r"^\s+([A-Za-z0-9_-]+)\).*$", line))}
+  """Case labels of a script's `case` blocks, or the first words a Python script's
+  `match args` cases take (`case ["pause", *rest]:`)."""
+  label = r'^\s+case \["([A-Za-z0-9_-]+)"' if path.endswith(".py") else r"^\s+([A-Za-z0-9_-]+)\).*$"
+  return {m[1] for line in text_lines(path) if (m := re.match(label, line))}
 
 
 def case_block(path, label):

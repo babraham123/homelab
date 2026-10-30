@@ -418,6 +418,22 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: pve1 Pause Vm Watchdog
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 pause_vm_watchdog
+              id: pve1_pause_vm_watchdog
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve1 Resume Vm Watchdog
+              icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
+              shell: ssh autoadmin@pve1 resume_vm_watchdog
+              id: pve1_resume_vm_watchdog
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: pve1 Host Key
               icon: <iconify-icon icon="material-symbols:host-rounded"></iconify-icon>
               shell: ssh autoadmin@pve1 host_key
@@ -490,6 +506,22 @@ dashboards:
               icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
               shell: ssh autoadmin@pve2 shutdown
               id: pve2_shutdown
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Pause Vm Watchdog
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 pause_vm_watchdog
+              id: pve2_pause_vm_watchdog
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: pve2 Resume Vm Watchdog
+              icon: <iconify-icon icon="material-symbols:host-sharp"></iconify-icon>
+              shell: ssh autoadmin@pve2 resume_vm_watchdog
+              id: pve2_resume_vm_watchdog
               maxConcurrent: 1
               timeout: 60
 

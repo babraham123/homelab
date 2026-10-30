@@ -106,6 +106,50 @@ groups:
           summary: "{{ $labels.host }} clock is off or unsynced"
           description: "TOTP, TLS and the SSH certs all need the clocks within seconds. timedatectl on the node."
 
+  # vm_watchdog on pve1 and pve2 (src/base/vm_watchdog/vm_watchdog.py)
+  - name: vm_watchdog
+    rules:
+      - alert: VMWatchdogReset
+        expr: increase(homelab_vm_watchdog_resets_total[30m]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.name }} on {{ $labels.host }} froze and was reset"
+          description: "Its agent went silent and it stopped all network and disk I/O. journalctl -u vm_watchdog on the host; the guest's journal from before the reset."
+      - alert: VMWatchdogGaveUp
+        expr: homelab_vm_watchdog_gave_up == 1
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.name }} on {{ $labels.host }} keeps freezing; vm_watchdog stopped resetting it"
+          description: "Reset 3 times in 6 hours and frozen again. It stays as it is until its agent answers or vm_watchdog restarts."
+      - alert: VMAgentDown
+        # A VM whose agent never answered since it started is never reset, and a busy one
+        # only after an hour
+        expr: homelab_vm_watchdog_agent_up == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.name }}'s guest agent on {{ $labels.host }} hasn't answered in 30 minutes"
+          description: "vm_watchdog can't tell if it froze. Is qemu-guest-agent installed and running in the guest? qm guest cmd VMID ping on the host."
+      - alert: VMWatchdogOnHold
+        expr: homelab_vm_watchdog_on_hold == 1
+        for: 6h
+        labels:
+          severity: warning
+        annotations:
+          summary: "vm_watchdog on {{ $labels.host }} has been on hold for 6 hours"
+          description: "A long pause_vm_watchdog, a stuck apt or dpkg, or a backup still running. journalctl -u vm_watchdog says why; resume_vm_watchdog ends a pause."
+      - alert: VMWatchdogStale
+        expr: time() - homelab_vm_watchdog_last_check_timestamp_seconds > 600
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "vm_watchdog on {{ $labels.host }} hasn't completed a check in 10 minutes"
+          description: "Stopped, or every check fails (pvesh). Use pause_vm_watchdog rather than stopping it for maintenance. journalctl -u vm_watchdog."
+
   - name: scrapes
     rules:
       - alert: TargetDown

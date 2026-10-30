@@ -17,7 +17,7 @@ run against the live instances.
   scrape address, rarely useful here
 - `step`: the backup step on `homelab_backup_*` and the snapraid job on `homelab_snapraid_*`
 - `alertname`, `alertgroup`, `alertstate`: on `ALERTS`. Groups: `backups`, `crowdsec`,
-  `fluentbit`, `hosts`, `network`, `pipeline`, `scrapes`, `uptime`, `vm-health`, `vmagent`,
+  `fluentbit`, `hosts`, `network`, `pipeline`, `scrapes`, `uptime`, `vm-health`, `vm_watchdog`, `vmagent`,
   `vmalert`, `vmsingle`, `vps`
 
 | Node | Jobs |
@@ -31,7 +31,7 @@ Metric prefixes by job: `authelia_`, `cs_` (both CrowdSec jobs; `cs_appsec_*` fr
 one), `fw_bouncer_`, `gatus_results_`, `haproxy_{frontend,backend,server}_`, `headscale_`,
 `tailscaled_`, `ntfy_`, `traefik_`, `finance_`, `nvidia_smi_`, `smartctl_device_`, `node_`,
 `vm_`/`vmagent_`/`vmalert_`/`vl_`/`fluentbit_`. Pushed by the nodes' own scripts: `homelab_*`
-(backups, net probe, deploys) and `image_updater_*`.
+(backups, net probe, deploys, vm_watchdog) and `image_updater_*`.
 
 ### Log fields
 

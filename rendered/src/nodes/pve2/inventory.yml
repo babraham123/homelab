@@ -18,6 +18,10 @@ commands:
     run: [sudo /root/homelab-rendered/src/nodes/pve2/prune.sh]
   - name: shutdown
     run: [sudo /usr/sbin/shutdown -h now]
+  - name: pause_vm_watchdog
+    run: [sudo /root/homelab-rendered/src/base/vm_watchdog/vm_watchdog.py pause]
+  - name: resume_vm_watchdog
+    run: [sudo /root/homelab-rendered/src/base/vm_watchdog/vm_watchdog.py resume]
   - name: install_ssh_ca
     script: base/debian/commands.sh
     pve1_file_transfer: true

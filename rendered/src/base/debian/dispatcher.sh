@@ -186,6 +186,12 @@ case "$(hostname)" in
       skip_next_backup)
         sudo /root/homelab-rendered/src/nodes/pve1/commands.sh skip_next_backup
         ;;
+      pause_vm_watchdog)
+        sudo /root/homelab-rendered/src/base/vm_watchdog/vm_watchdog.py pause
+        ;;
+      resume_vm_watchdog)
+        sudo /root/homelab-rendered/src/base/vm_watchdog/vm_watchdog.py resume
+        ;;
       install_ssh_ca)
         require_pve1
         sudo /root/homelab-rendered/src/base/debian/commands.sh install_ssh_ca
@@ -235,6 +241,12 @@ case "$(hostname)" in
         ;;
       shutdown)
         sudo /usr/sbin/shutdown -h now
+        ;;
+      pause_vm_watchdog)
+        sudo /root/homelab-rendered/src/base/vm_watchdog/vm_watchdog.py pause
+        ;;
+      resume_vm_watchdog)
+        sudo /root/homelab-rendered/src/base/vm_watchdog/vm_watchdog.py resume
         ;;
       install_ssh_ca)
         require_pve1

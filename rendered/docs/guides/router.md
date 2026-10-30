@@ -411,13 +411,10 @@ Service Watchdog:
 
 ## Updates
 
-- Disable the vm_watchdog in PVE1
+- Pause the vm_watchdog on pve1 for 2 hours, so it can't reset the router mid-upgrade
 
 ```bash
-ssh manualadmin@pve1
-sudo systemctl stop vm_watchdog
-sudo systemctl disable vm_watchdog
-exit
+ssh autoadmin@pve1 pause_vm_watchdog
 ```
 
 - Backup the pfsense VM image
@@ -426,13 +423,10 @@ exit
 - Apply the upgrade and reboot
 - Restore the pfsense config and re-install all pkgs
 - If necessary, manual re-install pkgs
-- re-enable the vm_watchdog
+- Resume the vm_watchdog
 
 ```bash
-ssh manualadmin@pve1
-sudo systemctl enable vm_watchdog
-sudo systemctl start vm_watchdog
-exit
+ssh autoadmin@pve1 resume_vm_watchdog
 ```
 
 ## USB Ethernet adapter (optional)

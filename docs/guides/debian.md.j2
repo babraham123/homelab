@@ -8,7 +8,6 @@ Initial setup for any Debian Linux instance. Configures the shell, ssh access an
 
 [Vid](https://www.youtube.com/watch?v=XEoO1FgIel4)
 
-- If running, temporarily stop the vm_watchdog service on the VM's Proxmox host.
 - Use graphical install, run through the options.
   - Leave name blank, username: manualadmin
   - Partition disks: Guided - use entire disk

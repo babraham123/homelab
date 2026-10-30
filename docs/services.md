@@ -95,7 +95,7 @@ yt_to_audiobook images carry their own batch runners (`/opt/*_batch.py`, from ea
 | container VMs, vpnsvcs | image_updater (timer) | Nightly image updates behind a Trivy scan ([podman-image-updater](https://github.com/babraham123/podman-image-updater), [Maintenance](maintenance.md#container-images)) |
 | container VMs, vpnsvcs, pve1, pve2 | node_exporter | Host metrics |
 | websvcs, devtop, gaming | nvidia_gpu_exporter | GPU temperature, power, clocks for the cards pve2 passes through; "GPUs" dashboard |
-| pve1, pve2 | vm_watchdog | VM health watchdog |
+| pve1, pve2 | vm_watchdog | Resets a VM that froze ([VM watchdog](#vm-watchdog)) |
 | pve1 | cert_notifier (timer) | Email warnings before cert expiry (msmtp) |
 | pve1 | ct_watch (timer) | Daily ctlogs.dev check for certs the homelab didn't request ([Security](security.md#tls-and-trust-hierarchy)) |
 | secsvcs | net_probe (timer) | Hourly pings, speed tests and iperf3 across the network ([net-probe](https://github.com/babraham123/net-probe), pinned by release tag and sha256; [Networking](networking.md#throughput-monitoring)); "Network" dashboard |
@@ -116,6 +116,28 @@ pve1, pve2, pbs2 and the router serve their own web UIs as pve1/pve2/pbs2/router
 - websvcs Traefik's ACME routes (`src/nodes/websvcs/traefik/acme_routes.yml.j2`) only obtain the
   certs; requests to them get a 403
 - `acme_transfer.sh` (`src/nodes/pve1/certificates/`) installs the certs on each host
+
+### VM watchdog
+
+`src/base/vm_watchdog/vm_watchdog.py` checks each running VM on pve1 and pve2 every 30 seconds
+through its QEMU guest agent (the `qemu-guest-agent` service in the guest, enabled per VM in PVE):
+
+- **Frozen** means the agent answered after the VM started, then went silent for 3 minutes in which
+  the guest also sent no network traffic and did no disk I/O. A guest that reboots or installs
+  updates without its agent keeps doing I/O, so it gets an hour before a reset. A VM whose agent
+  never answered is never reset (no agent installed, or still booting)
+- **Reset** is `qm stop` and `qm start`, at most 3 times in 6 hours per VM; then it is left as it is
+  and `VMWatchdogGaveUp` fires
+- **On hold**, checking nothing and starting every VM's silence over afterwards: while paused by
+  hand, while `backup_orchestrator` runs, during any vzdump, while apt, dpkg or unattended-upgrades
+  runs on the host, and while pve-guests starts or stops the guests. A VM is also skipped while it
+  is locked (backup, snapshot), paused by QEMU, or the target of a running PVE task (start,
+  shutdown, migrate)
+- **Pause by hand** for maintenance a VM goes through without its agent, like a pfSense upgrade:
+  `ssh autoadmin@pve1 pause_vm_watchdog` (2 hours, also an OliveTin button) and
+  `resume_vm_watchdog`; the pause also ends at the host's next boot
+- **Metrics** in `homelab_vm_watchdog.prom` on the host's textfile collector feed the
+  `vm_watchdog` alert group in `homelab.yml`
 
 ## Observability
 
@@ -212,7 +234,8 @@ flowchart LR
   - `homelab.yml`: hosts (`NodeDown`, `DiskAlmostFull`, `DiskFillingIn24h`, `MemoryPressure`,
     `HighLoad`, `HighCpuTemp`, `SystemdUnitFailed` for any "Homelab:" unit, `ClockSkew`),
     `TargetDown`, `AuthFailureBurst` (Authelia), and the Gatus-fed `EndpointDown`,
-    `CertExpiringSoon` (14 days), `CertExpiringCritical` (3 days)
+    `CertExpiringSoon` (14 days), `CertExpiringCritical` (3 days), and vm_watchdog's
+    `VMWatchdogReset`, `VMWatchdogGaveUp`, `VMAgentDown`, `VMWatchdogOnHold`, `VMWatchdogStale`
   - `backups.yml`: `BackupStale`, `BackupNeverRan`, `SnapraidStale`
   - `hardware.yml`: GPUs (`GpuHot`, `GpuThermalThrottling`, `GpuRecoveryNeeded`) and the media
     array's SMART (`DiskUnhealthy`, `DiskHot`, `DiskSectorsGrowing`, `DiskCrcErrors`)
