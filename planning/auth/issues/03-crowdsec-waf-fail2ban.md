@@ -93,8 +93,8 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
   to `:443` time out.
 - Six failed Authelia logins for different usernames from one outside IP ban that IP
   (`LePresidente/authelia-bf_user-enum`, capacity 5).
-- `curl 'https://www.SITE/?q=<script>alert(1)</script>'` from outside gets a 403 from the WAF and an
-  alert in `cscli alerts list`; the same from the LAN is logged with the LAN IP and not banned.
+- `curl https://www.SITE/.env` from outside gets a 403 from the WAF and an alert in
+  `cscli alerts list`; the same from the LAN is logged with the LAN IP and not banned.
 - With the crowdsec container on secsvcs stopped, every site stays reachable.
 - With secsvcs powered off, SSH brute force on 2202 is still banned by fail2ban.
 - The VPS's tailnet IP and LAN addresses never appear in `cscli decisions list`.
@@ -148,3 +148,26 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
 - 2026-10-12: maintainer decision: the LAPI listens on 8455 instead of 8080
   (`src/services/crowdsec/config.yaml.local`), to avoid future conflicts; not yet applied anywhere,
   so no old rules to remove.
+- 2026-10-30: applied and checked from a phone on mobile data and from the LAN. Part A passes:
+  - a 40-request 404 burst got `crowdsecurity/http-probing` (4h ban); the IP was in
+    `nft list ruleset` on the VPS and `:443` timed out;
+  - eight failed Authelia logins with different usernames got `LePresidente/authelia-bf` (4h
+    ban), seven seconds after the last;
+  - every ban that day was a public address; no LAN, tailnet or VPS address;
+  - `cscli capi status`: CAPI reachable, signal sharing and blocklist pulls on. The dashboard's
+    CAPI pull-age panel is empty: no target exports `cs_capi_last_pull_timestamp`.
+- 2026-10-30: Part B step 5 passes:
+  - `cscli machines list`: `localhost` and the three `appsec-<node>` agents validated, heartbeats
+    under a minute; `crowdsec_appsec` on secsvcs uses about 113 MB;
+  - `curl https://www.SITE/.env` gets a 403 and a `vpatch-env-access` alert from outside and from
+    the LAN, each logged with its own client IP; one request alerts without a ban;
+  - with `crowdsec` on secsvcs stopped, sites still load.
+
+  The acceptance test used to be `?q=<script>alert(1)</script>`, which gets a 200: XSS is only in
+  the CRS (941xxx), which is out-of-band. It logged `anomaly score out-of-band: xss: 40` as
+  expected, so the test now uses the in-band `/.env` patch.
+- 2026-10-30: first CRS false positive for step 6: pfSense's Telegraf pushes to
+  `metrics.SITE/write?db=pfsense` (about 8k a day) score 13 on 920180, 920420 and 920450 and make
+  most of the out-of-band alerts. pfSense sends from its address on the destination's subnet (the
+  `.1` gateway), which `clientTrustedIps` didn't list, so the gateways on the pve1 and pve2 subnets
+  are now trusted too. Still open: fail2ban with secsvcs off, and step 6.

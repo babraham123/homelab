@@ -219,3 +219,12 @@ Not adopted from the guide: hiding under a secret subdir. With `SSO_ONLY` and Au
   services. The client uses the built-in `two_factor` policy rather than `gen_access`, which would
   let `authelia_gen_access` members in with a password alone on a public service. Skip creating
   the group.
+- 2026-10-30: installed per the secsvcs guide. Checked so far:
+  - from a phone on mobile data, SSO through Authelia's two factors and consent, unlock and sync
+    work, and the login line logs the carrier IP;
+  - `https://vault.SITE/` carries Vaultwarden's own `Content-Security-Policy` and
+    `X-Frame-Options: SAMEORIGIN`;
+  - no `/notifications/` request for `vault.SITE` in Traefik's logs.
+
+  Still to check: a second Authelia user, the refused password login, `/admin`, 2 hours idle, no-SNI
+  drop, the backup stage and `pg_dumpall`, and the escrow export.

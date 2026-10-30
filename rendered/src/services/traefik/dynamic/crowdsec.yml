@@ -37,8 +37,12 @@ http:
           # Fluent Bit, PVE, PBS, pfSense, Home Assistant) would otherwise send every
           # body through the WAF. People's devices on the LAN are still checked, and
           # the LAPI's allowlist keeps them from being banned.
+          # The router sends from its address on the destination's subnet, so it's listed
+          # on each node subnet as well as its LAN address
           clientTrustedIps:
             - 192.168.1.1
+            - 192.168.4.1
+            - 192.168.2.1
             - 192.168.4.10
             - 192.168.2.10
             - 100.64.0.2

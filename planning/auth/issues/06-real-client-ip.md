@@ -96,3 +96,10 @@ unchecked, repeat check 3, then resolve this ticket and router/04.
   the acceptance checks (`notes/apply-since-5a50097.md` step 14) and the recurring check above.
 - 2026-10-17: copyparty is installed (c9ddbbe) and trusts `X-Forwarded-For` only from Traefik:
   `xff-src: {{ websvcs.container_subnet }}.6/32` in `src/services/copyparty/copyparty.conf.j2`.
+- 2026-10-30: acceptance checked from a phone on mobile data:
+  - `vault.SITE`: Traefik and Vaultwarden's "logged in successfully. IP:" both show the phone's
+    carrier IP; `auth.SITE`: Traefik and Authelia's `remote_ip` too. `files.SITE` not checked yet.
+  - From the LAN, Traefik and Vaultwarden log the LAN client's own address.
+  - `curl -H 'X-Forwarded-For: 203.0.113.9' https://auth.SITE/` logs the carrier IP; the forged
+    address appears in no log.
+  - Eight failed Authelia logins banned the phone's IP (`LePresidente/authelia-bf`), not the VPS.

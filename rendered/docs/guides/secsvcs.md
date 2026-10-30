@@ -166,15 +166,17 @@ request.
    journalctl -u traefik | grep -i crowdsec   # no plugin errors
    ```
 
-- Test from an outside IP: expect a 403 and an alert in `cscli alerts list`. From the LAN: blocked,
-  never banned
+- Test from an outside IP: expect a 403 from the `vpatch-env-access` virtual patch and an alert in
+  `cscli alerts list`. From the LAN: blocked, never banned. One request alerts without a ban; the
+  `appsec-vpatch` scenario bans after more
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' 'https://www.janedoe.com/?q=<script>alert(1)</script>'
+curl -s -o /dev/null -w '%{http_code}\n' https://www.janedoe.com/.env
 ```
 
-- The Core Rule Set only alerts (scenarios `anomaly score*`). Add exclusions for false positives,
-  then move it in-band
+- The Core Rule Set only alerts (scenarios `anomaly score*`), so an XSS probe such as
+  `?q=<script>alert(1)</script>` gets a 200 and an `xss` alert until it moves in-band. Add
+  exclusions for false positives, then move it in-band
 
 ## Vaultwarden
 
