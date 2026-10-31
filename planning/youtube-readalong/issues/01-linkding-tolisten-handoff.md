@@ -1,6 +1,6 @@
 # 01. Hand linkding `tolisten` bookmarks to the video inbox
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: bookmark-handoff, homelab
 Source: maintainer request 2026-10-23
@@ -53,3 +53,7 @@ Readeck and `listen` articles to Calliope's inbox every 15 minutes; it needs a t
   `TOLISTEN_TAG`, inbox under `VIDEOS_DIR`, default `/books/videos`, which the quadlet's
   `/srv/media/books:/books` volume covers), and the `bookmark_handoff` install case creates
   `/srv/media/books/videos/inbox`.
+
+- 2026-10-31: deployed to websvcs with the rest of the queue (`tools/deploy_src.sh`, then the install
+  cases). A `tolisten` talk produced `inbox/<slug>.json` within the timer period and was retagged;
+  yt_to_audiobook picked it up. Resolved.

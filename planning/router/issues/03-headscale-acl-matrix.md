@@ -1,6 +1,6 @@
 # 03. Re-enable the group-based Headscale ACL matrix
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26; tailscale/tailscale#5573 (Brad Fitzpatrick, 2023-07-18: "ACLs
@@ -81,3 +81,8 @@ that ACLs don't work for pfSense subnet routes.
   bouncer keeps pulling; admin's laptop pings the VPS and bisratpi; the three nodes reconnected
   within 2 s of the restart. No denied flow got through, so step 5 needed no netmap capture. The
   family-device check of step 4 (a phone on mobile data) is still owed. Step 6 is open.
+
+- 2026-10-31, later: the family-device check passed (a phone on mobile data reaches 100.64.0.6
+  and not 100.64.0.2, as the policy says), so steps 3–5 are complete, and step 6 is done:
+  `docs/security.md` "Current state" describes the live matrix and ADR 0003's consequence no longer
+  calls it disabled. Resolved.

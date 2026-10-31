@@ -90,3 +90,11 @@ Service `src/services/yt_to_audiobook/`, modelled on Calliope's runner, not on t
   into the image at `/opt/yt_to_audiobook_batch.py` with `VIDEOS_DIR` and `READALOUDS_DIR`
   defaulting to `/videos` and `/readalouds`. The quadlet no longer mounts a script; a runner edit
   ships through the image's rebuild, like the converter.
+
+- 2026-10-31: deployed to websvcs with the rest of the queue (`tools/deploy_src.sh`, then the install
+  cases). The first attempts failed with HTTP 429 on the `en` caption track (YouTube rate-limits
+  translated auto captions); yt-to-audiobook f732e93 (v0.1.1) fetches only uploaded `<lang>` or
+  `<lang>-orig` tracks, and the image was rebuilt through `update_images`. The retry (request moved
+  from `failed/` back to the inbox) finished: en-orig captions, 350 cues, the read-along in
+  Storyteller's Videos collection with the ntfy push. Still owed: the sponsor cut with the highlight
+  in sync after it, and the resume-after-restart check.

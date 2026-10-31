@@ -1,6 +1,6 @@
 # 03. Hand off `toread` bookmarks from linkding to Readeck
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab, bookmark-handoff
 Source: maintainer request 2026-10-11
@@ -70,3 +70,8 @@ stages. Acceptance still needs a deploy to websvcs.
 linkding and Readeck APIs; the `toread`/`readeck` tags are environment variables with those
 defaults. `src/services/bookmark_handoff/build.sh` builds the image from that repo; the quadlet,
 timer and secrets stay here. Acceptance still needs a deploy to websvcs.
+
+2026-10-31: deployed to websvcs with the rest of the queue (`tools/deploy_src.sh`, then the install
+cases). A bookmark tagged `toread` appeared in Readeck within the timer period, and the
+bookmark_handoff timer runs clean. The failure and duplicate cases are covered by the bookmark-
+handoff repo's tests. Resolved.

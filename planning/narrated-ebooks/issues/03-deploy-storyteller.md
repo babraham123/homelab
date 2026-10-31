@@ -96,3 +96,8 @@ Follow "Add a new service" in `docs/development.md`, with Readeck
   are bypassed only for the LAN and VPN (see 05).
 - The library is mounted read-write. The install case and Calliope give it to
   1000:1000, Storyteller's default PUID:PGID.
+
+2026-10-31: deployed to websvcs with the rest of the queue (`tools/deploy_src.sh`, then the install
+cases). Verified: OIDC login, and a yt_to_audiobook read-along appearing in the Videos collection
+through its watch folder without manual steps. Still owed: a Calliope book in Books with
+highlighting in the app, the OPDS feed from Readest, and a staged database's `integrity_check`.

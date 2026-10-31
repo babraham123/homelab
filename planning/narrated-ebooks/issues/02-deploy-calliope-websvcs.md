@@ -85,3 +85,14 @@ deploy, plus the P4 measurements above.
 `/opt/calliope_batch.py`; the quadlet runs it from there instead of mounting it, and its paths
 are `NARRATE_DIR`, `READALOUDS_DIR` and `VOICES_DIR` (defaults `/narrate`, `/readalouds`,
 `/voices`). Acceptance still needs a deploy, plus the P4 measurements above.
+
+2026-10-31: deployed to websvcs with the rest of the queue (`tools/deploy_src.sh`, then the install
+cases). The first book went to `failed/` with "no voice default.wav in /voices": the image ships
+`assets/neutral_narrator.wav`, and the voices directory needs a `default.wav` (put there by hand,
+2026-10-31). Retried from `failed/`: the path unit's `PathExistsGlob` did not fire for a file moved
+back into the inbox, so the hourly timer or a manual start is the retry route; `calliope_batch.py`
+reported 4658 sentences in 64 chapters and the P4 runs at 15–25 s per sentence, so a novel is a day
+of GPU time. The TTS printed a tqdm bar per sentence (over a thousand journal lines in the first
+minutes); 73275a79 sets `TQDM_DISABLE` and `HF_HUB_DISABLE_PROGRESS_BARS` in the quadlet, which the
+next `install_calliope` applies. Still owed: the finished book and its push, the resume-after-
+restart check, and the VRAM and real-time measurements.

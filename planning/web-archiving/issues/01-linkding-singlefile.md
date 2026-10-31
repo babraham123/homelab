@@ -105,3 +105,9 @@ Follow "Add a new service" in `docs/development.md`, with `src/services/isso/` a
   uses linkding's "Add To Linkding" shortcut, with a server snapshot.
 - Still to check on the host: Chromium memory during a snapshot, that no Chromium
   process is left over after a Pinkt save, and that `/api/` is refused from outside.
+
+2026-10-31: deployed to websvcs with the rest of the queue (`tools/deploy_src.sh`, then the install
+cases). Verified: the render and `archive.` wiring, Authelia login, Gatus and Homepage tiles, and a
+`toread` bookmark handed to Readeck (03). Still owed on the host: a SingleFile upload from the
+extension, a Pinkt share with no Chromium left behind, `/api/` refused from outside, and a staged
+database's `integrity_check`.

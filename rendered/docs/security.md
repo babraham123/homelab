@@ -75,14 +75,15 @@ internet directly. UPnP and NAT-PMP are disabled on the router, so no LAN device
 direct peer connections come from the endpoint-independent outbound NAT rule instead (see
 [Networking](networking.md#outbound-nat)). An embedded DERP relay covers peers that can't hole-punch.
 
-**Current state:** the network layer is not yet zero-trust. The intended group-based Headscale ACL
-matrix exists in `src/services/headscale/headscale_acl.hujson.j2` but is marked "not currently in
-use" and the active policy is permissive (each enrolled user gets broad access). SNAT does not block
-the matrix: Tailscale enforces ACLs in its OS-independent packet filter (`net/tstun`) on the tailnet
-address, before netstack SNATs the flow, so it works on pfSense today. SNAT only hides tailnet
-clients' addresses from the LAN side (pfSense VLAN rules, logs, Traefik). Kernel routing without
-SNAT is available on pfSense now via `TS_DEBUG_NETSTACK_SUBNETS=0`. Enforced segmentation today
-comes from pfSense VLAN firewall rules and Authelia's application-layer policies, not from the mesh.
+**Current state:** the group-based Headscale ACL matrix in
+`src/services/headscale/headscale_acl.hujson.j2` is the active policy (loaded 2026-10-31, headscale
+0.29.7): admins reach the whole tailnet and every subnet, family the LAN, public users only the
+published services, guests only the three web hosts' HTTP ports. Its `tests` block is checked at
+every policy load. Tailscale enforces ACLs in its OS-independent packet filter (`net/tstun`) on the
+tailnet address, before netstack SNATs the flow, so SNAT on pfSense never limited it; SNAT only
+hides tailnet clients' addresses from the LAN side (pfSense VLAN rules, logs, Traefik). Kernel
+routing without SNAT is available on pfSense via `TS_DEBUG_NETSTACK_SUBNETS=0`. The mesh policy
+sits in front of pfSense's VLAN firewall rules and Authelia's application-layer policies.
 
 ## Identity: LLDAP + Authelia
 

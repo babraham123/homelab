@@ -70,3 +70,9 @@ in the inbox, `readalouds/articles` or `failed`) carried over. Acceptance still 
 against faked linkding and Readeck APIs; tag and label names are environment variables defaulting
 to `listen` and `narrated`. The homelab keeps the quadlet and timer, and `build.sh` builds the
 image from that repo. Acceptance still needs a deploy.
+
+2026-10-31: deployed to websvcs with the rest of the queue (`tools/deploy_src.sh`, then the install
+cases). The container and timer run (the `toread` job in the same image works, web-archiving/03).
+The `listen` round trip itself is still owed: label an article in Readeck and look for `narrated`
+within 15 minutes, then the Articles collection once Calliope is free (a Gutenberg book is in front
+of it in the inbox).

@@ -70,3 +70,7 @@ an OIDC client on websvcs.
   with the snapshot as `data/db.sqlite3`. The archived articles on the HDD array are not
   staged; snapraid parity is their only protection (maintainer decision 2026-10-12).
 - The uptime check is `/api/info`, which needs no auth.
+
+2026-10-31: deployed to websvcs with the rest of the queue (`tools/deploy_src.sh`, then the install
+cases). Verified: OIDC login through Authelia (the handed-off article is visible in Readeck as the
+Authelia user). Still owed: saving from the extension and the iOS app, and a staged copy's restore.
