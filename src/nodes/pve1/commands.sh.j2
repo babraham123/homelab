@@ -22,8 +22,15 @@ case $1 in
     ls -lh "$archive"
     ;;
   backup_now)
-    # --no-block: a run takes over an hour, past OliveTin's timeout. A run already in
-    # progress is left to finish.
+    # A run already in progress is left to finish. The manual marker makes the run
+    # ignore a skip_next; the orchestrator removes it. --no-block: a run takes over an
+    # hour, past OliveTin's timeout.
+    if systemctl is-active --quiet backup_orchestrator.service; then
+      echo "a backup_orchestrator run is already in progress"
+      exit 0
+    fi
+    install -d -m 700 /var/lib/backup_orchestrator
+    touch /var/lib/backup_orchestrator/manual
     systemctl start --no-block backup_orchestrator.service
     echo "backup_orchestrator started; the ntfy alert topic gets the summary"
     ;;

@@ -27,6 +27,7 @@ storage=pbs2
 backups=/root/backups
 metrics=/var/lib/node_exporter/textfile_collector/homelab_backup.prom
 skip_flag=/var/lib/backup_orchestrator/skip_next
+manual_flag=/var/lib/backup_orchestrator/manual
 # backup_lib's ssh_opts, so these calls and the stage transport behave alike.
 ssh=(ssh "${ssh_opts[@]}")
 keyfile=/root/secrets/pbs_client.key
@@ -174,9 +175,13 @@ if [[ ${1:-} == --skip-next ]]; then
   echo "Skipping the run due $(systemctl show -P NextElapseUSecRealtime backup_orchestrator.timer)"
   exit 0
 fi
-# systemd sets TRIGGER_UNIT only when the timer started the service. Skipping writes
-# no metrics, so BackupStale's threshold leaves room for one skipped week.
-if [[ -f $skip_flag && ${TRIGGER_UNIT:-} == backup_orchestrator.timer ]]; then
+# backup_now leaves the manual marker; the timer's starts have none. (systemd's
+# TRIGGER_UNIT cannot tell them apart: the service keeps the timer's activation details
+# and passes them to every later start, manual ones included.) Skipping writes no
+# metrics, so BackupStale's threshold leaves room for one skipped week.
+if [[ -f $manual_flag ]]; then
+  rm -f "$manual_flag"
+elif [[ -f $skip_flag ]]; then
   rm -f "$skip_flag"
   notify "Backups skipped" "skip_next_backup was set; the next run is next week" 2
   exit 0
