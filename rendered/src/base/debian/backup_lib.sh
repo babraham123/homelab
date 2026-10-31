@@ -112,10 +112,18 @@ stage_collect() {
   # A run killed mid-collect leaves its dir behind; the same filesystem makes the mv atomic.
   rm -rf "${parent}"/.incoming.*
   tmp=$(mktemp -d -p "$parent" .incoming.XXXXXX)
-  if ! stage_stream "$node" | tar -C "$tmp" -x || ! (cd "$tmp" && sha256sum -c --quiet SHA256SUMS); then
+  # The node's backup.sh keeps running after the stage is streamed (the pve hosts' vzdump
+  # follows it), so its exit code is the whole backup's, reported apart from the manifest.
+  stage_stream "$node" | tar -C "$tmp" -x || {
+    local codes=("${PIPESTATUS[@]}")
+    rm -rf "$tmp"
+    (( codes[0] == 0 )) || die "${node}: backup.sh failed (exit ${codes[0]})"
+    die "${node}: stage not received intact"
+  }
+  (cd "$tmp" && sha256sum -c --quiet SHA256SUMS) || {
     rm -rf "$tmp"
     die "${node}: stage not received intact"
-  fi
+  }
   rm -rf "${dest}/files"
   mv "${tmp}/files" "${dest}/files"
   cp -a "${tmp}/dumps/." "${dest}/dumps/"
@@ -140,8 +148,8 @@ stage_stream() {
   fi
 }
 
-# vzdump through the API returns at once with a UPID; the task runs on. Polling its
-# status is what makes the call block, and the log is where vzdump reports per VM.
+# Waits for the task if it still runs, prints its log (where vzdump reports per VM) and
+# turns its end status into an exit code.
 pve_task() {
   local upid=$1 node status
   node=$(hostname)
@@ -156,10 +164,12 @@ pve_task() {
 
 # Snapshot mode keeps the VMs running; PBS stores only the chunks that changed since
 # the last run. The notes template names each backup after its guest in the PBS UI.
+# pvesh runs the worker in the foreground and prints the task's log ahead of the UPID, so
+# the UPID is picked out of its output.
 vzdump_to() {
   local storage=$1 upid
   shift
   upid=$(pvesh create "/nodes/$(hostname)/vzdump" "$@" --storage "$storage" --mode snapshot \
-    --notes-template '{{guestname}}')
+    --notes-template '{{guestname}}' | grep -o 'UPID:[^[:space:]]*' | tail -n 1)
   pve_task "$upid"
 }
