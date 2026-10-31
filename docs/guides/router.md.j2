@@ -159,6 +159,28 @@ fetch https://raw.githubusercontent.com/Weehooey/pfSense-scripts/refs/heads/main
 sh install-qemu-guest-agent.sh
 ```
 
+### Serial console
+
+pve1 reaches the network only through the router, so when pfSense is down or stuck at a prompt,
+the web UI and its VM console are out of reach too. A serial port gives a pfSense console from
+pve1's local keyboard and monitor. It adds no access: the socket on pve1 is root-only, and root
+there already owns the VM's display and disk.
+
+- Go to System >> Advanced >> Admin Access >> Console Options
+  - Check Serial Terminal
+  - Keep Primary Console on VGA, so the Proxmox console still shows the menu
+- Add the port, then restart the VM
+
+```bash
+# On pve1 as root
+qm shutdown VMID
+qm set VMID -serial0 socket
+qm start VMID
+qm terminal VMID   # Enter for the menu; exit with Ctrl+O
+```
+
+Use it as in [debugging](../debugging.md#serial-console).
+
 ### System Patches
 
 Apply security updates and fixes since the last release

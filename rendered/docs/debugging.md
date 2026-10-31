@@ -752,6 +752,18 @@ vi /cf/conf/config.xml
 rm /tmp/config.cache
 ```
 
+### Serial console
+
+pve1 reaches the network only through the router, so when pfSense is down or stuck at a prompt,
+the web UI (and its VM console) is out of reach too. The router's serial port, set up per the
+[router guide](guides/router.md#serial-console), gives a pfSense console from pve1's local
+keyboard and monitor:
+
+```bash
+# On pve1's local console as root
+qm terminal VMID   # Enter for the menu; exit with Ctrl+O
+```
+
 ### Decrypt a config backup
 
 Encrypted backups (e.g. from Auto Config Backup) are base64-wrapped AES:
@@ -777,6 +789,7 @@ Key Proxmox settings if the router VM has to be rebuilt:
 | Startup order | 1 (boots before everything else) |
 | Network | None at creation; after install attach `vmbr0` (VirtIO, firewall on) to share connectivity with the PVE host; keep the old MAC so DHCP reservations hold |
 | PCI devices | NIC ports passed through as `hostpci0`–`hostpci3`, in port order |
+| Serial port | `serial0: socket`, for [`qm terminal`](#serial-console) |
 
 ## Host administration
 

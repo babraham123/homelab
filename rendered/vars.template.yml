@@ -65,6 +65,8 @@ gaming:
   ip: 192.168.2.21
 devtop:
   ip: 192.168.2.22
+  # Screen Sharing needs one; the display is on pve2's loopback, so the SSH tunnel is the real auth
+  vnc_password: homelab
 
 # Subnets
 lan: # WiFi interface, split into VLANs below
@@ -78,6 +80,7 @@ pve2:
   subnet: 192.168.2
   mask: 192.168.2.0/24
   ip: 192.168.2.10
+  gpu1_pci: "0000:01:00" # PCI address of the GPU devtop and gaming take turns with
 lan2:
   subnet: 192.168.3
   mask: 192.168.3.0/24

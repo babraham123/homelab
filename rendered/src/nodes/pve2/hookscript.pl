@@ -42,7 +42,12 @@ if ($phase eq 'pre-start') {
 } elsif ($phase eq 'post-start') {
     # Second phase 'post-start' will be executed after the guest
     # successfully started.
-    # print "$vmid started successfully.\n";
+    my $devtop = `/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop`;
+
+    # QEMU forgets the VNC password at every start; vnc2 is the display in devtop's args
+    if ($vmid == $devtop) {
+        system("echo 'set_password vnc homelab -d vnc2' | qm monitor $vmid");
+    }
 
 } elsif ($phase eq 'pre-stop') {
     # Third phase 'pre-stop' will be executed before stopping the guest

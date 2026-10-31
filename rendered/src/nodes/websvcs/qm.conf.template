@@ -1,0 +1,23 @@
+# Proxmox VM settings (qm config) as a reference; IDs, MACs, UUIDs and PCI/USB addresses are placeholders
+acpi: 1
+agent: 1
+bios: ovmf
+boot: order=scsi0;net0
+cores: 7
+cpu: host
+efidisk0: local-lvm:vm-VMID-disk-0,efitype=4m,size=4M
+hostpci0: PCI_ADDR,pcie=1
+hostpci1: PCI_ADDR,pcie=1
+hostpci2: PCI_ADDR,pcie=1
+hostpci3: PCI_ADDR,pcie=1
+machine: q35
+memory: 8192
+name: websvcs
+net0: virtio=MAC_ADDR,bridge=vmbr0,firewall=1
+numa: 0
+onboot: 1
+ostype: l26
+scsi0: local-lvm:vm-VMID-disk-1,discard=on,iothread=1,replicate=0,size=64G,ssd=1
+scsihw: virtio-scsi-single
+sockets: 1
+vga: none

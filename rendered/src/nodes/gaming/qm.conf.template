@@ -1,0 +1,22 @@
+# Proxmox VM settings (qm config) as a reference; IDs, MACs, UUIDs and PCI/USB addresses are placeholders
+agent: 1
+bios: ovmf
+boot: order=ide0;ide2;net0
+cores: 13
+cpu: host
+efidisk0: local-lvm:vm-VMID-disk-0,efitype=4m,ms-cert=2023k,pre-enrolled-keys=1,size=4M
+hookscript: local:snippets/hookscript.pl
+hostpci0: PCI_ADDR,pcie=1,x-vga=1
+ide0: local-lvm:vm-VMID-disk-1,discard=on,replicate=0,size=256G,ssd=1
+ide2: local:iso/Win11_22H2_English_x64v1.iso,media=cdrom,size=5427180K
+machine: pc-q35-7.2
+memory: 18432
+name: gaming
+net0: virtio=MAC_ADDR,bridge=vmbr0,firewall=1
+numa: 0
+ostype: win11
+sata0: local:iso/virtio-win-0.1.229.iso,media=cdrom,size=522284K
+scsihw: virtio-scsi-single
+sockets: 1
+tpmstate0: local-lvm:vm-VMID-disk-2,size=4M,version=v2.0
+vga: none

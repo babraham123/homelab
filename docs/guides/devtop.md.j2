@@ -64,19 +64,21 @@ ssh manualadmin@pve2
 sudo su
 vmid=`/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop`
 qm set $vmid -vga std,clipboard=vnc
-echo "args: -vnc 0.0.0.0:{{ devtop.ip.split('.')[-1] }}" >> /etc/pve/local/qemu-server/$vmid.conf
+qm set $vmid --args '-vnc 127.0.0.1:{{ devtop.ip.split('.')[-1] }},password=on'
 exit
 exit
 sudo reboot
 ```
 
-TODO: add a password,
-[ref](https://forum.proxmox.com/threads/setting-vnc-password-permanently.46655/#post-221726),
-[ref2](https://pve.proxmox.com/wiki/VNC_Client_Access)
+- Connect from the laptop through an SSH tunnel. The display listens only on pve2's loopback, so
+  the tunnel's SSH login is the authentication. The VNC password, `devtop.vnc_password` in
+  `vars.yml`, is only there because macOS Screen Sharing hangs on a display without one; pve2's
+  hookscript sets it at every start, after `install_hookscript`.
 
-- add a pve2 secrets file,
-
-```text
-set_password vnc 8_CHAR_PASS -d vnc2
-expire_password vnc +600 -d vnc2
+```bash
+# On the laptop: opens the tunnel and the VNC viewer, Ctrl+C closes the tunnel
+tools/devtop_vnc.sh
+# By hand: leave it running
+ssh -N -L {{ 5900 + devtop.ip.split('.')[-1] | int }}:127.0.0.1:{{ 5900 + devtop.ip.split('.')[-1] | int }} manualadmin@pve2
+# VNC client → localhost:{{ 5900 + devtop.ip.split('.')[-1] | int }}
 ```

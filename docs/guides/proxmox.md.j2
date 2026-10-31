@@ -246,9 +246,9 @@ EOF
 ```bash
 ufw default allow routed
 ufw allow in from any to any port 22,8006,3128 proto tcp
-ufw allow in from any to any port 5900:5999 proto tcp
 ufw allow in from any to any port 111 proto udp
-# Excludes corosync and live migration ports
+# Excludes corosync, live migration and VNC (5900:5999) ports: the nodes aren't clustered, and
+# the web console goes through 8006
 ufw enable
 ```
 

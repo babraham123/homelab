@@ -10,7 +10,7 @@ Initial setup for the secondary VM host, PVE2. Handles VM management services.
 [Docs](https://pve.proxmox.com/pve-docs/qm.1.html)
 
 - Install the GPU hook script on devtop and gaming, so only one runs at a time
-  - Rerun after any deploy that changes `src/nodes/pve2/hookscript.pl`
+  - Rerun after any deploy that changes `src/nodes/pve2/hookscript.pl.j2`
 
 ```bash
 ssh autoadmin@pve2 install_hookscript

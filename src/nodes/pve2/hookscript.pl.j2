@@ -18,8 +18,8 @@ my $phase = shift;
 # https://forum.proxmox.com/threads/recover-gpu-from-vm-after-it-shuts-down.126457/
 sub unbind_gpu {
     system("sleep 5");
-    system('echo "0000:01:00.0" > "/sys/bus/pci/devices/0000:01:00.0/driver/unbind"');
-    system('echo "0000:01:00.1" > "/sys/bus/pci/devices/0000:01:00.1/driver/unbind"');
+    system('echo "{{ pve2.gpu1_pci }}.0" > "/sys/bus/pci/devices/{{ pve2.gpu1_pci }}.0/driver/unbind"');
+    system('echo "{{ pve2.gpu1_pci }}.1" > "/sys/bus/pci/devices/{{ pve2.gpu1_pci }}.1/driver/unbind"');
 }
 
 if ($phase eq 'pre-start') {
@@ -42,7 +42,12 @@ if ($phase eq 'pre-start') {
 } elsif ($phase eq 'post-start') {
     # Second phase 'post-start' will be executed after the guest
     # successfully started.
-    # print "$vmid started successfully.\n";
+    my $devtop = `/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop`;
+
+    # QEMU forgets the VNC password at every start; vnc2 is the display in devtop's args
+    if ($vmid == $devtop) {
+        system("echo 'set_password vnc {{ devtop.vnc_password }} -d vnc2' | qm monitor $vmid");
+    }
 
 } elsif ($phase eq 'pre-stop') {
     # Third phase 'pre-stop' will be executed before stopping the guest

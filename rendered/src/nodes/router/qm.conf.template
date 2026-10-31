@@ -1,0 +1,21 @@
+# Proxmox VM settings (qm config) as a reference; IDs, MACs, UUIDs and PCI/USB addresses are placeholders
+agent: 1
+boot: order=scsi0;net0
+cores: 2
+cpu: host
+hostpci0: PCI_ADDR
+hostpci1: PCI_ADDR
+hostpci2: PCI_ADDR
+hostpci3: PCI_ADDR
+memory: 12288
+name: router
+net0: virtio=MAC_ADDR,bridge=vmbr0,firewall=1
+numa: 0
+onboot: 1
+ostype: l26
+scsi0: local-lvm:vm-VMID-disk-0,discard=on,iothread=1,size=96G,ssd=1
+scsihw: virtio-scsi-single
+serial0: socket
+sockets: 1
+startup: order=1
+usb0: host=USB_PORT
