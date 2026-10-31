@@ -8,7 +8,7 @@ showed.
 - Claude runs `tools/wait_prompt.sh` in the background. It returns when your command has finished
   and the shell is back at a prompt, with that command's output.
 - Claude checks the output against the expected result, then `tools/apply_next.sh` puts the next
-  command on your clipboard, posts a notification and says "next step"
+  command on your clipboard, posts a notification and speaks one sentence on what the step does
 
 ## Safety
 

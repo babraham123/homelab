@@ -13,7 +13,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 log=${1:-notes/session.log}
-[[ -f $log ]] || die "no ${log}: start the session with script -q -a -F ${log} zsh -f -o interactivecomments"
+start_cmd="script -q -a -F ${log} zsh -f -o interactivecomments"
+# script(1) holds the log for as long as the recorded shell runs
+recording() { pgrep -qf "script .*${log}"; }
+[[ -f $log ]] || die "no ${log}: start the session with ${start_cmd}"
+recording || die "no recorded session on ${log}: start one with ${start_cmd}"
 
 # CSI and OSC sequences, then each line's text after its last carriage return (zsh's
 # PROMPT_SP filler, progress bars redrawing), then characters erased by a backspace
@@ -29,6 +33,7 @@ start=$(size_of)
 last=$start
 quiet=0
 while sleep 0.5; do
+  recording || die "the recorded session on ${log} ended: start another with ${start_cmd}"
   size=$(size_of)
   if (( size < start )); then start=0; fi    # the log was truncated
   if (( size != last )); then last=$size quiet=0; continue; fi

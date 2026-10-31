@@ -35,8 +35,10 @@ chat before staging anything, so the human can correct it with a `# note`.
 
 ## 2. Open the session
 
-If `notes/session.log` is missing: `touch notes/session.log`, then stage the guide's start
-command with `tools/apply_next.sh` and go to step 3. The first wake is the plain `%` prompt.
+`tools/wait_prompt.sh` dies with the start command when no `script` process holds
+`notes/session.log`. Then `touch notes/session.log` if it's missing, stage that start command
+with `tools/apply_next.sh` and show it in the chat too, and go to step 3 once the human has
+started it. The first wake is the plain `%` prompt.
 
 ## 3. The loop
 
@@ -47,10 +49,12 @@ command with `tools/apply_next.sh` and go to step 3. The first wake is the plain
      missing argument or a joined paste is a wrong step: re-stage it and say what differed.
    - **Note**: a `# ...` line is the human talking. Answer it before anything else.
    - **Result**: compare with the step's expected result and the exit signs in the output.
-3. Stage the next step with `tools/apply_next.sh TEXT MESSAGE`:
+3. Stage the next step with `tools/apply_next.sh TEXT MESSAGE SPEECH`:
    - TEXT: the command, the URL of a human step, or `''`
    - MESSAGE: one line, verdict then next step: "secsvcs failed_units clean → 1c:
      install_crowdsec secsvcs"
+   - SPEECH: one spoken sentence on what the next step does, in words, no step ids or
+     paths: "Install CrowdSec on secsvcs with warning-level logging."
    - a failed step: TEXT is the diagnostic command, MESSAGE names the failure. The step stays
      current until the human's note or the diagnostic clears it.
    - a secret-printing step (`age -d`, a secrets file, a password export): MESSAGE says "exit
