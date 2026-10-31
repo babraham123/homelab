@@ -27,6 +27,10 @@ Exec=/opt/calliope_batch.py
 Environment=TZ=America/Los_Angeles
 # Model weights (Chatterbox, faster-whisper) download here on first use.
 Environment=HF_HOME=/cache
+# The TTS prints a tqdm bar per sentence, and the downloads one per file: thousands of
+# journal lines a book, each a carriage-return redraw.
+Environment=TQDM_DISABLE=1
+Environment=HF_HUB_DISABLE_PROGRESS_BARS=1
 Environment=NTFY_URL=https://push.janedoe.com/alert
 # Storyteller's PUID:PGID
 Environment=READALOUDS_OWNER=1000:1000
