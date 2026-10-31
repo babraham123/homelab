@@ -1,6 +1,6 @@
 # 03. Re-enable the group-based Headscale ACL matrix
 
-Status: ready-for-human
+Status: ready-for-agent
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26; tailscale/tailscale#5573 (Brad Fitzpatrick, 2023-07-18: "ACLs
@@ -70,3 +70,14 @@ that ACLs don't work for pfSense subnet routes.
   → `public@:5201` and ICMP. `docs/guides/vpnsvcs.md.j2` "Telemetry agents" re-installed the
   pre-OIDC `headscale_private.yaml`, which would have dropped OIDC and the policy; it now runs
   `install_svcs.sh headscale`.
+- 2026-10-31: steps 3–5 done. `headscale policy check` on the VPS failed four tests first: a `*`
+  destination compiles to a `*` packet-filter entry, every address, so `group:admin`'s `*:*`
+  reached the VLANs the tests deny (this corrects the 2026-09-27 comment); a test without `proto`
+  matched the ICMP rule's `public@:*` for TCP ports; and a test whose source has no registered
+  node fails outright. `a06d3c7`: admin's tailnet grant is `autogroup:member:*`, the net_probe
+  test sets `proto: tcp`, the guests test is removed until a guest device exists. Headscale went
+  0.29.5 → 0.29.7 with the load (DB snapshot kept on the VPS). Wire: from the VPS, secsvcs 443
+  and 8455 open, secsvcs 22 and pve1 8006 time out; secsvcs pings the VPS and the firewall
+  bouncer keeps pulling; admin's laptop pings the VPS and bisratpi; the three nodes reconnected
+  within 2 s of the restart. No denied flow got through, so step 5 needed no netmap capture. The
+  family-device check of step 4 (a phone on mobile data) is still owed. Step 6 is open.
