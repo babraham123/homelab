@@ -294,8 +294,9 @@ flowchart LR
      - `src/base/debian/backup_lib.sh` owns both ends of the stage: the node scripts and the
        orchestrator source it; `src/nodes/pve1/collect_stage.sh NODE` pulls one node by hand
   2. pve1 and pve2: VM images to PBS through the API (`pvesh create /nodes/<n>/vzdump`, snapshot
-     mode). devtop and gaming share pve2's GPU: back up the running one, shut it down, back up the
-     other, start the first again
+     mode). gaming is left out: Windows and the games are reinstalled, not restored. It shares
+     pve2's GPU with devtop, so a stopped devtop is imaged with gaming shut down, then gaming
+     comes back
   3. pve1 → PBS with `proxmox-backup-client`, encrypted with `/root/secrets/pbs_client.key`:
      - `/root/backups/vpnsvcs` as `host/vpnsvcs` in namespace `pve1`, standing in for the VPS's
        image

@@ -26,25 +26,19 @@ websvcs=$("${rendered}/nodes/pve2/get_vm_id.sh" websvcs)
 devtop=$("${rendered}/nodes/pve2/get_vm_id.sh" devtop)
 gaming=$("${rendered}/nodes/pve2/get_vm_id.sh" gaming)
 
-# devtop and gaming share the GPU. vzdump launches a paused QEMU, GPU attached, to read
-# a stopped VM's disks whatever the mode, and the hookscript then stops the other VM.
-# So: back up whichever is running, shut it down, back up the other, then put things
-# back as they were.
-was_running=""
-for vm in "$devtop" "$gaming"; do
-  vm_running "$vm" && was_running=$vm
-done
-
+# gaming is not backed up: Windows and the games library are reinstalled, not restored,
+# and its image would not fit the datastore. devtop and gaming share the GPU: vzdump
+# launches a paused QEMU, GPU attached, to read a stopped VM's disks whatever the mode,
+# and the hookscript then stops the other VM. So a stopped devtop is imaged with gaming
+# off, and gaming comes back after.
 backup_vm "$websvcs"
-if [[ -n $was_running ]]; then
-  backup_vm "$was_running"
+gaming_was_running=0
+if ! vm_running "$devtop" && vm_running "$gaming"; then
+  gaming_was_running=1
   # The gaming VM can ignore ACPI mid-session; forceStop makes the timeout a hard stop.
-  qm shutdown "$was_running" --timeout 180 --forceStop 1
+  qm shutdown "$gaming" --timeout 180 --forceStop 1
 fi
-for vm in "$devtop" "$gaming"; do
-  [[ $vm == "$was_running" ]] || backup_vm "$vm"
-done
-if [[ -n $was_running ]]; then
-  qm start "$was_running"
+backup_vm "$devtop"
+if (( gaming_was_running )); then
+  qm start "$gaming"
 fi
-
