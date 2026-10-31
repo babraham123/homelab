@@ -783,9 +783,9 @@ Key Proxmox settings if the router VM has to be rebuilt:
 | OS type | Linux 6.x |
 | Firmware / machine | SeaBIOS, i440fx |
 | CPU | 2 cores, type `host` |
-| Memory | 12 GiB, ballooning off (required for PCI passthrough) |
+| Memory | 12 GiB; the balloon device stays at its default, no minimum, so it never reclaims (PCI passthrough pins guest RAM anyway) |
 | Disk | VirtIO SCSI single, discard on, IO thread, SSD emulation, no cache |
-| Boot order | `scsi0`, `ide2` |
+| Boot order | `scsi0`, `net0` (`ide2` holds the install ISO until pfSense is installed) |
 | Startup order | 1 (boots before everything else) |
 | Network | None at creation; after install attach `vmbr0` (VirtIO, firewall on) to share connectivity with the PVE host; keep the old MAC so DHCP reservations hold |
 | PCI devices | NIC ports passed through as `hostpci0`–`hostpci3`, in port order |
