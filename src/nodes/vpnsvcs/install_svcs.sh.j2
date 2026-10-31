@@ -72,6 +72,8 @@ case $1 in
     base/debian/add_homelab_tag.sh fail2ban.service
     systemctl enable fail2ban
     reload_restart fail2ban
+    # The server opens its socket a moment after systemd reports it started
+    wait_for 30 "fail2ban socket" fail2ban-client ping
     fail2ban-client status
     ;;
   crowdsec_firewall_bouncer)
