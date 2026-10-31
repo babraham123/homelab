@@ -34,7 +34,11 @@ if (( ! $# )); then
   done
 fi
 for node in "${nodes[@]}"; do
-  tools/upload_src.sh "$node" "$project_dir" || echo "${node} upload failed"
+  tools/upload_src.sh "$node" "$project_dir" || { echo "${node} upload failed"; continue; }
+  # InstallAutomation is gaming's install_dispatcher
+  install=install_dispatcher
+  [[ $node != gaming ]] || install=InstallAutomation
+  ssh "autoadmin@${node}" "$install" || echo "${node} ${install} failed"
 done
 
 (( $# )) || cat <<'EOF'

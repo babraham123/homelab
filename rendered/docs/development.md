@@ -136,7 +136,8 @@ flowchart TB
 
 Only validated output ever ships, and secrets only materialize inside the node at container start;
 the rendered tree on disk still has secret placeholders in its `*.j2` files. `deploy_src.sh` runs
-render + upload for every node in one command, or only the nodes it's given, and archives the
+render + upload + `install_dispatcher` (`InstallAutomation` on gaming) for every node in one
+command, or only the nodes it's given, and archives the
 repo plus `vars.yml` to pve1 (`archive_repo`) either way. A full deploy skips the gaming VM and
 prints the command to run once it's started. A render from a git checkout writes `DEPLOYED`
 (commit, uncommitted file count, render time) at the tree's root; after each upload the node
