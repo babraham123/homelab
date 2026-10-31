@@ -85,6 +85,15 @@ github_latest_version() {
   tag=$(github_latest_tag "$1")
   echo "${tag#v}"
 }
+# Usage: github_latest_patch OWNER/REPO MAJOR.MINOR; the highest MAJOR.MINOR.N tag without
+# its v, skipping pre-releases. Over git, for the same rate limit as github_latest_tag.
+github_latest_patch() {
+  local version
+  version=$(git ls-remote --tags --refs "https://github.com/$1" "v$2.*" |
+    sed -nE "s|.*refs/tags/v(${2//./\\.}\.[0-9]+)$|\1|p" | sort -V | tail -n 1)
+  [[ -n $version ]] || die "$1 has no $2.x release"
+  echo "$version"
+}
 
 install_lib() { install -D -m 644 "${rendered}/base/lib.sh" /usr/local/lib/homelab/lib.sh; }
 # Usage: install_bin SCRIPT...; for scripts run from /usr/local/bin, which source the

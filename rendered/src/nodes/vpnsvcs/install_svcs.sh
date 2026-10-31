@@ -25,12 +25,14 @@ case $1 in
     # sqlite3 takes the consistent DB snapshot for backup.sh
     apt install -y sqlite3
     nonlocal_bind
-    # Pinned: the release's checksums.txt comes from the same place as the deb
-    version=0.29.5
-    fetch_pinned "https://github.com/juanfont/headscale/releases/download/v${version}/headscale_${version}_linux_amd64.deb" \
-      9e8ec12a65229435863a2cdf5082853c282808e845efd3a1f0b0c02b8f84d723 headscale.deb
-    dpkg --install headscale.deb
-    rm headscale.deb
+    # The minor is fixed: a minor release can change the config and policy format
+    version=$(github_latest_patch juanfont/headscale 0.29)
+    deb="headscale_${version}_linux_amd64.deb"
+    url="https://github.com/juanfont/headscale/releases/download/v${version}"
+    wget "$url/$deb" "$url/checksums.txt"
+    sha256sum --check --ignore-missing checksums.txt || die "checksum mismatch: $deb"
+    dpkg --install "$deb"
+    rm "$deb" checksums.txt
     base/debian/add_homelab_tag.sh headscale.service
     install -D -m 644 services/headscale/headscale.yaml /etc/headscale/config.yaml
     install -D -m 644 services/headscale/headscale_acl.hujson /etc/headscale/acl.hujson
