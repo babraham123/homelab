@@ -16,6 +16,9 @@ AutoUpdate=local
 NoNewPrivileges=true
 DropCapability=all
 ReadOnly=true
+# The *_file secrets below mount at /run/secrets/<name>, and runc can't create their
+# mountpoints on the read-only root
+Tmpfs=/run/secrets
 HealthCmd=wget -q -O /dev/null http://admin:$${AM_ADMIN_PASSWORD}@127.0.0.1:9093/-/healthy
 HealthInterval=30s
 HealthRetries=3
