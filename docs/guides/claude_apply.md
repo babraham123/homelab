@@ -35,27 +35,16 @@ script -q -a -F notes/session.log zsh -f -o interactivecomments
 `zsh -f` skips your rc files, so the prompt ends in `%` and a space, which the watcher
 recognises; the powerlevel10k prompt ends in `❯` and would never wake it. `interactivecomments`
 brings back the `# note` lines (section 3) that your rc files would otherwise enable. `ssh` and `tools/*.sh`
-work as usual, interactive sessions included. Then tell Claude which steps to run, e.g. "assisted
-apply: notes/apply.md step 21".
+work as usual, interactive sessions included. Then `/apply notes/apply.md Full backup` in Claude
+Code to start at that heading, or `/apply notes/apply.md` for the whole file.
 
 ## 2. The loop (Claude)
 
-1. Run `tools/wait_prompt.sh` with `run_in_background`, then wait for its notification
-2. Compare the output it prints with the step's expected result. A `# ...` line is a note from the
-   human (see below).
-3. Call `tools/apply_next.sh TEXT MESSAGE`:
-   - TEXT: the next command, the URL for a human step, or `''`
-   - MESSAGE: one line with the verdict and the next step, e.g. "secsvcs failed_units clean →
-     next: install_fluentbit secsvcs"
-   - on a failure, TEXT is the diagnostic command and MESSAGE says what failed
-   - when the step needs more than one line of explanation, TEXT is `''` and MESSAGE is "see
-     Claude terminal"; the explanation goes in your reply. The watcher stays armed, so the human
-     answers either at the recorded prompt or in the chat. Don't end that reply on a question
-     the recorded session can't answer.
-4. Re-arm `tools/wait_prompt.sh` and repeat
-
-Never run the step's commands yourself, and never put a command that prints a secret on the
-clipboard without saying so in MESSAGE (so the human exits `script` first).
+`/apply FILE [HEADING]` (`.claude/skills/apply/SKILL.md`) is Claude's side: it reads the file into
+a step list, arms `tools/wait_prompt.sh`, checks each result against the step's expected
+output, and stages the next command with `tools/apply_next.sh`. Claude never runs a step's
+commands itself, and says so in the notification before any step that prints a secret, so you
+can exit `script` first.
 
 ## 3. Human steps and notes
 
