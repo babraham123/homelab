@@ -159,6 +159,16 @@ fetch https://raw.githubusercontent.com/Weehooey/pfSense-scripts/refs/heads/main
 sh install-qemu-guest-agent.sh
 ```
 
+- Turn off the backup freeze on the VM: the agent can't freeze pfSense's UFS root
+  ("Resource deadlock avoided"), so a snapshot-mode vzdump logs an error and goes on
+  unquiesced either way. pfSense keeps its config in a file it rewrites atomically, so an
+  unquiesced image restores fine.
+
+```bash
+# On pve1 as root, with the router's VMID
+qm set VMID --agent enabled=1,freeze-fs-on-backup=0
+```
+
 ### Serial console
 
 pve1 reaches the network only through the router, so when pfSense is down or stuck at a prompt,
