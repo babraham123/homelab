@@ -1,7 +1,7 @@
 // /etc/headscale/acl.hujson
 // Loaded via `policy.path` in headscale.yaml.j2; reloaded with `systemctl reload headscale`.
-// Requires headscale >= 0.29 (`tests` block; `*` means tailnet addresses only, so LAN
-// subnets must be named explicitly via `hosts`).
+// Requires headscale >= 0.29 (`tests` block). A `*` destination compiles to every address, so
+// admin names the tailnet's nodes as `autogroup:member` and the LAN subnets via `hosts`.
 // Ref:
 //   https://tailscale.com/kb/1018/acls/
 //   https://headscale.net/stable/ref/policy/
@@ -40,11 +40,14 @@
   // but are reached through pfSense's exit node, and `autogroup:internet` excludes private
   // ranges, so they need their own grants. The VLANs are reached by neither.
   "acls": [
-    // admin: every tailnet node, the home subnets, and exit nodes
+    // admin: every user's node on the tailnet, the home subnets, and exit nodes
     {
       "action": "accept",
       "src": ["group:admin"],
-      "dst": ["*:*", "router:*", "lan:*", "lan2:*", "pve1:*", "pve2:*", "autogroup:internet:*"]
+      "dst": [
+        "autogroup:member:*", "router:*", "lan:*", "lan2:*", "pve1:*", "pve2:*",
+        "autogroup:internet:*",
+      ]
     },
     // family: the home subnets and exit nodes, not other users' devices
     {
@@ -141,25 +144,15 @@
         "192.168.4.21:8123", "192.168.1.1:443", "192.168.1.50:443",
       ],
     },
-    // net_probe: secsvcs reaches the VPS's iperf3 server, nothing else on it
+    // net_probe: secsvcs reaches the VPS's iperf3 server, nothing else on it over TCP (a test
+    // without `proto` counts the ICMP rule's `public@:*` as reaching every port)
     {
       "src": "secsvcs",
+      "proto": "tcp",
       "accept": ["100.64.0.2:5201"],
       "deny": ["100.64.0.2:22", "100.64.0.2:9100"],
     },
-    // guests: web front doors only, nothing else on the subnets
-    {
-      "src": "guest1@",
-      "accept": [
-        "192.168.2.20:443", "192.168.4.20:443", "192.168.4.21:80",
-        "192.168.2.21:47989", "192.168.2.21:47999", "192.168.2.21:48010",
-      ],
-      "deny": [
-        "192.168.4.10:8006", "192.168.2.10:22", "192.168.1.1:443",
-        "192.168.4.20:22", "192.168.4.21:8123", "192.168.2.20:5432",
-        "192.168.2.21:47990", "192.168.2.21:3389", "192.168.2.21:22",
-        "192.168.1.50:443", "192.168.10.50:80",
-      ],
-    },
+    // No guests test: a test whose src has no registered node fails the policy, and guest1 has
+    // none until a visitor enrols (docs/guides/vpnsvcs.md.j2 "Guest users").
   ]
 }
