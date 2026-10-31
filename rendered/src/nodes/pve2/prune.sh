@@ -1,7 +1,8 @@
 #!/bin/bash
 # PBS retention: creates or updates one prune job per namespace, runs them, then runs
-# garbage collection. The orchestrator calls this after its upload step, so the
-# newest snapshots are counted, and only then, since PBS is only up during the run.
+# garbage collection with a short atime cutoff. The orchestrator calls this after its
+# upload step, so the newest snapshots are counted, and only then, since PBS is only up
+# during the run.
 # Retention lives here, not in the PBS UI. One job per namespace because prune jobs
 # can't tell images from host backups otherwise.
 # Usage:
@@ -46,4 +47,10 @@ prune_job() {
 prune_job images-pve1 pve1 "$image_retention"
 prune_job images-pve2 pve2 "$image_retention"
 prune_job files files keep-last=1,keep-weekly=3,keep-monthly=6
+# GC only frees chunks untouched for the atime cutoff, a day by default, so a failed
+# backup's orphans would wait for next week's run. Here nothing writes to the datastore
+# (every backup is done before the orchestrator prunes), so this GC may use a short
+# cutoff; the default comes back for PBS's own scheduled GC, which can overlap a backup.
+trap 'proxmox-backup-manager datastore update "$store" --delete tuning' EXIT
+proxmox-backup-manager datastore update "$store" --tuning gc-atime-cutoff=5
 pbs_task "$(proxmox-backup-manager garbage-collection start "$store" --output-format json | jq -r .)"
