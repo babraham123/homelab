@@ -9,5 +9,5 @@ groups:
           severity: critical
         annotations:
           summary: "Fluent Bit on {{ $labels.host }} has shipped no logs for 15 minutes"
-          description: "Its {{ $labels.name }} output to VictoriaLogs is stuck, so nothing from {{ $labels.host }} reaches the logs. podman logs fluentbit there; is VictoriaLogs up?"
+          description: "Its {{ $labels.name }} output to VictoriaLogs is stuck, so no logs arrive from {{ $labels.host }}. Check podman logs fluentbit there; is VictoriaLogs up?"
 ...
