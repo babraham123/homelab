@@ -1,6 +1,6 @@
 # 09. Deploy and cut over each node
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-25
@@ -37,3 +37,7 @@ pieces need their install cases or a rebuild, and a few leftovers stay behind.
 - `systemctl start car_ingest` imports a test upload; the Car dashboard shows it.
 - One run each of calliope, yt_to_audiobook, bookmark_handoff and geoip_generator succeeds from
   the new images.
+
+## Comments
+
+- 2026-11-01: closed by the maintainer.

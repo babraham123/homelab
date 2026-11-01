@@ -1,6 +1,6 @@
 # 05. Test OliveTin OIDC group claims and drop the allow-everyone workaround
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: upstream OliveTin/OliveTin#1103 (<https://github.com/OliveTin/OliveTin/issues/1103>)
@@ -52,3 +52,5 @@ reporter confirms it works in a release.
   `acls: [general]` on the gaming buttons), and OliveTin#1103 was closed 2026-09-29 after the
   `/user` page showed an LDAP group matched to an ACL (step 4). Only the three-user matrix test
   (step 3) remains.
+
+- 2026-11-01: closed by the maintainer.

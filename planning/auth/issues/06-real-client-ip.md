@@ -1,6 +1,6 @@
 # 06. Verify the real client IP reaches Traefik and apps through HAProxy
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26 (copyparty/01 "keep the client IP check"; needed again by
@@ -103,3 +103,5 @@ unchecked, repeat check 3, then resolve this ticket and router/04.
   - `curl -H 'X-Forwarded-For: 203.0.113.9' https://auth.SITE/` logs the carrier IP; the forged
     address appears in no log.
   - Eight failed Authelia logins banned the phone's IP (`LePresidente/authelia-bf`), not the VPS.
+
+- 2026-11-01: closed by the maintainer.

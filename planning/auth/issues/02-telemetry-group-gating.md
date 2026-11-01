@@ -1,6 +1,6 @@
 # 02. Gate VictoriaMetrics/VictoriaLogs/Alertmanager UIs on a telemetry LDAP group
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 13
@@ -88,3 +88,5 @@ rule. Confirm on your version.
   acceptance checks live.
 - 2026-10-17: ntfy dropped from scope: 11c348c (auth/13) took `push.SITE` off `telemetry_ui`, and
   the ntfy web app now signs in to ntfy itself.
+
+- 2026-11-01: closed by the maintainer.

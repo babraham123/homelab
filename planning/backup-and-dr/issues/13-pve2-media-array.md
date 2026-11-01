@@ -1,6 +1,6 @@
 # 13. Media array on pve2: HDDs on a passed-through SATA card, snapraid + mergerfs in websvcs
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: backup restructure grilling 2026-10-04
@@ -48,3 +48,5 @@ first sync, `systemctl list-timers 'snapraid-*'` shows both timers,
 series in VictoriaMetrics, and `ssh autoadmin@websvcs backup` stages nothing from the pool.
 
 ## Comments
+
+- 2026-11-01: closed by the maintainer.
