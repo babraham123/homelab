@@ -583,9 +583,6 @@ case "$(hostname)" in
       install_storyteller)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh storyteller
         ;;
-      install_frigate)
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh frigate
-        ;;
       install_calliope)
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh calliope
         ;;
@@ -616,7 +613,6 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh linkding
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh readeck
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh storyteller
-        sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh frigate
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh calliope
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh bookmark_handoff
         sudo /root/homelab-rendered/src/nodes/websvcs/install_svcs.sh yt_to_audiobook

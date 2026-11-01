@@ -22,7 +22,6 @@
   {"name": "metrics.janedoe.com", "type": "A", "value": "192.168.4.20"},
   {"name": "mqtt.janedoe.com", "type": "A", "value": "192.168.4.21"},
   {"name": "ntfy-alertmanager.janedoe.com", "type": "A", "value": "192.168.4.20"},
-  {"name": "nvr.janedoe.com", "type": "A", "value": "192.168.2.20"},
   {"name": "pbs2.janedoe.com", "type": "A", "value": "192.168.2.10"},
   {"name": "pgdb.janedoe.com", "type": "A", "value": "192.168.4.20"},
   {"name": "push.janedoe.com", "type": "A", "value": "192.168.4.20"},

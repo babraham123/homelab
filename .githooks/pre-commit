@@ -2,20 +2,20 @@
 # Runs the checks (tools/lib.sh run_checks) on the staged tree, rendered against
 # vars.template.yml. If everything passes, the render replaces rendered/ and is staged
 # with the commit. tools/check.sh runs the same checks on the working tree.
-# Activate with: git config core.hooksPath .githooks
+# Activate with: git config core.hooksPath .githooks (relative or absolute)
 # Skip once with: git commit --no-verify
 
 set -uo pipefail
 
-# Relative, so each worktree runs its own branch's hook rather than the main checkout's.
-hooks_path=$(git config core.hooksPath)
-if [ "$hooks_path" != .githooks ]; then
-  echo "pre-commit: core.hooksPath is '${hooks_path}', expected '.githooks'." >&2
-  echo "Run: git config core.hooksPath .githooks" >&2
-  exit 1
+# Git runs hooks from the root of the committing worktree. An absolute core.hooksPath
+# points every worktree at one checkout's copy, so hand off to this worktree's own, and
+# each branch runs its own hook.
+repo=$(pwd)
+if [ "$(cd "$(dirname "$0")" && pwd -P)" != "$(cd .githooks 2>/dev/null && pwd -P)" ]; then
+  [ -x .githooks/pre-commit ] || { echo "pre-commit: ${repo}/.githooks/pre-commit is missing" >&2; exit 1; }
+  exec .githooks/pre-commit "$@"
 fi
 
-repo=$(pwd)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 

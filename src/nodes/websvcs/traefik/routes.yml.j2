@@ -49,12 +49,12 @@ http:
       <<: *service
       rule: Host(`books.{{ site.url }}`)
       service: storyteller@file
-    # Authelia, then Frigate's own login. Home Assistant skips Authelia (a bypass rule for
-    # homesvcs's address) and signs in to Frigate.
-    nvr:
-      <<: *service
-      rule: Host(`nvr.{{ site.url }}`)
-      service: frigate@file
+    # Not in use. Authelia, then Frigate's own login. Home Assistant skips Authelia (a
+    # bypass rule for homesvcs's address) and signs in to Frigate.
+    # nvr:
+    #   <<: *service
+    #   rule: Host(`nvr.{{ site.url }}`)
+    #   service: frigate@file
     # Public, since websvcs is HAProxy's catch-all backend: keep authelia@file on every
     # router for this host, and no Authelia bypass rule for it.
     copyparty:
@@ -100,11 +100,11 @@ http:
       loadBalancer:
         servers:
           - url: http://books.{{ site.url }}:8001/
-    # Plain HTTP: Frigate's TLS is off (src/services/frigate/config.yml.j2)
-    frigate:
-      loadBalancer:
-        servers:
-          - url: http://nvr.{{ site.url }}:8971/
+    # Not in use. Plain HTTP: Frigate's TLS is off (src/services/frigate/config.yml.j2)
+    # frigate:
+    #   loadBalancer:
+    #     servers:
+    #       - url: http://nvr.{{ site.url }}:8971/
     copyparty:
       loadBalancer:
         servers:

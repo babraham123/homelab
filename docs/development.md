@@ -213,8 +213,8 @@ checks are `run_checks` in `tools/lib.sh`. If everything passes it replaces
 `rendered/` with that render and stages it, so every commit carries a readable copy of what the
 nodes get, with example values. `rendered/` is generated: edit the templates, never the copy. It is
 left out of the deploy render and marked `linguist-generated` so GitHub collapses it in diffs. The
-hook takes about 12 s. Activate it once per clone, with the relative path so each worktree runs
-its own branch's hook (the hook refuses to run with any other value):
+hook takes about 12 s. Activate it once per clone. An absolute path works too: the hook hands off
+to the committing worktree's own copy, so each worktree runs its own branch's hook.
 
 ```bash
 git config core.hooksPath .githooks

@@ -18,7 +18,7 @@ NoNewPrivileges=true
 
 Network=net.network
 HostName=nvr.{{ site.url }}
-IP={{ inv.addr.websvcs.frigate }}
+IP={{ websvcs.container_subnet }}.11
 # 8971: authenticated UI and API, reached by Traefik on the container network.
 # Never published: 5000 (unauthenticated API), 1984 (go2rtc API, no auth), 8554 (RTSP
 # restream); config.yml binds all three to the container's loopback.

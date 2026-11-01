@@ -43,7 +43,6 @@ EXPECTED = {
     "logs.janedoe.com",
     "metrics.janedoe.com",
     "ntfy-alertmanager.janedoe.com",
-    "nvr.janedoe.com",
     "pbs2.janedoe.com",
     "push.janedoe.com",
     "pve1.janedoe.com",

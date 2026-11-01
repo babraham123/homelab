@@ -1174,14 +1174,6 @@ dashboards:
               timeout: 60
 
           - inlineAction:
-              title: websvcs Install Frigate
-              icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
-              shell: ssh autoadmin@websvcs install_frigate
-              id: websvcs_install_frigate
-              maxConcurrent: 1
-              timeout: 60
-
-          - inlineAction:
               title: websvcs Install Calliope
               icon: <iconify-icon icon="material-symbols:cloud"></iconify-icon>
               shell: ssh autoadmin@websvcs install_calliope

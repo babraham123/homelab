@@ -34,12 +34,20 @@ if [[ "$node" != vpnsvcs ]]; then
   ufw allow in on "$POD_IFACE" to any port 53
   ufw route allow in on "$POD_IFACE" out on "$NET_IFACE"
 fi
-if [[ "$node" == websvcs ]]; then
-  # Frigate's WebRTC media, published on 8555 (tcp and udp) and DNATed to the container.
-  # From anywhere: off-VPN browsers arrive from their own public address through a
-  # pfSense state go2rtc opened; pfSense decides who else reaches it.
-  ufw route allow in on "$NET_IFACE" out on "$POD_IFACE" to any port 8555
-fi
+# Ports a container publishes besides Traefik's: DNATed to the container, so they need a
+# route rule, which the reset above would drop if it were added by hand
+case $node in
+  homesvcs)
+    # Mosquitto's TLS listener. From anywhere: clients present a cert from the internal
+    # CA, and pfSense decides which VLANs reach it
+    ufw route allow in on "$NET_IFACE" out on "$POD_IFACE" to any port 8883 proto tcp
+    ;;
+  # Not in use: Frigate's WebRTC media (tcp and udp). From anywhere: off-VPN browsers
+  # arrive from their own public address through a pfSense state go2rtc opened
+  # websvcs)
+  #   ufw route allow in on "$NET_IFACE" out on "$POD_IFACE" to any port 8555
+  #   ;;
+esac
 # Ports ufw opens on the host, each to its sources (open_ports in the inventory): the
 # exporters its vmagent scrapes through the bridge gateway, iperf3 for secsvcs's net_probe
 case $node in

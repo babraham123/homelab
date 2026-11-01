@@ -23,15 +23,13 @@ src/nodes/websvcs/install_svcs.sh copyparty
 src/nodes/websvcs/install_svcs.sh linkding
 src/nodes/websvcs/install_svcs.sh readeck
 src/nodes/websvcs/install_svcs.sh storyteller
-# Once the Coral driver is in (Hardware acceleration) and the camera password is in the
-# secrets file
-src/nodes/websvcs/install_svcs.sh frigate
 # Once the API tokens are in the secrets file (Bootstrap the reading apps)
 src/nodes/websvcs/install_svcs.sh bookmark_handoff
 src/nodes/websvcs/install_svcs.sh yt_to_audiobook
 # Once the GPU is set up (Hardware acceleration) and a voice is in place
 # src/nodes/websvcs/install_svcs.sh calliope
 
+# src/nodes/websvcs/install_svcs.sh frigate
 # src/nodes/websvcs/install_svcs.sh piper
 # src/nodes/websvcs/install_svcs.sh whisper
 # src/nodes/websvcs/install_svcs.sh openwakeword

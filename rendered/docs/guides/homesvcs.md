@@ -62,14 +62,11 @@ systemctl restart home_assistant
 Refs: [ESPHome](https://esphome.io/components/ota/esphome.html),
 [Shelly](https://www.home-assistant.io/integrations/shelly)
 
-- Enable LAN access to various services
+- `install_network.sh` lets the MQTT broker's 8883 through. Not in use: Shelly devices
 
 ```bash
 POD_IFACE=$(podman network inspect systemd-net | jq -r '.[0].network_interface')
 NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
-# MQTT broker
-ufw allow in from any to any port 8883 proto tcp
-ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 8883 proto tcp
 # HA, Shelly devices
 # ufw allow in from 192.168.11.0/24 to any port 5683 proto udp
 # ufw allow in from 192.168.21.0/24 to any port 5683 proto udp

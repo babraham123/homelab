@@ -104,10 +104,10 @@
         icon: home-assistant-alt.svg
         href: https://home.janedoe.com/auth/oidc/welcome
         description: Home automation dashboard
-    - Frigate:
-        icon: frigate.svg
-        href: https://nvr.janedoe.com/
-        description: Camera recordings and detections
+#     - Frigate:
+#         icon: frigate.svg
+#         href: https://nvr.janedoe.com/
+#         description: Camera recordings and detections
     - Zigbee2MQTT:
         icon: zigbee2mqtt.svg
         href: https://zigbee.janedoe.com/

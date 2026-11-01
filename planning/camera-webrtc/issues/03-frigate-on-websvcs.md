@@ -211,3 +211,8 @@ Verify:
   --cafile /c/ca.chain.pem --cert /c/client.pem --key /c/client.key -t 'frigate/#' -v -C 5`.
 - `sudo ss -ltnp; sudo ss -lunp` on websvcs: only 8555 new on the host.
 - `chrome://webrtc-internals` on trusted WiFi: the `{{ websvcs.ip }}:8555` host candidate.
+
+2026-11-01: Frigate is parked as "not in use" until the setup is done: out of websvcs's
+inventory, with its install case, Traefik router, Authelia bypass, Homepage entry and 8555 ufw
+rule commented out. Re-enabling them is the first step of the apply list. Apply step 10 is
+fixed: `install_network.sh` now adds homesvcs's 8883 route rule.

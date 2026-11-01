@@ -154,10 +154,6 @@ endpoints:
     <<: *internal
     url: "https://books.janedoe.com/api/health"
 
-  - name: frigate
-    <<: *internal
-    url: "https://nvr.janedoe.com/"
-
 
   # Internal CA, year-long certs (src/nodes/pve1/certificates/self_signed_cert_gen.sh). LDAPS is
   # the one TLS-on-connect service without client-certificate auth: Postgres negotiates
