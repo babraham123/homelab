@@ -1,6 +1,6 @@
 # 08. Create and push the repos, fast-forward the forks
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: podman-image-updater, net-probe, car-ingest, bookmark-handoff, haproxy-mapper,
   TTS-Narrated-Ebook-Creator, yt-to-audiobook, homelab
@@ -53,3 +53,4 @@ In this order:
   were on origin), and both batch worktrees are gone. Step 4 is half done: Renovate runs only on
   bookmark-handoff. podman-image-updater, net-probe and car-ingest have a `renovate.json` but no
   Dependency Dashboard, branch or PR from Renovate, so the app is not enabled on them.
+- 2026-11-01: resolved by the maintainer; Renovate enabled on the remaining three repos.
