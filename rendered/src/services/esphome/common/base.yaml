@@ -1,0 +1,16 @@
+# <esphomeconfig volume>/common/base.yaml
+# Shared by every device. A device made with "+ New Device" keeps its own api, ota and
+# wifi: ap: blocks, and merges the rest in with:
+#   packages:
+#     base: !include common/base.yaml
+# Ref: https://esphome.io/components/packages/
+---
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # The IoT SSID is hidden
+  fast_connect: true
+  # pfSense registers DHCP static mappings under this domain
+  domain: .iot.home.arpa
+logger:
+...

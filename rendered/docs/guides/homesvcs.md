@@ -27,6 +27,7 @@ src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
 src/nodes/homesvcs/install_svcs.sh vmagent
 src/nodes/homesvcs/install_svcs.sh mosquitto
 src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
+# Needs esphome_wifi_ssid and esphome_wifi_password
 src/nodes/homesvcs/install_svcs.sh esphome
 src/nodes/homesvcs/install_svcs.sh home_assistant
 src/nodes/homesvcs/install_svcs.sh fluentbit
@@ -37,6 +38,9 @@ systemctl list-units | grep Homelab
 image_updater --dry-run
 ```
 
+- ESPHome: the install writes only `common/base.yaml` and `secrets.yaml` (from the homesvcs
+  secrets) into the `esphomeconfig` volume; the dashboard owns the device files. Onboard a board
+  with the [ESPHome guide](./esphome.md).
 - Home Assistant config: `src/services/home_assistant/config` is installed to
   `/etc/opt/home_assistant/config`, mounted writable at `/config/homelab`;
   `/config/configuration.yaml` and `custom_sentences` link into it. The UI's

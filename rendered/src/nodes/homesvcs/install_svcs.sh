@@ -34,8 +34,25 @@ case $1 in
     reload_restart zigbee2mqtt
     ;;
   esphome)
-    install_quadlet services/esphome/esphome.container services/esphome/esphomeconfig.volume \
-      services/esphome/esphomebuild.volume
+    install_quadlet services/esphome/esphomeconfig.volume
+    systemctl daemon-reload
+    systemctl start esphomeconfig-volume.service
+    volpath=$(podman volume inspect -f '{{ .Mountpoint }}' systemd-esphomeconfig)
+    # The dashboard owns every other file in the volume (the device YAML), so the install
+    # writes only these two
+    install -D -m 644 -t "$volpath/common" services/esphome/common/base.yaml
+    # ESPHome reads !secret only from secrets.yaml. These are the names the New Device
+    # wizard looks for, so it fills them in without asking.
+    ssid=$(base/podman/get_secret.sh esphome_wifi_ssid)
+    password=$(base/podman/get_secret.sh esphome_wifi_password)
+    if [[ -z "$ssid" || "$ssid" == null || -z "$password" || "$password" == null ]]; then
+      die "esphome: set esphome_wifi_ssid and esphome_wifi_password in the homesvcs secrets"
+    fi
+    install -m 600 -o root -g root /dev/null "$volpath/secrets.yaml"
+    # yq quotes whatever needs it; the values reach it through its environment, not argv
+    SSID=$ssid PASSWORD=$password \
+      yq -n '.wifi_ssid = strenv(SSID) | .wifi_password = strenv(PASSWORD)' > "$volpath/secrets.yaml"
+    install_quadlet services/esphome/esphome.container services/esphome/esphomebuild.volume
     reload_restart esphome
     ;;
   home_assistant)
