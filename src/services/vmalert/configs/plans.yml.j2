@@ -9,7 +9,7 @@ groups:
       - record: homelab_vps_transfer_pool_bytes
         # The VPS plan's monthly outbound transfer pool; VpsTransferHigh in vps.yml and the
         # "VPS bandwidth" dashboard
-        expr: vector({{ site.vps_transfer_bytes }})
+        expr: vector({{ vps_mb_limit * 1000000 }})
         labels:
           host: vpnsvcs
 ...

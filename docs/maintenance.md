@@ -179,7 +179,7 @@ sudo systemctl start image_updater
 
 ## VPS bandwidth
 
-Linode bills the VPS's outbound transfer past the plan's monthly pool, `site.vps_transfer_bytes` in
+Linode bills the VPS's outbound transfer past the plan's monthly pool, `vps_mb_limit` (MB) in
 `vars.yml`; when the plan changes, set it, deploy secsvcs and run
 `ssh autoadmin@secsvcs install_vmalert`. `VpsTransferHigh` fires when the rolling 30-day `eth0`
 transmit passes 80% of it; the "VPS bandwidth" dashboard splits that into tailnet, DERP and funnel

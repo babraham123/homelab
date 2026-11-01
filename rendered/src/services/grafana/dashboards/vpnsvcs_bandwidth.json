@@ -116,7 +116,7 @@
         "colorMode": "value",
         "graphMode": "none"
       },
-      "description": "30-day egress over site.vps_transfer_bytes in vars.yml, which vmalert records as homelab_vps_transfer_pool_bytes (plans.yml.j2). VpsTransferHigh fires above 80%.",
+      "description": "30-day egress over vps_mb_limit in vars.yml, which vmalert records as homelab_vps_transfer_pool_bytes (plans.yml.j2). VpsTransferHigh fires above 80%.",
       "gridPos": {
         "h": 5,
         "w": 6,
@@ -158,7 +158,7 @@
         "colorMode": "value",
         "graphMode": "none"
       },
-      "description": "The plan's monthly outbound pool, site.vps_transfer_bytes in vars.yml.",
+      "description": "The plan's monthly outbound pool, vps_mb_limit in vars.yml.",
       "gridPos": {
         "h": 5,
         "w": 6,

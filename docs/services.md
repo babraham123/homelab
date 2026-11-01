@@ -219,7 +219,7 @@ flowchart LR
   - `VpsMetricsAbsent` fires on silence, since a pushing host can't raise `up == 0`; `HaproxyDown`
     and `HaproxyBackendConnectErrors` cover the edge; "HAProxy" dashboard
   - Bandwidth: Linode bills what leaves `eth0` past the plan's monthly pool
-    (`site.vps_transfer_bytes` in `vars.yml`, which vmalert records as
+    (`vps_mb_limit` in `vars.yml`, which vmalert records in bytes as
     `homelab_vps_transfer_pool_bytes` from `plans.yml.j2` so the rules and dashboards stay free of
     Jinja). The "VPS bandwidth" dashboard shows the rolling 30-day `eth0` transmit against it
     (needs `retention.metric_days` of 30 or more), and stacks `eth0` transmit by source:

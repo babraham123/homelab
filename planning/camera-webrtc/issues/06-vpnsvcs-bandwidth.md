@@ -49,7 +49,7 @@ the VPS is to it, or how much of it is DERP relaying versus the public funnel.
    Panel notes explain the derivation and its overstatement.
 5. **Alert** in `src/services/vmalert/configs/vps.yml`: `VpsTransferHigh` when
    `increase(node_network_transmit_bytes_total{device="eth0",host="vpnsvcs"}[30d])`
-   exceeds 80% of `site.vps_transfer_bytes`. That's a new var: the Linode plan's
+   exceeds 80% of `vps_mb_limit`. That's a new var: the Linode plan's
    monthly pool.
 6. **Docs:** `docs/services.md` observability section (the dashboard and the
    derivation).
@@ -59,7 +59,7 @@ the VPS is to it, or how much of it is DERP relaying versus the public funnel.
 - The dashboard's 30-day egress matches Linode's transfer page within 5%.
 - Forcing one tailnet client onto DERP and copying 1 GB through it raises `derp` by
   about 1 GB and leaves `tailnet` flat.
-- `VpsTransferHigh` fires in vmalert with `site.vps_transfer_bytes` temporarily set low.
+- `VpsTransferHigh` fires in vmalert with `vps_mb_limit` temporarily set low.
 - `ss -ltnp` shows no new listeners.
 
 ## Comments
@@ -70,11 +70,11 @@ estimate, and a laptop script answers the per-subdomain question when needed.
 
 - 2026-11-01: per-subdomain accounting dropped (maintainer): the laptop script and its acceptance
   line are removed. HAProxy keeps logging SNI and bytes per connection (item 3), so a LogsQL query
-  can still answer it ad hoc. Left: the dashboard, `VpsTransferHigh` with `site.vps_transfer_bytes`,
+  can still answer it ad hoc. Left: the dashboard, `VpsTransferHigh` with `vps_mb_limit`,
   and the docs.
 
 2026-11-01: items 4-6 in. The "VPS bandwidth" dashboard (`vpnsvcs_bandwidth.json`);
-`VpsTransferHigh` in `vps.yml`; `site.vps_transfer_bytes` in `vars.template.yml`;
+`VpsTransferHigh` in `vps.yml`; `vps_mb_limit` in `vars.template.yml`;
 `docs/services.md`, `docs/maintenance.md`, and the bytes-per-SNI LogsQL query in `docs/queries.md`.
 
 - The pool reaches the alert and the dashboard as a series, `homelab_vps_transfer_pool_bytes`,
@@ -96,8 +96,8 @@ estimate, and a laptop script answers the per-subdomain question when needed.
 Apply:
 
 ```bash
-# 1. Add the plan's pool to the real vars.yml (bytes), under site:
-#      vps_transfer_bytes: <plan's monthly transfer in bytes>
+# 1. Add the plan's pool to the real vars.yml, top level:
+#    vps_mb_limit: <plan's monthly transfer in MB>
 # 2. Deploy secsvcs, then install the rules and dashboards
 tools/deploy_src.sh secsvcs
 ssh autoadmin@secsvcs install_vmalert
@@ -113,7 +113,7 @@ curl -u "$VM_AUTH" https://metrics.SITE/api/v1/query --data-urlencode 'query=hom
 # 30-day egress: the dashboard's "Egress, last 30 days" vs Linode's transfer page, within 5%
 # DERP: force one tailnet client onto DERP (tailscale debug ... or block UDP), copy 1 GB through
 #    it; "derp + headscale" rises by about 1 GB and "tailnet" stays flat
-# Alert: set site.vps_transfer_bytes low (below the 30-day egress), redeploy and
+# Alert: set vps_mb_limit low (below the 30-day egress), redeploy and
 #    install_vmalert; VpsTransferHigh goes pending, then fires after 1h. Restore the value.
 # No new listeners on the VPS
 ssh manualadmin@vpnsvcs sudo ss -ltnp
