@@ -256,9 +256,10 @@ sudo tailscale up --login-server https://vpn.{{ site.url }}:443 --accept-routes 
 # after tools/upload_src.sh vpnsvcs ...
 cd /root/homelab-rendered/src
 cp services/headscale/headscale_acl.hujson /etc/headscale/acl.hujson
-# Runs the policy's tests against the DB
+# Runs the policy's tests against the DB, which needs headscale stopped
+systemctl stop headscale
 headscale policy check --file /etc/headscale/acl.hujson --bypass-grpc-and-access-database-directly
-systemctl reload headscale        # a failing policy is rejected
+systemctl start headscale         # a failing policy is rejected at load
 journalctl -eu headscale --no-pager | tail -20
 ```
 

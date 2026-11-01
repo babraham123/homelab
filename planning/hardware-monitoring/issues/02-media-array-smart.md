@@ -1,6 +1,6 @@
 # 02. Per-disk SMART metrics, dashboard and alerts for the media array
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-23
@@ -53,3 +53,6 @@ cables is most likely to show CRC errors first.
   declared, so `TargetDown` stays quiet until then), group `disks` in `hardware.yml` with
   `DiskUnhealthy` moved there, `smart_health()` dropped from `snapraid_run.sh.j2`, `disks.json`
   ("Disks"), ufw step in `pve2_storage.md.j2`. Acceptance waits for the array to be installed.
+- 2026-11-01: resolved. smartctl_exporter lists all four disks, `up{job="smartctl"}` is 1 and the
+  `disks` rules load. With the exporter polling, `hdparm -C` showed all four array disks (sdb to
+  sde) in standby.

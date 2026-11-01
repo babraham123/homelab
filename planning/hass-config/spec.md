@@ -40,4 +40,4 @@ on first install. After that it asks "Have you manually updated the config files
 
 | # | Title | Status | Type |
 | --- | --- | --- | --- |
-| [01](issues/01-split-config-ownership.md) | Repo-owned base config, UI-owned files, hand-written packages | `ready-for-agent` | task |
+| [01](issues/01-split-config-ownership.md) | Repo-owned base config, UI-owned files, hand-written packages | `resolved` | task |

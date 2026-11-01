@@ -21,5 +21,5 @@ researched (recommendation in its Answer) but not built.
 | [10](issues/10-alerting-pipeline-e2e.md) | Validate the alerting pipeline end to end | `resolved` | task |
 | [11](issues/11-vmagent-persistent-queue.md) | Keep vmagent's remote-write buffer on its volume, and cap it | `resolved` | task |
 | [12](issues/12-haproxy-metrics.md) | Expose HAProxy's metrics to the VPS's vmagent, scrape them, alert and graph | `resolved` | task |
-| [13](issues/13-log-based-alerts.md) | Alert on log lines through a second vmalert backed by VictoriaLogs | `needs-triage` | task |
+| [13](issues/13-log-based-alerts.md) | Alert on log lines through a second vmalert backed by VictoriaLogs | `wontfix` | task |
 | [14](issues/14-firewall-bouncer-down.md) | The CrowdSec firewall bouncer on vpnsvcs is neither pulling decisions nor serving metrics | `resolved` | task |

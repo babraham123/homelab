@@ -28,3 +28,10 @@ Find why the signal is refused (`podman exec storyteller ps -o pid,user,comm` wh
 image's entrypoint and Dockerfile) and make the stop clean: run the server without tini through
 `Exec=`, or fix the uid the child runs as. Confirm with `systemctl restart storyteller` leaving the
 unit `inactive`, not `failed`, and no tini line in `podman logs storyteller`.
+
+## Comments
+
+- 2026-11-01: still true. tini logged the `Permission denied` FATAL on every stop through 2026-11-01
+  05:11Z (six stops since 10-31). All of them came with a VM shutdown or reboot, so the unit never
+  sat in `failed` and `SystemdUnitFailed` did not fire for storyteller in the last 5 days. A
+  `systemctl restart storyteller` with the VM up would still leave it failed.

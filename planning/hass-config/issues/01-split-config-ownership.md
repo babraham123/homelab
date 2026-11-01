@@ -1,6 +1,6 @@
 # 01. Repo-owned base config, UI-owned files, hand-written packages
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-14; design in [spec.md](../spec.md)
@@ -58,3 +58,10 @@ The first run then reports no unexpected diff.
 - The conversation agent recognises a sentence from `commands.yaml`, once there is one.
 
 ## Comments
+
+- 2026-11-01: resolved, built differently in e14e10bb (2026-10-25): the repo-owned config is
+  installed to `/etc/opt/home_assistant/config` and mounted at `/config/homelab`, and the volume's
+  `configuration.yaml` and `custom_sentences` link into it. The UI-owned files stay in the volume,
+  and repo packages load from `homelab/packages`. Install stops with a diff on live edits, runs
+  `check_config` before the restart and restores the previous config on failure. Closed by the
+  maintainer.

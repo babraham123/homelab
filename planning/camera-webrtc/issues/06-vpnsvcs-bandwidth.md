@@ -1,4 +1,4 @@
-# 06. vpnsvcs bandwidth: totals, DERP estimate, per-subdomain script
+# 06. vpnsvcs bandwidth: totals and DERP estimate
 
 Status: ready-for-agent
 Type: task
@@ -42,41 +42,23 @@ the VPS is to it, or how much of it is DERP relaying versus the public funnel.
    Byte counts arrive when a connection closes, so long-lived DERP and WebSocket
    connections count in the window they close in. `haproxy.service` is tagged, so
    fluent-bit ships the lines to VictoriaLogs (`retention.log_days`, 14).
-4. **`tools/vps_bytes_by_subdomain.py`**, a uv script run on the laptop:
-   - `--since` (default `7d`, capped at `retention.log_days`); auth from `VL_AUTH`, as in
-     `docs/debugging.md` "Observability".
-   - One LogsQL query to `https://logs.SITE/select/logsql/query`, with the aggregation
-     done server-side:
-
-     ```text
-     _time:<since> hostname:=vpnsvcs "sni="
-       | extract "up=<up> down=<down> sni=<sni>"
-       | stats by (sni) sum(up) as up, sum(down) as down
-     ```
-
-   - Prints one row per SNI, sorted by `down` (bytes to clients, the billable
-     direction), with `up`, `down`, each row's share of the total, and a total row.
-     `-` is a client that sent no SNI or one with non-hostname characters. `vpn.SITE` is DERP plus
-     Headscale control.
-5. **Dashboard** `src/services/grafana/dashboards/vpnsvcs_bandwidth.json`:
+4. **Dashboard** `src/services/grafana/dashboards/vpnsvcs_bandwidth.json`:
    - billable egress (`eth0` tx), 30-day rolling, against the plan's transfer pool;
    - stacked `eth0` tx rate split into `tailnet` and `derp`, from item 2.
 
    Panel notes explain the derivation and its overstatement.
-6. **Alert** in `src/services/vmalert/configs/vps.yml`: `VpsTransferHigh` when
+5. **Alert** in `src/services/vmalert/configs/vps.yml`: `VpsTransferHigh` when
    `increase(node_network_transmit_bytes_total{device="eth0",host="vpnsvcs"}[30d])`
    exceeds 80% of `site.vps_transfer_bytes`. That's a new var: the Linode plan's
    monthly pool.
-7. **Docs:** `docs/services.md` observability section (the dashboard and the
-   derivation); `docs/maintenance.md` (the script).
+6. **Docs:** `docs/services.md` observability section (the dashboard and the
+   derivation).
 
 ## Acceptance
 
 - The dashboard's 30-day egress matches Linode's transfer page within 5%.
 - Forcing one tailnet client onto DERP and copying 1 GB through it raises `derp` by
   about 1 GB and leaves `tailnet` flat.
-- Loading a funnel site from mobile data puts its SNI in the script's output. Over the
-  same window, `vpn.SITE`'s `down` is within 15% of the dashboard's `derp` total.
 - `VpsTransferHigh` fires in vmalert with `site.vps_transfer_bytes` temporarily set low.
 - `ss -ltnp` shows no new listeners.
 
@@ -85,3 +67,8 @@ the VPS is to it, or how much of it is DERP relaying versus the public funnel.
 2026-10-16: scope cut. TURN is gone (04, wontfix), so the nftables per-port counters and
 the VictoriaLogs subdomain panel are dropped. The interface totals give the DERP
 estimate, and a laptop script answers the per-subdomain question when needed.
+
+- 2026-11-01: per-subdomain accounting dropped (maintainer): the laptop script and its acceptance
+  line are removed. HAProxy keeps logging SNI and bytes per connection (item 3), so a LogsQL query
+  can still answer it ad hoc. Left: the dashboard, `VpsTransferHigh` with `site.vps_transfer_bytes`,
+  and the docs.

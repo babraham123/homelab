@@ -1,6 +1,6 @@
 # 04. Scheduled iperf3 between pve1, pve2 and the VPS
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-23
@@ -58,3 +58,11 @@ over Tailscale is what every public request rides on.
   and a policy test.
 - 2026-10-25: the probe code is in the net-probe repo now; the targets, slots and busy checks
   above are entries in `src/base/net_probe/config.json.j2`.
+- 2026-11-01: the VPS iperf3 runs daily and its pings hourly; with pve2 off its probes skip as
+  `unreachable`. `headscale policy check -f /etc/headscale/config.yaml` failed because it was given
+  the server config, not the policy: the guide's command checks `/etc/headscale/acl.hujson`. Left:
+  that check and the streaming `busy` skip (both in `notes/apply.md`).
+- 2026-11-01: `headscale policy check --file /etc/headscale/acl.hujson
+  --bypass-grpc-and-access-database-directly` reports "Policy is valid" (headscale stopped for it).
+  Left: the streaming `busy` skip.
+- 2026-11-01: resolved by the maintainer; the streaming `busy` skip was not tested.

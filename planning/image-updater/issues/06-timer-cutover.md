@@ -1,6 +1,6 @@
 # 06. Disable podman-auto-update.timer, enable the updater timer
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: notes/image-updater-design.md "Changes, in rollout order" step 5
@@ -25,3 +25,4 @@ systemctl list-timers image_updater.timer
 
 - 2026-10-11: vpnsvcs is in scope too (it shares the fluentbit and vmagent quadlets); its slot is
   20:00. Fresh nodes get the updater timer from `podman.md`, so this is only for nodes built before.
+- 2026-11-01: done; closed by the maintainer.

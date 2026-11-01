@@ -89,8 +89,8 @@ flowchart LR
 | # | Title | Status | Type |
 | --- | --- | --- | --- |
 | [01](issues/01-gpu-dashboard-and-alerts.md) | GPU dashboard and temperature alerts | `ready-for-human` (code in; verify on deploy) | task |
-| [02](issues/02-media-array-smart.md) | Per-disk SMART metrics, dashboard and alerts for the media array | `ready-for-human` (code in; verify once the array is installed) | task |
-| [03](issues/03-wan-speed-test.md) | Scheduled WAN speed test from secsvcs | `ready-for-human` (code in; verify on deploy) | task |
-| [04](issues/04-iperf3-paths.md) | Scheduled iperf3 between pve1, pve2 and the VPS | `ready-for-human` (code in; verify on deploy) | task |
-| [05](issues/05-network-dashboard-and-alerts.md) | Network speed dashboard and alerts | `ready-for-human` (code in; verify on deploy) | task |
+| [02](issues/02-media-array-smart.md) | Per-disk SMART metrics, dashboard and alerts for the media array | `resolved` | task |
+| [03](issues/03-wan-speed-test.md) | Scheduled WAN speed test from secsvcs | `resolved` | task |
+| [04](issues/04-iperf3-paths.md) | Scheduled iperf3 between pve1, pve2 and the VPS | `resolved` | task |
+| [05](issues/05-network-dashboard-and-alerts.md) | Network speed dashboard and alerts | `resolved` | task |
 | [06](issues/06-smartctl-scrape-timeout.md) | smartctl_exporter on websvcs never answers a scrape | `resolved` | task |

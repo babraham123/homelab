@@ -1,6 +1,6 @@
 # 05. Quadlet labels, localhost/ images, install-time scan; per-VM rollout
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: notes/image-updater-design.md "Image references", "Scan gate and overrides", "Changes, in
@@ -57,3 +57,4 @@ vpnsvcs).
   `install_image_updater` to `/usr/local/bin/image_updater` at a pinned commit, with its image
   list in `src/base/podman/image_updater.json.j2`. The install-time gate in each `install_svcs.sh`
   is `/usr/local/bin/image_updater install "$1"`; the rollout above uses that path.
+- 2026-11-01: done; closed by the maintainer.

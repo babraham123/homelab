@@ -1,6 +1,6 @@
 # 01. Run the six pre-implementation checks
 
-Status: ready-for-human
+Status: resolved
 Type: research
 Repo: homelab
 Source: notes/image-updater-design.md "Checks before implementation"
@@ -25,3 +25,5 @@ Quick tests on one VM each. None blocks the design, but 3 and 6 decide the timer
 Record results under `## Answer`, and fold any change into `notes/image-updater-design.md`.
 
 ## Comments
+
+- 2026-11-01: done; closed by the maintainer.

@@ -42,3 +42,13 @@ unnoticed until a job slows down.
   `GpuRecoveryNeeded`) and `gpu.json` ("GPUs"). Not yet checked against a live exporter:
   confirm `nvidia_smi_clocks_current_*_clock_hz`, `nvidia_smi_utilization_memory_ratio` and the
   slowdown flag names on the P4's driver, and `vmalert -dryRun` the rules at deploy.
+- 2026-11-01: the rules load (`gpus` group healthy) and the dashboard has the P4 on websvcs and the
+  3060 Ti on devtop and gaming. The Calliope run on 2026-10-31 took the P4 from 37 to 92 °C in about
+  5 minutes. Then `nvidia-smi` started exiting 6 (GPU not found), every `nvidia_smi_*` GPU series
+  vanished, and no alert fired: `GpuHot` needs 5 minutes of samples and `GpuRecoveryNeeded` needs
+  the GPU to answer. Add an alert on `nvidia_smi_command_exit_code != 0` (or
+  `nvidia_smi_last_collect_success == 0`) for a few minutes. The P4 needs its fan before another
+  load test.
+- 2026-11-01: `GpuLost` added to the `gpus` group: `nvidia_smi_command_exit_code != 0` for 3m,
+  severity error. Against the 2026-10-31 failure it matches from 22:40 to 22:55, so it would have
+  fired. Left: deploy (`install_vmalert` on secsvcs) and a load test once the P4 has its fan.

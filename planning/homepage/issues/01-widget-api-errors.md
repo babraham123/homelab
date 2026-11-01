@@ -1,6 +1,6 @@
 # 01. Investigate the Proxmox, Google Calendar and weather widget API errors
 
-Status: ready-for-human
+Status: resolved
 Type: research
 Repo: homelab
 Source: maintainer request 2026-09-27
@@ -137,3 +137,4 @@ proxmox-backup-manager user delete-token api_ro@pam homepage # PBS
 - 2026-10-12: research pass; findings in Answer.
 - 2026-10-12: removed the Proxmox 1, Proxmox 2 and PBS widgets and their secrets. Weather and
   calendar fixes are in; close once the live validation above shows both loading.
+- 2026-11-01: the widgets work; closed by the maintainer.

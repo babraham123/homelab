@@ -1,6 +1,6 @@
 # 13. Alert on log lines through a second vmalert backed by VictoriaLogs
 
-Status: needs-triage
+Status: wontfix
 Type: task
 Repo: homelab
 Source: vaultwarden/01 (2026-10-12)
@@ -23,3 +23,8 @@ Failed SSO logins happen in Authelia and are already covered by the `auth` group
 ## Acceptance
 
 - A wrong admin token at `https://vault.SITE/admin` fires the alert and reaches ntfy.
+
+## Comments
+
+- 2026-11-01: wontfix (maintainer). The one rule wanted, Vaultwarden's `Invalid admin token`, needs
+  a signed-in admin behind Authelia to trigger; a second vmalert is not worth it for that.

@@ -239,8 +239,8 @@ flowchart LR
     `CertExpiringSoon` (14 days), `CertExpiringCritical` (3 days), and vm_watchdog's
     `VMWatchdogReset`, `VMWatchdogGaveUp`, `VMAgentDown`, `VMWatchdogOnHold`, `VMWatchdogStale`
   - `backups.yml`: `BackupStale`, `BackupNeverRan`, `SnapraidStale`
-  - `hardware.yml`: GPUs (`GpuHot`, `GpuThermalThrottling`, `GpuRecoveryNeeded`) and the media
-    array's SMART (`DiskUnhealthy`, `DiskHot`, `DiskSectorsGrowing`, `DiskCrcErrors`)
+  - `hardware.yml`: GPUs (`GpuHot`, `GpuThermalThrottling`, `GpuRecoveryNeeded`, `GpuLost`) and
+    the media array's SMART (`DiskUnhealthy`, `DiskHot`, `DiskSectorsGrowing`, `DiskCrcErrors`)
   - `network.yml`: `WanSlow` (three speed tests under half the plan), `VpsPathDown`,
     `NetProbeStale`, `NetProbeAbsent`
   - `vps.yml`: `VpsMetricsAbsent`, `HaproxyDown`, `HaproxyBackendConnectErrors`

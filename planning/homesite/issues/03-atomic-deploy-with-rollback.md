@@ -1,6 +1,6 @@
 # 03. Release-directory deploy with a bounded rollback history
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homesite
 Source: review finding 41
@@ -35,3 +35,4 @@ leaves the public site broken with nothing to roll back to.
   The first homesite deploy migrates an existing plain `www` dir into `releases/00000000T000000Z`.
   Homelab side is committed (18124cd). Remaining for a human: redeploy nginx on websvcs, then run
   the acceptance check live.
+- 2026-11-01: done; closed by the maintainer.

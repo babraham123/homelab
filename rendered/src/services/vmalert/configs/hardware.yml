@@ -34,6 +34,16 @@ groups:
           severity: error
         annotations:
           summary: "The driver wants {{ $labels.name }} on {{ $labels.host }} reset or the VM rebooted (action {{ $value }})"
+      - alert: GpuLost
+        # A card that overheats can drop off the bus: nvidia-smi then fails (exit 6, not
+        # found) while the exporter still answers, and every per-GPU series above stops.
+        expr: nvidia_smi_command_exit_code != 0
+        for: 3m
+        labels:
+          severity: error
+        annotations:
+          summary: "nvidia-smi on {{ $labels.host }} fails with exit {{ $value }}: the GPU is gone from the VM"
+          description: "Usually heat: check the card's airflow. Reboot the VM; if the card stays missing, power-cycle pve2."
   - name: disks
     rules:
       - alert: DiskUnhealthy

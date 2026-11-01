@@ -1,6 +1,6 @@
 # 03. Scheduled WAN speed test from secsvcs
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab, net-probe
 Source: maintainer request 2026-10-23
@@ -73,3 +73,5 @@ a degraded modem link or pfSense becoming the bottleneck all look like a quiet n
 - 2026-10-25: the runner is now its own repo, github.com/babraham123/net-probe, with its tests.
   `install_svcs.sh net_probe` installs it to `/usr/local/bin/net_probe` at a pinned commit,
   checked by sha256; `src/base/net_probe/config.json.j2` is its config, rendered from `vars.yml`.
+- 2026-11-01: resolved by the maintainer. The speed test has run at all four slots every day since
+  2026-10-28, each `speedtest: ok`.

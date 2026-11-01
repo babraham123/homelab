@@ -116,7 +116,7 @@ byte is received and sent.
 | [03](issues/03-frigate-on-websvcs.md) | Frigate with bundled go2rtc on websvcs; retire `src/services/go2rtc` | `ready-for-agent` | task |
 | [04](issues/04-coturn-on-vpnsvcs.md) | coturn on vpnsvcs | `wontfix` | task |
 | [05](issues/05-home-assistant-camera.md) | Home Assistant camera, WebRTC and Frigate integration | `ready-for-human` | task |
-| [06](issues/06-vpnsvcs-bandwidth.md) | vpnsvcs bandwidth: totals, DERP estimate, per-subdomain script | `ready-for-agent` | task |
+| [06](issues/06-vpnsvcs-bandwidth.md) | vpnsvcs bandwidth: totals and DERP estimate | `ready-for-agent` | task |
 | [07](issues/07-managed-switch-wired-vlans.md) | Managed PoE switch; enable wired VLANs 20 and 21 | `ready-for-human` | task |
 
 Order: (07, only for a wired camera) → 01 → 02 → 03 → 05; 06 independent. 04 is
