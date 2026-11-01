@@ -317,17 +317,8 @@ dns:
   # your tailnet base_domain is always the first search domain.
   search_domains: []
 
-  # Extra DNS records
-  # so far only A and AAAA records are supported (on the tailscale side)
-  # See: docs/ref/dns.md
-  extra_records: []
-  #   - name: "grafana.vpn.example.com"
-  #     type: "A"
-  #     value: "100.64.0.3"
-  #
-  #   # you can also put it in one line
-  #   - { name: "prometheus.vpn.example.com", type: "A", value: "100.64.0.3" }
-  #
+  # Extra DNS records (A and AAAA only, on the tailscale side; docs/ref/dns.md).
+  # Inline `extra_records` must stay absent: even an empty list is refused next to the path.
   # The site domain's LAN addresses for tailnet clients, rendered from
   # services/headscale/extra_records.json.j2 and installed by install_svcs.sh;
   # Headscale reloads the file on change, no restart.
