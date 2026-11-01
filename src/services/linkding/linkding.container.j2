@@ -40,8 +40,8 @@ Environment=LD_AUTH_PROXY_USERNAME_HEADER=HTTP_REMOTE_USER
 Environment=LD_AUTH_PROXY_LOGOUT_URL=https://auth.{{ site.url }}/logout
 Environment=LD_CSRF_TRUSTED_ORIGINS=https://archive.{{ site.url }}
 # uWSGI would log every request, the 10 s health probe included (~5k lines a day);
-# 4xx and 5xx responses are still logged.
-Environment=LD_DISABLE_REQUEST_LOGS=True
+# 4xx and 5xx responses are still logged. Lowercase: uwsgi.ini matches the exact value.
+Environment=LD_DISABLE_REQUEST_LOGS=true
 
 # Starts as root to chown the data dir, then runs as www-data. The database, favicons
 # and previews stay on the SSD (SQLite over mergerfs is unsafe); the page snapshots go
