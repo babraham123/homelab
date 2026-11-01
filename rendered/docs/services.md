@@ -153,6 +153,7 @@ flowchart LR
     end
 
     tg["Telegraf on pfSense"]
+    sl["syslogd on pfSense"]
 
     subgraph agents["homesvcs, websvcs and the VPS"]
         vmagent["vmagent"]
@@ -179,6 +180,7 @@ flowchart LR
     ne & sm -- "scrape (secsvcs targets)" --> vm
     tg -- "remote write" --> vm
     fb -- "push" --> vl
+    sl -- "syslog UDP :5140" --> vl
     vm -- "rules" --> va
     va -- "alerts" --> am
     am -- "route" --> nam
@@ -195,7 +197,7 @@ flowchart LR
     classDef agent stroke:#fbbf24,fill:transparent
     classDef data stroke:#22d3ee,fill:transparent
     class ne,sm,jd,phone src
-    class tg,vmagent,fb,va,am,nam,ntfy,gatus agent
+    class tg,sl,vmagent,fb,va,am,nam,ntfy,gatus agent
     class vm,vl,graf data
 ```
 

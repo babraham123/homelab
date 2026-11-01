@@ -229,5 +229,6 @@ address since pfSense routes subnet traffic without SNAT. "Network" dashboard;
 ## Router extras
 
 pfSense also runs CoDel traffic shaping (bufferbloat control), ntopng for traffic inspection,
-Telegraf for metrics export to VictoriaMetrics, and the Auto Config Backup package. Remote pfSense
-actions (e.g. waking pve2) go through autoadmin; see [the router guide](guides/router.md).
+Telegraf for metrics export to VictoriaMetrics, remote syslog of system notices (no firewall or DNS
+events) to VictoriaLogs, and the Auto Config Backup package. Remote pfSense actions (e.g. waking
+pve2) go through autoadmin; see [the router guide](guides/router.md).

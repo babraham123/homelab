@@ -53,6 +53,14 @@ ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.4.21 to any port
 ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.2.20 to any port 5432,6360,9091,465 proto tcp
 ```
 
+- Admit pfSense's syslog to VictoriaLogs, from the router's address on this subnet
+  ([router guide](./router.md#remote-logging))
+
+```bash
+ufw allow in from 192.168.4.1 to any port 5140 proto udp
+ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.4.1 to any port 5140 proto udp
+```
+
 - Confirm that the logs for traefik, authelia and lldap look good
 
 ```bash

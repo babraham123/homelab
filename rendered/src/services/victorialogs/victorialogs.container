@@ -21,10 +21,17 @@ ReadOnly=true
 Network=net.network
 HostName=logs.janedoe.com
 IP=10.10.0.8
+# Syslog from pfSense, which sends from its address on this VM's subnet; ufw admits only that.
+# Unprivileged port: the container drops every capability, NET_BIND_SERVICE included
+PublishPort=5140:5140/udp
 
 # https://docs.victoriametrics.com/victorialogs/#retention
+# https://docs.victoriametrics.com/victorialogs/data-ingestion/syslog/
+# Syslog streams drop the default proc_id: one stream per daemon, not per process
 Exec=--storageDataPath="/storage" \
      --httpListenAddr=":9428" \
+     --syslog.listenAddr.udp=":5140" \
+     '--syslog.streamFields.udp=["hostname","app_name"]' \
      --retention.maxDiskSpaceUsageBytes="24GiB" \
      --retentionPeriod="14d" \
      --storage.minFreeDiskSpaceBytes="8GiB" \

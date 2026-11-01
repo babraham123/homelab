@@ -36,7 +36,8 @@ one), `fw_bouncer_`, `gatus_results_`, `haproxy_{frontend,backend,server}_`, `he
 ### Log fields
 
 Set by `src/services/fluentbit/journald.lua.j2` from the journal. Only the units in each node's
-`homelab_services` reach VictoriaLogs; the rest of the journal stays on the node.
+`homelab_services` reach VictoriaLogs; the rest of the journal stays on the node. pfSense's syslog
+lines are the exception: see the last row.
 
 | Field | What |
 | ----- | ---- |
@@ -47,6 +48,7 @@ Set by `src/services/fluentbit/journald.lua.j2` from the journal. Only the units
 | `code` | `func file:line` of the logging call; `write_journald src/ctr_logging.c:467` for every container line |
 | `pid`, `boot_id` | From the journal; `errno` only when the journal set it |
 | `RequestMethod`, `RequestHost`, `RequestPath`, `RequestScheme`, `RequestProtocol`, `DownstreamStatus`, `OriginStatus`, `Duration`, `OriginDuration`, `Overhead` (ns), `DownstreamContentSize`, `ClientHost`, `ClientAddr`, `RouterName`, `ServiceName`, `entryPointName`, `TLSVersion`, `TLSCipher`, `RetryAttempts`, `request_User-Agent`, `request_Referer`, `request_Remote-User` | Traefik access-log lines only, from the JSON access log; `RequestMethod:*` selects them. `_msg` is rewritten to `METHOD host/path status Nms client`. `request_Remote-User` is the Authelia user on authenticated requests |
+| `app_name`, `severity`, `facility_keyword`, `level`, `proc_id` | pfSense's syslog lines only (system, DHCP, auth, gateway monitor, routing, NTP; no firewall or DNS); `app_name:*` selects them. The stream is `{hostname, app_name}`, `app_name` being the daemon (`dpinger`, `php-fpm`, `sshd`). `severity` is the `0`–`7` level there; `priority` is the raw syslog PRI (facility × 8 + severity) |
 
 Names with a hyphen need quotes: `"request_User-Agent":~"(?i)bot"`.
 
@@ -207,6 +209,10 @@ _time:1h {hostname="websvcs"} i(error)
 
 # Warning or worse by syslog level (host services; containers' stderr is always 3)
 _time:24h priority:<=4
+
+# pfSense notices, warning or worse, and which daemons sent them
+_time:24h app_name:* severity:<=4
+_time:24h app_name:* | stats by (app_name) count() n | sort by (n desc)
 
 # A phrase, and a regex in a field
 _time:1h {service="traefik"} "connection refused"

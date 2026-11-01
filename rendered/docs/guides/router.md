@@ -441,6 +441,22 @@ Service Watchdog:
 - Go to Services >> Service Watchdog
 - Add all of the services present (especially Tailscale and sshd)
 
+### Remote logging
+
+System notices go to VictoriaLogs on secsvcs over UDP syslog; firewall and DNS events stay local,
+being mostly scanner noise and query volume. secsvcs's ufw admits only `192.168.4.1`
+([secsvcs guide](./secsvcs.md#networking)).
+
+- Go to Status >> System Logs >> Settings
+- Log Message Format = syslog (RFC 5424), so timestamps carry the year and the UTC offset
+- Remote Logging Options:
+  - Enable Remote Logging, Source Address = PVE1, IP Protocol = IPv4
+  - Remote log servers = `192.168.4.20:5140`
+  - Remote Syslog Contents: System Events, DHCP Events, General Authentication Events, Gateway
+    Monitor Events, Routing Daemon Events, Network Time Protocol Events. Leave Everything, Firewall
+    Events and DNS Events off; VPN Events covers IPsec and OpenVPN, not Tailscale
+- Check from the laptop: `_time:10m app_name:*` in the logs UI lists pfSense's daemons
+
 ## Updates
 
 - Pause the vm_watchdog on pve1 for 2 hours, so it can't reset the router mid-upgrade
