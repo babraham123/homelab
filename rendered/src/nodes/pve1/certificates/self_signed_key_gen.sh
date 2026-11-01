@@ -43,6 +43,9 @@ chmod 400 private/zigbee.janedoe.com.key.pem
 openssl genrsa -out private/home.janedoe.com.key.pem 2048
 chmod 400 private/home.janedoe.com.key.pem
 
+openssl genrsa -out private/nvr.janedoe.com.key.pem 2048
+chmod 400 private/nvr.janedoe.com.key.pem
+
 openssl genrsa -out private/crowdsec.janedoe.com.key.pem 2048
 chmod 400 private/crowdsec.janedoe.com.key.pem
 
@@ -64,6 +67,7 @@ chmod 400 private/appsec-websvcs.janedoe.com.key.pem
   ssh autoadmin@secsvcs install_keys
 "$send" \
   private/webproxy.janedoe.com.key.pem \
+  private/nvr.janedoe.com.key.pem \
   private/appsec-websvcs.janedoe.com.key.pem |
   ssh autoadmin@websvcs install_keys
 "$send" \

@@ -1,0 +1,56 @@
+# /etc/containers/systemd/frigate.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+#   https://docs.frigate.video/frigate/installation
+
+[Unit]
+Description="Homelab: Frigate NVR, with its bundled go2rtc for the camera streams"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Wants=network.target
+After=network-online.target
+RequiresMountsFor=/srv/media
+
+[Container]
+Image=localhost/blakeblackshear/frigate:stable
+ContainerName=frigate
+AutoUpdate=local
+NoNewPrivileges=true
+
+Network=net.network
+HostName=nvr.{{ site.url }}
+IP={{ inv.addr.websvcs.frigate }}
+# 8971: authenticated UI and API, reached by Traefik on the container network.
+# Never published: 5000 (unauthenticated API), 1984 (go2rtc API, no auth), 8554 (RTSP
+# restream); config.yml binds all three to the container's loopback.
+# 8555: WebRTC media; browsers connect to it directly, so it's the one published port.
+PublishPort=8555:8555/tcp
+PublishPort=8555:8555/udp
+
+# iGPU decode (ffmpeg preset-vaapi), and the PCIe Coral for detection (gasket driver,
+# src/base/debian/install_coral.sh)
+AddDevice=/dev/dri:/dev/dri
+AddDevice=/dev/apex_0:/dev/apex_0
+# Decoded detect frames live in /dev/shm: 50 MB for logs and nginx, plus
+# (width x height x 1.5 + 270480) / 1048576 MB per frame at the detect resolution, 25 frames
+# per camera at least. One 720p camera needs 90 MB; at 128m Frigate fits nearly its full
+# 50 frame ring, and a sub stream smaller than 720p fits it whole.
+ShmSize=128m
+# Recording segments land here before they're moved to the media array. A size cap, not a
+# reservation: Frigate's suggested 1 GB costs RAM only while segments are queued.
+Tmpfs=/tmp/cache:rw,size=1g
+
+Environment=TZ={{ personal.timezone }}
+# The camera's view-only RTSP user; config.yml reads it as {FRIGATE_RTSP_PASSWORD}
+Secret=reolink_go2rtc_password,type=env,target=FRIGATE_RTSP_PASSWORD
+
+# config.yml, the client cert for Mosquitto, the event database and the model cache
+Volume=/etc/opt/frigate:/config
+# Recordings, clips and exports go on the media array
+Volume=/srv/media/frigate:/media/frigate
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

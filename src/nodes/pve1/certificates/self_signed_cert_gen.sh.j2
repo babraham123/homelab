@@ -176,6 +176,18 @@ openssl ca -config openssl.cnf -passin env:CA_PASS \
   -out certs/home.{{ site.url }}.client_cert.pem
 chmod 444 certs/home.{{ site.url }}.client_cert.pem
 
+# Frigate on websvcs logs in to Mosquitto with it; Mosquitto names the client after the CN
+openssl req -config openssl.cnf \
+  -key private/nvr.{{ site.url }}.key.pem \
+  -subj "${subj}/OU=websvcs/CN=nvr.{{ site.url }}" \
+  -addext 'subjectAltName = DNS:nvr.{{ site.url }}' \
+  -new -sha256 -out csr/nvr.{{ site.url }}.csr.pem
+openssl ca -config openssl.cnf -passin env:CA_PASS \
+  -extensions usr_cert -days 395 -notext -md sha256 \
+  -in csr/nvr.{{ site.url }}.csr.pem \
+  -out certs/nvr.{{ site.url }}.client_cert.pem
+chmod 444 certs/nvr.{{ site.url }}.client_cert.pem
+
 unset CA_PASS
 
 # Each node's files go on its install command's stdin
@@ -194,6 +206,7 @@ unset CA_PASS
 "$send" \
   certs/webproxy.{{ site.url }}.cert.pem \
   certs/webproxy.{{ site.url }}.client_cert.pem \
+  certs/nvr.{{ site.url }}.client_cert.pem \
   certs/appsec-websvcs.{{ site.url }}.client_cert.pem \
   certs/ca-chain.cert.pem |
   ssh autoadmin@websvcs install_certs

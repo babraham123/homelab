@@ -134,6 +134,16 @@ retention:
   log_days: 14
   metric_days: 14
   hass_days: 14
+  # Frigate: continuous recording, and the clips and snapshots of alerts and detections
+  frigate_days:
+    continuous: 7
+    events: 30
+
+# Cameras Frigate records (src/services/frigate/config.yml.j2), each with a static DHCP
+# lease on an IoT VLAN. `main` and `sub` are the RTSP paths, if the model's differ from
+# h264Preview_01_main and h264Preview_01_sub.
+cameras:
+  - {name: front, model: "<model>", ip: 192.168.11.50}
 
 # finance_exporter's tickers by asset type, each optional; each type gets its standard
 # metrics (src/services/finance_exporter/config.yaml.j2).

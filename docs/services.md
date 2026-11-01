@@ -9,7 +9,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
   (`systemctl list-units "*.service"` on the node)
 - Raw list: `grep -rn "^IP=" src --include="*.container.j2*"`
 - Not in use, so not in any `inventory.yml` or the tables below, though their quadlets exist:
-  go2rtc and the `wyoming` quadlets piper, whisper and openwakeword (websvcs)
+  the `wyoming` quadlets piper, whisper and openwakeword (websvcs)
 
 ## secsvcs: identity, certificates, observability (pve1, 10.10.0.0/24)
 
@@ -43,6 +43,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .8 | nginx | nginx | Static site + error pages | `www.janedoe.com`, apex |
 | .9 | homepage | homepage | Service dashboard | dash.janedoe.com |
 | .10 | isso | isso | Blog comments | comment.janedoe.com |
+| .11 | frigate | frigate:stable | NVR: recording and Coral object detection; its bundled go2rtc restreams the cameras and serves WebRTC on published port 8555 | nvr.janedoe.com |
 | .17 | linkding | linkding:latest-plus | Bookmarks and page archive | archive.janedoe.com |
 | .18 | readeck | readeck | Read-it-later reader | read.janedoe.com |
 | .19 | copyparty | copyparty/ac | File server (behind Authelia) | files.janedoe.com |

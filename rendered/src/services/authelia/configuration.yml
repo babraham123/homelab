@@ -802,6 +802,12 @@ access_control:
       networks: ['internal', 'vpn']
       policy: 'bypass'
 
+    # Home Assistant's Frigate integration can't pass Authelia; it signs in with a Frigate
+    # user instead, so Frigate's login is the only gate from homesvcs.
+    - domain: 'nvr.janedoe.com'
+      networks: ['192.168.4.21/32']
+      policy: 'bypass'
+
     - domain: '*.janedoe.com'
       subject: 'oauth2:client:{{ mustEnv "GATUS_OIDC_ID" }}'
       policy: 'one_factor'
@@ -2050,6 +2056,7 @@ identity_providers:
           - 'https://iot.janedoe.com/'
           - 'https://logs.janedoe.com/'
           - 'https://metrics.janedoe.com/'
+          - 'https://nvr.janedoe.com/'
           - 'https://read.janedoe.com/api/info'
           - 'https://vault.janedoe.com/alive'
           - 'https://vmalert.janedoe.com/'

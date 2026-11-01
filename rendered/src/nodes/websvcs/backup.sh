@@ -9,7 +9,8 @@
 # protection, the web archive (linkding snapshots, Readeck articles), read-along books
 # and Storyteller's processed books and uploads included; yt_to_audiobook's downloads
 # under /srv/media/books/videos are re-fetchable. The homesite releases are in the homesite repo; only the live
-# release is kept here.
+# release is kept here. Frigate's recordings and snapshots (/srv/media/frigate) aren't
+# backed up at all, nor its event database, which only indexes them, or its model cache.
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
@@ -29,7 +30,9 @@ excludes+=(--exclude=etc/opt/wyoming/src
   --exclude='var/opt/readeck/data/db.sqlite3*'
   --exclude='var/opt/storyteller/storyteller.db*'
   --exclude=var/opt/storyteller/cache
-  --exclude=var/opt/storyteller/image-cache)
+  --exclude=var/opt/storyteller/image-cache
+  --exclude='etc/opt/frigate/frigate.db*'
+  --exclude=etc/opt/frigate/model_cache)
 # Readeck's config.toml holds the secret key its API tokens are signed with. The car
 # recordings are small and the only copy of the trips; the rest of copyparty's uploads
 # are in the VM image only.

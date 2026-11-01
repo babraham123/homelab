@@ -348,6 +348,13 @@
           "upstream": "registry.gitlab.com/storyteller-platform/storyteller:web-v2"
         },
         {
+          "container": "frigate",
+          "image": "localhost/blakeblackshear/frigate:stable",
+          "service": "frigate",
+          "trivyignore": "/root/homelab-rendered/src/services/frigate/.trivyignore",
+          "upstream": "ghcr.io/blakeblackshear/frigate:stable"
+        },
+        {
           "build": "calliope",
           "build_script": "/root/homelab-rendered/src/services/calliope/build.sh",
           "container": "calliope",

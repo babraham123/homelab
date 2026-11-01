@@ -802,6 +802,12 @@ access_control:
       networks: ['internal', 'vpn']
       policy: 'bypass'
 
+    # Home Assistant's Frigate integration can't pass Authelia; it signs in with a Frigate
+    # user instead, so Frigate's login is the only gate from homesvcs.
+    - domain: 'nvr.{{ site.url }}'
+      networks: ['{{ homesvcs.ip }}/32']
+      policy: 'bypass'
+
     - domain: '*.{{ site.url }}'
       subject: 'oauth2:client:{% raw %}{{ mustEnv "GATUS_OIDC_ID" }}{% endraw %}'
       policy: 'one_factor'

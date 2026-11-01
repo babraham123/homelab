@@ -34,6 +34,12 @@ if [[ "$node" != vpnsvcs ]]; then
   ufw allow in on "$POD_IFACE" to any port 53
   ufw route allow in on "$POD_IFACE" out on "$NET_IFACE"
 fi
+if [[ "$node" == websvcs ]]; then
+  # Frigate's WebRTC media, published on 8555 (tcp and udp) and DNATed to the container.
+  # From anywhere: off-VPN browsers arrive from their own public address through a
+  # pfSense state go2rtc opened; pfSense decides who else reaches it.
+  ufw route allow in on "$NET_IFACE" out on "$POD_IFACE" to any port 8555
+fi
 # Ports ufw opens on the host, each to its sources (open_ports in the inventory): the
 # exporters its vmagent scrapes through the bridge gateway, iperf3 for secsvcs's net_probe
 case $node in

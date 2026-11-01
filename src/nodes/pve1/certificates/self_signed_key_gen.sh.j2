@@ -43,6 +43,9 @@ chmod 400 private/zigbee.{{ site.url }}.key.pem
 openssl genrsa -out private/home.{{ site.url }}.key.pem 2048
 chmod 400 private/home.{{ site.url }}.key.pem
 
+openssl genrsa -out private/nvr.{{ site.url }}.key.pem 2048
+chmod 400 private/nvr.{{ site.url }}.key.pem
+
 openssl genrsa -out private/crowdsec.{{ site.url }}.key.pem 2048
 chmod 400 private/crowdsec.{{ site.url }}.key.pem
 
@@ -61,6 +64,7 @@ chmod 400 private/appsec-{{ node }}.{{ site.url }}.key.pem
   ssh autoadmin@secsvcs install_keys
 "$send" \
   private/webproxy.{{ site.url }}.key.pem \
+  private/nvr.{{ site.url }}.key.pem \
   private/appsec-websvcs.{{ site.url }}.key.pem |
   ssh autoadmin@websvcs install_keys
 "$send" \

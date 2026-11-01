@@ -72,11 +72,6 @@ case $1 in
     reload_restart readeck
     ;;
   # Not in use: uncomment and add to src/nodes/websvcs/inventory.yml to install again
-#   go2rtc)
-#     install -D -m 644 -t /etc/opt/go2rtc services/go2rtc/config.yaml
-#     install_quadlet services/go2rtc/go2rtc.container
-#     reload_restart go2rtc
-#     ;;
 #   piper)
 #     mkdir -p /etc/opt/piper
 #     mkdir -p /var/opt/piper
@@ -163,6 +158,15 @@ case $1 in
     install -D -m 644 -t /etc/opt/storyteller services/storyteller/config.json
     install_quadlet services/storyteller/storyteller.container
     reload_restart storyteller
+    ;;
+  frigate)
+    require_media
+    # The quadlet passes the Coral through; without its driver the container won't start.
+    [[ -e /dev/apex_0 ]] || die "/dev/apex_0 is missing: install the Coral driver (docs/guides/gpu.md)"
+    mkdir -p /etc/opt/frigate/certificates /srv/media/frigate
+    install -D -m 644 -t /etc/opt/frigate services/frigate/config.yml
+    install_quadlet services/frigate/frigate.container
+    reload_restart frigate
     ;;
   calliope)
     require_media

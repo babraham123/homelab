@@ -104,14 +104,10 @@
         icon: home-assistant-alt.svg
         href: https://home.{{ site.url }}/auth/oidc/welcome
         description: Home automation dashboard
-#     - Frigate:
-#         icon: frigate.svg
-#         href: https://cameras.{{ site.url }}/
-#         description: Camera server
-#         # widget:
-#         #   type: frigate
-#         #   url: http://frigate.host.or.ip:port
-#         #   enableRecentEvents: true # Optional, defaults to false
+    - Frigate:
+        icon: frigate.svg
+        href: https://nvr.{{ site.url }}/
+        description: Camera recordings and detections
     - Zigbee2MQTT:
         icon: zigbee2mqtt.svg
         href: https://zigbee.{{ site.url }}/

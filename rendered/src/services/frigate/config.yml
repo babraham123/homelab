@@ -1,0 +1,105 @@
+# /etc/opt/frigate/config.yml
+# Ref: https://docs.frigate.video/configuration/reference
+# install_svcs.sh overwrites this file, so changes saved in Frigate's settings UI last only
+# until the next install.
+---
+# Frigate's own login on 8971, for everyone. Authelia sits in front for every client but
+# Home Assistant (homesvcs's address is bypassed), so the Frigate login is HA's only gate.
+# proxy.header_map would sign Authelia users in, but Frigate reads it only with auth
+# disabled, and then a request without the header is let in as `viewer` instead of being
+# sent to the login page (frigate/api/auth.py, `auth`): HA's bypass would be open.
+auth:
+  enabled: true
+  # Browsers reach Frigate only through Traefik's HTTPS
+  cookie_secure: true
+  failed_login_rate_limit: "1/second;5/minute;20/hour"
+  # Rate limits key on the client address Traefik puts in X-Forwarded-For
+  trusted_proxies:
+    - 10.11.0.6/32
+
+# Traefik terminates TLS and reaches 8971 over the container network, like every other
+# websvcs backend. Frigate's self-signed cert would need insecureSkipVerify in Traefik:
+# encryption on one host's bridge with nothing verified.
+tls:
+  enabled: false
+
+networking:
+  listen:
+    # Port 5000 treats every request as admin; only processes in the container need it
+    internal: "127.0.0.1:5000"
+    external: 8971
+
+mqtt:
+  host: mqtt.janedoe.com
+  port: 8883
+  # Mosquitto takes the client cert's CN (nvr.SITE) as the username; no password
+  tls_ca_certs: /config/certificates/ca.chain.pem
+  tls_client_cert: /config/certificates/client.pem
+  tls_client_key: /config/certificates/client.key
+
+detectors:
+  coral:
+    type: edgetpu
+    device: pci
+
+ffmpeg:
+  hwaccel_args: preset-vaapi
+
+# Off by default. The detect resolution is the sub stream's own.
+detect:
+  enabled: true
+
+go2rtc:
+  # Frigate's nginx and processes reach these on 127.0.0.1
+  api:
+    listen: "127.0.0.1:1984"
+  rtsp:
+    listen: "127.0.0.1:8554"
+  # The only connection to each camera; Frigate and every viewer read from here.
+  # {FRIGATE_RTSP_PASSWORD} is Frigate's env substitution, filled in at container start.
+  streams:
+    front:
+      - rtsp://go2rtc:{FRIGATE_RTSP_PASSWORD}@192.168.11.50:554/h264Preview_01_main
+    front_sub:
+      - rtsp://go2rtc:{FRIGATE_RTSP_PASSWORD}@192.168.11.50:554/h264Preview_01_sub
+  webrtc:
+    candidates:
+      # Trusted VLANs and the tailnet's subnet route
+      - 192.168.2.20:8555
+      # The home public IP, from STUN, for off-VPN browsers that can hole-punch
+      - stun:8555
+    # Replaces go2rtc's defaults, so one provider sees the home IP's STUN requests.
+    # STUN only, never a TURN credential: GET /api/config returns this list to every
+    # signed-in Frigate user.
+    ice_servers:
+      - urls: [stun:stun.cloudflare.com:3478]
+
+record:
+  enabled: true
+  continuous:
+    days: 7
+  alerts:
+    retain:
+      days: 30
+      mode: all
+  detections:
+    retain:
+      days: 30
+      mode: all
+
+snapshots:
+  enabled: true
+  retain:
+    default: 30
+
+cameras:
+  front:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/front
+          input_args: preset-rtsp-restream
+          roles: [record]
+        - path: rtsp://127.0.0.1:8554/front_sub
+          input_args: preset-rtsp-restream
+          roles: [detect]
+...

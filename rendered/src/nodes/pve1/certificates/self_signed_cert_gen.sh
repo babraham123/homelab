@@ -193,6 +193,18 @@ openssl ca -config openssl.cnf -passin env:CA_PASS \
   -out certs/home.janedoe.com.client_cert.pem
 chmod 444 certs/home.janedoe.com.client_cert.pem
 
+# Frigate on websvcs logs in to Mosquitto with it; Mosquitto names the client after the CN
+openssl req -config openssl.cnf \
+  -key private/nvr.janedoe.com.key.pem \
+  -subj "${subj}/OU=websvcs/CN=nvr.janedoe.com" \
+  -addext 'subjectAltName = DNS:nvr.janedoe.com' \
+  -new -sha256 -out csr/nvr.janedoe.com.csr.pem
+openssl ca -config openssl.cnf -passin env:CA_PASS \
+  -extensions usr_cert -days 395 -notext -md sha256 \
+  -in csr/nvr.janedoe.com.csr.pem \
+  -out certs/nvr.janedoe.com.client_cert.pem
+chmod 444 certs/nvr.janedoe.com.client_cert.pem
+
 unset CA_PASS
 
 # Each node's files go on its install command's stdin
@@ -211,6 +223,7 @@ unset CA_PASS
 "$send" \
   certs/webproxy.janedoe.com.cert.pem \
   certs/webproxy.janedoe.com.client_cert.pem \
+  certs/nvr.janedoe.com.client_cert.pem \
   certs/appsec-websvcs.janedoe.com.client_cert.pem \
   certs/ca-chain.cert.pem |
   ssh autoadmin@websvcs install_certs

@@ -1,6 +1,6 @@
 # 03. Frigate with bundled go2rtc on websvcs; retire `src/services/go2rtc`
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-13; bundled go2rtc decided 2026-10-14
@@ -106,3 +106,108 @@ Frigate's bundled go2rtc replaces it (maintainer decision 2026-10-14).
 - `ss -ltnp` / `-lunp` on websvcs show only 8555 newly bound on the host.
 
 ## Comments
+
+2026-11-01, implemented; ready for the apply and acceptance checks.
+
+What changed:
+
+- `src/services/go2rtc/` deleted, with its commented install case, the guide line and the
+  "not in use" mention.
+- `src/services/frigate/`: `frigate.container.j2` (`.11`, `nvr.SITE`, `/dev/dri`, `/dev/apex_0`,
+  `ShmSize=128m`, a 1 GB tmpfs cap at `/tmp/cache`, only 8555 tcp/udp published) and
+  `config.yml.j2` (streams, candidates and Cloudflare STUN from `cameras`; Coral `device: pci`;
+  `preset-vaapi`; detection on; MQTT over TLS; retention from `retention.frigate_days`).
+- Inventory entry under the media services, a `frigate` case (`require_media`, dies without
+  `/dev/apex_0`), Traefik router `nvr` → `http://nvr.SITE:8971/`, Authelia bypass for
+  `{{ homesvcs.ip }}/32`, Homepage entry, `docs/services.md` row, Gatus via `uptime: frigate`.
+- `vars.template.yml`: `cameras` (one placeholder) and `retention.frigate_days`
+  (`continuous: 7`, `events: 30`). Optional per-camera `main`/`sub` RTSP paths override
+  `h264Preview_01_main`/`_sub`.
+- `reolink_go2rtc_password` in websvcs's `secrets_template.yaml`.
+- Backup: Frigate's DB and model cache are excluded; recordings live on the media array,
+  which isn't staged.
+- `install_network.sh`: on websvcs, a ufw route rule for 8555 (tcp+udp). Published ports are
+  DNATed, so without it ufw's forward policy drops them, and `install_network.sh` resets ufw
+  each run, so a manual rule wouldn't survive.
+
+Deviations from the ticket, from Frigate's docs and v0.18.2 source:
+
+- **No `proxy.header_map`.** Frigate reads it only when `auth.enabled: false` (reference
+  config: "Only used if Frigate's auth is disabled"; `frigate/api/auth.py` `auth()`). With auth
+  on, identity comes only from Frigate's JWT (cookie or Bearer); without one it answers 401
+  with `location: /login`, so a request without `Remote-User` does fall back to Frigate's
+  login. With auth off, a request without the header is let in as user `viewer` with
+  `default_role`, so HA's Authelia bypass would be an open door. Auth stays on and
+  `header_map` is left out as dead config: Authelia users sign in twice (Authelia, then
+  Frigate).
+- **No `mqtt_frigate_password`.** Mosquitto has no password users here:
+  `require_certificate true` and `use_identity_as_username true`, like zigbee2mqtt and HA.
+  Frigate gets a client cert `CN=nvr.SITE` from the private CA (pve1's key/cert scripts, websvcs
+  `install_keys`/`install_certs` → `/etc/opt/frigate/certificates/`). Frigate's reference says
+  not to set user/password with a client cert.
+- **Frigate TLS off** (`tls.enabled: false`, documented for reverse proxies) rather than a
+  `serversTransport` with `insecureSkipVerify`: the hop is Traefik → container on websvcs's
+  own bridge, like every other backend, and skip-verify adds a transport that authenticates
+  nothing. `auth.cookie_secure: true`, since browsers only see HTTPS.
+- **Loopback binds** for 5000 (`networking.listen.internal: 127.0.0.1:5000`; every request on
+  it is admin), go2rtc's API (`127.0.0.1:1984`) and RTSP (`127.0.0.1:8554`): other containers
+  on websvcs's bridge can't reach them. Frigate's nginx, healthchecks and ffmpeg use 127.0.0.1.
+- IP via the inventory (`ip: 11`, `inv.addr.websvcs.frigate`), as the other quadlets do now.
+
+Other Frigate-docs findings:
+
+- shm: per frame `(w × h × 1.5 + 270480) / 1048576` MB at the detect resolution, 25 frames
+  per camera minimum (Frigate warns under 20, uses up to 50), plus 50 MB for logs and nginx.
+  One 720p camera: 90 MB.
+- Coral: PCIe `/dev/apex_0` with `device: pci`; USB would be `/dev/bus/usb` with
+  `device: usb`. websvcs's is PCIe (`1ac1:089a`).
+- Secrets: `{FRIGATE_*}` substitution works in go2rtc stream URLs (`create_config.py` formats
+  them with `FRIGATE_` env vars and `/run/secrets/FRIGATE_*`); go2rtc's own `${VAR}` is
+  disabled in streams. The password goes in the URL unescaped: letters and digits only.
+- `detect.enabled` defaults to false; set true.
+- `/` on 8971 serves the UI without auth, so Gatus's default `/` check works.
+
+Apply (nothing here has been run):
+
+1. `vars.yml`: add `cameras` (from 01) and `retention.frigate_days`; renders and
+   `tests/vars_test.sh` fail until both are there.
+2. Secrets: add `reolink_go2rtc_password`, then
+   `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh websvcs` on pve1.
+3. Coral and iGPU on websvcs:
+   `lspci -nn | grep -e 089a -e VGA; ls -l /dev/apex_0 /dev/dri/by-path/`.
+   If `/dev/apex_0` is missing: pve2 passthrough per `docs/guides/proxmox.md` "Coral TPU", then
+   `install_coral.sh` per `docs/guides/gpu.md`. `preset-vaapi` uses `/dev/dri/renderD128`;
+   check it's the iGPU, not the P4 (`vainfo --display drm --device /dev/dri/renderD128`).
+4. Deploy: `tools/deploy_src.sh websvcs secsvcs vpnsvcs`.
+5. Client cert (rotates every internal key and cert; restart the secure services after):
+   `sudo /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_key_gen.sh`, then
+   `self_signed_cert_gen.sh`.
+6. Remove the old go2rtc on websvcs:
+   `sudo systemctl stop go2rtc; sudo rm -f /etc/containers/systemd/go2rtc.container;`
+   `sudo rm -rf /etc/opt/go2rtc; sudo systemctl daemon-reload`, and
+   `sudo podman image rm localhost/alexxit/go2rtc:latest` if present.
+7. websvcs: `sudo /root/homelab-rendered/src/base/podman/install_network.sh`, then
+   `ssh autoadmin@websvcs install_traefik`, `install_homepage`, `install_frigate`. The image
+   is large: if the scan gate blocks it, add a `.trivyignore`.
+8. `ssh autoadmin@secsvcs install_authelia` and `install_gatus`;
+   `ssh autoadmin@vpnsvcs install_headscale` for the `nvr` MagicDNS record.
+9. Frigate's first start logs a generated admin password:
+   `sudo journalctl -u frigate | grep -i password`. Create a Frigate user for HA (05).
+10. homesvcs: `sudo ufw status | grep 8883`. The homesvcs guide adds the 8883 rules by hand
+    and `install_network.sh` resets ufw, so they may be gone; re-add them if so.
+
+Verify:
+
+- `curl -sI https://nvr.SITE/api/version` from homesvcs: 401 from Frigate, no Authelia
+  redirect. From mobile data: a redirect to `auth.SITE`.
+- Coral: `sudo podman exec frigate curl -s http://127.0.0.1:5000/api/stats | jq .detectors`
+  (inference under 15 ms).
+- One RTSP session:
+  `sudo nsenter -t "$(sudo podman inspect -f '{{.State.Pid}}' frigate)" -n ss -tn dst CAM_IP:554`
+  (go2rtc's socket is in the container's namespace, not the host's).
+- MQTT, on homesvcs:
+  `sudo podman run --rm --network host -v /etc/opt/home_assistant/certs:/c:ro
+  localhost/library/eclipse-mosquitto:latest mosquitto_sub -h mqtt.SITE -p 8883
+  --cafile /c/ca.chain.pem --cert /c/client.pem --key /c/client.key -t 'frigate/#' -v -C 5`.
+- `sudo ss -ltnp; sudo ss -lunp` on websvcs: only 8555 new on the host.
+- `chrome://webrtc-internals` on trusted WiFi: the `{{ websvcs.ip }}:8555` host candidate.

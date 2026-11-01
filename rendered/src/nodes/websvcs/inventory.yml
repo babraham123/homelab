@@ -69,6 +69,11 @@ services:
     uptime: storyteller
     uptime_path: /api/health
     upstream: registry.gitlab.com/storyteller-platform/storyteller:web-v2
+  frigate:
+    ip: 11
+    subdomain: nvr
+    uptime: frigate
+    upstream: ghcr.io/blakeblackshear/frigate:stable
   calliope:
     ip: 22
     build: calliope

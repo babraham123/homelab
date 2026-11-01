@@ -58,7 +58,7 @@ scrape_configs:
         target_label: host
         replacement: secsvcs
       - source_labels: [name]
-        regex: 'homepage|copyparty|linkding|readeck|storyteller'
+        regex: 'homepage|copyparty|linkding|readeck|storyteller|frigate'
         target_label: host
         replacement: websvcs
   - job_name: 'crowdsec'
