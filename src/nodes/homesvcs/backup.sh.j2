@@ -3,8 +3,9 @@
 # every service, staged under /var/opt/backups for pve1's backup_orchestrator to pull.
 # Usage:
 #   src/nodes/homesvcs/backup.sh
-# Not staged, on purpose: hassdb (the recorder history, large, HA rebuilds the schema)
-# and /var/opt/home_assistant/media (camera recordings).
+# Not staged, on purpose: hassdb (the recorder history, large, HA rebuilds the schema),
+# /var/opt/home_assistant/media (camera recordings) and esphomebuild (ESPHome's toolchains
+# and build cache, rebuilt by the next compile).
 
 # shellcheck source=src/base/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
@@ -40,12 +41,17 @@ cp "$archive" "${dir}/hass-$(date +%Y-%m-%dT%H%M%S).tar"
 # volume, and every image backup of it, stays small.
 find "$volpath/backups" -maxdepth 1 -name 'Custom_backup_*.tar' ! -path "$archive" -delete
 
-# Config trees: Zigbee2MQTT and ESPHome configs, Mosquitto, Traefik's acme.json, this
-# host's secrets key and bundle.
+# Config trees: Zigbee2MQTT's config, Mosquitto, Traefik's acme.json, this host's secrets
+# key and bundle.
 stage_paths /etc/opt /etc/ssh /etc/systemd/system /etc/containers/systemd
 # Zigbee2MQTT's device database and Mosquitto's retained messages. Both are small and
 # tolerate a live copy.
 stage_volume z2mdb
 stage_volume mqttdata
+# ESPHome's device YAML, which lives nowhere else. The build cache is its own volume
+# (esphomebuild, not staged) mounted at .esphome; the exclude keeps it out should it ever
+# land inside this one, e.g. with that mount missing.
+excludes+=(--exclude=.esphome)
+stage_volume esphomeconfig
 
 stage_send

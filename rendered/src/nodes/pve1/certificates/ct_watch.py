@@ -38,6 +38,7 @@ EXPECTED = {
     "home.janedoe.com",
     "homeproxy.janedoe.com",
     "idp-push.janedoe.com",
+    "iot.janedoe.com",
     "ldap.janedoe.com",
     "logs.janedoe.com",
     "metrics.janedoe.com",

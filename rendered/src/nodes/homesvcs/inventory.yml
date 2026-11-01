@@ -26,6 +26,14 @@ services:
     subdomain: zigbee
     uptime: zigbee2mqtt
     upstream: ghcr.io/koenkk/zigbee2mqtt:latest
+  esphome:
+    ip: 10
+    subdomain: iot
+    uptime: esphome
+    # Reads secrets.yaml and can reflash every device
+    admin: true
+    # Pinned: a bump means recompiling and OTA-updating every device
+    upstream: docker.io/esphome/esphome:2026.10.1
   home_assistant:
     ip: 11
     subdomain: home

@@ -23,11 +23,10 @@ http:
       <<: *service
       rule: Host(`zigbee.{{ site.url }}`)
       service: z2m@file
-    # Not in use
-    # esphome:
-    #   <<: *service
-    #   rule: Host(`iot.{{ site.url }}`)
-    #   service: esphome@file
+    esphome:
+      <<: *service
+      rule: Host(`iot.{{ site.url }}`)
+      service: esphome@file
   services:
     hass:
       loadBalancer:
@@ -39,7 +38,7 @@ http:
       loadBalancer:
         servers:
           - url: http://zigbee.{{ site.url }}:8080/
-    # esphome:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://iot.{{ site.url }}:6052/
+    esphome:
+      loadBalancer:
+        servers:
+          - url: http://iot.{{ site.url }}:6052/

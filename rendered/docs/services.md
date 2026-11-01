@@ -9,7 +9,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
   (`systemctl list-units "*.service"` on the node)
 - Raw list: `grep -rn "^IP=" src --include="*.container.j2*"`
 - Not in use, so not in any `inventory.yml` or the tables below, though their quadlets exist:
-  esphome (homesvcs), go2rtc and the `wyoming` quadlets piper, whisper and openwakeword (websvcs)
+  go2rtc and the `wyoming` quadlets piper, whisper and openwakeword (websvcs)
 
 ## secsvcs: identity, certificates, observability (pve1, 10.10.0.0/24)
 
@@ -75,6 +75,7 @@ yt_to_audiobook images carry their own batch runners (`/opt/*_batch.py`, from ea
 | .7 | vmagent | vmagent | Local metrics scraper | n/a |
 | .8 | mosquitto | eclipse-mosquitto | MQTT broker | mqtt (internal DNS only) |
 | .9 | zigbee2mqtt | zigbee2mqtt | Zigbee ↔ MQTT bridge | zigbee.janedoe.com |
+| .10 | esphome | esphome | ESP32/ESP8266 firmware builder, OTA updates ([guide](guides/esphome.md)) | iot.janedoe.com |
 | .11 | home_assistant | home-assistant | Home automation hub | home.janedoe.com |
 | .20 | fluentbit | fluent-bit:5.1 | Journal → VictoriaLogs forwarder | n/a |
 | .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
@@ -290,8 +291,8 @@ flowchart LR
 ## Storage and backups
 
 - **Container state**: named Podman volumes (`postgres18`, `grafanadata`, `vmdata`, `vldata`,
-  `ntfydb`, `vaultwardendata`, `hassdb`, `hassconfig`, `mqttdata`, `z2mdb`, …), `/etc/opt` and
-  `/var/opt`
+  `ntfydb`, `vaultwardendata`, `hassdb`, `hassconfig`, `mqttdata`, `z2mdb`, `esphomeconfig`, …),
+  `/etc/opt` and `/var/opt`
 - **VM disks**: LVM-thin on each host's NVMe, ext4 guests; no ZFS or RAID, backups over redundancy
 - **Media array** on pve2: four HDDs on a passed-through SATA card, snapraid parity, mergerfs, owned
   by websvcs. Not backed up; parity is its protection ([pve2 storage guide](guides/pve2_storage.md))

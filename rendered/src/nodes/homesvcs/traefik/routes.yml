@@ -23,11 +23,10 @@ http:
       <<: *service
       rule: Host(`zigbee.janedoe.com`)
       service: z2m@file
-    # Not in use
-    # esphome:
-    #   <<: *service
-    #   rule: Host(`iot.janedoe.com`)
-    #   service: esphome@file
+    esphome:
+      <<: *service
+      rule: Host(`iot.janedoe.com`)
+      service: esphome@file
   services:
     hass:
       loadBalancer:
@@ -39,7 +38,7 @@ http:
       loadBalancer:
         servers:
           - url: http://zigbee.janedoe.com:8080/
-    # esphome:
-    #   loadBalancer:
-    #     servers:
-    #       - url: http://iot.janedoe.com:6052/
+    esphome:
+      loadBalancer:
+        servers:
+          - url: http://iot.janedoe.com:6052/

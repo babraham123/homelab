@@ -286,6 +286,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: homesvcs Install Esphome
+              icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
+              shell: ssh autoadmin@homesvcs install_esphome
+              id: homesvcs_install_esphome
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: homesvcs Install Home Assistant
               icon: <iconify-icon icon="material-symbols:home"></iconify-icon>
               shell: ssh autoadmin@homesvcs install_home_assistant

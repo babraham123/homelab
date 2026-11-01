@@ -80,6 +80,10 @@ endpoints:
     <<: *internal
     url: "https://zigbee.janedoe.com/"
 
+  - name: esphome
+    <<: *internal
+    url: "https://iot.janedoe.com/"
+
   - name: home assistant
     <<: *tier1
     url: "https://home.janedoe.com/"

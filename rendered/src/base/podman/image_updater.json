@@ -40,6 +40,13 @@
           "upstream": "ghcr.io/koenkk/zigbee2mqtt:latest"
         },
         {
+          "container": "esphome",
+          "image": "localhost/esphome/esphome:2026.10.1",
+          "service": "esphome",
+          "trivyignore": "/root/homelab-rendered/src/services/esphome/.trivyignore",
+          "upstream": "docker.io/esphome/esphome:2026.10.1"
+        },
+        {
           "container": "home_assistant",
           "image": "localhost/homeassistant/home-assistant:2026.10",
           "service": "home_assistant",

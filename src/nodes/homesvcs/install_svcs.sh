@@ -33,12 +33,11 @@ case $1 in
     install_quadlet services/zigbee2mqtt/zigbee2mqtt.container services/zigbee2mqtt/z2mdb.volume
     reload_restart zigbee2mqtt
     ;;
-  # Not in use: uncomment and add to src/nodes/homesvcs/inventory.yml to install again
-#   esphome)
-#     install -D -m 644 -t /etc/opt/esphome/config services/esphome/*.yaml
-#     install_quadlet services/esphome/esphome.container
-#     reload_restart esphome
-#     ;;
+  esphome)
+    install_quadlet services/esphome/esphome.container services/esphome/esphomeconfig.volume \
+      services/esphome/esphomebuild.volume
+    reload_restart esphome
+    ;;
   home_assistant)
     config=/etc/opt/home_assistant/config
     installed=/etc/opt/home_assistant/config.installed

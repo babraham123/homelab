@@ -50,7 +50,7 @@ scrape_configs:
     # name, not group: the group is part of the key Gatus stores the history under.
     metric_relabel_configs:
       - source_labels: [name]
-        regex: 'zigbee2mqtt|home assistant'
+        regex: 'zigbee2mqtt|esphome|home assistant'
         target_label: host
         replacement: homesvcs
       - source_labels: [name]

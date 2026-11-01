@@ -124,6 +124,6 @@ Onboarding steps: [docs/guides/esphome.md.j2](../../docs/guides/esphome.md.j2).
 
 | # | Title | Status | Type | Blocked by |
 | --- | --- | --- | --- | --- |
-| [01](issues/01-install-dashboard.md) | Install the ESPHome dashboard on homesvcs | `ready-for-agent` | task | |
+| [01](issues/01-install-dashboard.md) | Install the ESPHome dashboard on homesvcs | `ready-for-human` | task | |
 | [02](issues/02-device-configs-and-secrets.md) | Shared device config, `secrets.yaml`, and backups of the config volume | `ready-for-agent` | task | 01 |
 | [03](issues/03-onboard-first-device.md) | Onboard the first device: browser flash, fixed IP, HA | `ready-for-human` | task | 02 |

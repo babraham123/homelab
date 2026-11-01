@@ -27,7 +27,7 @@ src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
 src/nodes/homesvcs/install_svcs.sh vmagent
 src/nodes/homesvcs/install_svcs.sh mosquitto
 src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
-# src/nodes/homesvcs/install_svcs.sh esphome
+src/nodes/homesvcs/install_svcs.sh esphome
 src/nodes/homesvcs/install_svcs.sh home_assistant
 src/nodes/homesvcs/install_svcs.sh fluentbit
 
@@ -66,17 +66,26 @@ NET_IFACE=$(ip -j -4 route show to default | jq -r '.[0].dev')
 # MQTT broker
 ufw allow in from any to any port 8883 proto tcp
 ufw route allow in on $NET_IFACE out on $POD_IFACE to any port 8883 proto tcp
-# ESPHome OTA updates. Published ports are DNATed to the containers, so the route rules are
-# what admit the traffic
-ufw allow in from 192.168.11.0/24 to any port 3232,8266,2040,8892 proto tcp
-ufw allow in from 192.168.21.0/24 to any port 3232,8266,2040,8892 proto tcp
-ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.11.0/24 to any port 3232,8266,2040,8892 proto tcp
-ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.21.0/24 to any port 3232,8266,2040,8892 proto tcp
 # HA, Shelly devices
 # ufw allow in from 192.168.11.0/24 to any port 5683 proto udp
 # ufw allow in from 192.168.21.0/24 to any port 5683 proto udp
 # ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.11.0/24 to any port 5683 proto udp
 # ufw route allow in on $NET_IFACE out on $POD_IFACE from 192.168.21.0/24 to any port 5683 proto udp
+```
+
+- ESPHome needs no inbound rule: devices never connect in. The dashboard's OTA uploads (TCP 3232
+  ESP32, 8266 ESP8266) and status pings, and Home Assistant's native API (TCP 6053), all go out
+  from homesvcs to WiFiIoT.
+- pfSense's LAN → WiFiIoT rules must allow those, and they aren't documented per port. Once a
+  device is on WiFiIoT, check from homesvcs (containers leave through its address):
+
+```bash
+dev=<name>.iot.home.arpa
+ping -c 3 "$dev"
+# 3232 for an ESP32, 8266 for an ESP8266
+for port in 6053 3232; do
+  timeout 3 bash -c "</dev/tcp/$dev/$port" && echo "$port open" || echo "$port blocked"
+done
 ```
 
 ## Onboarding

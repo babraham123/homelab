@@ -15,6 +15,7 @@
   {"name": "homeproxy.janedoe.com", "type": "A", "value": "192.168.4.21"},
   {"name": "homesvcs.janedoe.com", "type": "A", "value": "192.168.4.21"},
   {"name": "idp-push.janedoe.com", "type": "A", "value": "192.168.4.20"},
+  {"name": "iot.janedoe.com", "type": "A", "value": "192.168.4.21"},
   {"name": "janedoe.com", "type": "A", "value": "192.168.2.20"},
   {"name": "ldap.janedoe.com", "type": "A", "value": "192.168.4.20"},
   {"name": "logs.janedoe.com", "type": "A", "value": "192.168.4.20"},

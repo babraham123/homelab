@@ -96,6 +96,9 @@ case "$(hostname)" in
       install_zigbee2mqtt)
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
         ;;
+      install_esphome)
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh esphome
+        ;;
       install_home_assistant)
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh home_assistant
         ;;
@@ -112,6 +115,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh vmagent
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh mosquitto
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
+        sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh esphome
         sudo /root/homelab-rendered/src/nodes/homesvcs/install_svcs.sh home_assistant
         sudo /root/homelab-rendered/src/base/podman/install_svcs.sh fluentbit
         sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units

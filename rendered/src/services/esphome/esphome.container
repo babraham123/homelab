@@ -9,33 +9,35 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=localhost/esphome/esphome:stable
+Image=localhost/esphome/esphome:2026.10.1
 ContainerName=esphome
 AutoUpdate=local
 NoNewPrivileges=true
+DropCapability=all
+# No ReadOnly: PlatformIO writes its core dir under /root at compile time
+
+# pve1 is a 4-core box that also runs pfSense: a compile pegs every core it's given for
+# minutes. The memory limit is an estimate for an ESP32 (ESP-IDF) compile plus headroom;
+# resize it from a measured peak.
+PodmanArgs=--cpus=2
+Memory=2g
 
 Network=net.network
 HostName=iot.janedoe.com
 IP=10.12.0.10
-# ports: 6053 (native API), 6052 (dashboard)
-# OTA ports:
-#   3232 for the ESP32
-#   8266 for the ESP8266
-#   2040 for the RP2040
-#   8892 for Beken chips
-# hostPort:containerPort
-PublishPort=3232:3232
-PublishPort=8266:8266
-PublishPort=2040:2040
-PublishPort=8892:8892
+# Dashboard: port 6052. No published ports: OTA (3232 ESP32, 8266 ESP8266, 2040 RP2040)
+# and the native API (6053) are servers on the devices, so every connection goes out from
+# here. No serial device either: the first flash runs over Web Serial in the browser.
 
 Environment=TZ=America/Los_Angeles
+# WiFiIoT isn't in the mDNS bridge, so device status comes from ping
 Environment=ESPHOME_DASHBOARD_USE_PING=true
 
-Volume=/etc/opt/esphome/config:/config
-
-# TODO: Add usb to flash devices
-# AddDevice=/dev/ttyUSB0:/dev/ttyUSB0
+# Device YAML, written by the dashboard
+Volume=esphomeconfig.volume:/config
+# Toolchains and build output, gigabytes that rebuild on the next compile; a separate
+# volume keeps them out of the config volume's backup
+Volume=esphomebuild.volume:/config/.esphome
 
 [Service]
 Restart=on-failure

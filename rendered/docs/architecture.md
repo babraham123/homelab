@@ -31,7 +31,7 @@ flowchart TB
 
     subgraph pve1["pve1 (mini PC, always on)<br/>192.168.4.10"]
         secsvcs["secsvcs<br/>192.168.4.20<br/>Authelia, lldap, VictoriaMetrics, Grafana"]
-        homesvcs["homesvcs<br/>192.168.4.21<br/>Home Assistant, Mosquitto, Zigbee2MQTT"]
+        homesvcs["homesvcs<br/>192.168.4.21<br/>Home Assistant, Mosquitto, Zigbee2MQTT, ESPHome"]
     end
 
     subgraph pve2["pve2 (tower, on demand)<br/>192.168.2.10"]
