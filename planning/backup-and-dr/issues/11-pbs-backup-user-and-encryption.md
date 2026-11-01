@@ -1,6 +1,6 @@
 # 11. Back up to PBS as a backup-only user, and decide on client-side encryption
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer answer to backup-and-dr/09 open question 1 (2026-09-27)
@@ -94,3 +94,10 @@ Code side done: `secrets_template.yaml`, the orchestrator's `step_upload`,
 key on pve1, enter the token in `pve1.yaml`, pve2's user, token and ACL, `pvesm set pbs2` on both
 hosts, then the acceptance checks: `pvesm status`, a scratch restore, and `proxmox-backup-client
 snapshot forget` refused as the token.
+
+## Outcome
+
+Applied 2026-10-31. The full run that evening succeeded end to end: the orchestrator uploaded as
+the backup token, every PBS step (backup_pve1, backup_pve2, upload, prune) reported success, and
+the router, secsvcs, homesvcs, websvcs, devtop and gaming images plus host/vpnsvcs and host/pve1
+landed encrypted under their namespaces.
