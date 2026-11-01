@@ -5,7 +5,7 @@ bios: ovmf
 boot: order=scsi0;net0
 cores: 13
 cpu: host
-efidisk0: local-lvm:vm-VMID-disk-0,efitype=4m,pre-enrolled-keys=1,size=4M
+efidisk0: local-lvm:vm-VMID-disk-0,efitype=4m,ms-cert=2023k,pre-enrolled-keys=1,size=4M
 hookscript: local:snippets/hookscript.pl
 hostpci0: PCI_ADDR,pcie=1
 machine: q35
@@ -15,7 +15,7 @@ net0: virtio=MAC_ADDR,bridge=vmbr0,firewall=1
 numa: 0
 onboot: 1
 ostype: l26
-scsi0: local-lvm:vm-VMID-disk-1,discard=on,iothread=1,replicate=0,size=256G,ssd=1
+scsi0: local-lvm:vm-VMID-disk-1,discard=on,iothread=1,replicate=0,size=96G,ssd=1
 scsihw: virtio-scsi-single
 sockets: 1
 vga: std,clipboard=vnc

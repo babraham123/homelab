@@ -3,10 +3,11 @@ agent: 1
 boot: order=scsi0;net0
 cores: 2
 cpu: host
-hostpci0: PCI_ADDR
-hostpci1: PCI_ADDR
-hostpci2: PCI_ADDR
-hostpci3: PCI_ADDR
+hostpci0: PCI_ADDR,pcie=1
+hostpci1: PCI_ADDR,pcie=1
+hostpci2: PCI_ADDR,pcie=1
+hostpci3: PCI_ADDR,pcie=1
+machine: q35
 memory: 12288
 name: router
 net0: virtio=MAC_ADDR,bridge=vmbr0,firewall=1

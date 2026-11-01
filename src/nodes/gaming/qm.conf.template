@@ -7,7 +7,7 @@ cpu: host
 efidisk0: local-lvm:vm-VMID-disk-0,efitype=4m,ms-cert=2023k,pre-enrolled-keys=1,size=4M
 hookscript: local:snippets/hookscript.pl
 hostpci0: PCI_ADDR,pcie=1,x-vga=1
-ide0: local-lvm:vm-VMID-disk-1,discard=on,replicate=0,size=256G,ssd=1
+ide0: local-lvm:vm-VMID-disk-1,discard=on,replicate=0,size=96G,ssd=1
 ide2: local:iso/Win11_22H2_English_x64v1.iso,media=cdrom,size=5427180K
 machine: pc-q35-7.2
 memory: 18432
@@ -16,6 +16,7 @@ net0: virtio=MAC_ADDR,bridge=vmbr0,firewall=1
 numa: 0
 ostype: win11
 sata0: local:iso/virtio-win-0.1.229.iso,media=cdrom,size=522284K
+scsi1: local-lvm:vm-VMID-disk-3,backup=0,discard=on,size=500G,ssd=1
 scsihw: virtio-scsi-single
 sockets: 1
 tpmstate0: local-lvm:vm-VMID-disk-2,size=4M,version=v2.0

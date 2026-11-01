@@ -4,7 +4,7 @@ bios: ovmf
 boot: order=scsi0;net0
 cores: 2
 cpu: host
-efidisk0: local-lvm:vm-VMID-disk-0,efitype=4m,pre-enrolled-keys=1,size=4M
+efidisk0: local-lvm:vm-VMID-disk-0,efitype=4m,ms-cert=2023k,pre-enrolled-keys=1,size=4M
 machine: q35
 memory: 8192
 name: secsvcs

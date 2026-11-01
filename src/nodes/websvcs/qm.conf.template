@@ -17,7 +17,7 @@ net0: virtio=MAC_ADDR,bridge=vmbr0,firewall=1
 numa: 0
 onboot: 1
 ostype: l26
-scsi0: local-lvm:vm-VMID-disk-1,discard=on,iothread=1,replicate=0,size=64G,ssd=1
+scsi0: local-lvm:vm-VMID-disk-1,discard=on,iothread=1,replicate=0,size=96G,ssd=1
 scsihw: virtio-scsi-single
 sockets: 1
 vga: none

@@ -191,6 +191,41 @@ qm terminal VMID   # Enter for the menu; exit with Ctrl+O
 
 Use it as in [debugging](../debugging.md#serial-console).
 
+### q35 machine type
+
+The VM keeps SeaBIOS; only the machine type changes, and the passed-through NIC ports move to
+PCIe root ports (`pcie=1`, which i440fx lacks). Do it at pve1's local console: if the router
+doesn't come back, the web UI and SSH go with it. Add the [serial port](#serial-console) first
+so `qm terminal` reaches pfSense without the network, and keep a current router image as the
+fallback.
+
+Before, while the network works:
+
+- Go to Interfaces >> Assignments and note which `igcN` is WAN, LAN and LAN2
+- Enable the serial terminal as above
+
+```bash
+# On pve1's local console as root
+qm shutdown VMID
+qm set VMID --machine q35 \
+  --hostpci0 PCI_ADDR,pcie=1 --hostpci1 PCI_ADDR,pcie=1 \
+  --hostpci2 PCI_ADDR,pcie=1 --hostpci3 PCI_ADDR,pcie=1
+qm start VMID
+qm terminal VMID   # watch it boot; the menu must show WAN, LAN and LAN2 on the noted names
+```
+
+From the laptop: internet works and the pve1 web UI loads. If pfSense asks to assign interfaces,
+answer in `qm terminal` with the noted names (no VLANs; WAN, LAN, then LAN2 as an optional
+interface). If it still doesn't come up, roll back and keep the serial port:
+
+```bash
+# On pve1's local console as root
+qm shutdown VMID
+qm set VMID --delete machine \
+  --hostpci0 PCI_ADDR --hostpci1 PCI_ADDR --hostpci2 PCI_ADDR --hostpci3 PCI_ADDR
+qm start VMID
+```
+
 ### System Patches
 
 Apply security updates and fixes since the last release
