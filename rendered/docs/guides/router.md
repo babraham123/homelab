@@ -467,6 +467,7 @@ FreeBSD-latest: {
   enabled: yes
 }
 CONF
+export IGNORE_OSVERSION=yes    # FreeBSD's packages are built for an older 16-CURRENT than pfSense's
 pkg -R /root/fbsd-repo update -f
 pkg -R /root/fbsd-repo rquery '%n %v %dn' tailscale    # newest version, no dependencies
 pkg -R /root/fbsd-repo fetch -y -o /root/fbsd-pkgs tailscale
@@ -475,7 +476,7 @@ pkg -R /root/fbsd-repo fetch -y -o /root/fbsd-pkgs tailscale
 - Install, lock (so a package reinstall or pfSense update can't bring Netgate's back), restart
 
 ```sh
-pkg add -f /root/fbsd-pkgs/All/tailscale-*.pkg
+pkg add -f /root/fbsd-pkgs/All/Hashed/tailscale-*.pkg
 pkg lock -y tailscale
 /usr/local/bin/tailscaled --version                # runs; a failure here means an ABI mismatch
 /usr/local/etc/rc.d/pfsense_tailscaled restart

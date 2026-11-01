@@ -93,8 +93,8 @@ qm destroy 999 --purge
 ```
 
 - UI: PBS storage >> Backups >> Restore, or File Restore (`pvesm set pbs2 --encryption-key`)
-- devtop and gaming: re-attach `backup=0` data disks with
-  `qm set VMID --scsi1 local-games:vm-VMID-disk-1,backup=0`
+- gaming: the restore keeps the `backup=0` games disk as `unusedN`; re-attach it with
+  `qm set VMID --scsi1 local-lvm:vm-VMID-disk-3,backup=0,discard=on,ssd=1`
 - The router: restore from pve1's disk, works with pve2 off
 
 ```bash
