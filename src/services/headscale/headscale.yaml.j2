@@ -328,9 +328,10 @@ dns:
   #   # you can also put it in one line
   #   - { name: "prometheus.vpn.example.com", type: "A", value: "100.64.0.3" }
   #
-  # Alternatively, extra DNS records can be loaded from a JSON file.
-  # Headscale processes this file on each change.
-  # extra_records_path: /var/lib/headscale/extra-records.json
+  # The site domain's LAN addresses for tailnet clients, rendered from
+  # services/headscale/extra_records.json.j2 and installed by install_svcs.sh;
+  # Headscale reloads the file on change, no restart.
+  extra_records_path: /var/lib/headscale/extra-records.json
 
 # Unix socket used for the CLI to connect without authentication
 # Note: for production you will want to set this to something like:

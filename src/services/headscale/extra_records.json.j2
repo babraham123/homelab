@@ -1,0 +1,22 @@
+{#- The tailnet's view of the site domain: Headscale pushes 1.1.1.1 to every node, where
+    these names resolve to the VPS. These are unbound's redirects (src/services/dns/unbound.conf.j2)
+    minus the public ones (vpn, vpnsvcs) and the MX, which MagicDNS can't carry. Sorted by name:
+    Headscale reloads the file on a checksum change. -#}
+{%- set records = {
+  site.url: websvcs.ip,
+  'pve1.' ~ site.url: pve1.ip, 'pve2.' ~ site.url: pve2.ip, 'pbs2.' ~ site.url: pve2.ip,
+  'router.' ~ site.url: router.ip, 'secsvcs.' ~ site.url: secsvcs.ip,
+  'websvcs.' ~ site.url: websvcs.ip, 'gaming.' ~ site.url: gaming.ip,
+  'devtop.' ~ site.url: devtop.ip, 'homesvcs.' ~ site.url: homesvcs.ip,
+  'pgdb.' ~ site.url: secsvcs.ip, 'crowdsec.' ~ site.url: secsvcs.ip, 'mqtt.' ~ site.url: homesvcs.ip,
+} -%}
+{%- for node, ip in {'secsvcs': secsvcs.ip, 'homesvcs': homesvcs.ip, 'websvcs': websvcs.ip}.items() -%}
+  {%- for svc in inv.subdomains[node] -%}
+    {%- do records.update({svc ~ '.' ~ site.url: ip}) -%}
+  {%- endfor -%}
+{%- endfor -%}
+[
+{%- for name in records | sort %}
+  {"name": "{{ name }}", "type": "A", "value": "{{ records[name] }}"}{{ "," if not loop.last }}
+{%- endfor %}
+]

@@ -36,6 +36,7 @@ case $1 in
     base/debian/add_homelab_tag.sh headscale.service
     install -D -m 644 services/headscale/headscale.yaml /etc/headscale/config.yaml
     install -D -m 644 services/headscale/headscale_acl.hujson /etc/headscale/acl.hujson
+    install -D -m 644 services/headscale/extra_records.json /var/lib/headscale/extra-records.json
     touch /etc/opt/secrets/hs_oidc_id
     oidc_id=$(cat /etc/opt/secrets/hs_oidc_id | tr -d '\n')
     sed -i "s/PLACEHOLDER_ID/$oidc_id/g" /etc/headscale/config.yaml
