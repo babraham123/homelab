@@ -149,6 +149,11 @@ commands:
     script: services/alertmanager/mute_alerts.sh
   - name: unmute_alerts
     script: services/alertmanager/mute_alerts.sh
+  # pve1's backup_orchestrator brackets its run with these
+  - name: mute_backup_run
+    script: services/alertmanager/mute_alerts.sh
+  - name: unmute_backup_run
+    script: services/alertmanager/mute_alerts.sh
   - name: failed_units
     script: base/debian/commands.sh
   - name: update_images

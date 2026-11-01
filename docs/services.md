@@ -256,7 +256,9 @@ flowchart LR
   - ntfy-alertmanager: severity → ntfy priority, `host` label → tag; pushes to ntfy's `alert` topic
     (the phone app, iOS via ntfy.sh)
   - Mute for maintenance: OliveTin's Alerts buttons (`ssh autoadmin@secsvcs mute_alerts_4h`,
-    `unmute_alerts`) add or end a silence on everything but Watchdog; it expires on its own
+    `unmute_alerts`) add or end a silence on everything but Watchdog; it expires on its own.
+    The weekly backup run brackets itself with `mute_backup_run`/`unmute_backup_run`, a silence
+    on pve2 and its VMs only, since waking and sleeping pve2 trips their alerts
   - Container-to-container URLs are `<name>.SITE:<port>`, never through Traefik
 - **Dead-man switch**, since the path above lives entirely on secsvcs:
   - vmalert's `Watchdog` always fires; Alertmanager routes it to a null receiver

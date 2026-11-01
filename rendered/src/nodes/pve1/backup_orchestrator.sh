@@ -192,6 +192,10 @@ pve2_was_on=0
 is_reachable pve2 && pve2_was_on=1
 echo "pve2 initially $( (( pve2_was_on )) && echo on || echo off )"
 
+# Waking and sleeping pve2 trips the alerts on its VMs (the rules only skip websvcs while
+# pve2 is absent, not while it boots or shuts down), so they are silenced for the run.
+# A failed mute is not a failed backup.
+"${ssh[@]}" autoadmin@secsvcs mute_backup_run || warn "mute_backup_run failed"
 for step in "${LOCAL_STEPS[@]}"; do
   run "$step"
 done
@@ -205,6 +209,7 @@ write_metrics || failed+=(write_metrics)
 if (( ! pve2_was_on )); then
   run sleep_pve2
 fi
+"${ssh[@]}" autoadmin@secsvcs unmute_backup_run || warn "unmute_backup_run failed"
 
 minutes=$(( ($(date +%s) - started) / 60 ))
 if [[ -z "${failed[*]}" ]]; then

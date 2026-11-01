@@ -410,6 +410,12 @@ case "$(hostname)" in
       unmute_alerts)
         sudo /root/homelab-rendered/src/services/alertmanager/mute_alerts.sh unmute_alerts
         ;;
+      mute_backup_run)
+        sudo /root/homelab-rendered/src/services/alertmanager/mute_alerts.sh mute_backup_run
+        ;;
+      unmute_backup_run)
+        sudo /root/homelab-rendered/src/services/alertmanager/mute_alerts.sh unmute_backup_run
+        ;;
       failed_units)
         sudo /root/homelab-rendered/src/base/debian/commands.sh failed_units
         ;;

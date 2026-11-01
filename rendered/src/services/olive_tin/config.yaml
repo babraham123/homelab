@@ -806,6 +806,22 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: secsvcs Mute Backup Run
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs mute_backup_run
+              id: secsvcs_mute_backup_run
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
+              title: secsvcs Unmute Backup Run
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs unmute_backup_run
+              id: secsvcs_unmute_backup_run
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: secsvcs Failed Units
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs failed_units
