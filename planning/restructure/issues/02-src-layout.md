@@ -1,6 +1,6 @@
 # 02. Restructure src/ into nodes/, services/, base/ and update every path
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: user item 53
@@ -88,3 +88,8 @@ for `homelab-rendered/src/[a-z]` paths that don't exist.
   to `src/base/debian/msmtprc.j2`. The target layout and step 5 above reflect that. The cutover is
   now part of `notes/apply-since-5a50097.md`: steps 1 (deploy), 3 (dispatchers), 4 (pve1/pve2 host
   services and `msmtprc`) and 11 (vpnsvcs). The hosts are still at `5a50097`, so it hasn't run yet.
+- 2026-11-01: resolved. `src/` has `base/`, `clients/`, `nodes/` and `services/`; no tracked file
+  uses an old path, and every host runs a post-restructure commit with its services logging.
+  `src/nodes.jinja` from the target layout is gone: `tools/inventory.py` took over that logic. The
+  deadman errors on vpnsvcs up to 2026-10-31 (missing secrets, `msmtp: command not found`) came from
+  an unfinished dead-man setup, not a path problem.

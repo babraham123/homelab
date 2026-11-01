@@ -46,3 +46,10 @@ In this order:
 - `curl -fsS` of each pinned raw URL in `src/base/debian/install_svcs.sh` returns a file whose
   sha256 matches its `sha`.
 - Renovate opens its onboarding PR on each new repo.
+
+## Comments
+
+- 2026-11-01: step 5 done: the homelab extraction worktrees and their branches are removed (none
+  were on origin), and both batch worktrees are gone. Step 4 is half done: Renovate runs only on
+  bookmark-handoff. podman-image-updater, net-probe and car-ingest have a `renovate.json` but no
+  Dependency Dashboard, branch or PR from Renovate, so the app is not enabled on them.
