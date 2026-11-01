@@ -72,7 +72,7 @@ flowchart LR
 
 | # | Title | Status | Type |
 | --- | --- | --- | --- |
-| [01](issues/01-linkding-tolisten-handoff.md) | Hand linkding `tolisten` bookmarks to the video inbox | `ready-for-agent` | task |
+| [01](issues/01-linkding-tolisten-handoff.md) | Hand linkding `tolisten` bookmarks to the video inbox | `resolved` | task |
 | [02](issues/02-yt-to-audiobook-fetcher.md) | Fetch the audio and captions and build the read-along EPUB | `ready-for-agent` | task |
 | [03](issues/03-storyteller-alignment-trial.md) | Research: Storyteller's own alignment for a captionless video | `ready-for-human` | research |
 | [04](issues/04-parakeet-stt-fallback.md) | Transcribe captionless videos with Parakeet on the CPU | `ready-for-agent` | task |

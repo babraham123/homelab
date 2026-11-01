@@ -1,6 +1,6 @@
 # 04. Route subnets in the kernel on pfSense without SNAT, so LAN hosts see tailnet addresses
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26; tailscale/tailscale#5573, #21060, #21070, #18897; pfSense
@@ -81,3 +81,11 @@ pfSense instead of the tailnet client.
   `tailscaled_env`/System Patches note, no Tailscale-tab pass rule and no outbound NAT rule for
   `100.64.0.0/10` (`docs/networking.md` and the Traefik `trustedIPs` are done); and step 7, waiting
   on pfsense/FreeBSD-ports#1462 (open as of 2026-10-16).
+- 2026-11-01: resolved. Step 6: `docs/guides/router.md.j2` now has the Tailscale package patch
+  section (System Patches, the `SNAT Subnet Routes` box, Tailscale-tab pass rules, the outbound NAT
+  rule for `100.64.0.0/10`). Step 7: the router runs FreeBSD's `security/tailscale` 1.104.4, locked,
+  so the patched rc script passes `--snat-subnet-routes=false` alongside the env var; `tailscale
+  debug prefs` shows `"NoSNAT": true` and pf has no tailscale anchor. Phone checks from mobile data
+  (100.x source in pveproxy's log, exit node) passed. Left for later, in the router guide: unlock
+  and reinstall from Netgate's repo once it reaches 1.104.4, and drop the patch once
+  pfsense/FreeBSD-ports#1462 ships.

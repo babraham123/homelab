@@ -28,5 +28,5 @@ Constraint: websvcs is on pve2, which is on demand, so uploads only work while p
 | [02](issues/02-car-scanner-sample-export.md) | Capture a sample Car Scanner Pro export | `resolved` | task |
 | [03](issues/03-car-obd-metrics-sync.md) | Sync Car Scanner Pro trip logs from copyparty into VictoriaMetrics | `ready-for-human` | task |
 | [04](issues/04-termux-auto-upload.md) | Auto-upload Car Scanner Pro recordings from the phone with Termux | `wontfix` | task |
-| [05](issues/05-car-ingest-wican-jsonl.md) | Ingest WiCAN Pro logger batches (JSONL) in car_ingest | `ready-for-agent` | task |
+| [05](issues/05-car-ingest-wican-jsonl.md) | Ingest WiCAN Pro logger batches (JSONL) in car_ingest | `ready-for-human` | task |
 | [06](issues/06-car-upload-oidc-bearer.md) | OIDC client and bearer-token uploads for the WiCAN sync app | `needs-triage` | task |

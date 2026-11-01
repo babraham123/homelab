@@ -18,7 +18,8 @@ researched (recommendation in its Answer) but not built.
 | [07](issues/07-gatus-tier1-interval.md) | Check tier-1 services every 2 minutes in Gatus | `resolved` (`uptime_tier`) | task |
 | [08](issues/08-vpnsvcs-node-containers.md) | Install Podman on the VPS and containerise fluent-bit and vmagent (bridge network, push) | `resolved` | task |
 | [09](issues/09-long-term-retention-allowlist.md) | Explore long-term retention for an allowlist of series | `resolved` | research |
-| [10](issues/10-alerting-pipeline-e2e.md) | Validate the alerting pipeline end to end | `ready-for-human` (code in; run the test plan) | task |
+| [10](issues/10-alerting-pipeline-e2e.md) | Validate the alerting pipeline end to end | `resolved` | task |
 | [11](issues/11-vmagent-persistent-queue.md) | Keep vmagent's remote-write buffer on its volume, and cap it | `resolved` | task |
 | [12](issues/12-haproxy-metrics.md) | Expose HAProxy's metrics to the VPS's vmagent, scrape them, alert and graph | `resolved` | task |
 | [13](issues/13-log-based-alerts.md) | Alert on log lines through a second vmalert backed by VictoriaLogs | `needs-triage` | task |
+| [14](issues/14-firewall-bouncer-down.md) | The CrowdSec firewall bouncer on vpnsvcs is neither pulling decisions nor serving metrics | `resolved` | task |

@@ -93,3 +93,4 @@ flowchart LR
 | [03](issues/03-wan-speed-test.md) | Scheduled WAN speed test from secsvcs | `ready-for-human` (code in; verify on deploy) | task |
 | [04](issues/04-iperf3-paths.md) | Scheduled iperf3 between pve1, pve2 and the VPS | `ready-for-human` (code in; verify on deploy) | task |
 | [05](issues/05-network-dashboard-and-alerts.md) | Network speed dashboard and alerts | `ready-for-human` (code in; verify on deploy) | task |
+| [06](issues/06-smartctl-scrape-timeout.md) | smartctl_exporter on websvcs never answers a scrape | `resolved` | task |

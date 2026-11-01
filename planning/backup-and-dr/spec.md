@@ -26,7 +26,7 @@ tickets' answers and in `docs/services.md#storage-and-backups`.
 | [08](issues/08-home-assistant-backup.md) | Home Assistant native backup via dispatcher, triggered by the orchestrator | `resolved` | task |
 | [09](issues/09-pve1-disaster-recovery-guide.md) | pve1 disaster recovery guide with the complete escrow/backup file list | `resolved` | task |
 | [10](issues/10-host-file-backups.md) | Back up the important files on every host, not only the VM images | `resolved` | task |
-| [11](issues/11-pbs-backup-user-and-encryption.md) | Back up to PBS as a backup-only user, and decide on client-side encryption | `ready-for-human` | task |
+| [11](issues/11-pbs-backup-user-and-encryption.md) | Back up to PBS as a backup-only user, and decide on client-side encryption | `resolved` | task |
 | [12](issues/12-vps-full-backup.md) | Full backup of the VPS via dispatcher | `resolved` | task |
 | [13](issues/13-pve2-media-array.md) | Media array on pve2: HDDs on a passed-through SATA card, snapraid + mergerfs in websvcs | `ready-for-human` | task |
-| [14](issues/14-games-ssd.md) | Second SSD on pve2 for the gaming and devtop data disks | `needs-info` | task |
+| [14](issues/14-games-ssd.md) | Second SSD on pve2 for the gaming and devtop data disks | `resolved` | task |

@@ -1,6 +1,6 @@
 # 14. Second SSD on pve2 for the gaming and devtop data disks
 
-Status: needs-info
+Status: resolved
 Type: task
 Repo: homelab
 Source: backup restructure grilling 2026-10-04
@@ -29,3 +29,10 @@ changes) or on the SATA card (then it lands inside websvcs with the passthrough,
 out). Decide, buy, then flip to ready-for-human.
 
 ## Comments
+
+- 2026-11-01: resolved without a second SSD. The games disk lives on pve2's existing NVMe pool:
+  gaming's OS disk was shrunk to 96 GiB and a 500 GiB `scsi1` (`local-lvm`, `backup=0`) holds the
+  games, so the weekly image backs up only the OS disk. devtop and websvcs were shrunk to 96 GiB and
+  devtop gets no data disk. The pool is allocated without overcommit. The shared-NVMe concern stays;
+  a second SSD can still take the games disk later. Shrink steps are in `docs/guides/vm.md`, the
+  re-attach in `docs/guides/restore.md`.

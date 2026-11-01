@@ -1,6 +1,6 @@
 # 10. Validate the alerting pipeline end to end
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: maintainer request 2026-09-26
@@ -148,3 +148,4 @@ watches from outside.
   under `## Answer`.
 - 2026-10-17: Acceptance rewritten for the two-test plan (it still asked for tests 1–11), and the
   original table marked superseded.
+- 2026-11-01: closed by the maintainer.

@@ -21,4 +21,4 @@ key-seed coupling.
 | [11](issues/11-passwordless-admin.md) | Passwordless admin: NOPASSWD sudo behind FIDO keys, locked roots, SSH CA on YubiKeys | `ready-for-agent` | task |
 | [12](issues/12-add-user-command.md) | Add a user with one command from pve1 | `needs-triage` | task |
 | [13](issues/13-ntfy-push-credentials-and-routes.md) | Research: credentials for ntfy and ntfy-idp-push, and which routes Authelia protects | `resolved` | research |
-| [14](issues/14-ntfy-idp-push-install.md) | Install ntfy-idp-push on secsvcs and wire it to ntfy and Authelia | `needs-triage` | task |
+| [14](issues/14-ntfy-idp-push-install.md) | Install ntfy-idp-push on secsvcs and wire it to ntfy and Authelia | `ready-for-human` | task |

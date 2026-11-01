@@ -42,3 +42,4 @@ Constraints:
 | [05](issues/05-storyteller-mobile-access-research.md) | Research: how phones reach Storyteller, at home and away | `resolved` | research |
 | [06](issues/06-dialogue-voice.md) | Split dialogue from narration and speak it in a second voice | `ready-for-agent` | task |
 | [07](issues/07-speaker-attribution.md) | Give each character in a book its own voice, attributed on the P4 | `ready-for-agent` | task |
+| [08](issues/08-storyteller-stop-exit.md) | storyteller.service lands in failed after every stop | `needs-triage` | task |
