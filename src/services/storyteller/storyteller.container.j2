@@ -22,12 +22,14 @@ HostName=books.{{ site.url }}
 IP={{ inv.addr.websvcs.storyteller }}
 # port 8001
 
-# The entrypoint, started as root, drops to 1000 with gosu, and gosu 1.17 spins forever under
-# NoNewPrivileges. Started as 1000, it skips gosu and its chowns (install_svcs.sh does those)
-# once FORCE_USER_SETTING is set.
+# The image's entrypoint is skipped. Started as root, it drops to 1000 with gosu, which spins
+# forever under NoNewPrivileges; install_svcs.sh does its chowns instead. Either way it execs
+# tini, and AppArmor refuses tini's kill() of the server (EACCES), so a stop never reached the
+# server and tini exited 1. As PID 1, node gets podman's SIGTERM directly and exits 0 on it.
 User=1000
 Group=1000
-Environment=FORCE_USER_SETTING=1
+Entrypoint=node
+Exec=--enable-source-maps server.js
 
 Environment=TZ={{ personal.timezone }}
 # Ref: https://storyteller-platform.gitlab.io/storyteller/docs/installation/self-hosting
