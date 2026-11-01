@@ -9,6 +9,8 @@
 use strict;
 use warnings;
 
+use PVE::QemuServer::Monitor qw(mon_cmd);
+
 # print "GUEST HOOK: " . join(' ', @ARGV). "\n";
 
 my $vmid = shift;
@@ -44,9 +46,11 @@ if ($phase eq 'pre-start') {
     # successfully started.
     my $devtop = `/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop`;
 
-    # QEMU forgets the VNC password at every start; vnc2 is the display in devtop's args
+    # QEMU forgets the VNC password at every start; vnc2 is the display in devtop's args.
+    # QMP directly: `qm monitor` reads the controlling tty when there is one, so a piped
+    # command hangs an interactive `qm start`.
     if ($vmid == $devtop) {
-        system("echo 'set_password vnc homelab -d vnc2' | qm monitor $vmid");
+        mon_cmd($vmid, 'set_password', protocol => 'vnc', password => 'homelab', display => 'vnc2');
     }
 
 } elsif ($phase eq 'pre-stop') {
