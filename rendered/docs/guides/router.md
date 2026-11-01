@@ -387,6 +387,111 @@ Endpoint-independent mapping (EIM) lets Tailscale peers connect directly.
 - Verify from a LAN client: `tailscale netcheck` shows `MappingVariesByDestIP: false` and an empty
   `PortMapping`
 
+### Tailscale package patch
+
+`src/nodes/router/tailscale.patch` patches the Tailscale package's runtime files (built on package
+0.1.10, CE 2.9.0; source branch `tailscale-router-0.1.10` of the FreeBSD-ports fork):
+
+- A `SNAT Subnet Routes` checkbox (pfsense/FreeBSD-ports#1462). Unchecked, tailscaled runs with
+  `TS_DEBUG_NETSTACK_SUBNETS=0`, so the kernel forwards tailnet traffic through pf and LAN hosts
+  see the client's 100.x address. `--snat-subnet-routes=false` is passed only on Tailscale ≥ 1.104,
+  the first FreeBSD build that defines it.
+- The auth key stays out of the system log, and is passed only when the node needs to log in.
+- A restart waits for the old tailscaled to exit, so new settings always reach the new one.
+
+A package update overwrites the patched files; System >> Patches then lists the patch as not
+applied. Re-apply it as below.
+
+- Go to System >> Patches >> Add (or edit the existing one)
+  - Description = `Tailscale: SNAT knob, auth key, restart`
+  - Patch Contents: the file, copied raw so its tabs and trailing space survive
+    (`pbcopy < src/nodes/router/tailscale.patch`)
+  - Path Strip Count = 1, Base Directory = `/`, Auto Apply off
+  - Save, Test (must report it can be applied), Apply
+- Go to Firewall >> Rules >> Tailscale, add pass rules, Apply. Kernel-forwarded packets meet pf
+  here; without them they hit the default deny.
+  - Subnet routes: IPv4+IPv6, source `100.64.0.0/10` and `fd7a:115c:a1e0::/48`, destination the
+    advertised subnets
+  - Exit node: IPv4, source `100.64.0.0/10`, destination the `RFC1918` alias with Invert match
+- Go to Firewall >> NAT >> Outbound, add a rule: WAN, IPv4, protocol any, source `100.64.0.0/10`,
+  translation WAN address, Static Port and EIM off. Exit-node traffic otherwise leaves with its
+  100.x source.
+- Go to VPN >> Tailscale >> Settings, uncheck SNAT Subnet Routes, Save. Check from the shell:
+
+```sh
+grep -c wait_for_tailscaled_exit /usr/local/etc/rc.d/pfsense_tailscaled    # 3
+/usr/local/etc/rc.d/pfsense_tailscaled restart
+procstat -e $(pgrep -x tailscaled) | grep -o 'TS_DEBUG_NETSTACK_SUBNETS=0'
+tailscale debug prefs | grep -i -A2 autoupdate                             # "Apply": false
+grep -E 'Bringing up|Setting runtime|already running|killing it' /var/log/system.log | tail -n 4
+```
+
+- From a phone on mobile data, open the Proxmox UI on pve1: pveproxy's access log shows the phone's
+  100.x address. Browse through the exit node. Both still work after Status >> Filter Reload and a
+  reboot.
+
+### Tailscale from FreeBSD's packages
+
+Netgate's repo lags FreeBSD's `security/tailscale` port (CE 2.9.0 ships 1.98.5). Install FreeBSD's
+package and lock it until Netgate catches up. Run from the LAN, not over the tailnet, with the
+patch above already applied.
+
+- Pause the vm_watchdog (`ssh autoadmin@pve1 pause_vm_watchdog`), back up the pfSense config, and
+  take a disk-only snapshot on pve1 (the passthrough NICs rule out RAM state)
+
+```bash
+# On pve1 as root
+qm list | grep -i router
+qm snapshot VMID pre-tailscale --description "before FreeBSD's tailscale"
+```
+
+- Check that FreeBSD's repo key is on the router; stop if `trusted` is empty
+
+```sh
+# On the router as root
+tailscale version
+pkg config abi
+ls /usr/share/keys/pkg/trusted
+```
+
+- Fetch the package through a throwaway repo config, so pkg checks FreeBSD's signature
+
+```sh
+mkdir -p /root/fbsd-repo /root/fbsd-pkgs
+cat > /root/fbsd-repo/FreeBSD.conf <<'CONF'
+FreeBSD-latest: {
+  url: "pkg+https://pkg.freebsd.org/${ABI}/latest",
+  mirror_type: "srv",
+  signature_type: "fingerprints",
+  fingerprints: "/usr/share/keys/pkg",
+  enabled: yes
+}
+CONF
+pkg -R /root/fbsd-repo update -f
+pkg -R /root/fbsd-repo rquery '%n %v %dn' tailscale    # newest version, no dependencies
+pkg -R /root/fbsd-repo fetch -y -o /root/fbsd-pkgs tailscale
+```
+
+- Install, lock (so a package reinstall or pfSense update can't bring Netgate's back), restart
+
+```sh
+pkg add -f /root/fbsd-pkgs/All/tailscale-*.pkg
+pkg lock -y tailscale
+/usr/local/bin/tailscaled --version                # runs; a failure here means an ABI mismatch
+/usr/local/etc/rc.d/pfsense_tailscaled restart
+```
+
+- Verify: the new `tailscale version`; `tailscale up --help 2>&1 | grep -c snat-subnet-routes` is
+  `1`; the "Bringing up" line ends in `--snat-subnet-routes=false`; `tailscale debug prefs` shows
+  `"NoSNAT": true`; `pfctl -s Anchors | grep -ci tailscale` is `0`; then the patch section's checks.
+  In VictoriaLogs, `_time:15m app_name:tailscale` shows the start and
+  `_time:1d app_name:* (tskey OR "auth-key")` returns nothing.
+- Resume the vm_watchdog (`ssh autoadmin@pve1 resume_vm_watchdog`). After a few days, delete the
+  snapshot (`qm delsnapshot VMID pre-tailscale`) and `rm -r /root/fbsd-repo /root/fbsd-pkgs`.
+- Rollback: `pkg unlock -y tailscale`, `pkg install -f -y -r pfSense tailscale`, restart
+  `pfsense_tailscaled`; or `qm rollback VMID pre-tailscale`.
+- Once Netgate's repo reaches the same version, unlock and reinstall from the pfSense repo.
+
 ## PVE1 remaining setup
 
 Do the following sections from the [proxmox guide](./proxmox.md):
@@ -506,6 +611,8 @@ ssh autoadmin@pve1 pause_vm_watchdog
 - Apply the upgrade and reboot
 - Restore the pfsense config and re-install all pkgs
 - If necessary, manual re-install pkgs
+- Re-apply the [Tailscale package patch](#tailscale-package-patch); check that `tailscale` is
+  still locked (`pkg lock -l`) or reinstall [FreeBSD's](#tailscale-from-freebsds-packages)
 - Resume the vm_watchdog
 
 ```bash

@@ -1,0 +1,296 @@
+diff --git a/usr/local/etc/rc.d/pfsense_tailscaled b/usr/local/etc/rc.d/pfsense_tailscaled
+index c9f45eaf1..370b4fe4c 100755
+--- a/usr/local/etc/rc.d/pfsense_tailscaled
++++ b/usr/local/etc/rc.d/pfsense_tailscaled
+@@ -31,16 +31,13 @@ load_rc_config $name
+ : ${pfsense_tailscaled_advertiseroutes:=""}
+ : ${pfsense_tailscaled_exitnode_enable:="NO"}
+ : ${pfsense_tailscaled_loginserver:="https://controlplane.tailscale.com"}
+-: ${pfsense_tailscaled_snat_subnet_routes:="NO"}
++: ${pfsense_tailscaled_snat_subnet_routes:="YES"}
+ 
+ # source the tailscaled rc configuration too
+ load_rc_config tailscaled
+ 
+-# handle the --auth-key parameter
+-pfsense_tailscaled_up_flags="--auth-key=${pfsense_tailscaled_authkey}"
+-
+-# handle the --login-server parameter
+-pfsense_tailscaled_up_flags="${pfsense_tailscaled_up_flags} --login-server=${pfsense_tailscaled_loginserver}"
++# handle the --login-server parameter (--auth-key is added in tailscale_up so it never reaches the logs)
++pfsense_tailscaled_up_flags="--login-server=${pfsense_tailscaled_loginserver}"
+ 
+ # handle the --advertise-exit-node parameter
+ if checkyesno pfsense_tailscaled_exitnode_enable; then
+@@ -66,14 +63,6 @@ fi
+ # handle the --advertise-routes parameter
+ pfsense_tailscaled_up_flags="${pfsense_tailscaled_up_flags} --advertise-routes=${pfsense_tailscaled_advertiseroutes}"
+ 
+-# This is currently on available on Linux (see https://github.com/tailscale/tailscale/issues/5573)
+-# handle the –-snat-subnet-routes parameter
+-#if checkyesno pfsense_tailscaled_snat_subnet_routes; then
+-#	pfsense_tailscaled_up_flags="${pfsense_tailscaled_up_flags} --snat-subnet-routes"
+-#else
+-#	pfsense_tailscaled_up_flags="${pfsense_tailscaled_up_flags} --snat-subnet-routes=false"
+-#fi
+-
+ # Always disable automatic package updates.
+ pfsense_tailscaled_set_flags="--auto-update=false"
+ 
+@@ -90,6 +79,8 @@ tailscale_tun_dev_group="Tailscale"
+ tailscale_bin="/usr/local/bin/tailscale"
+ tailscaled_rcfile="/usr/local/etc/rc.d/tailscaled"
+ tailscale_tun_dev_wait=5
++tailscaled_stop_wait=15
++tailscale_backend_state_wait=10
+ 
+ # useful bits
+ tailscaled_state_file="tailscaled.state"
+@@ -125,12 +116,14 @@ pfsense_tailscaled_poststart() {
+ # rc command hook
+ pfsense_tailscaled_stop() {
+ 	tailscaled_stop
++	wait_for_tailscaled_exit ${tailscaled_stop_wait}
+ }
+ 
+ # rc command hook
+ pfsense_tailscaled_clean() {
+-	# stop tailscaled daemon
++	# stop tailscaled daemon; a daemon still exiting could write the state back
+ 	tailscaled_stop
++	wait_for_tailscaled_exit ${tailscaled_stop_wait}
+ 
+ 	# delete the state file
+ 	/bin/rm -f ${tailscaled_state_dir}/${tailscaled_state_file} >/dev/null 2>&1
+@@ -140,18 +133,65 @@ pfsense_tailscaled_clean() {
+ tailscale_set() {
+ 	logger -s -t tailscale "Setting runtime options for ${tailscale_tun_dev} with ${pfsense_tailscaled_set_flags}"
+ 	${tailscale_bin} set ${pfsense_tailscaled_set_flags} || {
+-		logger -s -t "Unable to set runtime options for ${tailscale_tun_dev}."
++		logger -s -t tailscale "Unable to set runtime options for ${tailscale_tun_dev}."
+ 	}
+ }
+ 
+ # bring up tailscale using the generated up flags from the configuration
+ tailscale_up() {
+-	logger -s -t tailscale "Bringing up ${tailscale_tun_dev} with ${pfsense_tailscaled_up_flags}"
+-	${tailscale_bin} up ${pfsense_tailscaled_up_flags} && {
++	# handle the --snat-subnet-routes parameter. Builds before Tailscale 1.104 reject it on
++	# FreeBSD; there TS_DEBUG_NETSTACK_SUBNETS=0 alone gives kernel routing without SNAT.
++	if ${tailscale_bin} up --help 2>&1 | grep -q snat-subnet-routes; then
++		if checkyesno pfsense_tailscaled_snat_subnet_routes; then
++			pfsense_tailscaled_up_flags="${pfsense_tailscaled_up_flags} --snat-subnet-routes"
++		else
++			pfsense_tailscaled_up_flags="${pfsense_tailscaled_up_flags} --snat-subnet-routes=false"
++		fi
++	fi
++
++	local _auth_flags=""
++	local _auth_note=""
++
++	# Only hand over the auth key when the node actually needs to log in. Control rejects a
++	# register request carrying an expired auth key even if the node key is still valid,
++	# which logs the node out on restart (https://github.com/tailscale/tailscale/issues/16987).
++	# GUI auth key changes purge the state first, so they still land here as NeedsLogin.
++	if [ -n "${pfsense_tailscaled_authkey}" ]; then
++		case "$(tailscale_backend_state ${tailscale_backend_state_wait})" in
++		NeedsLogin|NoState|"")
++			_auth_flags="--auth-key=${pfsense_tailscaled_authkey}"
++			_auth_note=" (using configured auth key)"
++			;;
++		esac
++	fi
++
++	logger -s -t tailscale "Bringing up ${tailscale_tun_dev}${_auth_note} with ${pfsense_tailscaled_up_flags}"
++	if ${tailscale_bin} up ${_auth_flags} ${pfsense_tailscaled_up_flags}; then
+ 		tailscale_set
+-	} || {
+-		logger -s -t "Unable to bring up ${tailscale_tun_dev}. Check authentication."
+-	}
++	else
++		logger -s -t tailscale "Unable to bring up ${tailscale_tun_dev}. Check authentication."
++	fi
++}
++
++# print the tailscaled backend state, waiting for it to settle past NoState after a fresh start
++tailscale_backend_state() {
++	local _maxwaited="${1}"
++	local _state=""
++	local _waited=0
++
++	while :; do
++		_state=$(${tailscale_bin} status --json 2>/dev/null | \
++			/usr/bin/sed -n 's/^.*"BackendState": *"\([A-Za-z]*\)".*$/\1/p' | /usr/bin/head -n 1)
++		case "${_state}" in
++		NoState|"") ;;
++		*) break ;;
++		esac
++		[ ${_waited} -ge ${_maxwaited} ] && break
++		sleep 1
++		_waited=$((_waited+1))
++	done
++
++	echo "${_state}"
+ }
+ 
+ # utility function to check if a kernel module is loaded and load it if not loaded
+@@ -243,7 +283,10 @@ tailscaled_not_running() {
+ 
+ # start tailscaled if not running, proxy through to upstream rcfile
+ tailscaled_start() {
+-	tailscaled_running && return 1;
++	tailscaled_running && {
++		logger -s -t tailscale "tailscaled is already running, not starting it with the current settings"
++		return 1
++	}
+ 	run_rc_script ${tailscaled_rcfile} start
+ }
+ 
+@@ -253,6 +296,28 @@ tailscaled_stop() {
+ 	run_rc_script ${tailscaled_rcfile} stop
+ }
+ 
++# wait for tailscaled to exit after a stop. rc.subr's own wait can give up while tailscaled is
++# still shutting down; a restart then finds the old daemon running, skips the start, and the
++# old process keeps its old environment (e.g. no TS_DEBUG_NETSTACK_SUBNETS after unchecking
++# SNAT). Kill it once the wait runs out so the start always applies the new settings.
++wait_for_tailscaled_exit() {
++	local _maxwaited="${1}"
++	local _waited=0
++
++	while tailscaled_running; do
++		if [ ${_waited} -ge ${_maxwaited} ]; then
++			logger -s -t tailscale "tailscaled still running after ${_maxwaited}s, killing it"
++			/bin/pkill -KILL -F /var/run/tailscaled.pid
++			sleep 1
++			break
++		fi
++		sleep 1
++		_waited=$((_waited+1))
++	done
++
++	tailscaled_not_running
++}
++
+ # restart tailscaled, proxy through to upstream rcfile
+ tailscaled_restart() {
+ 	run_rc_script ${tailscaled_rcfile} restart
+diff --git a/usr/local/pkg/tailscale.xml b/usr/local/pkg/tailscale.xml
+index 5c968ec45..ecf96730b 100755
+--- a/usr/local/pkg/tailscale.xml
++++ b/usr/local/pkg/tailscale.xml
+@@ -162,18 +162,29 @@
+ 			</description>
+ 			<type>checkbox</type>
+ 		</field>
+-<!-- This is currently only available on Linux (see https://github.com/tailscale/tailscale/issues/5573)
+ 		<field>
+ 			<fielddescr>SNAT Subnet Routes</fielddescr>
+ 			<fieldname>snatsubnetroutes</fieldname>
+ 			<description>
+ 				<![CDATA[
+-				By disabling source NAT (SNAT), the end machine sees the LAN IP address of the originating machine as the source.
++				Source NAT traffic to the advertised routes (default).
+ 				]]>
+ 			</description>
++			<sethelp>
++				<![CDATA[
++				With 'SNAT Subnet Routes' enabled (default), tailscaled forwards traffic to the advertised routes
++				itself and the destination sees this firewall's address as the source.
++				When disabled, the kernel forwards that traffic instead: it passes through the packet filter on the
++				Tailscale interface group (add pass rules under Firewall / Rules / Tailscale) and the destination sees
++				the Tailscale address of the originating node. Traffic through an advertised exit node then also
++				leaves with the originating node's Tailscale address, so if 'Advertise Exit Node' is enabled, also pass
++				traffic to non-local destinations under Firewall / Rules / Tailscale and add an Outbound NAT rule for
++				100.64.0.0/10 on the WAN interface.
++				]]>
++			</sethelp>
+ 			<type>checkbox</type>
++			<default_value>on</default_value>
+ 		</field>
+--->
+ 		<field>
+ 			<fielddescr>Notice</fielddescr>
+ 			<description>
+diff --git a/usr/local/pkg/tailscale/tailscale_common.inc b/usr/local/pkg/tailscale/tailscale_common.inc
+index 3b11772df..ab0d181e7 100644
+--- a/usr/local/pkg/tailscale/tailscale_common.inc
++++ b/usr/local/pkg/tailscale/tailscale_common.inc
+@@ -227,6 +227,14 @@ function tailscale_is_enabled()
+ 	return (tailscale_get_config('tailscale', 'enable', 'off') === 'on');
+ }
+ 
++/*
++ * Just a test if SNAT of subnet routes is enabled (the default)
++ */
++function tailscale_snat_subnet_routes_enabled()
++{
++	return (tailscale_get_config('tailscale', 'snatsubnetroutes', 'on') === 'on');
++}
++
+ /*
+  * Just a test if tailscale is not enabled
+  */
+@@ -489,14 +497,23 @@ function tailscale_map_and_write_rcconf($var_map, $output_file)
+ 
+ 	$var_string = implode(' ', array_values($formatted_vars));
+ 
++	/*
++	 * $var_string carries secrets (e.g. the auth key), so keep mwexec from logging the
++	 * command line on a non-zero exit, which sysrc -c returns whenever changes are pending
++	 */
++
+ 	# first perform sanity check
+ 	$cmd = implode(' ', [SYSRC_BIN, '-c', '-f', $output_file, $var_string]);
+-	if (mwexec($cmd) === 0)
++	if (mwexec($cmd, true) === 0)
+ 		return false;
+ 
+ 	# looks good, changes needed so write them out
+ 	$cmd = implode(' ', [SYSRC_BIN, '-f', $output_file, $var_string]);
+-	return (mwexec($cmd) === 0);
++	if (mwexec($cmd, true) === 0)
++		return true;
++
++	log_error(sprintf(gettext('Tailscale: unable to write %s'), $output_file));
++	return false;
+ }
+ 
+ /*
+@@ -559,14 +576,13 @@ function tailscale_pfsense_tailscaled_rcconf_map()
+ 		return tailscale_format_sysrc_variable($key, $value);
+ 	};
+ 
+-	# This is currently only available on Linux (see https://github.com/tailscale/tailscale/issues/5573)
+ 	# pfsense_tailscaled_snat_subnet_routes (bool)
+-	/** $rcconf_map['pfsense_tailscaled_snat_subnet_routes'] = function($key) {
++	$rcconf_map['pfsense_tailscaled_snat_subnet_routes'] = function($key) {
+ 		$value = SYSRC_NO;
+-		if (tailscale_get_config('tailscale', 'snatsubnetroutes', 'off') === 'on')
++		if (tailscale_snat_subnet_routes_enabled())
+ 			$value = SYSRC_YES;
+ 		return tailscale_format_sysrc_variable($key, $value);
+-	}; */
++	};
+ 
+ 	return $rcconf_map;
+ }
+@@ -600,6 +616,18 @@ function tailscale_tailscaled_rcconf_map()
+ 		return tailscale_format_sysrc_variable($key, $value);
+ 	};
+ 
++	# tailscaled_env (str)
++	#
++	# With SNAT disabled the kernel forwards subnet traffic instead of tailscaled's
++	# netstack, which is what preserves the source address and makes the packets
++	# traverse pf on the Tailscale interface group.
++	$rcconf_map['tailscaled_env'] = function($key) {
++		$value = '';
++		if (!tailscale_snat_subnet_routes_enabled())
++			$value = 'TS_DEBUG_NETSTACK_SUBNETS=0';
++		return tailscale_format_sysrc_variable($key, $value);
++	};
++
+ 	# tailscaled_syslog_output_enable (bool)
+ 	$rcconf_map['tailscaled_syslog_output_enable'] = function($key) {
+ 		$value = SYSRC_NO;

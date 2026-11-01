@@ -83,6 +83,7 @@ headscale --user USER_ID preauthkeys create --expiration 100y
   - Go to VPN >> Tailscale
   - Setup as an [Exit Node](https://headscale.net/stable/ref/routes/#exit-node) for the desired
     subnet
+  - Apply the [Tailscale package patch](./router.md#tailscale-package-patch)
   - Restart pfSense ([issue](https://github.com/tailscale/tailscale/issues/7780))
   - On the VPN server, enable pfSense's routes, [ref](https://headscale.net/stable/ref/routes/)
 
@@ -90,8 +91,8 @@ headscale --user USER_ID preauthkeys create --expiration 100y
 headscale nodes list-routes
 # Repeat for all desired subnets
 headscale nodes approve-routes --identifier NODE_ID --routes 0.0.0.0/0,::/0
-headscale nodes approve-routes --identifier NODE_ID --routes 192.168.5.0/24
-headscale nodes approve-routes --identifier NODE_ID --routes 192.168.7.0/24
+headscale nodes approve-routes --identifier NODE_ID --routes 192.168.2.0/24
+headscale nodes approve-routes --identifier NODE_ID --routes 192.168.4.0/24
 ```
 
 - Machine users can connect now; skip [Add public endpoint](#add-public-endpoint) for a private VPN
