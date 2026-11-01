@@ -1,6 +1,6 @@
 # 02. Fork and vendor the Traefik rewrite-headers plugin as a local plugin
 
-Status: ready-for-human
+Status: resolved
 Type: task
 Repo: homelab
 Source: review finding 10
@@ -61,3 +61,5 @@ the TLS terminator, plus a hard startup dependency on GitHub.
   acceptance items.
 - 2026-10-10: Fork created; the vendored source is pushed to it as 92d799d on `main`. Remaining: run
   `install_traefik` on each node and check the acceptance items.
+- 2026-11-01: Done per the user: `install_traefik` ran on each node and the acceptance items
+  pass.
