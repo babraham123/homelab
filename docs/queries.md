@@ -155,6 +155,10 @@ homelab_speedtest_bits_per_second / homelab_isp_plan_bits_per_second
 homelab_ping_rtt_seconds{path="vps"}
 homelab_ping_loss_ratio
 homelab_iperf_up == 0
+
+# VPS egress, Linode's billable direction: 30 days against the plan's pool, and DERP's part
+increase(node_network_transmit_bytes_total{host="vpnsvcs", device="eth0"}[30d]) / on (host) homelab_vps_transfer_pool_bytes
+sum(rate(haproxy_backend_bytes_out_total{host="vpnsvcs", proxy=~"local_https?_vpn"}[5m]))
 ```
 
 ### The pipeline itself
@@ -280,6 +284,11 @@ _time:7d {service="fail2ban"} "] Ban " | extract "[<jail>] Ban <ip>" | stats by 
 
 # HAProxy on the VPS logs TCP connections with the SNI it routed on
 _time:24h {service="haproxy"} | extract "sni=<sni>" | stats by (sni) count() n | sort by (n desc)
+
+# Bytes per SNI on the VPS, counted when each connection closes. `-` is no SNI or a
+# non-hostname one; vpn.SITE is DERP plus Headscale control
+_time:7d {hostname="vpnsvcs", service="haproxy"} "sni=" | extract " up=<up> down=<down> sni=<sni>"
+  | stats by (sni) sum(up) up, sum(down) down | sort by (down desc)
 ```
 
 ### Finding fields

@@ -217,6 +217,17 @@ flowchart LR
     vmagent in), tailscaled and node_exporter
   - `VpsMetricsAbsent` fires on silence, since a pushing host can't raise `up == 0`; `HaproxyDown`
     and `HaproxyBackendConnectErrors` cover the edge; "HAProxy" dashboard
+  - Bandwidth: Linode bills what leaves `eth0` past the plan's monthly pool
+    (`site.vps_transfer_bytes` in `vars.yml`, which vmalert records as
+    `homelab_vps_transfer_pool_bytes` from `plans.yml.j2` so the rules and dashboards stay free of
+    Jinja). The "VPS bandwidth" dashboard shows the rolling 30-day `eth0` transmit against it
+    (needs `retention.metric_days` of 30 or more), and stacks `eth0` transmit by source:
+    `tailnet` is `tailscale0` transmit (WireGuard to home: funnel requests, backups, pushes);
+    `derp + headscale` and `funnel` are HAProxy's bytes to clients from the `vpn.SITE` backends
+    and the `*svcs` proxies, since DERP ends on Headscale and never touches `tailscale0`; `other`
+    is the rest, mostly per-packet headers. `tailscale0` receive stays out: much of it ends on the
+    VPS (acks, replies to its pushes, net_probe's iperf3 upload). `VpsTransferHigh` fires at 80%
+    of the pool. Per subdomain: the bytes-per-SNI LogsQL query in [queries](queries.md)
 - **CrowdSec**: the engine's and LAPI's metrics (`:6060`) scraped on secsvcs, each node's AppSec
   (`appsec:6060`) by that node's scraper, the VPS's firewall bouncer (`:60601` on the bridge
   gateway) by the VPS's vmagent; "CrowdSec" dashboard
@@ -243,7 +254,8 @@ flowchart LR
     the media array's SMART (`DiskUnhealthy`, `DiskHot`, `DiskSectorsGrowing`, `DiskCrcErrors`)
   - `network.yml`: `WanSlow` (three speed tests under half the plan), `VpsPathDown`,
     `NetProbeStale`, `NetProbeAbsent`
-  - `vps.yml`: `VpsMetricsAbsent`, `HaproxyDown`, `HaproxyBackendConnectErrors`
+  - `vps.yml`: `VpsMetricsAbsent`, `HaproxyDown`, `HaproxyBackendConnectErrors`,
+    `VpsTransferHigh`; `plans.yml.j2` records plan limits from `vars.yml` as series
   - `crowdsec.yml`: `CrowdsecDown`, `CrowdsecBouncerStale` (no pull in 10 minutes),
     `CrowdsecAppsecDown` (a node's WAF), `CrowdsecNotParsing` (no Traefik line parsed in an hour)
   - `pipeline.yml`: `Watchdog`

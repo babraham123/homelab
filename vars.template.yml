@@ -31,6 +31,9 @@ site:
   blocked_countries:
     - "RU"
     - "CN"
+  # The VPS plan's monthly outbound transfer pool in bytes, for the VpsTransferHigh alert and
+  # the "VPS bandwidth" dashboard (src/services/vmalert/configs/plans.yml.j2)
+  vps_transfer_bytes: 1000000000000
 tail_domain: "janedoe.ts.net"
 
 # Hosts

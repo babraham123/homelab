@@ -1,0 +1,15 @@
+# Publishes plan limits from vars.yml as series, so alerts and dashboards compare against one
+# value without templating them: the other rule files and the Grafana dashboards hold Go and
+# Grafana templates that Jinja would read as its own. The ISP plan's speeds come from net_probe
+# instead (homelab_isp_plan_bits_per_second).
+---
+groups:
+  - name: plans
+    rules:
+      - record: homelab_vps_transfer_pool_bytes
+        # The VPS plan's monthly outbound transfer pool; VpsTransferHigh in vps.yml and the
+        # "VPS bandwidth" dashboard
+        expr: vector({{ site.vps_transfer_bytes }})
+        labels:
+          host: vpnsvcs
+...

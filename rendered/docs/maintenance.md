@@ -177,6 +177,14 @@ sudo systemctl start image_updater
   deploy, then run `install_image_updater` on each node. A deploy alone only changes its image
   list.
 
+## VPS bandwidth
+
+Linode bills the VPS's outbound transfer past the plan's monthly pool, `site.vps_transfer_bytes` in
+`vars.yml`; when the plan changes, set it, deploy secsvcs and run
+`ssh autoadmin@secsvcs install_vmalert`. `VpsTransferHigh` fires when the rolling 30-day `eth0`
+transmit passes 80% of it; the "VPS bandwidth" dashboard splits that into tailnet, DERP and funnel
+([services](services.md#observability)).
+
 ## Alerting pipeline test
 
 Once a year, with the backup restore test. Last done: never. Every alert goes vmalert → Alertmanager

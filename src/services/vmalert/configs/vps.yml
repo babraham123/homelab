@@ -37,4 +37,18 @@ groups:
           dashboard: "{{ $externalURL }}/d/haproxy?var-backend={{ $labels.proxy }}"
           summary: "HAProxy can't connect to {{ $labels.proxy }}"
           description: "The VM or its Traefik is down, or the tailnet path from the VPS is broken."
+      - alert: VpsTransferHigh
+        # Linode bills outbound transfer past the plan's monthly pool. A rolling 30 days
+        # stands in for the billing month, and needs retention.metric_days >= 30 to see it all.
+        # The pool is a recorded series (plans.yml.j2), so this file stays free of Jinja.
+        expr: |
+          increase(node_network_transmit_bytes_total{device="eth0",host="vpnsvcs"}[30d])
+            / on (host) homelab_vps_transfer_pool_bytes > 0.8
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          dashboard: "{{ $externalURL }}/d/vpnsvcs_bandwidth"
+          summary: "The VPS sent {{ $value | humanizePercentage }} of its monthly transfer pool in 30 days"
+          description: "The VPS bandwidth dashboard splits it into tailnet and DERP; the bytes-per-SNI LogsQL query in docs/queries.md ranks the public subdomains."
 ...

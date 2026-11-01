@@ -1,0 +1,397 @@
+{
+  "title": "VPS bandwidth",
+  "uid": "vpnsvcs_bandwidth",
+  "description": "What the VPS sends out eth0, against the plan's monthly transfer pool, split by source. Alert: VpsTransferHigh in vps.yml. Per subdomain: the bytes-per-SNI LogsQL query in docs/queries.md.",
+  "editable": true,
+  "schemaVersion": 39,
+  "tags": [
+    "vps",
+    "network"
+  ],
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "refresh": "5m",
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 1,
+      "title": "Egress, last 30 days",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "increase(node_network_transmit_bytes_total{host=\"vpnsvcs\",device=\"eth0\"}[30d])",
+          "legendFormat": "eth0 tx",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "description": "Everything the VPS sent out eth0, which is what Linode bills, over a rolling 30 days (not Linode's billing month). Needs retention.metric_days of 30 or more.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 2,
+      "title": "Share of pool",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "increase(node_network_transmit_bytes_total{host=\"vpnsvcs\",device=\"eth0\"}[30d]) / on (host) homelab_vps_transfer_pool_bytes",
+          "legendFormat": "share",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "description": "30-day egress over site.vps_transfer_bytes in vars.yml, which vmalert records as homelab_vps_transfer_pool_bytes (plans.yml.j2). VpsTransferHigh fires above 80%.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 3,
+      "title": "Transfer pool",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_vps_transfer_pool_bytes",
+          "legendFormat": "pool",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "description": "The plan's monthly outbound pool, site.vps_transfer_bytes in vars.yml.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 4,
+      "title": "DERP + Headscale, time range",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "sum(increase(haproxy_backend_bytes_out_total{host=\"vpnsvcs\",proxy=~\"local_https?_vpn\"}[$__range]))",
+          "legendFormat": "vpn",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "description": "Bytes HAProxy sent to clients from Headscale (vpn.SITE) over the dashboard's time range. The bytes-per-SNI LogsQL query's down for vpn.SITE over the same window should be close; the log counts a connection when it closes.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      }
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 5,
+      "title": "30-day egress against the pool",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "increase(node_network_transmit_bytes_total{host=\"vpnsvcs\",device=\"eth0\"}[30d])",
+          "legendFormat": "eth0 tx, 30 days",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "homelab_vps_transfer_pool_bytes",
+          "legendFormat": "pool",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pool"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "Rolling 30-day eth0 transmit; VpsTransferHigh fires at 80% of the dashed pool line.",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "interval": "1h"
+    },
+    {
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource"
+      },
+      "id": 6,
+      "title": "eth0 transmit by source",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "sum(rate(node_network_transmit_bytes_total{host=\"vpnsvcs\",device=\"tailscale0\"}[$__rate_interval]))",
+          "legendFormat": "tailnet",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "sum(rate(haproxy_backend_bytes_out_total{host=\"vpnsvcs\",proxy=~\"local_https?_vpn\"}[$__rate_interval]))",
+          "legendFormat": "derp + headscale",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "sum(rate(haproxy_backend_bytes_out_total{host=\"vpnsvcs\",proxy=~\".+svcs_https?_proxy\"}[$__rate_interval]))",
+          "legendFormat": "funnel",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "clamp_min(sum(rate(node_network_transmit_bytes_total{host=\"vpnsvcs\",device=\"eth0\"}[$__rate_interval])) - sum(rate(node_network_transmit_bytes_total{host=\"vpnsvcs\",device=\"tailscale0\"}[$__rate_interval])) - (sum(rate(haproxy_backend_bytes_out_total{host=\"vpnsvcs\",proxy=~\"local_https?_vpn\"}[$__rate_interval])) or vector(0)) - (sum(rate(haproxy_backend_bytes_out_total{host=\"vpnsvcs\",proxy=~\".+svcs_https?_proxy\"}[$__rate_interval])) or vector(0)), 0)",
+          "legendFormat": "other",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource"
+          },
+          "expr": "sum(rate(node_network_transmit_bytes_total{host=\"vpnsvcs\",device=\"eth0\"}[$__rate_interval]))",
+          "legendFormat": "eth0 tx",
+          "refId": "E"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "fillOpacity": 30
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "eth0 tx"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "Stacked, summing to eth0 transmit. tailnet: tailscale0 transmit, WireGuard to home: funnel requests, backups, vmagent and Fluent Bit pushes. derp + headscale: HAProxy's bytes to clients from the vpn.SITE backends; DERP relays between tailnet clients and never touches tailscale0. funnel: HAProxy's bytes to public clients from the *svcs proxies. other: eth0 transmit minus those: per-packet headers the others leave out (WireGuard's around tailnet packets, TCP/IP's around HAProxy's payload), acks, SSH, DNS and apt. tailscale0 receive isn't counted: much of it ends on the VPS (acks and replies to its pushes, net_probe's iperf3 upload), and what goes on to a client leaves through HAProxy, in funnel.",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      }
+    }
+  ]
+}

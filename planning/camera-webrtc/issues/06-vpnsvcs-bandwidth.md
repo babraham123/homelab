@@ -1,6 +1,6 @@
 # 06. vpnsvcs bandwidth: totals and DERP estimate
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Repo: homelab
 Source: maintainer request 2026-10-13; scope cut 2026-10-16
@@ -72,3 +72,49 @@ estimate, and a laptop script answers the per-subdomain question when needed.
   line are removed. HAProxy keeps logging SNI and bytes per connection (item 3), so a LogsQL query
   can still answer it ad hoc. Left: the dashboard, `VpsTransferHigh` with `site.vps_transfer_bytes`,
   and the docs.
+
+2026-11-01: items 4-6 in. The "VPS bandwidth" dashboard (`vpnsvcs_bandwidth.json`);
+`VpsTransferHigh` in `vps.yml`; `site.vps_transfer_bytes` in `vars.template.yml`;
+`docs/services.md`, `docs/maintenance.md`, and the bytes-per-SNI LogsQL query in `docs/queries.md`.
+
+- The pool reaches the alert and the dashboard as a series, `homelab_vps_transfer_pool_bytes`,
+  recorded by a new templated rule file, `src/services/vmalert/configs/plans.yml.j2`. Like
+  `homelab_isp_plan_bits_per_second`, one value feeds both, and neither `vps.yml` (Go templates
+  in its annotations) nor the dashboards (Grafana JSON) need Jinja. A dashboard constant would
+  have put the real value in a tracked file.
+- Item 2's derivation doesn't hold on live data. `tailscale0` rx + tx is larger than `eth0` tx in
+  a typical hour, so `derp` clamps to 0: much of `tailscale0` rx ends on the VPS (acks and
+  replies to the vmagent/Fluent Bit pushes, net_probe's nightly iperf3 upload) and never goes
+  out `eth0`. The dashboard instead stacks `eth0` tx as `tailnet` (`tailscale0` tx), `derp +
+  headscale` and `funnel` (HAProxy's `haproxy_backend_bytes_out_total` for the `vpn.SITE`
+  backends and the `*svcs` proxies: bytes to clients), and `other` (the rest: WireGuard and
+  TCP/IP headers, SSH, apt). Still no new collector. Over the last week HAProxy's Headscale
+  backend counter and the log's `vpn.SITE` down agreed within about 20%; the log counts a
+  connection only when it closes.
+- The 30-day window needs `retention.metric_days` >= 30 (the template's example is 14).
+
+Apply:
+
+```bash
+# 1. Add the plan's pool to the real vars.yml (bytes), under site:
+#      vps_transfer_bytes: <plan's monthly transfer in bytes>
+# 2. Deploy secsvcs, then install the rules and dashboards
+tools/deploy_src.sh secsvcs
+ssh autoadmin@secsvcs install_vmalert
+ssh autoadmin@secsvcs install_grafana
+```
+
+Verify (the acceptance checks):
+
+```bash
+# The pool series exists, and the alert loaded
+curl -u "$VM_AUTH" https://metrics.SITE/api/v1/query --data-urlencode 'query=homelab_vps_transfer_pool_bytes'
+#    vmalert.SITE: group vps lists VpsTransferHigh, group plans records the pool
+# 30-day egress: the dashboard's "Egress, last 30 days" vs Linode's transfer page, within 5%
+# DERP: force one tailnet client onto DERP (tailscale debug ... or block UDP), copy 1 GB through
+#    it; "derp + headscale" rises by about 1 GB and "tailnet" stays flat
+# Alert: set site.vps_transfer_bytes low (below the 30-day egress), redeploy and
+#    install_vmalert; VpsTransferHigh goes pending, then fires after 1h. Restore the value.
+# No new listeners on the VPS
+ssh manualadmin@vpnsvcs sudo ss -ltnp
+```
