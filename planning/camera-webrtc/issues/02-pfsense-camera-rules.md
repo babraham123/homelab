@@ -27,8 +27,9 @@ Rules in the pfSense GUI. Use an alias `cameras` for the camera IPs.
    9000 is the Baichuan port the HA integration prefers).
 
 **Toward websvcs:**
-5. Pass trusted VLANs (10, 20, LAN) and the tailnet (traffic arriving SNATed from the
-   router) → `{{ websvcs.ip }}` UDP/TCP 8555.
+5. Pass trusted VLANs (10, 20, LAN) and the tailnet (on the Tailscale interface, sources
+   keeping their `100.64.0.0/10` address: pfSense routes subnets without SNAT) →
+   `{{ websvcs.ip }}` UDP/TCP 8555.
 
 Record the rules in `docs/networking.md` (VLAN section: "IoT cameras") as the other
 VLAN rules are.
