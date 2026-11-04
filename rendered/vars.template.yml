@@ -127,8 +127,8 @@ model:
 isp:
   down_mbps: 1000
   up_mbps: 1000
-# The VPS plan's monthly outbound transfer pool in MB, for the VpsTransferHigh alert and the
-# "VPS bandwidth" dashboard (src/services/vmalert/configs/plans.yml.j2)
+
+# The VPS plan's monthly outbound transfer pool in MB
 vps_mb_limit: 1000000
 
 retention:
@@ -140,14 +140,12 @@ retention:
     continuous: 7
     events: 30
 
-# Cameras Frigate records (src/services/frigate/config.yml.j2), each with a static DHCP
-# lease on an IoT VLAN. `main` and `sub` are the RTSP paths, if the model's differ from
-# h264Preview_01_main and h264Preview_01_sub.
+# Cameras Frigate records, each with a static DHCP lease on an IoT VLAN. `main` and `sub`
+# are the RTSP paths, if the model's differ from h264Preview_01_main and h264Preview_01_sub.
 cameras:
   - {name: front, model: "<model>", ip: 192.168.11.50}
 
-# finance_exporter's tickers by asset type, each optional; each type gets its standard
-# metrics (src/services/finance_exporter/config.yaml.j2).
+# finance_exporter's tickers by asset type, each optional
 #   Yahoo symbols:  stocks, etfs, mutual_funds, indices (^GSPC), fx (EURUSD=X),
 #                   crypto (BTC-USD), futures (GC=F)
 #   treasuries:     Treasury.gov nominal par yield tenors (3M, 2Y, 10Y, 30Y)
