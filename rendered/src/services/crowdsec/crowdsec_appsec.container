@@ -39,12 +39,12 @@ Environment=USE_TLS=true
 Environment=CACERT_FILE=/certificates/ca.chain.pem
 Environment=CLIENT_CERT_FILE=/certificates/appsec.cert.pem
 Environment=CLIENT_KEY_FILE=/certificates/appsec.key.pem
-# In-band (blocks): virtual patches for known CVEs and the generic rules. CRS runs
-# out-of-band, detect only: its matches are alerts without a ban, since its scenario
-# (crowdsecurity/appsec-crs's crowdsec-appsec-outofband) isn't installed. Move it in-band,
-# with exclusions, once its alerts show the false positives (auth/03).
+# In-band, blocking with a 403: virtual patches for known CVEs, the generic rules and the
+# Core Rule Set. A CRS match blocks the request without banning its IP: its rules are
+# native, which the appsec-vpatch ban scenario skips. The homelab's own devices are only
+# alerted on (appsec.yaml).
 Environment="COLLECTIONS=crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-Environment=APPSEC_CONFIGS=crowdsecurity/crs
+Environment=APPSEC_CONFIGS=crowdsecurity/crs-inband
 Environment=APPSEC_RULES=crowdsecurity/crs
 Environment=LEVEL_WARN=true
 

@@ -1,0 +1,36 @@
+# /etc/opt/crowdsec_appsec/config/appsec-configs/homelab-home-detect-only.yaml
+# Ref: https://docs.crowdsec.net/docs/next/appsec/hooks
+# The homelab's own devices are never blocked: an in-band match from a home range lets the
+# request through and keeps its alert, so their matches can be reviewed for rule exclusions.
+# req.RemoteAddr is the client address Traefik's plugin sends in X-Crowdsec-Appsec-Ip, the
+# real one since HAProxy passes it with the PROXY protocol. The VPS's own addresses stay
+# blocked: if that chain broke, all public traffic would arrive from them, and the WAF
+# should then fail closed.
+---
+name: homelab/home-detect-only
+on_match:
+  - filter: |
+      IsInBand
+      && req.RemoteAddr not in ["12.34.56.78", "100.64.0.2"]
+      && !IpInRange(req.RemoteAddr, "10.13.0.0/24")
+      && any([
+        "127.0.0.0/8",
+        "100.64.0.0/10",
+        "fd7a:115c:a1e0::/48",
+        "192.168.1.0/24",
+        "192.168.3.0/24",
+        "192.168.4.0/24",
+        "192.168.2.0/24",
+        "192.168.10.0/24",
+        "192.168.11.0/24",
+        "192.168.12.0/24",
+        "192.168.20.0/24",
+        "192.168.21.0/24",
+        "10.10.0.0/24",
+        "10.12.0.0/24",
+        "10.11.0.0/24",
+        "10.13.0.0/24"
+      ], IpInRange(req.RemoteAddr, #))
+    apply:
+      - SetRemediation("allow")
+...

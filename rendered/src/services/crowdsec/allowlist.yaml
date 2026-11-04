@@ -11,7 +11,6 @@ whitelist:
     - "12.34.56.78"
   cidr:
     - "127.0.0.0/8"
-    # Tailnet: `prefixes` in src/services/headscale/headscale.yaml.j2
     - "100.64.0.0/10"
     - "fd7a:115c:a1e0::/48"
     - "192.168.1.0/24"

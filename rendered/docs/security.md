@@ -50,13 +50,15 @@ HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy
   hands the request, headers and body, to the node's own CrowdSec AppSec container, so it never
   leaves the VM:
   - in-band, blocking with a 403: CrowdSec's virtual patches for known CVEs and its generic rules
-    (`crowdsecurity/appsec-virtual-patching`, `appsec-generic-rules`); two different rules hit by
-    one IP within a minute ban it;
-  - out-of-band, detect only: the OWASP Core Rule Set (`crowdsecurity/crs`), whose matches are
-    alerts without a ban until its false positives are known;
+    (`crowdsecurity/appsec-virtual-patching`, `appsec-generic-rules`), where two different rules
+    hit by one IP within a minute ban it, and the OWASP Core Rule Set (`crowdsecurity/crs-inband`),
+    which blocks the request without a ban;
+  - the homelab's own ranges (the LANs, VLANs, tailnet and container subnets, but not the VPS's
+    addresses) are only alerted on: a match lets the request through and keeps the alert, so false
+    positives show up for rule exclusions without breaking anything at home
+    (`src/services/crowdsec/home_detect_only.yaml.j2`). The allowlist keeps them from being banned;
   - the homelab's own machines (the VMs, PVE, PBS, pfSense, the VPS's tailnet IP, the container
-    subnets) skip both checks, so metric and log pushes don't pass through the WAF; people's LAN
-    devices don't, and the allowlist keeps them from being banned.
+    subnets) skip the WAF, so metric and log pushes don't pass through it.
 
   AppSec is a CrowdSec agent that logs in to the LAPI with a client certificate from the private
   CA, so its blocks become alerts and bans there, and checks the plugin's per-node bouncer key with

@@ -90,6 +90,9 @@
 #                     container source}], in port order
 #   addr[node]:       {<quadlet name>: its container's IP address} for the containers with
 #                     an ip; vpnsvcs's vmagent is inv.addr.vpnsvcs.vmagent
+#   home_cidrs:       every range the homelab's own devices send from: loopback, the
+#                     tailnet, the LANs and VLANs, each node's containers (CrowdSec's
+#                     allowlist and AppSec's detect-only hook)
 #
 # Before deriving, every file is checked against the shape below (NODE), so a misspelled
 # or mistyped key fails the render instead of being ignored; the cross-file checks are
@@ -332,6 +335,16 @@ def ufw(node, spec, addrs, data):
   return rules
 
 
+def home_cidrs(data):
+  # Read from vars.yml; the test fixtures have only some of these keys
+  masks = [data[n]["mask"] for n in ("lan", "lan2", "pve1", "pve2") if n in data]
+  vlans = [v["mask"] for group in ("wifi", "wired") for v in (data.get(group) or {}).values()]
+  containers = [f'{data[n]["container_subnet"]}.0/24'
+                for n in ("secsvcs", "homesvcs", "websvcs", "vpnsvcs") if n in data]
+  # Tailnet: `prefixes` in src/services/headscale/headscale.yaml.j2
+  return ["127.0.0.0/8", "100.64.0.0/10", "fd7a:115c:a1e0::/48"] + masks + vlans + containers
+
+
 def derive(data):
   nodes = {node: spec or {} for node, spec in data["nodes"].items()}
   if errors := [e for node, spec in nodes.items() for e in validate(node, spec)]:
@@ -361,6 +374,7 @@ def derive(data):
                for node, spec in nodes.items()},
     "addr": addrs,
     "ufw": {node: ufw(node, spec, addrs[node], data) for node, spec in nodes.items()},
+    "home_cidrs": home_cidrs(data),
   }
 
 

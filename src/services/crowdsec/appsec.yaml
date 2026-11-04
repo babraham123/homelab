@@ -1,14 +1,16 @@
 # /etc/opt/crowdsec_appsec/config/acquis.d/appsec.yaml
 # Ref: https://docs.crowdsec.net/docs/next/log_processor/data_sources/appsec
 # Listens for the Traefik plugin on the node's Podman network only: nothing publishes
-# the port. appsec-default holds the in-band virtual patches and generic rules; crs is
-# out-of-band (crowdsec_appsec.container).
+# the port. Every rule is in-band: appsec-default holds the virtual patches and generic
+# rules, crs-inband the OWASP Core Rule Set. homelab/home-detect-only lets the homelab's own
+# devices through on a match, alert kept (home_detect_only.yaml.j2).
 ---
 source: appsec
 listen_addr: 0.0.0.0:7422
 appsec_configs:
   - crowdsecurity/appsec-default
-  - crowdsecurity/crs
+  - crowdsecurity/crs-inband
+  - homelab/home-detect-only
 labels:
   type: appsec
 ...

@@ -171,3 +171,10 @@ vpnsvcs and secsvcs guides get the install steps; an ADR for LAPI on secsvcs and
   most of the out-of-band alerts. pfSense sends from its address on the destination's subnet (the
   `.1` gateway), which `clientTrustedIps` didn't list, so the gateways on the pve1 and pve2 subnets
   are now trusted too. Still open: fail2ban with secsvcs off, and step 6.
+
+- 2026-11-04: step 6 split. CRS is in-band now (`crowdsecurity/crs-inband`), so it blocks
+  outside clients with a 403 (no ban: its native rules are outside the `appsec-vpatch` scenario).
+  `homelab/home-detect-only` (`src/services/crowdsec/home_detect_only.yaml.j2`) lets the home
+  ranges (`inv.home_cidrs`, shared with the allowlist; the VPS's own addresses excluded) through
+  on any in-band match and keeps the alert, so their false positives can be reviewed. Left: rule
+  exclusions after a few weeks of alerts, and the secsvcs-off fail2ban check.

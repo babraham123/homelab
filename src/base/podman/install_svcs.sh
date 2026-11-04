@@ -43,6 +43,8 @@ case $1 in
     install -D -m 644 -t /etc/opt/crowdsec_appsec/config/acquis.d services/crowdsec/appsec.yaml
     install -D -m 644 services/crowdsec/allowlist.yaml \
       /etc/opt/crowdsec_appsec/config/parsers/s02-enrich/homelab-allowlist.yaml
+    install -D -m 644 services/crowdsec/home_detect_only.yaml \
+      /etc/opt/crowdsec_appsec/config/appsec-configs/homelab-home-detect-only.yaml
     install_quadlet services/crowdsec/crowdsec_appsec.container services/crowdsec/appsecdata.volume
     install_dropins crowdsec_appsec
     reload_restart crowdsec_appsec

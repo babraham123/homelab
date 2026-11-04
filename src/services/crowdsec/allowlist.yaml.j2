@@ -10,21 +10,7 @@ whitelist:
   ip:
     - "{{ vpnsvcs.ip }}"
   cidr:
-    - "127.0.0.0/8"
-    # Tailnet: `prefixes` in src/services/headscale/headscale.yaml.j2
-    - "100.64.0.0/10"
-    - "fd7a:115c:a1e0::/48"
-    - "{{ lan.mask }}"
-    - "{{ lan2.mask }}"
-    - "{{ pve1.mask }}"
-    - "{{ pve2.mask }}"
-{%- for vlan in wifi.values() %}
-    - "{{ vlan.mask }}"
-{%- endfor %}
-{%- for vlan in wired.values() %}
-    - "{{ vlan.mask }}"
-{%- endfor %}
-{%- for node in [secsvcs, homesvcs, websvcs, vpnsvcs] %}
-    - "{{ node.container_subnet }}.0/24"
+{%- for cidr in inv.home_cidrs %}
+    - "{{ cidr }}"
 {%- endfor %}
 ...
