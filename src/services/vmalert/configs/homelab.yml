@@ -204,12 +204,14 @@ groups:
         expr: |
           gatus_results_endpoint_success == 0
             unless on (host) label_replace(absent(up{job="node_exporter_pve", host="pve2"}), "host", "websvcs", "", "")
-        for: 15m
+        # Three consecutive failures at the 10m interval (a lone failure leaves the series at 0
+        # for 10m, two for 20m); the 2m tier1 endpoints need 13.
+        for: 25m
         labels:
           severity: error
         annotations:
           dashboard: "{{ $externalURL }}/d/KPI7Qj1Wk"
-          summary: "{{ $labels.name }} has been failing its uptime check for 15 minutes"
+          summary: "{{ $labels.name }} has been failing its uptime check for 25 minutes"
           description: "Group {{ $labels.group }}; the history is on the Gatus page (uptime subdomain)."
       - alert: CertExpiringSoon
         # Gatus reports this for every TLS endpoint it checks. ACME renews at 30 days

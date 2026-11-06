@@ -22,7 +22,7 @@ public-endpoint: &public
   interval: 10m
   client:
     timeout: 10s
-    dns-resolver: udp://1.1.1.1:53
+    dns-resolver: udp://8.8.8.8:53
   headers:
     User-Agent: "Mozilla/5.0 (gatus-robot; Linux x86_64)"
   conditions:
@@ -33,7 +33,7 @@ public-endpoint: &public
 
 internal-client: &internal-client
   timeout: 10s
-  dns-resolver: udp://1.1.1.1:53
+  dns-resolver: udp://8.8.8.8:53
 
 internal-endpoint: &internal
   group: internal
