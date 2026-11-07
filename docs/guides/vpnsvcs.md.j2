@@ -264,6 +264,8 @@ journalctl -eu headscale --no-pager | tail -20
 ```
 
 - Spot-check from a node: `tailscale debug netmap | jq '.PacketFilter'`, `nc -zv HOST PORT`
+- Rollback to allow-all: set `path: ""` under `policy:` in `/etc/headscale/config.yaml` and
+  `systemctl restart headscale`
 
 ## Guest users
 
