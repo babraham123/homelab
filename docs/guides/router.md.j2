@@ -409,10 +409,13 @@ applied. Re-apply it as below.
   - Path Strip Count = 1, Base Directory = `/`, Auto Apply off
   - Save, Test (must report it can be applied), Apply
 - Go to Firewall >> Rules >> Tailscale, add pass rules, Apply. Kernel-forwarded packets meet pf
-  here; without them they hit the default deny.
+  here; without them they hit the default deny. Set Protocol = Any on both: the form defaults to
+  TCP, which passes web checks but drops UDP (Moonlight's 47998–48000, QUIC, DNS).
   - Subnet routes: IPv4+IPv6, source `100.64.0.0/10` and `fd7a:115c:a1e0::/48`, destination the
     advertised subnets
   - Exit node: IPv4, source `100.64.0.0/10`, destination the `RFC1918` alias with Invert match
+- Check that both rules read `*` in the Protocol column, and that UDP crosses: Moonlight from the
+  tailnet to the gaming VM.
 - Go to Firewall >> NAT >> Outbound, add a rule: WAN, IPv4, protocol any, source `100.64.0.0/10`,
   translation WAN address, Static Port and EIM off. Exit-node traffic otherwise leaves with its
   100.x source.
