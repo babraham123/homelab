@@ -3,11 +3,14 @@ groups:
   - name: fluentbit
     rules:
       - alert: NoOutputBytesProcessed
-        expr: rate(fluentbit_output_proc_bytes_total[5m]) == 0
-        for: 15m
+        # An hour, not minutes: vpnsvcs ships a few lines per half hour, so a 5m rate hit 0
+        # on a healthy node. Its quietest hour still carries a dozen records. Input can't gate
+        # this: it counts the whole journal, and the Lua filter drops the units not shipped.
+        expr: increase(fluentbit_output_proc_bytes_total[1h]) == 0
+        for: 5m
         labels:
           severity: critical
         annotations:
-          summary: "Fluent Bit on {{ $labels.host }} has shipped no logs for 15 minutes"
+          summary: "Fluent Bit on {{ $labels.host }} has shipped no logs for an hour"
           description: "Its {{ $labels.name }} output to VictoriaLogs is stuck, so no logs arrive from {{ $labels.host }}. Check podman logs fluentbit there; is VictoriaLogs up?"
 ...
