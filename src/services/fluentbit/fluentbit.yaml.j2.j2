@@ -62,3 +62,7 @@ pipeline:
       format: json_lines
       json_date_key: date
       json_date_format: double
+      # The journal cursor advances on read, not on delivery: with the default single retry,
+      # an outage drops the batches and the cursor skips them. Retrying forever fills
+      # mem_buf_limit instead, which pauses the input and leaves the rest in the journal.
+      retry_limit: no_limits
