@@ -17,6 +17,16 @@ New-NetFirewallRule -DisplayName "Nvidia GPU Exporter" -Direction Inbound -Actio
 Start-Service nvidia_gpu_exporter
 ```
 
+## Heat
+
+At stock settings the RTX 3060 Ti reached 90°C with its fan at 100% and the driver hung.
+
+- Power limit: `InstallAutomation.ps1` sets 160 W (default 200 W) at boot and before each stream.
+  Check with `nvidia-smi -q -d POWER` (Current Power Limit) or the
+  `nvidia_smi_enforced_power_limit_watts` metric
+- Frame cap: NVIDIA Control Panel → Manage 3D settings → Global Settings → Max Frame Rate = 60,
+  Apply. It matches the 60 Hz stream, and the driver profile keeps it across reboots
+
 ## Streaming
 
 ### Windows streaming server and game platforms
