@@ -33,7 +33,7 @@ services:
     # Reads secrets.yaml and can reflash every device
     admin: true
     # Pinned: a bump means recompiling and OTA-updating every device
-    upstream: docker.io/esphome/esphome:2026.10.1
+    upstream: docker.io/esphome/esphome:2026.10.2
   home_assistant:
     ip: 11
     subdomain: home
