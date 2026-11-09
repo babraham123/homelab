@@ -41,10 +41,10 @@
         },
         {
           "container": "esphome",
-          "image": "localhost/esphome/esphome:2026.10.1",
+          "image": "localhost/esphome/esphome:2026.10.2",
           "service": "esphome",
           "trivyignore": "/root/homelab-rendered/src/services/esphome/.trivyignore",
-          "upstream": "docker.io/esphome/esphome:2026.10.1"
+          "upstream": "docker.io/esphome/esphome:2026.10.2"
         },
         {
           "container": "home_assistant",

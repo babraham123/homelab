@@ -9,7 +9,7 @@ Wants=network.target
 After=network-online.target
 
 [Container]
-Image=localhost/esphome/esphome:2026.10.1
+Image=localhost/esphome/esphome:2026.10.2
 ContainerName=esphome
 AutoUpdate=local
 NoNewPrivileges=true
