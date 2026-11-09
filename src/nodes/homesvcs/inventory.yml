@@ -39,7 +39,7 @@ services:
     subdomain: home
     uptime: home assistant
     uptime_tier: 1
-    upstream: docker.io/homeassistant/home-assistant:2026.10
+    upstream: docker.io/homeassistant/home-assistant:2026.11
   fluentbit:
     shared: true
     ip: 20
