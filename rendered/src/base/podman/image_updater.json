@@ -48,10 +48,10 @@
         },
         {
           "container": "home_assistant",
-          "image": "localhost/homeassistant/home-assistant:2026.10",
+          "image": "localhost/homeassistant/home-assistant:2026.11",
           "service": "home_assistant",
           "trivyignore": "/root/homelab-rendered/src/services/home_assistant/.trivyignore",
-          "upstream": "docker.io/homeassistant/home-assistant:2026.10"
+          "upstream": "docker.io/homeassistant/home-assistant:2026.11"
         },
         {
           "container": "fluentbit",
