@@ -26,8 +26,8 @@ Maintainer decisions (2026-10-11):
 
 Constraints:
 
-- The P4 (Pascal, sm_61) only runs PyTorch builds for CUDA 12.6 or older; Chatterbox
-  pins `torch==2.6.0` on Python 3.10–3.13.
+- The P4 (Pascal, sm_61) only runs PyTorch builds for CUDA 12.6 or older, which end at
+  torch 2.14; Calliope runs torch 2.14.1+cu126 on Python 3.14.
 - websvcs is on pve2, which is on demand, so a job must survive the VM stopping
   mid-book.
 
