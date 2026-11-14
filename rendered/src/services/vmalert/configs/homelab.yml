@@ -242,4 +242,13 @@ groups:
         annotations:
           summary: "{{ $labels.host }}'s image updater hasn't finished cleanly in {{ $value | humanizeDuration }}"
           description: "Its containers aren't getting updates or CVE fixes. See journalctl -u image_updater, and systemctl list-timers image_updater.timer."
+      # One series per container the scan gate holds back, until an update gets through.
+      # Alertmanager mails these as one weekly digest and never pushes them.
+      - alert: ImageUpdateBlocked
+        expr: image_updater_blocked_days
+        labels:
+          severity: info
+        annotations:
+          summary: "{{ $labels.host }}/{{ $labels.container }} blocked for {{ $value }} days: {{ $labels.cves }}"
+          description: "The old image keeps running. After review, add the CVEs to the service's .trivyignore with an exp: date, or on {{ $labels.host }} run: sudo image_updater accept {{ $labels.container }}. Findings: journalctl -u image_updater."
 ...

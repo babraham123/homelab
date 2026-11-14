@@ -136,12 +136,14 @@ HIGH or CRITICAL CVE blocks the new image, and the old one keeps running. Design
 
 | ntfy `alert` topic | Priority |
 | --- | --- |
-| Update blocked by the scan, daily | 3; 5 after 7 days, with the `accept` command |
 | Update failed, rolled back to the previous image | 4 |
 | Updater broken, a registry still failing after two retries, or the Trivy DB refresh failed | 5 |
 
-`ImageUpdaterStale` fires after 36 h without a clean run. `ssh autoadmin@NODE update_images` runs
-the same gated update now, after a `.trivyignore` change or a pinned-image bump.
+Blocked updates don't push. `ImageUpdateBlocked` fires for each blocked container, from
+`image_updater_blocked_days`, and Alertmanager mails them as one digest on Monday mornings: host,
+container, days blocked and the CVEs. `ImageUpdaterStale` fires after 36 h without a clean run.
+`ssh autoadmin@NODE update_images` runs the same gated update now, after a `.trivyignore` change
+or a pinned-image bump.
 
 ```bash
 ssh manualadmin@NODE

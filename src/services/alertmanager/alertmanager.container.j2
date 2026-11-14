@@ -34,6 +34,8 @@ Exec=--config.file="/config/config.yml" --web.config.file="/config/web_config.ym
 
 Environment=TZ={{ personal.timezone }}
 Volume=/etc/opt/alertmanager:/config:ro
+# time_intervals' location is looked up in a tz database, which Alertmanager doesn't embed
+Volume=/usr/share/zoneinfo:/usr/share/zoneinfo:ro
 # Notification log and silences; without it a restart (every image update) forgets what
 # was sent and pushes every firing alert again.
 Volume=amdata.volume:/alertmanager

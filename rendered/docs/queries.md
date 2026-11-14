@@ -146,9 +146,9 @@ headscale_nodestore_nodes
 (time() - homelab_net_probe_last_success_timestamp_seconds) / 3600
 (time() - image_updater_last_success_timestamp_seconds) / 3600
 
-# Image updater: images by result, days a pending update has been blocked
+# Image updater: images by result; each blocked container, days blocked and its CVEs (label cves)
 sum by (host, result) (image_updater_images)
-image_updater_blocked_days > 0
+image_updater_blocked_days
 
 # WAN and VPS path
 homelab_speedtest_bits_per_second / homelab_isp_plan_bits_per_second
