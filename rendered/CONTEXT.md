@@ -31,8 +31,9 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   takes only inline (`render_services.sh` for Fluent Bit's unit list). Written with square
   brackets, `[[ ]]` and `[% %]` (`src/base/podman/second_pass.py`), which the first pass leaves
   as text. Plaintext secrets never sit in the rendered tree.
-- **shared service** — a platform service every container VM runs: Traefik, CrowdSec AppSec,
-  vmagent, Fluent Bit. Marked `shared: true` in each node's inventory, which keeps its install
+- **shared service** — a platform service several nodes run from one quadlet template: Traefik
+  and CrowdSec AppSec on secsvcs, homesvcs and websvcs; vmagent on homesvcs, websvcs and vpnsvcs;
+  Fluent Bit on all four. Marked `shared: true` in each node's inventory, which keeps its install
   order and image facts; its case is in `src/base/podman/install_svcs.sh` and its quadlet is one
   template for all nodes. The node's own lines are its **drop-in**,
   `src/nodes/<node>/<quadlet>.container.d/<node>.conf`: at least the container's `IP=`, plus any

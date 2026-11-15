@@ -23,7 +23,7 @@ showed.
   `-a` appends.
 - Keep Claude in Chrome (`/chrome`) off during a session: it would act in your logged-in tabs
 - Each clipboard command is one line of printable text with no trailing newline, so pasting it
-  doesn't run it. Read it before pressing Enter. The clipboard is overwritten every step.
+  doesn't run it. Read it before pressing Enter. Each step with a command overwrites the clipboard.
 
 ## 1. Start
 

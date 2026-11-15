@@ -57,7 +57,7 @@ qm guest exec VMID -- bash -c 'systemctl --failed'
 
 # Rescue a VM that's thrashing: stop every Homelab service
 qm guest exec VMID -- bash -c \
-  'systemctl list-units | grep Homelab | grep -o "[a-z0-9_]*.service" | xargs systemctl stop'
+  'systemctl list-units --plain --no-legend | awk "/Homelab/ {print \$1}" | xargs systemctl stop'
 ```
 
 ### VM fails to start
@@ -668,8 +668,9 @@ Example PromQL and LogsQL, and the labels and log fields they use: [queries](que
 | `uptime.janedoe.com` | Gatus checks |
 | `SERVICE:PORT/metrics` | Raw metrics from a service (e.g. `victoriametrics:8428`, `vmalert:8880`) |
 
-Metrics and logs require basic auth (`admin` + `victoriametrics_admin_password` /
-`victorialogs_admin_password`).
+A browser reaches metrics and logs through Authelia; anything else (curl, scripts) uses basic
+auth (`admin` + `victoriametrics_admin_password` / `victorialogs_admin_password`), and only from
+home and tailnet addresses.
 
 ```bash
 VM_AUTH="admin:$(/root/homelab-rendered/src/base/podman/get_secret.sh victoriametrics_admin_password)"

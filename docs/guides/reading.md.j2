@@ -71,8 +71,8 @@ flowchart LR
 - Books run one at a time, oldest first, while pve2 is up; an interrupted book resumes
 - Output: `readalouds/<collection>/<Title>/Title.readaloud.epub` and a JSON report of failed
   sentences
-- On failure: inputs and report in `narrate/failed/<Title>/`; move the book back to the inbox to
-  resume
+- On failure: inputs and report in `narrate/failed/<Title>/`; a book with an invalid sidecar goes
+  into `narrate/failed/` as it is. Move the book back to the inbox to resume
 - YouTube videos: tag the bookmark `tolisten` in linkding
   - Within 15 min it's queued for yt_to_audiobook and retagged `transcribed`
   - Captions in another language: also tag it `lang:xx` (e.g. `lang:de`); default `en`

@@ -119,7 +119,7 @@ exit
 exit
 ssh manualadmin@secsvcs
 sudo podman run --rmi docker.io/authelia/authelia:latest authelia crypto rand --length 72 --charset rfc3986
-sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate sha2crypt --variant sha512 --iterations 1000 --random --random.length 72 --random.charset rfc3986
+sudo podman run docker.io/authelia/authelia:latest authelia crypto hash generate sha2crypt --iterations 1000 --random --random.length 72 --random.charset rfc3986
 # Store hashed and raw version of secret under hs_oidc_secret(_hash). id under hs_oidc_id
 ssh -t manualadmin@pve1 'sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh secsvcs'
 # Restart authelia to pick up hashed secret version
@@ -306,7 +306,8 @@ src/nodes/vpnsvcs/install_svcs.sh headscale
 ```
 
 - On pve1: `sudo /root/homelab-rendered/src/nodes/pve1/secret_update.sh vpnsvcs`
-  - Copy the two passwords and `ntfy_alert_token` from `secsvcs.yaml`; add the Docker Hub token
+  - Copy the two passwords and `ntfy_alert_token` from `secsvcs.yaml`; add `docker_hub_username`
+    and `docker_hub_token`
 - Install and check
 
 ```bash
@@ -375,7 +376,7 @@ journalctl -u crowdsec-firewall-bouncer --no-pager | tail   # no TLS or 403 erro
   ```
 
   - On the VPS, `nft list ruleset | grep 203.0.113.7` within 10 s
-  - `cscli decisions delete --ip 203.0.113.7` removes it
+  - On secsvcs, `sudo podman exec crowdsec cscli decisions delete --ip 203.0.113.7` removes it
 
 - Rotate the key
   - Update both secrets

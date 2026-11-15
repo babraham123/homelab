@@ -68,7 +68,7 @@ ssh manualadmin@SUBDOMAIN
 
 - Record the MAC address, `ip addr`
 - In pfSense, create a static DHCP lease
-  - Go to Services >> DHCP Server >> LAN >> DHCP Static Mappings
+  - Go to Services >> DHCP Server >> WiFiTrusted >> DHCP Static Mappings
 
 - Add a DNS record
   - Update `unbound.conf`

@@ -110,8 +110,8 @@ Unbound on pfSense serves split-horizon DNS for the site domain:
   records from `src/services/headscale/extra_records.json.j2`, pointing at the LAN addresses the
   subnet routes reach. `vpn`/`vpnsvcs` stay public, and a wildcard isn't possible, so a new
   websvcs subdomain needs its inventory entry to resolve from the tailnet.
-- Internal-only names exist for `pgdb.` (Postgres) and `mqtt.` (Mosquitto); these resolve nowhere on
-  the public internet.
+- Internal-only names exist for `pgdb.` (Postgres), `mqtt.` (Mosquitto) and `crowdsec.` (the
+  CrowdSec LAPI); these resolve nowhere on the public internet.
 - `vpn.janedoe.com` and `vpnsvcs.janedoe.com` are `transparent`: they resolve via public DNS to the
   VPS, even for internal clients.
 

@@ -19,7 +19,8 @@ Once a year
   - Go to AP's admin console (https://wifi.SITE_URL) >> System >> Firmware Update
   - Make sure to apply every incremental update
 
-- Fresh backups first: `sudo systemctl start backup_orchestrator` on pve1
+- Fresh backups first: `ssh autoadmin@pve1 backup_now`, which runs even when the next run is
+  set to be skipped
 - pfSense: snapshot the router VM in PVE, then the [router guide](guides/router.md#updates)
 - Debian nodes: unattended-upgrades only applies security updates, so pull everything else. Go in
   dependency order, secsvcs last since every other node authenticates and logs through it:
@@ -140,7 +141,7 @@ HIGH or CRITICAL CVE blocks the new image, and the old one keeps running. Design
 | ntfy `alert` topic | Priority |
 | --- | --- |
 | Update failed, rolled back to the previous image | 4 |
-| Updater broken, a registry still failing after two retries, or the Trivy DB refresh failed | 5 |
+| Updater broken, an image still failing after two retries, or the Trivy DB refresh failed | 5 |
 
 Blocked updates don't push. `ImageUpdateBlocked` fires for each blocked container, from
 `image_updater_blocked_days`, and Alertmanager mails them as one digest on Monday mornings: host,

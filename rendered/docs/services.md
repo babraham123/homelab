@@ -7,7 +7,8 @@ Container catalog, host services, observability and backups. Hostnames use the p
   node's bridge network ([ADR 0001](adr/0001-podman-quadlets-over-kubernetes.md))
 - The catalog is what the repo defines; what runs is whatever `install_svcs.sh` installed
   (`systemctl list-units "*.service"` on the node)
-- Raw list: `grep -rn "^IP=" src --include="*.container.j2*"`
+- Raw list: `grep -rn "^IP=" src`, which also finds the shared services' drop-ins
+  (`src/nodes/<node>/<container>.container.d/`)
 - Not in use, so not in any `inventory.yml` or the tables below, though their quadlets exist:
   frigate and the `wyoming` quadlets piper, whisper and openwakeword (websvcs)
 
@@ -156,9 +157,9 @@ flowchart LR
     tg["Telegraf on pfSense"]
     sl["syslogd on pfSense"]
 
-    subgraph agents["homesvcs, websvcs and the VPS"]
-        vmagent["vmagent"]
-        fb["Fluent Bit"]
+    subgraph agents["Agents"]
+        vmagent["vmagent<br/>homesvcs, websvcs, VPS"]
+        fb["Fluent Bit<br/>secsvcs, homesvcs, websvcs, VPS"]
     end
 
     subgraph sec["secsvcs (10.10.0.0/24)"]
@@ -246,10 +247,13 @@ flowchart LR
 - **Alert rules**, `src/services/vmalert/configs/`, one file per concern; severity `critical` >
   `error` > `warning` > `info` maps to ntfy priority:
   - `homelab.yml`: hosts (`NodeDown`, `DiskAlmostFull`, `DiskFillingIn24h`, `MemoryPressure`,
-    `HighLoad`, `HighCpuTemp`, `SystemdUnitFailed` for any "Homelab:" unit, `ClockSkew`),
+    `HighLoad`, `HighCpuTemp`, `OomKill`, `SystemdUnitFailed` for any "Homelab:" unit,
+    `ServiceRestartLoop`, `ClockSkew`),
     `TargetDown`, `AuthFailureBurst` (Authelia), and the Gatus-fed `EndpointDown`,
     `CertExpiringSoon` (14 days), `CertExpiringCritical` (3 days), and vm_watchdog's
-    `VMWatchdogReset`, `VMWatchdogGaveUp`, `VMAgentDown`, `VMWatchdogOnHold`, `VMWatchdogStale`
+    `VMWatchdogReset`, `VMWatchdogGaveUp`, `VMAgentDown`, `VMWatchdogOnHold`, `VMWatchdogStale`,
+    and the image updater's `ImageUpdaterStale` and `ImageUpdateBlocked`; Alertmanager sends
+    `ImageUpdateBlocked` only as a Monday-morning email digest, never to ntfy
   - `backups.yml`: `BackupStale`, `BackupNeverRan`, `SnapraidStale`
   - `hardware.yml`: GPUs (`GpuHot`, `GpuThermalThrottling`, `GpuRecoveryNeeded`, `GpuLost`) and
     the media array's SMART (`DiskUnhealthy`, `DiskHot`, `DiskSectorsGrowing`, `DiskCrcErrors`)

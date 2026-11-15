@@ -163,7 +163,7 @@ flowchart TB
         direction TB
         root["Root CA<br/>src/nodes/pve1/certificates/openssl.root.cnf"]
         inter["Intermediate CA<br/>pathlen:0, 30-day CRLs"]
-        svc["Server certs: authelia, lldap, postgres,<br/>mosquitto, each Traefik<br/>Client certs: each Traefik,<br/>zigbee2mqtt, Home Assistant, Frigate"]
+        svc["Server certs: authelia, lldap, postgres,<br/>mosquitto, each Traefik<br/>Client certs: each Traefik, each CrowdSec AppSec,<br/>zigbee2mqtt, Home Assistant, Frigate (parked)"]
         root -- "signs" --> inter -- "issues" --> svc
     end
 

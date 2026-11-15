@@ -90,8 +90,8 @@ case $1 in
     mkdir -p /etc/systemd/system/image_updater.timer.d
     printf '[Timer]\nOnCalendar=*-*-* %s:00\n' "$slot" > /etc/systemd/system/image_updater.timer.d/slot.conf
     systemctl daemon-reload
-    # Enabling the timer is the per-VM cutover from podman-auto-update.timer
-    # (docs/maintenance.md), so installing leaves it as it was.
+    # The timer is enabled once, by hand (docs/guides/podman.md); installing leaves it as
+    # it was, so a reinstall doesn't undo a disabled updater.
     exit 0
     ;;
   net_probe)

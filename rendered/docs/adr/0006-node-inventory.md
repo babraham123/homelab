@@ -54,7 +54,7 @@ inferred, per node:
   whose key order is the install order, so a service can carry attributes; today those are
   `subdomain`, `uptime` (the Gatus endpoint name), `uptime_path`, `uptime_tier` and
   `uptime_conditions`.
-- `install_all_svcs: true` on the container VMs only.
+- `install_all_svcs: true` on the container VMs, `install_some_svcs: [names]` on vpnsvcs.
 - `dirs` per service: the `src/` dirs `upload_src.sh` ships to the node besides `src/base/` and
   its own node dir (`tools/node_dirs.sh`), so each node holds only the services it runs.
 - `triggers` for the gaming VM's PowerShell allowlist.
@@ -81,7 +81,8 @@ Hand-written files stay the source for everything else: `routes.yml`, quadlets, 
   render fails.
 - Adding a service means one `install_svcs.sh` case plus one `inventory.yml` line; a route on
   secsvcs/homesvcs also needs its `subdomain`.
-- Dispatcher case order is canonical: debian services, services, `install_all_svcs`, then commands.
+- Dispatcher case order is canonical: debian services, services, `install_all_svcs` or
+  `install_some_svcs`, commands, then `triggers`.
   OliveTin button order follows it.
 - Later per-service facts go on the service entry rather than into a new parser: image facts for the
   image updater (upstream/build, update-last, extra quadlets) and the source directories for

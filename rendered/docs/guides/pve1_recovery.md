@@ -34,7 +34,7 @@ Recover pve1 after a dead SSD or a lost trust root (AGE key, private CA, SSH CA,
 | `/root/acme/` | Traefik certs, `date_acme_certs.txt` | Regenerate | `acme_transfer.sh` |
 | `/root/.ssh/id_ed25519`, `id_ed25519-cert.pub` | root's client key | Regenerate | [step 10](#10-ssh-root-key-and-host-certs) |
 | `/etc/pve/storage.cfg`, `/etc/pve/priv/storage/pbs2.*` | `pbs2` storage, token, key | PBS host backup | [step 3](#3-reconnect-the-pbs-storage) |
-| `/etc/pve/user.cfg`, `qemu-server/*.conf` | users, VM configs | PBS host backup, PBS VM backup | `qmrestore`; users per the [Proxmox guide](./proxmox.md#backups) |
+| `/etc/pve/qemu-server/*.conf` | VM configs | PBS host backup, PBS VM backup | `qmrestore` |
 | `/etc/network/interfaces`, `/etc/resolv.conf` | host network | Regenerate | `src/nodes/pve1/interfaces.j2`, `resolv.conf.j2` |
 | `/root/homelab-rendered/` | rendered repo | Regenerate | `tools/deploy_src.sh` |
 | `/etc/msmtprc`, host scripts and units, AppArmor edit, node_exporter | host services | Regenerate | [step 11](#11-host-services) |
@@ -143,7 +143,8 @@ ssh-keygen -R pve1; ssh-keygen -R pve1.janedoe.com; ssh-keygen -R 192.168.4.10
 tools/deploy_src.sh
 ```
 
-- Check the output for `pve1 upload failed`
+- Check the output for `pve1 upload failed`. `pve1 repo archive failed` and `pve1
+  install_dispatcher failed` are expected: pve1 has no `autoadmin` yet (next step)
 - On pve1:
   - [Debian setup, Automation](./debian.md#automation): `autoadmin`, `install_dispatcher`
   - [pve1 guide, Configs](./pve1.md#configs)

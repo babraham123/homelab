@@ -177,16 +177,20 @@ It is a uv script (dependencies inline, run by `uv run`); the inventory facts it
 lists in the template data. It lints YAML (`yamllint`), JSON and markdown
 (`.markdownlint-cli2.yaml`: every rule, lines up to 100 columns, with exceptions for tabs in
 code, long code and table lines, sibling-only duplicate headings and lists in table cells),
-rejects duplicate container `IP=`s, and checks the node inventory, through the lists
+rejects two containers with the same inventory `ip`, and checks the node inventory, through the lists
 `tools/inventory.py` derives from it, against the files it describes:
 
 - every repo script a dispatcher case runs exists and has the case it is called with (services,
   `debian_services`, `commands[].script` and the paths in `commands[].run`);
-- every `install_svcs.sh` case is in the node's `services`;
+- every `install_svcs.sh` case is in the node's `services`, a shared service's case is in
+  `src/base/podman/install_svcs.sh` and not the node's, and every shared case is shared by some node;
+- every built image (no `upstream`) has its service's `build.sh`;
+- every node that runs `image_updater` has an `image_updater_slot`, and no two share one;
 - subdomains are unique; each is a `Host()` rule in its node's `traefik/routes.yml`, and every
   routed host is listed, except on websvcs, the default route;
 - the quadlet each service's case copies has `Image=localhost/` + the `upstream` ref without its
-  host, or `Image=localhost/<build>:latest`;
+  host, or `Image=localhost/<build>:latest`, and an `IP=` (in the node's drop-in for a shared
+  service) equal to the container's inventory `ip`;
 - the OliveTin config has a button for every dispatcher case except the `pve1_file_transfer` ones,
   none for those, and every `ssh autoadmin@NODE CASE` it runs names a real case;
 - every node and service dir a node uses is among those `tools/inventory.py dirs` ships it: absolute

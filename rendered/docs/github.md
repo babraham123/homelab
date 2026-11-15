@@ -1,8 +1,9 @@
 # GitHub repository rules
 
 The homelab and the repos it builds or installs from share one set of GitHub settings. A merge to
-`main` in a container repo reaches every node the next night (the image updater builds `main`),
-and the homelab pins commits of the others, so `main` is treated as the deploy branch.
+`main` in a repo the image updater builds from reaches its node the next night. ntfy-idp-push
+ships on a tagged release, whose image the updater pulls; podman-image-updater and net-probe are
+pinned to release tags and mdns-repeater to a commit. `main` is treated as the deploy branch.
 
 ## Settings
 

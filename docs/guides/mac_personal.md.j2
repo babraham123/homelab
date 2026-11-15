@@ -68,13 +68,16 @@ cd homelab
 git config core.hooksPath .githooks
 # Fill in personal details based on vars.template.yml
 vim vars.yml
-tools/render_src.sh /tmp/homelab-rendered
+# A private dir: the output holds real values
+out=$(mktemp -d)/homelab-rendered
+tools/render_src.sh "$out"
 
-cd /tmp/homelab-rendered/src
+cd "$out/src"
 cp base/debian/aliases.zsh ~/.oh-my-zsh/custom
 cp base/debian/functions.zsh ~/.oh-my-zsh/custom
 cp base/debian/ssh_config ~/.ssh/config
 chmod 600 ~/.ssh/config
+cd ~/Documents/homelab && rm -rf "$(dirname "$out")"
 ```
 
 ## Auto-switch DNS
