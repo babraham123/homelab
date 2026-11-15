@@ -131,7 +131,8 @@ boundaries, which VLAN segmentation otherwise breaks. Three pieces bridge it:
   deliberately gets no discovery.
 - A host-level **`mdns_repeater`** service on the container VMs repeats mDNS between the VM's NIC
   and its internal Podman bridge, so containers (e.g. Home Assistant) can discover devices.
-- A firewall rule allows UDP/5353 to the multicast range across the bridged VLANs.
+- No firewall rule of its own: the bridged VLANs keep LAN's allow-all rules, which pass UDP/5353 to
+  the multicast group.
 
 Gotcha: `avahi-daemon` must be disabled where `mdns_repeater` runs; it silently intercepts queries
 first. `probes/mdns.js` is a probe script for verifying which service types are visible from a given

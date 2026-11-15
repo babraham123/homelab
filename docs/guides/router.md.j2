@@ -361,8 +361,6 @@ Now work on the firewall rules.
     - Block IPv4 WiFiIoT subnets to RFC1918
     - Block IPv6 WiFiIoT subnets to IPv6Local
     - Move the default allows down here
-  - The mDNS-bridged VLANs (WiFiTrusted): at the top, Allow IPv4 UDP subnets to 224.0.0.251
-    port 5353, so discovery survives any later block rule
 
 TODO: configure wired VLANs when I get a proper switch
 
