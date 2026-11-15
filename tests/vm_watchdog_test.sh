@@ -93,6 +93,35 @@ homelab_vm_watchdog_gave_up{vmid="101",name="router"} 1
 EOF
 }
 
+# The host holds while apt, dpkg or unattended-upgrades runs (apt-daily-upgrade.service), but
+# not for the unattended-upgrade-shutdown helper Debian runs all the time: its comm is also
+# unattended-upgr.
+test_host_holds_for_upgrades_not_the_shutdown_helper() {
+  local out
+  out=$(python3 -I -B -c '
+import importlib.util, sys
+from pathlib import Path
+spec = importlib.util.spec_from_file_location("vm_watchdog", "src/base/vm_watchdog/vm_watchdog.py")
+w = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(w)
+w.PROC = Path(sys.argv[1])
+def survey(comms, active=()):
+  for i, name in enumerate(comms, 1):
+    (w.PROC / str(i)).mkdir(exist_ok=True)
+    (w.PROC / str(i) / "comm").write_text(name + "\n")
+  w.run = lambda *a, **k: "\n".join("activating" if u in active else "inactive" for u in w.HOLD_UNITS)
+  print(w.Proxmox.host_hold(None, []))
+survey(["systemd", "unattended-upgr"])
+survey(["systemd", "unattended-upgr"], ["apt-daily-upgrade.service"])
+survey(["systemd", "unattended-upgr", "dpkg"])
+' "$tmp")
+  assert_eq "$out" <<EOF
+None
+apt-daily-upgrade.service activating
+dpkg running
+EOF
+}
+
 test_pause_by_hand_expires() {
   assert_eq "$(python3 -I -B -c '
 import importlib.util, sys, time

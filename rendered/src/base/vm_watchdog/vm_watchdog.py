@@ -44,10 +44,13 @@ PAUSE_MINUTES = 120
 PAUSE_FILE = Path("/run/vm_watchdog/pause_until")
 METRICS = Path("/var/lib/node_exporter/textfile_collector/homelab_vm_watchdog.prom")
 # A oneshot unit is activating while it runs; pve-guests is activating while it starts the
-# guests at boot and deactivating while it shuts them down
-HOLD_UNITS = ["backup_orchestrator.service", "pve-guests.service"]
-# unattended-upgr is unattended-upgrades, cut to the kernel's 15-character comm
-HOLD_PROCESSES = {"apt", "apt-get", "aptitude", "dpkg", "unattended-upgr", "vzdump"}
+# guests at boot and deactivating while it shuts them down. apt-daily-upgrade runs
+# unattended-upgrades: matched by unit, since its comm (cut to 15 characters) is the same
+# unattended-upgr as the unattended-upgrade-shutdown helper that runs all the time.
+HOLD_UNITS = ["backup_orchestrator.service", "pve-guests.service", "apt-daily.service",
+              "apt-daily-upgrade.service"]
+HOLD_PROCESSES = {"apt", "apt-get", "aptitude", "dpkg", "vzdump"}
+PROC = Path("/proc")
 os.environ["PATH"] = "/usr/sbin:/usr/bin:/sbin:/bin"
 
 
@@ -113,7 +116,7 @@ class Proxmox:
     for unit, state in zip(HOLD_UNITS, states):
       if state in ("activating", "deactivating"):
         return f"{unit} {state}"
-    for comm in Path("/proc").glob("[0-9]*/comm"):
+    for comm in PROC.glob("[0-9]*/comm"):
       try:
         name = comm.read_text().strip()
       except OSError:
