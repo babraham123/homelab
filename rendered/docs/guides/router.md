@@ -93,7 +93,6 @@ systemctl start lightdm
     vfio
     vfio_iommu_type1
     vfio_pci
-    vfio_virqfd
     ```
 
 - Check that the drivers are loaded
@@ -296,9 +295,8 @@ For local-only overrides of existing routes
   rm pfsense-import-certificate.php
   ```
 
-  - Remove the default cert
-    - Go to System >> Certificates >> Certificates
-    - delete `webConfigurator default`
+  - The default cert `webConfigurator default` stays until the first import replaces it in the web
+    GUI ([ACME certificates](./pve1.md#acme-certificates))
 - Setup API access, [Ref](https://github.com/jaredhendrickson13/pfsense-api)
 
 ```bash

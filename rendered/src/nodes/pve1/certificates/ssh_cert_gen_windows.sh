@@ -30,6 +30,9 @@ sshsoc admin@gaming 'icacls "C:\ProgramData\ssh\ca_ssh_key.pub" /inheritance:r /
 sshsoc admin@gaming 'icacls "C:\ProgramData\ssh\ssh_host_key_cert.pub" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
 sshsoc admin@gaming 'icacls "C:\ProgramData\ssh\ssh_known_hosts" /inheritance:r /grant "SYSTEM:(F)" /grant "Administrators:(F)"'
 
-ssh -S ~/.ssh/ssh-socket-%r-%h-%p -O exit admin@gaming
+# sshd loads its host cert only at startup. The restart can take this session down with it.
+sshsoc admin@gaming 'Restart-Service sshd' || true
+
+ssh -S ~/.ssh/ssh-socket-%r-%h-%p -O exit admin@gaming || true
 
 date -u > /root/ssh/date_ssh_certs_windows.txt

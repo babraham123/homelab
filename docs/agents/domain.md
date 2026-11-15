@@ -12,8 +12,9 @@ codebase.
   also check `src/<context>/docs/adr/` for context-scoped decisions.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest
-creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and
-`/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
+creating them upfront. The `domain-modeling` skill of the mattpocock-skills plugin (also
+reached through the user-invoked `/mattpocock-skills:grill-with-docs` and
+`/mattpocock-skills:improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
 
 ## File structure
 

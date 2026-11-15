@@ -65,9 +65,8 @@ sudo su
 vmid=`/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh devtop`
 qm set $vmid -vga std,clipboard=vnc
 qm set $vmid --args '-vnc 127.0.0.1:{{ devtop.ip.split('.')[-1] }},password=on'
-exit
-exit
-sudo reboot
+# A reboot from inside the guest keeps the running QEMU process and its old hardware
+qm reboot $vmid
 ```
 
 - Connect from the laptop through an SSH tunnel. The display listens only on pve2's loopback, so

@@ -63,7 +63,6 @@ case $1 in
     nonlocal_bind
     base/debian/add_homelab_tag.sh haproxy.service
     # The files haproxy.cfg references must exist before it's checked
-    curl https://ssl-config.mozilla.org/ffdhe2048.txt > /etc/haproxy/dhparam
     mkdir -p /etc/haproxy/countries
 
     touch /etc/haproxy/countries/RU.map

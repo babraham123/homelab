@@ -34,7 +34,7 @@ Recover pve1 after a dead SSD or a lost trust root (AGE key, private CA, SSH CA,
 | `/root/acme/` | Traefik certs, `date_acme_certs.txt` | Regenerate | `acme_transfer.sh` |
 | `/root/.ssh/id_ed25519`, `id_ed25519-cert.pub` | root's client key | Regenerate | [step 10](#10-ssh-root-key-and-host-certs) |
 | `/etc/pve/storage.cfg`, `/etc/pve/priv/storage/pbs2.*` | `pbs2` storage, token, key | PBS host backup | [step 3](#3-reconnect-the-pbs-storage) |
-| `/etc/pve/user.cfg`, `qemu-server/*.conf` | `api_ro` user, VM configs | PBS host backup, PBS VM backup | `qmrestore`; users per the [Proxmox guide](./proxmox.md#backups) |
+| `/etc/pve/user.cfg`, `qemu-server/*.conf` | users, VM configs | PBS host backup, PBS VM backup | `qmrestore`; users per the [Proxmox guide](./proxmox.md#backups) |
 | `/etc/network/interfaces`, `/etc/resolv.conf` | host network | Regenerate | `src/nodes/pve1/interfaces.j2`, `resolv.conf.j2` |
 | `/root/homelab-rendered/` | rendered repo | Regenerate | `tools/deploy_src.sh` |
 | `/etc/msmtprc`, host scripts and units, AppArmor edit, node_exporter | host services | Regenerate | [step 11](#11-host-services) |
@@ -280,7 +280,6 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
   `/root/homelab-rendered/src/nodes/pve1/secret_update.sh pve1` from
   `src/nodes/pve1/secrets_template.yaml`:
   - a new Gmail app password ([Notifications](./pve1.md#notifications))
-  - a new `api_ro` password on PBS ([Proxmox guide, Monitoring](./proxmox.md#monitoring))
   - a new PBS token ([Proxmox guide, Backups](./proxmox.md#backups))
   - MaxMind keys from the MaxMind account
 - `rm -rf /root/secrets/lost`
@@ -303,7 +302,8 @@ qm guest exec VMID -- age -d -i /etc/opt/secrets/id_ed25519 /etc/opt/secrets/sec
 ### Only the SSH CA is lost
 
 - Existing certs work until they expire
-- New CA keys with a new `ca_ssh_key` passphrase ([CA certs](./pve1.md#ca-certs))
+- A new user CA with a new passphrase: `init_ssh_ca.sh` ([CA certs](./pve1.md#ca-certs)) creates
+  only the keys that are missing, so the host CA and root's key stay
 - Re-sign everything, then the gaming VM:
 
 ```bash
@@ -313,8 +313,8 @@ ssh autoadmin@pve2 start_gaming_vm
 /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ```
 
-- Replace the `@cert-authority` line in `~/.ssh/known_hosts` on each client with the one the script
-  prints
+- If the host CA (`ca_ssh_host_key`) was lost too, replace the `@cert-authority` line in
+  `~/.ssh/known_hosts` on each client with the one the script prints
 
 ### Only vars.yml is lost
 

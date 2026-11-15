@@ -19,9 +19,11 @@ ssh autoadmin@pve2 install_hookscript
 ## Automation
 
 - Programmatically send WoL packets from the router
+  - Enable Wake-on-LAN in the BIOS
+  - Record the MAC of the NIC in `vmbr0`, the one the router reaches
 
 ```bash
-ip -br link show | grep -E '^(en|eth)' | awk '{print $3}' > pve2_mac_address.txt
+ip -br link show master vmbr0 | grep -E '^(en|eth)' | awk '{print $3}' > pve2_mac_address.txt
 scp pve2_mac_address.txt admin@router:/root
 rm pve2_mac_address.txt
 ```

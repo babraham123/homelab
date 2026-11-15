@@ -128,7 +128,8 @@ $path = "C:\ProgramData\ssh\sshd_config"
 Add-Content -Path $path -Value (Get-Content "C:\Homelab\gaming-src\sshd_end.conf")
 # Install dispatcher commands
 powershell -ExecutionPolicy Bypass -File "C:\Homelab\gaming-src\InstallAutomation.ps1"
-exit
+# sshd reads its config only at startup; this ends the session
+Restart-Service sshd
 ```
 
 - Generate the SSH certs

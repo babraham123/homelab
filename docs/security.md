@@ -19,8 +19,8 @@ Principles:
 
 HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy.cfg.j2`):
 
-- **TLS hardening.** Mozilla intermediate profile: TLS 1.2/1.3 only, custom dhparam, session tickets
-  disabled.
+- **TLS passthrough.** HAProxy reads only the ClientHello's server name and forwards the encrypted
+  stream; TLS terminates at each node's Traefik, which holds the certs and the TLS settings.
 - **Layer-4 rate limiting.** Per-source stick tables on the :443 TCP frontend: more than 30
   concurrent connections or a connection rate over 50/3s → silent-drop. A 5s `inspect-delay` waits
   for the ClientHello and slows port scanners.

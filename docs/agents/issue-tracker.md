@@ -25,7 +25,7 @@ directly.
 
 ## Wayfinding operations
 
-Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
+Used by `/mattpocock-skills:wayfinder`, which only the user invokes. The **map** is a file with one **child** file per ticket.
 
 - **Map**: `planning/<effort>/map.md` (the Notes / Decisions-so-far / Fog body).
 - **Child ticket**: `planning/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question

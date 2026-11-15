@@ -22,7 +22,7 @@ dump="${dir}/pg_dumpall-$(date +%Y-%m-%dT%H%M%S).sql.zst"
 PGPASSWORD="$("${rendered}/base/podman/get_secret.sh" postgres_password)"
 export PGPASSWORD
 if ! podman exec -e PGPASSWORD postgres \
-    pg_dumpall -h pgdb.janedoe.com -U postgres | zstd -q -o "${dump}.tmp"; then
+    pg_dumpall --clean --if-exists -h pgdb.janedoe.com -U postgres | zstd -q -o "${dump}.tmp"; then
   rm -f "${dump}.tmp"
   die "pg_dumpall failed"
 fi

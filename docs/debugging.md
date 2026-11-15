@@ -195,7 +195,7 @@ podman images --filter reference='localhost/*'
 ```
 
 Building an image inside a quadlet: see
-[podman#22694](https://github.com/containers/podman/pull/22694).
+[podman#22694](https://github.com/podman-container-tools/podman/pull/22694).
 
 ### Known issues
 
@@ -590,19 +590,20 @@ LLDAP has [sample client configs](https://github.com/lldap/lldap#sample-client-c
 When a client (e.g. Gatus using client-credentials) fails against Authelia's token endpoint and logs
 aren't enough, capture and decrypt the traffic. Modern TLS uses forward secrecy, so the server key
 alone can't decrypt it; the client must export session keys via `SSLKEYLOGFILE`.
-`probes/oauth.go.j2` is a minimal Go client that does this.
+`probes/oauth.go.j2` is a minimal Go client that does this. On secsvcs as root, where the Gatus
+secrets are; traffic to Authelia stays on the host, so capture on every interface:
 
 ```bash
 # Build and run the test client
 go mod init oauth && go get golang.org/x/oauth2 golang.org/x/oauth2/clientcredentials
 go build -o oauth
-tcpdump -i vmbr0 host 12.34.56.78 -w capture.pcap &
+tcpdump -i any tcp port 443 -w capture.pcap &
 CLIENT_ID="$(/root/homelab-rendered/src/base/podman/get_secret.sh gatus_oidc_id)" CLIENT_SECRET="$(/root/homelab-rendered/src/base/podman/get_secret.sh gatus_oidc_secret)" ./oauth
 kill %1
 
 # Decrypt with the exported keys
 apt install -y tshark
-tshark -o tls.keylog_file:ssl_key.log -r capture.pcap -V -R "http.request || http.response"
+tshark -o tls.keylog_file:ssl_key.log -r capture.pcap -V -Y "http.request || http.response"
 ```
 
 To reproduce with Gatus itself, build it from source and run with

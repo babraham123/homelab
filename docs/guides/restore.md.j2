@@ -48,7 +48,8 @@ proxmox-backup-client restore host/vpnsvcs/2026-10-04T02:00:00Z vpnsvcs.pxar /tm
 - **Postgres**, from `secsvcs/dumps/postgres/pg_dumpall-*.sql.zst`
 
 ```bash
-# On secsvcs, with every other service stopped
+# On secsvcs, with every other service stopped. The dump drops and recreates every database
+# and role; the errors about the postgres role, which psql is connected as, are expected
 zstd -dc pg_dumpall-TIMESTAMP.sql.zst | podman exec -i postgres psql -U postgres
 ```
 
@@ -88,7 +89,8 @@ qm start VMID
 qmrestore pbs2:backup/vm/VMID/TIMESTAMP 999 --storage local-lvm --unique
 qm set 999 --net0 virtio,bridge=vmbr0,link_down=1   # same IP as the original
 qm start 999
-# guestmount -a /dev/pve/vm-999-disk-0 -i --ro /mnt/scratch
+# disk-0 is the EFI disk; the OS disk is scsi0's volume
+# guestmount -a "/dev/pve/$(qm config 999 | sed -n 's/^scsi0: local-lvm:\([^,]*\).*/\1/p')" -i --ro /mnt/scratch
 qm destroy 999 --purge
 ```
 
@@ -115,12 +117,14 @@ qmrestore /var/lib/vz/dump/vzdump-qemu-VMID-TIMESTAMP.vma.zst VMID --storage loc
      - Mount the SATA SSD where it was and recreate the datastore entry
      - Copy back `/etc/proxmox-backup` from pve1's `/root/backups/pve2/files/etc/proxmox-backup/`,
        then `systemctl restart proxmox-backup proxmox-backup-proxy`
-  3. Datastore lost:
-     - New `backup1` with namespaces `pve1`, `pve2`, `files`; recreate the `pve1@pbs!backup` token
-       and ACLs ([Proxmox guide](./proxmox.md#backups)); re-point pve1's `pbs2` storage
-     - Rebuild pve2's VMs from their guides and pve1's `/root/backups/websvcs`
+  3. Datastore lost: new `backup1` with namespaces `pve1`, `pve2`, `files`; recreate the
+     `pve1@pbs!backup` token and ACLs ([Proxmox guide](./proxmox.md#backups))
   4. Copy back `/etc/pve/storage.cfg` and `priv/storage/pbs2.*` from
-     `/root/backups/pve2/files/etc/pve/`, then `qmrestore` websvcs, devtop and gaming
+     `/root/backups/pve2/files/etc/pve/`, then:
+     - Datastore intact: `qmrestore` websvcs, devtop and gaming
+     - Datastore lost: re-point pve1's and pve2's `pbs2` storage at the new datastore's
+       fingerprint and token (`pvesm set pbs2`), then rebuild pve2's VMs from their guides and
+       pve1's `/root/backups/websvcs`
   5. `tools/deploy_src.sh`; `install_dispatcher`, `install_vm_watchdog`, `install_certs_and_keys` on
      pve2; `install_all_svcs` on websvcs
 

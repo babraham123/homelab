@@ -115,11 +115,12 @@ sudo systemctl enable moonlight.service
 - Install [xone](https://github.com/dlundqvist/xone) driver
 
 ```bash
-# Plugin in dongle
+# Unplug the dongle first; the install also downloads its firmware
+sudo apt install -y dkms curl libarchive-tools
 git clone https://github.com/dlundqvist/xone
 cd xone
-sudo ./install.sh --release
-sudo xow-get-firmware.sh --skip-disclaimer
+sudo make install
+# Plug in the dongle
 ```
 
 - Power on controllers,

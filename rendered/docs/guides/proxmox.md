@@ -91,7 +91,6 @@ sudo update-grub
     vfio
     vfio_iommu_type1
     vfio_pci
-    vfio_virqfd
     ```
 
   - `sudo vim /etc/modprobe.d/pve-blocklist.conf`
@@ -352,19 +351,6 @@ src/base/debian/install_svcs.sh node_exporter
 ```bash
 # Use 192.168.4.20 on pve1, 192.168.2.20 on pve2
 ufw allow in from 192.168.4.20 to any port 9100 proto tcp
-```
-
-- Create an API user in the PVE console (for pve1, pve2 and pbs2)
-  - Go to Datacenter >> Permissions >> Users >> Add, name = api_ro
-  - Go to Permissions >> Add >> User Permission
-  - path = /, user = api_ro@pam, role = PVEAuditor, propagate = check
-  - For PBS, Permissions -> Access Control, PVEAuditor -> Audit. Store its password as
-    `pbs2_api_password`:
-
-```bash
-ssh manualadmin@pve1
-sudo su
-/root/homelab-rendered/src/nodes/pve1/secret_update.sh pve1
 ```
 
 After pve1, secsvcs and victoriametrics are set up, for pve1, pve2 and pbs2.

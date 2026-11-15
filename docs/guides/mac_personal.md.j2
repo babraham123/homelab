@@ -53,8 +53,9 @@ wget -O .vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.
 
 ```bash
 brew install fd yq yamllint jq shellcheck markdownlint-cli2 uv
-pipx install jinjanator
-pipx inject jinjanator jinjanator-plugin-ansible passlib "bcrypt==4.0.1"
+# Same versions as CI (.github/workflows/ci.yml)
+uv tool install jinjanator --with jinjanator-plugin-ansible==26.1.0 \
+  --with passlib==1.7.4 --with bcrypt==4.0.1
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 

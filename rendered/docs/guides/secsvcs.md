@@ -350,7 +350,8 @@ systemctl list-units | grep Homelab
 systemctl stop ALL_OTHER_SERVICES
 container=$(podman container ls | grep postgres | awk '{print $1}')
 now=$(date -I)
-podman exec -it --user 70 "$container" pg_dumpall -U postgres --clean --if-exists > pgdump-$now.sql
+# No -t: a terminal would turn the dump's line endings into CRLF
+podman exec --user 70 "$container" pg_dumpall -U postgres --clean --if-exists > pgdump-$now.sql
 gzip *.sql
 systemctl stop postgres
 ```
@@ -362,7 +363,7 @@ cd /root/backups
 /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh postgres
 gunzip FILE.sql.gz
 container=$(podman container ls | grep postgres | awk '{print $1}')
-podman exec -it --user 70 "$container" psql -U postgres < FILE.sql
+podman exec -i --user 70 "$container" psql -U postgres < FILE.sql
 systemctl start ALL_OTHER_SERVICES
 ```
 
