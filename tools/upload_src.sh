@@ -24,7 +24,11 @@ if [[ "$host" == "router" ]]; then
 fi
 
 if [[ "$host" == "gaming" ]]; then
-  echo "gaming admin password:"
+  echo "gaming admin password (twice):"
+  # scp into an existing directory nests the copy inside it. powershell spelled out, as
+  # admin's default shell may be cmd.
+  ssh "admin@gaming.${url}" 'powershell -NoProfile -Command "if (Test-Path C:\Homelab\gaming-src) { Remove-Item -Recurse -Force C:\Homelab\gaming-src -ErrorAction Stop }"' ||
+    die "couldn't remove the previous upload on gaming"
   scp -qr -o LogLevel=QUIET "${project_dir}/src/nodes/gaming" "admin@gaming.${url}:C:/Homelab/gaming-src"
   exit 0
 fi

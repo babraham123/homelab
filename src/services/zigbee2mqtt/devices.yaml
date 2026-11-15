@@ -1,4 +1,6 @@
 # /etc/opt/zigbee2mqtt/config/devices.yaml
 # Ref: https://www.zigbee2mqtt.io/guide/configuration/devices-groups.html
+# The starting point: z2m owns the live copy, which install_svcs.sh never overwrites
 ---
+{}
 ...

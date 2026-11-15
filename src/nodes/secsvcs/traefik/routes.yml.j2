@@ -43,6 +43,8 @@
       rule: PathPrefix(`/`)
       priority: 1
       service: s403@file
+      middlewares:
+        - s403-path@file
 {%- endmacro -%}
 http:
   routers:
@@ -234,7 +236,14 @@ http:
       loadBalancer:
         servers:
           - url: http://command.{{ site.url }}:1337/
+    # websvcs's nginx answers /403 (s403-path) with the styled 403 page. Traefik drops the
+    # path of a server URL, and must send www's Host so websvcs routes it to nginx.
     s403:
       loadBalancer:
+        passHostHeader: false
         servers:
-          - url: https://www.{{ site.url }}/error/403.html
+          - url: https://www.{{ site.url }}/
+  middlewares:
+    s403-path:
+      replacePath:
+        path: /403

@@ -41,8 +41,13 @@ case $1 in
   failed_units)
     systemctl list-units --failed --no-pager
     if command -v podman > /dev/null; then
-      podman ps -a --filter status=exited --filter status=created --filter health=unhealthy \
-        --format '{{.Names}}\t{{.Status}}'
+      # podman ORs filters with the same key and ANDs different keys, so unhealthy is its
+      # own call; an exited container can also be unhealthy, hence the dedupe
+      {
+        podman ps -a --filter status=exited --filter status=created \
+          --format '{{.Names}}\t{{.Status}}'
+        podman ps -a --filter health=unhealthy --format '{{.Names}}\t{{.Status}}'
+      } | sort -u
     fi
     ;;
   # The nightly scanned update, now (base/podman/image_updater.service)

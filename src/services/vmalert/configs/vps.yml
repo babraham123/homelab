@@ -25,11 +25,11 @@ groups:
       - alert: HaproxyBackendConnectErrors
         # The backend servers have no health check (one server each, a false DOWN would
         # cut traffic), so an unreachable VM shows as connection errors once traffic hits it.
-        # host is the VM behind the proxy; not for websvcs while pve2 is off (see EndpointDown
-        # in homelab.yml).
+        # host is the VM behind the proxy; not for websvcs while pve2 is off (group pve2 in
+        # homelab.yml).
         expr: |
           label_replace(sum by (proxy) (rate(haproxy_backend_connection_errors_total{proxy=~".*svcs_https?_proxy"}[5m])) > 0, "host", "$1", "proxy", "(.*)_https?_proxy")
-            unless on (host) label_replace(absent(up{job="node_exporter_pve", host="pve2"}), "host", "websvcs", "", "")
+            unless on (host) homelab:pve2_off
         for: 5m
         labels:
           severity: error

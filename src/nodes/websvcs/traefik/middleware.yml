@@ -13,7 +13,3 @@ http:
         regex: "^https?://?(.+)"
         replacement: "https://www.${1}"
         permanent: true
-    no-buffering:
-      buffering:
-        maxRequestBodyBytes: 0
-        maxResponseBodyBytes: 0

@@ -6,14 +6,29 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../../base/lib.sh"
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
+# Usage: switch_gpu_vm FROM TO; devtop and gaming share the GPU, so one stops before the
+# other starts. A guest that ignores the shutdown is stopped after 30 s.
+switch_gpu_vm() {
+  local from to
+  from=$("${rendered}/nodes/pve2/get_vm_id.sh" "$1")
+  to=$("${rendered}/nodes/pve2/get_vm_id.sh" "$2")
+  if vm_running "$from"; then
+    qm shutdown "$from" --timeout 30 --forceStop 1
+  fi
+  # Still booting from an earlier call
+  if ! vm_running "$to"; then
+    qm start "$to" --timeout 30
+  fi
+}
+
+vm_running() {
+  [[ $(qm status "$1") == "status: running" ]]
+}
+
 case $1 in
   start_gaming_vm)
     ping -c1 -W1 {{ gaming.ip }} && exit 0
-    vm_id=$("${rendered}/nodes/pve2/get_vm_id.sh" devtop)
-    qm shutdown "$vm_id" --timeout 30
-    # If the VM is stuck it will be stopped by the hookscript
-    vm_id=$("${rendered}/nodes/pve2/get_vm_id.sh" gaming)
-    qm start "$vm_id" --timeout 30
+    switch_gpu_vm devtop gaming
     # Poll until the guest is reachable so callers that chain an SSH command into
     # it don't race the OS boot (sshd/scheduled tasks aren't up yet).
     for _ in $(seq 1 60); do
@@ -34,11 +49,7 @@ case $1 in
     done
     ;;
   stop_gaming_vm)
-    vm_id=$("${rendered}/nodes/pve2/get_vm_id.sh" gaming)
-    qm shutdown "$vm_id" --timeout 30
-    # If the VM is stuck it will be stopped by the hookscript
-    vm_id=$("${rendered}/nodes/pve2/get_vm_id.sh" devtop)
-    qm start "$vm_id" --timeout 30
+    switch_gpu_vm gaming devtop
     ;;
   install_certs_and_keys)
     # Takes the certificates on stdin (send_files.sh), moves them into their respective

@@ -63,6 +63,8 @@ http:
       rule: PathPrefix(`/`)
       priority: 1
       service: s403@file
+      middlewares:
+        - s403-path@file
     victoriametrics-hass-api:
       <<: *service
       rule: Host(`metrics.janedoe.com`) && HeaderRegexp(`Authorization`, `^Token .+$`)
@@ -105,6 +107,8 @@ http:
       rule: PathPrefix(`/`)
       priority: 1
       service: s403@file
+      middlewares:
+        - s403-path@file
     victorialogs-api:
       <<: *service
       rule: Host(`logs.janedoe.com`)
@@ -142,6 +146,8 @@ http:
       rule: PathPrefix(`/`)
       priority: 1
       service: s403@file
+      middlewares:
+        - s403-path@file
     alertmanager-api:
       <<: *service
       rule: Host(`alert.janedoe.com`)
@@ -274,7 +280,14 @@ http:
       loadBalancer:
         servers:
           - url: http://command.janedoe.com:1337/
+    # websvcs's nginx answers /403 (s403-path) with the styled 403 page. Traefik drops the
+    # path of a server URL, and must send www's Host so websvcs routes it to nginx.
     s403:
       loadBalancer:
+        passHostHeader: false
         servers:
-          - url: https://www.janedoe.com/error/403.html
+          - url: https://www.janedoe.com/
+  middlewares:
+    s403-path:
+      replacePath:
+        path: /403

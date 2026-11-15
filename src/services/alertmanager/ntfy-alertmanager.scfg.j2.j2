@@ -95,9 +95,9 @@ alertmanager {
   # Basic authentication (https://prometheus.io/docs/alerting/latest/https/)
   user admin
   password [[ env('alertmanager_admin_password') ]]
-  # By default the Alertmanager URL gets parsed from the webhook. In case that
-  # Alertmanager is not reachable under that URL, it can be overwritten here.
-  url https://alert.{{ site.url }}
+  # Silences go straight to the container: inside podman alert.SITE resolves to it, and
+  # it listens only on 9093
+  url http://alert.{{ site.url }}:9093
 }
 
 # When the alert-mode is set to single, ntfy-alertmanager will cache each single alert

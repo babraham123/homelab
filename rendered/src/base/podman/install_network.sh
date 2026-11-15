@@ -19,6 +19,9 @@ if [[ "$node" != vpnsvcs ]]; then
   ufw allow in from any to any port 22,80,443 proto tcp
   # mDNS
   ufw allow in from any to any port 5353 proto udp
+  # The reset disabled ufw; enable it now so a failing step below leaves the firewall up.
+  # The rules added after this apply live.
+  ufw --force enable
 fi
 
 install_quadlet "${rendered}/nodes/${node}/net.network"
@@ -69,6 +72,5 @@ BUILD_IFACE=$(podman network inspect podman | jq -r '.[0].network_interface')
 ufw route allow in on "$BUILD_IFACE" out on "$NET_IFACE" to any port 53
 ufw route allow in on "$BUILD_IFACE" out on "$NET_IFACE" to any port 80,443 proto tcp
 if [[ "$node" != vpnsvcs ]]; then
-  ufw --force enable
   ufw status verbose
 fi

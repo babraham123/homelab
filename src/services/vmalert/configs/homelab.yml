@@ -195,15 +195,33 @@ groups:
           summary: "{{ $value | printf \"%.0f\" }} failed logins in 10 minutes"
           description: "Authelia's regulation bans after a few failures per user; a burst across users is a scan. Check the authelia log for the source IPs."
 
+  - name: pve2
+    rules:
+      # pve2 is powered on when needed, and websvcs runs on it, so websvcs's alerts hold while
+      # pve2 is off: `unless on (host) homelab:pve2_off`. pve2 pushes its own metrics to
+      # VictoriaMetrics every 10s (PVE's external metric server), so their silence means pve2
+      # is off, not that websvcs, which scrapes pve2's node_exporter, is down.
+      - record: homelab:pve2_off
+        expr: label_replace(absent_over_time(system_uptime{host="pve2", object="nodes"}[2m]), "host", "websvcs", "", "")
+      - alert: WebsvcsMetricsAbsent
+        # websvcs's vmagent scrapes its own targets and pve2, so a dead websvcs can't raise
+        # NodeDown or TargetDown: absence is the signal, as for the VPS (vps.yml)
+        expr: absent_over_time(up{job="vmagent", host="websvcs"}[5m]) unless on (host) homelab:pve2_off
+        for: 5m
+        labels:
+          severity: error
+        annotations:
+          summary: "No metrics from websvcs for 10 minutes while pve2 is on"
+          description: "websvcs, its vmagent, or its path to VictoriaMetrics is down; its public sites are likely down too. qm status on pve2."
+
   - name: uptime
     # Gatus is the second path: HTTPS checks that don't depend on the scrape pipeline.
     rules:
       - alert: EndpointDown
-        # Not for websvcs while pve2 is off: it's powered on when needed, and its collector
-        # scrapes pve2, so the series is absent rather than 0.
+        # Not for websvcs while pve2 is off (group pve2)
         expr: |
           gatus_results_endpoint_success == 0
-            unless on (host) label_replace(absent(up{job="node_exporter_pve", host="pve2"}), "host", "websvcs", "", "")
+            unless on (host) homelab:pve2_off
         # Three consecutive failures at the 10m interval (a lone failure leaves the series at 0
         # for 10m, two for 20m); the 2m tier1 endpoints need 13.
         for: 25m

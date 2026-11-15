@@ -29,7 +29,11 @@ case $1 in
     ;;
   zigbee2mqtt)
     mkdir -p /etc/opt/zigbee2mqtt/certificates
-    install -D -m 644 -t /etc/opt/zigbee2mqtt/config services/zigbee2mqtt/*.yaml
+    install -D -m 644 -t /etc/opt/zigbee2mqtt/config services/zigbee2mqtt/configuration.yaml
+    for file in devices.yaml groups.yaml; do
+      [ -e "/etc/opt/zigbee2mqtt/config/${file}" ] ||
+        install -m 644 "services/zigbee2mqtt/${file}" /etc/opt/zigbee2mqtt/config/
+    done
     install_quadlet services/zigbee2mqtt/zigbee2mqtt.container services/zigbee2mqtt/z2mdb.volume
     reload_restart zigbee2mqtt
     ;;

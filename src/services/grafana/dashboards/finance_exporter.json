@@ -381,7 +381,7 @@
             "type": "victoriametrics-metrics-datasource"
           },
           "exemplar": false,
-          "expr": "finance_current_price{ticker=~\"$stocks\"}",
+          "expr": "finance_current_price{ticker=~\"$stocks\"} * on (plugin, source, ticker) group_left (exchange, name, recommendation) finance_yahoo_info",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1509,14 +1509,14 @@
         "datasource": {
           "type": "victoriametrics-metrics-datasource"
         },
-        "definition": "label_values(finance_current_price, asset_class)",
+        "definition": "label_values(finance_yahoo_info, asset_class)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "asset_class",
         "options": [],
         "query": {
-          "query": "label_values(finance_current_price, asset_class)",
+          "query": "label_values(finance_yahoo_info, asset_class)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1545,14 +1545,14 @@
         "datasource": {
           "type": "victoriametrics-metrics-datasource"
         },
-        "definition": "label_values(finance_current_price{asset_class=~\"$asset_class\"}, ticker)",
+        "definition": "label_values(finance_yahoo_info{asset_class=~\"$asset_class\"}, ticker)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "stocks",
         "options": [],
         "query": {
-          "query": "label_values(finance_current_price{asset_class=~\"$asset_class\"}, ticker)",
+          "query": "label_values(finance_yahoo_info{asset_class=~\"$asset_class\"}, ticker)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

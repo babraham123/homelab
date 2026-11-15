@@ -79,6 +79,9 @@ case $1 in
     mv ./id_ed25519* /etc/opt/olive_tin/ssh
     mv ./known_hosts /etc/opt/olive_tin/ssh
     chmod 644 /etc/opt/olive_tin/ssh/known_hosts
+    # OliveTin runs as uid 1000 (olive_tin.container); ssh refuses a key it can't read
+    chown 1000:1000 /etc/opt/olive_tin/ssh /etc/opt/olive_tin/ssh/*
+    chmod 600 /etc/opt/olive_tin/ssh/id_ed25519
     ;;
   *)
     die "unknown file type: $1"

@@ -114,8 +114,10 @@ advanced:
   # Note: changing requires repairing of all devices (default: shown below)
   # network_key: [1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 13]
 
-# devices: devices.yaml
-# groups: groups.yaml
+# z2m writes paired devices and groups into these, so reinstalling configuration.yaml keeps
+# their names (install_svcs.sh creates them only when missing)
+devices: devices.yaml
+groups: groups.yaml
 
 # Optional: Enable the availability feature (default = false)
 # topic: zigbee2mqtt/[FRIENDLY_NAME]/availability

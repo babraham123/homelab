@@ -2,11 +2,11 @@
 
 [Unit]
 Description="Homelab: snapraid scrub of the media array"
-# Both jobs lock the content files; let the other finish first.
-Conflicts=snapraid-sync.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/snapraid_run.sh scrub
+# Both jobs lock the content files: wait for the other to finish rather than fail on
+# snapraid's own lock (Conflicts= would stop the running one instead)
+ExecStart=/usr/bin/flock /run/snapraid.lock /usr/local/bin/snapraid_run.sh scrub
 Nice=10
 IOSchedulingClass=idle

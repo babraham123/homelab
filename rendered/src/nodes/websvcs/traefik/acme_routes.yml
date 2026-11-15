@@ -6,7 +6,10 @@ http:
     pve1: &acme_service
       rule: Host(`pve1.janedoe.com`)
       entryPoints: websecure
-      service: s403@file
+      # nginx answers /403 with the styled 403 page, whatever the Host
+      service: nginx@file
+      middlewares:
+        - s403-path@file
       tls:
         options: intermediate@file
         certResolver: le-http-production
@@ -19,8 +22,7 @@ http:
     router:
       <<: *acme_service
       rule: Host(`router.janedoe.com`)
-  services:
-    s403:
-      loadBalancer:
-        servers:
-          - url: https://www.janedoe.com/error/403.html
+  middlewares:
+    s403-path:
+      replacePath:
+        path: /403

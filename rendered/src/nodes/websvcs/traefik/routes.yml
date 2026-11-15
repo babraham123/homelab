@@ -63,7 +63,6 @@ http:
       service: copyparty@file
       middlewares:
         - authelia@file
-        - no-buffering@file
         - secure-headers@file
     static-files:
       <<: *service

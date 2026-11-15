@@ -37,12 +37,19 @@ case $job in
     rc=$?
     set -e
     (( rc == 0 || rc == 2 )) || die "$diff"
-    # A bad rm or ransomware would otherwise be written into parity.
-    threshold=200
-    removed=$(awk '/removed$/ {print $1}' <<< "$diff")
-    if (( removed > threshold )); then
-      die "${removed} files removed since the last sync, over the threshold of ${threshold}." \
-        "If that is intended: snapraid sync --force-empty, or run this with the threshold raised."
+    # A bad rm or ransomware would otherwise be written into parity: deleted files show as
+    # removed, files encrypted in place as updated. Bulk tag edits update many files, so
+    # updated gets more room. Only the summary lines count; a file name can end in "removed".
+    count() { awk -v kind="$1" '$0 ~ "^ *[0-9]+ " kind "$" {print $1}' <<< "$diff"; }
+    removed=$(count removed)
+    updated=$(count updated)
+    if (( ${removed:-0} > 200 )); then
+      die "${removed} files removed since the last sync, over the threshold of 200." \
+        "If that is intended: snapraid sync (--force-empty for a whole disk) by hand."
+    fi
+    if (( ${updated:-0} > 2000 )); then
+      die "${updated} files updated since the last sync, over the threshold of 2000." \
+        "If that is intended: snapraid sync by hand."
     fi
     snapraid sync
     ;;
