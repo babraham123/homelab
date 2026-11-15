@@ -352,9 +352,17 @@ Now work on the firewall rules.
   - WiFiIoT, WiFiGuest: Create the following rules
     - Block IPv4+6 TCP WiFiIoT subnets to This Firewall (self) 443
     - Allow IPv4+6 WiFiIoT subnets to WiFiIoT address
+    - WiFiIoT only, the allowlisted services ([networking](../networking.md#vlans)), above the
+      RFC1918 block:
+      - Allow IPv4 TCP WiFiIoT subnets to 192.168.4.21 port 443 (Home Assistant, via
+        homesvcs's Traefik)
+      - Allow IPv4 TCP WiFiIoT subnets to 192.168.4.21 port 8883 (Mosquitto; clients need a
+        cert from the internal CA)
     - Block IPv4 WiFiIoT subnets to RFC1918
     - Block IPv6 WiFiIoT subnets to IPv6Local
     - Move the default allows down here
+  - The mDNS-bridged VLANs (WiFiTrusted): at the top, Allow IPv4 UDP subnets to 224.0.0.251
+    port 5353, so discovery survives any later block rule
 
 TODO: configure wired VLANs when I get a proper switch
 
