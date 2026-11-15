@@ -1,0 +1,17 @@
+# /etc/opt/traefik/config/dynamic/home_only.yml
+# Ref: https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/ipallowlist/
+# yamllint disable rule:document-start rule:document-end
+http:
+  middlewares:
+    # For routes the internet has no business reaching, though HAProxy routes their subdomain
+    # (a browser UI on the same name stays public behind Authelia). The client address is the
+    # connection's: HAProxy's PROXY header sets it, trusted only from vpnsvcs's tailnet address
+    # (static.yml), so a public client keeps its own address and gets a 403. If pfSense ever
+    # SNATs the tailnet again, every public client arrives as the gateway `.1` and passes
+    # (docs/networking.md).
+    home-only:
+      ipAllowList:
+        sourceRange:
+{%- for cidr in inv.home_cidrs %}
+          - "{{ cidr }}"
+{%- endfor %}

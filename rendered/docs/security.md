@@ -112,7 +112,9 @@ Two integration models:
    Alertmanager UIs only have a shared admin login, which Traefik injects as basic auth. Traefik
    multi-layer routing sends only members of the `telemetry_access` group to those UIs, matching
    on the `Remote-Groups` header from Authelia. Everyone else gets a 403 page. Their non-browser API
-   routes skip Authelia and rely on the app's own auth. ntfy's web app is different: Authelia
+   routes (and ntfy-alertmanager's) skip Authelia and rely on the app's own auth, and the
+   `home-only` middleware admits only the homelab's own ranges (LANs, VLANs, tailnet, container
+   subnets), so the internet gets a 403 there. ntfy's web app is different: Authelia
    gates only page loads (`Sec-Fetch-Mode: navigate`), then each person signs in to ntfy with
    their own account, and ntfy's ACLs decide which topics they see.
 2. **OIDC** (apps with native SSO support): Authelia is the issuer for eight clients: Headscale,

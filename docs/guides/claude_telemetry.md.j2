@@ -6,7 +6,8 @@ Give Claude Code on a Mac query access to VictoriaMetrics and VictoriaLogs throu
 
 - The API routes on `metrics.{{ site.url }}` and `logs.{{ site.url }}` skip Authelia and take only the
   shared `admin` basic auth ([security](../security.md)), so the servers send that as a header
-- Neither name is public: the Mac must be on the LAN or the tailnet
+- Both names resolve publicly, but their API routes admit only the homelab's own ranges
+  (`home-only`), so the Mac must be on the LAN or the tailnet
 
 ## 1. Install
 

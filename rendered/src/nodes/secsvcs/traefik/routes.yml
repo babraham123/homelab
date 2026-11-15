@@ -68,12 +68,16 @@ http:
       rule: Host(`metrics.janedoe.com`) && HeaderRegexp(`Authorization`, `^Token .+$`)
       service: victoriametrics@file
       middlewares:
+        - "home-only@file"
         - "vm-auth-token@file"
+    # The non-browser APIs: the app's own auth, and only from home and tailnet addresses
+    # (dynamic/home_only.yml); the -ui routes above stay public behind Authelia
     victoriametrics-api:
       <<: *service
       rule: Host(`metrics.janedoe.com`)
       service: victoriametrics@file
-      middlewares: []
+      middlewares:
+        - "home-only@file"
     victorialogs-ui:
       rule: Host(`logs.janedoe.com`) && HeaderRegexp(`User-Agent`, `^Mozilla\/.*`)
       entryPoints: websecure
@@ -105,7 +109,8 @@ http:
       <<: *service
       rule: Host(`logs.janedoe.com`)
       service: victorialogs@file
-      middlewares: []
+      middlewares:
+        - "home-only@file"
     vmalert:
       <<: *service
       rule: Host(`vmalert.janedoe.com`)
@@ -141,7 +146,8 @@ http:
       <<: *service
       rule: Host(`alert.janedoe.com`)
       service: alertmanager@file
-      middlewares: []
+      middlewares:
+        - "home-only@file"
     # Browser navigations only, where Authelia's redirect works. The web app signs in to ntfy
     # itself, so its fetch, WebSocket and service-worker requests go to ntfy-api with their own
     # credentials. The redeem page carries its code in the fragment, which Authelia's post-login
@@ -167,7 +173,8 @@ http:
       <<: *service
       rule: Host(`ntfy-alertmanager.janedoe.com`)
       service: ntfy-alertmanager@file
-      middlewares: []
+      middlewares:
+        - "home-only@file"
     # Clients call the API directly, so no Authelia. No secure-headers either: it would replace
     # Vaultwarden's own CSP and X-Frame-Options, and add them to the connector pages the
     # extension frames for WebAuthn and Duo.
