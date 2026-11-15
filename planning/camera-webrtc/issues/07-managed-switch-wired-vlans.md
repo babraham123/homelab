@@ -22,7 +22,9 @@ can't be isolated until then. This ticket only blocks 01 if the camera is wired.
 4. **pfSense:**
    - enable the VLAN 20/21 interfaces and DHCP;
    - copy the WiFi VLAN rules: IoT → trusted blocked by default, allowlisted services
-     only;
+     only. On WiredIoT that's, above its RFC1918 block, TCP to homesvcs on 443 (Home
+     Assistant, via Traefik) and 8883 (Mosquitto), as on WiFiIoT
+     (`docs/guides/router.md`);
    - add VLAN 21 to the `cameras` rules from 02.
 5. **Docs:**
    - `docs/networking.md`: VLAN table status `planned` → `active`;
@@ -32,7 +34,8 @@ can't be isolated until then. This ticket only blocks 01 if the camera is wired.
 ## Acceptance
 
 - A device on a VLAN 21 access port gets a `192.168.21.x` lease and can't reach
-  `192.168.20.0/24`, `192.168.10.0/24` or the service VMs, except through 02's rules.
+  `192.168.20.0/24`, `192.168.10.0/24` or the service VMs, except homesvcs on 443 and 8883
+  and 02's rules.
 - A device on VLAN 20 reaches the service VMs as before.
 - The switch's management UI is reachable only from trusted VLANs.
 

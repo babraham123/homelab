@@ -362,7 +362,8 @@ Now work on the firewall rules.
     - Block IPv6 WiFiIoT subnets to IPv6Local
     - Move the default allows down here
 
-TODO: configure wired VLANs when I get a proper switch
+TODO: configure wired VLANs when I get a proper switch (planning/camera-webrtc/issues/07);
+WiredIoT gets the WiFiIoT rules, exceptions included
 
 ### WiFi continued
 
