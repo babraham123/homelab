@@ -23,7 +23,7 @@ Once a year
 - pfSense: snapshot the router VM in PVE, then the [router guide](guides/router.md#updates)
 - Debian nodes: unattended-upgrades only applies security updates, so pull everything else. Go in
   dependency order, secsvcs last since every other node authenticates and logs through it:
-  vpnsvcs, homesvcs, devtop, websvcs (`ssh autoadmin@router start_pve2` first), secsvcs
+  vpnsvcs, homesvcs, then `ssh autoadmin@router start_pve2` for devtop and websvcs, then secsvcs
 
 ```bash
 ssh autoadmin@NODE upgrade
@@ -33,11 +33,13 @@ ssh autoadmin@NODE reboot
 ssh autoadmin@NODE failed_units
 ```
 
-- Headscale is a GitHub release, not an apt package, pinned by version and sha256 in the
-  `headscale` case of `src/nodes/vpnsvcs/install_svcs.sh.j2` (the sha256 is the deb's line in
-  the release's `checksums.txt`): set both, deploy, then `sudo
-  /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale`
-- mdns-repeater is pinned the same way, by commit, in the `mdns_repeater` case of
+- Headscale is a GitHub release, not an apt package. The `headscale` case of
+  `src/nodes/vpnsvcs/install_svcs.sh.j2` installs the newest patch of a fixed minor
+  (`github_latest_patch juanfont/headscale 0.29`) and checks the deb against the release's
+  `checksums.txt`. A new patch: rerun the install. A new minor (config or policy format may
+  change; read the upgrade notes linked in the [vpnsvcs guide](guides/vpnsvcs.md#upgrade)): change
+  the minor, deploy, then `sudo /root/homelab-rendered/src/nodes/vpnsvcs/install_svcs.sh headscale`
+- mdns-repeater is pinned by commit in the `mdns_repeater` case of
   `src/base/debian/install_svcs.sh`
 - net_probe and Ookla's speedtest CLI are pinned by URL and sha256 in the `net_probe` case of
   `src/base/debian/install_svcs.sh`: set both to the new release or version, deploy, then
@@ -104,13 +106,14 @@ sudo /root/homelab-rendered/src/nodes/pve1/certificates/acme_transfer.sh
 - Once a year
 
 ```bash
+# Both scripts stop at the first host that's down: websvcs and devtop live on pve2
+ssh autoadmin@router start_pve2
 ssh manualadmin@pve1
-# Generate self signed certs
+# Once websvcs and devtop answer: generate self signed certs
 sudo /root/homelab-rendered/src/nodes/pve1/certificates/self_signed_cert_gen.sh
 # Generate SSH certs
 sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen.sh
-# Generate SSH certs for the Gaming VM
-ssh autoadmin@router start_pve2
+# Generate SSH certs for the Gaming VM; last, since starting it shuts devtop down
 ssh autoadmin@pve2 start_gaming_vm
 sudo /root/homelab-rendered/src/nodes/pve1/certificates/ssh_cert_gen_windows.sh
 ```

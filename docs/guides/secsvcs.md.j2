@@ -15,7 +15,7 @@ cd /root/homelab-rendered
 src/nodes/secsvcs/install_svcs.sh postgres
 src/nodes/secsvcs/install_svcs.sh lldap
 src/nodes/secsvcs/install_svcs.sh authelia
-src/nodes/secsvcs/install_svcs.sh traefik
+src/base/podman/install_svcs.sh traefik
 src/nodes/secsvcs/install_svcs.sh victoriametrics
 src/nodes/secsvcs/install_svcs.sh victorialogs
 src/nodes/secsvcs/install_svcs.sh gatus
@@ -29,8 +29,8 @@ src/nodes/secsvcs/install_svcs.sh vaultwarden
 src/nodes/secsvcs/install_svcs.sh olive_tin
 # needs the prerequisites in CrowdSec below
 src/nodes/secsvcs/install_svcs.sh crowdsec
-src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
-src/nodes/secsvcs/install_svcs.sh fluentbit
+src/base/podman/install_svcs.sh crowdsec_appsec
+src/base/podman/install_svcs.sh fluentbit
 
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab
@@ -83,7 +83,7 @@ journalctl -eu authelia
   - Create the `grafana_admin`, `hass_admin`, `command_admin` and `files_admin` groups, add your
     user to them
   - Restore the authelia middleware
-    `/root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh traefik`
+    `/root/homelab-rendered/src/base/podman/install_svcs.sh traefik`
 
 - Confirm that authelia is working, open <https://auth.{{ site.url }}>
 
@@ -116,7 +116,7 @@ src/nodes/secsvcs/install_svcs.sh crowdsec
 podman exec crowdsec cscli lapi status
 podman exec crowdsec cscli capi status          # registered, blocklist pulled
 podman exec crowdsec cscli metrics show acquisition parsers   # traefik and authelia lines parsed
-src/nodes/secsvcs/install_svcs.sh fluentbit     # ship the new unit's journal
+src/base/podman/install_svcs.sh fluentbit     # ship the new unit's journal
 ```
 
 - New online API identity: delete `/etc/opt/crowdsec/config/online_api_credentials.yaml` and the
@@ -160,11 +160,12 @@ request.
    ```bash
    src/nodes/secsvcs/install_svcs.sh crowdsec
    podman exec crowdsec cscli bouncers list    # vpnsvcs, and traefik_<node> for all three
-   src/nodes/secsvcs/install_svcs.sh crowdsec_appsec
-   src/nodes/secsvcs/install_svcs.sh traefik
+   src/base/podman/install_svcs.sh crowdsec_appsec
+   src/base/podman/install_svcs.sh traefik
    ```
 
-3. On homesvcs and websvcs: `install_svcs.sh crowdsec_appsec`, then `install_svcs.sh traefik`
+3. On homesvcs and websvcs: `src/base/podman/install_svcs.sh crowdsec_appsec`, then
+   `src/base/podman/install_svcs.sh traefik`
 4. Check, on secsvcs
 
    ```bash
@@ -205,7 +206,7 @@ src/nodes/secsvcs/install_svcs.sh authelia
 sed -n '/Vaultwarden DB/,/CREATE DATABASE vaultwarden/p' /var/opt/db/pg_init.sql \
   | podman exec -i postgres psql -U postgres -v ON_ERROR_STOP=1
 src/nodes/secsvcs/install_svcs.sh vaultwarden
-src/nodes/secsvcs/install_svcs.sh traefik
+src/base/podman/install_svcs.sh traefik
 curl -fsS https://vault.{{ site.url }}/alive
 ```
 
@@ -252,7 +253,7 @@ sudo su
 cd /root/homelab-rendered
 src/nodes/secsvcs/install_svcs.sh ntfy
 src/nodes/secsvcs/install_svcs.sh ntfy_idp_push
-src/nodes/secsvcs/install_svcs.sh traefik
+src/base/podman/install_svcs.sh traefik
 curl -fsS https://idp-push.{{ site.url }}/healthz
 podman exec ntfy_idp_push ntfy-idp-push user list
 ```

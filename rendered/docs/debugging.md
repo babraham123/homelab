@@ -128,10 +128,10 @@ cd -
 podman run --rm -v "$PWD"/services/vmalert/configs:/etc/alerts:ro \
   localhost/victoriametrics/vmalert:latest -rule='/etc/alerts/*.yml' -dryRun
 
-# Alertmanager: the unit's ExecStartPre renders secrets into the installed file, so check that
-# one after a restart
-podman run --rm -v /etc/opt/alertmanager:/config:ro --entrypoint amtool \
-  localhost/prom/alertmanager:latest check-config /config/config.yml
+# Alertmanager: config.yml is installed as is (its secrets are *_file paths); ExecStartPre
+# renders only web_config.yml. The image has no tz database for time_intervals' location.
+podman run --rm -v /etc/opt/alertmanager:/config:ro -v /usr/share/zoneinfo:/usr/share/zoneinfo:ro \
+  --entrypoint amtool localhost/prom/alertmanager:latest check-config /config/config.yml
 ```
 
 Traefik, ntfy-alertmanager and Gatus have no offline check, so restart them and look:
@@ -611,23 +611,24 @@ To reproduce with Gatus itself, build it from source and run with
 
 ### Run Authelia outside a container
 
-Useful to iterate on `configuration.yml` quickly. Download a release binary, write each secret to a
-file, and point the `*_FILE` env vars at them:
+Useful to iterate on `configuration.yml` quickly. On secsvcs as root, with a release binary in a
+scratch directory and `systemctl stop authelia` first (same port). The config is a Go template
+that reads the OIDC ids and hashes with `mustEnv`, so every quadlet `Secret=` becomes a plain env
+var, and it reads keys from the hard-coded `/certificates/`:
 
 ```bash
-/root/homelab-rendered/src/base/podman/get_secret.sh authelia_jwt_secret | head -c -1 > authelia_jwt_secret
-# ...one file per secret below; edit certificates_directory in configuration.yml
-AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE=authelia_jwt_secret \
-AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE=lldap_admin_password \
-AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=authelia_storage_key \
-AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE=authelia_pg_password \
-AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE=authelia_smtp_password \
-AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE=oidc_hmac_secret \
+while IFS=, read -r name _ target; do
+  export "${target#target=}=$(/root/homelab-rendered/src/base/podman/get_secret.sh "${name#Secret=}")"
+done < <(grep '^Secret=' /etc/containers/systemd/authelia.container)
+ln -sfn /etc/opt/authelia/certificates /certificates
+X_AUTHELIA_CONFIG_FILTERS=template \
+AUTHELIA_NOTIFIER_SMTP_TLS_PRIVATE_KEY_FILE=/certificates/auth.key \
+AUTHELIA_NOTIFIER_SMTP_TLS_CERTIFICATE_CHAIN_FILE=/certificates/auth.cert.pem \
 AUTHELIA_SERVER_DISABLE_HEALTHCHECK=true \
-  ./authelia-linux-amd64 --config configuration.yml
+  ./authelia-linux-amd64 --config /etc/opt/authelia/config/configuration.yml
+# Done: drop the link, restart the container, then exit this shell, which holds the secrets
+rm /certificates; systemctl start authelia
 ```
-
-Match the env var list to the `Secret=` lines in `src/services/authelia/authelia.container.j2`.
 
 ## Databases
 

@@ -22,15 +22,15 @@ I use the SMLight SLZB-06M adapter, it's reasonably priced and very feature rich
 sudo su
 cd /root/homelab-rendered
 # Needs crowdsec_bouncer_homesvcs and the WAF client cert (secsvcs guide: Traefik WAF)
-src/nodes/homesvcs/install_svcs.sh traefik
-src/nodes/homesvcs/install_svcs.sh crowdsec_appsec
-src/nodes/homesvcs/install_svcs.sh vmagent
+src/base/podman/install_svcs.sh traefik
+src/base/podman/install_svcs.sh crowdsec_appsec
+src/base/podman/install_svcs.sh vmagent
 src/nodes/homesvcs/install_svcs.sh mosquitto
 src/nodes/homesvcs/install_svcs.sh zigbee2mqtt
 # Needs esphome_wifi_ssid and esphome_wifi_password
 src/nodes/homesvcs/install_svcs.sh esphome
 src/nodes/homesvcs/install_svcs.sh home_assistant
-src/nodes/homesvcs/install_svcs.sh fluentbit
+src/base/podman/install_svcs.sh fluentbit
 
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab

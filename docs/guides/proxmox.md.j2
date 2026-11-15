@@ -16,13 +16,21 @@
 ## PVE setup
 
 - Shell in with root, password
-- Update deb repository, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
-  - `nano /etc/apt/sources.list`, add `contrib non-free non-free-firmware` to all 3 sources
-  - `nano /etc/apt/sources.list.d/pve-enterprise.list`
+- Update deb repository, [ref](https://pve.proxmox.com/wiki/Package_Repositories)
+  - `nano /etc/apt/sources.list.d/debian.sources`: every `Components:` line is
+    `main contrib non-free non-free-firmware`
 
-```text
-# deb https://enterprise.proxmox.com/debian/pve trixie pve-enterprise
-deb http://download.proxmox.com/debian/pve trixie pve-no-subscription
+```bash
+# As root. PVE 9 lists its repos as deb822 .sources files: turn off the enterprise and Ceph ones
+sed -i '/^Types:/a Enabled: false' /etc/apt/sources.list.d/pve-enterprise.sources \
+  /etc/apt/sources.list.d/ceph.sources
+tee /etc/apt/sources.list.d/proxmox.sources > /dev/null <<'EOF'
+Types: deb
+URIs: http://download.proxmox.com/debian/pve
+Suites: trixie
+Components: pve-no-subscription
+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+EOF
 ```
 
 - Basic [Debian Linux setup](./debian.md)

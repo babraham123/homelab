@@ -31,7 +31,7 @@ ls /root/backups/secsvcs/files/etc/opt/
 export PBS_REPOSITORY='pve1@pbs!backup@pbs2.janedoe.com:backup1'
 export PBS_PASSWORD=$(age -d -i /root/secrets/age.txt /root/secrets/pve1.yaml.age | yq .pbs2_backup_token)
 proxmox-backup-client snapshot list --ns files
-proxmox-backup-client catalog dump host/pve1/2026-10-04T02:00:00Z backups.pxar --ns files \
+proxmox-backup-client catalog dump host/pve1/2026-10-04T02:00:00Z --ns files \
   --keyfile /root/secrets/pbs_client.key | grep secsvcs/dumps
 proxmox-backup-client restore host/pve1/2026-10-04T02:00:00Z backups.pxar /tmp/restore --ns files \
   --keyfile /root/secrets/pbs_client.key --pattern 'secsvcs/dumps/postgres/*'
@@ -130,7 +130,7 @@ Record the date in `docs/maintenance.md`.
 
 1. Wake pve2, restore secsvcs to VMID 999 with `--unique` and the NIC down
    - Log in on the console
-   - `systemctl list-units 'Homelab*'`: every service running
+   - `systemctl list-units | grep Homelab`: every service running
    - `podman exec postgres psql -U postgres -c '\l'`: lists the databases
    - Destroy it
 2. Restore the newest Headscale DB with `proxmox-backup-client restore ... --pattern`, then

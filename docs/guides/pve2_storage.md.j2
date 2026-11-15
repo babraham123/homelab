@@ -38,15 +38,18 @@ ls -l /dev/disk/by-id/ | grep -v part
 
 ```bash
 lspci -nn -s ADDRESS         # the [vendor:device] id
-echo 'options vfio-pci ids=VENDOR:DEVICE' > /etc/modprobe.d/sata-passthrough.conf
+# softdep: vfio-pci loads before ahci, so ahci can't claim the card first
+printf 'options vfio-pci ids=VENDOR:DEVICE\nsoftdep ahci pre: vfio-pci\n' > /etc/modprobe.d/sata-passthrough.conf
 update-initramfs -u -k all && reboot
 ```
 
 - Check: `lspci -k -s ADDRESS` shows `vfio-pci`, and the HDDs are gone from `lsblk`
-- Attach the card to websvcs
+- Attach the card to websvcs in a free slot: `hostpciN` replaces whatever is there, and websvcs
+  already passes through the GPU, iGPU and TPU. `N` is the first index `qm config` doesn't list
 
 ```bash
-qm set $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs) --hostpci1 ADDRESS,pcie=1
+qm config $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs) | grep hostpci
+qm set $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs) --hostpciN ADDRESS,pcie=1
 qm stop $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs) && qm start $(/root/homelab-rendered/src/nodes/pve2/get_vm_id.sh websvcs)
 ```
 

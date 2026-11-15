@@ -12,9 +12,9 @@ Guide to setup websvcs on PVE2. Just service installation.
 ```bash
 cd /root/homelab-rendered
 # Needs the bouncer key and WAF cert: secsvcs guide, Traefik WAF
-src/nodes/websvcs/install_svcs.sh traefik
-src/nodes/websvcs/install_svcs.sh crowdsec_appsec
-src/nodes/websvcs/install_svcs.sh vmagent
+src/base/podman/install_svcs.sh traefik
+src/base/podman/install_svcs.sh crowdsec_appsec
+src/base/podman/install_svcs.sh vmagent
 src/nodes/websvcs/install_svcs.sh nginx
 src/nodes/websvcs/install_svcs.sh homepage
 src/nodes/websvcs/install_svcs.sh isso
@@ -38,7 +38,7 @@ src/nodes/websvcs/install_svcs.sh yt_to_audiobook
 
 # Once fred_api_key is in the secrets file, if ticker.rates lists FRED series
 src/nodes/websvcs/install_svcs.sh finance_exporter
-src/nodes/websvcs/install_svcs.sh fluentbit
+src/base/podman/install_svcs.sh fluentbit
 
 systemctl restart mdns_repeater
 systemctl list-units | grep Homelab

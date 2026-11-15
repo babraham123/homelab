@@ -76,6 +76,15 @@ headscale --user USER_ID preauthkeys create --expiration 100y
 
 ## Remote access
 
+- Install HAProxy first: Headscale listens on 8443 (and 8080 for its certificate), and only
+  HAProxy maps 443 and 80 to them, so nothing can log in without it
+
+```bash
+sudo su
+cd /root/homelab-rendered
+src/nodes/vpnsvcs/install_svcs.sh haproxy
+```
+
 - For home network, use Tailscale plugin on pfSense
   ([src](https://www.wundertech.net/how-to-set-up-tailscale-on-pfsense/),
   [ref](https://davidisaksson.dev/posts/tailscale-on-pfsense/))
@@ -89,10 +98,9 @@ headscale --user USER_ID preauthkeys create --expiration 100y
 
 ```bash
 headscale nodes list-routes
-# Repeat for all desired subnets
-headscale nodes approve-routes --identifier NODE_ID --routes 0.0.0.0/0,::/0
-headscale nodes approve-routes --identifier NODE_ID --routes 192.168.2.0/24
-headscale nodes approve-routes --identifier NODE_ID --routes 192.168.4.0/24
+# Every route in one call: each call replaces the node's whole approved list
+headscale nodes approve-routes --identifier NODE_ID \
+  --routes 0.0.0.0/0,::/0,192.168.2.0/24,192.168.4.0/24
 ```
 
 - Machine users can connect now; skip [Add public endpoint](#add-public-endpoint) for a private VPN
@@ -131,14 +139,7 @@ chown headscale:headscale /etc/opt/secrets/hs_oidc_*
 chmod 600 /etc/opt/secrets/*
 ```
 
-- Route traffic via HAProxy
-
-```bash
-sudo su
-cd /root/homelab-rendered
-src/nodes/vpnsvcs/install_svcs.sh haproxy
-```
-
+- HAProxy, installed under [Remote access](#remote-access), already routes every subdomain
 - Update Headscale
   - `src/nodes/vpnsvcs/install_svcs.sh headscale`
 - Update your DNS A record
@@ -309,8 +310,8 @@ src/nodes/vpnsvcs/install_svcs.sh headscale
 - Install and check
 
 ```bash
-src/nodes/vpnsvcs/install_svcs.sh fluentbit
-src/nodes/vpnsvcs/install_svcs.sh vmagent
+src/base/podman/install_svcs.sh fluentbit
+src/base/podman/install_svcs.sh vmagent
 ss -ltnp | grep -E ':(8405|9090|9100) '   # 8405, 9090 on 10.13.0.1 only
 podman exec vmagent wget -qO- 10.13.0.1:8405/metrics | head -3
 podman exec vmagent wget -qO- 100.100.100.100/metrics | head -3   # tailscaled through tailscale0
@@ -438,8 +439,8 @@ journalctl -u deadman --no-pager | tail       # silent when healthy
   2. From pve1, put the files back
 
      ```bash
-     scp -r /root/backups/vpnsvcs manualadmin@NEW_IP:
-     ssh -t manualadmin@NEW_IP 'sudo cp -a vpnsvcs/files/. / && sudo rm -rf vpnsvcs'
+     scp -P 2202 -r /root/backups/vpnsvcs manualadmin@NEW_IP:
+     ssh -p 2202 -t manualadmin@NEW_IP 'sudo cp -a vpnsvcs/files/. / && sudo rm -rf vpnsvcs'
      ```
 
   3. Continue the guide

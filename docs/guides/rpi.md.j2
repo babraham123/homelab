@@ -22,7 +22,7 @@ diskutil
 touch /Volumes/bootfs/ssh
 # Setup username and password (just openssl on Linux)
 brew install openssl
-/opt/homebrew/opt/openssl/bin/openssl passwd -6 | sed -e 's/^/USERNAME:/;' > /Volumes/bootfs/openconf
+/opt/homebrew/opt/openssl/bin/openssl passwd -6 | sed -e 's/^/USERNAME:/;' > /Volumes/bootfs/userconf.txt
 # Hash your WiFi password
 # sudo apt -y install wpa_passphrase
 sudo port install wpa_passphrase
@@ -48,7 +48,7 @@ vim /Volumes/bootfs/wpa_supplicant.conf
 
 ```bash
 ssh-keygen -R raspberrypi.local
-ssh pi@raspberrypi.local
+ssh USERNAME@raspberrypi.local
 ip addr
 ```
 

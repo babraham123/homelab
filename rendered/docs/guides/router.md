@@ -35,12 +35,19 @@ iface enp2s0 inet dhcp
 `systemctl restart networking`
 
 - Test connection: `ping 1.1.1.1`
-- Add proxmox repo, [src](https://it42.cc/2019/10/14/fix-proxmox-repository-is-not-signed/)
-  - `sudo nano /etc/apt/sources.list.d/pve-enterprise.list`
+- Add proxmox repo, [ref](https://pve.proxmox.com/wiki/Package_Repositories)
 
-```text
-#deb https://enterprise.proxmox.com/debian/pve trixie pve-enterprise
-deb http://download.proxmox.com/debian/pve trixie pve-no-subscription
+```bash
+# As root. PVE 9 lists its repos as deb822 .sources files: turn off the enterprise and Ceph ones
+sed -i '/^Types:/a Enabled: false' /etc/apt/sources.list.d/pve-enterprise.sources \
+  /etc/apt/sources.list.d/ceph.sources
+tee /etc/apt/sources.list.d/proxmox.sources > /dev/null <<'EOF'
+Types: deb
+URIs: http://download.proxmox.com/debian/pve
+Suites: trixie
+Components: pve-no-subscription
+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+EOF
 ```
 
 - Install desktop env,
@@ -48,7 +55,6 @@ deb http://download.proxmox.com/debian/pve trixie pve-no-subscription
 
 ```bash
 sudo su
-rm /etc/apt/sources.list.d/ceph.list
 apt update && apt upgrade
 apt install -y xfce4 chromium lightdm sudo ufw
 adduser manualadmin
@@ -108,9 +114,9 @@ lspci
   [src](https://www.virtualizationhowto.com/2022/08/pfsense-proxmox-install-process-and-configuration/)
   - UFS, GPT
   - Assign Interfaces: WAN=igc0, LAN=igc1, LAN2=igc3, rest as optional
-  - Set LAN Interface IPs
-    - `192.168.1.[100 - 200]/24`
-    - `192.168.3.[100 - 200]/24`
+  - Set LAN Interface IPs; the router is `.1` on every subnet
+    - LAN: `192.168.1.1/24`, DHCP range `192.168.1.100` - `192.168.1.200`
+    - LAN2: `192.168.3.1/24`, DHCP range `192.168.3.100` - `192.168.3.200`
 - Log into pfSense GUI
   - Connect eth1 (LAN) directly to laptop
   - Connect to admin console via LAN ip address (192.168.1.1)
@@ -137,7 +143,7 @@ TODO: integrate these instructions with above
 - Go to Interface >> OPT4
   - Enable, Description = LAN2
   - IPv4 Configuration Type = Static IPv4
-  - IPv4 Address = 192.168.3.0/24
+  - IPv4 Address = 192.168.3.1/24
 - Go to Services >> DHCP Server >> LAN2
   - Enable, Address Pool Range is 192.168.3.100 - 200
 - Go to Firewall >> Rules. Copy existing rules from LAN
@@ -328,7 +334,8 @@ Repeat these steps for each VLAN. This is similar to the "Add an interface" sect
   - Click the new interface (OPT#).
     - Enable, Description = VLAN name
     - IPv4 Configuration Type = Static IPv4
-    - IPv4 Address has the VLAN ID in the 3rd octet (example: 192.168.10.0/24)
+    - IPv4 Address has the VLAN ID in the 3rd octet and ends in `.1` (example:
+      192.168.10.1/24)
 - Go to Services >> DHCP Server >> VLAN name
   - Enable, Address Pool Range is SUBNET.10 - SUBNET.254
 - Trusted only: Go to Services >> mDNS Bridge. Add WiFiTrusted
