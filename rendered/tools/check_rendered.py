@@ -291,6 +291,22 @@ def check_routes(site, nodes):
       fail(inventory(node), f"no service has subdomain {subdomain}, which {routes} routes")
 
 
+# Traefik takes the client address from HAProxy's PROXY header, and accepts a connection
+# without one from the VPS as the VPS itself: a home address the WAF and home-only trust
+# (docs/networking.md). So every HAProxy server off the VPS must send the header.
+def check_proxy_protocol():
+  cfg = "src/services/haproxy/haproxy.cfg"
+  if not os.path.isfile(cfg):
+    return
+  for line in text_lines(cfg):
+    fields = line.split("#", 1)[0].split()
+    if len(fields) < 3 or fields[0] != "server" or fields[2].startswith(("127.", "localhost")):
+      continue
+    if "send-proxy-v2" not in fields[3:]:
+      fail(cfg, f"server {fields[1]} sends no PROXY header (send-proxy-v2), so Traefik "
+           "would see its clients as the VPS")
+
+
 def shells(value):
   """Every `shell` value of every mapping in a parsed YAML document."""
   if isinstance(value, dict):
@@ -379,6 +395,7 @@ def main():
   check_image_updater_slots(nodes)
   check_unique_subdomains(nodes)
   check_routes(site, nodes)
+  check_proxy_protocol()
   check_olive_tin(nodes)
   check_upload_dirs(nodes)
   sys.exit(1 if failed else 0)

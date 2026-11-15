@@ -6,9 +6,9 @@ http:
     # For routes the internet has no business reaching, though HAProxy routes their subdomain
     # (a browser UI on the same name stays public behind Authelia). The client address is the
     # connection's: HAProxy's PROXY header sets it, trusted only from vpnsvcs's tailnet address
-    # (static.yml), so a public client keeps its own address and gets a 403. If pfSense ever
-    # SNATs the tailnet again, every public client arrives as the gateway `.1` and passes
-    # (docs/networking.md).
+    # and the subnet gateways it arrives from under SNAT (static.yml), so a public client keeps
+    # its own address and gets a 403. A HAProxy backend without send-proxy-v2 would let every
+    # public client pass as the VPS (docs/networking.md, ProxyChainBroken).
     home-only:
       ipAllowList:
         sourceRange:

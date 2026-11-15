@@ -193,12 +193,22 @@ key on the client IP, so each hop passes it on and trusts it only from the hop b
 | Traefik → app | `X-Forwarded-For` and `X-Real-Ip`, with the client IP Traefik resolved | the app's trusted-proxy setting |
 | Traefik → Authelia (ForwardAuth, `trustForwardHeader`) | `X-Forwarded-For` | any peer that reaches :9091 |
 
-Both Traefik `trustedIPs` lists hold only vpnsvcs's tailnet address (`vpnsvcs.tailnet_ip`).
-pfSense routes tailnet traffic in the kernel without SNAT, so HAProxy's connections
-keep that source address and every other tailnet, LAN or VLAN client arrives from its own address,
-which can't assert a client IP. If pfSense falls back to SNAT (for example after a Tailscale package
-update overwrites the System Patches change), HAProxy's connections arrive from the subnet gateway
-`.1`, which isn't trusted: Traefik ignores the PROXY header and logs every public client as `.1`.
+`forwardedHeaders.trustedIPs` holds only vpnsvcs's tailnet address (`vpnsvcs.tailnet_ip`);
+`proxyProtocol.trustedIPs` adds the two node-subnet gateways (`pve1.subnet.1`, `pve2.subnet.1`).
+pfSense routes tailnet traffic in the kernel without SNAT, so HAProxy's connections keep the tailnet
+source address and every other tailnet, LAN or VLAN client arrives from its own address, which can't
+assert a client IP. If pfSense falls back to SNAT (for example after a Tailscale package update
+overwrites the System Patches change), HAProxy's connections arrive from the gateway `.1`, and the
+PROXY header from it still names the real client: the WAF, `home-only`, bans and access logs keep
+working. Only pfSense, and tailnet clients while it SNATs, send from a gateway, so only they could
+assert a client address. Tailnet clients under SNAT send no header and show up as `.1`.
+
+The `ProxyChainBroken` alert (`src/services/vmalert/logs/traefik.yml.j2`) fires on any request from
+a gateway or the router, which under SNAT your own tailnet devices make, and on requests from the
+VPS other than its own telemetry pushes, which is what a backend without `send-proxy-v2` looks like:
+those clients pass as the VPS, a home address, so they skip the WAF and pass `home-only`.
+`tools/check_rendered.py` fails a render whose HAProxy config has a server off the VPS without
+`send-proxy-v2`, so the alert is for what reaches the VPS some other way.
 
 Per app:
 

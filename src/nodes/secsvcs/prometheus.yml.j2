@@ -19,6 +19,11 @@ scrape_configs:
       - targets: ['vmalert.{{ site.url }}:8880']
     metrics_path: /metrics
     relabel_configs: *host
+  - job_name: 'vmalert_logs'
+    static_configs:
+      - targets: ['{{ inv.addr.secsvcs.vmalert_logs }}:8880']
+    metrics_path: /metrics
+    relabel_configs: *host
   - job_name: 'victoriametrics'
     static_configs:
       - targets: ['metrics.{{ site.url }}:8428']

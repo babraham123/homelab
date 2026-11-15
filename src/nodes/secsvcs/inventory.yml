@@ -55,6 +55,11 @@ services:
     uptime: vmalert
     upstream: docker.io/victoriametrics/vmalert:latest
     update_last: true
+  # LogsQL rules: the same image, pointed at VictoriaLogs
+  vmalert_logs:
+    ip: 19
+    upstream: docker.io/victoriametrics/vmalert:latest
+    dirs: [services/vmalert]
   ntfy:
     ip: 13
     subdomain: push

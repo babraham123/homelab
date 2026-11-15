@@ -56,6 +56,12 @@ case $1 in
     install_quadlet services/vmalert/vmalert.container
     reload_restart vmalert
     ;;
+  vmalert_logs)
+    rm -f /etc/opt/vmalert_logs/*.yml
+    install -D -m 644 -t /etc/opt/vmalert_logs services/vmalert/logs/*.yml
+    install_quadlet services/vmalert/vmalert_logs.container
+    reload_restart vmalert_logs
+    ;;
   alertmanager)
     install -D -m 644 -t /etc/opt/alertmanager services/alertmanager/config.yml services/alertmanager/web_config.yml.j2
     install_quadlet services/alertmanager/alertmanager.container services/alertmanager/amdata.volume

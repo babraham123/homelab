@@ -1,0 +1,32 @@
+# /etc/opt/vmalert_logs/traefik.yml
+# LogsQL rules, evaluated by vmalert_logs against VictoriaLogs: vmalert takes one
+# datasource, so the metrics rules (../configs/) run in their own instance.
+# Ref: https://docs.victoriametrics.com/victorialogs/vmalert/
+---
+groups:
+  - name: traefik
+    type: vlogs
+    interval: 5m
+    rules:
+      - alert: ProxyChainBroken
+        # Every public request reaches Traefik through HAProxy with a PROXY header naming
+        # the real client. Requests from a router address mean pfSense SNATs tailnet traffic:
+        # the PROXY header still names public clients (static.yml trusts the gateways), but
+        # tailnet devices show up as `.1` to pfSense's VLAN rules, Traefik and the logs.
+        # Requests from the VPS for anything but its own pushes and checks mean a HAProxy
+        # backend lost send-proxy-v2: every public client then passes as the VPS, a home
+        # address, so it skips the WAF (traefik/dynamic/crowdsec.yml) and passes home-only
+        # (traefik/dynamic/home_only.yml).
+        expr: >-
+          {service="traefik"} RequestMethod:*
+          (ClientHost:in("192.168.1.1", "192.168.4.1", "192.168.2.1")
+          or (ClientHost:="100.64.0.2"
+          -RequestHost:in("metrics.janedoe.com", "logs.janedoe.com", "alert.janedoe.com", "push.janedoe.com")))
+          | stats by (hostname, ClientHost) count() requests
+          | rename hostname as host
+        labels:
+          severity: error
+        annotations:
+          summary: "Traefik on {{ $labels.host }} sees clients as {{ $labels.ClientHost }}"
+          description: "{{ $value }} requests in 5 minutes. From a gateway or the router: pfSense SNATs the tailnet; tailscale debug prefs there should show \"NoSNAT\": true (docs/guides/router.md, System Patches). From the VPS: a HAProxy backend lacks send-proxy-v2, so public clients skip the WAF and reach the home-only APIs."
+...

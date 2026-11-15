@@ -315,6 +315,9 @@ case "$(hostname)" in
       install_vmalert)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert
         ;;
+      install_vmalert_logs)
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert_logs
+        ;;
       install_ntfy)
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy
         ;;
@@ -357,6 +360,7 @@ case "$(hostname)" in
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh gatus
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh alertmanager
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert
+        sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh vmalert_logs
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh ntfy-alertmanager
         sudo /root/homelab-rendered/src/nodes/secsvcs/install_svcs.sh grafana

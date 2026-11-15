@@ -61,8 +61,11 @@ entryPoints:
     proxyProtocol:
       insecure: false
       # HAProxy reaches Traefik over the tailnet; pfSense routes it without SNAT, so it arrives
-      # from vpnsvcs's tailnet address
-      trustedIPs: [100.64.0.2]
+      # from vpnsvcs's tailnet address. If pfSense falls back to SNAT, it arrives from the
+      # subnet gateway instead, and trusting the gateways keeps the real client address.
+      # Connections without a header (pfSense's own, tailnet clients under SNAT) pass as
+      # their source address.
+      trustedIPs: [100.64.0.2, 192.168.4.1, 192.168.2.1]
     forwardedHeaders:
       insecure: false
       trustedIPs: [100.64.0.2]
@@ -75,7 +78,7 @@ entryPoints:
         - crowdsec@file
     proxyProtocol:
       insecure: false
-      trustedIPs: [100.64.0.2]
+      trustedIPs: [100.64.0.2, 192.168.4.1, 192.168.2.1]
     forwardedHeaders:
       insecure: false
       trustedIPs: [100.64.0.2]

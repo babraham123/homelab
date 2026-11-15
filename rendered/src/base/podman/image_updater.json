@@ -111,6 +111,13 @@
           "upstream": "docker.io/twinproduction/gatus:latest"
         },
         {
+          "container": "vmalert_logs",
+          "image": "localhost/victoriametrics/vmalert:latest",
+          "service": "vmalert_logs",
+          "trivyignore": "/root/homelab-rendered/src/services/vmalert/.trivyignore",
+          "upstream": "docker.io/victoriametrics/vmalert:latest"
+        },
+        {
           "container": "grafana",
           "image": "localhost/grafana/grafana-oss:latest",
           "service": "grafana",

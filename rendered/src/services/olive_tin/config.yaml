@@ -686,6 +686,14 @@ dashboards:
               timeout: 60
 
           - inlineAction:
+              title: secsvcs Install Vmalert Logs
+              icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
+              shell: ssh autoadmin@secsvcs install_vmalert_logs
+              id: secsvcs_install_vmalert_logs
+              maxConcurrent: 1
+              timeout: 60
+
+          - inlineAction:
               title: secsvcs Install Ntfy
               icon: <iconify-icon icon="material-symbols:security"></iconify-icon>
               shell: ssh autoadmin@secsvcs install_ntfy

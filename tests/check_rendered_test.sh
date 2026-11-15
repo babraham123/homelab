@@ -309,6 +309,14 @@ error: src/nodes/secsvcs/inventory.yml: uses src/services/shared, which upload_s
 EOF
 }
 
+test_haproxy_server_without_proxy_header() {
+  fixture_tree
+  edit src/services/haproxy/haproxy.cfg 's/ send-proxy-v2$//'
+  expect_errors <<'EOF'
+error: src/services/haproxy/haproxy.cfg: server secsvcs_https sends no PROXY header (send-proxy-v2), so Traefik would see its clients as the VPS
+EOF
+}
+
 test_image_updater_slot_missing() {
   fixture_tree
   edit src/nodes/secsvcs/inventory.yml '/^image_updater_slot:/d'

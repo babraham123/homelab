@@ -53,8 +53,8 @@ HAProxy on the VPS filters before routing (config: `src/services/haproxy/haproxy
     (`crowdsecurity/appsec-virtual-patching`, `appsec-generic-rules`), where two different rules
     hit by one IP within a minute ban it, and the OWASP Core Rule Set (`crowdsecurity/crs-inband`),
     which blocks the request without a ban;
-  - the homelab's own ranges (the LANs, VLANs, tailnet and container subnets, but not the VPS's
-    addresses) are only alerted on: a match lets the request through and keeps the alert, so false
+  - the homelab's own ranges (the LANs, VLANs, tailnet and container subnets) are only alerted
+    on: a match lets the request through and keeps the alert, so false
     positives show up for rule exclusions without breaking anything at home
     (`src/services/crowdsec/home_detect_only.yaml.j2`). The allowlist keeps them from being banned;
   - the homelab's own machines (the VMs, PVE, PBS, pfSense, the VPS's tailnet IP, the container

@@ -3,16 +3,13 @@
 # The homelab's own devices are never blocked: an in-band match from a home range lets the
 # request through and keeps its alert, so their matches can be reviewed for rule exclusions.
 # req.RemoteAddr is the client address Traefik's plugin sends in X-Crowdsec-Appsec-Ip, the
-# real one since HAProxy passes it with the PROXY protocol. The VPS's own addresses stay
-# blocked: if that chain broke, all public traffic would arrive from them, and the WAF
-# should then fail closed.
+# real one since HAProxy passes it with the PROXY protocol. The VPS's addresses never get
+# here: its tailnet address is in the plugin's clientTrustedIps (traefik/dynamic/crowdsec.yml).
 ---
 name: homelab/home-detect-only
 on_match:
   - filter: |
       IsInBand
-      && req.RemoteAddr not in ["12.34.56.78", "100.64.0.2"]
-      && !IpInRange(req.RemoteAddr, "10.13.0.0/24")
       && any([
         "127.0.0.0/8",
         "100.64.0.0/10",

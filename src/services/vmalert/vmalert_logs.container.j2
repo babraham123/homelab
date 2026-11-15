@@ -1,0 +1,64 @@
+# /etc/containers/systemd/vmalert_logs.container
+# Ref: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+# https://docs.victoriametrics.com/victorialogs/vmalert/
+# A second vmalert for the LogsQL rules (logs/): one instance takes one datasource.
+# Alert state goes to VictoriaMetrics, like the metrics vmalert's.
+
+[Unit]
+Description="Homelab: Executes alerting rules on logs"
+StartLimitIntervalSec=30
+StartLimitBurst=10
+Requires=victorialogs.service
+Requires=alertmanager.service
+Wants=network.target
+After=network-online.target victorialogs.service victoriametrics.service alertmanager.service
+
+[Container]
+Image=localhost/victoriametrics/vmalert:latest
+ContainerName=vmalert_logs
+AutoUpdate=local
+NoNewPrivileges=true
+DropCapability=all
+ReadOnly=true
+HealthCmd=wget -q -O /dev/null http://127.0.0.1:8880/health
+HealthInterval=30s
+HealthRetries=3
+HealthOnFailure=kill
+
+# metrics at :8880/metrics; not routed by Traefik
+Network=net.network
+HostName=vmalert-logs.{{ site.url }}
+IP={{ inv.addr.secsvcs.vmalert_logs }}
+
+Exec=--datasource.url="http://logs.{{ site.url }}:9428/" \
+     --datasource.basicAuth.username="admin" \
+     --datasource.basicAuth.password="%{VL_ADMIN_PASSWORD}" \
+     --rule.defaultRuleType=vlogs \
+     --remoteRead.url="http://metrics.{{ site.url }}:8428/" \
+     --remoteRead.basicAuth.username="admin" \
+     --remoteRead.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
+     --remoteWrite.url="http://metrics.{{ site.url }}:8428/" \
+     --remoteWrite.basicAuth.username="admin" \
+     --remoteWrite.basicAuth.password="%{VM_ADMIN_PASSWORD}" \
+     --notifier.url="http://alert.{{ site.url }}:9093/" \
+     --notifier.basicAuth.username="admin" \
+     --notifier.basicAuth.password="%{AM_ADMIN_PASSWORD}" \
+     --rule="/etc/alerts/*.yml" \
+     --loggerLevel="WARN" \
+     --loggerTimezone="{{ personal.timezone }}" \
+     --external.url="https://graph.{{ site.url }}" \
+     {% raw %}--external.alert.source='explore?orgId=1&left={"datasource":"VictoriaLogs","queries":[{"expr":{{$$expr|jsonEscape|queryEscape}},"refId":"A"}],"range":{"from":"now-1h","to":"now"}}'{% endraw %}
+
+Environment=TZ={{ personal.timezone }}
+Secret=victorialogs_admin_password,type=env,target=VL_ADMIN_PASSWORD
+Secret=victoriametrics_admin_password,type=env,target=VM_ADMIN_PASSWORD
+Secret=alertmanager_admin_password,type=env,target=AM_ADMIN_PASSWORD
+
+Volume=/etc/opt/vmalert_logs:/etc/alerts:ro
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
