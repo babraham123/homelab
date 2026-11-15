@@ -38,5 +38,5 @@ http:
           - "Remote-Name"
         tls:
           ca: /certificates/ca.chain.crt
-          cert: /certificates/proxy.crt
+          cert: /certificates/proxy.client.crt
           key: /certificates/proxy.key

@@ -250,15 +250,78 @@ func TestServeHTTPHost(t *testing.T) {
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://internal.example.com/", nil)
-	req.Header.Set("Host", "internal.example.com")
 
 	rewriteBody.ServeHTTP(httptest.NewRecorder(), req)
 
-	if gotHeader != "example.com" {
-		t.Errorf("Host header: expect: example.com, result: %s", gotHeader)
-	}
 	if gotHost != "example.com" {
 		t.Errorf("req.Host: expect: example.com, result: %s", gotHost)
+	}
+	if gotHeader != "" {
+		t.Errorf("Host header: expect none, result: %s", gotHeader)
+	}
+}
+
+func TestServeHTTPUnwrappedWithoutResponseRewrites(t *testing.T) {
+	config := &Config{
+		Rewrites: Rewrites{
+			Request: []Rewrite{{Header: "Authorization", Regex: "^Token (.+)$", Replacement: "Basic $1"}},
+		},
+	}
+
+	recorder := httptest.NewRecorder()
+	var got http.ResponseWriter
+	next := func(rw http.ResponseWriter, req *http.Request) {
+		got = rw
+	}
+
+	rewriteBody, err := New(context.Background(), http.HandlerFunc(next), config, "rewriteHeader")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rewriteBody.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	if got != http.ResponseWriter(recorder) {
+		t.Errorf("next got %T, expect the original writer", got)
+	}
+}
+
+// statusRecorder records the Link values sent with each WriteHeader call.
+type statusRecorder struct {
+	*httptest.ResponseRecorder
+	sent [][]string
+}
+
+func (s *statusRecorder) WriteHeader(code int) {
+	s.sent = append(s.sent, s.Header().Values("Link"))
+	if code >= http.StatusOK {
+		s.ResponseRecorder.WriteHeader(code)
+	}
+}
+
+func TestServeHTTPResponseRewrittenOnce(t *testing.T) {
+	config := &Config{
+		Rewrites: Rewrites{
+			Response: []Rewrite{{Header: "Link", Regex: "^(.*)$", Replacement: "x$1"}},
+		},
+	}
+
+	next := func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Link", "a")
+		rw.WriteHeader(http.StatusEarlyHints)
+		rw.Write([]byte("body"))
+	}
+
+	rewriteBody, err := New(context.Background(), http.HandlerFunc(next), config, "rewriteHeader")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := &statusRecorder{ResponseRecorder: httptest.NewRecorder()}
+	rewriteBody.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	if len(recorder.sent) != 2 || !testEq(recorder.sent[0], []string{"a"}) || !testEq(recorder.sent[1], []string{"xa"}) {
+		t.Errorf("Link per response: expect [[a] [xa]], result: %v", recorder.sent)
 	}
 }
 

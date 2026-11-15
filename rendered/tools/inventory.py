@@ -199,6 +199,8 @@ def validate(node, spec):
       errors += [f"{at}: {key} needs {need}" for key, need in NEEDS.items() if key in svc and need not in svc]
       if "containers" in svc and (inline := sorted(set(svc) & set(IMAGE))):
         errors.append(f"{at}: containers replaces {', '.join(inline)}")
+      if svc.get("dirs") == []:
+        errors.append(f"{at}: dirs is empty; leave it out for services/{name}")
       for container, facts in (svc.get("containers") or {name: svc}).items():
         if "upstream" in (facts or {}) and "build" in facts:
           errors.append(f"{at}: {container} is either pulled (upstream) or built (build), not both")

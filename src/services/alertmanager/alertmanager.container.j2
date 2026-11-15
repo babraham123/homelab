@@ -19,7 +19,9 @@ ReadOnly=true
 # The *_file secrets below mount at /run/secrets/<name>, and runc can't create their
 # mountpoints on the read-only root
 Tmpfs=/run/secrets
-HealthCmd=wget -q -O /dev/null http://admin:$${AM_ADMIN_PASSWORD}@127.0.0.1:9093/-/healthy
+# Credentials in a header: in the URL, a password's # ? / would cut the host and % would be
+# decoded. busybox wget has no --user. $$ and %% escape systemd.
+HealthCmd=wget -q -O /dev/null --header "Authorization: Basic $$(printf 'admin:%%s' "$${AM_ADMIN_PASSWORD}" | base64)" http://127.0.0.1:9093/-/healthy
 HealthInterval=30s
 HealthRetries=3
 HealthOnFailure=kill

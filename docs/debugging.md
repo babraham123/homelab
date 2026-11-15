@@ -708,15 +708,15 @@ curl -s -u ":TOKEN" https://push.janedoe.com/TOPIC/json
 curl -u ":TOKEN" -d "hello" https://push.janedoe.com/TOPIC
 ```
 
-ntfy also accepts email-to-topic over SMTP. `probes/email.txt.j2` is a raw SMTP session. Traefik
-exposes it only as SMTPS on 465; plain SMTP on port 25 is reachable only from `systemd-net` on
-secsvcs:
+ntfy also accepts email-to-topic over SMTP. `rendered/probes/email.txt` is a raw SMTP session;
+SMTP ends lines with CRLF, so the commands send it with `-crlf` / `-C`. Traefik exposes it only as
+SMTPS on 465; plain SMTP on port 25 is reachable only from `systemd-net` on secsvcs:
 
 ```bash
-openssl s_client -connect push.janedoe.com:465 -quiet < probes/email.txt
+openssl s_client -connect push.janedoe.com:465 -quiet -crlf < rendered/probes/email.txt
 # Plain SMTP, from secsvcs
 podman run -i --rm --net systemd-net docker.io/nicolaka/netshoot:latest \
-  nc ntfy 25 < probes/email.txt
+  nc -C ntfy 25 < rendered/probes/email.txt
 ```
 
 Test outbound mail (used by cert_notifier and other alerts). msmtp is configured only on pve1 and

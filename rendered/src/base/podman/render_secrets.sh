@@ -31,6 +31,8 @@ if [ -f "$file" ]; then
   chmod 600 "$file"
 fi
 
+# A first render creates the file, and would make it world-readable until the chmod
+umask 077
 jinjanate --quiet --customize "$(dirname "$0")/second_pass.py" -o "$file" "$file.j2"
 chmod 400 "$file"
 

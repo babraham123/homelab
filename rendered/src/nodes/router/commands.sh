@@ -41,10 +41,14 @@ case "$1" in
     wake "$iface" "$mac"
     # Poll until the host actually boots, BIOS + Proxmox startup can take well over 10s from cold.
     for _ in $(seq 1 60); do
-      ping -c1 -W1 192.168.2.10 > /dev/null 2>&1 && break
+      if ping -c1 -W1 192.168.2.10 > /dev/null 2>&1; then
+        sleep 10
+        exit 0
+      fi
       sleep 5
     done
-    sleep 10
+    echo "pve2 didn't answer pings within 5 minutes of the wake packet" >&2
+    exit 1
     ;;
   *)
     echo "Unauthorized command: $1" >&2

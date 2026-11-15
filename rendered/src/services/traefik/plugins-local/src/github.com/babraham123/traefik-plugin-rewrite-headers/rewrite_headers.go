@@ -2,8 +2,10 @@
 package traefik_plugin_rewrite_headers
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -84,13 +86,14 @@ func New(_ context.Context, next http.Handler, config *Config, name string) (htt
 }
 
 func (r *rewriteBody) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	wrappedWriter := &responseWriter{
-		writer:   rw,
-		rewrites: r.responses,
-	}
-
-	// Modify requests headers before passing the response writer.
 	for _, rewrite := range r.requests {
+		// net/http moves the Host header into req.Host and leaves it out of req.Header
+		if strings.EqualFold(rewrite.header, "Host") {
+			if req.Host != "" {
+				req.Host = strings.TrimSpace(rewrite.regex.ReplaceAllString(req.Host, rewrite.replacement))
+			}
+			continue
+		}
 
 		headers := req.Header.Values(rewrite.header)
 
@@ -103,20 +106,32 @@ func (r *rewriteBody) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		for _, header := range headers {
 			value := rewrite.regex.ReplaceAllString(header, rewrite.replacement)
 			req.Header.Add(rewrite.header, strings.TrimSpace(value))
-
-			// Special case for "Host"
-			if strings.EqualFold(rewrite.header, "Host") {
-				req.Host = strings.TrimSpace(value)
-			}
 		}
 	}
 
-	r.next.ServeHTTP(wrappedWriter, req)
+	// Under Yaegi, http.ResponseController can't see a wrapper's Unwrap or Flush, so a
+	// wrapped writer can't stream; only Hijack (WebSockets) passes through. Wrap only when
+	// there are response headers to rewrite.
+	if len(r.responses) == 0 {
+		r.next.ServeHTTP(rw, req)
+		return
+	}
+
+	r.next.ServeHTTP(&responseWriter{writer: rw, rewrites: r.responses}, req)
 }
 
 type responseWriter struct {
-	writer   http.ResponseWriter
-	rewrites []rewrite
+	writer      http.ResponseWriter
+	rewrites    []rewrite
+	wroteHeader bool
+}
+
+func (r *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	hijacker, ok := r.writer.(http.Hijacker)
+	if !ok {
+		return nil, nil, fmt.Errorf("%T doesn't support hijacking", r.writer)
+	}
+	return hijacker.Hijack()
 }
 
 func (r *responseWriter) Header() http.Header {
@@ -124,10 +139,24 @@ func (r *responseWriter) Header() http.Header {
 }
 
 func (r *responseWriter) Write(bytes []byte) (int, error) {
+	if !r.wroteHeader {
+		r.WriteHeader(http.StatusOK)
+	}
 	return r.writer.Write(bytes)
 }
 
 func (r *responseWriter) WriteHeader(statusCode int) {
+	// An informational response (103 Early Hints) shares the header map with the final one,
+	// which would get the rewrites a second time
+	if statusCode < http.StatusOK {
+		r.writer.WriteHeader(statusCode)
+		return
+	}
+	if r.wroteHeader {
+		return
+	}
+	r.wroteHeader = true
+
 	for _, rewrite := range r.rewrites {
 		headers := r.writer.Header().Values(rewrite.header)
 

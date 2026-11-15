@@ -24,8 +24,10 @@ case $1 in
   backup_now)
     # A run already in progress is left to finish. The manual marker makes the run
     # ignore a skip_next; the orchestrator removes it. --no-block: a run takes over an
-    # hour, past OliveTin's timeout.
-    if systemctl is-active --quiet backup_orchestrator.service; then
+    # hour, past OliveTin's timeout. A running oneshot is "activating", which is-active
+    # doesn't count.
+    state=$(systemctl show -p ActiveState --value backup_orchestrator.service)
+    if [[ "$state" == active || "$state" == activating ]]; then
       echo "a backup_orchestrator run is already in progress"
       exit 0
     fi

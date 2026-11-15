@@ -51,6 +51,17 @@ prune_job files files keep-last=1,keep-weekly=3,keep-monthly=6
 # backup's orphans would wait for next week's run. Here nothing writes to the datastore
 # (every backup is done before the orchestrator prunes), so this GC may use a short
 # cutoff; the default comes back for PBS's own scheduled GC, which can overlap a backup.
-trap 'proxmox-backup-manager datastore update "$store" --delete tuning' EXIT
-proxmox-backup-manager datastore update "$store" --tuning gc-atime-cutoff=5
+# --tuning replaces the whole property string, so the other tuning options are kept and
+# the saved string is restored.
+tuning=$(proxmox-backup-manager datastore show "$store" --output-format json | jq -r '.tuning // ""')
+restore_tuning() {
+  if [[ -n $tuning ]]; then
+    proxmox-backup-manager datastore update "$store" --tuning "$tuning"
+  else
+    proxmox-backup-manager datastore update "$store" --delete tuning
+  fi
+}
+trap restore_tuning EXIT
+short=$(tr ',' '\n' <<< "$tuning" | grep -v '^gc-atime-cutoff=' | grep . | paste -sd, -)
+proxmox-backup-manager datastore update "$store" --tuning "${short:+${short},}gc-atime-cutoff=5"
 pbs_task "$(proxmox-backup-manager garbage-collection start "$store" --output-format json | jq -r .)"

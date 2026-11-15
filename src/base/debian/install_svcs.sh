@@ -13,7 +13,8 @@ watch_homelab_units
 case $1 in
   mdns_repeater)
     apt install -y build-essential
-    # Pinned to a commit; git checks the tree against it
+    # Pinned to a commit; git checks the tree against it. A failed run leaves its build dir.
+    rm -rf mdns-repeater
     mkdir mdns-repeater
     cd mdns-repeater
     git init --quiet
@@ -37,7 +38,9 @@ case $1 in
     NE_VERSION=$(github_latest_version prometheus/node_exporter)
     ne="node_exporter-${NE_VERSION}.linux-amd64"
     url="https://github.com/prometheus/node_exporter/releases/download/v${NE_VERSION}"
-    wget "$url/$ne.tar.gz" "$url/sha256sums.txt"
+    # -O, so a failed run's download is replaced rather than kept beside as .1
+    wget -O "$ne.tar.gz" "$url/$ne.tar.gz"
+    wget -O sha256sums.txt "$url/sha256sums.txt"
     sha256sum --check --ignore-missing sha256sums.txt || die "checksum mismatch: $ne.tar.gz"
     tar xzf "$ne.tar.gz"
     # Root owns what the service runs and the textfiles it reads, so a compromised
@@ -57,7 +60,8 @@ case $1 in
     NGE_VERSION=$(github_latest_version utkuozdemir/nvidia_gpu_exporter)
     deb="nvidia-gpu-exporter_${NGE_VERSION}_linux_amd64.deb"
     url="https://github.com/utkuozdemir/nvidia_gpu_exporter/releases/download/v${NGE_VERSION}"
-    wget "$url/$deb" "$url/checksums.txt"
+    wget -O "$deb" "$url/$deb"
+    wget -O checksums.txt "$url/checksums.txt"
     sha256sum --check --ignore-missing checksums.txt || die "checksum mismatch: $deb"
     apt install -y "./$deb"
     rm "$deb" checksums.txt

@@ -247,6 +247,7 @@ services:
   solo:
     subdomain: s
     uptime_oauth: false
+    dirs: []
 commands:
   - {script: base/debian/commands.sh, run: [ls]}
   - {name: ls, run: [ls], sudo: false}
@@ -270,6 +271,7 @@ error: src/nodes/beta/inventory.yml: services.app: uptime needs subdomain
 error: src/nodes/beta/inventory.yml: services.pod: containers replaces ip
 error: src/nodes/beta/inventory.yml: services.pod: pod-db is either pulled (upstream) or built (build), not both
 error: src/nodes/beta/inventory.yml: services.solo: uptime_oauth needs uptime
+error: src/nodes/beta/inventory.yml: services.solo: dirs is empty; leave it out for services/solo
 error: src/nodes/beta/inventory.yml: commands[0]: needs a name
 error: src/nodes/beta/inventory.yml: commands[0]: runs either a script or run lines, not both or neither
 error: src/nodes/beta/inventory.yml: commands.ls: sudo only applies to a script

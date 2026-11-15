@@ -44,12 +44,18 @@ mkdir -p "${stage}/homelab-rendered/src"
 tar -C "${project_dir}/src" -cf - $paths | tar -C "${stage}/homelab-rendered/src" -xf -
 [ ! -f "${project_dir}/DEPLOYED" ] || cp "${project_dir}/DEPLOYED" "${stage}/homelab-rendered/"
 
+# A per-run name, so an interrupted upload's leftovers are never merged into or block this
+# one; the new tree is in place under /root before the old one is removed.
+name="homelab-rendered.$(date +%Y%m%d%H%M%S).$$"
 # vpnsvcs's SSH port comes from ~/.ssh/config (src/base/debian/ssh_config)
-scp -qr -o LogLevel=QUIET "${stage}/homelab-rendered" "manualadmin@${host}.${url}:/home/manualadmin"
+scp -qr -o LogLevel=QUIET "${stage}/homelab-rendered" "manualadmin@${host}.${url}:/home/manualadmin/${name}"
 echo "manualadmin's sudo password on ${host}:"
-ssh -t "manualadmin@${host}.${url}" '
-sudo chown -R root:root homelab-rendered
+ssh -t "manualadmin@${host}.${url}" "
+set -e
+sudo chown -R root:root ${name}
+sudo mv ${name} /root/${name}
 sudo rm -rf /root/homelab-rendered
-sudo mv homelab-rendered /root/homelab-rendered
+sudo mv /root/${name} /root/homelab-rendered
 sudo /root/homelab-rendered/src/base/debian/record_deploy.sh
-'
+sudo find /home/manualadmin /root -maxdepth 1 -name 'homelab-rendered.*' -exec rm -rf {} +
+"
