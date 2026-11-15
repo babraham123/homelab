@@ -193,8 +193,8 @@ cd /root/ca
 
 - [pve1 guide, ACME Certificates](./pve1.md#acme-certificates): `traefik-certs-dumper`,
   `mkdir -p /root/acme`
-- [pve1 guide, Notifications](./pve1.md#notifications): msmtp, AppArmor, `cert_notifier`; skip the
-  Gmail account
+- [pve1 guide, Notifications](./pve1.md#notifications): msmtp, AppArmor, `cert_notifier`,
+  `ct_watch`; skip the Gmail account
 - [Proxmox guide](./proxmox.md): VM management, Networking, Monitoring
 
 ### 12. Certificates
@@ -210,7 +210,8 @@ cd /root/ca
   - Login at `https://auth.janedoe.com`
   - `ssh manualadmin@pve1` from the workstation, no host-key prompt
   - `pvesm status` shows `pbs2` active
-  - `systemctl status cert_notifier.timer vm_watchdog node_exporter backup_orchestrator.timer --no-pager`
+  - `systemctl status cert_notifier.timer ct_watch.timer vm_watchdog node_exporter
+    backup_orchestrator.timer --no-pager`
 - Power off pve2: `ssh autoadmin@pve2 shutdown`
 
 ### Router without a VM backup

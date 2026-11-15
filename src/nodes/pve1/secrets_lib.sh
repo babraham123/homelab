@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # pve1's secrets, sourced after lib.sh: one age file per host, /root/secrets/<host>.yaml.age,
-# encrypted to pve1's AGE key and, for a VM, to the host's SSH key too, so the file pve1 edits
-# is the one the host decrypts (docs/adr/0004-sops-age-secrets.md).
+# encrypted to pve1's AGE key and, for a VM, to its manualadmin SSH key too, so the file pve1
+# edits is the one the host decrypts (docs/adr/0004-sops-age-secrets.md).
 #   # shellcheck source=src/nodes/pve1/secrets_lib.sh
 #   source "$(dirname "${BASH_SOURCE[0]}")/secrets_lib.sh"
 

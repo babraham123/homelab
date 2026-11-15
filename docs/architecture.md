@@ -36,7 +36,7 @@ flowchart TB
 
     subgraph pve2["pve2 (tower, on demand)<br/>192.168.2.10"]
         websvcs["websvcs<br/>192.168.2.20<br/>nginx, Homepage"]
-        devtop["devtop<br/>192.168.2.22<br/>Linux desktop"]
+        devtop["devtop<br/>192.168.2.22<br/>Linux desktop, RTX 3060 Ti"]
         gaming["gaming<br/>192.168.2.21<br/>Windows, RTX 3060 Ti"]
     end
 
@@ -52,7 +52,7 @@ flowchart TB
 
     subgraph store["Storage and backup"]
         pbs2["Proxmox Backup Server (pbs2) on pve2<br/>VM images + host files, prune/GC"]
-        hdds["WD HDDs (websvcs media array) + Blu-ray<br/>bought, not installed in pve2"]
+        hdds["WD HDDs on pve2<br/>websvcs media array, snapraid + mergerfs"]
     end
 
     inet -- "TLS :443" --> haproxy
@@ -88,9 +88,9 @@ flowchart TB
     classDef planned stroke:#94a3b8,stroke-dasharray:4 3,fill:transparent
     class haproxy,headscale ext
     class secsvcs,homesvcs,websvcs,devtop,gaming host
-    class pbs2 data
+    class pbs2,hdds data
     class ap,trusted,iot,guest,zigbee,wdev dev
-    class hdds,sw planned
+    class sw planned
 ```
 
 Public traffic enters only through HAProxy on the VPS, which routes by TLS SNI over a Tailscale mesh
@@ -131,8 +131,8 @@ development, GPU workloads) and off otherwise.
 | CPU | Intel Core i5-13500 (6 P-cores + 8 E-cores) |
 | RAM | 32 GB DDR5-4800 (2×16 GB) |
 | Storage | 1 TB WD Black SN850X NVMe (OS/VMs) + 500 GB WD Red SATA SSD |
-| GPU | Nvidia RTX 3060 Ti, passed to the gaming VM |
-| Accelerators | Nvidia Tesla P4 (voice pipeline STT), Coral TPU (camera object detection), Intel iGPU (Quick Sync) |
+| GPU | Nvidia RTX 3060 Ti, passed to the gaming VM or devtop, whichever runs (they take turns) |
+| Accelerators | Nvidia Tesla P4 (Calliope narration), Coral TPU (for Frigate, parked), Intel iGPU (Quick Sync) |
 | PSU | Corsair RM550x 550 W |
 
 pve2 runs `websvcs`, `devtop`, the Windows `gaming` VM, and Proxmox Backup Server (`pbs2`). GPU/PCI
@@ -152,7 +152,8 @@ as on the VMs.
 | -------- | -------- | ------- |
 | TP-Link EAP660 HD WiFi 6 AP | deployed | wall-mounted, tagged VLANs for trusted/IoT/guest SSIDs |
 | SMLight SLZB-06 Zigbee adapter | deployed | used by Zigbee2MQTT on `homesvcs` |
-| HDDs (WD 3.5") + Blu-ray drive | bought, not yet installed | HDDs: websvcs media array on pve2, snapraid + mergerfs |
+| HDDs (4× WD 3.5") | deployed | websvcs media array on pve2, snapraid + mergerfs |
+| Blu-ray drive | bought, not yet installed | |
 | 24-port PoE+ managed switch | planned | unblocks the wired VLANs (20/21) |
 | 4G LTE failover modem | planned | pfSense WAN failover |
 | Rack, patch panel, UPS, PiKVM | planned | |
@@ -188,6 +189,8 @@ Recorded as ADRs in `docs/adr/`:
   agent](adr/0005-ssh-forced-command-dispatcher.md)
 - [Declared node inventory instead of parsing configs at render time](adr/0006-node-inventory.md)
 - [VPS metrics pushed by a local vmagent](adr/0007-vps-metrics-pushed.md)
+- [Per-node scanned image updater instead of registry auto-update](adr/0008-scanned-image-updater.md)
+- [CrowdSec decides on secsvcs, the VPS enforces](adr/0009-crowdsec-lapi-on-secsvcs.md)
 
 ## Secrets
 

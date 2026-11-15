@@ -73,7 +73,6 @@ flowchart LR
   sentences
 - On failure: inputs and report in `narrate/failed/<Title>/`; move the book back to the inbox to
   resume
-- The P4 is shared with whisper: voice commands slow down while a book narrates
 - YouTube videos: tag the bookmark `tolisten` in linkding
   - Within 15 min it's queued for yt_to_audiobook and retagged `transcribed`
   - Captions in another language: also tag it `lang:xx` (e.g. `lang:de`); default `en`

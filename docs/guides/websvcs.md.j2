@@ -19,6 +19,8 @@ src/nodes/websvcs/install_svcs.sh nginx
 src/nodes/websvcs/install_svcs.sh homepage
 src/nodes/websvcs/install_svcs.sh isso
 src/nodes/websvcs/install_svcs.sh copyparty
+# Imports the car recordings uploaded to copyparty's /car every 15 minutes
+src/nodes/websvcs/install_svcs.sh car_ingest
 # Once the media array is mounted (pve2_storage.md)
 src/nodes/websvcs/install_svcs.sh linkding
 src/nodes/websvcs/install_svcs.sh readeck

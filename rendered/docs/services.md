@@ -15,7 +15,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 
 | IP | Service | Image | Purpose | URL |
 | ----- | --------- | ------- | --------- | ----- |
-| .3 | postgres | postgres | Authelia and Vaultwarden storage | pgdb (internal DNS only) |
+| .3 | postgres | postgres | Storage for Authelia, LLDAP, Gatus, Grafana and Vaultwarden | pgdb (internal DNS only) |
 | .4 | lldap | lldap | User/group directory | ldap.janedoe.com |
 | .5 | authelia | authelia | SSO portal, OIDC provider | auth.janedoe.com |
 | .6 | traefik | traefik | Node ingress, TLS termination | secproxy.janedoe.com |
@@ -30,7 +30,7 @@ Container catalog, host services, observability and backups. Hostnames use the p
 | .15 | olive_tin | olivetin | Web buttons for admin actions (via SSH dispatcher) | command.janedoe.com |
 | .16 | crowdsec | crowdsec | IP bans from the logs, LAPI for the VPS's bouncer ([Security](security.md#the-edge-haproxy)) | crowdsec (internal DNS only), port 8455 |
 | .17 | vaultwarden | vaultwarden/server | Password manager, public, SSO-only via Authelia | vault.janedoe.com |
-| .18 | ntfy_idp_push | ntfy-idp-push | Mobile push for Authelia over ntfy; people's ntfy accounts from LLDAP | idp-push.janedoe.com |
+| .18 | ntfy_idp_push | ntfy-idp-push | People's ntfy accounts from LLDAP; Authelia's mobile push over ntfy once Authelia can call it (authelia#7647) | idp-push.janedoe.com |
 | .20 | fluentbit | fluent-bit | Journal → VictoriaLogs forwarder | n/a |
 | .23 | crowdsec_appsec | crowdsec | WAF for the node's Traefik ([Security](security.md#the-edge-haproxy)) | n/a |
 

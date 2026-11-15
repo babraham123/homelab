@@ -90,6 +90,7 @@ Vocabulary used throughout this repo. Use these terms exactly; see
   from **ACME** (public Let's Encrypt certs via Traefik).
 - **VLAN-ID-as-third-octet** — each VLAN's subnet embeds its ID: VLAN 10 → `192.168.10.0/24`. VLAN
   subnets are separate /24s, not carved from their parent interface's subnet.
-- **mobile push** — Authelia's "Mobile Push" second factor, served by **ntfy-idp-push**
+- **mobile push** — Authelia's "Mobile Push" second factor, to be served by **ntfy-idp-push**
   (`idp-push.SITE`): a Duo Auth API stand-in that sends the prompt over ntfy and approves only with
-  the enrolled phone's passkey. It also keeps each person's ntfy account in step with LLDAP.
+  the enrolled phone's passkey. Not enabled yet: Authelia's `duo_api` stays off until authelia#7647
+  lands. Today ntfy-idp-push only keeps each person's ntfy account in step with LLDAP.

@@ -16,9 +16,9 @@ run against the live instances.
 - `job`: the scrape job, per node in `src/nodes/<node>/prometheus.yml.j2`; `instance` is the
   scrape address, rarely useful here
 - `step`: the backup step on `homelab_backup_*` and the snapraid job on `homelab_snapraid_*`
-- `alertname`, `alertgroup`, `alertstate`: on `ALERTS`. Groups: `backups`, `crowdsec`,
-  `fluentbit`, `hosts`, `network`, `pipeline`, `scrapes`, `uptime`, `vm-health`, `vm_watchdog`, `vmagent`,
-  `vmalert`, `vmsingle`, `vps`
+- `alertname`, `alertgroup`, `alertstate`: on `ALERTS`. Groups: `auth`, `backups`, `crowdsec`,
+  `disks`, `fluentbit`, `gpus`, `hosts`, `image_updater`, `network`, `pipeline`, `plans`, `scrapes`,
+  `traefik`, `uptime`, `vm-health`, `vm_watchdog`, `vmagent`, `vmalert`, `vmsingle`, `vps`
 
 | Node | Jobs |
 | ---- | ---- |
@@ -30,8 +30,10 @@ run against the live instances.
 Metric prefixes by job: `authelia_`, `cs_` (both CrowdSec jobs; `cs_appsec_*` from the appsec
 one), `fw_bouncer_`, `gatus_results_`, `haproxy_{frontend,backend,server}_`, `headscale_`,
 `tailscaled_`, `ntfy_`, `traefik_`, `finance_`, `nvidia_smi_`, `smartctl_device_`, `node_`,
-`vm_`/`vmagent_`/`vmalert_`/`vl_`/`fluentbit_`. Pushed by the nodes' own scripts: `homelab_*`
-(backups, net probe, deploys, vm_watchdog) and `image_updater_*`.
+`vm_`/`vmagent_`/`vmalert_`/`vl_`/`fluentbit_`. Written by the nodes' own scripts as node_exporter
+textfiles, so scraped under `job="node_exporter"` (`node_exporter_pve` on the PVE hosts):
+`homelab_*` (backups, snapraid, net probe, deploys, vm_watchdog) and `image_updater_*`.
+`homelab_vps_transfer_pool_bytes` is a vmalert recording rule (`plans.yml.j2`).
 
 ### Log fields
 
@@ -44,7 +46,7 @@ lines are the exception: see the last row.
 | `hostname`, `service` | The stream fields: filter on them with `{hostname="websvcs", service="traefik"}`. `service` is the container name, or the unit name for host services (`haproxy`, `fail2ban`, `node_exporter`, `net_probe`, `snapraid-sync`) |
 | `_msg`, `_time` | The message and the journal's timestamp |
 | `priority` | syslog level, `0` emerg to `7` debug. Podman logs a container's stdout at `6` and its stderr at `3` whatever the line says, so for containers it tells the stream, not the severity; host services (`haproxy`, `fail2ban`) use it properly |
-| `invocation_id` | One run of a unit: every line of one oneshot (`calliope`, `car_ingest`, `net_probe`, `image_updater`) |
+| `invocation_id` | One run of a unit: every line of one run of a batch job (`calliope`, `car_ingest`, `net_probe`, `image_updater`) |
 | `code` | `func file:line` of the logging call; `write_journald src/ctr_logging.c:467` for every container line |
 | `pid`, `boot_id` | From the journal; `errno` only when the journal set it |
 | `RequestMethod`, `RequestHost`, `RequestPath`, `RequestScheme`, `RequestProtocol`, `DownstreamStatus`, `OriginStatus`, `Duration`, `OriginDuration`, `Overhead` (ns), `DownstreamContentSize`, `ClientHost`, `ClientAddr`, `RouterName`, `ServiceName`, `entryPointName`, `TLSVersion`, `TLSCipher`, `RetryAttempts`, `request_User-Agent`, `request_Referer`, `request_Remote-User` | Traefik access-log lines only, from the JSON access log; `RequestMethod:*` selects them. `_msg` is rewritten to `METHOD host/path status Nms client`. `request_Remote-User` is the Authelia user on authenticated requests |
@@ -282,11 +284,12 @@ _time:24h {service="crowdsec"} "ban on Ip"
 # fail2ban on the VPS (host service; "Restore Ban" lines are re-applied old bans)
 _time:7d {service="fail2ban"} "] Ban " | extract "[<jail>] Ban <ip>" | stats by (jail) count() bans, count_uniq(ip) ips
 
-# HAProxy on the VPS logs TCP connections with the SNI it routed on
+# HAProxy on the VPS logs only the TCP connections that ended in an error, timeout or retry
+# (`option dontlog-normal`), with the SNI it routed on. Counts below are of those, not of traffic.
 _time:24h {service="haproxy"} | extract "sni=<sni>" | stats by (sni) count() n | sort by (n desc)
 
-# Bytes per SNI on the VPS, counted when each connection closes. `-` is no SNI or a
-# non-hostname one; vpn.SITE is DERP plus Headscale control
+# Bytes per SNI on the VPS, of those failed connections only (Grafana "VPS bandwidth" has the
+# totals). `-` is no SNI or a non-hostname one; vpn.SITE is DERP plus Headscale control
 _time:7d {hostname="vpnsvcs", service="haproxy"} "sni=" | extract " up=<up> down=<down> sni=<sni>"
   | stats by (sni) sum(up) up, sum(down) down | sort by (down desc)
 ```

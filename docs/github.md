@@ -47,9 +47,9 @@ CTranslate2, whose newer builds drop CUDA 12.6 or Pascal.
 
 In the homelab, Renovate updates only the images pinned to a version (`upstream:` in the node
 inventories, the quadlets' `Image=localhost/...` and any other mention under `src/`, `docs/` and
-`rendered/`), plus the tool versions in CI and the pre-commit hook. Floating tags are the image
-updater's job, and pinning their digests would bypass its scan. A new major version waits for
-approval on the Dependency Dashboard, since it usually needs a migration.
+`rendered/`), plus the tool versions in CI and the pre-commit checks (`tools/lib.sh`). Floating
+tags are the image updater's job, and pinning their digests would bypass its scan. A new major
+version waits for approval on the Dependency Dashboard, since it usually needs a migration.
 
 ## Checking a repo
 

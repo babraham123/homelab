@@ -80,12 +80,14 @@ direct peer connections come from the endpoint-independent outbound NAT rule ins
 **Current state:** the group-based Headscale ACL matrix in
 `src/services/headscale/headscale_acl.hujson.j2` is the active policy (loaded 2026-10-31, headscale
 0.29.7): admins reach the whole tailnet and every subnet, family the LAN, public users only the
-published services, guests only the three web hosts' HTTP ports. Its `tests` block is checked at
-every policy load. Tailscale enforces ACLs in its OS-independent packet filter (`net/tstun`) on the
-tailnet address, before netstack SNATs the flow, so SNAT on pfSense never limited it; SNAT only
-hides tailnet clients' addresses from the LAN side (pfSense VLAN rules, logs, Traefik). Kernel
-routing without SNAT is available on pfSense via `TS_DEBUG_NETSTACK_SUBNETS=0`. The mesh policy
-sits in front of pfSense's VLAN firewall rules and Authelia's application-layer policies.
+published services, guests only the three web hosts' HTTP ports and the gaming VM's Moonlight
+ports. The `public@` user (HAProxy on the VPS) reaches only those web front doors, plus CrowdSec's
+LAPI on secsvcs for the VPS's bouncer. Its `tests` block is checked at every policy load. Tailscale
+enforces ACLs in its OS-independent packet filter (`net/tstun`) on the tailnet address. pfSense
+routes tailnet traffic in the kernel without SNAT (`TS_DEBUG_NETSTACK_SUBNETS=0`), so tailnet
+clients keep their own addresses on the LAN side: pfSense VLAN rules, logs and Traefik see them.
+The mesh policy sits in front of pfSense's VLAN firewall rules and Authelia's application-layer
+policies.
 
 ## Identity: LLDAP + Authelia
 
@@ -94,12 +96,12 @@ sits in front of pfSense's VLAN firewall rules and Authelia's application-layer 
   `authelia_gen_access` get in with one factor from the LAN and the tailnet, and need two from the
   internet; TOTP and WebAuthn/passkeys are enabled, with zxcvbn password policy.
 - **Admin tools need two factors from every network.** The services marked `admin: true` in the node
-  inventory (the Traefik dashboards, LLDAP, vmalert, Alertmanager, OliveTin and Vaultwarden's
-  `/admin`, its one path behind Authelia's proxy check) get their own two-factor rule ahead of the
-  LAN/tailnet downgrade, so a password alone never reaches them. The split is deliberate: Authelia
-  decides the factor, the app decides the role (OliveTin's ACLs, LLDAP's admin group, the
-  `telemetry_access` group below). Proxmox, PBS and pfSense have their own logins and aren't behind
-  Authelia.
+  inventory (the Traefik dashboards, LLDAP, vmalert, Alertmanager, OliveTin, ESPHome,
+  ntfy-idp-push and Vaultwarden's `/admin`, its one path behind Authelia's proxy check) get their
+  own two-factor rule ahead of the LAN/tailnet downgrade, so a password alone never reaches them.
+  The split is deliberate: Authelia decides the factor, the app decides the role (OliveTin's ACLs,
+  LLDAP's admin group, the `telemetry_access` group below). Proxmox, PBS and pfSense have their
+  own logins and aren't behind Authelia.
 
 Two integration models:
 
@@ -113,8 +115,8 @@ Two integration models:
    routes skip Authelia and rely on the app's own auth. ntfy's web app is different: Authelia
    gates only page loads (`Sec-Fetch-Mode: navigate`), then each person signs in to ntfy with
    their own account, and ntfy's ACLs decide which topics they see.
-2. **OIDC** (apps with native SSO support): Authelia is the issuer for seven clients: Headscale
-   and OliveTin (two-factor), Grafana, Home Assistant, Gatus, Readeck and Storyteller.
+2. **OIDC** (apps with native SSO support): Authelia is the issuer for eight clients: Headscale,
+   OliveTin and Vaultwarden (two-factor), Grafana, Home Assistant, Gatus, Readeck and Storyteller.
    OIDC gives the app group-based role mapping, not just a yes/no at the proxy.
 
 ```mermaid
@@ -195,9 +197,10 @@ flowchart TB
     classDef host stroke:#a78bfa,fill:transparent
 ```
 
-- **Internal TLS**: service-to-service connections (Authelia↔LLDAP, Authelia↔Traefik mutual TLS,
-  Postgres, MQTT) use certs from the private two-tier CA. Certs and keys are distributed to
-  `/etc/opt/<svc>/certificates/` by `commands.sh install_certs` / `install_keys`.
+- **Internal TLS**: service-to-service connections (Authelia↔LLDAP, Traefik→Authelia, Postgres,
+  MQTT) use certs from the private two-tier CA; Traefik→Authelia isn't mutual yet (Known gaps).
+  Certs and keys are distributed to `/etc/opt/<svc>/certificates/` by `commands.sh
+  install_certs` / `install_keys`.
 - **Postgres takes TLS only**: `src/services/postgres/pg_hba.conf` has `hostssl` rules and no `host`
   ones, so a client that skips TLS is refused before sending its password; every client verifies
   the server cert (`verify-full`, or Authelia's `tls` block).
@@ -263,9 +266,9 @@ AGE, kept out of git and written to disk encrypted (see [ADR
 0004](adr/0004-sops-age-secrets.md)):
 
 - Source of truth is on pve1: one age file per host at `/root/secrets/<host>.yaml.age`, encrypted
-  to pve1's AGE key and, for a VM, the host's ed25519 SSH key. The whole file is encrypted, names
-  included; `secrets_template.yaml` lists the names.
-- Each VM gets that same file as `/etc/opt/secrets/secrets.yaml.age`. The host's private key sits
+  to pve1's AGE key and, for a VM, the VM's `manualadmin` ed25519 SSH key. The whole file is
+  encrypted, names included; `secrets_template.yaml` lists the names.
+- Each VM gets that same file as `/etc/opt/secrets/secrets.yaml.age`. A copy of that private key sits
   beside it in the root-only `/etc/opt/secrets/`.
 - Git holds only `src/nodes/<node>/secrets_template.yaml` (names, no values).
 - Podman uses the `shell` secrets driver: Podman stores placeholders, and at container startup
@@ -293,7 +296,6 @@ admin operations happen over localhost, not the public interface.
 
 ## Known gaps
 
-- Headscale ACLs disabled (above): network-layer zero trust is not real today.
 - Traefik→Authelia mutual TLS is disabled pending a certificate fix: Traefik presents client certs,
   but Authelia's `client_certificates` check is commented out.
 - Authelia→LLDAP is server-verified LDAPS plus the bind password: LLDAP can't verify client certs

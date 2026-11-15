@@ -194,6 +194,8 @@ apparmor_parser -r /etc/apparmor.d/usr.bin.msmtp
 cd /root/homelab-rendered
 cp src/base/debian/msmtprc /etc
 src/nodes/pve1/install_svcs.sh cert_notifier
+# Daily ntfy alert on certificates for the domain this homelab didn't request
+src/nodes/pve1/install_svcs.sh ct_watch
 ```
 
 ## Backups

@@ -439,9 +439,10 @@ echo "show stat" | socat stdio /run/haproxy/admin.sock | cut -d, -f1,2,18
 echo "show table" | socat stdio /run/haproxy/admin.sock   # rate-limit / ban tables
 ```
 
-HAProxy routes on SNI without terminating TLS. Each :443 connection logs one line when it closes,
-ending in `up=<bytes> down=<bytes> sni=<name>` (`journalctl -u haproxy | grep sni=`); an SNI with
-characters outside `[a-z0-9.-]` logs as `-`. To see exactly what SNI a client sends, capture
+HAProxy routes on SNI without terminating TLS. A :443 connection that ends in an error, timeout or
+retry logs one line when it closes, ending in `up=<bytes> down=<bytes> sni=<name>` (`journalctl -u
+haproxy | grep sni=`); normal ones aren't logged (`option dontlog-normal`). An SNI with characters
+outside `[A-Za-z0-9.-]` logs as `-`. To see exactly what SNI a client sends, capture
 ClientHello packets and open the file in Wireshark:
 
 ```bash

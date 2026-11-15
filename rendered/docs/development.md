@@ -55,9 +55,11 @@
   - `*.volume`: Podman volume definitions
   - Service configuration files
 - `src/base/`: setup shared across nodes, all shipped to every Debian node: `debian/`, `podman/`,
-  `node_exporter/`, `vm_watchdog/`. `debian/dispatcher.sh` and `debian/sudoers` are every Debian
-  node's (all but the router and gaming), selected at runtime by hostname; the router's and
-  gaming's dispatchers are in their node directories
+  `node_exporter/`, `vm_watchdog/`, `net_probe/`, `iperf3_server/`, `mdns_repeater/`, plus `lib.sh`
+  (the scripts' shared helpers) and `ntfy.py` (ntfy pushes from the Python scripts).
+  `debian/dispatcher.sh` and `debian/sudoers` are every Debian node's (all but the router and
+  gaming), selected at runtime by hostname; the router's and gaming's dispatchers are in their
+  node directories
 - `src/clients/`: setup for devices that aren't nodes and never get an upload: `macos/`, the
   personal Mac's VPN switching ([guide](guides/mac_personal.md))
 
@@ -173,9 +175,10 @@ script.
 Rendering ends with `tools/check_rendered.py`, which reports every failure as `error: FILE: MESSAGE`.
 It is a uv script (dependencies inline, run by `uv run`); the inventory facts it checks are the `inv:`
 lists in the template data. It lints YAML (`yamllint`), JSON and markdown
-(`.markdownlint-cli2.yaml`: only rules for markdown that renders wrong, broken heading links and the
-100-column line limit), rejects duplicate container `IP=`s, and checks the node inventory, through
-the lists `tools/inventory.py` derives from it, against the files it describes:
+(`.markdownlint-cli2.yaml`: every rule, lines up to 100 columns, with exceptions for tabs in
+code, long code and table lines, sibling-only duplicate headings and lists in table cells),
+rejects duplicate container `IP=`s, and checks the node inventory, through the lists
+`tools/inventory.py` derives from it, against the files it describes:
 
 - every repo script a dispatcher case runs exists and has the case it is called with (services,
   `debian_services`, `commands[].script` and the paths in `commands[].run`);
@@ -249,6 +252,10 @@ repo root, in parallel; helpers shared by the suites are in `tests/lib.sh`. Plai
   out from ADR 0006; and the shape errors it reports for a misspelled, mistyped or lone key.
 - `image_updater_test.sh`: the image updater's config, `src/base/podman/image_updater.json.j2`,
   from a fixture inventory.
+- `net_probe_test.sh`: the net_probe config, `src/base/net_probe/config.json.j2`: its targets,
+  test order, slots and busy thresholds.
+- `vm_watchdog_test.sh`: `src/base/vm_watchdog/vm_watchdog.py` against the reset rules in
+  [Services](services.md).
 - `vars_test.sh`: `vars.template.yml` and `vars.yml` (when present) have the same top-level keys,
   and `render_src.sh` explains a missing vars file or a missing closing `...`.
 - `render_test.sh`: a full render of `vars.template.yml` passes every check (skipped by `--fast`,

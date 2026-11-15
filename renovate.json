@@ -27,10 +27,10 @@
     },
     {
       "customType": "regex",
-      "description": "Python tools pinned in CI and the pre-commit hook",
+      "description": "Python tools pinned in CI and the pre-commit checks (tools/lib.sh run_checks)",
       "managerFilePatterns": [
         "/^\\.github/workflows/.+\\.ya?ml$/",
-        "/^\\.githooks/pre-commit$/"
+        "/^tools/lib\\.sh$/"
       ],
       "matchStrings": [
         "(?<depName>ruff)@(?<currentValue>\\d[\\d.]*)",

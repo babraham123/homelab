@@ -13,8 +13,9 @@ showed.
 ## Safety
 
 - The session's only input is your keyboard. The log is a copy of what the terminal displayed,
-  so this design gives Claude no path to type into it. Claude is not allowed `ssh`, `tmux` or
-  `osascript`; the permission rules, not the design, are what keep it that way.
+  so this design gives Claude no path to type into it. `ssh`, `tmux` and `osascript` aren't in
+  `.claude/settings.json`'s allow list, so Claude has to ask before each one; that prompt, not the
+  design, is what keeps it out. Decline it.
 - What the terminal shows is untrusted: a host's output could try to steer Claude. You read each
   clipboard command before pressing Enter; that is the control.
 - `notes/session.log` holds whatever your terminal displayed. Exit `script` before a step that
