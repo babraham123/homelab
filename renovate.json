@@ -27,10 +27,10 @@
     },
     {
       "customType": "regex",
-      "description": "Python tools pinned in CI and the pre-commit checks (tools/lib.sh run_checks)",
+      "description": "Python tools pinned in CI and the pre-commit checks (tools/lib.sh run_checks). rendered/tools/lib.sh is matched too, so the PR stays in step with the pre-commit render that CI compares.",
       "managerFilePatterns": [
         "/^\\.github/workflows/.+\\.ya?ml$/",
-        "/^tools/lib\\.sh$/"
+        "/^(rendered/)?tools/lib\\.sh$/"
       ],
       "matchStrings": [
         "(?<depName>ruff)@(?<currentValue>\\d[\\d.]*)",
