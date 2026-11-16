@@ -55,10 +55,10 @@
         },
         {
           "container": "fluentbit",
-          "image": "localhost/fluent/fluent-bit:5.1",
+          "image": "localhost/fluent/fluent-bit:5.2",
           "service": "fluentbit",
           "trivyignore": "/root/homelab-rendered/src/services/fluentbit/.trivyignore",
-          "upstream": "docker.io/fluent/fluent-bit:5.1"
+          "upstream": "docker.io/fluent/fluent-bit:5.2"
         }
       ],
       "ntfy": {
@@ -161,10 +161,10 @@
         },
         {
           "container": "fluentbit",
-          "image": "localhost/fluent/fluent-bit:5.1",
+          "image": "localhost/fluent/fluent-bit:5.2",
           "service": "fluentbit",
           "trivyignore": "/root/homelab-rendered/src/services/fluentbit/.trivyignore",
-          "upstream": "docker.io/fluent/fluent-bit:5.1"
+          "upstream": "docker.io/fluent/fluent-bit:5.2"
         },
         {
           "container": "traefik",
@@ -225,10 +225,10 @@
       "images": [
         {
           "container": "fluentbit",
-          "image": "localhost/fluent/fluent-bit:5.1",
+          "image": "localhost/fluent/fluent-bit:5.2",
           "service": "fluentbit",
           "trivyignore": "/root/homelab-rendered/src/services/fluentbit/.trivyignore",
-          "upstream": "docker.io/fluent/fluent-bit:5.1"
+          "upstream": "docker.io/fluent/fluent-bit:5.2"
         },
         {
           "container": "vmagent",
@@ -313,10 +313,10 @@
         },
         {
           "container": "fluentbit",
-          "image": "localhost/fluent/fluent-bit:5.1",
+          "image": "localhost/fluent/fluent-bit:5.2",
           "service": "fluentbit",
           "trivyignore": "/root/homelab-rendered/src/services/fluentbit/.trivyignore",
-          "upstream": "docker.io/fluent/fluent-bit:5.1"
+          "upstream": "docker.io/fluent/fluent-bit:5.2"
         },
         {
           "container": "copyparty",

@@ -13,7 +13,7 @@ services:
   fluentbit:
     shared: true
     ip: 20
-    upstream: docker.io/fluent/fluent-bit:5.1
+    upstream: docker.io/fluent/fluent-bit:5.2
   vmagent:
     shared: true
     ip: 7
