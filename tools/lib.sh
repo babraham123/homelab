@@ -67,7 +67,7 @@ run_checks() {
       shellcheck -x --source-path=SCRIPTDIR --severity=warning .githooks/pre-commit || status=1
     # Syntax errors, undefined names, unused imports and variables
     fd . --type f --extension py --exec-batch \
-      uvx --quiet ruff@0.17.5 check --quiet --no-cache --select E9,F || status=1
+      uvx --quiet ruff@0.17.6 check --quiet --no-cache --select E9,F || status=1
     exit "$status"
   ) || status=1
   return "$status"
